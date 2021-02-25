@@ -25,9 +25,10 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 interface JsonCodeEditorProps {
   hit: DocViewRenderProps | ElasticSearchHit;
   width?: string | number;
+  hasLineNumbers?: boolean;
 }
 
-export const JsonCodeEditor = ({ hit, width }: JsonCodeEditorProps) => {
+export const JsonCodeEditor = ({ hit, width, hasLineNumbers = true }: JsonCodeEditorProps) => {
   const jsonValue = JSON.stringify(hit, null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
@@ -71,6 +72,7 @@ export const JsonCodeEditor = ({ hit, width }: JsonCodeEditorProps) => {
           options={{
             automaticLayout: true,
             fontSize: 12,
+            lineNumbers: hasLineNumbers ? 'on' : 'off',
             minimap: {
               enabled: false,
             },

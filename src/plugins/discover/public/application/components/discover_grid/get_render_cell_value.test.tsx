@@ -156,6 +156,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <JsonCodeEditor
+        hasLineNumbers={false}
         hit={
           Object {
             "_id": "1",
@@ -248,6 +249,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <JsonCodeEditor
+        hasLineNumbers={false}
         hit={
           Object {
             "_id": "1",

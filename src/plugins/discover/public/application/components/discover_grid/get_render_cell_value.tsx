@@ -109,7 +109,7 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor hit={row} width={370} />;
+      return <JsonCodeEditor hit={row} hasLineNumbers={false} width={370} />;
     }
     const formatted = indexPattern.formatHit(row);
 
