@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   InstallablePackage,
   InstallSource,
@@ -41,6 +41,7 @@ import { ConcurrentInstallOperationError } from '../../../errors';
 export async function _installPackage({
   savedObjectsClient,
   callCluster,
+  esClient,
   installedPkg,
   paths,
   packageInfo,
@@ -49,6 +50,7 @@ export async function _installPackage({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   installedPkg?: SavedObject<Installation>;
   paths: string[];
   packageInfo: InstallablePackage;
@@ -171,7 +173,7 @@ export async function _installPackage({
     // if this is an update or retrying an update, delete the previous version's pipelines
     if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
       await deletePreviousPipelines(
-        callCluster,
+        esClient,
         savedObjectsClient,
         pkgName,
         installedPkg.attributes.version
@@ -180,7 +182,7 @@ export async function _installPackage({
     // pipelines from a different version may have installed during a failed update
     if (installType === 'rollback' && installedPkg) {
       await deletePreviousPipelines(
-        callCluster,
+        esClient,
         savedObjectsClient,
         pkgName,
         installedPkg.attributes.install_version

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -31,8 +31,9 @@ export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const { savedObjectsClient, pkgkey, callCluster, esClient } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -53,7 +54,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, callCluster);
+  await deleteAssets(installation, savedObjectsClient, callCluster, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -86,11 +87,15 @@ function deleteKibanaAssets(
   });
 }
 
-function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallESAsCurrentUser) {
+function deleteESAssets(
+  installedObjects: EsAssetReference[],
+  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient
+) {
   return installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
-      return deletePipeline(callCluster, id);
+      return deletePipeline(esClient, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
       return deleteTemplate(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
@@ -104,12 +109,13 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
 async function deleteAssets(
   { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
 
   const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, callCluster),
+    ...deleteESAssets(installedEs, callCluster, esClient),
     ...deleteKibanaAssets(installedKibana, savedObjectsClient),
   ];
 

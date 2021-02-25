@@ -63,7 +63,7 @@ async function createSetupSideEffects(
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
-    ensureInstalledDefaultPackages(soClient, callCluster),
+    ensureInstalledDefaultPackages(soClient, callCluster, esClient),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     isFleetServerEnabled
@@ -86,7 +86,7 @@ async function createSetupSideEffects(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, callCluster);
+  await ensurePackagesCompletedInstall(soClient, callCluster, esClient);
 
   if (isFleetServerEnabled) {
     await awaitIfFleetServerSetupPending();
@@ -95,6 +95,7 @@ async function createSetupSideEffects(
       savedObjectsClient: soClient,
       pkgName: FLEET_SERVER_PACKAGE,
       callCluster,
+      esClient,
     });
 
     if (defaultFleetServerPolicyCreated) {

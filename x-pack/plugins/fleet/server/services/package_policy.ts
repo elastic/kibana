@@ -92,6 +92,7 @@ class PackagePolicyService {
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
           callCluster,
+          esClient,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,
