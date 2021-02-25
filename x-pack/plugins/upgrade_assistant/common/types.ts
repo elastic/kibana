@@ -94,8 +94,9 @@ export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export enum ReindexWarning {
   // 7.0 -> 8.0 warnings
-  apmReindex,
   customTypeName,
+
+  // 8.0 -> 9.0 warnings
 }
 
 export enum IndexGroup {
