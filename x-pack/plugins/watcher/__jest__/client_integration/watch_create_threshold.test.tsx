@@ -50,8 +50,8 @@ const WATCH_VISUALIZE_DATA = {
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../public/application/lib/api', () => {
-  const original = jest.requireActual('../public/application/lib/api');
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
 
   return {
     ...original,
