@@ -653,7 +653,7 @@ describe('<EditPolicy />', () => {
       });
 
       test('removes default, recommended option', async () => {
-        const { actions, find, component } = testBed;
+        const { actions, find } = testBed;
         await actions.warm.enable(true);
         actions.warm.showDataAllocationOptions();
 
