@@ -14,6 +14,7 @@ Table of Contents
 	- [Terminology](#terminology)
 	- [Usage](#usage)
 	- [Limitations](#limitations)
+	- [Plugin status](#plugin-status)
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
@@ -63,6 +64,27 @@ Note that the `manage_own_api_key` cluster privilege is not enough - it can be u
     action [cluster:admin/xpack/security/api_key/invalidate] \
     is unauthorized for user [user-name-here]
 ```
+
+## Plugin status
+
+Alerts plugin's status is customized by including information about checking framework decryption failures:
+```
+core.status.set(
+        combineLatest([
+          core.status.derivedStatus$,
+          getHealthStatusStream(startPlugins.taskManager),
+        ]).pipe(
+          map(([derivedStatus, healthStatus]) => {
+            if (healthStatus.level > derivedStatus.level) {
+              return healthStatus as ServiceStatus;
+            } else {
+              return derivedStatus;
+            }
+          })
+        )
+      );
+```
+To check framework decryption failures we use task `alerting_health_check`, which runs with default interval 60 mins. To change the dafault schedule use kibana.yml configuration option `xpack.alerts.healthCheck.interval: 60m`.
 
 ## Alert types
 
