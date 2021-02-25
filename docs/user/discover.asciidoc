@@ -8,7 +8,7 @@
 *Discover* is your window into your data in {es}. *Discover* enables you to 
 quickly search and filter your data, get information about structure of the fields, 
 and navigate to *Visualize* and *Maps* to present your data.
-You can customize and save your searches and place them on a Dashboard.
+You can customize and save your searches and place them on a dashboard.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
