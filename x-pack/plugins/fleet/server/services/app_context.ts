@@ -22,7 +22,8 @@ import {
 } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { FleetConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import { ExternalCallback, ExternalCallbacksStorage } from '../types';
+import { FleetAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {

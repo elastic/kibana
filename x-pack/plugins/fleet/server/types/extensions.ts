@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../common';
+import { DeletePackagePoliciesResponse, NewPackagePolicy, UpdatePackagePolicy } from '../../common';
 
 /**
  * Callbacks supported by the Fleet plugin
@@ -19,6 +19,14 @@ export type ExternalCallback =
         context: RequestHandlerContext,
         request: KibanaRequest
       ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'postPackagePolicyDelete',
+      (
+        deletedPackagePolicies: DeletePackagePoliciesResponse,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<void>
     ]
   | [
       'packagePolicyUpdate',
