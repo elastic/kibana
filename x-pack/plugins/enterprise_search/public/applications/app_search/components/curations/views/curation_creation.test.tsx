@@ -28,7 +28,6 @@ describe('CurationCreation', () => {
   it('renders', () => {
     const wrapper = shallow(<CurationCreation />);
 
-    expect(wrapper.find('h1').text()).toEqual('Create new curation');
     expect(wrapper.find(CurationQueries)).toHaveLength(1);
   });
 
