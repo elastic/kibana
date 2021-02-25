@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { History } from 'history';
 import _ from 'lodash';
 import { map } from 'rxjs/operators';
