@@ -74,7 +74,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'context:step': { type: 'long' },
   'accessibility:disableAnimations': { type: 'boolean' },
   'fileUpload:maxFileSize': { type: 'keyword' },
-  'ml:fileDataVisualizerMaxFileSize': { type: 'keyword' },
   'ml:anomalyDetection:results:enableTimeDefaults': { type: 'boolean' },
   'ml:anomalyDetection:results:timeDefaults': { type: 'keyword' },
   'truncate:maxHeight': { type: 'long' },

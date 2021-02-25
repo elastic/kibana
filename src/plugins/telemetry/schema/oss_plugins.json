@@ -4238,9 +4238,6 @@
         "fileUpload:maxFileSize": {
           "type": "keyword"
         },
-        "ml:fileDataVisualizerMaxFileSize": {
-          "type": "keyword"
-        },
         "ml:anomalyDetection:results:enableTimeDefaults": {
           "type": "boolean"
         },
