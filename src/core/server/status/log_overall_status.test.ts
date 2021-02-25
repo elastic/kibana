@@ -31,7 +31,7 @@ describe('getOverallStatusChanges', () => {
       const expected = '--a';
 
       expectObservable(getOverallStatusChanges(overall$, stop$)).toBe(expected, {
-        a: 'Kibana overall status is now available',
+        a: 'Kibana is now available',
       });
     });
   });
@@ -50,8 +50,8 @@ describe('getOverallStatusChanges', () => {
       const expected = '--a--b';
 
       expectObservable(getOverallStatusChanges(overall$, stop$)).toBe(expected, {
-        a: 'Kibana overall status is now degraded',
-        b: 'Kibana overall status is now available (was degraded)',
+        a: 'Kibana is now degraded',
+        b: 'Kibana is now available (was degraded)',
       });
     });
   });
@@ -76,8 +76,8 @@ describe('getOverallStatusChanges', () => {
       const expected = '--a-----b';
 
       expectObservable(getOverallStatusChanges(overall$, stop$)).toBe(expected, {
-        a: 'Kibana overall status is now degraded',
-        b: 'Kibana overall status is now available (was degraded)',
+        a: 'Kibana is now degraded',
+        b: 'Kibana is now available (was degraded)',
       });
     });
   });
