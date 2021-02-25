@@ -266,12 +266,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         const [unfilteredResponse, filteredResponse] = await Promise.all([
+          supertest.get(`/api/apm/services?start=${start}&end=${end}`) as Promise<Response>,
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters={}`
-          ) as Promise<Response>,
-          supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
-              `{ "kuery": "not (processor.event:transaction)" }`
+            `/api/apm/services?start=${start}&end=${end}&kuery=${encodeURIComponent(
+              'not (processor.event:transaction)'
             )}`
           ) as Promise<Response>,
         ]);
