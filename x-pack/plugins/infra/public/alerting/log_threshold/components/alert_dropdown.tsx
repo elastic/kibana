@@ -16,7 +16,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 const readOnlyUserTooltipContent = i18n.translate(
   'xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent',
   {
-    defaultMessage: 'Unable to create an alert',
+    defaultMessage: 'Creating alerts requires more permissions in this application.',
   }
 );
 
