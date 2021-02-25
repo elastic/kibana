@@ -6,31 +6,19 @@
  */
 
 import * as React from 'react';
-import { EuiButton, EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
 import { txtDrilldowns, txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 import { DrilldownList } from '../drilldown_list';
+import { DrilldownManagerContent } from './drilldown_manager_content';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
-
-  const tabs: EuiTabbedContentProps['tabs'] = [
-    {
-      id: 'create',
-      name: 'Create new',
-      content: <FormDrilldownWizard />,
-    },
-    {
-      id: 'list',
-      name: 'Manage',
-      content: 'manage...',
-    },
-  ];
 
   const footer =
     route[0] === 'create' ? (
@@ -48,30 +36,23 @@ export const DrilldownManager: React.FC = ({}) => {
   if (route[0] === 'create') content = <FormDrilldownWizard />;
   if (route[0] === 'manage') content = <DrilldownList />;
 
-  const flyoutFrame = (
+  const banner = !hideWelcomeMessage && (
+    <DrilldownHelloBar
+      docsLink={drilldowns.deps.docsLink}
+      onHideClick={drilldowns.hideWelcomeMessage}
+    />
+  );
+
+  return (
     <FlyoutFrame
       title={txtDrilldowns}
       footer={footer}
       onClose={drilldowns.close}
       // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
       // onBack={() => drilldowns.setScreen('list')}
-      banner={
-        !hideWelcomeMessage && (
-          <DrilldownHelloBar
-            docsLink={drilldowns.deps.docsLink}
-            onHideClick={drilldowns.hideWelcomeMessage}
-          />
-        )
-      }
+      banner={banner}
     >
-      <EuiTabbedContent
-        tabs={tabs}
-        selectedTab={tabs.find(({ id }) => id === route[0])}
-        onTabClick={({ id }) => drilldowns.setRoute([id])}
-      />
-      {content}
+      <DrilldownManagerContent />
     </FlyoutFrame>
   );
-
-  return flyoutFrame;
 };
