@@ -20,6 +20,8 @@ import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {
   const onChange = jest.fn();
+  const onDeleteEngine = jest.fn();
+
   const data = [
     {
       name: 'test-engine',
@@ -41,6 +43,7 @@ describe('EnginesTable', () => {
     loading: false,
     pagination,
     onChange,
+    onDeleteEngine,
   };
 
   describe('basic table', () => {

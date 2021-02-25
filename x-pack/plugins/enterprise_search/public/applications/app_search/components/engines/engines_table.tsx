@@ -40,6 +40,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   loading,
   pagination,
   onChange,
+  onDeleteEngine,
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -141,7 +142,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
             }
           ),
           description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manageDescription',
+            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
             {
               defaultMessage: 'Manage this engine',
             }
@@ -152,6 +153,23 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
             sendEngineTableLinkClickTelemetry();
             navigateToUrl(generteEncodedEnginePath(engineDetails.name));
           },
+        },
+        {
+          name: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
+            {
+              defaultMessage: 'Delete this engine',
+            }
+          ),
+          type: 'icon',
+          icon: 'trash',
+          onClick: (engineDetails) => onDeleteEngine(engineDetails.name),
         },
       ],
     },

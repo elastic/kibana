@@ -37,6 +37,7 @@ import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+
   const {
     dataLoading,
     engines,
@@ -46,9 +47,14 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesMeta,
     metaEnginesLoading,
   } = useValues(EnginesLogic);
-  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
-    EnginesLogic
-  );
+
+  const {
+    deleteEngine,
+    loadEngines,
+    loadMetaEngines,
+    onEnginesPagination,
+    onMetaEnginesPagination,
+  } = useActions(EnginesLogic);
 
   useEffect(() => {
     loadEngines();
@@ -97,6 +103,7 @@ export const EnginesOverview: React.FC = () => {
               hidePerPageOptions: true,
             }}
             onChange={handlePageChange(onEnginesPagination)}
+            onDeleteEngine={deleteEngine}
           />
         </EuiPageContentBody>
 
@@ -119,6 +126,7 @@ export const EnginesOverview: React.FC = () => {
                   hidePerPageOptions: true,
                 }}
                 onChange={handlePageChange(onMetaEnginesPagination)}
+                onDeleteEngine={deleteEngine}
               />
             </EuiPageContentBody>
           </>
