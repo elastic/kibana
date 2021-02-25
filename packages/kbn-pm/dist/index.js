@@ -177,6 +177,7 @@ function help() {
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
+        --force-yarn-install    Forces yarn install to run on bootstrap
         --offline               Run in offline mode
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
@@ -208,10 +209,11 @@ async function run(argv) {
     },
     default: {
       cache: true,
+      'force-install': true,
       offline: false,
       validate: true
     },
-    boolean: ['cache', 'offline', 'validate']
+    boolean: ['cache', 'force-install', 'offline', 'validate']
   });
   const args = options._;
 
@@ -8904,7 +8906,8 @@ const BootstrapCommand = {
     const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path;
-    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
+    const forceInstall = !!options && options['force-install'] === true; // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}node_modules`); // Install bazel machinery tools if needed
@@ -8920,9 +8923,12 @@ const BootstrapCommand = {
     //
     // Until we have our first package build within Bazel we will always need to directly call the yarn rule
     // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
-    // TODO: Remove the first run statement as soon as we add the first Bazel package build
+    // TODO: Change CLI default in order to not force install as soon as we have our first Bazel package being built
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
+    if (forceInstall) {
+      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
+    }
+
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build'], runOffline); // Install monorepo npm dependencies outside of the Bazel managed ones
 
     for (const batch of batchedNonBazelProjects) {
