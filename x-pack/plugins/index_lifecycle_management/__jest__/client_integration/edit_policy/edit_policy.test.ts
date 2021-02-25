@@ -851,7 +851,6 @@ describe('<EditPolicy />', () => {
       await actions.cold.enable(true);
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
-      expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
     });
 
     test('hiding rollover tip on minimum age', async () => {
