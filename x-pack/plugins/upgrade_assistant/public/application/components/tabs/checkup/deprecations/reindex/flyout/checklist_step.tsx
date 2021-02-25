@@ -16,13 +16,12 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ReindexStatus, ReindexWarning } from '../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
 import { ReindexState } from '../polling_service';
 import { ReindexProgress } from './progress';
@@ -78,7 +77,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   cancelReindex: () => void;
   http: HttpSetup;
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http, renderGlobalCallouts }) => {
-  const { loadingState, status, hasRequiredPrivileges, reindexWarnings } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
   return (
@@ -135,34 +134,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </h3>
         </EuiTitle>
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
-        {reindexWarnings && reindexWarnings.includes(ReindexWarning.apmReindex) && (
-          <Fragment>
-            <EuiSpacer />
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.calloutTitle"
-                  defaultMessage="After reindexing APM indices, return to the {apmSetupLink} to reload Kibana objects. You only need to do this once."
-                  values={{
-                    apmSetupLink: (
-                      <EuiLink
-                        href={http.basePath.prepend(`/app/kibana#/home/tutorial/apm`)}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.apmSetupLinkLabel"
-                          defaultMessage="APM Setup Instructions"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-              color="warning"
-              iconType="alert"
-            />
-          </Fragment>
-        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

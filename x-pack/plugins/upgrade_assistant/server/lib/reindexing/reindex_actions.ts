@@ -21,6 +21,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { versionService } from '../version';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
@@ -84,14 +85,12 @@ export interface ReindexActions {
   /**
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
+   * @param withTypeName
    */
-  getFlatSettings(indexName: string): Promise<FlatSettings | null>;
-
-  /**
-   * Retrieve index settings (in flat, dot-notation style) and mappings with the type name included.
-   * @param indexName
-   */
-  getFlatSettingsWithTypeName(indexName: string): Promise<FlatSettingsWithTypeName | null>;
+  getFlatSettings(
+    indexName: string,
+    withTypeName?: boolean
+  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -242,35 +241,34 @@ export const reindexActionsFactory = (
       return allOps;
     },
 
-    async getFlatSettings(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.get<{
-        [indexName: string]: FlatSettings;
-      }>({
-        index: indexName,
-        flat_settings: true,
-      });
+    async getFlatSettings(indexName: string, withTypeName?: boolean) {
+      let flatSettings;
 
-      if (!flatSettings[indexName]) {
+      if (versionService.getMajorVersion() === 7 && withTypeName) {
+        // On 7.x, we need to get index settings with mapping type
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettingsWithTypeName;
+        }>({
+          index: indexName,
+          flat_settings: true,
+          // This @ts-ignore is needed on master since the flag is deprecated on >7.x
+          // @ts-ignore
+          include_type_name: true,
+        });
+      } else {
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettings;
+        }>({
+          index: indexName,
+          flat_settings: true,
+        });
+      }
+
+      if (!flatSettings.body[indexName]) {
         return null;
       }
 
-      return flatSettings[indexName];
-    },
-
-    async getFlatSettingsWithTypeName(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.get<{
-        [indexName: string]: FlatSettingsWithTypeName;
-      }>({
-        index: indexName,
-        flat_settings: true,
-        include_type_name: true,
-      });
-
-      if (!flatSettings[indexName]) {
-        return null;
-      }
-
-      return flatSettings[indexName];
+      return flatSettings.body[indexName];
     },
 
     async _fetchAndLockIndexGroupDoc(indexGroup) {

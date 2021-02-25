@@ -12,7 +12,6 @@ export const CannotCreateIndex = Symbol('CannotCreateIndex');
 export const ReindexTaskFailed = Symbol('ReindexTaskFailed');
 export const ReindexTaskCannotBeDeleted = Symbol('ReindexTaskCannotBeDeleted');
 export const ReindexAlreadyInProgress = Symbol('ReindexAlreadyInProgress');
-export const CannotReindexSystemIndexInCurrent = Symbol('CannotReindexSystemIndexInCurrent');
 export const ReindexIsNotInQueue = Symbol('ReindexIsNotInQueue');
 export const ReindexCannotBeCancelled = Symbol('ReindexCannotBeCancelled');
 
