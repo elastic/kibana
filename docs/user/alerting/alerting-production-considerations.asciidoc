@@ -24,7 +24,7 @@ For more details on Task Manager, see <<task-manager-background-tasks>>.
 Alert and action tasks can run late or at an inconsistent schedule.
 This is typically a symptom of the specific usage of the cluster in question.
 
-Such issues can be addressed by tweaking the {kib} <<task-manager>> or scaling the deployment to better suit your use case.
+You can address such issues by tweaking the {kib} <<task-manager>> or scaling the deployment to better suit your use case.
 
 For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubleshooting`>>.
 ==============================================
@@ -33,12 +33,12 @@ For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubleshooting`
 [[alerting-scaling-guidance]]
 === Scaling Guidance
 
-As Alerts and Actions leverage <<task-manager>> to perform the majority of their work, scaling {kib} Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
+As alerts and actions leverage <<task-manager>> to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
 When estimating the required task throughput, keep the following in mind:
 
-* Each Alert utilizes a single recurring task which is scheduled to run at the cadance defined by its <<defining-alerts-general-details, check interval>>
-* Each Action utilizes a single task, but since <<alerting-concepts-suppressing-duplicate-notifications, actions are taken per instance>>, alerts can end up generating a large number of non-recurring tasks.
+* Each alert uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-alerts-general-details, check interval>>.
+* Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications, actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
 
 It is difficult to predict how much throughput is needed to ensure all Alerts and Actions are executed at consistent schedules.
 By counting Alerts as recurring tasks and Actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurment.
