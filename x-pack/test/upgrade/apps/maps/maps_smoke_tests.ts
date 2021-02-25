@@ -10,7 +10,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
-export default function ({ getPageObjects, getService, updateBaselines }: FtrProviderContext  & { updateBaselines: boolean }) {
+export default function ({
+  getPageObjects,
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
@@ -77,10 +81,9 @@ export default function ({ getPageObjects, getService, updateBaselines }: FtrPro
   // These tests might fail locally because of scaling factors and resolution.
 
   describe('maps smoke tests', function describeIndexTests() {
-
     const spaces = [
-      {space: "default", basePath: ""},
-      {space: "automation", basePath: "s/automation"}
+      { space: 'default', basePath: '' },
+      { space: 'automation', basePath: 's/automation' },
     ];
 
     before(async () => {
@@ -89,16 +92,12 @@ export default function ({ getPageObjects, getService, updateBaselines }: FtrPro
       });
     });
 
-    spaces.forEach(({space, basePath}) => {
+    spaces.forEach(({ space, basePath }) => {
       describe('space ' + space + ' ecommerce', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'home',
-            '/tutorial_directory/sampleData',
-            {
-              basePath: basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('ecommerce');
@@ -125,13 +124,9 @@ export default function ({ getPageObjects, getService, updateBaselines }: FtrPro
 
       describe('space ' + space + ' flights', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'home',
-            '/tutorial_directory/sampleData',
-            {
-              basePath: basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('flights');
           await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
@@ -153,13 +148,9 @@ export default function ({ getPageObjects, getService, updateBaselines }: FtrPro
 
       describe('space ' + space + ' web logs', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'home',
-            '/tutorial_directory/sampleData',
-            {
-              basePath: basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('logs');
           await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');

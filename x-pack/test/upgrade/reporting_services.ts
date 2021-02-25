@@ -202,7 +202,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     getAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string) {
       return stats.reporting[jobType].total;
     },
-
   };
 }
 

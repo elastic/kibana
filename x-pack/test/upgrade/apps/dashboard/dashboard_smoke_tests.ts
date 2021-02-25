@@ -18,31 +18,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('dashboard smoke tests', function describeIndexTests() {
-
     const spaces = [
-      {space: "default", basePath: ""},
-      {space: "automation", basePath: "s/automation"}
+      { space: 'default', basePath: '' },
+      { space: 'automation', basePath: 's/automation' },
     ];
 
-    const dashboard_tests = [
-      {name: "flights", numPanels: 19},
-      {name: "logs", numPanels: 11},
-      {name: "ecommerce", numPanels: 12}
+    const dashboardTests = [
+      { name: 'flights', numPanels: 19 },
+      { name: 'logs', numPanels: 11 },
+      { name: 'ecommerce', numPanels: 12 },
     ];
 
-    spaces.forEach(({space, basePath}) => {
+    spaces.forEach(({ space, basePath }) => {
       describe('space ' + space, () => {
         beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'home',
-            '/tutorial_directory/sampleData',
-            {
-              basePath: basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
           await PageObjects.header.waitUntilLoadingHasFinished();
         });
-        dashboard_tests.forEach(({name, numPanels}) => {
+        dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
             await PageObjects.home.launchSampleDashboard(name);
             await PageObjects.header.waitUntilLoadingHasFinished();
@@ -61,15 +56,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await renderable.waitForRender();
           log.debug('Checking pie charts rendered');
           await pieChart.expectPieSliceCount(4);
-          //https://github.com/elastic/kibana/issues/92887
-          //log.debug('Checking area, bar and heatmap charts rendered');
-          //await dashboardExpect.seriesElementCount(15);
+          // https://github.com/elastic/kibana/issues/92887
+          // log.debug('Checking area, bar and heatmap charts rendered');
+          // await dashboardExpect.seriesElementCount(15);
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(50);
           log.debug('Checking input controls rendered');
           await dashboardExpect.inputControlItemCount(3);
           log.debug('Checking tag cloud rendered');
-          await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
+          await dashboardExpect.tagCloudWithValuesFound([
+            'Sunny',
+            'Rain',
+            'Clear',
+            'Cloudy',
+            'Hail',
+          ]);
           log.debug('Checking vega chart rendered');
           const tsvb = await find.existsByCssSelector('.vgaVis__view');
           expect(tsvb).to.be(true);

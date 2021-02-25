@@ -6,7 +6,7 @@
  */
 
 export default ({ loadTestFile }) => {
-    describe('upgrade', function () {
-      loadTestFile(require.resolve('./canvas_smoke_tests'));
-    });
-  };
+  describe('upgrade', function () {
+    loadTestFile(require.resolve('./canvas_smoke_tests'));
+  });
+};

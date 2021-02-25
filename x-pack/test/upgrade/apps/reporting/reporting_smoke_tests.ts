@@ -14,7 +14,6 @@ interface UsageStats {
   reporting: ReportingUsageStats;
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
@@ -24,20 +23,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   const spaces = [
-    {space: "default", basePath: ""},
-    {space: "automation", basePath: "s/automation"}
+    { space: 'default', basePath: '' },
+    { space: 'automation', basePath: 's/automation' },
   ];
 
-  const reporting_tests = [
-    {name: "flights", type: "pdf", link: "PDF Reports"},
-    {name: "flights", type: "pdf_optimize", link: "PDF Reports"},
-    {name: "flights", type: "png", link: "PNG Reports"},
-    {name: "logs", type: "pdf", link: "PDF Reports"},
-    {name: "logs", type: "pdf_optimize", link: "PDF Reports"},
-    {name: "logs", type: "png", link: "PNG Reports"},
-    {name: "ecommerce", type: "pdf", link: "PDF Reports"},
-    {name: "ecommerce", type: "pdf_optimize", link: "PDF Reports"},
-    {name: "ecommerce", type: "png", link: "PNG Reports"}
+  const reportingTests = [
+    { name: 'flights', type: 'pdf', link: 'PDF Reports' },
+    { name: 'flights', type: 'pdf_optimize', link: 'PDF Reports' },
+    { name: 'flights', type: 'png', link: 'PNG Reports' },
+    { name: 'logs', type: 'pdf', link: 'PDF Reports' },
+    { name: 'logs', type: 'pdf_optimize', link: 'PDF Reports' },
+    { name: 'logs', type: 'png', link: 'PNG Reports' },
+    { name: 'ecommerce', type: 'pdf', link: 'PDF Reports' },
+    { name: 'ecommerce', type: 'pdf_optimize', link: 'PDF Reports' },
+    { name: 'ecommerce', type: 'png', link: 'PNG Reports' },
   ];
 
   describe('reporting smoke tests', () => {
@@ -53,27 +52,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(usage.reporting.enabled).to.be(true);
       });
     });
-    spaces.forEach(({space, basePath}) => {
+    spaces.forEach(({ space, basePath }) => {
       describe('generate report space ' + space, () => {
         before(async () => {
           usage = (await usageAPI.getUsageStats()) as UsageStats;
           completedReportCount = reportingAPI.getCompletedReportCount(usage);
         });
         beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'home',
-            '/tutorial_directory/sampleData',
-            {
-              basePath: basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
           await PageObjects.header.waitUntilLoadingHasFinished();
         });
-        reporting_tests.forEach(({name, type, link}) => {
+        reportingTests.forEach(({ name, type, link }) => {
           it('name ' + name + ' type ' + type, async () => {
             await PageObjects.home.launchSampleDashboard(name);
             await PageObjects.share.openShareMenuItem(link);
-            if (type == "pdf_optimize") {
+            if (type === 'pdf_optimize') {
               await testSubjects.click('usePrintLayout');
             }
             const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
@@ -81,11 +76,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const url = await browser.getClipboardValue();
             await reportingAPI.expectAllJobsToFinishSuccessfully(
               await Promise.all([
-                  reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
+                reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
               ])
             );
-            const usage = await usageAPI.getUsageStats();
-            reportingAPI.expectCompletedReportCount(usage, completedReportCount+1);
+            usage = (await usageAPI.getUsageStats()) as UsageStats;
+            reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
           });
         });
       });
