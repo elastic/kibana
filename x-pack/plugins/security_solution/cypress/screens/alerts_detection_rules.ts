@@ -17,6 +17,12 @@ export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
+export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
+
+export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+
+export const REFRESH_BTN = '[data-test-subj="refreshRulesAction"] button';
+
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';

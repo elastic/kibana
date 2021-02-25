@@ -8,13 +8,16 @@
 
 import { buildRequestBody } from './build_request_body';
 import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
-import { getIndexPatternObject } from '../helpers/get_index_pattern';
+import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
 
 export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
   const uiSettings = req.getUiSettingsService();
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
+    indexPatternsService: await req.getIndexPatternsService(),
+  });
 
   const request = await buildRequestBody(
     req,
