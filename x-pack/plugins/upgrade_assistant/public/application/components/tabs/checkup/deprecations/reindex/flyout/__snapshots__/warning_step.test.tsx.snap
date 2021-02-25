@@ -27,12 +27,11 @@ exports[`WarningsFlyoutStep renders 1`] = `
       checkedIds={
         Object {
           "reindexWarning-0": false,
-          "reindexWarning-1": false,
         }
       }
       description={
         <FormattedMessage
-          defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the default type name, {defaultType}, and will be updated when reindexed. Ensure no application code or scripts rely on a different type."
+          defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
           values={
             Object {
@@ -55,31 +54,6 @@ exports[`WarningsFlyoutStep renders 1`] = `
               </EuiCode>,
             }
           }
-        />
-      }
-      onChange={[Function]}
-      warning={1}
-    />
-    <WarningCheckbox
-      checkedIds={
-        Object {
-          "reindexWarning-0": false,
-          "reindexWarning-1": false,
-        }
-      }
-      description={
-        <FormattedMessage
-          defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema. Historical APM data will not visible until it's reindexed."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
-          values={Object {}}
-        />
-      }
-      documentationUrl="https://www.elastic.co/guide/en/observability/master/whats-new.html"
-      label={
-        <FormattedMessage
-          defaultMessage="This index will be converted to ECS format"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
-          values={Object {}}
         />
       }
       onChange={[Function]}

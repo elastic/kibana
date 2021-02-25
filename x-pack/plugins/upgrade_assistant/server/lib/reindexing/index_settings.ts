@@ -7,12 +7,8 @@
 
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
-import { isLegacyApmIndex } from '../apm';
 import { versionService } from '../version';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
-
-export const DEFAULT_TYPE_NAME = '_doc';
-
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;
@@ -73,31 +69,22 @@ export const generateNewIndexName = (indexName: string): string => {
  * @param flatSettings
  */
 export const getReindexWarnings = (
-  flatSettings: FlatSettingsWithTypeName,
-  apmIndexPatterns: string[] = []
+  flatSettings: FlatSettingsWithTypeName | FlatSettings
 ): ReindexWarning[] => {
-  const indexName = flatSettings.settings['index.provided_name'];
-  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
-  const apmReindexWarning = isLegacyApmIndex(
-    indexName,
-    apmIndexPatterns,
-    flatSettings.mappings[typeName]
-  );
-  const typeNameWarning = usesCustomTypeName(flatSettings);
+  const warnings = [] as Array<[ReindexWarning, boolean]>;
 
-  const warnings = [
-    [ReindexWarning.apmReindex, apmReindexWarning],
-    [ReindexWarning.customTypeName, typeNameWarning],
-  ] as Array<[ReindexWarning, boolean]>;
+  if (versionService.getMajorVersion() === 7) {
+    const DEFAULT_TYPE_NAME = '_doc';
+    // In 7+ it's not possible to have more than one type anyways, so always grab the first
+    // (and only) key.
+    const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
+
+    const typeNameWarning = Boolean(typeName && typeName !== DEFAULT_TYPE_NAME);
+
+    warnings.push([ReindexWarning.customTypeName, typeNameWarning]);
+  }
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
-};
-
-const usesCustomTypeName = (flatSettings: FlatSettingsWithTypeName) => {
-  // In 7+ it's not possible to have more than one type anyways, so always grab the first
-  // (and only) key.
-  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
-  return typeName && typeName !== DEFAULT_TYPE_NAME;
 };
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>

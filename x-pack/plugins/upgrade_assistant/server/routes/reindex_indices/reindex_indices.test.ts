@@ -7,7 +7,6 @@
 
 import { kibanaResponseFactory } from 'src/core/server';
 import { licensingMock } from '../../../../licensing/server/mocks';
-import { apmOSSPluginSetupMock } from '../../../../../../src/plugins/apm_oss/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 
@@ -61,7 +60,6 @@ describe('reindex API', () => {
     routeDependencies = {
       credentialStore,
       router: mockRouter,
-      apmOSS: apmOSSPluginSetupMock.create(),
       licensing: licensingMock.createSetup(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
@@ -91,7 +89,9 @@ describe('reindex API', () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
       });
-      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([ReindexWarning.apmReindex]);
+      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([
+        ReindexWarning.customTypeName,
+      ]);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
