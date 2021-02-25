@@ -54,7 +54,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, callCluster, esClient);
+  await deleteAssets(installation, savedObjectsClient, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -87,11 +87,7 @@ function deleteKibanaAssets(
   });
 }
 
-function deleteESAssets(
-  installedObjects: EsAssetReference[],
-  callCluster: CallESAsCurrentUser,
-  esClient: ElasticsearchClient
-) {
+function deleteESAssets(installedObjects: EsAssetReference[], esClient: ElasticsearchClient) {
   return installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
@@ -109,13 +105,12 @@ function deleteESAssets(
 async function deleteAssets(
   { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
 
   const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, callCluster, esClient),
+    ...deleteESAssets(installedEs, esClient),
     ...deleteKibanaAssets(installedKibana, savedObjectsClient),
   ];
 
