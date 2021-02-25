@@ -44,9 +44,6 @@ that summarize the contents of the data.
 At the end of this tutorial, you’ll be ready to start exploring with your own
 data in *Discover*.
 
-[role="screenshot"]
-image::images/Discover-Start.png[Discover]
-
 
 [float]
 === Prerequisites
@@ -56,24 +53,6 @@ image::images/Discover-Start.png[Discover]
 <<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
 - You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
-
-[float]
-[[whats-you-goal-in-discover]]
-=== Define your goal
-
-When you explore your data in **Discover**, it's common to start with one or two goals:
-
-- **Get an overview of what is happening.**
-For example, you might look for
-information on the overall health and performance of your ecommerce business,
-and then share your findings in a report.
-
-- **Find an answer to a specific question.** You want
-to determine your customers' shopping preferences,
-and then visualize your findings on a dashboard.
-
-For this tutorial, your goal is to better manage your product inventory.  You want to
-know the top-selling products and on what day of the week these products sell the most.
 
 [float]
 [[find-the-data-you-want-to-use]]
@@ -207,12 +186,12 @@ You can bookmark this document and share the link.
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query and the filters.
 
-[role="screenshot"]
-image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
-
 . In the toolbar, click **Save**.
 
 . Give your search a title, and then click **Save**.
++ 
+[role="screenshot"]
+image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
 
 [float]
 === Visualize your findings
@@ -220,6 +199,9 @@ If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
 . From the **Selected fields** list, click  `day_of_week`, and then click **Visualize**.
++
+[role="screenshot"]
+image:images/discover-visualize.png[Discover sidebar field popover with visualize button, width=75%]
 +
 {kib} creates a visualization best suited for this field.
 
