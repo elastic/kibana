@@ -53,14 +53,14 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 ## Alerts API keys
 
-When we create an alerts we generate a new API key.
+When we create an alert, we generate a new API key.
 
-When we change, delete or manage alert availabilty we need to invalidate the old API key and create a new one (except the delete process).
+When we update, enable, or disable an alert, we must invalidate the old API key and create a new one.
 
-For managing API keys invalidation process we use additional saved object `api_key_pending_invalidation`, which stores all alerts API keys that was marked for invalidation during the updating or changing alerts.
-For executing security plugin invalidation we schedule a task which runs by default for every 5 mins to check if `api_key_pending_invalidation` saved object contains new API keys which marked for invalidation earlier then configured delay: default value is 5 mins.
-To change the default invalidation task schedule, use kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.interval: '5m'`.
-To change the default delay for the makrked API key invalidation, use kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.removalDelay: '5m'`.
+To manage the invalidation process for API keys, we use the saved object `api_key_pending_invalidation`.  This object stores all API keys that were marked for invalidation when alerts were updated.
+For security plugin invalidation, we schedule a task to check if the`api_key_pending_invalidation` saved object contains new API keys that are marked for invalidation earlier than the configured delay.  The default value for running the task is 5 mins.
+To change the schedule for the invalidation task, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.interval`.
+To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.removalDelay`.
 
 ## Limitations
 
