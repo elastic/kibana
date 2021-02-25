@@ -50,10 +50,9 @@ import { _installPackage } from './_install_package';
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, callCluster, esClient } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   try {
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
@@ -64,7 +63,6 @@ export async function installLatestPackage(options: {
       installSource: 'registry',
       savedObjectsClient,
       pkgkey,
-      callCluster,
       esClient,
     });
   } catch (err) {
@@ -105,10 +103,9 @@ export async function ensureInstalledDefaultPackages(
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, callCluster, esClient } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
   if (installedPackage) {
     return installedPackage;
@@ -117,7 +114,6 @@ export async function ensureInstalledPackage(options: {
   await installLatestPackage({
     savedObjectsClient,
     pkgName,
-    callCluster,
     esClient,
   });
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -172,7 +168,6 @@ export async function handleInstallPackageFailure({
         installSource: 'registry',
         savedObjectsClient,
         pkgkey: prevVersion,
-        callCluster,
         esClient,
       });
     }
@@ -214,7 +209,6 @@ export async function upgradePackage({
         installSource: 'registry',
         savedObjectsClient,
         pkgkey,
-        callCluster,
         esClient,
       });
       return {
@@ -252,7 +246,6 @@ export async function upgradePackage({
 interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
   force?: boolean;
 }
@@ -260,7 +253,6 @@ interface InstallRegistryPackageParams {
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
-  callCluster,
   esClient,
   force = false,
 }: InstallRegistryPackageParams): Promise<AssetReference[]> {
@@ -282,7 +274,6 @@ async function installPackageFromRegistry({
 
   return _installPackage({
     savedObjectsClient,
-    callCluster,
     esClient,
     installedPkg,
     paths,
@@ -294,7 +285,6 @@ async function installPackageFromRegistry({
 
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
   archiveBuffer: Buffer;
   contentType: string;
@@ -306,7 +296,6 @@ export type InstallPackageParams =
 
 async function installPackageByUpload({
   savedObjectsClient,
-  callCluster,
   esClient,
   archiveBuffer,
   contentType,
@@ -342,7 +331,6 @@ async function installPackageByUpload({
 
   return _installPackage({
     savedObjectsClient,
-    callCluster,
     esClient,
     installedPkg,
     paths,
@@ -358,21 +346,19 @@ export async function installPackage(args: InstallPackageParams) {
   }
 
   if (args.installSource === 'registry') {
-    const { savedObjectsClient, pkgkey, esClient, callCluster, force } = args;
+    const { savedObjectsClient, pkgkey, esClient, force } = args;
 
     return installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
-      callCluster,
       force,
     });
   } else if (args.installSource === 'upload') {
-    const { savedObjectsClient, esClient, callCluster, archiveBuffer, contentType } = args;
+    const { savedObjectsClient, esClient, archiveBuffer, contentType } = args;
 
     return installPackageByUpload({
       savedObjectsClient,
-      callCluster,
       esClient,
       archiveBuffer,
       contentType,
@@ -489,7 +475,6 @@ export async function ensurePackagesCompletedInstall(
           savedObjectsClient,
           pkgkey,
           esClient,
-          callCluster,
         })
       );
     }

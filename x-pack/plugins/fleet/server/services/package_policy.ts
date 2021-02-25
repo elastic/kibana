@@ -91,7 +91,6 @@ class PackagePolicyService {
         ensureInstalledPackage({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
-          callCluster,
           esClient,
         }),
         getPackageInfo({

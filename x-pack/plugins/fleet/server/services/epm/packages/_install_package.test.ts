@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  LegacyScopedClusterClient,
-  ElasticsearchClient,
-} from 'src/core/server';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -41,12 +37,10 @@ function sleep(millis: number) {
 
 describe('_installPackage', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let callCluster: jest.Mocked<LegacyScopedClusterClient['callAsCurrentUser']>;
   let esClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
-    callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
@@ -69,7 +63,6 @@ describe('_installPackage', () => {
 
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
-      callCluster,
       esClient,
       paths: [],
       packageInfo: {

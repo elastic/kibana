@@ -14,13 +14,7 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
 } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
-  AssetReference,
-  Installation,
-  CallESAsCurrentUser,
-  ElasticsearchAssetType,
-  InstallType,
-} from '../../../types';
+import { AssetReference, Installation, ElasticsearchAssetType, InstallType } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
@@ -40,7 +34,6 @@ import { ConcurrentInstallOperationError } from '../../../errors';
 
 export async function _installPackage({
   savedObjectsClient,
-  callCluster,
   esClient,
   installedPkg,
   paths,
@@ -49,7 +42,6 @@ export async function _installPackage({
   installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
   installedPkg?: SavedObject<Installation>;
   paths: string[];

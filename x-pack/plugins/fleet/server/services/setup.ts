@@ -94,7 +94,6 @@ async function createSetupSideEffects(
     const fleetServerPackage = await ensureInstalledPackage({
       savedObjectsClient: soClient,
       pkgName: FLEET_SERVER_PACKAGE,
-      callCluster,
       esClient,
     });
 

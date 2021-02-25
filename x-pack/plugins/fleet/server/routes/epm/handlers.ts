@@ -234,7 +234,6 @@ export const installPackageFromRegistryHandler: RequestHandler<
       installSource: 'registry',
       savedObjectsClient,
       pkgkey,
-      callCluster,
       esClient,
       force: request.body?.force,
     });
@@ -306,7 +305,6 @@ export const installPackageByUploadHandler: RequestHandler<
     });
   }
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
@@ -314,7 +312,6 @@ export const installPackageByUploadHandler: RequestHandler<
     const res = await installPackage({
       installSource: 'upload',
       savedObjectsClient,
-      callCluster,
       esClient,
       archiveBuffer,
       contentType,
