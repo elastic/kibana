@@ -83,7 +83,7 @@ describe('Events Details Helpers', () => {
       },
     ],
   };
-  const mockReturn = [
+  const resultFields = [
     {
       category: 'event',
       field: 'event.category',
@@ -256,8 +256,8 @@ describe('Events Details Helpers', () => {
     {
       category: 'threat',
       field: 'threat.indicator.first_seen',
-      values: ['2021-02-22T17:29:25.195Z', '2021-02-22T17:29:25.195Z'],
-      originalValue: ['2021-02-22T17:29:25.195Z', '2021-02-22T17:29:25.195Z'],
+      values: ['2021-02-22T17:29:25.195Z'],
+      originalValue: ['2021-02-22T17:29:25.195Z'],
       isObjectArray: false,
     },
     {
@@ -270,8 +270,8 @@ describe('Events Details Helpers', () => {
     {
       category: 'threat',
       field: 'threat.indicator.type',
-      values: ['custom', 'custom'],
-      originalValue: ['custom', 'custom'],
+      values: ['custom'],
+      originalValue: ['custom'],
       isObjectArray: false,
     },
     {
@@ -320,11 +320,11 @@ describe('Events Details Helpers', () => {
   describe('#getDataFromFieldsHits', () => {
     it('happy path', () => {
       const result = getDataFromFieldsHits(fields);
-      expect(result).toEqual(mockReturn);
+      expect(result).toEqual(resultFields);
     });
     it('lets get weird', () => {
       const whackFields = {
-        'threat.indicator': [
+        'crazy.pants': [
           {
             'matched.field': ['matched_field'],
             first_seen: ['2021-02-22T17:29:25.195Z'],
@@ -339,13 +339,30 @@ describe('Events Details Helpers', () => {
                     lazer: [
                       {
                         cool: true,
+                        lazer: [
+                          {
+                            lazer: [
+                              {
+                                lazer: [
+                                  {
+                                    lazer: [
+                                      {
+                                        whoa: false,
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
                       },
                     ],
                   },
                   {
                     lazer: [
                       {
-                        cool: true,
+                        cool: false,
                       },
                     ],
                   },
@@ -356,38 +373,73 @@ describe('Events Details Helpers', () => {
               },
             ],
           },
-          {
-            'matched.field': ['matched_field_2'],
-            first_seen: ['2021-02-22T17:29:25.195Z'],
-            provider: ['other_you'],
-            type: ['custom'],
-            'matched.atomic': ['matched_atomic_2'],
-            lazer: [
-              {
-                'great.field': [
-                  {
-                    wowoe: [
-                      {
-                        fooooo: ['grrrrr'],
-                      },
-                    ],
-                    astring: 'cool',
-                    aNumber: 1,
-                    anObject: {
-                      neat: true,
-                    },
-                  },
-                ],
-              },
-            ],
-          },
         ],
       };
+      const whackResultFields = [
+        {
+          category: 'crazy',
+          field: 'crazy.pants.matched.field',
+          values: ['matched_field'],
+          originalValue: ['matched_field'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.first_seen',
+          values: ['2021-02-22T17:29:25.195Z'],
+          originalValue: ['2021-02-22T17:29:25.195Z'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.provider',
+          values: ['yourself'],
+          originalValue: ['yourself'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.type',
+          values: ['custom'],
+          originalValue: ['custom'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.matched.atomic',
+          values: ['matched_atomic'],
+          originalValue: ['matched_atomic'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.lazer.great.field',
+          values: ['grrrrr', 'grrrrr_2'],
+          originalValue: ['grrrrr', 'grrrrr_2'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.lazer.lazer.lazer.cool',
+          values: ['true', 'false'],
+          originalValue: ['true', 'false'],
+          isObjectArray: false,
+        },
+        {
+          category: 'crazy',
+          field: 'crazy.pants.lazer.lazer.lazer.lazer.lazer.lazer.lazer.whoa',
+          values: ['false'],
+          originalValue: ['false'],
+          isObjectArray: false,
+        },
+      ];
+      const result = getDataFromFieldsHits(whackFields);
+      expect(result).toEqual(whackResultFields);
     });
   });
   it('#getDataFromFieldsHitsSafety', async () => {
     const result = await getDataFromFieldsHitsSafety(fields);
-    expect(result).toEqual(mockReturn);
+    expect(result).toEqual(resultFields);
   });
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {

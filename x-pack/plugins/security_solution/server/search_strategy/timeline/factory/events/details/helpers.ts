@@ -84,34 +84,43 @@ export const getDataFromFieldsHits = (
     const objArrStr = toObjectArrayOfStrings(item);
     const strArr = objArrStr.map(({ str }) => str);
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
-    const preKey = prependField ? `${prependField}.${field}` : field;
+    const dotField = prependField ? `${prependField}.${field}` : field;
+
+    // return simple field value (non-object, non-array)
     if (!isObjectArray) {
       return [
         ...accumulator,
         {
           category: fieldCategory,
-          field: preKey,
+          field: dotField,
           values: isGeoField(field) ? formatGeoLocation(item) : strArr,
           originalValue: strArr,
           isObjectArray,
         } as TimelineEventsDetailsItem,
       ];
     }
-    let yay;
-    if (Array.isArray(item)) {
-      yay = item.reduce((acc, i) => [...acc, getDataFromFieldsHits(i, preKey, fieldCategory)], []);
-    } else {
-      yay = getDataFromFieldsHits(item, prependField, fieldCategory);
-    }
-    const flat = [...accumulator, ...yay].flat().reduce(
+
+    // format nested fields
+    const nestedFields = Array.isArray(item)
+      ? item
+          .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+          .flat()
+      : getDataFromFieldsHits(item, prependField, fieldCategory);
+
+    // combine duplicate fields
+    const flat = [...accumulator, ...nestedFields].reduce(
       (acc, f) => ({
         ...acc,
         ...(acc[f.field] != null
           ? {
               [f.field]: {
                 ...f,
-                originalValue: [...acc[f.field].originalValue, ...f.originalValue],
-                values: [...acc[f.field].values, ...f.values],
+                originalValue: acc[f.field].originalValue.includes(f.originalValue[0])
+                  ? acc[f.field].originalValue
+                  : [...acc[f.field].originalValue, ...f.originalValue],
+                values: acc[f.field].values.includes(f.values[0])
+                  ? acc[f.field].values
+                  : [...acc[f.field].values, ...f.values],
               },
             }
           : { [f.field]: f }),
