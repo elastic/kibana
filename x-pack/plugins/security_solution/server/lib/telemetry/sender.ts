@@ -367,6 +367,7 @@ const allowlistEventFields: AllowlistFields = {
     token: {
       integrity_level_name: true,
     },
+    thread: true,
   },
   Target: {
     process: {
