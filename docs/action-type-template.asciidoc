@@ -29,10 +29,10 @@ Example preconfigured format for this action type
  my-<ACTION-TYPE>:
    name: preconfigured-<ACTION-TYPE>-action-type
    actionTypeId: .<ACTION-TYPE>
-   config: <1>
+   config:
      property1: value1
      property2: value2
-   secrets: <2>
+   secrets:
      property3: value3
 --
 
@@ -41,14 +41,13 @@ Example preconfigured format for this action type
 ////
 List of properties from the ConfigSchema and SecretsSchema for this action type.
 ////
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type.
+
 `property1`:: A short description of this property.
-+
 `property2`:: A short descriptionn of this property.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `property3`:: A short descriptionn of this property.
 
 [float]

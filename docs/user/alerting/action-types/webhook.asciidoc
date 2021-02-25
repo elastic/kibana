@@ -27,32 +27,27 @@ Password::  Password for HTTP basic authentication.
  my-webhook:
    name: preconfigured-webhook-action-type
    actionTypeId: .webhook
-   config: <1>
+   config:
      url: https://test.host
      method: POST
      headers:
        testheader: testvalue
-   secrets: <2>
+   secrets:
      user: testuser
      password: passwordkeystorevalue
 --
 
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type.
+
 `url`:: A URL string that corresponds to *URL*.
-+
 `method`:: A string that corresponds to *Method*.
-+
 `headers`:: A record<string, string> that corresponds to *Headers*.
-+
 `hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
-+
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
-'''
 
 [float]
 [[webhook-action-configuration]]

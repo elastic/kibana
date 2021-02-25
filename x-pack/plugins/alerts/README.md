@@ -17,6 +17,8 @@ Table of Contents
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
+		- [Action variables](#action-variables)
+		- [Documentation](#documentation)
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
@@ -125,7 +127,13 @@ For example, if the `context` has one variable `foo` which is an object that has
 ```
 
 ### Documentation
-We suggest you add user documentation for your alert type following the template provided in `docs/alert-type-template.asciidoc`. The [Index Threshold alert type](https://www.elastic.co/guide/en/kibana/master/alert-type-index-threshold.html) is an example of documentation created following the template.
+You should create asciidoc for the new alert type. 
+* For stack alerts, add an entry to the alert type index - [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) which points to a new document for the alert type that should be in the directory [`docs/user/alerting/stack-alerts`](../../../docs/user/alerting/stack-alerts).
+
+* Solution specific alert documentation should live within the docs for the solution. 
+
+We suggest following the template provided in `docs/alert-type-template.asciidoc`. The [Index Threshold alert type](https://www.elastic.co/guide/en/kibana/master/alert-type-index-threshold.html) is an example of documentation created following the template.
+
 ### Example
 
 This example receives server and threshold as parameters. It will read the CPU usage of the server and schedule actions to be executed (asynchronously by the task manager) if the reading is greater than the threshold.

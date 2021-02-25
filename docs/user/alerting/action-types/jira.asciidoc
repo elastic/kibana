@@ -25,26 +25,23 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
  my-jira:
    name: preconfigured-jira-action-type
    actionTypeId: .jira
-   config: <1>
+   config:
      apiUrl: https://elastic.atlassian.net
      projectKey: ES
-   secrets: <2>
+   secrets:
      email: testuser
      apiToken: tokenkeystorevalue
 --
 
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type.
+
 `apiUrl`:: An address that corresponds to *URL*.
-+
 `projectKey`:: A key that corresponds to *Project Key*.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `email`:: A string that corresponds to *Email*.
-+
 `apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-'''
 
 [float]
 [[jira-action-configuration]]

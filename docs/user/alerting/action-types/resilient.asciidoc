@@ -25,26 +25,23 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
  my-resilient:
    name: preconfigured-resilient-action-type
    actionTypeId: .resilient
-   config: <1>
+   config:
      apiUrl: https://elastic.resilient.net
      orgId: ES
-   secrets: <2>
+   secrets:
      apiKeyId: testuser
      apiKeySecret: tokenkeystorevalue
 --
 
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type.
+
 `apiUrl`:: An address that corresponds to *URL*.
-+
 `orgId`:: An ID that corresponds to *Organization ID*.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `apiKeyId`:: A string that corresponds to *API key ID*.
-+
 `apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-'''
 
 [float]
 [[resilient-action-configuration]]

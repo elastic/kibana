@@ -144,20 +144,19 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
  my-pagerduty:
    name: preconfigured-pagerduty-action-type
    actionTypeId: .pagerduty
-   config: <1>
+   config:
      apiUrl: https://test.host
-   secrets: <2>
+   secrets:
      routingKey: testroutingkey
 --
 
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type.
+
 `apiURL`:: A URL string that corresponds to *API URL*.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `routingKey`:: A string that corresponds to *Integration Key*.
-'''
 
 [float]
 [[pagerduty-action-configuration]]

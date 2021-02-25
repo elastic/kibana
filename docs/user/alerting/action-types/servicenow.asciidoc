@@ -24,22 +24,21 @@ Password::  Password for HTTP Basic authentication.
  my-servicenow:
    name: preconfigured-servicenow-action-type
    actionTypeId: .servicenow
-   config: <1>
+   config:
      apiUrl: https://dev94428.service-now.com/
-   secrets: <2>
+   secrets:
      username: testuser
      password: passwordkeystorevalue
 --
-<1> Config defines information for the action type and contains the following properties.
-+
+
+Config defines information for the action type.
+
 `apiUrl`:: An address that corresponds to *URL*.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `username`:: A string that corresponds to *Username*.
-+
 `password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-'''
 
 [float]
 [[servicenow-action-configuration]]

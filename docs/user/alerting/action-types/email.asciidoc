@@ -30,36 +30,30 @@ Password::  Password for login type authentication.
  my-email:
    name: preconfigured-email-action-type
    actionTypeId: .email
-   config: <1>
+   config:
      from: testsender@test.com
      host: validhostname
      port: 8080
      secure: false
-   secrets: <2>
+   secrets:
      user: testuser
      password: passwordkeystorevalue
 --
 
-<1> Config defines information for the action type and contains the following properties.
-+
+Config defines information for the action type
+
 `service`:: The name of a https://nodemailer.com/smtp/well-known/[well-known email service provider]. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value, see the (https://nodemailer.com/usage/using-gmail/)[Nodemailer Gmail documentation].
-+
 `from`:: An email address that corresponds to *Sender*.
-+
 `host`:: A string that corresponds to *Host*.
-+
 `port`:: A number that corresponds to *Port*.
-+
 `secure`:: A boolean that corresponds to *Secure*.
-+
 `hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
-<2> Secrets defines sensitive information for the action type and contains the following properties.
-+
+Secrets defines sensitive information for the action type.
+
 `user`:: A string that corresponds to *Username*. Required if `hasAuth` is set to `true`.
-+
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
-'''
+
 
 [float]
 [[email-action-configuration]]
