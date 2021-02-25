@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error missing local definition
 export * from './datatable';
 export * from './autocomplete';
 export * from './constants';

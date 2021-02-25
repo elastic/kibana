@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './query';
+export { queryDatatable } from './query';
