@@ -37,6 +37,7 @@ export class RenderingService {
       uiPlugins,
       serverBasePath: http.basePath.serverBasePath,
       packageInfo: this.coreContext.env.packageInfo,
+      getAuthStatus: http.auth.get,
     });
     registerBootstrapRoute({ router, renderer: bootstrapRenderer });
 

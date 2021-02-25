@@ -11,6 +11,7 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { PackageInfo } from '@kbn/config';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
+import { GetAuthState, KibanaRequest } from '../../http';
 import { getStylesheetPaths } from './get_stylesheet_paths';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { BootstrapTemplateInterpolator } from './render_template';
@@ -22,9 +23,11 @@ interface FactoryOptions {
   serverBasePath: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
+  getAuthStatus: GetAuthState;
 }
 
 interface RenderedOptions {
+  request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
 }
 
@@ -37,12 +40,16 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   serverBasePath,
   uiPlugins,
+  getAuthStatus,
 }) => {
   const templateInterpolator = new BootstrapTemplateInterpolator();
 
-  return async ({ uiSettingsClient }) => {
-    const darkMode = await uiSettingsClient.get('theme:darkMode');
-    const themeVersion = await uiSettingsClient.get('theme:version');
+  return async ({ uiSettingsClient, request }) => {
+    const { status: authStatus } = getAuthStatus(request);
+    const canUseSettings = authStatus !== 'unauthenticated'; // unknown is when auth is not present - oss
+
+    const darkMode = canUseSettings ? await uiSettingsClient.get('theme:darkMode') : false;
+    const themeVersion = canUseSettings ? await uiSettingsClient.get('theme:version') : 'v7';
     const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
     const buildHash = packageInfo.buildNum;
     const basePath = serverBasePath;

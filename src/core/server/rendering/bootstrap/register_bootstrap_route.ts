@@ -28,7 +28,7 @@ export const registerBootstrapRoute = ({
     async (ctx, req, res) => {
       const uiSettingsClient = ctx.core.uiSettings.client;
 
-      const { body, etag } = await renderer({ uiSettingsClient });
+      const { body, etag } = await renderer({ uiSettingsClient, request: req });
 
       return res.ok({
         body,
