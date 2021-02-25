@@ -23,7 +23,6 @@ export * from './httpurl';
 export * from './missing_asset';
 export * from './palettes';
 export * from './pivot_object_array';
-// @ts-expect-error missing local definition
 export * from './resolve_dataurl';
 export * from './unquote_string';
 export * from './url';
