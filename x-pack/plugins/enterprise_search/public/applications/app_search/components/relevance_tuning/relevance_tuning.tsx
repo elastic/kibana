@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
-  EuiText,
   EuiLink,
   EuiEmptyPrompt,
 } from '@elastic/eui';
