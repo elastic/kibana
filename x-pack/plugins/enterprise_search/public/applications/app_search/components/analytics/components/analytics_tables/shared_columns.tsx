@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH } from '../../../../routes';
-import { generateEnginePath } from '../../../engine';
-
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
+import { generateEnginePath, EngineLogic } from '../../../engine';
 import { Query, RecentQuery } from '../../types';
+
 import { InlineTagsList } from './inline_tags_list';
 
 /**
@@ -56,12 +60,12 @@ export const ACTIONS_COLUMN = {
         { defaultMessage: 'View query analytics' }
       ),
       type: 'icon',
-      icon: 'popout',
+      icon: 'eye',
       color: 'primary',
       onClick: (item: Query | RecentQuery) => {
         const { navigateToUrl } = KibanaLogic.values;
 
-        const query = (item as Query).key || (item as RecentQuery).query_string;
+        const query = (item as Query).key || (item as RecentQuery).query_string || '""';
         navigateToUrl(generateEnginePath(ENGINE_ANALYTICS_QUERY_DETAIL_PATH, { query }));
       },
       'data-test-subj': 'AnalyticsTableViewQueryButton',
@@ -72,12 +76,25 @@ export const ACTIONS_COLUMN = {
       }),
       description: i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip',
-        { defaultMessage: 'Edit query analytics' }
+        { defaultMessage: 'Edit query' }
       ),
       type: 'icon',
       icon: 'pencil',
-      onClick: () => {
-        // TODO: CurationsLogic
+      onClick: async (item: Query | RecentQuery) => {
+        const { http } = HttpLogic.values;
+        const { navigateToUrl } = KibanaLogic.values;
+        const { engineName } = EngineLogic.values;
+
+        try {
+          const query = (item as Query).key || (item as RecentQuery).query_string || '""';
+          const response = await http.get(
+            `/api/app_search/engines/${engineName}/curations/find_or_create`,
+            { query: { query } }
+          );
+          navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
+        } catch (e) {
+          flashAPIErrors(e);
+        }
       },
       'data-test-subj': 'AnalyticsTableEditQueryButton',
     },

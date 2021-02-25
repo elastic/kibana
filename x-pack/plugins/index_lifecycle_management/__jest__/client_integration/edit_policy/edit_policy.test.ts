@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -24,11 +25,10 @@ import {
   getDefaultHotPhasePolicy,
 } from './constants';
 
-window.scrollTo = jest.fn();
-
 describe('<EditPolicy />', () => {
   let testBed: EditPolicyTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
+
   afterAll(() => {
     server.restore();
   });
@@ -59,7 +59,7 @@ describe('<EditPolicy />', () => {
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.hot.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
-      await actions.delete.enable(false);
+      await actions.delete.disablePhase();
       await actions.savePolicy();
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -87,7 +87,7 @@ describe('<EditPolicy />', () => {
                 unknown_setting: true,
               },
             },
-            min_age: '0ms',
+            min_age: '0d',
           },
         },
       });
@@ -125,7 +125,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setBestCompression(true);
         await actions.hot.toggleShrink(true);
         await actions.hot.setShrink('2');
-        await actions.hot.setReadonly(true);
+        await actions.hot.toggleReadonly(true);
         await actions.hot.toggleIndexPriority(true);
         await actions.hot.setIndexPriority('123');
 
@@ -253,7 +253,7 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0ms",
+            "min_age": "0d",
           }
         `);
       });
@@ -269,7 +269,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
-        await actions.warm.setReadonly(true);
+        await actions.warm.toggleReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -308,7 +308,7 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "0ms",
+                "min_age": "0d",
               },
             },
           }
@@ -475,6 +475,29 @@ describe('<EditPolicy />', () => {
 
       const { component } = testBed;
       component.update();
+    });
+
+    test('serialization', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { component, actions } = testBed;
+      component.update();
+      await actions.delete.enablePhase();
+      await actions.setWaitForSnapshotPolicy('test');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy.phases.delete).toEqual({
+        min_age: '365d',
+        actions: {
+          delete: {},
+          wait_for_snapshot: {
+            policy: 'test',
+          },
+        },
+      });
     });
 
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
@@ -670,43 +693,52 @@ describe('<EditPolicy />', () => {
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
       });
     });
-  });
-
-  describe('searchable snapshot', () => {
     describe('on cloud', () => {
-      describe('new policy', () => {
-        beforeEach(async () => {
-          // simulate creating a new policy
-          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
-          httpRequestsMockHelpers.setListNodes({
-            isUsingDeprecatedDataRoleConfig: false,
-            nodesByAttributes: { test: ['123'] },
-            nodesByRoles: { data: ['123'] },
-          });
-          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
-
-          await act(async () => {
-            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-          });
-
-          const { component } = testBed;
-          component.update();
-        });
-        test('defaults searchable snapshot to true on cloud', async () => {
-          const { find, actions } = testBed;
-          await actions.cold.enable(true);
-          expect(
-            find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
-          ).toBe(true);
-        });
-      });
-      describe('existing policy', () => {
+      describe('using legacy data role config', () => {
         beforeEach(async () => {
           httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
           httpRequestsMockHelpers.setListNodes({
-            isUsingDeprecatedDataRoleConfig: false,
             nodesByAttributes: { test: ['123'] },
-            nodesByRoles: { data: ['123'] },
+            // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
+            // be available.
+            nodesByRoles: { data_hot: ['123'] },
+            isUsingDeprecatedDataRoleConfig: true,
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+          await act(async () => {
+            testBed = await setup({
+              appServicesContext: {
+                cloud: {
+                  isCloudEnabled: true,
+                },
+                license: licensingMock.createLicense({ license: { type: 'basic' } }),
+              },
+            });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('removes default, recommended option', async () => {
+          const { actions, find } = testBed;
+          await actions.warm.enable(true);
+          actions.warm.showDataAllocationOptions();
+
+          expect(find('defaultDataAllocationOption').exists()).toBeFalsy();
+          expect(find('customDataAllocationOption').exists()).toBeTruthy();
+          expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          // Show the call-to-action for users to migrate their cluster to use node roles
+          expect(find('cloudDataTierCallout').exists()).toBeTruthy();
+        });
+      });
+      describe('using node roles', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data_hot: ['123'] },
+            isUsingDeprecatedDataRoleConfig: false,
           });
           httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
@@ -717,19 +749,34 @@ describe('<EditPolicy />', () => {
           const { component } = testBed;
           component.update();
         });
-        test('correctly sets snapshot repository default to "found-snapshots"', async () => {
-          const { actions } = testBed;
+
+        test('should show recommended, custom and "off" options on cloud with data roles', async () => {
+          const { actions, find } = testBed;
+
+          await actions.warm.enable(true);
+          actions.warm.showDataAllocationOptions();
+          expect(find('defaultDataAllocationOption').exists()).toBeTruthy();
+          expect(find('customDataAllocationOption').exists()).toBeTruthy();
+          expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          // We should not be showing the call-to-action for users to activate the cold tier on cloud
+          expect(find('cloudMissingColdTierCallout').exists()).toBeFalsy();
+          // Do not show the call-to-action for users to migrate their cluster to use node roles
+          expect(find('cloudDataTierCallout').exists()).toBeFalsy();
+        });
+
+        test('should show cloud notice when cold tier nodes do not exist', async () => {
+          const { actions, find } = testBed;
           await actions.cold.enable(true);
-          await actions.cold.toggleSearchableSnapshot(true);
-          await actions.savePolicy();
-          const latestRequest = server.requests[server.requests.length - 1];
-          const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-          expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
-            'found-snapshots'
-          );
+          expect(find('cloudMissingColdTierCallout').exists()).toBeTruthy();
+          // Assert that other notices are not showing
+          expect(find('defaultAllocationNotice').exists()).toBeFalsy();
+          expect(find('noNodeAttributesWarning').exists()).toBeFalsy();
         });
       });
     });
+  });
+
+  describe('searchable snapshot', () => {
     describe('on non-enterprise license', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -766,7 +813,97 @@ describe('<EditPolicy />', () => {
         expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
       });
     });
+
+    describe('on cloud', () => {
+      describe('new policy', () => {
+        beforeEach(async () => {
+          // simulate creating a new policy
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+            isUsingDeprecatedDataRoleConfig: false,
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('defaults searchable snapshot to true on cloud', async () => {
+          const { find, actions } = testBed;
+          await actions.cold.enable(true);
+          expect(
+            find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
+          ).toBe(true);
+        });
+      });
+      describe('existing policy', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data_hot: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+          const { actions } = testBed;
+          await actions.cold.enable(true);
+          await actions.cold.toggleSearchableSnapshot(true);
+          await actions.savePolicy();
+          const latestRequest = server.requests[server.requests.length - 1];
+          const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+          expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+            'found-snapshots'
+          );
+        });
+      });
+    });
   });
+  describe('with rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('shows rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeTruthy();
+    });
+  });
+
   describe('without rollover', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -776,6 +913,7 @@ describe('<EditPolicy />', () => {
         nodesByRoles: { data: ['123'] },
       });
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
       await act(async () => {
         testBed = await setup({
@@ -796,6 +934,20 @@ describe('<EditPolicy />', () => {
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
+    });
+
+    test('hiding rollover tip on minimum age', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.toggleRollover(false);
+
+      await actions.warm.enable(true);
+      await actions.cold.enable(true);
+      await actions.delete.enablePhase();
+
+      expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();
+      expect(actions.delete.hasRolloverTipOnMinAge()).toBeFalsy();
     });
   });
 
@@ -837,19 +989,156 @@ describe('<EditPolicy />', () => {
       expect(actions.timeline.hasColdPhase()).toBe(true);
       expect(actions.timeline.hasDeletePhase()).toBe(false);
 
-      await actions.delete.enable(true);
+      await actions.delete.enablePhase();
       expect(actions.timeline.hasHotPhase()).toBe(true);
       expect(actions.timeline.hasWarmPhase()).toBe(true);
       expect(actions.timeline.hasColdPhase()).toBe(true);
       expect(actions.timeline.hasDeletePhase()).toBe(true);
     });
+  });
 
-    test('show and hide rollover indicator on timeline', async () => {
+  describe('policy error notifications', () => {
+    let runTimers: () => void;
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+
+      ({ runTimers } = testBed);
+    });
+
+    test('shows phase error indicators correctly', async () => {
+      // This test simulates a user configuring a policy phase by phase. The flow is the following:
+      // 0. Start with policy with no validation issues present
+      // 1. Configure hot, introducing a validation error
+      // 2. Configure warm, introducing a validation error
+      // 3. Configure cold, introducing a validation error
+      // 4. Fix validation error in hot
+      // 5. Fix validation error in warm
+      // 6. Fix validation error in cold
+      // We assert against each of these progressive states.
+
       const { actions } = testBed;
-      expect(actions.timeline.hasRolloverIndicator()).toBe(true);
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
-      expect(actions.timeline.hasRolloverIndicator()).toBe(false);
+
+      // 0. No validation issues
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+
+      // 1. Hot phase validation issue
+      await actions.hot.toggleForceMerge(true);
+      await actions.hot.setForcemergeSegmentsCount('-22');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(true);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+
+      // 2. Warm phase validation issue
+      await actions.warm.enable(true);
+      await actions.warm.toggleForceMerge(true);
+      await actions.warm.setForcemergeSegmentsCount('-22');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(true);
+      expect(actions.warm.hasErrorIndicator()).toBe(true);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+
+      // 3. Cold phase validation issue
+      await actions.cold.enable(true);
+      await actions.cold.setReplicas('-33');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(true);
+      expect(actions.warm.hasErrorIndicator()).toBe(true);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // 4. Fix validation issue in hot
+      await actions.hot.setForcemergeSegmentsCount('1');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(true);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // 5. Fix validation issue in warm
+      await actions.warm.setForcemergeSegmentsCount('1');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // 6. Fix validation issue in cold
+      await actions.cold.setReplicas('1');
+      runTimers();
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+    });
+
+    test('global error callout should show if there are any form errors', async () => {
+      const { actions } = testBed;
+
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+
+      await actions.saveAsNewPolicy(true);
+      await actions.setPolicyName('');
+      runTimers();
+
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+    });
+
+    test('clears all error indicators if last erroring field is unmounted', async () => {
+      const { actions } = testBed;
+
+      await actions.cold.enable(true);
+      // introduce validation error
+      await actions.cold.setSearchableSnapshot('');
+      runTimers();
+
+      await actions.savePolicy();
+      runTimers();
+
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // unmount the field
+      await actions.cold.toggleSearchableSnapshot(false);
+
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
     });
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactWrapper, mount } from 'enzyme';
@@ -57,6 +58,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: undefined,
           operator: isOperator,
           value: undefined,
@@ -84,6 +86,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -115,6 +118,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOperator,
           value: '1234',
@@ -148,6 +152,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOneOfOperator,
           value: ['1234'],
@@ -181,6 +186,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOneOfOperator,
           value: ['1234'],
@@ -214,6 +220,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isInListOperator,
           value: 'some-list-id',
@@ -247,6 +254,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotInListOperator,
           value: 'some-list-id',
@@ -280,6 +288,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: existsOperator,
           value: undefined,
@@ -316,6 +325,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: doesNotExistOperator,
           value: undefined,
@@ -352,6 +362,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: {
             name: 'extension.text',
             type: 'string',
@@ -409,6 +420,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -434,7 +446,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'machine.os', operator: 'included', type: 'match', value: '' },
+      { id: '123', field: 'machine.os', operator: 'included', type: 'match', value: '' },
       0
     );
   });
@@ -444,6 +456,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -469,7 +482,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
+      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
       0
     );
   });
@@ -479,6 +492,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOperator,
           value: '1234',
@@ -504,7 +518,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '126.45.211.34' },
       0
     );
   });
@@ -514,6 +528,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOneOfOperator,
           value: '1234',
@@ -539,7 +554,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { id: '123', field: 'ip', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
       0
     );
   });
@@ -549,6 +564,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotInListOperator,
           value: '1234',
@@ -575,6 +591,7 @@ describe('BuilderEntryItem', () => {
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
+        id: '123',
         field: 'ip',
         operator: 'excluded',
         type: 'list',
@@ -589,6 +606,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('bytes'),
           operator: isOneOfOperator,
           value: '',
@@ -623,6 +641,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('bytes'),
           operator: isOneOfOperator,
           value: '',

@@ -1,34 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from '@hapi/boom';
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
+import Boom from '@hapi/boom';
+import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'src/core/server';
+
+import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { savedObjectToAgent } from './saved_objects';
-import { searchHitToAgent } from './helpers';
+import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { appContextService } from '../../services';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
+function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+  return filters
+    .filter((filter) => filter !== undefined)
+    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
+      | KueryNode
+      | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const kueryNode: KueryNode =
+        typeof kuery === 'string' ? esKuery.fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
-    return `(${filter})`;
-  }, undefined);
+      if (!acc) {
+        return kueryNode;
+      }
+
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, kueryNode],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
-function removeSOAttributes(kuery: string) {
+export function removeSOAttributes(kuery: string) {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
 }
 
@@ -55,12 +72,15 @@ export async function listAgents(
   const filters = [];
 
   if (kuery && kuery !== '') {
-    filters.push(removeSOAttributes(kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
 
   const res = await esClient.search({
     index: AGENTS_INDEX,
@@ -68,7 +88,7 @@ export async function listAgents(
     size: perPage,
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
-    q: _joinFilters(filters),
+    body,
   });
 
   let agentResults: Agent[] = res.body.hits.hits.map(searchHitToAgent);
@@ -119,18 +139,20 @@ export async function countInactiveAgents(
     filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+
   const res = await esClient.search({
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
-    q: _joinFilters(filters),
+    body,
   });
-
   return res.body.hits.total.value;
 }
 
 export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
-  const agentHit = await esClient.get<ESSearchHit<AgentSOAttributes>>({
+  const agentHit = await esClient.get<ESSearchHit<FleetServerAgent>>({
     index: AGENTS_INDEX,
     id: agentId,
   });
@@ -139,27 +161,31 @@ export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
   return agent;
 }
 
-export async function getAgents(soClient: SavedObjectsClientContract, agentIds: string[]) {
-  const agentSOs = await soClient.bulkGet<AgentSOAttributes>(
-    agentIds.map((agentId) => ({
-      id: agentId,
-      type: AGENT_SAVED_OBJECT_TYPE,
-    }))
-  );
-  const agents = agentSOs.saved_objects.map(savedObjectToAgent);
+export async function getAgents(
+  esClient: ElasticsearchClient,
+  agentIds: string[]
+): Promise<Agent[]> {
+  const body = { docs: agentIds.map((_id) => ({ _id })) };
+
+  const res = await esClient.mget({
+    body,
+    index: AGENTS_INDEX,
+  });
+
+  const agents = res.body.docs.map(searchHitToAgent);
   return agents;
 }
 
 export async function getAgentByAccessAPIKeyId(
-  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   accessAPIKeyId: string
 ): Promise<Agent> {
-  const response = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    searchFields: ['access_api_key_id'],
-    search: escapeSearchQueryPhrase(accessAPIKeyId),
+  const res = await esClient.search<SearchResponse<FleetServerAgent>>({
+    index: AGENTS_INDEX,
+    q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
-  const [agent] = response.saved_objects.map(savedObjectToAgent);
+
+  const [agent] = res.body.hits.hits.map(searchHitToAgent);
 
   if (!agent) {
     throw Boom.notFound('Agent not found');
@@ -175,15 +201,49 @@ export async function getAgentByAccessAPIKeyId(
 }
 
 export async function updateAgent(
-  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string,
-  data: {
-    userProvidedMetatada: any;
-  }
+  data: Partial<AgentSOAttributes>
 ) {
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: data.userProvidedMetatada,
+  await esClient.update({
+    id: agentId,
+    index: AGENTS_INDEX,
+    body: { doc: agentSOAttributesToFleetServerAgentDoc(data) },
+    refresh: 'wait_for',
   });
+}
+
+export async function bulkUpdateAgents(
+  esClient: ElasticsearchClient,
+  updateData: Array<{
+    agentId: string;
+    data: Partial<AgentSOAttributes>;
+  }>
+) {
+  const body = updateData.flatMap(({ agentId, data }) => [
+    {
+      update: {
+        _id: agentId,
+      },
+    },
+    {
+      doc: { ...agentSOAttributesToFleetServerAgentDoc(data) },
+    },
+  ]);
+
+  const res = await esClient.bulk({
+    body,
+    index: AGENTS_INDEX,
+    refresh: 'wait_for',
+  });
+
+  return {
+    items: res.body.items.map((item: { update: { _id: string; error?: Error } }) => ({
+      id: item.update._id,
+      success: !item.update.error,
+      error: item.update.error,
+    })),
+  };
 }
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
@@ -191,7 +251,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
     id: agentId,
     index: AGENT_SAVED_OBJECT_TYPE,
     body: {
-      active: false,
+      doc: { active: false },
     },
   });
 }

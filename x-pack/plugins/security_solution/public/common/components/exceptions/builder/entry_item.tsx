@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
@@ -136,7 +138,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           </EuiFormRow>
         );
       } else {
-        return comboBox;
+        return (
+          <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+            {comboBox}
+          </EuiFormRow>
+        );
       }
     },
     [handleFieldChange, indexPattern, entry, listType]
@@ -174,7 +180,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   };
 

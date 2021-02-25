@@ -112,6 +112,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "isCcrEnabled": true,

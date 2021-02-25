@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -29,29 +31,23 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const snapshotRequest = pipe(
-          SnapshotRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const snapshotRequest = pipe(
+        SnapshotRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          snapshotRequest.sourceId
-        );
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        snapshotRequest.sourceId
+      );
 
-        UsageCollector.countNode(snapshotRequest.nodeType);
-        const client = createSearchClient(requestContext, framework);
-        const snapshotResponse = await getNodes(client, snapshotRequest, source);
+      UsageCollector.countNode(snapshotRequest.nodeType);
+      const client = createSearchClient(requestContext, framework);
+      const snapshotResponse = await getNodes(client, snapshotRequest, source);
 
-        return response.ok({
-          body: SnapshotNodeResponseRT.encode(snapshotResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: SnapshotNodeResponseRT.encode(snapshotResponse),
+      });
     }
   );
 };

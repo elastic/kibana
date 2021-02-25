@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy } from 'lodash';
@@ -142,9 +143,11 @@ export class IndexDeprecationTable extends React.Component<
 
   private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
-    // should show the reindex button. This should work for known usecases.
+    // should show the reindex button. This should work for known use cases.
     const { indices } = this.props;
-    if (!indices.find((i) => i.reindex === true)) {
+    const hasActionsColumn = Boolean(indices.find((i) => i.reindex === true));
+
+    if (hasActionsColumn === false) {
       return null;
     }
 

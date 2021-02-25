@@ -296,140 +296,140 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       className="euiSpacer euiSpacer--l"
                     />
                   </EuiSpacer>
-                  <EuiOverlayMask>
-                    <Portal
-                      containerInfo={
-                        <div
-                          class="euiOverlayMask euiOverlayMask--aboveHeader"
-                        >
-                          <div
-                            data-eui="EuiFocusTrap"
-                          >
+                  <EuiConfirmModal
+                    cancelButtonText={
+                      <FormattedMessage
+                        defaultMessage="Cancel"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                        values={Object {}}
+                      />
+                    }
+                    confirmButtonText={
+                      <FormattedMessage
+                        defaultMessage="Confirm"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                        values={Object {}}
+                      />
+                    }
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                    title={
+                      <FormattedMessage
+                        defaultMessage="Confirm License Upload"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                        values={Object {}}
+                      />
+                    }
+                  >
+                    <EuiModal
+                      className="euiModal--confirmation"
+                      onClose={[Function]}
+                    >
+                      <EuiOverlayMask>
+                        <Portal
+                          containerInfo={
                             <div
-                              class="euiModal euiModal--maxWidth-default euiModal--confirmation"
-                              tabindex="0"
+                              class="euiOverlayMask euiOverlayMask--aboveHeader"
                             >
-                              <button
-                                aria-label="Closes this modal window"
-                                class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
-                                type="button"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  class="euiButtonIcon__icon"
-                                  data-euiicon-type="cross"
-                                />
-                              </button>
                               <div
-                                class="euiModal__flex"
+                                data-eui="EuiFocusTrap"
                               >
                                 <div
-                                  class="euiModalHeader"
+                                  class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                  tabindex="0"
                                 >
-                                  <div
-                                    class="euiModalHeader__title"
-                                    data-test-subj="confirmModalTitleText"
+                                  <button
+                                    aria-label="Closes this modal window"
+                                    class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                    type="button"
                                   >
-                                    Confirm License Upload
-                                  </div>
-                                </div>
-                                <div
-                                  class="euiModalBody"
-                                >
+                                    <span
+                                      aria-hidden="true"
+                                      class="euiButtonIcon__icon"
+                                      data-euiicon-type="cross"
+                                    />
+                                  </button>
                                   <div
-                                    class="euiModalBody__overflow"
+                                    class="euiModal__flex"
                                   >
                                     <div
-                                      class="euiText euiText--medium"
-                                      data-test-subj="confirmModalBodyText"
+                                      class="euiModalHeader"
                                     >
-                                      <div>
+                                      <div
+                                        class="euiModalHeader__title"
+                                        data-test-subj="confirmModalTitleText"
+                                      >
+                                        Confirm License Upload
+                                      </div>
+                                    </div>
+                                    <div
+                                      class="euiModalBody"
+                                    >
+                                      <div
+                                        class="euiModalBody__overflow"
+                                      >
                                         <div
                                           class="euiText euiText--medium"
+                                          data-test-subj="confirmModalBodyText"
                                         >
-                                          Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                        </div>
-                                        <div
-                                          class="euiText euiText--medium"
-                                        >
-                                          <ul>
-                                            <li>
-                                              Watcher will be disabled
-                                            </li>
-                                          </ul>
+                                          <div>
+                                            <div
+                                              class="euiText euiText--medium"
+                                            >
+                                              Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                            </div>
+                                            <div
+                                              class="euiText euiText--medium"
+                                            >
+                                              <ul>
+                                                <li>
+                                                  Watcher will be disabled
+                                                </li>
+                                              </ul>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
+                                    <div
+                                      class="euiModalFooter"
+                                    >
+                                      <button
+                                        class="euiButtonEmpty euiButtonEmpty--primary"
+                                        data-test-subj="confirmModalCancelButton"
+                                        type="button"
+                                      >
+                                        <span
+                                          class="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            class="euiButtonEmpty__text"
+                                          >
+                                            Cancel
+                                          </span>
+                                        </span>
+                                      </button>
+                                      <button
+                                        class="euiButton euiButton--primary euiButton--fill"
+                                        data-test-subj="confirmModalConfirmButton"
+                                        type="button"
+                                      >
+                                        <span
+                                          class="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            class="euiButton__text"
+                                          >
+                                            Confirm
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                                <div
-                                  class="euiModalFooter"
-                                >
-                                  <button
-                                    class="euiButtonEmpty euiButtonEmpty--primary"
-                                    data-test-subj="confirmModalCancelButton"
-                                    type="button"
-                                  >
-                                    <span
-                                      class="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        class="euiButtonEmpty__text"
-                                      >
-                                        Cancel
-                                      </span>
-                                    </span>
-                                  </button>
-                                  <button
-                                    class="euiButton euiButton--primary euiButton--fill"
-                                    data-test-subj="confirmModalConfirmButton"
-                                    type="button"
-                                  >
-                                    <span
-                                      class="euiButtonContent euiButton__content"
-                                    >
-                                      <span
-                                        class="euiButton__text"
-                                      >
-                                        Confirm
-                                      </span>
-                                    </span>
-                                  </button>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      }
-                    >
-                      <EuiConfirmModal
-                        cancelButtonText={
-                          <FormattedMessage
-                            defaultMessage="Cancel"
-                            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-                            values={Object {}}
-                          />
-                        }
-                        confirmButtonText={
-                          <FormattedMessage
-                            defaultMessage="Confirm"
-                            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-                            values={Object {}}
-                          />
-                        }
-                        onCancel={[Function]}
-                        onConfirm={[Function]}
-                        title={
-                          <FormattedMessage
-                            defaultMessage="Confirm License Upload"
-                            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-                            values={Object {}}
-                          />
-                        }
-                      >
-                        <EuiModal
-                          className="euiModal--confirmation"
-                          onClose={[Function]}
+                          }
                         >
                           <EuiFocusTrap>
                             <div
@@ -647,10 +647,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               </div>
                             </div>
                           </EuiFocusTrap>
-                        </EuiModal>
-                      </EuiConfirmModal>
-                    </Portal>
-                  </EuiOverlayMask>
+                        </Portal>
+                      </EuiOverlayMask>
+                    </EuiModal>
+                  </EuiConfirmModal>
                   <EuiText>
                     <div
                       className="euiText euiText--medium"

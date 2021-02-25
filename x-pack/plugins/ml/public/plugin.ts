@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,6 @@ import type {
   SharePluginStart,
   UrlGeneratorContract,
 } from 'src/plugins/share/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
@@ -46,6 +46,13 @@ import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 import type { MapsStartApi } from '../../maps/public';
+import { LensPublicStart } from '../../lens/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import { registerMlAlerts } from './alerting/register_ml_alerts';
+import { FileUploadPluginStart } from '../../file_upload/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -55,12 +62,15 @@ export interface MlStartDependencies {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  lens?: LensPublicStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  fileUpload: FileUploadPluginStart;
 }
+
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -68,6 +78,7 @@ export interface MlSetupDependencies {
   kibanaVersion: string;
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -102,13 +113,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
+            lens: pluginsStart.lens,
             kibanaVersion,
+            triggersActionsUi: pluginsStart.triggersActionsUi,
+            fileUpload: pluginsStart.fileUpload,
           },
           params
         );
@@ -117,6 +130,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
+
+    if (pluginsSetup.triggersActionsUi) {
+      registerMlAlerts(pluginsSetup.triggersActionsUi);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -173,13 +190,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     };
   }
 
-  start(core: CoreStart, deps: any) {
+  start(core: CoreStart, deps: MlStartDependencies) {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
     });
+
     return {
       urlGenerator: this.urlGenerator,
     };

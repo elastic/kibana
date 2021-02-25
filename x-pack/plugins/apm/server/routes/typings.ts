@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import t, { Encode, Encoder } from 'io-ts';
@@ -142,7 +143,7 @@ export type Client<
     forceCache?: boolean;
     endpoint: TEndpoint;
   } & (TRouteState[TEndpoint] extends { params: t.Any }
-      ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
+      ? MaybeOptional<{ params: t.OutputOf<TRouteState[TEndpoint]['params']> }>
       : {}) &
     (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
 ) => Promise<

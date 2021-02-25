@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -34,11 +35,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -62,11 +63,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -145,11 +146,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-ruby/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );

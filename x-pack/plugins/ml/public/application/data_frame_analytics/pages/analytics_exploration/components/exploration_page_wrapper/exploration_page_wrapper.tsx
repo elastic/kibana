@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState } from 'react';
@@ -176,6 +177,11 @@ export const ExplorationPageWrapper: FC<Props> = ({
         <ExpandableSectionAnalytics jobId={jobConfig.id} />
       )}
 
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
+      )}
+
       {isLoadingJobConfig === true &&
         jobConfig !== undefined &&
         totalFeatureImportance === undefined && <LoadingPanel />}
@@ -190,10 +196,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
           </>
         )}
 
-      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
-      )}
+      <EuiSpacer size="m" />
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&

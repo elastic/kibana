@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
@@ -21,10 +22,10 @@ const renderApp = (
   history: ManagementAppMountParams['history'],
   coreStart: CoreStart,
   share: SharePluginStart,
-  spaces?: SpacesPluginStart
+  spacesApi?: SpacesPluginStart
 ) => {
   ReactDOM.render(
-    React.createElement(JobsListPage, { coreStart, history, share, spaces }),
+    React.createElement(JobsListPage, { coreStart, history, share, spacesApi }),
     element
   );
   return () => {

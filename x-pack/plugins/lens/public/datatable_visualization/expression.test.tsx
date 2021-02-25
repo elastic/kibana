@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DatatableProps, getDatatable } from './expression';
@@ -58,12 +59,22 @@ function sampleArgs() {
 
   const args: DatatableProps['args'] = {
     title: 'My fanci metric chart',
-    columns: {
-      columnIds: ['a', 'b', 'c'],
-      sortBy: '',
-      sortDirection: 'none',
-      type: 'lens_datatable_columns',
-    },
+    columns: [
+      {
+        columnId: 'a',
+        type: 'lens_datatable_column',
+      },
+      {
+        columnId: 'b',
+        type: 'lens_datatable_column',
+      },
+      {
+        columnId: 'c',
+        type: 'lens_datatable_column',
+      },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
   };
 
   return { data, args };

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Client } from 'elasticsearch';
@@ -40,7 +40,7 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  migrations: { skip: true },
+  migrations: { skip: false },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
@@ -185,7 +185,7 @@ export function createTestServers({
   adjustTimeout: (timeout: number) => void;
   settings?: {
     es?: {
-      license: 'oss' | 'basic' | 'gold' | 'trial';
+      license: 'basic' | 'gold' | 'trial';
       [key: string]: any;
     };
     kbn?: {
@@ -208,7 +208,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get(settings, 'es.license', 'oss');
+  const license = get(settings, 'es.license', 'basic');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {

@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, useCallback, useEffect, useRef } from 'react';
 
-import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
+import {
+  useForm,
+  OnFormUpdateArg,
+  FormData,
+  FormOptions,
+  useKibana,
+} from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
 import { EditProcessorForm } from './edit_processor_form';
@@ -31,6 +38,14 @@ interface Props {
   onClose: () => void;
   processor?: ProcessorInternal;
 }
+
+const formOptions: FormOptions = {
+  /**
+   * This is important for allowing configuration of empty text fields in certain processors that
+   * remove values from their inputs.
+   */
+  stripEmptyFields: false,
+};
 
 export const ProcessorFormContainer: FunctionComponent<Props> = ({
   processor,
@@ -80,6 +95,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   const { form } = useForm({
     defaultValue: { fields: getProcessor().options },
     serializer: formSerializer,
+    options: formOptions,
   });
   const { subscribe } = form;
 

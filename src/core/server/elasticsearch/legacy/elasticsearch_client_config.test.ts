@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { duration } from 'moment';
@@ -99,7 +99,6 @@ test('parses fully specified config', () => {
       "apiVersion": "v7.0.0",
       "hosts": Array [
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -111,7 +110,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -123,7 +121,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -135,6 +132,7 @@ test('parses fully specified config', () => {
           "query": null,
         },
       ],
+      "httpAuth": "elastic:changeme",
       "keepAlive": true,
       "log": [Function],
       "pingTimeout": 12345,

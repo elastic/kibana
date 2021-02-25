@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -47,6 +48,8 @@ const ABSOLUTE_DATE = {
   newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
   startTime: '2019-08-01T20:03:29.186Z',
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
+  firefoxEndTimeTyped: '2019-08-01T15:03:29',
+  firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
 describe('url state', () => {
@@ -72,13 +75,20 @@ describe('url state', () => {
     setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateDates();
 
+    let startDate: string;
+    let endDate: string;
+
+    if (Cypress.browser.name === 'firefox') {
+      startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped).toISOString().replace('000', '186');
+      endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
+    } else {
+      startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
+      endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
+    }
+
     cy.url().should(
       'include',
-      `(global:(linkTo:!(timeline),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `(global:(linkTo:!(timeline),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
     );
   });
 
@@ -129,13 +139,20 @@ describe('url state', () => {
     setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateTimelineDates();
 
+    let startDate: string;
+    let endDate: string;
+
+    if (Cypress.browser.name === 'firefox') {
+      startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped).toISOString().replace('000', '186');
+      endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
+    } else {
+      startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
+      endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
+    }
+
     cy.url().should(
       'include',
-      `timeline:(linkTo:!(),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `timeline:(linkTo:!(),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
     );
   });
 

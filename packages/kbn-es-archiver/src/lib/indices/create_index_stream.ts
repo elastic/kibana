@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
   value: {
@@ -63,15 +64,20 @@ export function createCreateIndexStream({
           kibanaIndexAlreadyDeleted = true;
         }
 
-        await client.indices.create({
-          method: 'PUT',
-          index,
-          body: {
-            settings,
-            mappings,
-            aliases,
+        await client.indices.create(
+          {
+            method: 'PUT',
+            index,
+            body: {
+              settings,
+              mappings,
+              aliases,
+            },
           },
-        });
+          {
+            headers: ES_CLIENT_HEADERS,
+          }
+        );
 
         stats.createdIndex(index, { settings });
       } catch (err) {
@@ -88,7 +94,10 @@ export function createCreateIndexStream({
           return;
         }
 
-        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          err?.meta?.body?.error?.type !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import dateMath from '@elastic/datemath';
@@ -19,6 +19,7 @@ import {
   EuiSuperDatePicker,
   EuiFieldText,
   prettyDuration,
+  EuiIconProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
@@ -57,6 +58,11 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  iconType?: EuiIconProps['type'];
+  placeholder?: string;
+  isClearable?: boolean;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 // Needed for React.lazy
@@ -185,6 +191,11 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          placeholder={props.placeholder}
+          isClearable={props.isClearable}
+          iconType={props.iconType}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
         />
       </EuiFlexItem>
     );

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { registerLayerWizard } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from './file_upload_wizard';
 // @ts-ignore
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
-// @ts-ignore
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../sources/es_geo_line_source';
 // @ts-ignore

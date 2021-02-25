@@ -124,22 +124,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         },
       ]
     }
-    vis={
-      Object {
-        "serialize": [MockFunction],
-        "setState": [MockFunction],
-        "type": Object {
-          "schemas": Object {
-            "metrics": Array [
-              Object {
-                "name": "metric",
-              },
-            ],
-          },
-          "type": "area",
-        },
-      }
-    }
   />
   <EuiSpacer
     size="s"
@@ -168,22 +152,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     onPositionChanged={[Function]}
     setCategoryAxis={[Function]}
-    vis={
-      Object {
-        "serialize": [MockFunction],
-        "setState": [MockFunction],
-        "type": Object {
-          "schemas": Object {
-            "metrics": Array [
-              Object {
-                "name": "metric",
-              },
-            ],
-          },
-          "type": "area",
-        },
-      }
-    }
   />
 </Fragment>
 `;

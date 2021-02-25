@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
@@ -62,9 +64,11 @@ export const from = {
         // Ignore
       }
     }
+    return undefined;
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  undefinedIfValue: (value: any) => (v: boolean) => (v === value ? undefined : v),
+  undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
+  emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
 };
 
 export const EDITOR_PX_HEIGHT = {
@@ -76,4 +80,6 @@ export const EDITOR_PX_HEIGHT = {
 
 export type FieldsConfig = Record<string, FieldConfig<any>>;
 
-export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;
+export type FormFieldsComponent = FunctionComponent<{
+  initialFieldValues?: Record<string, any>;
+}>;

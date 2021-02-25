@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiHeaderLink,
   EuiIcon,
@@ -28,8 +30,9 @@ export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/a
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 
 export function AnomalyDetectionSetupLink() {
-  const { uiFilters } = useUrlParams();
-  const environment = uiFilters.environment;
+  const {
+    urlParams: { environment },
+  } = useUrlParams();
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();

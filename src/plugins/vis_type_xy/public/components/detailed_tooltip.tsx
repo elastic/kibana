@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -27,10 +27,7 @@ interface TooltipData {
   value: string;
 }
 
-// TODO: replace when exported from elastic/charts
-const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
-
-const getTooltipData = (
+export const getTooltipData = (
   aspects: Aspects,
   header: TooltipValue | null,
   value: TooltipValue
@@ -81,7 +78,7 @@ const getTooltipData = (
   if (
     aspects.splitColumn &&
     valueSeries.smHorizontalAccessorValue !== undefined &&
-    valueSeries.smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+    valueSeries.smHorizontalAccessorValue !== undefined
   ) {
     data.push({
       label: aspects.splitColumn.title,
@@ -92,7 +89,7 @@ const getTooltipData = (
   if (
     aspects.splitRow &&
     valueSeries.smVerticalAccessorValue !== undefined &&
-    valueSeries.smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+    valueSeries.smVerticalAccessorValue !== undefined
   ) {
     data.push({
       label: aspects.splitRow.title,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -56,7 +57,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   const removeTechnique = useCallback(
     (index: number) => {
       const threats = [...(field.value as Threats)];
-      const techniques = threats[threatIndex].technique;
+      const techniques = threats[threatIndex].technique ?? [];
       techniques.splice(index, 1);
       threats[threatIndex] = {
         ...threats[threatIndex],
@@ -72,7 +73,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     threats[threatIndex] = {
       ...threats[threatIndex],
       technique: [
-        ...threats[threatIndex].technique,
+        ...(threats[threatIndex].technique ?? []),
         { id: 'none', name: 'none', reference: 'none', subtechnique: [] },
       ],
     };
@@ -87,19 +88,20 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         name: '',
         reference: '',
       };
+      const technique = threats[threatIndex].technique ?? [];
       onFieldChange([
         ...threats.slice(0, threatIndex),
         {
           ...threats[threatIndex],
           technique: [
-            ...threats[threatIndex].technique.slice(0, index),
+            ...technique.slice(0, index),
             {
               id,
               reference,
               name,
               subtechnique: [],
             },
-            ...threats[threatIndex].technique.slice(index + 1),
+            ...technique.slice(index + 1),
           ],
         },
         ...threats.slice(threatIndex + 1),
@@ -146,9 +148,11 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     [field, updateTechnique]
   );
 
+  const techniques = values[threatIndex].technique ?? [];
+
   return (
     <TechniqueContainer>
-      {values[threatIndex].technique.map((technique, index) => (
+      {techniques.map((technique, index) => (
         <div key={index}>
           <EuiSpacer size="s" />
           <EuiFormRow

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -13,10 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ENVIRONMENT_ALL,
-  getNextEnvironmentUrlParam,
-} from '../../../../../common/environment_filter_values';
+import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
   asPercent,
@@ -95,7 +93,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnLatency',
         {
-          defaultMessage: 'Latency',
+          defaultMessage: 'Latency (avg.)',
         }
       ),
       width: px(unit * 10),
@@ -181,7 +179,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           query: {
             start,
             end,
-            environment: environment || ENVIRONMENT_ALL.value,
+            environment,
             numBuckets: 20,
           },
         },

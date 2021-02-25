@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import Boom from '@hapi/boom';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -18,7 +20,7 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import { SavedObjectTarget } from '../types';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -68,19 +70,14 @@ const setup = async (opts: SetupOpts = {}) => {
   const savedObjectToCopy = {
     type: 'dashboard',
     id: 'my-dash',
-    references: [
-      {
-        type: 'visualization',
-        id: 'my-viz',
-        name: 'My Viz',
-      },
-    ],
-    meta: { icon: 'dashboard', title: 'foo', namespaceType: 'single' },
-  } as SavedObjectsManagementRecord;
+    namespaces: ['default'],
+    icon: 'dashboard',
+    title: 'foo',
+  } as SavedObjectTarget;
 
   const wrapper = mountWithIntl(
     <CopySavedObjectsToSpaceFlyout
-      savedObject={savedObjectToCopy}
+      savedObjectTarget={savedObjectToCopy}
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
       toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
       onClose={onClose}
@@ -99,10 +96,6 @@ const setup = async (opts: SetupOpts = {}) => {
 };
 
 describe('CopyToSpaceFlyout', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 

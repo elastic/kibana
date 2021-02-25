@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -533,6 +534,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           aggFieldNamePairs,
           splitFieldName,
           splitFieldValue,
+          runtimeMappings,
         } = request.body;
 
         const { newJobLineChart } = jobServiceProvider(client, mlClient);
@@ -545,7 +547,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
-          splitFieldValue
+          splitFieldValue,
+          runtimeMappings
         );
 
         return response.ok({
@@ -587,6 +590,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
+          runtimeMappings,
         } = request.body;
 
         const { newJobPopulationChart } = jobServiceProvider(client, mlClient);
@@ -598,7 +602,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           intervalMs,
           query,
           aggFieldNamePairs,
-          splitFieldName
+          splitFieldName,
+          runtimeMappings
         );
 
         return response.ok({
@@ -704,6 +709,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           start,
           end,
           analyzer,
+          runtimeMappings,
         } = request.body;
 
         const resp = await validateCategoryExamples(
@@ -714,7 +720,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           timeField,
           start,
           end,
-          analyzer
+          analyzer,
+          runtimeMappings
         );
 
         return response.ok({

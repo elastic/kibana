@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { monaco } from '../monaco_imports';
@@ -18,7 +18,12 @@ const toDiagnostics = (error: PainlessError): monaco.editor.IMarkerData => {
   };
 };
 
+export interface SyntaxErrors {
+  [modelId: string]: PainlessError[];
+}
 export class DiagnosticsAdapter {
+  private errors: SyntaxErrors = {};
+
   constructor(private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
@@ -55,8 +60,16 @@ export class DiagnosticsAdapter {
 
     if (errorMarkers) {
       const model = monaco.editor.getModel(resource);
+      this.errors = {
+        ...this.errors,
+        [model!.id]: errorMarkers,
+      };
       // Set the error markers and underline them with "Error" severity
       monaco.editor.setModelMarkers(model!, ID, errorMarkers.map(toDiagnostics));
     }
+  }
+
+  public getSyntaxErrors() {
+    return this.errors;
   }
 }

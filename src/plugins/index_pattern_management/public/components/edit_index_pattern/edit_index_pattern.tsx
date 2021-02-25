@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { filter } from 'lodash';
@@ -26,8 +26,6 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import { IndexPatternTableItem } from '../types';
-import { getIndexPatterns } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -36,7 +34,7 @@ export interface EditIndexPatternProps extends RouteComponentProps {
 const mappingAPILink = i18n.translate(
   'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
   {
-    defaultMessage: 'Mapping API',
+    defaultMessage: 'field mappings',
   }
 );
 
@@ -62,7 +60,6 @@ export const EditIndexPattern = withRouter(
       uiSettings,
       indexPatternManagementStart,
       overlays,
-      savedObjects,
       chrome,
       data,
     } = useKibana<IndexPatternManagmentContext>().services;
@@ -97,11 +94,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-            savedObjects.client,
-            uiSettings.get('defaultIndex'),
-            indexPatternManagementStart
-          );
+          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -149,7 +142,8 @@ export const EditIndexPattern = withRouter(
     chrome.docTitle.change(indexPattern.title);
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-
+    const kibana = useKibana();
+    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
@@ -179,16 +173,16 @@ export const EditIndexPattern = withRouter(
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
-                values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
+                values={{
+                  indexPatternTitle: <strong>{indexPattern.title}</strong>,
+                  mappingAPILink: (
+                    <EuiLink href={docsUrl} target="_blank" external>
+                      {mappingAPILink}
+                    </EuiLink>
+                  ),
+                }}
               />{' '}
-              <EuiLink
-                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
-                target="_blank"
-                external
-              >
-                {mappingAPILink}
-              </EuiLink>
             </p>
           </EuiText>
           {conflictedFields.length > 0 && (
@@ -206,6 +200,9 @@ export const EditIndexPattern = withRouter(
             fields={fields}
             history={history}
             location={location}
+            refreshFields={() => {
+              setFields(indexPattern.getNonScriptedFields());
+            }}
           />
         </div>
       </EuiPanel>

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import React, { Dispatch } from 'react';
 import * as i18n from '../translations';
-import { Action } from './reducer';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import {
   deleteRulesAction,
   duplicateRulesAction,
@@ -22,7 +23,7 @@ import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 
 interface GetBatchItems {
   closePopover: () => void;
-  dispatch: Dispatch<Action>;
+  dispatch: Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   hasMlPermissions: boolean;
   hasActionsPrivileges: boolean;

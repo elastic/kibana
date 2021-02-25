@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pickBy, countBy } from 'lodash/fp';
@@ -149,6 +150,7 @@ export const transformAlertToRule = (
     threshold: alert.params.threshold,
     threat_filters: alert.params.threatFilters,
     threat_index: alert.params.threatIndex,
+    threat_indicator_path: alert.params.threatIndicatorPath,
     threat_query: alert.params.threatQuery,
     threat_mapping: alert.params.threatMapping,
     threat_language: alert.params.threatLanguage,

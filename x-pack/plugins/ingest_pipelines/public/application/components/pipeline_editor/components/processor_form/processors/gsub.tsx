@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -40,6 +41,7 @@ const fieldsConfig: FieldsConfig = {
     ],
   },
 
+  // This is a required field, but we exclude validation because we accept empty values as ''
   replacement: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldLabel', {
@@ -47,17 +49,11 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
-      { defaultMessage: 'Replacement text for matches.' }
-    ),
-    validations: [
       {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.replacementRequiredError', {
-            defaultMessage: 'A value is required.',
-          })
-        ),
-      },
-    ],
+        defaultMessage:
+          'Replacement text for matches. A blank value will remove the matched text from the resulting text.',
+      }
+    ),
   },
 };
 

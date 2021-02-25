@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -185,14 +186,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -270,7 +271,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -330,7 +331,7 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         persistLoading: true,
@@ -449,7 +450,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'My connector',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
         }))
@@ -492,7 +493,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowITSM,
         fields: null,
       },
       currentConfiguration: {
@@ -521,7 +522,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowITSM,
         fields: null,
       },
       closureType: 'close-by-pushing',
@@ -545,7 +546,7 @@ describe('user interactions', () => {
         connector: {
           id: 'resilient-2',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         closureType: 'close-by-user',

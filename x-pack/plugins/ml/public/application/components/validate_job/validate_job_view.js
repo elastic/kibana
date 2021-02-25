@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -18,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
@@ -160,24 +160,19 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={close} style={{ width: '800px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
+  <EuiModal onClose={close} style={{ width: '800px' }}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
 
-      <EuiModalBody>{children}</EuiModalBody>
+    <EuiModalBody>{children}</EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage
-            id="xpack.ml.validateJob.modal.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
+    <EuiModalFooter>
+      <EuiButton onClick={close} size="s" fill>
+        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 );
 Modal.propType = {
   close: PropTypes.func.isRequired,

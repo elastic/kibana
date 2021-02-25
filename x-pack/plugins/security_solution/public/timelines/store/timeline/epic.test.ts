@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
@@ -88,9 +89,14 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: 'event.sequence',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedEvent: {},
+        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -233,6 +239,11 @@ describe('Epic Timeline', () => {
           start: '2019-10-30T21:06:27.644Z',
         },
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: 'event.sequence',
+          timestampField: '@timestamp',
+        },
         eventType: 'all',
         excludedRowRendererIds: [],
         filters: [

@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { snapshotReducer } from './snapshot';
-import {
-  getSnapshotCountAction,
-  getSnapshotCountActionSuccess,
-  getSnapshotCountActionFail,
-} from '../actions';
+import { getSnapshotCountAction } from '../actions';
+import { IHttpFetchError } from '../../../../../../src/core/public';
 
 describe('snapshot reducer', () => {
   it('updates existing state', () => {
-    const action = getSnapshotCountAction({
+    const action = getSnapshotCountAction.get({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'foo: bar',
@@ -31,7 +29,7 @@ describe('snapshot reducer', () => {
   });
 
   it(`sets the state's status to loading during a fetch`, () => {
-    const action = getSnapshotCountAction({
+    const action = getSnapshotCountAction.get({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
     });
@@ -39,7 +37,7 @@ describe('snapshot reducer', () => {
   });
 
   it('changes the count when a snapshot fetch succeeds', () => {
-    const action = getSnapshotCountActionSuccess({
+    const action = getSnapshotCountAction.success({
       up: 10,
       down: 15,
       total: 25,
@@ -49,8 +47,8 @@ describe('snapshot reducer', () => {
   });
 
   it('appends a current error to existing errors list', () => {
-    const action = getSnapshotCountActionFail(
-      new Error(`I couldn't get your data because the server denied the request`)
+    const action = getSnapshotCountAction.fail(
+      new Error(`I couldn't get your data because the server denied the request`) as IHttpFetchError
     );
 
     expect(snapshotReducer(undefined, action)).toMatchSnapshot();

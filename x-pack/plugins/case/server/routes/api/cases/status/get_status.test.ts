@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -14,6 +16,7 @@ import {
 } from '../../__fixtures__';
 import { initGetCasesStatusApi } from './get_status';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { CaseType } from '../../../../../common/api';
 
 describe('GET status', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -22,6 +25,7 @@ describe('GET status', () => {
     page: 1,
     perPage: 1,
     type: 'cases',
+    sortField: 'created_at',
   };
 
   beforeAll(async () => {
@@ -34,26 +38,26 @@ describe('GET status', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
+    const response = await routeHandler(context, request, kibanaResponseFactory);
+    expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
       ...findArgs,
-      filter: 'cases.attributes.status: open',
+      filter: `((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
-    expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
+    expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
       ...findArgs,
-      filter: 'cases.attributes.status: in-progress',
+      filter: `((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
-    expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
+    expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
       ...findArgs,
-      filter: 'cases.attributes.status: closed',
+      filter: `((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
     expect(response.payload).toEqual({
@@ -69,13 +73,13 @@ describe('GET status', () => {
       method: 'get',
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [{ ...mockCases[0], id: 'throw-error-find' }],
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
   });
 });

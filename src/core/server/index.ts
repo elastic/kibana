@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -49,6 +49,7 @@ import {
   SavedObjectsServiceStart,
   ISavedObjectsExporter,
   ISavedObjectsImporter,
+  SavedObjectsClientProviderOptions,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
@@ -235,6 +236,7 @@ export {
 export {
   DiscoveredPlugin,
   Plugin,
+  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -259,6 +261,8 @@ export {
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportResultDetails,
@@ -276,6 +280,8 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
@@ -372,6 +378,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
 
@@ -409,8 +416,9 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
-      exporter: ISavedObjectsExporter;
-      importer: ISavedObjectsImporter;
+      getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+      getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+      getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;

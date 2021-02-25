@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 interface Props {
   confirmResetTestOutput: () => void;
@@ -44,18 +46,16 @@ export const ResetDocumentsModal: FunctionComponent<Props> = ({
   closeModal,
 }) => {
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="resetDocumentsConfirmationModal"
-        title={i18nTexts.modalTitle}
-        onCancel={closeModal}
-        onConfirm={confirmResetTestOutput}
-        cancelButtonText={i18nTexts.cancelButtonLabel}
-        confirmButtonText={i18nTexts.resetButtonLabel}
-      >
-        <p>{i18nTexts.modalDescription}</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="resetDocumentsConfirmationModal"
+      title={i18nTexts.modalTitle}
+      onCancel={closeModal}
+      onConfirm={confirmResetTestOutput}
+      cancelButtonText={i18nTexts.cancelButtonLabel}
+      confirmButtonText={i18nTexts.resetButtonLabel}
+    >
+      <p>{i18nTexts.modalDescription}</p>
+    </EuiConfirmModal>
   );
 };

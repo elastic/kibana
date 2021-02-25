@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiSuperSelect, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { act } from '@testing-library/react';
 
@@ -42,23 +42,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it renders row label if one passed in', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          rowLabel={'Row Label'}
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="126.45.211.34"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        rowLabel={'Row Label'}
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="126.45.211.34"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -68,23 +66,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it renders disabled if "isDisabled" is true', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="126.45.211.34"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled
-          onChange={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="126.45.211.34"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled
+        onChange={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -94,23 +90,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it renders loading if "isLoading" is true', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="126.45.211.34"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="126.45.211.34"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+      />
     );
     wrapper.find('[data-test-subj="valuesAutocompleteMatch"] button').at(0).simulate('click');
     expect(
@@ -122,23 +116,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it allows user to clear values if "isClearable" is true', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="126.45.211.34"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={true}
-          isDisabled={false}
-          onChange={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="126.45.211.34"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={true}
+        isDisabled={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -150,23 +142,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it correctly displays selected value', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="126.45.211.34"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="126.45.211.34"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+      />
     );
 
     expect(
@@ -177,23 +167,21 @@ describe('AutocompleteFieldMatchComponent', () => {
   test('it invokes "onChange" when new value created', async () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue=""
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={mockOnChange}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue=""
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+      />
     );
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
@@ -206,23 +194,21 @@ describe('AutocompleteFieldMatchComponent', () => {
   test('it invokes "onChange" when new value selected', async () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          selectedValue=""
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={mockOnChange}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue=""
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+      />
     );
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
@@ -234,23 +220,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it refreshes autocomplete with search query when new value searched', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldMatchComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          selectedValue=""
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-          onError={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldMatchComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue=""
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+      />
     );
     act(() => {
       ((wrapper.find(EuiComboBox).props() as unknown) as {
@@ -285,23 +269,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     test('it displays only two options - "true" or "false"', () => {
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldMatchComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ssl')}
-            selectedValue=""
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            isLoading={false}
-            isClearable={false}
-            isDisabled={false}
-            onChange={jest.fn()}
-            onError={jest.fn()}
-          />
-        </ThemeProvider>
+        <AutocompleteFieldMatchComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ssl')}
+          selectedValue=""
+          indexPattern={{
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          }}
+          isLoading={false}
+          isClearable={false}
+          isDisabled={false}
+          onChange={jest.fn()}
+          onError={jest.fn()}
+        />
       );
 
       expect(
@@ -324,23 +306,21 @@ describe('AutocompleteFieldMatchComponent', () => {
     test('it invokes "onChange" with "true" when selected', () => {
       const mockOnChange = jest.fn();
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldMatchComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ssl')}
-            selectedValue=""
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            isLoading={false}
-            isClearable={false}
-            isDisabled={false}
-            onChange={mockOnChange}
-            onError={jest.fn()}
-          />
-        </ThemeProvider>
+        <AutocompleteFieldMatchComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ssl')}
+          selectedValue=""
+          indexPattern={{
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          }}
+          isLoading={false}
+          isClearable={false}
+          isDisabled={false}
+          onChange={mockOnChange}
+          onError={jest.fn()}
+        />
       );
 
       ((wrapper.find(EuiSuperSelect).props() as unknown) as {
@@ -353,23 +333,21 @@ describe('AutocompleteFieldMatchComponent', () => {
     test('it invokes "onChange" with "false" when selected', () => {
       const mockOnChange = jest.fn();
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldMatchComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ssl')}
-            selectedValue=""
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            isLoading={false}
-            isClearable={false}
-            isDisabled={false}
-            onChange={mockOnChange}
-            onError={jest.fn()}
-          />
-        </ThemeProvider>
+        <AutocompleteFieldMatchComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ssl')}
+          selectedValue=""
+          indexPattern={{
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          }}
+          isLoading={false}
+          isClearable={false}
+          isDisabled={false}
+          onChange={mockOnChange}
+          onError={jest.fn()}
+        />
       );
 
       ((wrapper.find(EuiSuperSelect).props() as unknown) as {
@@ -394,23 +372,21 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     test('it number input when field type is number', () => {
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldMatchComponent
-            placeholder="Placeholder text"
-            selectedField={getField('bytes')}
-            selectedValue=""
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            isLoading={false}
-            isClearable={false}
-            isDisabled={false}
-            onChange={jest.fn()}
-            onError={jest.fn()}
-          />
-        </ThemeProvider>
+        <AutocompleteFieldMatchComponent
+          placeholder="Placeholder text"
+          selectedField={getField('bytes')}
+          selectedValue=""
+          indexPattern={{
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          }}
+          isLoading={false}
+          isClearable={false}
+          isDisabled={false}
+          onChange={jest.fn()}
+          onError={jest.fn()}
+        />
       );
 
       expect(
@@ -421,23 +397,21 @@ describe('AutocompleteFieldMatchComponent', () => {
     test('it invokes "onChange" with numeric value when inputted', () => {
       const mockOnChange = jest.fn();
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldMatchComponent
-            placeholder="Placeholder text"
-            selectedField={getField('bytes')}
-            selectedValue=""
-            indexPattern={{
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            }}
-            isLoading={false}
-            isClearable={false}
-            isDisabled={false}
-            onChange={mockOnChange}
-            onError={jest.fn()}
-          />
-        </ThemeProvider>
+        <AutocompleteFieldMatchComponent
+          placeholder="Placeholder text"
+          selectedField={getField('bytes')}
+          selectedValue=""
+          indexPattern={{
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          }}
+          isLoading={false}
+          isClearable={false}
+          isDisabled={false}
+          onChange={mockOnChange}
+          onError={jest.fn()}
+        />
       );
 
       wrapper

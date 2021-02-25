@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -37,7 +38,7 @@ export interface AllTimelinesArgs {
     status,
     timelineType,
   }: AllTimelinesVariables) => void;
-  timelines: OpenTimelineResult[];
+  timelines: OpenTimelineResult[] | null;
   loading: boolean;
   totalCount: number;
   customTemplateTimelineCount: number;
@@ -104,7 +105,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   const [allTimelines, setAllTimelines] = useState<Omit<AllTimelinesArgs, 'fetchAllTimeline'>>({
     loading: false,
     totalCount: 0,
-    timelines: [],
+    timelines: null, // use null as initial state to distinguish between empty result and haven't started loading.
     customTemplateTimelineCount: 0,
     defaultTimelineCount: 0,
     elasticTemplateTimelineCount: 0,
@@ -127,7 +128,10 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
       const fetchData = async () => {
         try {
           if (apolloClient != null) {
-            setAllTimelines((prevState) => ({ ...prevState, loading: true }));
+            setAllTimelines((prevState) => ({
+              ...prevState,
+              loading: true,
+            }));
 
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,

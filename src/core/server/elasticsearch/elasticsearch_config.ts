@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -12,6 +12,7 @@ import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
+import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -52,10 +53,42 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: ['authorization'],
+  requestHeadersWhitelist: schema.oneOf(
+    [
+      schema.string({
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders([headersWhitelist]);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+      schema.arrayOf(schema.string(), {
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders(headersWhitelist);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+    ],
+    {
+      defaultValue: ['authorization'],
+    }
+  ),
+  customHeaders: schema.recordOf(schema.string(), schema.string(), {
+    defaultValue: {},
+    validate: (customHeaders) => {
+      const reservedHeaders = getReservedHeaders(Object.keys(customHeaders));
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
   }),
-  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),

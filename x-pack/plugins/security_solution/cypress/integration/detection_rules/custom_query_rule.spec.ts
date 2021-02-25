@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
@@ -79,7 +80,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   deleteFirstRule,
   deleteSelectedRules,
   editFirstRule,
@@ -87,8 +88,8 @@ import {
   goToCreateNewRule,
   goToRuleDetails,
   selectNumberOfRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
+  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -135,7 +136,7 @@ describe('Custom detection rules creation', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -157,8 +158,7 @@ describe('Custom detection rules creation', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -244,7 +244,7 @@ describe('Custom detection rules deletion and edition', () => {
           cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
 
           deleteFirstRule();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(
@@ -274,7 +274,7 @@ describe('Custom detection rules deletion and edition', () => {
 
           selectNumberOfRules(numberOfRulesToBeDeleted);
           deleteSelectedRules();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(

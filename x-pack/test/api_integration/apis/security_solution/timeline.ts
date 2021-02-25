@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -79,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
               direction: Direction.desc,
             },
             fieldRequested: ['@timestamp', 'host.name'],
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
             timerange: {
@@ -87,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {
@@ -123,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {

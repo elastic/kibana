@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -729,12 +730,21 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const geoField = await this._getGeoField();
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&geoFieldType=${geoField.type}`;
+    const urlTemplate = `${mvtUrlServicePath}\
+?x={x}\
+&y={y}\
+&z={z}\
+&geometryFieldName=${this._descriptor.geoField}\
+&index=${indexPattern.title}\
+&requestBody=${risonDsl}\
+&geoFieldType=${geoField.type}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate,
+      urlTemplate: searchFilters.searchSessionId
+        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
+        : urlTemplate,
     };
   }
 }

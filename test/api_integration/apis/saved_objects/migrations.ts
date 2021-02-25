@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -48,6 +48,12 @@ const BAZ_TYPE: SavedObjectsType = {
   namespaceType: 'single',
   mappings: { properties: {} },
 };
+const FLEET_AGENT_EVENT_TYPE: SavedObjectsType = {
+  name: 'fleet-agent-event',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+};
 
 function getLogMock() {
   return {
@@ -63,9 +69,10 @@ function getLogMock() {
 }
 export default ({ getService }: FtrProviderContext) => {
   const esClient = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Kibana index migration', () => {
-    before(() => esClient.indices.delete({ index: '.migrate-*' }));
+    before(() => esDeleteAllIndices('.migrate-*'));
 
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.migration-a';
@@ -99,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       // Test that unrelated index templates are unaffected
@@ -233,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
@@ -330,6 +337,80 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('drops fleet-agent-event saved object types when doing a migration', async () => {
+      const index = '.migration-b';
+      const originalDocs = [
+        {
+          id: 'fleet-agent-event:a',
+          type: 'fleet-agent-event',
+          'fleet-agent-event': { name: 'Foo A' },
+        },
+        {
+          id: 'fleet-agent-event:e',
+          type: 'fleet-agent-event',
+          'fleet-agent-event': { name: 'Fooey' },
+        },
+        { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
+        { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
+      ];
+
+      const mappingProperties = {
+        'fleet-agent-event': { properties: { name: { type: 'text' } } },
+        bar: { properties: { mynum: { type: 'integer' } } },
+      };
+
+      let savedObjectTypes: SavedObjectsType[] = [
+        FLEET_AGENT_EVENT_TYPE,
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+            '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+            '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          },
+        },
+      ];
+
+      await createIndex({ esClient, index, esDeleteAllIndices });
+      await createDocs({ esClient, index, docs: originalDocs });
+
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
+
+      // @ts-expect-error name doesn't exist on mynum type
+      mappingProperties.bar.properties.name = { type: 'keyword' };
+      savedObjectTypes = [
+        FLEET_AGENT_EVENT_TYPE,
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '2.3.4': (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`),
+          },
+        },
+      ];
+
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
+
+      // Assert that fleet-agent-events were dropped
+      expect(await fetchDocs(esClient, index)).to.eql([
+        {
+          id: 'bar:i',
+          type: 'bar',
+          migrationVersion: { bar: '2.3.4' },
+          bar: { mynum: 68, name: 'NAME i' },
+          references: [],
+          coreMigrationVersion: KIBANA_VERSION,
+        },
+        {
+          id: 'bar:o',
+          type: 'bar',
+          migrationVersion: { bar: '2.3.4' },
+          bar: { mynum: 6, name: 'NAME o' },
+          references: [],
+          coreMigrationVersion: KIBANA_VERSION,
+        },
+      ]);
+    });
+
     it('Coordinates migrations across the Kibana cluster', async () => {
       const index = '.migration-c';
       const originalDocs = [{ id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } }];
@@ -347,7 +428,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       const result = await Promise.all([
@@ -439,13 +520,13 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           ...BAR_TYPE,
-          namespaceType: 'multiple',
+          namespaceType: 'multiple-isolated',
           convertToMultiNamespaceTypeVersion: '2.0.0',
         },
         BAZ_TYPE, // must be registered for reference transforms to be applied to objects of this type
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       await migrateIndex({
@@ -554,8 +635,17 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-async function createIndex({ esClient, index }: { esClient: ElasticsearchClient; index: string }) {
-  await esClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
+async function createIndex({
+  esClient,
+  index,
+  esDeleteAllIndices,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  esDeleteAllIndices: (pattern: string) => Promise<void>;
+}) {
+  await esDeleteAllIndices(`${index}*`);
+
   const properties = {
     type: { type: 'keyword' },
     foo: { properties: { name: { type: 'keyword' } } },

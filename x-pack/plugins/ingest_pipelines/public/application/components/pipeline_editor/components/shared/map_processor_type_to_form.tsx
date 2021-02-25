@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -134,7 +135,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       <FormattedMessage
         id="xpack.ingestPipelines.processors.description.dateIndexName"
         defaultMessage="Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as {value}."
-        values={{ value: <EuiCode inline>{'my-index-yyyy-MM-dd'}</EuiCode> }}
+        values={{ value: <EuiCode>{'my-index-yyyy-MM-dd'}</EuiCode> }}
       />
     ),
   },

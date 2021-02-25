@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertType, ActionVariables } from '../../types';
@@ -44,8 +45,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
       ]
     `);
@@ -91,8 +100,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -146,8 +163,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -204,8 +229,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "fooC-description",
@@ -280,8 +313,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "fooC-description",

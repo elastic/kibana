@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
@@ -137,6 +138,7 @@ export const useMetricsK8sAnomaliesResults = ({
   endTime,
   startTime,
   sourceId,
+  anomalyThreshold,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetMetricsHostsAnomaliesDatasetsError,
@@ -145,6 +147,7 @@ export const useMetricsK8sAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
+  anomalyThreshold: number;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
@@ -182,6 +185,7 @@ export const useMetricsK8sAnomaliesResults = ({
         return await callGetMetricsK8sAnomaliesAPI(
           {
             sourceId,
+            anomalyThreshold,
             startTime: queryStartTime,
             endTime: queryEndTime,
             metric,
@@ -216,6 +220,7 @@ export const useMetricsK8sAnomaliesResults = ({
     },
     [
       sourceId,
+      anomalyThreshold,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -297,6 +302,7 @@ export const useMetricsK8sAnomaliesResults = ({
 
 interface RequestArgs {
   sourceId: string;
+  anomalyThreshold: number;
   startTime: number;
   endTime: number;
   metric: Metric;
@@ -309,13 +315,23 @@ export const callGetMetricsK8sAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, metric, sort, pagination, datasets } = requestArgs;
+  const {
+    sourceId,
+    anomalyThreshold,
+    startTime,
+    endTime,
+    metric,
+    sort,
+    pagination,
+    datasets,
+  } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsK8sAnomaliesRequestPayloadRT.encode({
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: {
             startTime,
             endTime,

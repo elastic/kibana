@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -15,6 +16,7 @@ import {
   EuiPopover,
   EuiButtonEmpty,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
@@ -315,9 +317,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           </EuiText>
         )}
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-            defaultMessage: 'Order by',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+                defaultMessage: 'Rank by',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderByHelp', {
+                  defaultMessage: `Specifies the dimension the top values are ranked by.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -337,14 +355,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-            defaultMessage: 'Order direction',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+                defaultMessage: 'Rank direction',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
+                  defaultMessage: `Specifies the ranking order of the top values.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -377,7 +411,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>

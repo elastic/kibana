@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
@@ -15,6 +16,7 @@ import {
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
+import { IngestManagerError } from '../../../errors';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
@@ -184,7 +186,8 @@ export async function getPackageFromSource(options: {
       name: pkgName,
       version: pkgVersion,
     });
-    if (!res) {
+
+    if (!res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
         pkgVersion,
@@ -206,7 +209,9 @@ export async function getPackageFromSource(options: {
     // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  if (!res) {
+    throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  }
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,

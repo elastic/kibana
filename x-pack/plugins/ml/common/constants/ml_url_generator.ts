@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
@@ -35,6 +36,7 @@ export const ML_PAGES = {
    */
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
   ANOMALY_DETECTION_CREATE_JOB: `jobs/new_job`,
+  ANOMALY_DETECTION_CREATE_JOB_ADVANCED: `jobs/new_job/advanced`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: `jobs/new_job/step/job_type`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: `jobs/new_job/step/index_or_search`,
   SETTINGS: 'settings',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -61,15 +62,8 @@ export default function (providerContext: FtrProviderContext) {
             cluster: ['monitor', 'manage_api_key'],
             indices: [
               {
-                names: [
-                  'logs-*',
-                  'metrics-*',
-                  'traces-*',
-                  '.ds-logs-*',
-                  '.ds-metrics-*',
-                  '.ds-traces-*',
-                ],
-                privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+                names: ['logs-*', 'metrics-*', 'traces-*'],
+                privileges: ['create_doc', 'indices:admin/auto_create'],
                 allow_restricted_indices: false,
               },
             ],
@@ -100,17 +94,8 @@ export default function (providerContext: FtrProviderContext) {
         cluster: ['monitor', 'manage_api_key'],
         indices: [
           {
-            names: [
-              'logs-*',
-              'metrics-*',
-              'traces-*',
-              '.ds-logs-*',
-              '.ds-metrics-*',
-              '.ds-traces-*',
-              '.logs-endpoint.diagnostic.collection-*',
-              '.ds-.logs-endpoint.diagnostic.collection-*',
-            ],
-            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+            names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+            privileges: ['auto_configure', 'create_doc'],
             allow_restricted_indices: false,
           },
         ],
@@ -119,6 +104,20 @@ export default function (providerContext: FtrProviderContext) {
         metadata: {},
         transient_metadata: { enabled: true },
       });
+    });
+
+    it('should install default packages', async () => {
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/epm/packages?experimental=true`)
+        .expect(200);
+      const installedPackages = apiResponse.response
+        .filter((p: any) => p.status === 'installed')
+        .map((p: any) => p.name)
+        .sort();
+
+      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'system']);
     });
   });
 }

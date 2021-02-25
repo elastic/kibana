@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
@@ -88,7 +89,9 @@ describe('reindex API', () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
       });
-      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([ReindexWarning.allField]);
+      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([
+        ReindexWarning.customTypeName,
+      ]);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',

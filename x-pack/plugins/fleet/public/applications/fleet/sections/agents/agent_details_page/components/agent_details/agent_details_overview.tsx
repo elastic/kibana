@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
@@ -172,7 +174,9 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription className="eui-textTruncate">
+                  {description}
+                </EuiDescriptionListDescription>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );

@@ -1,17 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import { DeleteTimelineModal } from './delete_timeline_modal';
 
 import * as i18n from '../translations';
+import { TimelineType } from '../../../../../common/types/timeline';
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useParams: jest.fn(),
+  };
+});
 
 describe('DeleteTimelineModal', () => {
+  beforeAll(() => {
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.default });
+  });
+
   test('it renders the expected title when a timeline is selected', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
@@ -79,7 +94,9 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(i18n.DELETE_WARNING);
+    expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(
+      i18n.DELETE_TIMELINE_WARNING
+    );
   });
 
   test('it invokes closeModal when the Cancel button is clicked', () => {
@@ -112,5 +129,25 @@ describe('DeleteTimelineModal', () => {
     wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
     expect(onDelete).toBeCalled();
+  });
+});
+
+describe('DeleteTimelineTemplateModal', () => {
+  beforeAll(() => {
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.template });
+  });
+
+  test('it renders a deletion warning', () => {
+    const wrapper = mountWithIntl(
+      <DeleteTimelineModal
+        title="Privilege Escalation"
+        onDelete={jest.fn()}
+        closeModal={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(
+      i18n.DELETE_TIMELINE_TEMPLATE_WARNING
+    );
   });
 });

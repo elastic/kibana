@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaResponseFactory } from 'kibana/server';
@@ -111,7 +112,7 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsDeleteRouteHandler', () => {
-    const deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler(appContextMock);
+    const deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler();
 
     it('should return ok when trusted app deleted', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -145,19 +146,18 @@ describe('handlers', () => {
 
       exceptionsListClient.deleteExceptionListItem.mockRejectedValue(error);
 
-      await deleteTrustedAppHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ params: { id: '123' } }),
-        mockResponse
-      );
-
-      assertResponse(mockResponse, 'internalError', error);
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      await expect(
+        deleteTrustedAppHandler(
+          createHandlerContextMock(),
+          httpServerMock.createKibanaRequest({ params: { id: '123' } }),
+          mockResponse
+        )
+      ).rejects.toThrowError(error);
     });
   });
 
   describe('getTrustedAppsCreateRouteHandler', () => {
-    const createTrustedAppHandler = getTrustedAppsCreateRouteHandler(appContextMock);
+    const createTrustedAppHandler = getTrustedAppsCreateRouteHandler();
 
     it('should return ok with body when trusted app created', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -179,19 +179,18 @@ describe('handlers', () => {
 
       exceptionsListClient.createExceptionListItem.mockRejectedValue(error);
 
-      await createTrustedAppHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ body: NEW_TRUSTED_APP }),
-        mockResponse
-      );
-
-      assertResponse(mockResponse, 'internalError', error);
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      await expect(
+        createTrustedAppHandler(
+          createHandlerContextMock(),
+          httpServerMock.createKibanaRequest({ body: NEW_TRUSTED_APP }),
+          mockResponse
+        )
+      ).rejects.toThrowError(error);
     });
   });
 
   describe('getTrustedAppsListRouteHandler', () => {
-    const getTrustedAppsListHandler = getTrustedAppsListRouteHandler(appContextMock);
+    const getTrustedAppsListHandler = getTrustedAppsListRouteHandler();
 
     it('should return ok with list when no errors', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -223,19 +222,18 @@ describe('handlers', () => {
 
       exceptionsListClient.findExceptionListItem.mockRejectedValue(error);
 
-      await getTrustedAppsListHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ body: NEW_TRUSTED_APP }),
-        mockResponse
-      );
-
-      assertResponse(mockResponse, 'internalError', error);
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      await expect(
+        getTrustedAppsListHandler(
+          createHandlerContextMock(),
+          httpServerMock.createKibanaRequest({ body: NEW_TRUSTED_APP }),
+          mockResponse
+        )
+      ).rejects.toThrowError(error);
     });
   });
 
   describe('getTrustedAppsSummaryHandler', () => {
-    const getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+    const getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler();
 
     it('should return ok with list when no errors', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -289,14 +287,13 @@ describe('handlers', () => {
 
       exceptionsListClient.findExceptionListItem.mockRejectedValue(error);
 
-      await getTrustedAppsSummaryHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest(),
-        mockResponse
-      );
-
-      assertResponse(mockResponse, 'internalError', error);
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      await expect(
+        getTrustedAppsSummaryHandler(
+          createHandlerContextMock(),
+          httpServerMock.createKibanaRequest(),
+          mockResponse
+        )
+      ).rejects.toThrowError(error);
     });
   });
 });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
@@ -18,13 +20,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await supertest.get(
-        `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
-      );
+      const response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
 
       expect(response.status).to.be(200);
       expect(response.body.items.length).to.be(0);
@@ -38,9 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: any;
       before(async () => {
-        response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+        response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
       });
 
       it('returns the correct status code', async () => {

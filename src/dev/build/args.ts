@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import getopts from 'getopts';
@@ -22,7 +22,7 @@ export function readCliArgs(argv: string[]) {
       'rpm',
       'deb',
       'docker-images',
-      'docker-contexts',
+      'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-centos',
       'release',
@@ -45,7 +45,6 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
-      'docker-contexts': null,
       oss: null,
       'version-qualifier': '',
     },
@@ -72,7 +71,7 @@ export function readCliArgs(argv: string[]) {
 
   // In order to build a docker image we always need
   // to generate all the platforms
-  if (flags['docker-images'] || flags['docker-contexts']) {
+  if (flags['docker-images']) {
     flags['all-platforms'] = true;
   }
 
@@ -82,12 +81,7 @@ export function readCliArgs(argv: string[]) {
     }
 
     // build all if no flags specified
-    if (
-      flags.rpm === null &&
-      flags.deb === null &&
-      flags['docker-images'] === null &&
-      flags['docker-contexts'] === null
-    ) {
+    if (flags.rpm === null && flags.deb === null && flags['docker-images'] === null) {
       return true;
     }
 
@@ -106,7 +100,7 @@ export function readCliArgs(argv: string[]) {
     createDockerCentOS:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
-    createDockerContexts: isOsPackageDesired('docker-contexts'),
+    createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
   };
 

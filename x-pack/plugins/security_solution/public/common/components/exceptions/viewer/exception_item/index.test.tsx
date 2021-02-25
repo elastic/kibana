@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -15,12 +15,21 @@ import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/
 
 jest.mock('../../../../lib/kibana');
 
+const mockTheme = {
+  eui: {
+    euiColorDanger: '#ece',
+    euiColorLightestShade: '#ece',
+    euiColorPrimary: '#ece',
+    euiFontWeightSemiBold: 'bold',
+  },
+};
+
 describe('ExceptionItem', () => {
   it('it renders ExceptionDetails and ExceptionEntries', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionItem
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
@@ -40,7 +49,7 @@ describe('ExceptionItem', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionItem
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
@@ -62,7 +71,7 @@ describe('ExceptionItem', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionItem
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
@@ -87,7 +96,7 @@ describe('ExceptionItem', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionItem
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
@@ -106,7 +115,7 @@ describe('ExceptionItem', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionItem
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}

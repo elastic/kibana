@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -36,10 +37,13 @@ interface EditUserParams {
 export const usersManagementApp = Object.freeze({
   id: 'users',
   create({ authc, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.usersTitle', {
+      defaultMessage: 'Users',
+    });
     return {
       id: this.id,
       order: 10,
-      title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [
           [coreStart],
@@ -48,7 +52,7 @@ export const usersManagementApp = Object.freeze({
           { UserAPIClient },
           { RolesAPIClient },
         ] = await Promise.all([
-          getStartServices(),
+          getStartServices(), // TODO: remove this and write test.
           import('./users_grid'),
           import('./edit_user'),
           import('./user_api_client'),
@@ -114,6 +118,7 @@ export const usersManagementApp = Object.freeze({
         );
 
         return () => {
+          coreStart.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -162,10 +163,14 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
 
-    expect(postComment.mock.calls[0][0]).toBe('new-case');
-    expect(postComment.mock.calls[0][1]).toEqual({
+    expect(postComment.mock.calls[0][0].caseId).toBe('new-case');
+    expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });
@@ -195,10 +200,14 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="all-cases-modal-button"]`).first().simulate('click');
 
-    expect(postComment.mock.calls[0][0]).toBe('selected-case');
-    expect(postComment.mock.calls[0][1]).toEqual({
+    expect(postComment.mock.calls[0][0].caseId).toBe('selected-case');
+    expect(postComment.mock.calls[0][0].data).toEqual({
       alertId: 'test-id',
       index: 'test-index',
+      rule: {
+        id: null,
+        name: null,
+      },
       type: 'alert',
     });
   });
@@ -207,7 +216,7 @@ describe('AddToCaseAction', () => {
     usePostCommentMock.mockImplementation(() => {
       return {
         ...defaultPostComment,
-        postComment: jest.fn().mockImplementation((caseId, data, updateCase) => updateCase()),
+        postComment: jest.fn().mockImplementation(({ caseId, data, updateCase }) => updateCase()),
       };
     });
 

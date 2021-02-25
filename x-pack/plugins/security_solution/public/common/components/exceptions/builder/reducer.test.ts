@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -12,6 +13,10 @@ import { getEntryListMock } from '../../../../../../lists/common/schemas/types/e
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { Action, State, exceptionsBuilderReducer } from './reducer';
 import { getDefaultEmptyEntry } from './helpers';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
 
 const initialState: State = {
   disableAnd: false,

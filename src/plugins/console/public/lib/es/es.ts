@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import $ from 'jquery';
 import { stringify } from 'query-string';
+
+interface SendOptions {
+  asSystemRequest?: boolean;
+}
 
 const esVersion: string[] = [];
 
@@ -20,13 +24,19 @@ export function getContentType(body: any) {
   return 'application/json';
 }
 
-export function send(method: string, path: string, data: any) {
+export function send(
+  method: string,
+  path: string,
+  data: any,
+  { asSystemRequest }: SendOptions = {}
+) {
   const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     headers: {
       'kbn-xsrf': 'kibana',
+      ...(asSystemRequest && { 'kbn-system-request': 'true' }),
     },
     data,
     contentType: getContentType(data),

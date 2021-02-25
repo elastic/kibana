@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { template } from 'lodash';
@@ -32,6 +32,34 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
   Object.entries(formatted).forEach(([key, val]) => {
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([key, val]);
+  });
+  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
+};
+
+export const formatTopLevelObject = (
+  row: Record<string, any>,
+  fields: Record<string, any>,
+  indexPattern: IndexPattern
+) => {
+  const highlights = row.highlight ?? {};
+  const highlightPairs: Array<[string, unknown]> = [];
+  const sourcePairs: Array<[string, unknown]> = [];
+  Object.entries(fields).forEach(([key, values]) => {
+    const field = indexPattern.getFieldByName(key);
+    const formatter = field
+      ? indexPattern.getFormatterForField(field)
+      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+    const formatted = values
+      .map((val: unknown) =>
+        formatter.convert(val, 'html', {
+          field,
+          hit: row,
+          indexPattern,
+        })
+      )
+      .join(', ');
+    const pairs = highlights[key] ? highlightPairs : sourcePairs;
+    pairs.push([key, formatted]);
   });
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };

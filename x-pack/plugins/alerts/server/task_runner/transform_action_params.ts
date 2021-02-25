@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -26,6 +27,7 @@ interface TransformActionParamsOptions {
   actionParams: AlertActionParams;
   alertParams: AlertTypeParams;
   state: AlertInstanceState;
+  kibanaBaseUrl?: string;
   context: AlertInstanceContext;
 }
 
@@ -43,6 +45,7 @@ export function transformActionParams({
   context,
   actionParams,
   state,
+  kibanaBaseUrl,
   alertParams,
 }: TransformActionParamsOptions): AlertActionParams {
   // when the list of variables we pass in here changes,
@@ -60,6 +63,7 @@ export function transformActionParams({
     context,
     date: new Date().toISOString(),
     state,
+    kibanaBaseUrl,
     params: alertParams,
   };
   return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);

@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-
-import { MAPBOX_STYLES } from './mapbox_styles';
 
 const JOIN_PROPERTY_NAME = '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1';
 const EXPECTED_JOIN_VALUES = {
@@ -17,10 +16,6 @@ const EXPECTED_JOIN_VALUES = {
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
-const CIRCLE_STYLE_LAYER_INDEX = 0;
-const FILL_STYLE_LAYER_INDEX = 2;
-const LINE_STYLE_LAYER_INDEX = 3;
-const TOO_MANY_FEATURES_LAYER_INDEX = 4;
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -91,34 +86,6 @@ export default function ({ getPageObjects, getService }) {
           expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
         }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
-      });
-    });
-
-    it('should style fills, points, lines, and bounding-boxes independently', async () => {
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      const layersForVectorSource = mapboxStyle.layers.filter((mbLayer) => {
-        return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
-      });
-
-      //circle layer for points
-      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.POINT_LAYER);
-
-      //fill layer
-      expect(layersForVectorSource[FILL_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.FILL_LAYER);
-
-      //line layer for borders
-      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.LINE_LAYER);
-
-      //Too many features layer (this is a static style config)
-      expect(layersForVectorSource[TOO_MANY_FEATURES_LAYER_INDEX]).to.eql({
-        id: 'n1t6f_toomanyfeatures',
-        type: 'fill',
-        source: 'n1t6f',
-        minzoom: 0,
-        maxzoom: 24,
-        filter: ['==', ['get', '__kbn_too_many_features__'], true],
-        layout: { visibility: 'visible' },
-        paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
       });
     });
 

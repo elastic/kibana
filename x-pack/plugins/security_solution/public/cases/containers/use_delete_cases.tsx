@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useReducer } from 'react';
@@ -11,7 +12,7 @@ import {
   useStateToaster,
 } from '../../common/components/toasters';
 import * as i18n from './translations';
-import { deleteCases } from './api';
+import { deleteCases, deleteSubCases } from './api';
 import { DeleteCase } from './types';
 
 interface DeleteState {
@@ -86,7 +87,13 @@ export const useDeleteCases = (): UseDeleteCase => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         const caseIds = cases.map((theCase) => theCase.id);
-        await deleteCases(caseIds, abortCtrl.signal);
+        // We don't allow user batch delete sub cases on UI at the moment.
+        if (cases[0].type != null || cases.length > 1) {
+          await deleteCases(caseIds, abortCtrl.signal);
+        } else {
+          await deleteSubCases(caseIds, abortCtrl.signal);
+        }
+
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
           displaySuccessToast(

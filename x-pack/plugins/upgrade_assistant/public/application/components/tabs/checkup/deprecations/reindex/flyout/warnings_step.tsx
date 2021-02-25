@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -9,9 +10,9 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
   EuiCallOut,
   EuiCheckbox,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -100,12 +101,10 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
     }));
   };
 
-  const { docLinks } = useAppContext();
-  const { ELASTIC_WEBSITE_URL } = docLinks;
+  const { docLinks, kibanaVersionInfo } = useAppContext();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
-  const observabilityDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/observability`;
 
-  // TODO: Revisit warnings returned for 8.0 upgrade; many of these are likely obselete now
   return (
     <>
       <EuiFlyoutBody>
@@ -130,85 +129,31 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {warnings.includes(ReindexWarning.allField) && (
+        {kibanaVersionInfo.currentMajor === 7 && warnings.includes(ReindexWarning.customTypeName) && (
           <WarningCheckbox
             checkedIds={checkedIds}
             onChange={onChange}
-            warning={ReindexWarning.allField}
+            warning={ReindexWarning.customTypeName}
             label={
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
-                defaultMessage="{allField} will be removed"
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
+                defaultMessage="Mapping type will be changed to {defaultType}"
                 values={{
-                  allField: <EuiCode>_all</EuiCode>,
+                  defaultType: <EuiCode>_doc</EuiCode>,
                 }}
               />
             }
             description={
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
-                defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
+                defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the
+                    default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
                 values={{
-                  allField: <EuiCode>_all</EuiCode>,
+                  defaultType: <EuiCode>_doc</EuiCode>,
                 }}
               />
             }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default`}
-          />
-        )}
-
-        {warnings.includes(ReindexWarning.apmReindex) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.apmReindex}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
-                defaultMessage="This index will be converted to ECS format"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
-                defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema.
-                      Historical APM data will not visible until it's reindexed."
-              />
-            }
-            documentationUrl={`${observabilityDocBasePath}/master/whats-new.html`}
-          />
-        )}
-
-        {warnings.includes(ReindexWarning.booleanFields) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.booleanFields}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningTitle"
-                defaultMessage="Boolean data in {_source} might change"
-                values={{ _source: <EuiCode>_source</EuiCode> }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
-                defaultMessage="If a document contain a boolean field that is neither {true} or {false}
-                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
-                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
-                values={{
-                  true: <EuiCode>true</EuiCode>,
-                  false: <EuiCode>false</EuiCode>,
-                  yes: <EuiCode>&quot;yes&quot;</EuiCode>,
-                  on: <EuiCode>&quot;on&quot;</EuiCode>,
-                  one: <EuiCode>1</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_field`}
+            documentationUrl={`${esDocBasePath}/${DOC_LINK_VERSION}/removal-of-types.html`}
           />
         )}
       </EuiFlyoutBody>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, ChangeEvent } from 'react';
@@ -17,15 +18,18 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 
+import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
+import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
+import { SourcesLogic } from '../../sources_logic';
 
+import { AvailableSourcesList } from './available_sources_list';
+import { ConfiguredSourcesList } from './configured_sources_list';
 import {
   ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
   ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
@@ -37,10 +41,6 @@ import {
   ADD_SOURCE_EMPTY_TITLE,
   ADD_SOURCE_EMPTY_BODY,
 } from './constants';
-
-import { SourcesLogic } from '../../sources_logic';
-import { AvailableSourcesList } from './available_sources_list';
-import { ConfiguredSourcesList } from './configured_sources_list';
 
 export const AddSourceList: React.FC = () => {
   const { contentSources, dataLoading, availableSources, configuredSources } = useValues(
@@ -108,7 +108,7 @@ export const AddSourceList: React.FC = () => {
               data-test-subj="FilterSourcesInput"
               value={filterValue}
               onChange={handleFilterChange}
-              fullWidth={true}
+              fullWidth
               placeholder={ADD_SOURCE_PLACEHOLDER}
             />
           </EuiFormRow>

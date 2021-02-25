@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
@@ -30,9 +31,10 @@ export function TransactionErrorRateChart({
 }: Props) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, start, end, transactionName },
+  } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -45,17 +47,26 @@ export function TransactionErrorRateChart({
               serviceName,
             },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters, transactionType, transactionName]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+    ]
   );
 
   const errorRates = data?.transactionErrorRate || [];

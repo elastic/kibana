@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -16,8 +16,13 @@ import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
 
+const mockTheme = {
+  eui: {
+    euiColorMediumShade: '#ece',
+  },
+};
+
 describe('unknown_column_renderer', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
   beforeEach(() => {
@@ -49,7 +54,7 @@ describe('unknown_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <span>{emptyColumn}</span>
       </ThemeProvider>
     );
@@ -65,7 +70,7 @@ describe('unknown_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <span>{emptyColumn}</span>
       </ThemeProvider>
     );

@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { RoleMapping } from '../../../shared/types';
+import { Engine } from '../../components/engine/types';
 import { Account } from '../../types';
 
 export type RoleTypes = 'owner' | 'admin' | 'dev' | 'editor' | 'analyst';
@@ -102,3 +105,11 @@ export const getRoleAbilities = (role: Account['role']): Role => {
 
   return Object.assign(myRole, topLevelProps, abilities);
 };
+
+export interface ASRoleMapping extends RoleMapping {
+  accessAllEngines: boolean;
+  engines: Engine[];
+  toolTip?: {
+    content: string;
+  };
+}

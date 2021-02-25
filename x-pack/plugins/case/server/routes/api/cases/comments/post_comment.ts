@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -18,6 +19,11 @@ export function initPostCommentApi({ router }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            subCaseID: schema.maybe(schema.string()),
+          })
+        ),
         body: escapeHatch,
       },
     },
@@ -27,12 +33,12 @@ export function initPostCommentApi({ router }: RouteDeps) {
       }
 
       const caseClient = context.case.getCaseClient();
-      const caseId = request.params.case_id;
+      const caseId = request.query?.subCaseID ?? request.params.case_id;
       const comment = request.body as CommentRequest;
 
       try {
         return response.ok({
-          body: await caseClient.addComment({ caseClient, caseId, comment }),
+          body: await caseClient.addComment({ caseId, comment }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

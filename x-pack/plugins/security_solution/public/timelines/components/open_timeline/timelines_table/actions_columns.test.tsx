@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIconProps } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -18,12 +18,13 @@ import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 
+const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
+
 jest.mock('../../../../common/lib/kibana');
 
 const { TimelinesTable } = jest.requireActual('.');
 
 describe('#getActionsColumns', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
@@ -36,7 +37,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['delete'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -50,7 +51,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -64,7 +65,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -78,7 +79,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -92,7 +93,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -106,7 +107,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['delete'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -123,7 +124,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(missingSavedObjectId),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -140,7 +141,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(mockResults),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -160,7 +161,7 @@ describe('#getActionsColumns', () => {
       onOpenTimeline,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -176,7 +177,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['export'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -188,7 +189,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(mockResults),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -205,7 +206,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['export'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -225,7 +226,7 @@ describe('#getActionsColumns', () => {
       enableExportTimelineDownloader,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -241,7 +242,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['createFrom', 'duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -255,7 +256,7 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['createFrom', 'duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );

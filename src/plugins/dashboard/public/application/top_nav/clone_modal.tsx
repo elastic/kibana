@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiCallOut,
@@ -138,69 +137,67 @@ export class DashboardCloneModal extends React.Component<Props, State> {
 
   render() {
     return (
-      <EuiOverlayMask>
-        <EuiModal
-          data-test-subj="dashboardCloneModal"
-          className="dshCloneModal"
-          onClose={this.props.onClose}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-                defaultMessage="Clone dashboard"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
-                  defaultMessage="Please enter a new name for your dashboard."
-                />
-              </p>
-            </EuiText>
-
-            <EuiSpacer />
-
-            <EuiFieldText
-              autoFocus
-              aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
-                defaultMessage: 'Cloned Dashboard Title',
-              })}
-              data-test-subj="clonedDashboardTitle"
-              value={this.state.newDashboardName}
-              onChange={this.onInputChange}
-              isInvalid={this.state.hasTitleDuplicate}
+      <EuiModal
+        data-test-subj="dashboardCloneModal"
+        className="dshCloneModal"
+        onClose={this.props.onClose}
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+              defaultMessage="Clone dashboard"
             />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-            {this.renderDuplicateTitleCallout()}
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+        <EuiModalBody>
+          <EuiText>
+            <p>
               <FormattedMessage
-                id="dashboard.topNav.cloneModal.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
+                defaultMessage="Please enter a new name for your dashboard."
               />
-            </EuiButtonEmpty>
+            </p>
+          </EuiText>
 
-            <EuiButton
-              fill
-              data-test-subj="cloneConfirmButton"
-              onClick={this.cloneDashboard}
-              isLoading={this.state.isLoading}
-            >
-              <FormattedMessage
-                id="dashboard.topNav.cloneModal.confirmButtonLabel"
-                defaultMessage="Confirm Clone"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+          <EuiSpacer />
+
+          <EuiFieldText
+            autoFocus
+            aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
+              defaultMessage: 'Cloned Dashboard Title',
+            })}
+            data-test-subj="clonedDashboardTitle"
+            value={this.state.newDashboardName}
+            onChange={this.onInputChange}
+            isInvalid={this.state.hasTitleDuplicate}
+          />
+
+          {this.renderDuplicateTitleCallout()}
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+            <FormattedMessage
+              id="dashboard.topNav.cloneModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+
+          <EuiButton
+            fill
+            data-test-subj="cloneConfirmButton"
+            onClick={this.cloneDashboard}
+            isLoading={this.state.isLoading}
+          >
+            <FormattedMessage
+              id="dashboard.topNav.cloneModal.confirmButtonLabel"
+              defaultMessage="Confirm Clone"
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 }

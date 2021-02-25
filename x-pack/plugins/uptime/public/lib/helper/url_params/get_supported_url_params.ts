@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parseIsPaused } from './parse_is_paused';
@@ -21,6 +22,7 @@ export interface UptimeUrlParams {
   search: string;
   statusFilter: string;
   focusConnectorField?: boolean;
+  query?: string;
 }
 
 const {
@@ -74,9 +76,11 @@ export const getSupportedUrlParams = (params: {
     statusFilter,
     pagination,
     focusConnectorField,
+    query,
   } = filteredParams;
 
   return {
+    query,
     pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,

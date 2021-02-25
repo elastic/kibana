@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SemVer } from 'semver';
 
-export const MOCK_VERSION_STRING = '8.0.0';
+import { mockKibanaSemverVersion } from '../../../common/constants';
 
-export const getMockVersionInfo = (versionString = MOCK_VERSION_STRING) => {
-  const currentVersion = new SemVer(versionString);
-  const currentMajor = currentVersion.major;
+export const getMockVersionInfo = () => {
+  const currentMajor = mockKibanaSemverVersion.major;
 
   return {
-    currentVersion,
+    currentVersion: mockKibanaSemverVersion,
     currentMajor,
     prevMajor: currentMajor - 1,
     nextMajor: currentMajor + 1,

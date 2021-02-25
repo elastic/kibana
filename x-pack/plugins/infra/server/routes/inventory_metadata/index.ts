@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -32,33 +33,27 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { sourceId, nodeType, currentTime } = pipe(
-          InventoryMetaRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const { sourceId, nodeType, currentTime } = pipe(
+        InventoryMetaRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
 
-        const awsMetadata = await getCloudMetadata(
-          framework,
-          requestContext,
-          configuration,
-          nodeType,
-          currentTime
-        );
+      const awsMetadata = await getCloudMetadata(
+        framework,
+        requestContext,
+        configuration,
+        nodeType,
+        currentTime
+      );
 
-        return response.ok({
-          body: InventoryMetaResponseRT.encode(awsMetadata),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: InventoryMetaResponseRT.encode(awsMetadata),
+      });
     }
   );
 };

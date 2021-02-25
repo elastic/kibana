@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -18,6 +19,7 @@ import {
 import { AggCardinality } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -637,7 +639,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
       ...runtimeMappings,
     };
 
@@ -647,6 +649,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+
     const aggregations = body.aggregations;
     const totalCount = body.hits.total.value;
     const stats = {

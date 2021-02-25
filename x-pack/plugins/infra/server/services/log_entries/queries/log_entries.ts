@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { RequestParams } from '@elastic/elasticsearch';
@@ -19,6 +20,8 @@ import {
 } from '../../../utils/elasticsearch_runtime_types';
 import { createSortClause, createTimeRangeFilterClauses } from './common';
 
+const CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
+
 export const createGetLogEntriesQuery = (
   logEntriesIndex: string,
   startTimestamp: number,
@@ -33,6 +36,7 @@ export const createGetLogEntriesQuery = (
 ): RequestParams.AsyncSearchSubmit<Record<string, any>> => {
   const sortDirection = getSortDirection(cursor);
   const highlightQuery = createHighlightQuery(highlightTerm, fields);
+  const fieldsWithContext = createFieldsWithContext(fields);
 
   return {
     index: logEntriesIndex,
@@ -50,7 +54,7 @@ export const createGetLogEntriesQuery = (
           ],
         },
       },
-      fields,
+      fields: fieldsWithContext,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
@@ -115,6 +119,9 @@ const createHighlightQuery = (
     };
   }
 };
+
+const createFieldsWithContext = (fields: string[]): string[] =>
+  Array.from(new Set([...fields, ...CONTEXT_FIELDS]));
 
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,

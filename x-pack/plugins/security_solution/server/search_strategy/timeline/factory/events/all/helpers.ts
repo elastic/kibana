@@ -1,13 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
 import { toStringArray } from '../../../../helpers/to_array';
 import { formatGeoLocation, isGeoField } from '../details/helpers';
+
+const getTimestamp = (hit: EventHit): string => {
+  if (hit.fields && hit.fields['@timestamp']) {
+    return `${hit.fields['@timestamp'][0] ?? ''}`;
+  } else if (hit._source && hit._source['@timestamp']) {
+    return hit._source['@timestamp'];
+  }
+  return '';
+};
 
 export const formatTimelineData = (
   dataFields: readonly string[],
@@ -19,7 +29,7 @@ export const formatTimelineData = (
       flattenedFields.node._id = hit._id;
       flattenedFields.node._index = hit._index;
       flattenedFields.node.ecs._id = hit._id;
-      flattenedFields.node.ecs.timestamp = (hit.fields['@timestamp'][0] ?? '') as string;
+      flattenedFields.node.ecs.timestamp = getTimestamp(hit);
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
         flattenedFields.cursor.value = hit.sort[0];

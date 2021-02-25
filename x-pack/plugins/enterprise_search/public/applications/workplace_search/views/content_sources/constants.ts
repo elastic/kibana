@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -412,10 +413,6 @@ export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
-  defaultMessage: 'and',
-});
-
 export const LICENSE_CALLOUT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title',
   {
@@ -463,5 +460,13 @@ export const UNDERSTAND_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.understandButton',
   {
     defaultMessage: 'I understand',
+  }
+);
+
+export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+  {
+    defaultMessage:
+      'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
   }
 );

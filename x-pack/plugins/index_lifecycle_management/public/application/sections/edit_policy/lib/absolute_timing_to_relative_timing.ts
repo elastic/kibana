@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -20,8 +21,6 @@
  */
 
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { flow } from 'fp-ts/function';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
 
@@ -32,21 +31,6 @@ import { FormInternal } from '../types';
 type MinAgePhase = 'warm' | 'cold' | 'delete';
 
 type Phase = 'hot' | MinAgePhase;
-
-const i18nTexts = {
-  forever: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.Forever', {
-    defaultMessage: 'Forever',
-  }),
-  lessThanADay: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.lessThanADay', {
-    defaultMessage: 'Less than a day',
-  }),
-  day: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.day', {
-    defaultMessage: 'day',
-  }),
-  days: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.days', {
-    defaultMessage: 'days',
-  }),
-};
 
 const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
 
@@ -161,38 +145,3 @@ export const calculateRelativeFromAbsoluteMilliseconds = (
 };
 
 export type RelativePhaseTimingInMs = ReturnType<typeof calculateRelativeFromAbsoluteMilliseconds>;
-
-const millisecondsToDays = (milliseconds?: number): string | undefined => {
-  if (milliseconds == null) {
-    return;
-  }
-  if (!isFinite(milliseconds)) {
-    return i18nTexts.forever;
-  }
-  const days = milliseconds / 8.64e7;
-  return days < 1
-    ? i18nTexts.lessThanADay
-    : `${Math.floor(days)} ${days === 1 ? i18nTexts.day : i18nTexts.days}`;
-};
-
-export const normalizeTimingsToHumanReadable = ({
-  total,
-  phases,
-}: PhaseAgeInMilliseconds): { total?: string; hot?: string; warm?: string; cold?: string } => {
-  return {
-    total: millisecondsToDays(total),
-    hot: millisecondsToDays(phases.hot),
-    warm: millisecondsToDays(phases.warm),
-    cold: millisecondsToDays(phases.cold),
-  };
-};
-
-/**
- * Given {@link FormInternal}, extract the min_age values for each phase and calculate
- * human readable strings for communicating how long data will remain in a phase.
- */
-export const absoluteTimingToRelativeTiming = flow(
-  formDataToAbsoluteTimings,
-  calculateRelativeFromAbsoluteMilliseconds,
-  normalizeTimingsToHumanReadable
-);

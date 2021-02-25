@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subscription } from 'rxjs';
@@ -223,16 +224,16 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
     appenders: {
       auditTrailAppender: config.appender ?? {
-        kind: 'console',
+        type: 'console',
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           highlight: true,
         },
       },
     },
     loggers: [
       {
-        context: 'audit.ecs',
+        name: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import chunk from 'lodash/fp/chunk';
@@ -11,8 +12,10 @@ import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { combineConcurrentResults } from './utils';
+import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
+  tuples,
   threatMapping,
   query,
   inputIndex,
@@ -22,8 +25,6 @@ export const createThreatSignals = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
@@ -46,6 +47,7 @@ export const createThreatSignals = async ({
   threatLanguage,
   buildRuleMessage,
   threatIndex,
+  threatIndicatorPath,
   name,
   concurrentSearches,
   itemsPerSearch,
@@ -89,12 +91,27 @@ export const createThreatSignals = async ({
     perPage,
   });
 
+  const threatEnrichment = buildThreatEnrichment({
+    buildRuleMessage,
+    exceptionItems,
+    listClient,
+    logger,
+    services,
+    threatFilters,
+    threatIndex,
+    threatIndicatorPath,
+    threatLanguage,
+    threatQuery,
+  });
+
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
+          tuples,
+          threatEnrichment,
           threatMapping,
           query,
           inputIndex,
@@ -104,8 +121,6 @@ export const createThreatSignals = async ({
           savedId,
           services,
           exceptionItems,
-          gap,
-          previousStartedAt,
           listClient,
           logger,
           eventsTelemetry,

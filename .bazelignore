@@ -8,8 +8,7 @@
 .idea
 .teamcity
 .yarn-local-mirror
-bazel-cache
-bazel-dist
+/bazel
 build
 node_modules
 target

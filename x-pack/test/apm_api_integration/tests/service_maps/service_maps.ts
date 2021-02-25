@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import querystring from 'querystring';
@@ -48,7 +49,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
-          uiFilters: encodeURIComponent('{}'),
         });
         const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 

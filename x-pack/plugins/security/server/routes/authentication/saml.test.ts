@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
@@ -75,16 +76,14 @@ describe('SAML authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       authc.login.mockRejectedValue(unhandledException);
 
-      const internalServerErrorResponse = Symbol('error');
       const responseFactory = httpServerMock.createResponseFactory();
-      responseFactory.internalError.mockReturnValue(internalServerErrorResponse as any);
 
       const request = httpServerMock.createKibanaRequest({
         body: { SAMLResponse: 'saml-response' },
       });
 
-      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
-        internalServerErrorResponse
+      await expect(routeHandler({} as any, request, responseFactory)).rejects.toThrow(
+        unhandledException
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {

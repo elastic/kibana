@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,18 +20,17 @@ interface CreateParams {
 export const apiKeysManagementApp = Object.freeze({
   id: 'api_keys',
   create({ getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.apiKeysTitle', {
+      defaultMessage: 'API Keys',
+    });
     return {
       id: this.id,
       order: 30,
-      title: i18n.translate('xpack.security.management.apiKeysTitle', {
-        defaultMessage: 'API Keys',
-      }),
+      title,
       async mount({ element, setBreadcrumbs }) {
         setBreadcrumbs([
           {
-            text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
-              defaultMessage: 'API Keys',
-            }),
+            text: title,
             href: `/`,
           },
         ]);
@@ -40,6 +40,8 @@ export const apiKeysManagementApp = Object.freeze({
           import('./api_keys_grid'),
           import('./api_keys_api_client'),
         ]);
+
+        core.chrome.docTitle.change(title);
 
         render(
           <KibanaContextProvider services={core}>
@@ -54,6 +56,7 @@ export const apiKeysManagementApp = Object.freeze({
         );
 
         return () => {
+          core.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

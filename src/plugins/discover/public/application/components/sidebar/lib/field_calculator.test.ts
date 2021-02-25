@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 // @ts-ignore
-import realHits from 'fixtures/real_hits.js';
+import realHits from '../../../../__fixtures__/real_hits.js';
 // @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from '../../../../__fixtures__/logstash_fields';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { IndexPattern } from '../../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../../data/public/test_utils';

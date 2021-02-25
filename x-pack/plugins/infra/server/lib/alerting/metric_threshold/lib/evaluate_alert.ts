@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
@@ -59,8 +60,17 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         filterQuery,
         timeframe
       );
-      const { threshold, comparator } = criterion;
-      const comparisonFunction = comparatorMap[comparator];
+      const { threshold, warningThreshold, comparator, warningComparator } = criterion;
+      const pointsEvaluator = (points: any[] | typeof NaN | null, t?: number[], c?: Comparator) => {
+        if (!t || !c) return [false];
+        const comparisonFunction = comparatorMap[c];
+        return Array.isArray(points)
+          ? points.map(
+              (point) => t && typeof point.value === 'number' && comparisonFunction(point.value, t)
+            )
+          : [false];
+      };
+
       return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
         if (isTooManyBucketsPreviewException(points)) throw points;
         return {
@@ -68,12 +78,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
-          shouldFire: Array.isArray(points)
-            ? points.map(
-                (point) =>
-                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
-              )
-            : [false],
+          shouldFire: pointsEvaluator(points, threshold, comparator),
+          shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
           isNoData: Array.isArray(points)
             ? points.map((point) => point?.value === null || point === null)
             : [points === null],

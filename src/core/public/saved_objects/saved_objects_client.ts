@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
@@ -21,12 +21,14 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
+type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
 >;
 
-type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
 
 /** @public */
 export interface SavedObjectsCreateOptions {
@@ -345,10 +347,7 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      return renameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['find']>>,
-        SavedObjectsFindResponsePublic
-      >(
+      return renameKeys<SavedObjectsFindResponse, SavedObjectsFindResponsePublic>(
         {
           saved_objects: 'savedObjects',
           total: 'total',

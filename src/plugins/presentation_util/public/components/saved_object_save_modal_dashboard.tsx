@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -40,14 +40,10 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const {
-    canAccessDashboards,
-    canCreateNewDashboards,
-    canEditDashboards,
-  } = capabilities.useService();
+  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
 
-  const disableDashboardOptions =
-    !canAccessDashboards() || (!canCreateNewDashboards && !canEditDashboards);
+  // Disable the dashboard options if the user can't access dashboards or if they're read-only
+  const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'

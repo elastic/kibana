@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './datapanel.scss';
@@ -62,10 +63,11 @@ const supportedFieldTypes = new Set([
   'boolean',
   'date',
   'ip',
-  'document',
   'number_range',
   'date_range',
   'ip_range',
+  'histogram',
+  'document',
 ]);
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -75,6 +77,7 @@ const fieldTypeNames: Record<DataType, string> = {
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
 };
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by

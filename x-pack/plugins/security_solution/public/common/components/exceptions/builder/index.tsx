@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { addIdToItem } from '../../../../../common';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
@@ -238,8 +241,6 @@ export const ExceptionBuilderComponent = ({
         entries: [...entries, isNested ? getDefaultNestedEmptyEntry() : getDefaultEmptyEntry()],
       };
 
-      // setAndLogicIncluded(updatedException.entries.length > 1);
-
       setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
     },
     [setUpdateExceptions, exceptions]
@@ -285,12 +286,12 @@ export const ExceptionBuilderComponent = ({
             ...lastEntry,
             entries: [
               ...lastEntry.entries,
-              {
+              addIdToItem({
                 field: '',
                 type: OperatorTypeEnum.MATCH,
                 operator: OperatorEnum.INCLUDED,
                 value: '',
-              },
+              }),
             ],
           },
         ],
@@ -350,7 +351,7 @@ export const ExceptionBuilderComponent = ({
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">

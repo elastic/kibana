@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { lazy } from 'react';
@@ -10,7 +11,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import { serviceNowITSMConfiguration, serviceNowSIRConfiguration } from './config';
 import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
@@ -67,10 +67,10 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowITSMActionParams
 > {
   return {
-    id: serviceNowITSMConfiguration.id,
+    id: '.servicenow',
     iconClass: logo,
-    selectMessage: serviceNowITSMConfiguration.desc,
-    actionTypeTitle: serviceNowITSMConfiguration.name,
+    selectMessage: i18n.SERVICENOW_ITSM_DESC,
+    actionTypeTitle: i18n.SERVICENOW_ITSM_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (
@@ -102,10 +102,10 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
   ServiceNowSIRActionParams
 > {
   return {
-    id: serviceNowSIRConfiguration.id,
+    id: '.servicenow-sir',
     iconClass: logo,
-    selectMessage: serviceNowSIRConfiguration.desc,
-    actionTypeTitle: serviceNowSIRConfiguration.name,
+    selectMessage: i18n.SERVICENOW_SIR_DESC,
+    actionTypeTitle: i18n.SERVICENOW_SIR_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (actionParams: ServiceNowSIRActionParams): GenericValidationResult<unknown> => {

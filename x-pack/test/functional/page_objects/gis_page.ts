@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -170,6 +171,10 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await testSubjects.click('mapSaveAndReturnButton');
     }
 
+    async expectMissingSaveAndReturnButton() {
+      await testSubjects.missingOrFail('mapSaveAndReturnButton');
+    }
+
     async expectMissingSaveButton() {
       await testSubjects.missingOrFail('mapSaveButton');
     }
@@ -328,6 +333,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
         });
         await this.waitForLayersToLoad();
       }
+    }
+
+    async getNumberOfLayers() {
+      const tocEntries = await find.allByCssSelector('.mapTocEntry');
+      return tocEntries.length;
     }
 
     async doesLayerExist(layerName: string) {

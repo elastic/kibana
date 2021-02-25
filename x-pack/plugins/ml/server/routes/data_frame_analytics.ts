@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
@@ -44,7 +45,7 @@ function getAnalyticsMap(
   client: IScopedClusterClient,
   idOptions: GetAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.getAnalyticsMap(idOptions);
 }
 
@@ -53,7 +54,7 @@ function getExtendedMap(
   client: IScopedClusterClient,
   idOptions: ExtendAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 

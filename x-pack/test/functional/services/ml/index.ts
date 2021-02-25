@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,7 +18,7 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
-import { MachineLearningDataFrameAnalyticsScatterplotProvider } from './data_frame_analytics_scatterplot';
+import { MachineLearningDataFrameAnalyticsCanvasElementProvider } from './data_frame_analytics_canvas_element';
 import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
@@ -44,6 +45,7 @@ import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewe
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
+import { MachineLearningAlertingProvider } from './alerting';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -64,7 +66,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
-  const dataFrameAnalyticsScatterplot = MachineLearningDataFrameAnalyticsScatterplotProvider(
+  const dataFrameAnalyticsCanvasElement = MachineLearningDataFrameAnalyticsCanvasElementProvider(
     context
   );
 
@@ -94,10 +96,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
+  const alerting = MachineLearningAlertingProvider(context, commonUI);
 
   return {
     anomaliesTable,
     anomalyExplorer,
+    alerting,
     api,
     commonAPI,
     commonConfig,
@@ -109,7 +113,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsResults,
     dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
-    dataFrameAnalyticsScatterplot,
+    dataFrameAnalyticsCanvasElement,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getBuckets } from './get_buckets';
@@ -24,6 +25,7 @@ describe('get buckets', () => {
     });
 
     await getBuckets({
+      environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
       setup: {
@@ -41,14 +43,7 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {
-          environment: 'prod',
-        },
-        esFilter: [
-          {
-            term: { 'service.environment': 'prod' },
-          },
-        ],
+        uiFilters: {},
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',

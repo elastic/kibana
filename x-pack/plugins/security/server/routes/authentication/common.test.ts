@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
@@ -412,11 +413,9 @@ describe('Common authentication routes', () => {
         body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
       });
 
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrow(
+        unhandledException
+      );
     });
 
     it('returns 401 if login fails.', async () => {
@@ -682,11 +681,9 @@ describe('Common authentication routes', () => {
       authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrowError(
+        unhandledException
+      );
     });
 
     it('returns 204 if successfully acknowledged.', async () => {

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { METRIC_TYPE } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { UIM_APP_NAME } from '../constants';
@@ -20,7 +23,7 @@ export class UiMetricService {
       return;
     }
 
-    const { reportUiCounter, METRIC_TYPE } = this.usageCollection;
+    const { reportUiCounter } = this.usageCollection;
     reportUiCounter(UIM_APP_NAME, METRIC_TYPE.COUNT, name);
   }
 

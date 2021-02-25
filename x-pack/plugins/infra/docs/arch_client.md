@@ -26,7 +26,7 @@ However, components that tweak EUI should go into `/public/components/eui/${comp
 
 If using an EUI component that has not yet been typed, types should be placed into `/types/eui.d.ts`
 
-## Containers (Also: [see GraphQL docs](docs/graphql.md))
+## Containers
 
 - HOC's based on Apollo.
 - One folder per data type e.g. `host`. Folder name should be singular.

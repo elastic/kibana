@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -25,26 +26,28 @@ interface CreateParams {
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
   create({ getStartServices, spacesManager }: CreateParams) {
+    const title = i18n.translate('xpack.spaces.displayName', {
+      defaultMessage: 'Spaces',
+    });
+
     return {
       id: this.id,
       order: 2,
-      title: i18n.translate('xpack.spaces.displayName', {
-        defaultMessage: 'Spaces',
-      }),
+      title,
 
       async mount({ element, setBreadcrumbs, history }) {
         const [
-          { notifications, i18n: i18nStart, application },
+          { notifications, i18n: i18nStart, application, chrome },
           { features },
         ] = await getStartServices();
         const spacesBreadcrumbs = [
           {
-            text: i18n.translate('xpack.spaces.management.breadcrumb', {
-              defaultMessage: 'Spaces',
-            }),
+            text: title,
             href: `/`,
           },
         ];
+
+        chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(spacesBreadcrumbs);
@@ -131,6 +134,7 @@ export const spacesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },
