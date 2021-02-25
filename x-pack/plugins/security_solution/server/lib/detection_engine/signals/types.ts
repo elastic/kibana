@@ -73,6 +73,12 @@ export interface ThresholdSignalHistory {
   [hash: string]: ThresholdSignalHistoryRecord;
 }
 
+export interface RuleRangeTuple {
+  to: moment.Moment;
+  from: moment.Moment;
+  maxSignals: number;
+}
+
 export interface SignalSource {
   [key: string]: SearchTypes;
   // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
@@ -251,8 +257,11 @@ export interface QueryFilter {
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
 export interface SearchAfterAndBulkCreateParams {
-  gap: moment.Duration | null;
-  previousStartedAt: Date | null | undefined;
+  tuples: Array<{
+    to: moment.Moment;
+    from: moment.Moment;
+    maxSignals: number;
+  }>;
   ruleParams: RuleTypeParams;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;

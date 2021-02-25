@@ -205,7 +205,7 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
       {
         defaultMessage:
-          'Specify the document path containing your threat indicator fields. Used for enrichment of indicator match alerts. Defaults to threat.indicator unless otherwise specified.',
+          'Specify the document path containing your threat indicator fields. Used for enrichment of indicator match alerts.',
       }
     ),
     labelAppend: OptionalFieldLabel,
