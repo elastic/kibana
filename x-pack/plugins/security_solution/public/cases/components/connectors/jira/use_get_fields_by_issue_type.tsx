@@ -35,19 +35,20 @@ export const useGetFieldsByIssueType = ({
 }: Props): UseGetFieldsByIssueType => {
   const [isLoading, setIsLoading] = useState(true);
   const [fields, setFields] = useState<Fields>({});
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
-    let didCancel = false;
     const fetchData = async () => {
       if (!connector || !issueType) {
         setIsLoading(false);
         return;
       }
 
-      abortCtrl.current = new AbortController();
-      setIsLoading(true);
       try {
+        abortCtrl.current = new AbortController();
+        setIsLoading(true);
+
         const res = await getFieldsByIssueType({
           http,
           signal: abortCtrl.current.signal,
@@ -55,7 +56,7 @@ export const useGetFieldsByIssueType = ({
           id: issueType,
         });
 
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
           setFields(res.data ?? {});
           if (res.status && res.status === 'error') {
@@ -66,22 +67,24 @@ export const useGetFieldsByIssueType = ({
           }
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
-          toastNotifications.addDanger({
-            title: i18n.FIELDS_API_ERROR,
-            text: error.message,
-          });
+          if (error.name !== 'AbortError') {
+            toastNotifications.addDanger({
+              title: i18n.FIELDS_API_ERROR,
+              text: error.message,
+            });
+          }
         }
       }
     };
 
+    didCancel.current = false;
     abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
     };
   }, [http, connector, issueType, toastNotifications]);
