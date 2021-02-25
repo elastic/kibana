@@ -90,8 +90,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: PromiseReturnType<typeof supertest.get>;
 
-      const uiFilters = JSON.stringify({});
-
       describe('average latency type', () => {
         before(async () => {
           response = await supertest.get(
@@ -170,7 +168,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-node/transactions/charts/latency`,
               query: {
-                uiFilters,
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
                 start: moment(end).subtract(15, 'minutes').toISOString(),
