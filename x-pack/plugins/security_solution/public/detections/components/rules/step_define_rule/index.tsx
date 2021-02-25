@@ -289,14 +289,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   const thresholdFormValue = useMemo((): Threshold | undefined => {
-    return formThresholdValue != null &&
-      formThresholdField != null &&
-      formThresholdCardinalityField != null &&
-      formThresholdCardinalityValue != null
+    return formThresholdValue != null
       ? {
-          field: formThresholdField[0],
+          field: formThresholdField?.length ? formThresholdField[0] : [],
           value: formThresholdValue,
-          cardinality_field: formThresholdCardinalityField[0],
+          cardinality_field: formThresholdCardinalityField?.length
+            ? formThresholdCardinalityField[0]
+            : '',
           cardinality_value: formThresholdCardinalityValue,
         }
       : undefined;

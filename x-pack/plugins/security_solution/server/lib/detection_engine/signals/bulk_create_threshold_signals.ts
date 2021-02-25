@@ -101,7 +101,11 @@ const getTransformedHits = (
         _id: calculateThresholdSignalUuid(
           ruleId,
           startedAt,
-          Array.isArray(threshold.field) ? threshold.field : [threshold.field]
+          Array.isArray(threshold.field)
+            ? threshold.field
+            : isEmpty(threshold.field)
+            ? []
+            : [threshold.field!]
         ),
         _source: source,
       },
@@ -115,7 +119,7 @@ const getTransformedHits = (
 
   const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
     return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
-      if (i < threshold.field.length - 1) {
+      if (i < threshold.field!.length - 1) {
         const nextLevelIdx = i + 1;
         const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
         if (nextLevelAggParts == null) {
@@ -208,7 +212,11 @@ const getTransformedHits = (
         _id: calculateThresholdSignalUuid(
           ruleId,
           startedAt,
-          Array.isArray(threshold.field) ? threshold.field : [threshold.field],
+          Array.isArray(threshold.field)
+            ? threshold.field
+            : isEmpty(threshold.field)
+            ? []
+            : [threshold.field!],
           bucket.terms.map((term) => term.value).join(',')
         ),
         _source: source,

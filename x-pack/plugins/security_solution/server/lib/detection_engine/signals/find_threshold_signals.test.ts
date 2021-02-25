@@ -266,7 +266,7 @@ describe('findThresholdSignals', () => {
     );
   });
 
-  it('should generate a threshold signal query when only a cardinality field and value are provided', async () => {
+  it('should generate a threshold signal query when only a value and a cardinality field/value are provided', async () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
@@ -277,6 +277,7 @@ describe('findThresholdSignals', () => {
       threshold: {
         cardinality_field: 'source.ip',
         cardinality_value: 5,
+        value: 200,
       },
       buildRuleMessage,
       timestampOverride: undefined,
@@ -290,6 +291,7 @@ describe('findThresholdSignals', () => {
                 source: '""',
                 lang: 'painless',
               },
+              min_doc_count: 200,
             },
             aggs: {
               cardinality_count: {
