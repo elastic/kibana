@@ -12,10 +12,10 @@ import {
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { defineKeyRotationRoutes } from './key_rotation';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from './index.mock';
 import { EncryptionKeyRotationService } from '../crypto';
 

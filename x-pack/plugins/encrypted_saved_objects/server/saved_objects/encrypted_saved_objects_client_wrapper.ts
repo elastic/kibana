@@ -27,8 +27,8 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
   SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsUtils,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';

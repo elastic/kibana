@@ -7,7 +7,7 @@
 
 import { ConfigSchema, ConfigType } from '../config';
 
-import { httpServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { encryptionKeyRotationServiceMock } from '../crypto/index.mock';
 
 export const routeDefinitionParamsMock = {

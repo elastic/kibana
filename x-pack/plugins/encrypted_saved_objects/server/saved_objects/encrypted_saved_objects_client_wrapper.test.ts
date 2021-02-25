@@ -14,9 +14,9 @@ import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/s
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
-jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    '../../../../../src/core/server/saved_objects/service/lib/utils'
+    'src/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {
