@@ -110,9 +110,9 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |createdBy|The userid that created this alert.|
 |updatedBy|The userid that last updated this alert.|
 
-### The `actionVariables` property
+### Action Variables
 
-This property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
 
 For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
 
@@ -124,6 +124,8 @@ For example, if the `context` has one variable `foo` which is an object that has
 }
 ```
 
+### Documentation
+We suggest you add user documentation for your alert type following the template provided in `docs/alert-type-template.asciidoc`. The [Index Threshold alert type](https://www.elastic.co/guide/en/kibana/master/alert-type-index-threshold.html) is an example of documentation created following the template.
 ### Example
 
 This example receives server and threshold as parameters. It will read the CPU usage of the server and schedule actions to be executed (asynchronously by the task manager) if the reading is greater than the threshold.
