@@ -13,7 +13,7 @@ When relying on alerts and actions as mission critical services, make sure you f
 {kib} uses <<task-manager>> to run Alerts and Actions as background tasks, distributed across all {kib} instances in the cluster.
 
 By default, each {kib} instance polls for work at 3 second intervals, and can run a maximum of 10 concurrent tasks.
-These tasks are then ran on the {kib} server.
+These tasks are then run on the {kib} server.
 
 In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
 
