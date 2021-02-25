@@ -4433,13 +4433,22 @@
     "csp": {
       "properties": {
         "strict": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if strict mode should be used."
+          }
         },
         "warnLegacyBrowsers": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if legacy browser versions should be warned."
+          }
         },
         "rulesChangedFromDefault": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the rules have been changed from the default."
+          }
         }
       }
     },
