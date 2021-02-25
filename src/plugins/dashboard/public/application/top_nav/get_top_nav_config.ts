@@ -151,7 +151,7 @@ function getViewConfig(action: NavAction, disableButton?: boolean) {
     disableButton,
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Return',
+      defaultMessage: 'Cancel',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',

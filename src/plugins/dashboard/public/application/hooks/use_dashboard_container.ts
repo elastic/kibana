@@ -94,7 +94,7 @@ export const useDashboardContainer = ({
           isEmbeddedExternally: Boolean(isEmbeddedExternally),
           dashboardCapabilities,
           dashboardStateManager,
-          // incomingEmbeddable,
+          incomingEmbeddable,
           query,
           searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
         })
