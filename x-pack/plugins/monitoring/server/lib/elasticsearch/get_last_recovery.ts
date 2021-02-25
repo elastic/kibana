@@ -50,7 +50,7 @@ export function handleLegacyLastRecoveries(resp: ElasticsearchResponse, start: n
     const data = (resp.hits?.hits[0]?._source.index_recovery?.shards ?? []).filter(
       filterOldShardActivity(moment.utc(start).valueOf())
     );
-    data.sort((a, b) => b.start_time_in_millis - a.start_time_in_millis);
+    data.sort((a, b) => (b.start_time_in_millis ?? 0) - (a.start_time_in_millis ?? 0));
     return data;
   }
 
@@ -61,7 +61,7 @@ function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
   const data = (resp.hits?.hits ?? [])
     .map((hit) => hit._source.elasticsearch?.index?.recovery)
     .filter(filterOldShardActivity(moment.utc(start).valueOf()));
-  data.sort((a, b) => (a && b ? b.start_time_in_millis - a.start_time_in_millis : 0));
+  data.sort((a, b) => (a && b ? (b.start_time_in_millis ?? 0) - (a.start_time_in_millis ?? 0) : 0));
   return data;
 }
 
