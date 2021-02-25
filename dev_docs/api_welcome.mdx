@@ -3,12 +3,51 @@ id: kibDevDocsApiWelcome
 slug: /kibana-dev-docs/api-welcome
 title: Welcome
 summary: The home of automatically generated plugin API documentation using extracted TSDocs
-date: 2021-01-02
+date: 2021-02-25
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-Welcome to Kibana's plugin API documentation. As a plugin developer, this is where you can 
-learn the details of every service you can take advantage of to help you build awe-inspiring creative solutions and applications!
+Welcome to Kibana's plugin API documentation! As a plugin developer, this is where you can 
+learn the details of every service you can take advantage of to help you build awe-inspiring
+ creative solutions and applications!
+
+<DocCallOut color="warning" title="Experimental">
+This documentation is being automatically generated using an
+ [_experimental_ system](https://github.com/elastic/kibana/blob/master/rfcs/text/0014_api_documentation.md). That means
+ it may be removed or modified. Please create an issue 
+ </DocCallOut>
+
+ ## What is included
+
+ Every plugin that exposes functionality for other plugins to use exposes a 
+ <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public plugin API"/> (note this system 
+ does *not* handle REST APIs). The API documentation system detects this and automatically generates API documentation for
+ these public services.
+
+ <DocCallOut title="@internal tags">API items that have an `@internal` in the comment are not 
+ included in the documentation system.</DocCallOut> 
+
+ ## How it works
+
+There is one extra step required to have your API docs show up in the _navigation_ of the docs system. Follow
+the instructions <DocLink id="docsSetup" section="configure-the-nav-for-your-content" text="here" /> to learn how to 
+configure the navigation menu. This is the nav file you will 
+be editing: [https://github.com/elastic/elastic-docs/blob/master/config/nav-kibana-dev.ts](https://github.com/elastic/elastic-docs/blob/master/config/nav-kibana-dev.ts)
+
+Your API docs will exist in the top level `api_docs` folder and will use a doc id of the pattern `kib${PluginName}PluginApi`.
+
+If you have a very large plugin you can split up the documentation by adding a `serviceFolders` section into your `kibana.json` that matches
+folder names. This will automatically group any API items that are defined in those "service folders" into a separate doc with a doc id of
+`kib${PluginName}${ServiceName}PluginApi`. The data plugin does this, so you can check that out as an example.
+
+ ## Handling API changes in PRs
+
+ If you change or delete an existing API, or add a new one, you will have to run the command `node scripts/build_api_docs` in order to update the
+ docs in your PR, or CI will fail. When this happens, consider:
+ 
+ 1. If this affects an existing API item, have you emailed the `kibana-contributors` list with a heads up? It's important to give advance 
+ notice, since there may be corner cases you aren't aware of, even if your PR passes CI.
+ 2. If the change you are making isn't relevant to contributors, consider a) making the API private, or b) adding the `@internal` flag to it.
 
 If you have any questions or issues, please reach out to the Kibana platform team or create an issue [here](https://github.com/elastic/kibana/issues).
 
