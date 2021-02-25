@@ -19,16 +19,24 @@ jest.mock('./common', () => {
 
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { installTransform } from './install';
-import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  ILegacyScopedClusterClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { appContextService } from '../../../app_context';
 
 describe('test transform install', () => {
   let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
+  let esClient: jest.Mocked<ElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -36,6 +44,7 @@ describe('test transform install', () => {
       callAsInternalUser: jest.fn(),
       callAsCurrentUser: jest.fn(),
     };
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -157,6 +166,7 @@ describe('test transform install', () => {
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
       legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
@@ -330,6 +340,7 @@ describe('test transform install', () => {
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
@@ -447,6 +458,7 @@ describe('test transform install', () => {
       } as unknown) as RegistryPackage,
       [],
       legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
@@ -564,6 +576,7 @@ describe('test transform install', () => {
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 

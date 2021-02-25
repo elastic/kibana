@@ -168,6 +168,7 @@ export async function _installPackage({
       packageInfo,
       paths,
       callCluster,
+      esClient,
       savedObjectsClient
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
@@ -30,6 +30,7 @@ export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const logger = appContextService.getLogger();
@@ -53,7 +54,7 @@ export const installTransform = async (
 
   // delete all previous transform
   await deleteTransforms(
-    callCluster,
+    esClient,
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
 

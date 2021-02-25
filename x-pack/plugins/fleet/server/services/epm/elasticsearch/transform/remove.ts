@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
-export const stopTransforms = async (transformIds: string[], callCluster: CallESAsCurrentUser) => {
+export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
-    await callCluster('transport.request', {
-      method: 'POST',
-      path: `/_transform/${transformId}/_stop`,
-      query: 'force=true',
-      ignore: [404],
-    });
+    await esClient.transport.request(
+      {
+        method: 'POST',
+        path: `/_transform/${transformId}/_stop`,
+        querystring: 'force=true',
+      },
+      {
+        ignore: [404],
+      }
+    );
   }
 };
 
-export const deleteTransforms = async (
-  callCluster: CallESAsCurrentUser,
-  transformIds: string[]
-) => {
+export const deleteTransforms = async (esClient: ElasticsearchClient, transformIds: string[]) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
     logger.info(`Deleting currently installed transform ids ${transformIds}`);
@@ -32,35 +33,50 @@ export const deleteTransforms = async (
   await Promise.all(
     transformIds.map(async (transformId) => {
       // get the index the transform
-      const transformResponse: {
+      const { body } = await esClient.transport.request(
+        {
+          method: 'GET',
+          path: `/_transform/${transformId}`,
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      // `transport.request` doesn't accept generics, so we cast the type here.
+      const transformResponse = body as {
         count: number;
         transforms?: Array<{
           dest: {
             index: string;
           };
         }>;
-      } = await callCluster('transport.request', {
-        method: 'GET',
-        path: `/_transform/${transformId}`,
-        ignore: [404],
-      });
+      };
 
-      await stopTransforms([transformId], callCluster);
-      await callCluster('transport.request', {
-        method: 'DELETE',
-        query: 'force=true',
-        path: `/_transform/${transformId}`,
-        ignore: [404],
-      });
+      await stopTransforms([transformId], esClient);
+      await esClient.transport.request(
+        {
+          method: 'DELETE',
+          querystring: 'force=true',
+          path: `/_transform/${transformId}`,
+        },
+        {
+          ignore: [404],
+        }
+      );
       logger.info(`Deleted: ${transformId}`);
       if (transformResponse?.transforms) {
         // expect this to be 1
         for (const transform of transformResponse.transforms) {
-          await callCluster('transport.request', {
-            method: 'DELETE',
-            path: `/${transform?.dest?.index}`,
-            ignore: [404],
-          });
+          await esClient.transport.request(
+            {
+              method: 'DELETE',
+              path: `/${transform?.dest?.index}`,
+            },
+            {
+              ignore: [404],
+            }
+          );
         }
       } else {
         logger.warn(`cannot find transform for ${transformId}`);
