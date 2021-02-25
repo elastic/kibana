@@ -10,16 +10,15 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AnalyticsChart } from '../../analytics';
 
 import { TotalCharts } from './total_charts';
 
 describe('TotalCharts', () => {
-  let wrapper: ShallowWrapper;
-
+  let wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   beforeAll(() => {
     jest.clearAllMocks();
     setMockValues({
@@ -27,22 +26,22 @@ describe('TotalCharts', () => {
       queriesPerDay: [0, 1, 2, 3, 5, 10, 50],
       operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     });
-    wrapper = shallow(<TotalCharts />);
+    wrapper = mount(<TotalCharts />);
   });
 
   it('renders the total queries chart', () => {
     const chart = wrapper.find('[data-test-subj="TotalQueriesChart"]');
 
-    expect(chart.find('h2').text()).toEqual('Total queries');
-    expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/analytics');
+    expect(chart.find('h4').text()).toEqual('Total queries');
+    expect(chart.find(EuiButtonEmptyTo).prop('to')).toEqual('/engines/some-engine/analytics');
     expect(chart.find(AnalyticsChart)).toHaveLength(1);
   });
 
   it('renders the total API operations chart', () => {
     const chart = wrapper.find('[data-test-subj="TotalApiOperationsChart"]');
 
-    expect(chart.find('h2').text()).toEqual('Total API operations');
-    expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/api-logs');
+    expect(chart.find('h4').text()).toEqual('Total API operations');
+    expect(chart.find(EuiButtonEmptyTo).prop('to')).toEqual('/engines/some-engine/api-logs');
     expect(chart.find(AnalyticsChart)).toHaveLength(1);
   });
 });
