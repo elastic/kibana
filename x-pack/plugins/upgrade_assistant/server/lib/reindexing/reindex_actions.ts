@@ -85,14 +85,12 @@ export interface ReindexActions {
   /**
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
+   * @param withTypeName
    */
-  getFlatSettings(indexName: string): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
-
-  /**
-   * Retrieve index settings (in flat, dot-notation style) and mappings with the type name included.
-   * @param indexName
-   */
-  getFlatSettingsWithTypeName(indexName: string): Promise<FlatSettingsWithTypeName | null>;
+  getFlatSettings(
+    indexName: string,
+    withTypeName?: boolean
+  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -243,10 +241,10 @@ export const reindexActionsFactory = (
       return allOps;
     },
 
-    async getFlatSettings(indexName: string) {
+    async getFlatSettings(indexName: string, withTypeName?: boolean) {
       let flatSettings;
 
-      if (versionService.getMajorVersion() === 7) {
+      if (versionService.getMajorVersion() === 7 && withTypeName) {
         // On 7.x, we need to get index settings with mapping type
         flatSettings = await esClient.indices.get<{
           [indexName: string]: FlatSettingsWithTypeName;
@@ -271,22 +269,6 @@ export const reindexActionsFactory = (
       }
 
       return flatSettings.body[indexName];
-    },
-
-    async getFlatSettingsWithTypeName(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.get<{
-        [indexName: string]: FlatSettingsWithTypeName;
-      }>({
-        index: indexName,
-        flat_settings: true,
-        include_type_name: true,
-      });
-
-      if (!flatSettings[indexName]) {
-        return null;
-      }
-
-      return flatSettings[indexName];
     },
 
     async _fetchAndLockIndexGroupDoc(indexGroup) {

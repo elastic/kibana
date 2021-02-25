@@ -68,7 +68,6 @@ describe('reindexService', () => {
       findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
       findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
-      getFlatSettingsWithTypeName: jest.fn(unimplemented('getFlatSettingsWithTypeName')),
       cleanupChanges: jest.fn(),
       incrementIndexGroupReindexes: jest.fn(unimplemented('incrementIndexGroupReindexes')),
       decrementIndexGroupReindexes: jest.fn(unimplemented('decrementIndexGroupReindexes')),
@@ -87,7 +86,7 @@ describe('reindexService', () => {
       clusterClient.asCurrentUser,
       actions,
       log,
-      licensingPluginSetup,
+      licensingPluginSetup
     );
 
     versionService.setup(mockKibanaVersion);
@@ -212,7 +211,7 @@ describe('reindexService', () => {
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
       const indexName = 'myIndex';
-      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce({
+      actions.getFlatSettings.mockResolvedValueOnce({
         settings: {
           'index.provided_name': indexName,
         },
@@ -226,7 +225,7 @@ describe('reindexService', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce(null);
+      actions.getFlatSettings.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toBeNull();
     });
@@ -246,12 +245,6 @@ describe('reindexService', () => {
     it('fails if index does not exist', async () => {
       clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(false));
       await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
-      expect(actions.createReindexOp).not.toHaveBeenCalled();
-    });
-
-    it('fails if system index', async () => {
-      actions.getFlatSettings.mockResolvedValueOnce({ settings: {}, mappings: {} });
-      await expect(service.createReindexOperation('.myIndex')).rejects.toThrow();
       expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
 
@@ -977,7 +970,6 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(1);
           expect(clusterClient.asCurrentUser.delete).toHaveBeenCalledWith({
             index: '.tasks',
-            type: 'task',
             id: 'xyz',
           });
         });
@@ -1022,7 +1014,6 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.cancelled);
           expect(clusterClient.asCurrentUser.delete).toHaveBeenLastCalledWith({
             index: '.tasks',
-            type: 'task',
             id: 'xyz',
           });
         });

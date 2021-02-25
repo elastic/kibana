@@ -33,7 +33,6 @@ import {
   ReindexCannotBeCancelled,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
-  CannotReindexSystemIndexInCurrent,
 } from '../../lib/reindexing/error_symbols';
 
 import { reindexHandler } from './reindex_handler';
@@ -55,13 +54,7 @@ export function createReindexWorker({
   licensing,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(
-    savedObjects,
-    credentialStore,
-    esClient,
-    logger,
-    licensing,
-  );
+  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {
@@ -81,9 +74,6 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       case MultipleReindexJobsFound:
       case ReindexCannotBeCancelled:
         return kibanaResponseFactory.badRequest({ body: e.message });
-      case CannotReindexSystemIndexInCurrent:
-        // Not implemented (specific to current version)
-        return kibanaResponseFactory.customError({ body: e.message, statusCode: 501 });
       default:
       // nothing matched
     }

@@ -27,7 +27,6 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
-import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
 import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
@@ -112,7 +111,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this));
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(dependencies);
-    registerQueryDefaultFieldRoutes(dependencies);
 
     if (usageCollection) {
       getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
@@ -125,7 +123,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  async start({ savedObjects, elasticsearch }: CoreStart) {
+  start({ savedObjects, elasticsearch }: CoreStart) {
     this.savedObjectsServiceStart = savedObjects;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
@@ -145,7 +143,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       ),
     });
 
-    this.worker!.start();
+    this.worker.start();
   }
 
   stop(): void {

@@ -12,17 +12,15 @@ import {
   UpgradeAssistantStatus,
 } from '../../common/types';
 
-import { isSystemIndex } from './reindexing';
-
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
-  isCloudEnabled: boolean,
+  isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const [{ body: deprecations }] = await Promise.all([
-    dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>(),
-  ]);
+  const {
+    body: deprecations,
+  } = await dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>();
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
@@ -50,32 +48,19 @@ export async function getUpgradeAssistantStatus(
 }
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
-const getCombinedIndexInfos = (
-  deprecations: DeprecationAPIResponse,
-) => {
-
-  return (
-    Object.keys(deprecations.index_settings)
-      .reduce((indexDeprecations, indexName) => {
-        return indexDeprecations.concat(
-          deprecations.index_settings[indexName].map(
-            (d) =>
-              ({
-                ...d,
-                index: indexName,
-                reindex: /Index created before/.test(d.message),
-                needsDefaultFields: /Number of fields exceeds automatic field expansion limit/.test(
-                  d.message
-                ),
-              } as EnrichedDeprecationInfo)
-          )
-        );
-      }, [] as EnrichedDeprecationInfo[])
-      // Filter out warnings for system indices until we know more about what changes are required for the
-      // next upgrade in a future minor version.
-      .filter((deprecation) => !isSystemIndex(deprecation.index!))
-  );
-};
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
+  Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
+    return indexDeprecations.concat(
+      deprecations.index_settings[indexName].map(
+        (d) =>
+          ({
+            ...d,
+            index: indexName,
+            reindex: /Index created before/.test(d.message),
+          } as EnrichedDeprecationInfo)
+      )
+    );
+  }, [] as EnrichedDeprecationInfo[]);
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
   const combined = deprecations.cluster_settings

@@ -52,7 +52,7 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private licensing: LicensingPluginSetup,
+    private licensing: LicensingPluginSetup
   ) {
     this.log = log.get('reindex_worker');
     if (ReindexWorker.workerSingleton) {
@@ -65,7 +65,7 @@ export class ReindexWorker {
       callAsInternalUser,
       reindexActionsFactory(this.client, callAsInternalUser),
       log,
-      this.licensing,
+      this.licensing
     );
 
     ReindexWorker.workerSingleton = this;
@@ -150,12 +150,7 @@ export class ReindexWorker {
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
-    return reindexServiceFactory(
-      callAsCurrentUser,
-      actions,
-      this.log,
-      this.licensing,
-    );
+    return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
 
   private updateInProgressOps = async () => {
@@ -231,12 +226,7 @@ export class ReindexWorker {
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
 
-    const service = reindexServiceFactory(
-      callAsCurrentUser,
-      actions,
-      this.log,
-      this.licensing,
-    );
+    const service = reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

@@ -11,12 +11,7 @@ import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({
-  cloud,
-  router,
-  licensing,
-  log,
-}: RouteDependencies) {
+export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   router.get(

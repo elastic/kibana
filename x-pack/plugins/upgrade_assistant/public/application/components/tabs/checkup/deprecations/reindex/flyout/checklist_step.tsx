@@ -16,13 +16,12 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ReindexStatus, ReindexWarning } from '../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
 import { ReindexState } from '../polling_service';
 import { ReindexProgress } from './progress';
@@ -78,7 +77,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   cancelReindex: () => void;
   http: HttpSetup;
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http, renderGlobalCallouts }) => {
-  const { loadingState, status, hasRequiredPrivileges, reindexWarnings } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
   return (

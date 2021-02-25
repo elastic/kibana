@@ -18,10 +18,7 @@ import {
   ReindexWarning,
 } from '../../../common/types';
 
-
 import { esIndicesStateCheck } from '../es_indices_state_check';
-
-import { versionService } from '../version';
 
 import {
   generateNewIndexName,
@@ -135,7 +132,7 @@ export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
-  licensing: LicensingPluginSetup,
+  licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
 
@@ -424,7 +421,6 @@ export const reindexServiceFactory = (
     // Delete the task from ES .tasks index
     const { body: deleteTaskResp } = await esClient.delete({
       index: '.tasks',
-      type: 'task',
       id: taskId,
     });
 
@@ -552,7 +548,7 @@ export const reindexServiceFactory = (
     },
 
     async detectReindexWarnings(indexName: string) {
-      const flatSettings = await actions.getFlatSettingsWithTypeName(indexName);
+      const flatSettings = await actions.getFlatSettings(indexName, true);
       if (!flatSettings) {
         return null;
       } else {
@@ -569,12 +565,6 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
-      if (isSystemIndex(indexName)) {
-        throw error.reindexSystemIndex(
-          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${versionService.getMajorVersion()}.x minor version.`
-        );
-      }
-
       const { body: indexExists } = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -772,8 +762,6 @@ export const reindexServiceFactory = (
     },
   };
 };
-
-export const isSystemIndex = (indexName: string) => indexName.startsWith('.');
 
 export const isMlIndex = (indexName: string) => {
   const sourceName = sourceNameForIndex(indexName);
