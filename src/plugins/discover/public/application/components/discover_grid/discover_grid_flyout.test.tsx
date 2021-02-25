@@ -32,7 +32,12 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
+        services={
+          ({
+            filterManager: createFilterManagerMock(),
+            addBasePath: (path: string) => path,
+          } as unknown) as DiscoverServices
+        }
       />
     );
 
@@ -53,7 +58,12 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
+        services={
+          ({
+            filterManager: createFilterManagerMock(),
+            addBasePath: (path: string) => path,
+          } as unknown) as DiscoverServices
+        }
       />
     );
 
@@ -63,7 +73,7 @@ describe('Discover flyout', function () {
       `"#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
+      `"/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
     );
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(onClose).toHaveBeenCalled();
