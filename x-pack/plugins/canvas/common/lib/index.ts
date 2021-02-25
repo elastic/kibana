@@ -11,7 +11,6 @@ export * from './constants';
 export * from './dataurl';
 // @ts-expect-error missing local definition
 export * from './errors';
-// @ts-expect-error missing local definition
 export * from './expression_form_handlers';
 export * from './fetch';
 export * from './fonts';
