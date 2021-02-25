@@ -141,7 +141,6 @@ export async function _installPackage({
     const installedDataStreamIlm = await installIlmForDataStream(
       packageInfo,
       paths,
-      callCluster,
       esClient,
       savedObjectsClient
     );
