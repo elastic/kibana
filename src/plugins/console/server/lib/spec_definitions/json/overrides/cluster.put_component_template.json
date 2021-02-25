@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "cluster.put_component_template": {
     "data_autocomplete_rules": {
       "settings": {
@@ -14,6 +15,17 @@
       "mappings": {
         "__scope_link": "put_mapping"
       }
+=======
+  "indices.put_template": {
+    "data_autocomplete_rules": {
+      "template": {},
+      "aliases": {},
+      "settings": {},
+      "mappings": {},
+      "version": 0,
+      "_meta": {},
+      "allow_auto_create": false
+>>>>>>> 06d966eca57... [Console] Autocompletion of component_templates (#91180)
     }
   }
 }
