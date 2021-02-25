@@ -49,7 +49,12 @@ describe('SpacesPopoverList', () => {
     const wrapper = mountWithIntl(
       <SpacesPopoverList spaces={spaces} buttonText="hello world" spacesApiUi={spacesApiUi} />
     );
-    await act(async () => {}); // lazy-load SpaceAvatar
+
+    // lazy-load SpaceAvatar
+    await act(async () => {
+      wrapper.update();
+    });
+
     return wrapper;
   }
 

@@ -58,10 +58,12 @@ describe('SpaceColumnHeader', () => {
       <SpaceColumnHeader spaces={spaces} entry={entry} spacesApiUi={spacesApiUi} />
     );
 
+    await act(async () => {});
+
     // lazy-load SpaceAvatar
-    await act(async () => {});
-    await act(async () => {});
-    wrapper.update();
+    await act(async () => {
+      wrapper.update();
+    });
 
     return wrapper;
   }

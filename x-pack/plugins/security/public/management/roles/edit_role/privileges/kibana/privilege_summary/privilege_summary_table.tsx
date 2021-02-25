@@ -32,7 +32,7 @@ import {
   EffectiveFeaturePrivileges,
 } from './privilege_summary_calculator';
 
-interface Props {
+export interface PrivilegeSummaryTableProps {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
@@ -44,7 +44,7 @@ function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
 }
 
-export const PrivilegeSummaryTable = (props: Props) => {
+export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   const [expandedFeatures, setExpandedFeatures] = useState<string[]>([]);
 
   const featureCategories = useMemo(() => {
