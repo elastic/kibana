@@ -86,7 +86,7 @@ async function createSetupSideEffects(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, callCluster, esClient);
+  await ensurePackagesCompletedInstall(soClient, esClient);
 
   if (isFleetServerEnabled) {
     await awaitIfFleetServerSetupPending();

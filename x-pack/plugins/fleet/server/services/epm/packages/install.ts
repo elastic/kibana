@@ -22,7 +22,6 @@ import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../
 import {
   AssetReference,
   Installation,
-  CallESAsCurrentUser,
   AssetType,
   EsAssetReference,
   InstallType,
@@ -446,7 +445,6 @@ export const removeAssetsFromInstalledEsByType = async (
 
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser,
   esClient: ElasticsearchClient
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
