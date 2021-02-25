@@ -6,11 +6,15 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import React, { createContext, ReactChild, useContext, useMemo } from 'react';
+import React, { createContext, ReactChild, useContext, useMemo, useEffect } from 'react';
 import qs from 'query-string';
 import { ApplicationStart } from 'kibana/public';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
+
+import { useKibana } from '../../../shared_imports';
+
+import { getPolicyEditPath, getPolicyCreatePath } from '../../services/navigation';
 
 type PolicyView = { id: 'policy' } | { id: 'rollupAction'; phase: 'hot' | 'cold' };
 
@@ -39,6 +43,12 @@ export const EditPolicyContextProvider = ({
   children: ReactChild;
 }) => {
   const { search } = useLocation();
+  const {
+    services: { breadcrumbService },
+  } = useKibana();
+
+  const { policyName } = value;
+
   const currentView = useMemo<PolicyView>(() => {
     const { rollup } = qs.parse(search) as { rollup: 'hot' | 'cold' };
     if (rollup) {
@@ -46,6 +56,24 @@ export const EditPolicyContextProvider = ({
     }
     return { id: 'policy' };
   }, [search]);
+
+  const { id: currentViewId } = currentView;
+
+  useEffect(() => {
+    switch (currentViewId) {
+      case 'policy':
+        breadcrumbService.setBreadcrumbs({ type: 'editPolicy' });
+        break;
+      case 'rollupAction':
+        breadcrumbService.setBreadcrumbs({
+          type: 'configurePolicyRollup',
+          payload: {
+            editPolicyPath: policyName ? getPolicyEditPath(policyName) : getPolicyCreatePath(),
+          },
+        });
+        break;
+    }
+  }, [breadcrumbService, search, currentViewId, policyName]);
 
   return (
     <EditPolicyContext.Provider

@@ -124,7 +124,6 @@ export class RollupWizard extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    // props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
     const { value } = props;
     const deserializedRollup = value ? deserializeRollup(value) : {};
 

@@ -10,23 +10,28 @@ import { cloneDeep, get, set } from 'lodash';
 
 import { SerializedPolicy, RollupAction } from '../../../../common/types';
 
+import { FormHook } from '../../../shared_imports';
+
+interface Field {
+  enabled: boolean;
+  action: RollupAction;
+}
+
+interface RollupFormConfig {
+  hot: Field;
+  cold: Field;
+}
+
+type RollupFormHook = FormHook<RollupFormConfig>;
 export interface RollupFormContextValue {
   getCurrent: () => RollupFormConfig;
   setCurrent: (
     rollupConfig: RollupFormConfig | ((rollupConfig: RollupFormConfig) => RollupFormConfig)
   ) => void;
+  form: {
+    submit: RollupFormHook['submit'];
+  };
   addRollupConfigToPolicy: (policy: SerializedPolicy) => SerializedPolicy;
-}
-
-interface RollupFormConfig {
-  hot: {
-    enabled: boolean;
-    action: RollupAction;
-  };
-  cold: {
-    enabled: boolean;
-    action: RollupAction;
-  };
 }
 
 const RollupFormContext = createContext<RollupFormContextValue>(null as any);
@@ -75,12 +80,26 @@ export const RollupFormContextProvider = ({ policy, children }: Props) => {
     [rollupForm]
   );
 
+  const submit: RollupFormHook['submit'] = useCallback(async () => {
+    const isValid = Object.values(rollupForm).every((v) => Boolean(v.enabled && v.action));
+
+    return {
+      data: {
+        ...rollupForm,
+      },
+      isValid,
+    };
+  }, [rollupForm]);
+
   return (
     <RollupFormContext.Provider
       value={{
         addRollupConfigToPolicy,
         getCurrent: getCurrentRollupAction,
         setCurrent: setRollupForm,
+        form: {
+          submit,
+        },
       }}
     >
       {children}

@@ -11,32 +11,46 @@ import { ManagementAppMountParams } from '../../../../../../src/plugins/manageme
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
-// Build the breadcrumbs for this app
-const breadcrumbs = (function () {
-  const policies: ChromeBreadcrumb[] = [
+const breadcrumbs = {
+  policies: (): ChromeBreadcrumb[] => [
     {
       text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.homeLabel', {
         defaultMessage: 'Index Lifecycle Management',
       }),
       href: `/policies`,
     },
-  ];
-
-  const editPolicy: ChromeBreadcrumb[] = [
-    ...policies,
+  ],
+  editPolicy: ({ editPolicyPath }: { editPolicyPath?: string }) => [
+    ...breadcrumbs.policies(),
     {
       text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.editPolicyLabel', {
         defaultMessage: 'Edit policy',
       }),
+      href: editPolicyPath,
+    },
+  ],
+  configurePolicyRollup: ({ editPolicyPath }: { editPolicyPath: string }) => [
+    ...breadcrumbs.editPolicy({ editPolicyPath }),
+    {
+      text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.editPolicyRollupLabel', {
+        defaultMessage: 'Configure rollup',
+      }),
       href: undefined,
     },
-  ];
+  ],
+};
 
-  return {
-    policies,
-    editPolicy,
-  };
-})();
+type SetBreadcrumbsArg =
+  | {
+      type: 'policies';
+    }
+  | {
+      type: 'editPolicy';
+    }
+  | {
+      type: 'configurePolicyRollup';
+      payload: { editPolicyPath: string };
+    };
 
 export class BreadcrumbService {
   private setBreadcrumbsHandler?: SetBreadcrumbs;
@@ -45,12 +59,25 @@ export class BreadcrumbService {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
   }
 
-  public setBreadcrumbs(type: keyof typeof breadcrumbs): void {
+  public setBreadcrumbs(arg: SetBreadcrumbsArg): void {
     if (!this.setBreadcrumbsHandler) {
       throw new Error(`BreadcrumbService#setup() must be called first!`);
     }
 
-    const newBreadcrumbs = breadcrumbs[type] ? [...breadcrumbs[type]] : [...breadcrumbs.policies];
+    let newBreadcrumbs: ChromeBreadcrumb[];
+    switch (arg.type) {
+      case 'policies':
+        newBreadcrumbs = breadcrumbs.policies();
+        break;
+      case 'editPolicy':
+        newBreadcrumbs = breadcrumbs.editPolicy({});
+        break;
+      case 'configurePolicyRollup':
+        newBreadcrumbs = breadcrumbs.configurePolicyRollup(arg.payload);
+        break;
+      default:
+        newBreadcrumbs = breadcrumbs.policies();
+    }
 
     // Pop off last breadcrumb
     const lastBreadcrumb = newBreadcrumbs.pop() as {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -43,13 +43,9 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   history,
 }) => {
   const {
-    services: { breadcrumbService, license },
+    services: { license },
   } = useKibana();
   const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs('editPolicy');
-  }, [breadcrumbService]);
 
   if (isLoading) {
     return (
