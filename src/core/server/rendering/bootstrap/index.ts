@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getStylesheetPaths } from './get_stylesheet_paths';
-export { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-export { AppBootstrap } from './app_bootstrap';
+export { registerBootstrapRoute } from './register_bootstrap_route';
+export { bootstrapRendererFactory } from './bootstrap_renderer';
