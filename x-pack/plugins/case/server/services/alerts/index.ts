@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -36,15 +36,19 @@ interface AlertsResponse {
   docs: Alert[];
 }
 
+function isEmptyAlert(alert: AlertInfo): boolean {
+  return isEmpty(alert.id) || isEmpty(alert.index);
+}
+
 export class AlertService {
   constructor() {}
 
   public async updateAlertsStatus({ alerts, scopedClusterClient }: UpdateAlertsStatusArgs) {
     const body = alerts
-      .filter((alert) => !_.isEmpty(alert.id) && !_.isEmpty(alert.index))
+      .filter((alert) => !isEmptyAlert(alert))
       .flatMap((alert) => [
         { update: { _id: alert.id, _index: alert.index } },
-        { script: { source: `ctx._source.signal.status = '${alert.status}'`, lang: 'painless' } },
+        { doc: { signal: { status: alert.status } } },
       ]);
 
     if (body.length <= 0) {
@@ -59,7 +63,7 @@ export class AlertService {
     alertsInfo,
   }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
     const docs = alertsInfo
-      .filter((alert) => !_.isEmpty(alert.id) && !_.isEmpty(alert.index))
+      .filter((alert) => !isEmptyAlert(alert))
       .slice(0, MAX_ALERTS_PER_SUB_CASE)
       .map((alert) => ({ _id: alert.id, _index: alert.index }));
 

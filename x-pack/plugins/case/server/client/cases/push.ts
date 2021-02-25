@@ -12,7 +12,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ActionResult, ActionsClient } from '../../../../actions/server';
-import { flattenCaseSavedObject, getAlertIndicesAndIDs } from '../../routes/api/utils';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../routes/api/utils';
 
 import {
   ActionConnector,
@@ -94,7 +94,7 @@ export const push = async ({
     );
   }
 
-  const alertsInfo = getAlertIndicesAndIDs(theCase?.comments);
+  const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
   try {
     alerts = await caseClient.getAlerts({

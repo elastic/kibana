@@ -14,7 +14,7 @@ import {
   User,
 } from '../../common/api';
 import { UpdateAlertRequest } from '../client/types';
-import { getAlertIndicesAndIDs } from '../routes/api/utils';
+import { getAlertInfoFromComments } from '../routes/api/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -36,7 +36,7 @@ export function createAlertUpdateRequest({
   comment: CommentRequest;
   status: CaseStatuses;
 }): UpdateAlertRequest[] {
-  return getAlertIndicesAndIDs([comment]).map((alert) => ({ ...alert, status }));
+  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 
 /**

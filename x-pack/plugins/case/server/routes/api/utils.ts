@@ -111,6 +111,15 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   return [];
 };
 
+const getIDsAndIndicesAsArrays = (
+  comment: CommentRequestAlertType
+): { ids: string[]; indices: string[] } => {
+  return {
+    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+  };
+};
+
 /**
  * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
  * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
@@ -124,16 +133,9 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
     return [];
   }
 
-  const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-  const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
+  const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
   if (ids.length !== indices.length) {
-    // TODO: add logger
-    /* logger.warn(
-      `Alert ids and indices arrays must have the same length ids: ${JSON.stringify(
-        ids
-      )} indices: ${JSON.stringify(indices)}`
-    );*/
     return [];
   }
 
@@ -143,7 +145,7 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertIndicesAndIDs = (comments: CommentRequest[] | undefined): AlertInfo[] => {
+export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined): AlertInfo[] => {
   if (comments === undefined) {
     return [];
   }
@@ -361,5 +363,47 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    const { ids, indices } = getIDsAndIndicesAsArrays(comment);
+
+    /**
+     * The alertId and index field must either be both of type string or they must both be string[] and be the same length.
+     * Having a one-to-one relationship between the id and index of an alert avoids accidentally updating or
+     * retrieving the wrong alert. Elasticsearch only guarantees that the _id (the field we use for alertId) to be
+     * unique within a single index. So if we attempt to update or get a specific alert across multiple indices we could
+     * update or receive the wrong one.
+     *
+     * Consider the situation where we have a alert1 with _id = '100' in index 'my-index-awesome' and also in index
+     *  'my-index-hi'.
+     * If we attempt to update the status of alert1 using an index pattern like `my-index-*` or even providing multiple
+     * indices, there's a chance we'll accidentally update too many alerts.
+     *
+     * This check doesn't enforce that the API request has the correct alert ID to index relationship it just guards
+     * against accidentally making a request like:
+     * {
+     *  alertId: [1,2,3],
+     *  index: awesome,
+     * }
+     *
+     * Instead this requires the requestor to provide:
+     * {
+     *  alertId: [1,2,3],
+     *  index: [awesome, awesome, awesome]
+     * }
+     *
+     * Ideally we'd change the format of the comment request to be an array of objects like:
+     * {
+     *  alerts: [{id: 1, index: awesome}, {id: 2, index: awesome}]
+     * }
+     *
+     * But we'd need to also implement a migration because the saved object document currently stores the id and index
+     * in separate fields.
+     */
+    if (ids.length !== indices.length) {
+      throw badRequest(
+        `Received an alert comment with ids and indices arrays of different lengths ids: ${JSON.stringify(
+          ids
+        )} indices: ${JSON.stringify(indices)}`
+      );
+    }
   }
 };
