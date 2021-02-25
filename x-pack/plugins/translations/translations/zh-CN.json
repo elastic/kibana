@@ -9784,7 +9784,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle": "可搜索快照",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody": "要创建可搜索快照，需要企业许可证。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle": "需要企业许可证",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody": "在热阶段禁用滚动更新后，无法创建可搜索快照。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError": "快照存储库名称必填。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel": "创建可搜索快照",
     "xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto": "显示请求",

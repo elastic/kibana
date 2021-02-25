@@ -426,6 +426,7 @@ describe('<EditPolicy />', () => {
         await actions.cold.setMinAgeUnits('s');
         await actions.cold.setDataAllocation('node_attrs');
         await actions.cold.setSelectedNodeAttribute('test:123');
+        await actions.cold.setSearchableSnapshot('my-repo');
         await actions.cold.setReplicas('123');
         await actions.cold.setFreeze(true);
         await actions.cold.setIndexPriority('123');
@@ -447,6 +448,9 @@ describe('<EditPolicy />', () => {
                     },
                   },
                   "freeze": Object {},
+                  "searchable_snapshot": Object {
+                    "snapshot_repository": "my-repo",
+                  },
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -468,19 +472,6 @@ describe('<EditPolicy />', () => {
             },
           }
         `);
-      });
-
-      // Setting searchable snapshot field disables setting replicas so we test this separately
-      test('setting searchable snapshot', async () => {
-        const { actions } = testBed;
-        await actions.cold.enable(true);
-        await actions.cold.setSearchableSnapshot('my-repo');
-        await actions.savePolicy();
-        const latestRequest2 = server.requests[server.requests.length - 1];
-        const entirePolicy2 = JSON.parse(JSON.parse(latestRequest2.requestBody).body);
-        expect(entirePolicy2.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
-          'my-repo'
-        );
       });
     });
   });
@@ -815,14 +806,15 @@ describe('<EditPolicy />', () => {
       const { component } = testBed;
       component.update();
     });
-    test('hiding and disabling searchable snapshot field', async () => {
+    test('hides fields in hot phase', async () => {
       const { actions } = testBed;
       await actions.hot.toggleDefaultRollover(false);
       await actions.hot.toggleRollover(false);
-      await actions.cold.enable(true);
 
+      expect(actions.hot.forceMergeFieldExists()).toBeFalsy();
+      expect(actions.hot.shrinkExists()).toBeFalsy();
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
-      expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
+      expect(actions.hot.readonlyExists()).toBeFalsy();
     });
   });
 });
