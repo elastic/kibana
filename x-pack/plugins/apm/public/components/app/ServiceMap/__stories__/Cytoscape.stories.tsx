@@ -282,7 +282,7 @@ export function NodeIcons() {
             icon={
               <img
                 alt={node.data('label')}
-                src={iconForNode(node)}
+                src={iconForNode(node, false)}
                 height={80}
                 width={80}
               />
