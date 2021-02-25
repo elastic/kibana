@@ -128,7 +128,7 @@ describe('injectReferences', () => {
     const attributes = {
       title: 'my map',
     };
-    expect(injectReferences({ attributes })).toEqual({
+    expect(injectReferences({ attributes, references: [] })).toEqual({
       attributes: {
         title: 'my map',
       },
