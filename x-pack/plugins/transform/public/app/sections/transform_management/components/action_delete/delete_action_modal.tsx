@@ -123,6 +123,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="transformDeleteModal"
       title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
       onCancel={closeModal}
       onConfirm={deleteAndCloseModal}
