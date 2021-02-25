@@ -25,16 +25,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = encodeURIComponent(range.start);
   const end = encodeURIComponent(range.end);
 
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
-
   registry.when(
     'APM Services Overview with a basic license when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+        const response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
 
         expect(response.status).to.be(200);
         expect(response.body.hasHistoricalData).to.be(false);
@@ -56,9 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let sortedItems: typeof response.body.items;
 
       before(async () => {
-        response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+        response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
         sortedItems = sortBy(response.body.items, 'serviceName');
       });
 
@@ -273,9 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           };
 
           before(async () => {
-            response = await supertest.get(
-              `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
-            );
+            response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
           });
 
           it('the response is successful', () => {
@@ -321,7 +313,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
+            `/api/apm/services?start=${start}&end=${end}`
           );
         });
 
@@ -346,8 +338,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
-              `{"kuery":"service.name:opbeans-java","environment":"ENVIRONMENT_ALL"}`
+            `/api/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
+              'service.name:opbeans-java'
             )}`
           );
         });

@@ -6,12 +6,12 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
-import { getCaseUserActions } from './api';
+import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
@@ -46,7 +46,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string) => void;
+  fetchCaseUserActions: (caseId: string, subCaseId?: string) => void;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
@@ -238,26 +238,29 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string
+  caseConnectorId: string,
+  subCaseId?: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
-
+  const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    (thisCaseId: string) => {
-      let didCancel = false;
-      const abortCtrl = new AbortController();
+    (thisCaseId: string, thisSubCaseId?: string) => {
       const fetchData = async () => {
-        setCaseUserActionsState({
-          ...caseUserActionsState,
-          isLoading: true,
-        });
         try {
-          const response = await getCaseUserActions(thisCaseId, abortCtrl.signal);
-          if (!didCancel) {
+          setCaseUserActionsState({
+            ...caseUserActionsState,
+            isLoading: true,
+          });
+
+          const response = await (thisSubCaseId
+            ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.current.signal)
+            : getCaseUserActions(thisCaseId, abortCtrl.current.signal));
+          if (!didCancel.current) {
             // Attention Future developer
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
@@ -265,7 +268,11 @@ export const useGetCaseUserActions = (
               ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
               : [];
 
-            const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
+            const caseUserActions = !isEmpty(response)
+              ? thisSubCaseId
+                ? response
+                : response.slice(1)
+              : [];
             setCaseUserActionsState({
               caseUserActions,
               ...getPushedInfo(caseUserActions, caseConnectorId),
@@ -275,7 +282,7 @@ export const useGetCaseUserActions = (
             });
           }
         } catch (error) {
-          if (!didCancel) {
+          if (!didCancel.current) {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -292,21 +299,24 @@ export const useGetCaseUserActions = (
           }
         }
       };
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
       fetchData();
-      return () => {
-        didCancel = true;
-        abortCtrl.abort();
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseUserActionsState, caseConnectorId]
+    [caseConnectorId]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId);
+      fetchCaseUserActions(caseId, subCaseId);
     }
+
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, caseConnectorId]);
+  }, [caseId, subCaseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

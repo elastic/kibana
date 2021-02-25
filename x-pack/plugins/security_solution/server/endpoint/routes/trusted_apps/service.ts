@@ -6,7 +6,7 @@
  */
 
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 
 import {
   DeleteTrustedAppsRequestParams,

@@ -11,22 +11,30 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export function getErrorGroupSample({
+  environment,
+  kuery,
   serviceName,
   groupId,
   setup,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   groupId: string;
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_error_group_sample', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const params = {
       apm: {
@@ -39,8 +47,9 @@ export function getErrorGroupSample({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [ERROR_GROUP_ID]: groupId } },
-              { range: rangeFilter(start, end) },
-              ...esFilter,
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
             ],
             should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
           },

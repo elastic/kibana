@@ -35,14 +35,18 @@ import { CredentialsList } from './credentials_list';
 import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
-  const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
+  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   );
 
-  const { dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
+  const { meta, dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
   useEffect(() => {
-    initializeCredentialsData();
+    fetchCredentials();
+  }, [meta.page.current]);
+
+  useEffect(() => {
+    fetchDetails();
     return () => {
       resetCredentials();
     };

@@ -144,8 +144,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         jest.fn().mockRejectedValueOnce(new Error('Error getting repository')),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -221,8 +220,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         mockSnapshotGetEsResponse,
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
