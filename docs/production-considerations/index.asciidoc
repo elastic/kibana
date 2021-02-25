@@ -1,4 +1,5 @@
-include::task-manager.asciidoc[]
+include::production.asciidoc[]
+include::alerting-production-considerations.asciidoc[]
 include::task-manager-production-considerations.asciidoc[]
 include::task-manager-health-monitoring.asciidoc[]
 include::task-manager-troubleshooting.asciidoc[]

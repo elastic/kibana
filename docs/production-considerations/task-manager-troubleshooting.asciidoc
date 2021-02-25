@@ -12,9 +12,9 @@ If your problem isn’t described here, please review open issues in the followi
 
 Have a question? Contact us in the [https://discuss.elastic.co/](discuss forum).
 
-
+[float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
-=== Tasks with Small Schedule Intervals Run Late
+=== Tasks with small schedule intervals run late
 
 *Symptom*:
 
@@ -26,7 +26,7 @@ Task Manager polls for tasks at the cadence specified by the <<task-manager-sett
 
 This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
 
-
+[float]
 [[task-manager-health-tasks-run-late]]
 === Tasks Run Late
 
@@ -54,7 +54,7 @@ _Drift_ is often addressed by adjusting the scaling the deployment to better sui
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
-=== Diagnosing A Root Cause For Drift
+=== Diagnosing a root cause for drift
 
 The following is a step-by-step guide to identifying a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
