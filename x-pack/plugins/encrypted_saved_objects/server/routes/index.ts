@@ -7,9 +7,9 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { IRouter, Logger } from 'src/core/server';
+
 import { ConfigType } from '../config';
 import { EncryptionKeyRotationService } from '../crypto';
-
 import { defineKeyRotationRoutes } from './key_rotation';
 
 /**

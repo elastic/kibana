@@ -6,28 +6,27 @@
  */
 
 import {
+  ISavedObjectTypeRegistry,
   SavedObject,
+  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsOpenPointInTimeOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsRemoveReferencesToOptions,
-  ISavedObjectTypeRegistry,
   SavedObjectsRemoveReferencesToResponse,
 } from 'src/core/server';
+
 import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LegacyAuditLogger, AuthenticatedUser } from '../../../security/server';
-import { SavedObjectDescriptor, descriptorToArray } from '../crypto';
+import { AuthenticatedUser, LegacyAuditLogger } from '../../../security/server';
+import { descriptorToArray, SavedObjectDescriptor } from '../crypto';
 
 /**
  * Represents all audit events the plugin can log.

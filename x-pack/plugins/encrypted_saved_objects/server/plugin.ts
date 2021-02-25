@@ -6,19 +6,21 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
-import { Logger, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+
 import { SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { ConfigType } from './config';
+import { CreateEncryptedSavedObjectsMigrationFn, getCreateMigration } from './create_migration';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
   EncryptionKeyRotationService,
 } from './crypto';
-import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { setupSavedObjects, ClientInstanciator } from './saved_objects';
-import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { defineRoutes } from './routes';
+import { ClientInstanciator, setupSavedObjects } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;

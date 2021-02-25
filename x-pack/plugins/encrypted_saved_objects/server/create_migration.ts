@@ -6,11 +6,12 @@
  */
 
 import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationFn,
   SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
+
+import { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (

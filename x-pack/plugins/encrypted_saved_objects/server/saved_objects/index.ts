@@ -7,13 +7,14 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  StartServicesAccessor,
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsServiceSetup,
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
+  StartServicesAccessor,
 } from 'src/core/server';
+
 import { SecurityPluginSetup } from '../../../security/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';

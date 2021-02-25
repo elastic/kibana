@@ -6,10 +6,6 @@
  */
 
 import { SavedObject, SavedObjectsClientContract, SavedObjectsServiceStart } from 'src/core/server';
-import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
-import { EncryptionKeyRotationService } from './encryption_key_rotation_service';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
-
 import {
   coreMock,
   httpServerMock,
@@ -17,6 +13,10 @@ import {
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
 } from 'src/core/server/mocks';
+
+import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+import { EncryptionKeyRotationService } from './encryption_key_rotation_service';
 import { encryptedSavedObjectsServiceMock } from './index.mock';
 
 function getMockSavedObject(savedObject?: Partial<SavedObject<any>>) {

@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
+
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 

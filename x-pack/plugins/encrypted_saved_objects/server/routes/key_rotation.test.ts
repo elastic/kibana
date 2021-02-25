@@ -13,11 +13,11 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from 'src/core/server';
-import { defineKeyRotationRoutes } from './key_rotation';
-
 import { httpServerMock } from 'src/core/server/mocks';
-import { routeDefinitionParamsMock } from './index.mock';
+
 import { EncryptionKeyRotationService } from '../crypto';
+import { routeDefinitionParamsMock } from './index.mock';
+import { defineKeyRotationRoutes } from './key_rotation';
 
 describe('Key rotation routes', () => {
   let router: jest.Mocked<IRouter>;
