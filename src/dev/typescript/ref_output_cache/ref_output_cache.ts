@@ -76,6 +76,20 @@ export class RefOutputCache {
    * written to the directory.
    */
   async initCaches() {
+    const outdatedOutDirs = (
+      await concurrentMap(100, this.outDirs, async (outDir) => ({
+        path: outDir,
+        outdated: !(await matchMergeBase(outDir, this.mergeBase)),
+      }))
+    )
+      .filter((o) => o.outdated)
+      .map((o) => o.path);
+
+    if (!outdatedOutDirs.length) {
+      this.log.debug('all outDirs have a recent cache');
+      return;
+    }
+
     const archive =
       this.archives.get(this.mergeBase) ??
       (await this.archives.getFirstAvailable([
@@ -84,20 +98,6 @@ export class RefOutputCache {
       ]));
 
     if (!archive) {
-      return;
-    }
-
-    const outdatedOutDirs = (
-      await concurrentMap(100, this.outDirs, async (outDir) => ({
-        path: outDir,
-        outdated: !(await matchMergeBase(outDir, archive.sha)),
-      }))
-    )
-      .filter((o) => o.outdated)
-      .map((o) => o.path);
-
-    if (!outdatedOutDirs.length) {
-      this.log.debug('all outDirs have the most recent cache');
       return;
     }
 
@@ -132,7 +132,7 @@ export class RefOutputCache {
       this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
       await del(outDir);
       await unzip(Path.resolve(tmpDir, cacheName), outDir);
-      await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), archive.sha);
+      await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), this.mergeBase);
     });
   }
 
