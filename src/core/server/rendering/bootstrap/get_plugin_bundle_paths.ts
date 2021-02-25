@@ -32,7 +32,7 @@ export const getPluginsBundlePaths = ({
         bundlePath: `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`,
       });
 
-      readPlugins(uiPlugins.internal.get(pluginId)!.requiredBundles);
+      readPlugins(uiPlugins.internal.get(pluginId)?.requiredBundles ?? []);
     }
   };
 
