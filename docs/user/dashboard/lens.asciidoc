@@ -22,6 +22,52 @@ image::images/lens_data_info.png[Data summary window with Other]
 
 NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
 
+
+[float]
+[[drag-and-drop-keyboard-navigation]]
+=== Create your visualizations faster with keyboard navigation
+
+Lens has a fully accessible, continuously improved drag and drop system. By using keyboard navigation instead of a mouse you can significantly speed up your work.
+
+[role="screenshot"]
+image::images/lens_drag_drop_1.png[Presented Lens drag and drop]
+
+[float]
+[[drag-and-drop-keyboard-navigation-drop-a-field]]
+==== Drop a field to the workspace or configuration panel
+
+. Set a focus on the chosen field. 
+. Press space to start a drag.
+. Using left and right arrows, select a drop target. 
+. Press space to confirm.
+
+[float]
+[[drag-and-drop-keyboard-navigation-duplicate-an-operation]]
+==== Duplicate an existing operation
+
+Creating a few similar operations can be repetetive and time-consuming. A good usecase would be a need for creating multiple percentiles. Instead of configuring each metric from scratch, you can duplicate it – just drag a metric to duplicate and drop it into an empty dimension. For keyboard navigation:
+
+. Set focus on an item you want to duplicate.
+. Press space to start a drag.
+. Using left and right arrow keys, choose as a target a button `Drop a field or click to add` in the same group.
+. Confirm with space.
+
+[role="screenshot"]
+image::images/lens_drag_drop_2.gif[Using drag and drop to duplicate an item]
+
+[float]
+[[drag-and-drop-keyboard-navigation-reorder-elements]]
+==== Reorder elements in the group
+To reorder the element in the group, simply pick up the item and move it into desired place.
+
+. Set focus on the item.
+. Press space to start a drag.
+. Use up and down arrow keys to reorder.
+. Press space to confirm. 
+
+[role="screenshot"]
+image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
+
 [float]
 [[lens-faq]]
 ==== Frequently asked questions
@@ -112,4 +158,3 @@ At the moment it is not possible to inspect the Elasticsearch query for a *Lens*
 // ===== What {es} aggregations are renamed as Lens functions?
 
 // Show a table here like the aggregation-reference in Kibana guide
-
