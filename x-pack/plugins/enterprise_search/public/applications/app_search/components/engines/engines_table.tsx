@@ -7,12 +7,13 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiBasicTable, EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n/react';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
@@ -31,6 +32,7 @@ interface EnginesTableProps {
     hidePerPageOptions: boolean;
   };
   onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
+  onDeleteEngine(engineName: string): void;
 }
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
@@ -40,15 +42,15 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   onChange,
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
 
-  const engineLinkProps = (engineName: string) => ({
-    to: generateEncodedPath(ENGINE_PATH, { engineName }),
-    onClick: () =>
-      sendAppSearchTelemetry({
-        action: 'clicked',
-        metric: 'engine_table_link',
-      }),
-  });
+  const generteEncodedEnginePath = (engineName: string) =>
+    generateEncodedPath(ENGINE_PATH, { engineName });
+  const sendEngineTableLinkClickTelemetry = () =>
+    sendAppSearchTelemetry({
+      action: 'clicked',
+      metric: 'engine_table_link',
+    });
 
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
@@ -57,7 +59,11 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo
+          data-test-subj="engineNameLink"
+          to={generteEncodedEnginePath(name)}
+          onClick={sendEngineTableLinkClickTelemetry}
+        >
           {name}
         </EuiLinkTo>
       ),
@@ -120,24 +126,34 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       truncateText: true,
     },
     {
-      field: 'name',
       name: i18n.translate(
         'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions',
         {
           defaultMessage: 'Actions',
         }
       ),
-      dataType: 'string',
-      render: (name: string) => (
-        <EuiLinkTo {...engineLinkProps(name)}>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
-            defaultMessage="Manage"
-          />
-        </EuiLinkTo>
-      ),
-      align: 'right',
-      width: '100px',
+      actions: [
+        {
+          name: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage',
+            {
+              defaultMessage: 'Manage',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manageDescription',
+            {
+              defaultMessage: 'Manage this engine',
+            }
+          ),
+          type: 'button',
+          color: 'primary',
+          onClick: (engineDetails) => {
+            sendEngineTableLinkClickTelemetry();
+            navigateToUrl(generteEncodedEnginePath(engineDetails.name));
+          },
+        },
+      ],
     },
   ];
 
