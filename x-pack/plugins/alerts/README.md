@@ -133,11 +133,12 @@ Currently most of the alerts are free features. But some alert types are subscri
 
 ## Documentation
 
-You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the directory [`docs/user/alerting/alert-types`](../../../docs/user/alerting/alert-types).
+You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the proper application directory.
 
 ## Tests
 
-The alert type should have both jest tests and functional tests.
+The alert type should have jest tests and optionaly functional tests. 
+In the the tests we recomend to test the expected alert execution result with a different input params, the structure of the created alert and the params validation. The rest will be guaranteed as a framework functionality.
 
 ### Example
 
