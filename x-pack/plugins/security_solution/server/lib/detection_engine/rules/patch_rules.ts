@@ -7,7 +7,7 @@
 
 import { defaults } from 'lodash/fp';
 import { validate } from '../../../../common/validate';
-import { PartialAlert } from '../../../../../alerts/server';
+import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';

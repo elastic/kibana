@@ -17,7 +17,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { BaseHit, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';

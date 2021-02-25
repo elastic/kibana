@@ -27,7 +27,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { pick } from 'lodash';
-import { AlertActionParam } from '../../../../../alerts/common';
+import { AlertActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
   AlertAction,

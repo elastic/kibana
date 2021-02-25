@@ -39,7 +39,7 @@ import {
 } from './index_threshold_api';
 import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {

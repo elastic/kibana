@@ -40,7 +40,7 @@ import {
   DEFAULT_HIDDEN_ACTION_TYPES,
   DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
 } from '../../../common/constants';
-import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
+import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 

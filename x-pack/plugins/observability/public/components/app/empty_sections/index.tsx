@@ -8,7 +8,7 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { Alert } from '../../../../../alerts/common';
+import { Alert } from '../../../../../alerting/common';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
 import { usePluginContext } from '../../../hooks/use_plugin_context';

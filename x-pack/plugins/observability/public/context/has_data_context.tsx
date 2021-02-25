@@ -7,7 +7,7 @@
 
 import { uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { Alert } from '../../../alerts/common';
+import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';

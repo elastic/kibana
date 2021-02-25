@@ -11,7 +11,7 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ShardError } from '../../types';
 import { buildRuleMessageFactory } from './rule_messages';
 

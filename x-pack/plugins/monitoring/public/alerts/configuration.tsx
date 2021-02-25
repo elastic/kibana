@@ -12,7 +12,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
-import { BASE_ALERT_API_PATH } from '../../../alerts/common';
+import { BASE_ALERT_API_PATH } from '../../../alerting/common';
 
 interface Props {
   alert: CommonAlert;

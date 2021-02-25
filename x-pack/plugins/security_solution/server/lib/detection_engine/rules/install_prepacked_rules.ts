@@ -6,8 +6,8 @@
  */
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { Alert, AlertTypeParams } from '../../../../../alerts/common';
-import { AlertsClient } from '../../../../../alerts/server';
+import { Alert, AlertTypeParams } from '../../../../../alerting/common';
+import { AlertsClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 

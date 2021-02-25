@@ -13,7 +13,7 @@ import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
 import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
-import { Alert, AlertTypeParams } from '../../../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../../../alerting/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 

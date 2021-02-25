@@ -10,7 +10,7 @@ import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
-import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import {
   Alert,

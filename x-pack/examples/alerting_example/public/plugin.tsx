@@ -11,7 +11,7 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../../src/core/public';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerts/public';
+import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
-import { ActionGroup } from '../../alerts/common';
+import { ActionGroup } from '../../alerting/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
 
 export enum AlertType {

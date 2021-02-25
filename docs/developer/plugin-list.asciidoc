@@ -297,8 +297,8 @@ which will load the visualization's editor.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
-|The Kibana alerting plugin provides a common place to set up alerts. You can:
+|{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
+|The Kibana alerting plugin provides a common place to set up alerting.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]

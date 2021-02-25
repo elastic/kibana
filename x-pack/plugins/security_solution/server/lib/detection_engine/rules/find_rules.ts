@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindResult } from '../../../../../alerts/server';
+import { FindResult } from '../../../../../alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams } from '../types';
 import { FindRuleOptions } from './types';

@@ -16,7 +16,7 @@ import {
   AlertNavigation,
   AlertStateNavigation,
   AlertUrlNavigation,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { Alert } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 

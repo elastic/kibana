@@ -16,7 +16,7 @@ import { Section, routeToAlertDetails } from './constants';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PluginStartContract as AlertingStart } from '../../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';

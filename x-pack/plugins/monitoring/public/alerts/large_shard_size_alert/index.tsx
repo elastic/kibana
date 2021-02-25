@@ -14,7 +14,7 @@ import {
   ALERT_DETAILS,
   ALERT_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 interface ValidateOptions extends AlertTypeParams {
   indexPattern: string;

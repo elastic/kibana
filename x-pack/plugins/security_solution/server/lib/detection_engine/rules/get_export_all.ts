@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsClient } from '../../../../../alerts/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';

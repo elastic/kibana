@@ -68,7 +68,7 @@ Note that the `manage_own_api_key` cluster privilege is not enough - it can be u
 
 ### Methods
 
-**server.newPlatform.setup.plugins.alerts.registerType(options)**
+**server.newPlatform.setup.plugins.alerting.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -242,7 +242,7 @@ const myAlertType: AlertType<
 	producer: 'alerting',
 };
 
-server.newPlatform.setup.plugins.alerts.registerType(myAlertType);
+server.newPlatform.setup.plugins.alerting.registerType(myAlertType);
 ```
 
 ## Role Based Access-Control

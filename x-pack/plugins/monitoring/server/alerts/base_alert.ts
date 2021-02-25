@@ -13,8 +13,8 @@ import {
   AlertInstance,
   AlertsClient,
   AlertServices,
-} from '../../../alerts/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+} from '../../../alerting/server';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -34,7 +34,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 type ExecutedState =

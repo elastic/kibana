@@ -24,7 +24,7 @@ import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '..
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
+import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,

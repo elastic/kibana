@@ -19,7 +19,7 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
+import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
 import {
   ALERT_LICENSE_EXPIRATION,
   LEGACY_ALERT_DETAILS,
@@ -27,7 +27,7 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';

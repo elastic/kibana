@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { RecoveredActionGroup } from '../../../../../plugins/alerts/common';
+import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {

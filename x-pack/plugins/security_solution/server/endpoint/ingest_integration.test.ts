@@ -81,7 +81,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts,
+        endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient
       );

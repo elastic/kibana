@@ -9,7 +9,7 @@ import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import {
   getGapBetweenRuns,

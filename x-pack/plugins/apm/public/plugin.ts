@@ -27,7 +27,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerts/public';
+} from '../../alerting/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Alert } from '../../../../../alerts/common';
+import { Alert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams, RuleNotificationAlertTypeParams } from './types';
 import { addTags } from './add_tags';

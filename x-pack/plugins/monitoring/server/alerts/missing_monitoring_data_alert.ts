@@ -17,7 +17,7 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
@@ -25,8 +25,8 @@ import {
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';

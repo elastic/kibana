@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
-  "requiredPlugins": ["alerts", "triggersActionsUi", "features"],
+  "requiredPlugins": ["alerting", "triggersActionsUi", "features"],
   "server": true,
   "ui": true
 }

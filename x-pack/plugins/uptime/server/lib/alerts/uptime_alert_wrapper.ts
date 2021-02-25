@@ -10,7 +10,7 @@ import {
   AlertExecutorOptions,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { createUptimeESClient, UptimeESClient } from '../lib';

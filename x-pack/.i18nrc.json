@@ -3,7 +3,7 @@
   "paths": {
     "xpack.actions": "plugins/actions",
     "xpack.uiActionsEnhanced": "plugins/ui_actions_enhanced",
-    "xpack.alerts": "plugins/alerts",
+    "xpack.alerting": "plugins/alerting",
     "xpack.eventLog": "plugins/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
     "xpack.apm": "plugins/apm",

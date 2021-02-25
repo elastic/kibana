@@ -23,7 +23,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { mockLogger, sampleWrappedThresholdSignalHit } from './__mocks__/es_results';
 import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
 import { buildRuleMessageFactory } from './rule_messages';

@@ -7,7 +7,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerts/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
@@ -15,7 +15,7 @@ import { defineAlertTypes } from './alert_types';
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerts: AlertingPluginSetup;
+  alerting: AlertingPluginSetup;
 }
 
 export interface FixtureStartDeps {

@@ -6,7 +6,7 @@
  */
 
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { AlertsClient } from '../../../../alerts/server';
+import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import {
   CommonAlertStatus,

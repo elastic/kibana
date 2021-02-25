@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerts/common';
+import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerting/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';

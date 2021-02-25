@@ -17,7 +17,7 @@ import { ValidationResult } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 

@@ -20,7 +20,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
-import { Alert } from '../../../../../../alerts/common';
+import { Alert } from '../../../../../../alerting/common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { SectionContainer } from '..';
 

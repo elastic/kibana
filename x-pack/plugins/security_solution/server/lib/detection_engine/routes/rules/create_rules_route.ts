@@ -21,7 +21,7 @@ import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
+import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,

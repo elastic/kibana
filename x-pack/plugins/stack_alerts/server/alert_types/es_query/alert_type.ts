@@ -17,7 +17,7 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerts/server';
+import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 

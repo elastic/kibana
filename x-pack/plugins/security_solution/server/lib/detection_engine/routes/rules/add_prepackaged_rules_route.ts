@@ -33,7 +33,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 import { transformError, buildSiemResponse } from '../utils';
-import { AlertsClient } from '../../../../../../alerts/server';
+import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';

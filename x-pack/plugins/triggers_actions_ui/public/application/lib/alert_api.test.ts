@@ -30,7 +30,7 @@ import {
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 const http = httpServiceMock.createStartContract();
 

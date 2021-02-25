@@ -16,7 +16,7 @@ import {
   AlertInstanceContext,
   AlertTypeState,
   AlertTypeParams,
-} from '../../../../../../../plugins/alerts/server';
+} from '../../../../../../../plugins/alerting/server';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
