@@ -48,7 +48,11 @@ import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
+import {
+  ENTRIES,
+  ENTRIES_WITH_IDS,
+  OLD_DATE_RELATIVE_TO_DATE_NOW,
+} from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -56,6 +60,10 @@ import {
   OsTypeArray,
 } from '../../../../../lists/common/schemas';
 import { IIndexPattern } from 'src/plugins/data/common';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -229,9 +237,22 @@ describe('Exception helpers', () => {
   });
 
   describe('#filterExceptionItems', () => {
+    // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+    // for context around the temporary `id`
+    test('it correctly validates entries that include a temporary `id`', () => {
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        { ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
+    });
+
     test('it removes entry items with "value" of "undefined"', () => {
       const { entries, ...rest } = getExceptionListItemSchemaMock();
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -250,6 +271,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "value" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -270,6 +292,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -290,6 +313,7 @@ describe('Exception helpers', () => {
     test('it removes "match_any" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH_ANY,
         operator: OperatorEnum.INCLUDED,
@@ -313,6 +337,52 @@ describe('Exception helpers', () => {
         field: '',
         type: OperatorTypeEnum.NESTED,
         entries: [getEntryMatchMock()],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes the "nested" entry entries with "value" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [getEntryMatchMock(), { ...getEntryMatchMock(), value: '' }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            ...getExceptionListItemSchemaMock().entries,
+            { ...mockEmptyException, entries: [getEntryMatchMock()] },
+          ],
+        },
+      ]);
+    });
+
+    test('it removes the "nested" entry item if all its entries are invalid', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: 'host.name',
+        type: OperatorTypeEnum.NESTED,
+        entries: [{ ...getEntryMatchMock(), value: '' }],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema

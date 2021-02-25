@@ -32,6 +32,7 @@ import {
   comment,
   entry,
   entriesNested,
+  nestedEntryItem,
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
@@ -43,6 +44,7 @@ import { validate } from '../../../../common/validate';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { addIdToItem, removeIdFromItem } from '../../../../common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -149,12 +151,12 @@ export const getNewExceptionItem = ({
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
-      {
+      addIdToItem({
         field: '',
         operator: 'included',
         type: 'match',
         value: '',
-      },
+      }),
     ],
     item_id: undefined,
     list_id: listId,
@@ -173,16 +175,37 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => {
-        const [validatedEntry] = validate(t, entry);
-        const [validatedNestedEntry] = validate(t, entriesNested);
+      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
 
-        if (validatedEntry != null || validatedNestedEntry != null) {
-          return true;
+        if (entriesNested.is(strippedSingleEntry)) {
+          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+            return validatedNestedEntry != null;
+          });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
+
+          const [validatedNestedEntry] = validate(
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
+            entriesNested
+          );
+
+          if (validatedNestedEntry != null) {
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
+          }
+          return nestedAcc;
+        } else {
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
+
+          if (validatedEntry != null) {
+            return [...nestedAcc, singleEntry];
+          }
+          return nestedAcc;
         }
-
-        return false;
-      });
+      }, []);
 
       const item = { ...exception, entries };
 
@@ -401,7 +424,7 @@ export const getCodeSignatureValue = (
     return codeSignature.map((signature) => {
       return {
         subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted ?? '',
+        trusted: signature.trusted.toString() ?? '',
       };
     });
   } else {

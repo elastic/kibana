@@ -135,7 +135,7 @@ export function ApmPanel(props) {
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
                         defaultMessage="APM servers: {apmsTotal}"
-                        values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
+                        values={{ apmsTotal }}
                       />
                     </EuiLink>
                   </h3>
