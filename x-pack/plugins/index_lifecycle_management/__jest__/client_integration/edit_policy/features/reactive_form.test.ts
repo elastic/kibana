@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { DEFAULT_POLICY } from '../constants';
+import { getDefaultHotPhasePolicy } from '../constants';
 
 describe('<EditPolicy /> reactive form', () => {
   let testBed: EditPolicyTestBed;
@@ -24,7 +24,7 @@ describe('<EditPolicy /> reactive form', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
     httpRequestsMockHelpers.setListNodes({
       nodesByRoles: { data: ['node1'] },
       nodesByAttributes: { 'attribute:true': ['node1'] },
@@ -41,40 +41,6 @@ describe('<EditPolicy /> reactive form', () => {
 
     const { component } = testBed;
     component.update();
-  });
-
-  describe('rollover', () => {
-    test('shows forcemerge when rollover enabled', async () => {
-      const { actions } = testBed;
-      expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
-    });
-    test('hides forcemerge when rollover is disabled', async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
-      expect(actions.hot.forceMergeFieldExists()).toBeFalsy();
-    });
-
-    test('shows shrink input when rollover enabled', async () => {
-      const { actions } = testBed;
-      expect(actions.hot.shrinkExists()).toBeTruthy();
-    });
-    test('hides shrink input when rollover is disabled', async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
-      expect(actions.hot.shrinkExists()).toBeFalsy();
-    });
-    test('shows readonly input when rollover enabled', async () => {
-      const { actions } = testBed;
-      expect(actions.hot.readonlyExists()).toBeTruthy();
-    });
-    test('hides readonly input when rollover is disabled', async () => {
-      const { actions } = testBed;
-      await actions.hot.toggleDefaultRollover(false);
-      await actions.hot.toggleRollover(false);
-      expect(actions.hot.readonlyExists()).toBeFalsy();
-    });
   });
 
   describe('timing', () => {
