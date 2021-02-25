@@ -72,14 +72,12 @@ export async function installLatestPackage(options: {
 
 export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser,
   esClient: ElasticsearchClient
 ): Promise<Installation[]> {
   const installations = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
     packagesToUpgrade: Object.values(defaultPackages),
-    callCluster,
     esClient,
   });
 
@@ -127,7 +125,6 @@ export async function handleInstallPackageFailure({
   pkgName,
   pkgVersion,
   installedPkg,
-  callCluster,
   esClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -135,7 +132,6 @@ export async function handleInstallPackageFailure({
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
 }) {
   if (error instanceof IngestManagerError) {
@@ -184,7 +180,6 @@ export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageEr
 
 interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
   esClient: ElasticsearchClient;
   installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
   latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
@@ -192,7 +187,6 @@ interface UpgradePackageParams {
 }
 export async function upgradePackage({
   savedObjectsClient,
-  callCluster,
   esClient,
   installedPkg,
   latestPkg,
@@ -224,7 +218,6 @@ export async function upgradePackage({
         pkgName: latestPkg.name,
         pkgVersion: latestPkg.version,
         installedPkg,
-        callCluster,
         esClient,
       });
       return { name: pkgToUpgrade, error: installFailed };

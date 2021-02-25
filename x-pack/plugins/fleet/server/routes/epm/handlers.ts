@@ -224,7 +224,6 @@ export const installPackageFromRegistryHandler: RequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
@@ -249,7 +248,6 @@ export const installPackageFromRegistryHandler: RequestHandler<
       pkgName,
       pkgVersion,
       installedPkg,
-      callCluster,
       esClient,
     });
 
@@ -278,11 +276,9 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
-    callCluster,
     esClient,
     packagesToUpgrade: request.body.packages,
   });

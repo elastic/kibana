@@ -63,7 +63,7 @@ async function createSetupSideEffects(
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
-    ensureInstalledDefaultPackages(soClient, callCluster, esClient),
+    ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     isFleetServerEnabled
