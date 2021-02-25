@@ -225,6 +225,9 @@ export class BaseAlert {
   }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
     state: ExecutedState;
   }): Promise<any> {
+    if (!this.rawAlert?.id) {
+      return Promise.resolve();
+    }
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );

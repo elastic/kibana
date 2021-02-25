@@ -46,7 +46,8 @@ export async function fetchStatus(
       }
       return accum;
     }, []);
-    byType[alertTypeId] = result;
+    const key = `${alertTypeId}:${id}`;
+    byType[key] = result;
   });
 
   await Promise.all(promises);

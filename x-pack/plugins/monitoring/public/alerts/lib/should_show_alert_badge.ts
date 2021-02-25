@@ -17,6 +17,20 @@ export function shouldShowAlertBadge(
   if (!alerts) {
     return false;
   }
-  const inSetupMode = isInSetupMode(context);
-  return inSetupMode || alertTypeIds.find((name) => alerts[name] && alerts[name].states.length);
+
+  if (isInSetupMode(context)) {
+    return true;
+  }
+
+  for (const key in alerts) {
+    if (!alerts.hasOwnProperty(key)) {
+      continue;
+    }
+    const alert = alerts[key];
+    if (alertTypeIds.indexOf(alert.rawAlert.alertTypeId) >= 0 && alert.states.length) {
+      return true;
+    }
+  }
+
+  return false;
 }
