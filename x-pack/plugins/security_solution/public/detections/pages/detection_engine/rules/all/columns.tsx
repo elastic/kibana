@@ -67,6 +67,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
+    'data-test-subj': 'duplicateRuleAction',
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: !actionsPrivileges ? (
