@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export function queryDatatable(datatable, query) {
+import type { Datatable } from '../../../types';
+export function queryDatatable(datatable: Datatable, query: Record<string, any>) {
   if (query.size) {
     datatable = {
       ...datatable,
@@ -14,17 +14,17 @@ export function queryDatatable(datatable, query) {
   }
 
   if (query.and) {
-    query.and.forEach((filter) => {
+    query.and.forEach((filter: any) => {
       // handle exact matches
       if (filter.filterType === 'exactly') {
-        datatable.rows = datatable.rows.filter((row) => {
+        datatable.rows = datatable.rows.filter((row: any) => {
           return row[filter.column] === filter.value;
         });
       }
 
       // handle time filters
       if (filter.filterType === 'time') {
-        const columnNames = datatable.columns.map((col) => col.name);
+        const columnNames = datatable.columns.map((col: any) => col.name);
 
         // remove row if no column match
         if (!columnNames.includes(filter.column)) {
@@ -32,7 +32,7 @@ export function queryDatatable(datatable, query) {
           return;
         }
 
-        datatable.rows = datatable.rows.filter((row) => {
+        datatable.rows = datatable.rows.filter((row: any) => {
           const fromTime = new Date(filter.from).getTime();
           const toTime = new Date(filter.to).getTime();
           const rowTime = new Date(row[filter.column]).getTime();
