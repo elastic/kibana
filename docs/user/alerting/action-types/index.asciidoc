@@ -8,7 +8,7 @@ The index action type will index a document into {es}. See also the {ref}/indice
 [[index-connector-configuration]]
 ==== Connector configuration
 
-Index connectors have the following configuration properties:
+Index connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 Index::     The {es} index to be written to.
@@ -24,35 +24,26 @@ Execution time field::  This field will be automatically set to the time the ale
  my-index:
    name: action-type-index
    actionTypeId: .index
-   config:
+   config: <1>
      index: .kibana
      refresh: true
      executionTimeField: somedate
 --
 
-[[index-connector-config-properties]]
-**`config`** defines the action type specific to the configuration and contains the following properties:
-
-[cols="2*<"]
-|===
-
-|`index`
-| A string that corresponds to *Index*.
-
-|`refresh`
-| A boolean that corresponds to *Refresh*. Defaults to `false`.
-
-|`executionTimeField`
-| A string that corresponds to *Execution time field*.
-
-|===
-
+<1> Config defines information for the action type and contains the following properties.
++
+`index`:: A string that corresponds to *Index*.
++
+`refresh`:: A boolean that corresponds to *Refresh*. Defaults to `false`.
++
+`executionTimeField`:: A string that corresponds to *Execution time field*.
+'''
 
 [float]
 [[index-action-configuration]]
 ==== Action configuration
 
-Index actions have the following properties:
+Index actions have the following properties.
 
 Document::  The document to index in JSON format.
 

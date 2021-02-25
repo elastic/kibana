@@ -8,7 +8,7 @@ The Jira action type uses the https://developer.atlassian.com/cloud/jira/platfor
 [[jira-connector-configuration]]
 ==== Connector configuration
 
-Jira connectors have the following configuration properties:
+Jira connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       Jira instance URL.
@@ -25,45 +25,32 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
  my-jira:
    name: preconfigured-jira-action-type
    actionTypeId: .jira
-   config:
+   config: <1>
      apiUrl: https://elastic.atlassian.net
      projectKey: ES
-   secrets:
+   secrets: <2>
      email: testuser
      apiToken: tokenkeystorevalue
 --
 
-[[jira-connector-config-properties]]
-**`config`** defines the action type specific to the configuration and contains the following properties:
+<1> Config defines information for the action type and contains the following properties.
++
+`apiUrl`:: An address that corresponds to *URL*.
++
+`projectKey`:: A key that corresponds to *Project Key*.
 
-[cols="2*<"]
-|===
+<2> Secrets defines sensitive information for the action type and contains the following properties.
++
+`email`:: A string that corresponds to *Email*.
++
+`apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+'''
 
-| `apiUrl`
-| An address that corresponds to *URL*.
-
-| `projectKey`
-| A key that corresponds to *Project Key*.
-
-|===
-
-**`secrets`** defines sensitive information for the action type and contains the following properties:
-
-[cols="2*<"]
-|===
-
-| `email`
-| A string that corresponds to *Email*.
-
-| `apiToken`
-| A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-
-|===
-
+[float]
 [[jira-action-configuration]]
 ==== Action configuration
 
-Jira actions have the following configuration properties:
+Jira actions have the following configuration properties.
 
 Subaction::        The subaction to perform: `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, or `getFields`.
 Subaction params:: The parameters of the subaction.

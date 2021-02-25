@@ -8,7 +8,7 @@ The IBM Resilient action type uses the https://developer.ibm.com/security/resili
 [[resilient-connector-configuration]]
 ==== Connector configuration
 
-IBM Resilient connectors have the following configuration properties:
+IBM Resilient connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       IBM Resilient instance URL.
@@ -25,45 +25,32 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
  my-resilient:
    name: preconfigured-resilient-action-type
    actionTypeId: .resilient
-   config:
+   config: <1>
      apiUrl: https://elastic.resilient.net
      orgId: ES
-   secrets:
+   secrets: <2>
      apiKeyId: testuser
      apiKeySecret: tokenkeystorevalue
 --
 
-[[resilient-connector-config-properties]]
-**`config`** defines the action type specific to the configuration and contains the following properties:
+<1> Config defines information for the action type and contains the following properties.
++
+`apiUrl`:: An address that corresponds to *URL*.
++
+`orgId`:: An ID that corresponds to *Organization ID*.
 
-[cols="2*<"]
-|===
+<2> Secrets defines sensitive information for the action type and contains the following properties.
++
+`apiKeyId`:: A string that corresponds to *API key ID*.
++
+`apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+'''
 
-| `apiUrl`
-| An address that corresponds to *URL*.
-
-| `orgId`
-| An ID that corresponds to *Organization ID*.
-
-|===
-
-**`secrets`** defines sensitive information for the action type and contains the following properties:
-
-[cols="2*<"]
-|===
-
-| `apiKeyId`
-| A string that corresponds to *API key ID*.
-
-| `apiKeySecret`
-| A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-
-|===
-
+[float]
 [[resilient-action-configuration]]
 ==== Action configuration
 
-IBM Resilient actions have the following configuration properties:
+IBM Resilient actions have the following configuration properties.
 
 Subaction::        The subaction to perform: `pushToService`, `getFields`, `incidentTypes`, or `severity`.
 Subaction params:: The parameters of the subaction.

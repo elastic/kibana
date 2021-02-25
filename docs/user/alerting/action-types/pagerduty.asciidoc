@@ -129,7 +129,7 @@ This is an irreversible action and impacts all alerts that use this connector.
 [[pagerduty-connector-configuration]]
 ==== Connector configuration
 
-PagerDuty connectors have the following configuration properties:
+PagerDuty connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
@@ -144,38 +144,26 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
  my-pagerduty:
    name: preconfigured-pagerduty-action-type
    actionTypeId: .pagerduty
-   config:
+   config: <1>
      apiUrl: https://test.host
-   secrets:
+   secrets: <2>
      routingKey: testroutingkey
 --
 
-[[pagerduty-connector-config-properties]]
-**`config`** defines the action type specific to the configuration and contains the following properties:
+<1> Config defines information for the action type and contains the following properties.
++
+`apiURL`:: A URL string that corresponds to *API URL*.
 
-[cols="2*<"]
-|===
-
-|`apiURL`
-| A URL string that corresponds to *API URL*.
-
-|===
-
-**`secrets`** defines sensitive information for the action type and contains the following properties:
-
-[cols="2*<"]
-|===
-
-|`routingKey`
-| A string that corresponds to *Integration Key*.
-
-|===
+<2> Secrets defines sensitive information for the action type and contains the following properties.
++
+`routingKey`:: A string that corresponds to *Integration Key*.
+'''
 
 [float]
 [[pagerduty-action-configuration]]
 ==== Action configuration
 
-PagerDuty actions have the following properties:
+PagerDuty actions have the following properties.
 
 Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
 Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
