@@ -7,7 +7,7 @@
 
 *Discover* is your window into your data in {es}. *Discover* enables you to 
 quickly search and filter, get information about structure, 
-and navigate to Visualize and Maps to present your data.
+and navigate to *Visualize* and *Maps* to present your data.
 You can customize and save your searches and place them on a Dashboard.
 
 ++++
