@@ -169,7 +169,24 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
           ),
           type: 'icon',
           icon: 'trash',
-          onClick: (engineDetails) => onDeleteEngine(engineDetails.name),
+          onClick: ({ name }) => {
+            if (
+              window.confirm(
+                i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
+                  {
+                    defaultMessage:
+                      'Are you sure you want to permanently delete "{name}" and all of its content?',
+                    values: {
+                      name,
+                    },
+                  }
+                )
+              )
+            ) {
+              onDeleteEngine(name);
+            }
+          },
         },
       ],
     },
