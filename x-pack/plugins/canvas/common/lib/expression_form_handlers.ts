@@ -6,12 +6,14 @@
  */
 
 export class ExpressionFormHandlers {
+  public destroy: () => void;
+  public done: () => void;
   constructor() {
     this.destroy = () => {};
     this.done = () => {};
   }
 
-  onDestroy(fn) {
+  onDestroy(fn: () => void) {
     this.destroy = fn;
   }
 }
