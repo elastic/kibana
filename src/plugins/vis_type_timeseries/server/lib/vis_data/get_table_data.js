@@ -11,7 +11,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
-import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 
@@ -23,7 +23,10 @@ export async function getTableData(req, panel) {
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
-  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
+  const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
+    indexPatternsService: await req.getIndexPatternsService(),
+  });
+
   const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
 
   const calculatePivotLabel = async () => {
