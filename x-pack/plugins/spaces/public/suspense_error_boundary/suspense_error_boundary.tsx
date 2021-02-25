@@ -38,7 +38,6 @@ export class SuspenseErrorBoundary extends Component<PropsWithChildren<Props>, S
       });
       const toastMessage = i18n.translate('xpack.spaces.uiApi.errorBoundaryToastMessage', {
         defaultMessage: 'Reload page to continue.',
-        values: { componentStack },
       });
       notifications.toasts.addError(error, { title, toastMessage });
     }
