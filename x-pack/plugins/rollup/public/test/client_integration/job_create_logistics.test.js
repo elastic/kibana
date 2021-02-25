@@ -181,6 +181,11 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           expect(options).toEqual(['minute', 'hour', 'day', 'week', 'month', 'year']);
         });
 
+        it('should default to "WEEK"', () => {
+          const frequencySelect = find('cronFrequencySelect');
+          expect(frequencySelect.props().value).toBe('WEEK');
+        });
+
         describe('every minute', () => {
           it('should not have any additional configuration', () => {
             changeFrequency('MINUTE');
