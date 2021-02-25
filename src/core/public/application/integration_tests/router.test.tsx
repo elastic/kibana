@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
-import { MockedMounterMap, MockedMounterTuple } from '../types.test';
+import { MockedMounterMap, MockedMounterTuple } from '../mocks';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
 

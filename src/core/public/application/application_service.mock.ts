@@ -18,7 +18,7 @@ import {
   InternalApplicationSetup,
   PublicAppInfo,
 } from './types';
-import { ApplicationServiceContract } from './types.test';
+import { ApplicationServiceContract } from './mocks';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),

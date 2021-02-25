@@ -19,7 +19,7 @@ import { shallow, mount } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { MockLifecycle } from './types.test';
+import { MockLifecycle } from './mocks';
 import { ApplicationService } from './application_service';
 import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
 import { act } from 'react-dom/test-utils';
