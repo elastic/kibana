@@ -56,7 +56,7 @@ const comboBoxOptionToEngineName = (option: EuiComboBoxOptionOption<string>): st
 export const MetaEngineCreation: React.FC = () => {
   const {
     configuredLimits: {
-      engine: { maxEnginesPerMetaEngine } = { maxEnginesPerMetaEngine: Infinity },
+      engine: { maxEnginesPerMetaEngine },
     },
   } = useValues(AppLogic);
 
