@@ -3721,280 +3721,556 @@
           }
         },
         "apiCalls.savedObjectsBulkCreate.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsCreate.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsDelete.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsFind.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsGet.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolve.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsUpdate.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsImport.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsImport.createNewCopiesEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called with the `createNewCopiesEnabled` option."
+          }
         },
         "apiCalls.savedObjectsImport.createNewCopiesEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called without the `createNewCopiesEnabled` option."
+          }
         },
         "apiCalls.savedObjectsImport.overwriteEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called with the `overwrite` option."
+          }
         },
         "apiCalls.savedObjectsImport.overwriteEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called without the `overwrite` option."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called with the `createNewCopiesEnabled` option."
+          }
         },
         "apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called without the `createNewCopiesEnabled` option."
+          }
         },
         "apiCalls.savedObjectsExport.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.default.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.custom.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
         },
         "apiCalls.savedObjectsExport.allTypesSelected.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called with the `createNewCopiesEnabled` option."
+          }
         },
         "apiCalls.savedObjectsExport.allTypesSelected.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called without all types selected."
+          }
         }
       }
     },
