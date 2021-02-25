@@ -93,9 +93,6 @@
     "yarn": "^1.21.1"
   },
   "sideEffects": [
-    "src/plugins/*/public/index.(js|ts)",
-    "x-pack/plugins/*/public/index.(js|ts)",
-
     "packages/kbn-i18n/**",
     "src/plugins/console/**",
     "x-pack/plugins/grokdebugger/**",
