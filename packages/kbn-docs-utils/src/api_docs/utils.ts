@@ -91,9 +91,6 @@ export function getPluginApiDocId(
   const cleanName = id.replace('.', '_');
   if (serviceInfo) {
     const serviceName = getServiceForPath(serviceInfo.apiPath, serviceInfo.directory);
-    log.debug(
-      `Service for path ${serviceInfo.apiPath} and ${serviceInfo.directory} is ${serviceName}`
-    );
     const serviceFolder = serviceInfo.serviceFolders?.find((f) => f === serviceName);
 
     if (serviceFolder) {

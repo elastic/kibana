@@ -47,9 +47,6 @@ export function getArrowFunctionDec(
   anchorLink: AnchorLink,
   log: ToolingLog
 ) {
-  log.debug(
-    `Getting Arrow Function doc def for node ${node.getName()} of kind ${node.getKindName()}`
-  );
   return {
     id: getApiSectionId(anchorLink),
     type: TypeKind.FunctionKind,

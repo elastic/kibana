@@ -97,7 +97,7 @@ export interface Reference {
   pluginId: string;
   scope: ApiScope;
   docId: string;
-  section: string;
+  section?: string;
   text: string;
 }
 
