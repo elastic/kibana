@@ -2,6 +2,10 @@
 [[task-manager-health-monitoring]]
 == Task Manager health monitoring
 
+++++
+<titleabbrev>health monitoring</titleabbrev>
+++++
+
 The {kib} Task Manager has an internal monitoring mechanism keeping track of a variety of metrics which can be consumed via both a health monitoring API, and the {kib} Server Log.
 
 The health monitoring API is designed to be fast, providing a reliable endpoint which can be monitored.

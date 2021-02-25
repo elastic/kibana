@@ -1,6 +1,6 @@
 [role="xpack"]
 [[task-manager]]
-= {kib} Task Manager
+= Background task management
 
 {kib} Task Manager uses background tasks to distribute work across multiple {kib} instances.
 
