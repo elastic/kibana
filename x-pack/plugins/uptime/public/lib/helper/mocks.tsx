@@ -218,6 +218,7 @@ export const mountWithRouterRedux = (
     true,
     options?.storeState
   );
+}
 
 const getHistoryFromUrl = (url: Url) => {
   if (typeof url === 'string') {

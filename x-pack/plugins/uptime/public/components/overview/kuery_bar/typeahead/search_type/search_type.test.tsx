@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../../lib/helper/mocks';
 import { SearchType } from './search_type';
 
 describe('Kuery bar search type', () => {

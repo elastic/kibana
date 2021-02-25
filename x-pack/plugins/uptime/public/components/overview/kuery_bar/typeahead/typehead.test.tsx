@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Typeahead } from './typehead';
-import { render } from '../../../../lib/helper/rtl_helpers';
+import { render } from '../../../../lib/helper/mocks';
 
 describe('Type head', () => {
   jest.useFakeTimers();
