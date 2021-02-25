@@ -9,6 +9,7 @@ import { KibanaRequest, Logger } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginStart } from '../../../spaces/server';
+import { Access } from '../../common/types';
 import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
@@ -19,10 +20,6 @@ interface CheckAccess {
   spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
-}
-export interface Access {
-  hasAppSearchAccess: boolean;
-  hasWorkplaceSearchAccess: boolean;
 }
 
 const ALLOW_ALL_PLUGINS = {
