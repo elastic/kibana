@@ -9,11 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { EngineDetails } from '../engine/types';
+
+import { DELETE_ENGINE_MESSAGE } from './constants';
 
 interface EnginesValues {
   dataLoading: boolean;
@@ -30,7 +32,8 @@ interface EnginesAPIResponse {
   meta: Meta;
 }
 interface EnginesActions {
-  deleteEngine(engineName: string): { engineName: string };
+  deleteEngine(engine: EngineDetails): { engine: EngineDetails };
+  onDeleteEngineSuccess(engine: EngineDetails): { engine: EngineDetails };
   onEnginesLoad({ results, meta }: EnginesAPIResponse): EnginesAPIResponse;
   onMetaEnginesLoad({ results, meta }: EnginesAPIResponse): EnginesAPIResponse;
   onEnginesPagination(page: number): { page: number };
@@ -42,7 +45,8 @@ interface EnginesActions {
 export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
   path: ['enterprise_search', 'app_search', 'engines_logic'],
   actions: {
-    deleteEngine: (engineName) => ({ engineName }),
+    deleteEngine: (engine) => ({ engine }),
+    onDeleteEngineSuccess: (engine) => ({ engine }),
     onEnginesLoad: ({ results, meta }) => ({ results, meta }),
     onMetaEnginesLoad: ({ results, meta }) => ({ results, meta }),
     onEnginesPagination: (page) => ({ page }),
@@ -99,12 +103,18 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    deleteEngine: async ({ engineName }) => {
+    deleteEngine: async ({ engine }) => {
       const { http } = HttpLogic.values;
+      let response;
+
       try {
-        await http.delete(`/api/app_search/engines/${engineName}`);
+        response = await http.delete(`/api/app_search/engines/${engine.name}`);
       } catch (e) {
         flashAPIErrors(e);
+      }
+
+      if (response) {
+        actions.onDeleteEngineSuccess(engine);
       }
     },
     loadEngines: async () => {
@@ -132,6 +142,14 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
         },
       });
       actions.onMetaEnginesLoad(response);
+    },
+    onDeleteEngineSuccess: async ({ engine }) => {
+      setSuccessMessage(DELETE_ENGINE_MESSAGE(engine.name));
+      if (engine.type === 'default') {
+        actions.loadEngines();
+      } else if (engine.type === 'meta') {
+        actions.loadMetaEngines();
+      }
     },
   }),
 });

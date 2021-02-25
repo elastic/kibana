@@ -18,7 +18,7 @@ import { EnginesLogic } from './';
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -125,22 +125,36 @@ describe('EnginesLogic', () => {
 
   describe('listeners', () => {
     describe('deleteEngine', () => {
-      it('should call the engine API endpoint', async () => {
-        http.delete.mockReturnValueOnce(Promise.resolve());
+      it('calls the engine API endpoint then onDeleteEngineSuccess', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve({}));
         mount();
-        EnginesLogic.actions.deleteEngine('test-engine');
+        jest.spyOn(EnginesLogic.actions, 'onDeleteEngineSuccess');
+
+        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
         await nextTick();
 
-        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/test-engine');
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/hello-world');
+        expect(EnginesLogic.actions.onDeleteEngineSuccess).toHaveBeenCalledWith(MOCK_ENGINE);
       });
 
       it('calls flashAPIErrors on API Error', async () => {
         http.delete.mockReturnValueOnce(Promise.reject());
         mount();
-        EnginesLogic.actions.deleteEngine('test-engine');
+
+        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+      });
+
+      it('calls onDeleteEngineSuccess on success', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve());
+        mount();
+
+        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/hello-world');
       });
     });
 
@@ -183,6 +197,34 @@ describe('EnginesLogic', () => {
         expect(EnginesLogic.actions.onMetaEnginesLoad).toHaveBeenCalledWith(
           MOCK_ENGINES_API_RESPONSE
         );
+      });
+    });
+
+    describe('onDeleteEngineSuccess', () => {
+      beforeEach(() => {
+        mount();
+      });
+
+      it('should call setSuccessMessage', () => {
+        EnginesLogic.actions.onDeleteEngineSuccess(MOCK_ENGINE);
+
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('should call loadEngines if engine.type === default', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: 'default' });
+
+        expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
+      });
+
+      it('should call loadMetaEngines if engine.type === meta', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadMetaEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: 'meta' });
+
+        expect(EnginesLogic.actions.loadMetaEngines).toHaveBeenCalled();
       });
     });
   });

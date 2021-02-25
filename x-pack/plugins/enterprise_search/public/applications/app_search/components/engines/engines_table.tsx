@@ -38,7 +38,7 @@ interface EnginesTableProps {
     hidePerPageOptions: boolean;
   };
   onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
-  onDeleteEngine(engineName: string): void;
+  onDeleteEngine(engine: EngineDetails): void;
 }
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
@@ -177,22 +177,22 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         ),
         type: 'icon',
         icon: 'trash',
-        onClick: ({ name }) => {
+        onClick: (engine) => {
           if (
             window.confirm(
               i18n.translate(
                 'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
                 {
                   defaultMessage:
-                    'Are you sure you want to permanently delete "{name}" and all of its content?',
+                    'Are you sure you want to permanently delete "{engineName}" and all of its content?',
                   values: {
-                    name,
+                    engineName: engine.name,
                   },
                 }
               )
             )
           ) {
-            onDeleteEngine(name);
+            onDeleteEngine(engine);
           }
         },
       },
