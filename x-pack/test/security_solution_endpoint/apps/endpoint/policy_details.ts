@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
 
   // Failing: See https://github.com/elastic/kibana/issues/92567
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
     describe('with an invalid policy id', () => {
@@ -460,10 +460,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
 
-        // Since the Save button is on a sticky footer, it first closes out the success toast before saving again
-        await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        // await (await testSubjects.find('ToastExit')).click();
-        // await testSubjects.missingOrFail('policyDetailsSuccessMessage');
+        // Make sure the toast button closes so the save button on the sticky footer is visible
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');

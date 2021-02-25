@@ -70,10 +70,6 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
-      // await browser.scrollTop();
-      await testSubjects.existOrFail('policyDetailsSuccessMessage');
-      // await this.findToastExit + click
-      // await testSubjects.missingOrFail('policyDetailsSuccessMessage');
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
