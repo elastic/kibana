@@ -24,7 +24,6 @@ import {
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
-// @ts-expect-error
 import { injectReferences } from '././../../common/migrations/references';
 
 interface Settings {

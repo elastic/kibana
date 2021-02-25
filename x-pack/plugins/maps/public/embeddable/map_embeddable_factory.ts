@@ -68,7 +68,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const maybeMapByValueInput = state as EmbeddableStateWithType | MapByValueInput;
 
     if ((maybeMapByValueInput as MapByValueInput).attributes !== undefined) {
-      const { references } = extractReferences(maybeMapByValueInput);
+      const { references } = extractReferences({ attributes: maybeMapByValueInput.attributes });
 
       return { state, references };
     }
