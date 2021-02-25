@@ -456,7 +456,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost ? dragging.ghost : undefined;
 
   return (
-    <div className="lnsDragDrop__container">
+    <>
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, classes, className),
@@ -471,7 +471,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
             style: ghost.style,
           })
         : null}
-    </div>
+    </>
   );
 });
 
