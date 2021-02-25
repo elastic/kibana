@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 
 export async function installILMPolicy(paths: string[], esClient: ElasticsearchClient) {
@@ -29,19 +29,8 @@ export async function installILMPolicy(paths: string[], esClient: ElasticsearchC
     })
   );
 }
+
 const isILMPolicy = (path: string) => {
   const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.ilmPolicy;
 };
-export async function policyExists(
-  name: string,
-  callCluster: CallESAsCurrentUser
-): Promise<boolean> {
-  const response = await callCluster('transport.request', {
-    method: 'GET',
-    path: '/_ilm/policy/?filter_path=' + name,
-  });
-
-  // If the response contains a key, it means the policy exists
-  return Object.keys(response).length > 0;
-}
