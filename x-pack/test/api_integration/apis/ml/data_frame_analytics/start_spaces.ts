@@ -85,6 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fail to start job from different space', async () => {
       const body = await runStartRequest(jobIdSpace2, idSpace1, 404);
       expect(body.error).to.eql('Not Found');
+
+      await ml.api.waitForAnalyticsState(jobIdSpace1, DATA_FRAME_TASK_STATE.STOPPED);
     });
   });
 };
