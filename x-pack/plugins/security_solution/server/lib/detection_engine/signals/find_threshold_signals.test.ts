@@ -277,6 +277,7 @@ describe('findThresholdSignals', () => {
       threshold: {
         cardinality_field: 'source.ip',
         cardinality_value: 5,
+        field: [],
         value: 200,
       },
       buildRuleMessage,
