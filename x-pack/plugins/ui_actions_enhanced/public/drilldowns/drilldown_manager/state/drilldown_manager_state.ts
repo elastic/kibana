@@ -42,8 +42,8 @@ export class DrilldownManagerState {
    * available routes are:
    *
    * - `['create']`
-   * - `['create', 'new']`
-   * - `['create', 'clone', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx']`
+   * - `['new']`
+   * - `['new', 'DASHBOARD_TO_DASHBOARD_DRILLDOWN']`
    * - `['manage']`
    * - `['edit', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
    */

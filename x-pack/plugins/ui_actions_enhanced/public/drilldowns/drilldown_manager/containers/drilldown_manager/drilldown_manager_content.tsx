@@ -6,32 +6,12 @@
  */
 
 import * as React from 'react';
-import { EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
-import { FormDrilldownWizard } from '../form_drilldown_wizard';
+import { Tabs } from '../tabs';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 
-  const tabs: EuiTabbedContentProps['tabs'] = [
-    {
-      id: 'create',
-      name: 'Create new',
-      content: <FormDrilldownWizard />,
-    },
-    {
-      id: 'manage',
-      name: 'Manage',
-      content: 'manage...',
-    },
-  ];
-
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      selectedTab={tabs.find(({ id }) => id === route[0])}
-      onTabClick={({ id }) => drilldowns.setRoute([id])}
-    />
-  );
+  return <Tabs />;
 };

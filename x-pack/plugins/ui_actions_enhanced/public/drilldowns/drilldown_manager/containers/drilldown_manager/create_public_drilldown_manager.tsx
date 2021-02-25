@@ -12,6 +12,10 @@ import { DrilldownManager } from './drilldown_manager';
 
 export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
 
+/**
+ * This HOC creates a "public" `<DrilldownManager>` component `PublicDrilldownManagerComponent`,
+ * which can be exported from plugin contract for other plugins to consume.
+ */
 export const createPublicDrilldownManager = (
   dependencies: DrilldownManagerDependencies
 ): PublicDrilldownManagerComponent => {

@@ -84,7 +84,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
-          initialRoute={'/create/new'}
+          initialRoute={'/new'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}

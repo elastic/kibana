@@ -46,11 +46,7 @@ export interface PublicDrilldownManagerProps {
    * Possible values of the route:
    *
    * - `/create` --- opens with "Create new" tab selected.
-   * - `/create/new` --- opens with the "Create new" tab selected showing new
-   *   drilldown form.
-   * - `/create/clone/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` --- opens with the
-   *   "Create new" tab selected in a clone mode where drilldown with ID
-   *   `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` is being cloned.
+   * - `/new` --- opens with the "Create new" tab selected showing new drilldown form.
    * - `/manage` --- opens with selected "Manage" tab.
    * - `/edit/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
    *   drilldown with ID `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` is being edited.

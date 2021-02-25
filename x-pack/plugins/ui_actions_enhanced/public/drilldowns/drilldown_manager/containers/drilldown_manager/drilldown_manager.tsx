@@ -46,11 +46,11 @@ export const DrilldownManager: React.FC = ({}) => {
   return (
     <FlyoutFrame
       title={txtDrilldowns}
+      banner={banner}
       footer={footer}
       onClose={drilldowns.close}
       // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
       // onBack={() => drilldowns.setScreen('list')}
-      banner={banner}
     >
       <DrilldownManagerContent />
     </FlyoutFrame>

@@ -28,3 +28,17 @@ export const txtEditDrilldownButtonLabel = i18n.translate(
     defaultMessage: 'Save',
   }
 );
+
+export const txtCreateNew = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.createNew',
+  {
+    defaultMessage: 'Create new',
+  }
+);
+
+export const txtManage = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.manage',
+  {
+    defaultMessage: 'Manage',
+  }
+);
