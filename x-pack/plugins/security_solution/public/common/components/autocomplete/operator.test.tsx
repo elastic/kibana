@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
@@ -18,17 +16,15 @@ import { isOperator, isNotOperator } from './operators';
 describe('OperatorComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={true}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={true}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -38,17 +34,15 @@ describe('OperatorComponent', () => {
 
   test('it renders loading if "isLoading" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={true}
-          isClearable={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={true}
+        isClearable={false}
+        onChange={jest.fn()}
+      />
     );
     wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"] button`).at(0).simulate('click');
     expect(
@@ -60,17 +54,15 @@ describe('OperatorComponent', () => {
 
   test('it allows user to clear values if "isClearable" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={true}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={true}
+        onChange={jest.fn()}
+      />
     );
 
     expect(wrapper.find(`button[data-test-subj="comboBoxClearButton"]`).exists()).toBeTruthy();
@@ -78,18 +70,16 @@ describe('OperatorComponent', () => {
 
   test('it displays "operatorOptions" if param is passed in with items', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-          operatorOptions={[isNotOperator]}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+        operatorOptions={[isNotOperator]}
+      />
     );
 
     expect(
@@ -99,18 +89,16 @@ describe('OperatorComponent', () => {
 
   test('it does not display "operatorOptions" if param is passed in with no items', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-          operatorOptions={[]}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+        operatorOptions={[]}
+      />
     );
 
     expect(
@@ -145,17 +133,15 @@ describe('OperatorComponent', () => {
 
   test('it correctly displays selected operator', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -165,27 +151,25 @@ describe('OperatorComponent', () => {
 
   test('it only displays subset of operators if field type is nested', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={{
-            name: 'nestedField',
-            type: 'nested',
-            esTypes: ['text'],
-            count: 0,
-            scripted: false,
-            searchable: true,
-            aggregatable: false,
-            readFromDocValues: false,
-            subType: { nested: { path: 'nestedField' } },
-          }}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={{
+          name: 'nestedField',
+          type: 'nested',
+          esTypes: ['text'],
+          count: 0,
+          scripted: false,
+          searchable: true,
+          aggregatable: false,
+          readFromDocValues: false,
+          subType: { nested: { path: 'nestedField' } },
+        }}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -195,17 +179,15 @@ describe('OperatorComponent', () => {
 
   test('it only displays subset of operators if field type is boolean', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ssl')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ssl')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -221,17 +203,15 @@ describe('OperatorComponent', () => {
   test('it invokes "onChange" when option selected', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <OperatorComponent
-          placeholder="Placeholder text"
-          selectedField={getField('machine.os.raw')}
-          operator={isOperator}
-          isDisabled={false}
-          isLoading={false}
-          isClearable={false}
-          onChange={mockOnChange}
-        />
-      </ThemeProvider>
+      <OperatorComponent
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        operator={isOperator}
+        isDisabled={false}
+        isLoading={false}
+        isClearable={false}
+        onChange={mockOnChange}
+      />
     );
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {

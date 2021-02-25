@@ -183,6 +183,13 @@ export const setup = async (arg?: {
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
+  const showDataAllocationOptions = (phase: Phases) => () => {
+    act(() => {
+      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
+    });
+    component.update();
+  };
+
   const createMinAgeActions = (phase: Phases) => {
     return {
       hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
@@ -377,6 +384,7 @@ export const setup = async (arg?: {
       },
       warm: {
         enable: enable('warm'),
+        showDataAllocationOptions: showDataAllocationOptions('warm'),
         ...createMinAgeActions('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
@@ -388,6 +396,7 @@ export const setup = async (arg?: {
       },
       cold: {
         enable: enable('cold'),
+        showDataAllocationOptions: showDataAllocationOptions('cold'),
         ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,

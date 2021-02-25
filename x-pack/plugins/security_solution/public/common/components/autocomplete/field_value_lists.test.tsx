@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
@@ -47,17 +45,15 @@ jest.mock('../../../lists_plugin_deps', () => {
 describe('AutocompleteFieldListsComponent', () => {
   test('it renders disabled if "isDisabled" is true', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="some-list-id"
-          isLoading={false}
-          isClearable={true}
-          isDisabled
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="some-list-id"
+        isLoading={false}
+        isClearable={true}
+        isDisabled
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -69,17 +65,15 @@ describe('AutocompleteFieldListsComponent', () => {
 
   test('it renders loading if "isLoading" is true', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('@tags')}
-          selectedValue=""
-          isLoading
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('@tags')}
+        selectedValue=""
+        isLoading
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     wrapper
@@ -97,17 +91,15 @@ describe('AutocompleteFieldListsComponent', () => {
 
   test('it allows user to clear values if "isClearable" is true', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue=""
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue=""
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
     expect(
       wrapper
@@ -118,17 +110,15 @@ describe('AutocompleteFieldListsComponent', () => {
 
   test('it correctly displays lists that match the selected "keyword" field esType', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('@tags')}
-          selectedValue=""
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('@tags')}
+        selectedValue=""
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
@@ -142,17 +132,15 @@ describe('AutocompleteFieldListsComponent', () => {
 
   test('it correctly displays lists that match the selected "ip" field esType', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue=""
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue=""
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
@@ -166,17 +154,15 @@ describe('AutocompleteFieldListsComponent', () => {
 
   test('it correctly displays selected list', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="some-list-id"
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="some-list-id"
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -190,17 +176,15 @@ describe('AutocompleteFieldListsComponent', () => {
   test('it invokes "onChange" when option selected', async () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldListsComponent
-          placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue=""
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={mockOnChange}
-        />
-      </ThemeProvider>
+      <AutocompleteFieldListsComponent
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue=""
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={mockOnChange}
+      />
     );
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
