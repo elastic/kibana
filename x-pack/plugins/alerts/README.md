@@ -13,6 +13,7 @@ Table of Contents
 - [Kibana alerting](#kibana-alerting)
 	- [Terminology](#terminology)
 	- [Usage](#usage)
+	- [Alerts API keys](#alerts-api-keys)
 	- [Limitations](#limitations)
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
@@ -49,6 +50,17 @@ A Kibana alert detects a condition and executes one or more actions when that co
 1. Develop and register an alert type (see alert types -> example).
 2. Configure feature level privileges using RBAC 
 3. Create an alert using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html) (see alerts -> create).
+
+## Alerts API keys
+
+When we create an alerts we generate a new API key.
+
+When we change, delete or manage alert availabilty we need to invalidate the old API key and create a new one (except the delete process).
+
+For managing API keys invalidation process we use additional saved object `api_key_pending_invalidation`, which stores all alerts API keys that was marked for invalidation during the updating or changing alerts.
+For executing security plugin invalidation we schedule a task which runs by default for every 5 mins to check if `api_key_pending_invalidation` saved object contains new API keys which marked for invalidation earlier then configured delay: default value is 5 mins.
+To change the default invalidation task schedule, use kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.interval: '5m'`.
+To change the default delay for the makrked API key invalidation, use kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.removalDelay: '5m'`.
 
 ## Limitations
 
