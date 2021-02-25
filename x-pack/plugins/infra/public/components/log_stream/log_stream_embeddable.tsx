@@ -66,7 +66,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     }
 
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
-    const endTimestamp = datemathToEpochMillis(this.input.timeRange.to);
+    const endTimestamp = datemathToEpochMillis(this.input.timeRange.to, 'up');
 
     if (!startTimestamp || !endTimestamp) {
       return;
