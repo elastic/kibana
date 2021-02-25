@@ -39,7 +39,7 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
         });
       } catch (error) {
         logger.error(
-          `Failed to retrieve case in route case id: ${request.params.case_id} include comments: ${request.query.includeComments} include sub comments: ${request.query.includeSubCaseComments}: ${error}`
+          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments} \ninclude sub comments: ${request.query.includeSubCaseComments}: ${error}`
         );
         return response.customError(wrapError(error));
       }
