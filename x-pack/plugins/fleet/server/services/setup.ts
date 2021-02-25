@@ -101,7 +101,6 @@ async function createSetupSideEffects(
       await addPackageToAgentPolicy(
         soClient,
         esClient,
-        callCluster,
         fleetServerPackage,
         defaultFleetServerPolicy,
         defaultOutput
@@ -146,7 +145,6 @@ async function createSetupSideEffects(
         await addPackageToAgentPolicy(
           soClient,
           esClient,
-          callCluster,
           installedPackage,
           agentPolicyWithPackagePolicies,
           defaultOutput
@@ -261,7 +259,6 @@ function generateRandomPassword() {
 async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
   defaultOutput: Output
@@ -279,7 +276,7 @@ async function addPackageToAgentPolicy(
     agentPolicy.namespace
   );
 
-  await packagePolicyService.create(soClient, esClient, callCluster, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     bumpRevision: false,
   });
 }
