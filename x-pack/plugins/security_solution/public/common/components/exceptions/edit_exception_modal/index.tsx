@@ -382,7 +382,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       )}
       {updateError == null && (
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
 
           <EuiButton
             data-test-subj="edit-exception-confirm-button"
