@@ -13,7 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';

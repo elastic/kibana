@@ -444,13 +444,19 @@ export const threat_technique = t.intersection([
 ]);
 export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
 export const threat_techniques = t.array(threat_technique);
-export const threat = t.exact(
-  t.type({
-    framework: threat_framework,
-    tactic: threat_tactic,
-    technique: threat_techniques,
-  })
-);
+export const threat = t.intersection([
+  t.exact(
+    t.type({
+      framework: threat_framework,
+      tactic: threat_tactic,
+    })
+  ),
+  t.exact(
+    t.partial({
+      technique: threat_techniques,
+    })
+  ),
+]);
 export type Threat = t.TypeOf<typeof threat>;
 
 export const threats = t.array(threat);
