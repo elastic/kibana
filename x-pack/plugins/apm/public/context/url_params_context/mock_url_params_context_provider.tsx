@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { IUrlParams } from './types';
-import { UrlParamsContext, useUiFilters } from './url_params_context';
+import { UrlParamsContext } from './url_params_context';
 
 const defaultUrlParams = {
   page: 0,
@@ -35,7 +35,7 @@ export function MockUrlParamsContextProvider({
         rangeId: 0,
         refreshTimeRange,
         urlParams,
-        uiFilters: useUiFilters(urlParams),
+        uiFilters: {},
       }}
       children={children}
     />
