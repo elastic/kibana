@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   EsAssetReference,
   RegistryDataStream,
@@ -13,7 +13,6 @@ import {
   InstallablePackage,
 } from '../../../../types';
 import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
-import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
 import { deletePipelineRefs } from './remove';
@@ -27,7 +26,7 @@ interface RewriteSubstitution {
 export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
@@ -74,7 +73,7 @@ export const installPipelines = async (
       acc.push(
         installPipelinesForDataStream({
           dataStream,
-          callCluster,
+          esClient,
           paths: pipelinePaths,
           pkgVersion: installablePackage.version,
         })
@@ -107,12 +106,12 @@ export function rewriteIngestPipeline(
 }
 
 export async function installPipelinesForDataStream({
-  callCluster,
+  esClient,
   pkgVersion,
   paths,
   dataStream,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   pkgVersion: string;
   paths: string[];
   dataStream: RegistryDataStream;
@@ -150,33 +149,35 @@ export async function installPipelinesForDataStream({
   });
 
   const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ callCluster, pipeline });
+    return installPipeline({ esClient, pipeline });
   });
 
   return Promise.all(installationPromises);
 }
 
 async function installPipeline({
-  callCluster,
+  esClient,
   pipeline,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   pipeline: any;
 }): Promise<EsAssetReference> {
-  const callClusterParams: {
+  const esClientParams: {
     method: string;
     path: string;
-    ignore: number[];
     body: any;
-    headers?: any;
   } = {
     method: 'PUT',
     path: `/_ingest/pipeline/${pipeline.nameForInstallation}`,
-    ignore: [404],
     body: pipeline.contentForInstallation,
   };
+
+  const esClientRequestParams: { ignore: number[]; headers?: any } = {
+    ignore: [404],
+  };
+
   if (pipeline.extension === 'yml') {
-    callClusterParams.headers = {
+    esClientRequestParams.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
       // but we want JSON responses (to extract error messages, status code, or other metadata)
@@ -189,7 +190,8 @@ async function installPipeline({
   // exposed in the convenience endpoint 'ingest.putPipeline' of elasticsearch-js-legacy
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-  await callCluster('transport.request', callClusterParams);
+  await esClient.transport.request(esClientParams, esClientRequestParams);
+
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
 }
 

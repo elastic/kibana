@@ -150,7 +150,7 @@ export async function _installPackage({
     const installedPipelines = await installPipelines(
       packageInfo,
       paths,
-      callCluster,
+      esClient,
       savedObjectsClient
     );
     // install or update the templates referencing the newly installed pipelines
