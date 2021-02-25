@@ -111,6 +111,8 @@ export const getDataFromFieldsHits = (
     const flat = [...accumulator, ...nestedFields].reduce(
       (acc, f) => ({
         ...acc,
+        // acc is hashmap to determine if we already have the field or not without an array iteration
+        // its converted back to array in return with Object.values
         ...(acc[f.field] != null
           ? {
               [f.field]: {
