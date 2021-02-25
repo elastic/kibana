@@ -51,5 +51,3 @@ export * from './plugin';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from '../public/application/app';
-
-export { triggersActionsUiMock } from './mocks';
