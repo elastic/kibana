@@ -8,7 +8,7 @@
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { HostItem, HostsFields } from '../common';
+import { HostItem, HostsFields, SortRequestDirection } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
 export interface HostDetailsStrategyResponse extends IEsSearchResponse {
@@ -21,4 +21,42 @@ export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginat
   skip?: boolean;
   timerange: TimerangeInput;
   inspect?: Maybe<Inspect>;
+}
+
+export interface AggregationRequest {
+  [aggField: string]: {
+    terms?: {
+      field?: string;
+      missing?: string;
+      size?: number;
+      script?: {
+        source: string;
+        lang: string;
+      };
+      order?: {
+        [aggSortField: string]: SortRequestDirection;
+      };
+    };
+    max?: {
+      field: string;
+    };
+    aggs?: {
+      [aggSortField: string]: {
+        [aggType: string]: {
+          field: string;
+        };
+      };
+    };
+    top_hits?: {
+      size?: number;
+      sort?: Array<{
+        [aggSortField: string]: {
+          order: SortRequestDirection;
+        };
+      }>;
+      _source: {
+        includes: string[];
+      };
+    };
+  };
 }

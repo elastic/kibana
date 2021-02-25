@@ -9,7 +9,6 @@ import { CoreSetup } from '../../../../../../src/core/server';
 import { SetupPlugins } from '../../plugin';
 
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
-import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 
@@ -32,7 +31,6 @@ export function compose(
 
   const domainLibs: AppDomainLibs = {
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter()),
-    hosts: new Hosts(new ElasticsearchHostsAdapter(framework, endpointContext)),
   };
 
   const libs: AppBackendLibs = {

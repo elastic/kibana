@@ -9,6 +9,8 @@ import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 
+export type SortRequestDirection = 'asc' | 'desc';
+
 export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
