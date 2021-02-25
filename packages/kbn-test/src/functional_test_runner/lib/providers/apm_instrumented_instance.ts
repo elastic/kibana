@@ -82,44 +82,77 @@ export const createApmInstrumentedInstance = <T extends object>(
   };
 
   const createObjectWrapper = (path: string, object: object): object => {
-    return new Proxy(object, {
-      get(_, property: keyof T, receiver) {
-        const value = Reflect.get(object, property, receiver);
+    return new Proxy(
+      {},
+      {
+        get(_, property: keyof T, receiver) {
+          const value = Reflect.get(object, property, receiver);
 
-        // don't wrap symbol properties
-        if (typeof property !== 'string') {
+          // don't wrap symbol properties
+          if (typeof property !== 'string') {
+            return value;
+          }
+
+          const subPath = path ? `${path}.${property}` : `${property}`;
+
+          // wrap function properties
+          if (typeof value === 'function' && subPath !== 'init') {
+            const cached = fnWrappers.get(value);
+            if (cached) {
+              return cached;
+            }
+
+            const wrapper = createFnWrapper(subPath, object, value);
+            fnWrappers.set(value, wrapper);
+            return wrapper;
+          }
+
+          // deeply wrap object properties
+          if (isObj(value)) {
+            const cached = objWrappers.get(value);
+            if (cached) {
+              return cached;
+            }
+
+            const wrapper = createObjectWrapper(subPath, value);
+            objWrappers.set(value, wrapper);
+            return wrapper;
+          }
+
           return value;
-        }
-
-        const subPath = path ? `${path}.${property}` : `${property}`;
-
-        // wrap function properties
-        if (typeof value === 'function' && subPath !== 'init') {
-          const cached = fnWrappers.get(value);
-          if (cached) {
-            return cached;
-          }
-
-          const wrapper = createFnWrapper(subPath, object, value);
-          fnWrappers.set(value, wrapper);
-          return wrapper;
-        }
-
-        // deeply wrap object properties
-        if (isObj(value)) {
-          const cached = objWrappers.get(value);
-          if (cached) {
-            return cached;
-          }
-
-          const wrapper = createObjectWrapper(subPath, value);
-          objWrappers.set(value, wrapper);
-          return wrapper;
-        }
-
-        return value;
-      },
-    });
+        },
+        has(_, property) {
+          return Reflect.has(object, property);
+        },
+        getOwnPropertyDescriptor(_, property) {
+          return Reflect.getOwnPropertyDescriptor(object, property);
+        },
+        defineProperty() {
+          throw new Error(`please don't mutate service objects`);
+        },
+        deleteProperty() {
+          throw new Error(`please don't mutate service objects`);
+        },
+        set() {
+          throw new Error(`please don't mutate service objects`);
+        },
+        setPrototypeOf() {
+          throw new Error(`please don't mutate service objects`);
+        },
+        isExtensible() {
+          return false;
+        },
+        getPrototypeOf() {
+          return Reflect.getPrototypeOf(object);
+        },
+        preventExtensions() {
+          return true;
+        },
+        ownKeys() {
+          return Reflect.ownKeys(object);
+        },
+      }
+    );
   };
 
   return createObjectWrapper('', instance) as T;
