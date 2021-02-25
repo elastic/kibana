@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export * from './ensure_yarn_integrity_exists';
-export * from './get_cache_folders';
-export * from './install_tools';
-export * from './run';
+import { join } from 'path';
+import { writeFile } from '../fs';
+
+export async function ensureYarnIntegrityFileExists(nodeModulesPath: string) {
+  try {
+    await writeFile(join(nodeModulesPath, '.yarn-integrity'), '', { flag: 'wx' });
+  } catch {
+    // no-op
+  }
+}

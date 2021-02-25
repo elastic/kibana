@@ -60,6 +60,7 @@ yarn_install(
   data = [
     "//:.yarnrc",
     "//:preinstall_check.js",
+    "//:node_modules/.yarn-integrity",
   ],
   symlink_node_modules = True,
   quiet = False,

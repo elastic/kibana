@@ -17,7 +17,7 @@ import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
 import { readYarnLock } from '../utils/yarn_lock';
 import { validateDependencies } from '../utils/validate_dependencies';
-import { installBazelTools, runBazel } from '../utils/bazel';
+import { ensureYarnIntegrityFileExists, installBazelTools, runBazel } from '../utils/bazel';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -27,6 +27,12 @@ export const BootstrapCommand: ICommand = {
     const nonBazelProjectsOnly = await getNonBazelProjectsOnly(projects);
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path;
+
+    // TODO: make an --offline flag
+
+    // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    // for bazel to know it has to re-install the node_modules after a reset or a clean
+    await ensureYarnIntegrityFileExists(`${kibanaProjectPath}${sep}node_modules`);
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
@@ -39,6 +45,11 @@ export const BootstrapCommand: ICommand = {
     // And should begin from the ones with none dependencies forward.
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
+    //
+    // Until we have our first package build within Bazel we will always need to directly call the yarn rule
+    // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
+    // TODO: Remove the first run statement as soon as we add the first Bazel package build
+    await runBazel(['run', '@nodejs//:yarn']);
     await runBazel(['build', '//packages:build']);
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
