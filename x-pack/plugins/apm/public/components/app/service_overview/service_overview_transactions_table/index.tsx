@@ -55,6 +55,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   });
 
   const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
 
   const { transactionType } = useApmServiceContext();
   const {
@@ -96,12 +97,13 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         return {
-          // Used to refetch the comparison statistics when a new primary statistics were fetched.
+          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
           requestId: uuid(),
           ...response,
         };
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -110,14 +112,18 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       end,
       transactionType,
       latencyAggregationType,
+      comparisonType,
+      pageIndex,
+      direction,
+      field,
     ]
   );
 
   const { transactionGroups, requestId } = data;
   const currentPageTransactionGroups = orderBy(
     transactionGroups,
-    sort.field,
-    sort.direction
+    field,
+    direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
   const transactionNames = JSON.stringify(
@@ -158,12 +164,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches statistics when requestId, transaction names or comparison type change
-    // requestId: Is used to refetch the comparison data when a new primary statistics were fetched.
-    // transactionNams: Is used to fetch the comparison data when a user navigate to a different page within the table
-    // comparison type: Is used to refetch the comparison when the comparison type is changed, either manually by a user or automatically when the date picker is changed
+    // only fetches comparison statistics when requestId is invalidated by primary statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames, comparisonType],
+    [requestId],
     { preservePreviousData: false }
   );
 
@@ -183,13 +186,6 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     pageSize: PAGE_SIZE,
     totalItemCount: transactionGroups.length,
     hidePerPageOptions: true,
-  };
-
-  const sorting = {
-    sort: {
-      field: sort.field,
-      direction: sort.direction,
-    },
   };
 
   return (
@@ -234,7 +230,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
                 items={currentPageTransactionGroups}
                 columns={columns}
                 pagination={pagination}
-                sorting={sorting}
+                sorting={{ sort: { field, direction } }}
                 onChange={(newTableOptions: {
                   page?: {
                     index: number;
