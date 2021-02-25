@@ -29,7 +29,7 @@ describe('ChecklistFlyout', () => {
       status: undefined,
       reindexTaskPercComplete: null,
       errorMessage: null,
-      reindexWarnings: [ReindexWarning.apmReindex],
+      reindexWarnings: [ReindexWarning.customTypeName],
       hasRequiredPrivileges: true,
     } as ReindexState,
   };
