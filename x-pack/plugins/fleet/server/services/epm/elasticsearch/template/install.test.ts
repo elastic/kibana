@@ -12,15 +12,16 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { installTemplate } from './install';
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
-  const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation(async (_, params) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.transport.request.mockImplementation((params) => {
     if (
       params &&
       params.method === 'GET' &&
       params.path === '/_index_template/metrics-package.dataset'
     ) {
-      return { index_templates: [] };
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
     }
+    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
   });
 
   const fields: Field[] = [];
@@ -40,7 +41,7 @@ test('tests installPackage to use correct priority and index_patterns for data s
   const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
   const templatePriorityDatasetIsPrefixUnset = 200;
   await installTemplate({
-    callCluster,
+    esClient,
     fields,
     dataStream: dataStreamDatasetIsPrefixUnset,
     packageVersion: pkg.version,
@@ -54,15 +55,16 @@ test('tests installPackage to use correct priority and index_patterns for data s
 });
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
-  const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation(async (_, params) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.transport.request.mockImplementation((params) => {
     if (
       params &&
       params.method === 'GET' &&
       params.path === '/_index_template/metrics-package.dataset'
     ) {
-      return { index_templates: [] };
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
     }
+    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
   });
 
   const fields: Field[] = [];
@@ -83,7 +85,7 @@ test('tests installPackage to use correct priority and index_patterns for data s
   const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
   const templatePriorityDatasetIsPrefixFalse = 200;
   await installTemplate({
-    callCluster,
+    esClient,
     fields,
     dataStream: dataStreamDatasetIsPrefixFalse,
     packageVersion: pkg.version,
@@ -97,15 +99,16 @@ test('tests installPackage to use correct priority and index_patterns for data s
 });
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
-  const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation(async (_, params) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.transport.request.mockImplementation((params) => {
     if (
       params &&
       params.method === 'GET' &&
       params.path === '/_index_template/metrics-package.dataset'
     ) {
-      return { index_templates: [] };
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
     }
+    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
   });
 
   const fields: Field[] = [];
@@ -126,7 +129,7 @@ test('tests installPackage to use correct priority and index_patterns for data s
   const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
   const templatePriorityDatasetIsPrefixTrue = 150;
   await installTemplate({
-    callCluster,
+    esClient,
     fields,
     dataStream: dataStreamDatasetIsPrefixTrue,
     packageVersion: pkg.version,
@@ -140,14 +143,14 @@ test('tests installPackage to use correct priority and index_patterns for data s
 });
 
 test('tests installPackage remove the aliases property if the property existed', async () => {
-  const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation(async (_, params) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.transport.request.mockImplementation((params) => {
     if (
       params &&
       params.method === 'GET' &&
       params.path === '/_index_template/metrics-package.dataset'
     ) {
-      return {
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise({
         index_templates: [
           {
             name: 'metrics-package.dataset',
@@ -157,8 +160,9 @@ test('tests installPackage remove the aliases property if the property existed',
             },
           },
         ],
-      };
+      });
     }
+    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
   });
 
   const fields: Field[] = [];
@@ -178,7 +182,7 @@ test('tests installPackage remove the aliases property if the property existed',
   const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
   const templatePriorityDatasetIsPrefixUnset = 200;
   await installTemplate({
-    callCluster,
+    esClient,
     fields,
     dataStream: dataStreamDatasetIsPrefixUnset,
     packageVersion: pkg.version,

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   RegistryDataStream,
   ElasticsearchAssetType,
@@ -14,7 +14,6 @@ import {
   RegistryElasticsearch,
   InstallablePackage,
 } from '../../../../types';
-import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import {
@@ -29,15 +28,15 @@ import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../pa
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
-  await installPreBuiltComponentTemplates(paths, callCluster);
-  await installPreBuiltTemplates(paths, callCluster);
+  await installPreBuiltComponentTemplates(paths, esClient);
+  await installPreBuiltTemplates(paths, esClient);
 
   // remove package installation's references to index templates
   await removeAssetsFromInstalledEsByType(
@@ -63,7 +62,7 @@ export const installTemplates = async (
         acc.push(
           installTemplateForDataStream({
             pkg: installablePackage,
-            callCluster,
+            esClient,
             dataStream,
           })
         );
@@ -80,7 +79,7 @@ export const installTemplates = async (
   return [];
 };
 
-const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCurrentUser) => {
+const installPreBuiltTemplates = async (paths: string[], esClient: ElasticsearchClient) => {
   const templatePaths = paths.filter((path) => isTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = getPathParts(path);
@@ -95,15 +94,13 @@ const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCu
       templateAPIPath = '_index_template';
     }
 
-    const callClusterParams: {
+    const esClientParams: {
       method: string;
       path: string;
-      ignore: number[];
       body: any;
     } = {
       method: 'PUT',
       path: `/${templateAPIPath}/${templateName}`,
-      ignore: [404],
       body: content,
     };
     // This uses the catch-all endpoint 'transport.request' because there is no
@@ -111,7 +108,7 @@ const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCu
     // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    return callCluster('transport.request', callClusterParams);
+    return esClient.transport.request(esClientParams, { ignore: [404] });
   });
   try {
     return await Promise.all(templateInstallPromises);
@@ -124,7 +121,7 @@ const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCu
 
 const installPreBuiltComponentTemplates = async (
   paths: string[],
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ) => {
   const templatePaths = paths.filter((path) => isComponentTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
@@ -132,22 +129,21 @@ const installPreBuiltComponentTemplates = async (
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(getAsset(path).toString('utf8'));
 
-    const callClusterParams: {
+    const esClientParams: {
       method: string;
       path: string;
-      ignore: number[];
       body: any;
     } = {
       method: 'PUT',
       path: `/_component_template/${templateName}`,
-      ignore: [404],
       body: content,
     };
     // This uses the catch-all endpoint 'transport.request' because there is no
     // convenience endpoint for component templates yet.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    return callCluster('transport.request', callClusterParams);
+    return esClient.transport.request(esClientParams, { ignore: [404] });
   });
+
   try {
     return await Promise.all(templateInstallPromises);
   } catch (e) {
@@ -175,16 +171,16 @@ const isComponentTemplate = (path: string) => {
 
 export async function installTemplateForDataStream({
   pkg,
-  callCluster,
+  esClient,
   dataStream,
 }: {
   pkg: InstallablePackage;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   dataStream: RegistryDataStream;
 }): Promise<TemplateRef> {
   const fields = await loadFieldsFromYaml(pkg, dataStream.path);
   return installTemplate({
-    callCluster,
+    esClient,
     fields,
     dataStream,
     packageVersion: pkg.version,
@@ -195,22 +191,23 @@ export async function installTemplateForDataStream({
 function putComponentTemplate(
   body: object | undefined,
   name: string,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): { clusterPromise: Promise<any>; name: string } | undefined {
   if (body) {
-    const callClusterParams: {
+    const esClientParams: {
       method: string;
       path: string;
-      ignore: number[];
       body: any;
     } = {
       method: 'PUT',
       path: `/_component_template/${name}`,
-      ignore: [404],
       body,
     };
 
-    return { clusterPromise: callCluster('transport.request', callClusterParams), name };
+    return {
+      clusterPromise: esClient.transport.request(esClientParams, { ignore: [404] }),
+      name,
+    };
   }
 }
 
@@ -250,7 +247,7 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
 async function installDataStreamComponentTemplates(
   templateName: string,
   registryElasticsearch: RegistryElasticsearch | undefined,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ) {
   const templates: string[] = [];
   const componentPromises: Array<Promise<any>> = [];
@@ -260,13 +257,13 @@ async function installDataStreamComponentTemplates(
   const mappings = putComponentTemplate(
     compTemplates.mappingsTemplate,
     `${templateName}-mappings`,
-    callCluster
+    esClient
   );
 
   const settings = putComponentTemplate(
     compTemplates.settingsTemplate,
     `${templateName}-settings`,
-    callCluster
+    esClient
   );
 
   if (mappings) {
@@ -285,13 +282,13 @@ async function installDataStreamComponentTemplates(
 }
 
 export async function installTemplate({
-  callCluster,
+  esClient,
   fields,
   dataStream,
   packageVersion,
   packageName,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   fields: Field[];
   dataStream: RegistryDataStream;
   packageVersion: string;
@@ -312,11 +309,15 @@ export async function installTemplate({
   }
 
   // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
-  const getTemplateRes = await callCluster('transport.request', {
-    method: 'GET',
-    path: `/_index_template/${templateName}`,
-    ignore: [404],
-  });
+  const { body: getTemplateRes } = await esClient.transport.request(
+    {
+      method: 'GET',
+      path: `/_index_template/${templateName}`,
+    },
+    {
+      ignore: [404],
+    }
+  );
 
   const existingIndexTemplate = getTemplateRes?.index_templates?.[0];
   if (
@@ -327,12 +328,10 @@ export async function installTemplate({
     const updateIndexTemplateParams: {
       method: string;
       path: string;
-      ignore: number[];
       body: any;
     } = {
       method: 'PUT',
       path: `/_index_template/${templateName}`,
-      ignore: [404],
       body: {
         ...existingIndexTemplate.index_template,
         template: {
@@ -347,13 +346,13 @@ export async function installTemplate({
     // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await callCluster('transport.request', updateIndexTemplateParams);
+    await esClient.transport.request(updateIndexTemplateParams, { ignore: [404] });
   }
 
   const composedOfTemplates = await installDataStreamComponentTemplates(
     templateName,
     dataStream.elasticsearch,
-    callCluster
+    esClient
   );
 
   const template = getTemplate({
@@ -369,15 +368,13 @@ export async function installTemplate({
   });
 
   // TODO: Check return values for errors
-  const callClusterParams: {
+  const esClientParams: {
     method: string;
     path: string;
-    ignore: number[];
     body: any;
   } = {
     method: 'PUT',
     path: `/_index_template/${templateName}`,
-    ignore: [404],
     body: template,
   };
   // This uses the catch-all endpoint 'transport.request' because there is no
@@ -385,7 +382,7 @@ export async function installTemplate({
   // The existing convenience endpoint `indices.putTemplate` only sends to _template,
   // which does not support v2 templates.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-  await callCluster('transport.request', callClusterParams);
+  await esClient.transport.request(esClientParams, { ignore: [404] });
 
   return {
     templateName,
