@@ -5,15 +5,34 @@
  * 2.0.
  */
 
-export enum ConfigKeys {
-  NAME = 'name',
-  URLS = 'urls',
-  SCHEDULE = 'schedule',
+export enum DataStream {
+  HTTP = 'synthetics/http',
+  TCP = 'synthetics/tcp',
+  ICMP = 'synthetics/icmp',
 }
 
-export type Config = Record<ConfigKeys, string>;
+// values must match keys in the integration package
+export enum ConfigKeys {
+  MAX_REDIRECTS = 'max_redirects',
+  MONITOR_TYPE = 'type',
+  NAME = 'name',
+  PROXY_URL = 'proxy_url',
+  SCHEDULE = 'schedule',
+  SERVICE_NAME = 'service.name',
+  TAGS = 'tags',
+  TIMEOUT = 'timeout',
+  URLS = 'urls',
+}
+
+export type Config = Record<ConfigKeys, string | number | string[]>;
 
 export interface ICustomFields {
-  schedule: Config['schedule'];
-  urls: Config['urls'];
+  [ConfigKeys.MAX_REDIRECTS]: number;
+  [ConfigKeys.MONITOR_TYPE]: DataStream;
+  [ConfigKeys.PROXY_URL]: string;
+  [ConfigKeys.SCHEDULE]: number;
+  [ConfigKeys.SERVICE_NAME]: string;
+  [ConfigKeys.TIMEOUT]: number;
+  [ConfigKeys.URLS]: string;
+  [ConfigKeys.TAGS]: string[];
 }

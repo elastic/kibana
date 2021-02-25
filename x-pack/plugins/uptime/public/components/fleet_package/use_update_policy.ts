@@ -25,17 +25,39 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
   const currentConfig = useRef<Config>(defaultConfig);
 
   useEffect(() => {
-    const configKeys = Object.keys(config) as ConfigKeys[];
+    const { type, ...configWithoutType } = config;
+    const configKeys = Object.keys(config) as ConfigKeys[]; // all keys for determining if the form has been changed
+    const policyKeys = Object.keys(configWithoutType) as ConfigKeys[]; // only keys needed for data stream variables
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
-    const isValid = !!newPolicy.name && !!config.urls && !!config.schedule;
+    const isValid =
+      !!newPolicy.name &&
+      !!config[ConfigKeys.URLS] &&
+      !!config[ConfigKeys.SCHEDULE] &&
+      config[ConfigKeys.SCHEDULE] > 1;
+    const updatedPolicy = { ...newPolicy };
+    const currentInput = updatedPolicy.inputs.find((input) => input.type === type);
+    const dataStream = currentInput?.streams[0];
 
     // prevent an infinite loop of updating the policy
-    if (configDidUpdate) {
-      const updatedPolicy = { ...newPolicy };
-      configKeys.forEach((key) => {
-        const configItem = updatedPolicy.inputs[0]?.streams[0]?.vars?.[key];
+    if (currentInput && dataStream && configDidUpdate) {
+      // reset all data streams to enabled false
+      updatedPolicy.inputs.forEach((input) => (input.enabled = false));
+      // enable only the input type and data stream that matches the monitor type.
+      currentInput.enabled = true;
+      dataStream.enabled = true;
+      policyKeys.forEach((key) => {
+        const configItem = dataStream.vars?.[key];
         if (configItem) {
-          configItem.value = config[key];
+          switch (key) {
+            case ConfigKeys.SCHEDULE:
+              configItem.value = `@every ${config[key]}`; // convert to cron
+              break;
+            case ConfigKeys.TAGS:
+              configItem.value = JSON.stringify(config[key]); // convert to yaml string
+              break;
+            default:
+              configItem.value = config[key];
+          }
         }
       });
       currentConfig.current = config;

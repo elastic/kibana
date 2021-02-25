@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { Config, ICustomFields } from './types';
+import { Config, ConfigKeys, DataStream, ICustomFields } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 
@@ -46,8 +46,14 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
 const defaultValues = {
-  urls: '',
-  schedule: '',
+  [ConfigKeys.MAX_REDIRECTS]: 0,
+  [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKeys.PROXY_URL]: '',
+  [ConfigKeys.SCHEDULE]: 5,
+  [ConfigKeys.SERVICE_NAME]: '',
+  [ConfigKeys.TAGS]: [],
+  [ConfigKeys.TIMEOUT]: 1600,
+  [ConfigKeys.URLS]: '',
 };
 
 const defaultConfig: Config = {

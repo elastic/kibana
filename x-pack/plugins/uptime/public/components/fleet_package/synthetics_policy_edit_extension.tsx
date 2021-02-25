@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import { ICustomFields } from './types';
+import { ConfigKeys, ICustomFields } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 
@@ -18,9 +18,20 @@ import { useUpdatePolicy } from './use_update_policy';
 export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
     const defaultConfig = {
-      name: currentPolicy.name,
-      urls: currentPolicy.inputs[0]?.streams[0]?.vars?.urls.value,
-      schedule: currentPolicy.inputs[0]?.streams[0]?.vars?.schedule.value,
+      [ConfigKeys.NAME]: currentPolicy.name,
+      [ConfigKeys.URLS]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.URLS].value,
+      [ConfigKeys.SCHEDULE]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SCHEDULE].value,
+      [ConfigKeys.MONITOR_TYPE]:
+        currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.MONITOR_TYPE].value,
+      [ConfigKeys.MAX_REDIRECTS]:
+        currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.MAX_REDIRECTS].value,
+      [ConfigKeys.PROXY_URL]:
+        currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.PROXY_URL].value,
+      [ConfigKeys.SERVICE_NAME]:
+        currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SERVICE_NAME].value,
+      [ConfigKeys.TIMEOUT]:
+        currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SERVICE_NAME].value,
+      [ConfigKeys.TAGS]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SERVICE_NAME].value,
     };
     const { setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange });
 
@@ -31,12 +42,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       [setConfig]
     );
 
-    return (
-      <CustomFields
-        defaultValues={{ urls: defaultConfig.urls, schedule: defaultConfig.schedule }}
-        onChange={handleInputChange}
-      />
-    );
+    return <CustomFields defaultValues={defaultConfig} onChange={handleInputChange} />;
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';
