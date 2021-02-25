@@ -69,7 +69,7 @@ export const Curations: React.FC = () => {
 
 export const CurationsTable: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
-  const { onPaginate, deleteCurationSet } = useActions(CurationsLogic);
+  const { onPaginate, deleteCuration } = useActions(CurationsLogic);
 
   const columns: Array<EuiBasicTableColumn<Curation>> = [
     {
@@ -141,7 +141,7 @@ export const CurationsTable: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (curation: Curation) => deleteCurationSet(curation.id),
+          onClick: (curation: Curation) => deleteCuration(curation.id),
           'data-test-subj': 'CurationsTableDeleteButton',
         },
       ],
