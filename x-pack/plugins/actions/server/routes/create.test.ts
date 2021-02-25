@@ -7,12 +7,13 @@
 
 import { createActionRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { actionsClientMock } from '../../actions_client.mock';
-import { verifyAccessAndContext } from '../verify_access_and_context';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
+import { verifyAccessAndContext } from './verify_access_and_context';
+import { omit } from 'lodash';
 
-jest.mock('../verify_access_and_context.ts', () => ({
+jest.mock('./verify_access_and_context.ts', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -30,7 +31,7 @@ describe('createActionRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector"`);
 
     const createResult = {
       id: '1',
@@ -38,6 +39,12 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+    };
+
+    const createApiResult = {
+      ...omit(createResult, ['actionTypeId', 'isPreconfigured']),
+      action_type_id: createResult.actionTypeId,
+      is_preconfigured: createResult.isPreconfigured,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -48,7 +55,7 @@ describe('createActionRoute', () => {
       {
         body: {
           name: 'My name',
-          actionTypeId: 'abc',
+          action_type_id: 'abc',
           config: { foo: true },
           secrets: {},
         },
@@ -56,7 +63,7 @@ describe('createActionRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: createResult });
+    expect(await handler(context, req, res)).toEqual({ body: createApiResult });
 
     expect(actionsClient.create).toHaveBeenCalledTimes(1);
     expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -75,7 +82,7 @@ describe('createActionRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: createResult,
+      body: createApiResult,
     });
   });
 
@@ -96,7 +103,17 @@ describe('createActionRoute', () => {
       isPreconfigured: false,
     });
 
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          action_type_id: 'abc',
+          config: { foo: true },
+          secrets: {},
+        },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -124,7 +141,17 @@ describe('createActionRoute', () => {
       isPreconfigured: false,
     });
 
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          action_type_id: 'abc',
+          config: { foo: true },
+          secrets: {},
+        },
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
   });

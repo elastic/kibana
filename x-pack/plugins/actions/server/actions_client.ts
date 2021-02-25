@@ -56,7 +56,7 @@ interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   action: Action;
 }
 
@@ -73,7 +73,7 @@ interface ConstructorOptions {
   auditLogger?: AuditLogger;
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
 }
