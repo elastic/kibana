@@ -2,7 +2,7 @@
 === Search for relevance
 Sometimes you might be unsure which documents best match your question. 
 {es} assigns a relevancy, or score to each document, so you can
-can narrow you search to the documents with the most relevant results.
+can narrow your search to the documents with the most relevant results.
 The higher the score, the better it matches your query.
 
 For example, suppose you have the <<gs-get-data-into-kibana, sample flights data set>>, and you're a searching for
