@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
 import { createIntervalBasedFormatter } from '../components/lib/create_interval_based_formatter';
@@ -52,27 +52,27 @@ export const DataTimeRangeModeLabel = ({
       getFormattedPanelInterval();
 
     const tooltipContent = (
-      <FormattedMessage
-        id="visTypeTimeseries.dataTimeRangeModeLabel.lastValueTooltip"
-        defaultMessage="Bucket: {bucket} {interval}"
-        values={{
-          bucket: lastBucketDate,
-          interval: formattedPanelInterval && (
-            <p>
-              <FormattedMessage
-                id="visTypeTimeseries.dataTimeRangeModeLabel.panelInterval"
-                defaultMessage="Interval: {formattedPanelInterval}"
-                values={{ formattedPanelInterval }}
-              />
-            </p>
-          ),
-        }}
-      />
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="visTypeTimeseries.dataTimeRangeModeLabel.lastBucketDate"
+            defaultMessage="Bucket: {lastBucketDate}"
+            values={{ lastBucketDate }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="visTypeTimeseries.dataTimeRangeModeLabel.panelInterval"
+            defaultMessage="Interval: {formattedPanelInterval}"
+            values={{ formattedPanelInterval }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
-        <EuiLink href="#">{lastValueFormattedMessage}</EuiLink>
+        <EuiLink onClick={() => {}}>{lastValueFormattedMessage}</EuiLink>
       </EuiToolTip>
     );
   };
