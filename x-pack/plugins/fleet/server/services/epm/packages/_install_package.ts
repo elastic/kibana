@@ -136,7 +136,7 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    await installILMPolicy(paths, callCluster);
+    await installILMPolicy(paths, esClient);
 
     const installedDataStreamIlm = await installIlmForDataStream(
       packageInfo,

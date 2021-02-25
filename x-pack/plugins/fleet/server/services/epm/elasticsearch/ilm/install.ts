@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 
-export async function installILMPolicy(paths: string[], callCluster: CallESAsCurrentUser) {
+export async function installILMPolicy(paths: string[], esClient: ElasticsearchClient) {
   const ilmPaths = paths.filter((path) => isILMPolicy(path));
   if (!ilmPaths.length) return;
   await Promise.all(
@@ -17,7 +18,7 @@ export async function installILMPolicy(paths: string[], callCluster: CallESAsCur
       const { file } = getPathParts(path);
       const name = file.substr(0, file.lastIndexOf('.'));
       try {
-        await callCluster('transport.request', {
+        await esClient.transport.request({
           method: 'PUT',
           path: '/_ilm/policy/' + name,
           body,
