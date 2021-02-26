@@ -4455,47 +4455,68 @@
     "kibana": {
       "properties": {
         "index": {
-          "type": "keyword"
+          "type": "keyword",
+          "_meta": {
+            "description": "The index storing the saved objects"
+          }
         },
         "dashboard": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of dashboard saved objects"
+              }
             }
           }
         },
         "visualization": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of visualization saved objects"
+              }
             }
           }
         },
         "search": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of search saved objects"
+              }
             }
           }
         },
         "index_pattern": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of index_pattern saved objects"
+              }
             }
           }
         },
         "graph_workspace": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of graph_workspace saved objects"
+              }
             }
           }
         },
         "timelion_sheet": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of timelion_sheet saved objects"
+              }
             }
           }
         }
