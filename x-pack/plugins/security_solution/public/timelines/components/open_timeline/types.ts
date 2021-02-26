@@ -167,9 +167,9 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** Refetch table */
-  refetch?: (existingTimeline?: OpenTimelineResult[], existingCount?: number) => void;
-  /** The results of executing a search */
-  searchResults: OpenTimelineResult[];
+  refetch?: () => void;
+  /** The results of executing a search, null is the status before data fatched */
+  searchResults: OpenTimelineResult[] | null;
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
   /** Toggle export timelines modal*/
