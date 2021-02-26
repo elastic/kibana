@@ -8,13 +8,15 @@
 
 import { LifecyclePhase } from './lifecycle_phase';
 
-import { Suite, Test } from '../fake_mocha_types';
+import { Suite, Test, Runnable } from '../fake_mocha_types';
 
 export class Lifecycle {
   public readonly beforeTests = new LifecyclePhase<[Suite]>({
     singular: true,
   });
-  public readonly beforeEachRunnable = new LifecyclePhase<[Test]>();
+  public readonly beforeEachRunnable = new LifecyclePhase<[Runnable]>();
+  public readonly afterEachRunnable = new LifecyclePhase<[Runnable]>();
+  public readonly failedRunnable = new LifecyclePhase<[Runnable, Error]>();
   public readonly beforeTestSuite = new LifecyclePhase<[Suite]>();
   public readonly beforeEachTest = new LifecyclePhase<[Test]>();
   public readonly afterTestSuite = new LifecyclePhase<[Suite]>();

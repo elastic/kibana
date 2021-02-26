@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
+
+import apm from 'elastic-apm-node';
+
 interface ApmSpan {
   setOutcome(outcome: 'success' | 'failure' | 'unknown'): void;
   end(): void;
@@ -31,8 +35,28 @@ const isObj = (value: any): value is object => {
   return typeof value === 'object' && value;
 };
 
+const toStringArg = (value: any): string => {
+  switch (typeof value) {
+    case 'string':
+      return `"${value}"`;
+    case 'number':
+    case 'boolean':
+    case 'bigint':
+    case 'undefined':
+      return `${value}`;
+    case 'symbol':
+      return '<Symbol>';
+    case 'function':
+      return `<Function...>`;
+    case 'object':
+      if (value === null) {
+        return `null`;
+      }
+      return inspect(value, false, 1, false);
+  }
+};
+
 export const createApmInstrumentedInstance = <T extends object>(
-  startSpan: StartSpanFn | null,
   instance: T,
   type: string,
   instanceName: string
@@ -42,8 +66,13 @@ export const createApmInstrumentedInstance = <T extends object>(
 
   const createFnWrapper = (path: string, context: object, fn: SomeFn): SomeFn => {
     return (...args: any[]) => {
-      const span = startSpan
-        ? startSpan(`${instanceName}.${path}()`, type, instanceName, path)
+      const span = apm.isStarted()
+        ? apm.startSpan(
+            `${instanceName}.${path}(${args.map(toStringArg).join(', ')})`,
+            type,
+            instanceName,
+            path
+          )
         : undefined;
 
       if (!span) {

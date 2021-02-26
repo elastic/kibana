@@ -8,6 +8,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { inspect } from 'util';
+import apm from 'elastic-apm-node';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -79,6 +80,8 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
+    const span = apm.startSpan('retry delay...');
     await delay(retryDelay);
+    span?.end();
   }
 }

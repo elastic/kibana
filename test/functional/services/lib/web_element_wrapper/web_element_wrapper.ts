@@ -12,6 +12,7 @@ import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
+import { createApmInstrumentedInstance } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
@@ -51,14 +52,18 @@ export class WebElementWrapper {
       return webElement;
     }
 
-    return new WebElementWrapper(
-      webElement,
-      locator,
-      driver,
-      timeout,
-      fixedHeaderHeight,
-      logger,
-      browserType
+    return createApmInstrumentedInstance(
+      new WebElementWrapper(
+        webElement,
+        locator,
+        driver,
+        timeout,
+        fixedHeaderHeight,
+        logger,
+        browserType
+      ),
+      'webElement',
+      locator ? `Element<${locator.toString()}>` : 'element'
     );
   }
 

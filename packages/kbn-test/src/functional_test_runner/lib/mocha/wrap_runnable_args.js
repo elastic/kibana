@@ -15,15 +15,20 @@ import { wrapFunction, wrapAsyncFunction } from './wrap_function';
  */
 export function wrapRunnableArgs(fn, lifecycle, handler) {
   return wrapFunction(fn, {
-    before(target, thisArg, argumentsList) {
+    before(_, __, argumentsList) {
       for (let i = 0; i < argumentsList.length; i++) {
         if (typeof argumentsList[i] === 'function') {
           argumentsList[i] = wrapAsyncFunction(argumentsList[i], {
-            async before(target, thisArg) {
-              await lifecycle.beforeEachRunnable.trigger(thisArg);
+            async before(_, thisArg) {
+              await lifecycle.beforeEachRunnable.trigger(thisArg.test);
             },
 
-            async handleError(target, thisArg, argumentsList, err) {
+            async after(_, thisArg) {
+              await lifecycle.afterEachRunnable.trigger(thisArg.test);
+            },
+
+            async handleError(_, thisArg, __, err) {
+              await lifecycle.failedRunnable.trigger(thisArg.test, err);
               await handler(err, thisArg.test);
               throw err;
             },

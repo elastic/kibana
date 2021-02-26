@@ -12,16 +12,12 @@ import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
 import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
-import { createApmInstrumentedInstance, StartSpanFn } from './apm_instrumented_instance';
+import { createApmInstrumentedInstance } from './apm_instrumented_instance';
 
 export class ProviderCollection {
   private readonly instances = new Map();
 
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly startApmSpan: StartSpanFn | null,
-    private readonly providers: Providers
-  ) {}
+  constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
 
   public getService = (name: string) => this.getInstance('Service', name);
 
@@ -113,7 +109,6 @@ export class ProviderCollection {
         }
 
         if (
-          this.startApmSpan &&
           name !== '__webdriver__' &&
           name !== 'log' &&
           name !== 'config' &&
@@ -122,7 +117,7 @@ export class ProviderCollection {
           typeof instance === 'object' &&
           instance
         ) {
-          instance = createApmInstrumentedInstance(this.startApmSpan, instance, type, name);
+          instance = createApmInstrumentedInstance(instance, type, name);
         }
 
         instances.set(provider, instance);

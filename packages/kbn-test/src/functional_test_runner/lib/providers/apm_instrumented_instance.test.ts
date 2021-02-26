@@ -10,23 +10,28 @@ import { createRecursiveSerializer } from '@kbn/dev-utils';
 
 import { createApmInstrumentedInstance } from './apm_instrumented_instance';
 
-const printSymbol = Symbol('print');
+const mockPrint = Symbol('print');
 
-const getSpan = jest.fn((...names: string[]) => {
-  let outcome: string | null = null;
-  let ended = false;
-  return {
-    setOutcome(_: string) {
-      outcome = _;
-    },
-    end() {
-      ended = true;
-    },
-    [printSymbol]() {
-      return `SPAN[name=${names.join('/')}, outcome=${outcome}, ended=${ended}]`;
-    },
-  };
-});
+jest.mock('elastic-apm-node', () => ({
+  isStarted: jest.fn(() => true),
+  startSpan: jest.fn((...names: string[]) => {
+    let outcome: string | null = null;
+    let ended = false;
+    return {
+      setOutcome(_: string) {
+        outcome = _;
+      },
+      end() {
+        ended = true;
+      },
+      [mockPrint]() {
+        return `SPAN[name=${names.join('/')}, outcome=${outcome}, ended=${ended}]`;
+      },
+    };
+  }),
+}));
+
+const { startSpan } = jest.requireMock('elastic-apm-node');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -34,8 +39,8 @@ afterEach(() => {
 
 expect.addSnapshotSerializer(
   createRecursiveSerializer(
-    (v) => typeof v === 'object' && v && printSymbol in v,
-    (v) => v[printSymbol]()
+    (v) => typeof v === 'object' && v && mockPrint in v,
+    (v) => v[mockPrint]()
   )
 );
 
@@ -71,7 +76,7 @@ it('deeply wraps objects so that methods start and end spans', () => {
     },
   };
 
-  const instrumented = createApmInstrumentedInstance(getSpan, instance, 'service', 'myInstance');
+  const instrumented = createApmInstrumentedInstance(instance, 'service', 'myInstance');
 
   expect(instrumented.foo()).toBe('foo');
   expect(instrumented.sub.api.subFoo()).toBe('subFoo');
@@ -80,7 +85,7 @@ it('deeply wraps objects so that methods start and end spans', () => {
   expect(() => instrumented.bar()).toThrowErrorMatchingInlineSnapshot(`"bar"`);
   expect(() => instrumented.sub.api.subBar()).toThrowErrorMatchingInlineSnapshot(`"subBar"`);
 
-  expect(getSpan).toMatchInlineSnapshot(`
+  expect(startSpan).toMatchInlineSnapshot(`
     [MockFunction] {
       "calls": Array [
         Array [

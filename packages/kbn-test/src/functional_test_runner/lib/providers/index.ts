@@ -8,3 +8,4 @@
 
 export { ProviderCollection } from './provider_collection';
 export { Provider, readProviderSpec } from './read_provider_spec';
+export { createApmInstrumentedInstance } from './apm_instrumented_instance';

@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
+
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { loadConfiguration } from '@kbn/apm-config-loader';
-import type { start } from 'elastic-apm-node';
+import unloadedApm from 'elastic-apm-node';
 
-type Agent = ReturnType<typeof start>;
+type Agent = typeof unloadedApm;
 type ApmTransaction = NonNullable<ReturnType<Agent['startTransaction']>>;
 
-import { Suite, Test } from './fake_mocha_types';
+import { Suite, Test, Runnable } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
@@ -34,17 +36,14 @@ function loadApm() {
     return LOADED_APM;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  LOADED_APM = require('elastic-apm-node') as Agent;
-
   // load APM config and start shipping stats for "ftr" service
-  LOADED_APM.start({
+  unloadedApm.start({
     ...loadConfiguration([], REPO_ROOT, false).getConfig('ftr'),
     // disable raw HTTP instrumentation, capture higher level spans instead via services
     disableInstrumentations: ['http', 'https'],
   });
 
-  return LOADED_APM;
+  return (LOADED_APM = unloadedApm);
 }
 
 export class FunctionalTestRunner {
@@ -66,21 +65,40 @@ export class FunctionalTestRunner {
   }
 
   async run() {
-    // use a single transaction for now
-    const transaction = loadApm().startTransaction('functional tests');
+    const apm = loadApm();
 
     return await this._run(async (config, coreProviders) => {
+      const transactions = new WeakMap<Runnable, ApmTransaction | null>();
+      const runnableErrors = new WeakMap<Runnable, Error>();
+
+      this.lifecycle.beforeEachRunnable.add((runnable) => {
+        transactions.set(runnable, apm.startTransaction(runnable.fullTitle(), runnable.type));
+      });
+
+      this.lifecycle.failedRunnable.add((runnable, error) => {
+        runnableErrors.set(runnable, error);
+      });
+
+      this.lifecycle.afterEachRunnable.add((runnable) => {
+        const transaction = transactions.get(runnable);
+        if (transaction === undefined) {
+          throw new Error(`beforeEachRunnable() was not triggered for test: ${inspect(runnable)}`);
+        }
+
+        if (transaction !== null) {
+          const error = runnableErrors.get(runnable);
+          transaction.setOutcome(error ? 'failure' : 'success');
+          transaction.end();
+        }
+      });
+
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-      const providers = new ProviderCollection(
-        this.log,
-        transaction ? (x0, x1, x2, x3) => transaction?.startSpan(x0, x1, x2, x3) : null,
-        [
-          ...coreProviders,
-          ...readProviderSpec('Service', config.get('services')),
-          ...readProviderSpec('PageObject', config.get('pageObjects')),
-        ]
-      );
+      const providers = new ProviderCollection(this.log, [
+        ...coreProviders,
+        ...readProviderSpec('Service', config.get('services')),
+        ...readProviderSpec('PageObject', config.get('pageObjects')),
+      ]);
 
       await providers.loadAll();
 
@@ -92,13 +110,13 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, apm);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
 
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
-    }, transaction);
+    });
   }
 
   async getTestStats() {
@@ -118,7 +136,7 @@ export class FunctionalTestRunner {
           }),
         }));
 
-      const providers = new ProviderCollection(this.log, null, [
+      const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readStubbedProviderSpec('Service', config.get('services')),
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
@@ -137,8 +155,7 @@ export class FunctionalTestRunner {
   }
 
   async _run<T = any>(
-    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>,
-    apmTransaction?: ApmTransaction | null
+    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
 
@@ -173,8 +190,6 @@ export class FunctionalTestRunner {
       runErrorOccurred = true;
       throw runError;
     } finally {
-      apmTransaction?.end();
-
       try {
         await this.close();
       } catch (closeError) {

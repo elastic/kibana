@@ -34,7 +34,7 @@ export function decorateMochaUi(lifecycle, context) {
    */
   function wrapSuiteFunction(name, fn) {
     return wrapFunction(fn, {
-      before(target, thisArg, argumentsList) {
+      before(_, __, argumentsList) {
         if (suiteCount > 0 && suiteLevel === 0) {
           throw new Error(`
             Test files must only define a single top-level suite. Please ensure that
@@ -164,6 +164,7 @@ export function decorateMochaUi(lifecycle, context) {
       case 'it':
       case 'it.only':
       case 'it.skip':
+      case 'it.retries':
       case 'xit':
       case 'specify':
       case 'specify.only':
@@ -179,7 +180,7 @@ export function decorateMochaUi(lifecycle, context) {
         return wrapTestHookFunction(property, value);
 
       default:
-        return wrapNonSuiteFunction(property, value);
+        throw new Error(`unexpected and unwrappable mocha UI function [${property}]`);
     }
   }
 

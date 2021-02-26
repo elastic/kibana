@@ -53,7 +53,7 @@ export const loadTestFiles = ({
     }
 
     loadTracer(provider, `testProvider[${path}]`, () => {
-      // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
+      // mocha.suite hocus-pocus comes from: https://github.com/mochajs/mocha/blob/1d52fd38c7acc4de2c0b8b5df864134bb6b2d991/lib/mocha.js#L221-L223
 
       const context = decorateMochaUi(lifecycle, global);
       mocha.suite.emit('pre-require', context, path, mocha);
