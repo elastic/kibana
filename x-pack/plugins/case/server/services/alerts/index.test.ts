@@ -33,9 +33,10 @@ describe('updateAlertsStatus', () => {
         body: [
           { update: { _id: 'alert-id-1', _index: '.siem-signals' } },
           {
-            script: {
-              lang: 'painless',
-              source: `ctx._source.signal.status = '${CaseStatuses.closed}'`,
+            doc: {
+              signal: {
+                status: CaseStatuses.closed,
+              },
             },
           },
         ],
