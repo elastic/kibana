@@ -20,17 +20,19 @@ export interface SwimlaneConfig {
 }
 
 export interface SwimlaneMappingConfig {
-  alertSourceKeyName: SwimlaneFieldMappingConfig;
-  severityKeyName: SwimlaneFieldMappingConfig;
-  caseNameKeyName: SwimlaneFieldMappingConfig;
-  caseIdKeyName: SwimlaneFieldMappingConfig;
-  alertNameKeyName: SwimlaneFieldMappingConfig;
-  commentsKeyName: SwimlaneFieldMappingConfig;
+  alertSourceConfig: SwimlaneFieldMappingConfig;
+  severityConfig: SwimlaneFieldMappingConfig;
+  caseNameConfig: SwimlaneFieldMappingConfig;
+  caseIdConfig: SwimlaneFieldMappingConfig;
+  alertNameConfig: SwimlaneFieldMappingConfig;
+  commentsConfig: SwimlaneFieldMappingConfig;
 }
 
 export interface SwimlaneFieldMappingConfig {
-  fieldKey: string;
-  fieldId: string;
+  id: string;
+  key: string;
+  name: string;
+  fieldType: string;
 }
 
 export interface SwimlaneSecrets {

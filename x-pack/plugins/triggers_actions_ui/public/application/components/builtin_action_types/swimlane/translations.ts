@@ -34,6 +34,13 @@ export const SW_REQUIRED_APP_ID_TEXT = i18n.translate(
   }
 );
 
+export const SW_REQUIRED_FIELD_MAPPINGS_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
+  {
+    defaultMessage: 'Field mappings are required.',
+  }
+);
+
 export const SW_REQUIRED_API_TOKEN_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredApiTokenText',
   {
@@ -74,21 +81,21 @@ export const SW_API_TOKEN_TEXT_FIELD_LABEL = i18n.translate(
 export const SW_MAPPING_TITLE_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingTitleTextFieldLabel',
   {
-    defaultMessage: 'Field Mappings',
+    defaultMessage: 'Configure Field Mappings',
   }
 );
 
-export const SW_ALERT_SOURCE_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceKeyNameTextFieldLabel',
+export const SW_ALERT_SOURCE_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceFieldLabel',
   {
-    defaultMessage: 'Source Key',
+    defaultMessage: 'Source',
   }
 );
 
-export const SW_SEVERITY_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severityKeyNameTextFieldLabel',
+export const SW_SEVERITY_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severityFieldLabel',
   {
-    defaultMessage: 'Severity Key',
+    defaultMessage: 'Severity',
   }
 );
 
@@ -99,35 +106,55 @@ export const SW_MAPPING_DESCRIPTION_TEXT_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const SW_ALERT_NAME_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertNameKeyNameTextFieldLabel',
+export const SW_ALERT_NAME_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertNameFieldLabel',
   {
-    defaultMessage: 'Alert Name Key',
+    defaultMessage: 'Alert Name',
   }
 );
 
-export const SW_CASE_ID_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseIdKeyNameTextFieldLabel',
+export const SW_CASE_ID_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseIdFieldLabel',
   {
-    defaultMessage: 'Case ID Key',
+    defaultMessage: 'Case ID',
   }
 );
 
-export const SW_CASE_NAME_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseNameKeyNameTextFieldLabel',
+export const SW_CASE_NAME_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseNameFieldLabel',
   {
-    defaultMessage: 'Case Name Key',
+    defaultMessage: 'Case Name',
   }
 );
 
-export const SW_COMMENTS_KEY_NAME_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.commentsKeyNameTextFieldLabel',
+export const SW_COMMENTS_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.commentsFieldLabel',
   {
-    defaultMessage: 'Comments Key',
+    defaultMessage: 'Comments',
   }
+);
+
+export const SW_REMEMBER_VALUE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.rememberValueLabel',
+  { defaultMessage: 'Remember this value. You must reenter it each time you edit the connector.' }
 );
 
 export const SW_REENTER_VALUE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.reenterValueLabel',
   { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
+);
+
+export const SW_CONFIGURE_CONNECTION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureConnectionLabel',
+  { defaultMessage: 'Configure API Connection' }
+);
+
+export const SW_RETRIEVE_CONFIGURATION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.retrieveConfigurationLabel',
+  { defaultMessage: 'Configure Fields' }
+);
+
+export const SW_RETRIEVE_CONFIGURATION_RESET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.resetConfigurationLabel',
+  { defaultMessage: 'Reset Configuration' }
 );

@@ -9,17 +9,19 @@ import { schema } from '@kbn/config-schema';
 export const ConfigMap = {
   id: schema.string(),
   key: schema.string(),
+  name: schema.string(),
+  fieldType: schema.string(),
 };
 
 export const ConfigMapSchema = schema.object(ConfigMap);
 
 export const ConfigMapping = {
-  alertSourceKeyName: ConfigMapSchema,
-  severityKeyName: ConfigMapSchema,
-  caseNameKeyName: schema.nullable(ConfigMapSchema),
-  caseIdKeyName: ConfigMapSchema,
-  alertNameKeyName: ConfigMapSchema,
-  commentsKeyName: schema.nullable(ConfigMapSchema),
+  alertSourceConfig: ConfigMapSchema,
+  severityConfig: ConfigMapSchema,
+  caseNameConfig: schema.nullable(ConfigMapSchema),
+  caseIdConfig: ConfigMapSchema,
+  alertNameConfig: ConfigMapSchema,
+  commentsConfig: schema.nullable(ConfigMapSchema),
 };
 
 export const ConfigMappingSchema = schema.object(ConfigMapping);

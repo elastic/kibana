@@ -6,7 +6,7 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { SwimlaneActionConnector } from '../types';
+import { SwimlaneActionConnector } from './types';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 jest.mock('../../../../common/lib/kibana');
 
@@ -23,10 +23,10 @@ describe('SwimlaneActionConnectorFields renders', () => {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
         mappings: {
-          alertSourceKeyName: 'product-source',
-          severityKeyName: 'severity',
-          caseNameKeyName: 'case-name',
-          caseIdKeyName: 'case-id',
+          alertSourceConfig: { id: '123', key: 'product-source' },
+          severityConfig: { id: '123', key: 'severity' },
+          caseNameConfig: { id: '123', key: 'case-name' },
+          caseIdConfig: { id: '123', key: 'case-id' },
         },
       },
     } as SwimlaneActionConnector;
@@ -51,10 +51,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
       'http:\\test'
     );
     expect(wrapper.find('[data-test-subj="swimlaneAppIdInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlanealertSourceKeyNameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneSeverityKeyNameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseIdKeyNameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseNameKeyNameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="swimlaneApiTokenInput"]').length > 0).toBeTruthy();
   });
 
@@ -90,10 +86,10 @@ describe('SwimlaneActionConnectorFields renders', () => {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
         mappings: {
-          alertSourceKeyName: 'product-source',
-          severityKeyName: 'severity',
-          caseNameKeyName: 'case-name',
-          caseIdKeyName: 'case-id',
+          alertSourceConfig: { id: '123', key: 'product-source' },
+          severityConfig: { id: '123', key: 'severity' },
+          caseNameConfig: { id: '123', key: 'case-name' },
+          caseIdConfig: { id: '123', key: 'case-id' },
         },
       },
     } as SwimlaneActionConnector;

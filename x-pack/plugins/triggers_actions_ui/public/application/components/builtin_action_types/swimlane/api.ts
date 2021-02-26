@@ -5,23 +5,35 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { BASE_ACTION_API_PATH } from '../../../../../../actions/common';
 
 export async function getApplication({
   http,
-  signal,
-  connectorId,
-  id,
+  url,
+  appId,
+  apiToken,
 }: {
   http: HttpSetup;
-  signal: AbortSignal;
-  connectorId: string;
-  id: string;
+  url: string;
+  appId: string;
+  apiToken: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/`, {
-    body: JSON.stringify({
-      params: { subAction: 'application', subActionParams: { id } },
-    }),
-    signal,
-  });
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Private-Token': `${apiToken}`,
+  };
+
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const apiUrl = urlWithoutTrailingSlash.endsWith('api')
+    ? urlWithoutTrailingSlash
+    : urlWithoutTrailingSlash + '/api';
+  const applicationUrl = `${apiUrl}/app/{appId}`;
+
+  const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
+  try {
+    return await http.get(getApplicationUrl(appId), {
+      headers,
+    });
+  } catch (error) {
+    throw new Error(`Unable to get application with id ${appId}. Error: ${error.message}`);
+  }
 }

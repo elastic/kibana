@@ -6,7 +6,7 @@
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
-import { SwimlaneActionConnector } from '.././types';
+import { SwimlaneActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.swimlane';
 let actionTypeModel: ActionTypeModel;
@@ -39,6 +39,9 @@ describe('swimlane connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
+        mappings: {
+          caseIdConfig: { id: '1234' },
+        },
       },
     } as SwimlaneActionConnector;
 
@@ -47,6 +50,7 @@ describe('swimlane connector validation', () => {
         apiToken: [],
         apiUrl: [],
         appId: [],
+        mappings: [],
       },
     });
 
@@ -58,6 +62,7 @@ describe('swimlane connector validation', () => {
         apiToken: [],
         apiUrl: [],
         appId: [],
+        mappings: [],
       },
     });
   });
@@ -78,10 +83,10 @@ describe('swimlane connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        severityKeyName: ['SeverityKeyName is required.'],
         apiToken: [],
         apiUrl: [],
         appId: [],
+        mappings: ['Field mappings are required.'],
       },
     });
   });

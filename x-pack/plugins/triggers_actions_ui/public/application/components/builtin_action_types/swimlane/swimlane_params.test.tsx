@@ -10,12 +10,14 @@ import SwimlaneParamsFields from './swimlane_params';
 describe('SwimlaneParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
-      alertName: 'alert name',
-      alertSource: 'alert source',
-      caseId: '3456789',
-      caseName: 'my case name',
-      comments: 'my comments',
-      severity: 'critical',
+      subActionParams: {
+        alertName: 'alert name',
+        alertSource: 'alert source',
+        caseId: '3456789',
+        caseName: 'my case name',
+        comments: 'my comments',
+        severity: 'critical',
+      },
     };
 
     const wrapper = mountWithIntl(

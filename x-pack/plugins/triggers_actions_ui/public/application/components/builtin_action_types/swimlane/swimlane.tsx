@@ -30,6 +30,7 @@ export function getActionType(): ActionTypeModel<
         apiUrl: new Array<string>(),
         appId: new Array<string>(),
         apiToken: new Array<string>(),
+        mappings: new Array<string>(),
       };
       validationResult.errors = errors;
       if (!action.secrets.apiToken) {
@@ -37,6 +38,9 @@ export function getActionType(): ActionTypeModel<
       }
       if (!action.config.appId) {
         errors.appId.push(i18n.SW_REQUIRED_APP_ID_TEXT);
+      }
+      if (!action.config.mappings) {
+        errors.mappings.push(i18n.SW_REQUIRED_FIELD_MAPPINGS_TEXT);
       }
       return validationResult;
     },
