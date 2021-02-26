@@ -213,6 +213,13 @@ export const schema = Joi.object()
       })
       .default(),
 
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
+      })
+      .default(),
+
     // settings for the kibanaServer.uiSettings module
     uiSettings: Joi.object()
       .keys({

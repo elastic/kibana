@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { badRequest, boomify, isBoom } from '@hapi/boom';
+import { badRequest, Boom, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -45,6 +45,7 @@ import {
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';
+import { isCaseError } from '../../common/error';
 
 export const transformNewSubCase = ({
   createdAt,
@@ -182,9 +183,19 @@ export const transformNewComment = ({
   };
 };
 
+/**
+ * Transforms an error into the correct format for a kibana response.
+ */
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const options = { statusCode: error.statusCode ?? 500 };
-  const boom = isBoom(error) ? error : boomify(error, options);
+  let boom: Boom;
+
+  if (isCaseError(error)) {
+    boom = error.boomify();
+  } else {
+    const options = { statusCode: error.statusCode ?? 500 };
+    boom = isBoom(error) ? error : boomify(error, options);
+  }
+
   return {
     body: boom,
     headers: boom.output.headers as { [key: string]: string },
