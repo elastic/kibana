@@ -36,6 +36,9 @@ const toSelectedOptions = (
   return [];
 };
 
+const toComboBoxOptions = (options: IdsWithTitle) =>
+  options.map(({ title, id }) => ({ label: title, id }));
+
 export const ComboBoxSelect = ({
   onIndexChange,
   onModeChange,
@@ -52,9 +55,6 @@ export const ComboBoxSelect = ({
     },
     [onIndexChange]
   );
-
-  const toComboBoxOptions = (options: IdsWithTitle) =>
-    options.map(({ title, id }) => ({ label: title, id }));
 
   useEffect(() => {
     async function fetchIndexes() {

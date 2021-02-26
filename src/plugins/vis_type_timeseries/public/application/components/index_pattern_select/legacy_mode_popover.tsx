@@ -98,14 +98,16 @@ export const LegacyModePopover = ({ index }: LegacyModePopoverProps) => {
 
   useEffect(() => {
     async function retrieveIndex() {
+      const shouldShowExtraCallOuts = Boolean(index);
       let hasIndex = false;
-      if (index) {
+
+      if (shouldShowExtraCallOuts) {
         const { indexPatterns } = getDataStart();
         hasIndex = Boolean((await indexPatterns.find(index)).find((i) => i.title === index));
       }
 
-      setShowReadyToMigrateCallOut(Boolean(index) && hasIndex);
-      setNoMatchedIndicesCallOut(Boolean(index) && !hasIndex);
+      setShowReadyToMigrateCallOut(shouldShowExtraCallOuts && hasIndex);
+      setNoMatchedIndicesCallOut(shouldShowExtraCallOuts && !hasIndex);
     }
 
     retrieveIndex();
