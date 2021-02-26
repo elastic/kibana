@@ -1,5 +1,5 @@
 [role="xpack"]
-[[task-manager]]
+[[task-manager-production-considerations]]
 == Task Manager
 
 {kib} Task Manager is leveraged by features such as Alerting, Actions, and Reporting to run mission critical work as persistent background tasks.
