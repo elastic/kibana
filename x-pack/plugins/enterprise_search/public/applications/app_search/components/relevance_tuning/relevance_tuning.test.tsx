@@ -79,7 +79,7 @@ describe('RelevanceTuning', () => {
     let wrapper: ShallowWrapper;
 
     beforeAll(() => {
-      // An eninge would have no schema if it is newly created, and no documents have been indexed
+      // An engine would have no schema if it is newly created, and no documents have been indexed
       // yet.
       setMockValues({
         ...values,
