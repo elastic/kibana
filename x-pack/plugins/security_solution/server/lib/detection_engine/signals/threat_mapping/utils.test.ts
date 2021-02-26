@@ -589,6 +589,7 @@ describe('utils', () => {
       it('generates a string that can be later decoded', () => {
         const encoded = encodeThreatMatchNamedQuery({
           id: 'id',
+          index: 'index',
           field: 'field',
           value: 'value',
         });
@@ -601,6 +602,7 @@ describe('utils', () => {
       it('can decode an encoded query', () => {
         const query: ThreatMatchNamedQuery = {
           id: 'my_id',
+          index: 'index',
           field: 'threat.indicator.domain',
           value: 'host.name',
         };
@@ -623,6 +625,7 @@ describe('utils', () => {
       it('raises an error if the query is missing a value', () => {
         const badQuery: ThreatMatchNamedQuery = {
           id: 'my_id',
+          index: 'index',
           // @ts-expect-error field intentionally undefined
           field: undefined,
           value: 'host.name',
@@ -630,7 +633,7 @@ describe('utils', () => {
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"my_id","field":"","value":"host.name"}'
+          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
         );
       });
     });
