@@ -169,9 +169,9 @@ export class CaseClientHandler implements CaseClient {
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to update alerts status using client ids: ${JSON.stringify(
-          args.ids
-        )} \nindices: ${JSON.stringify([...args.indices])} \nstatus: ${args.status}: ${error}`,
+        message: `Failed to update alerts status using client alerts: ${JSON.stringify(
+          args.alerts
+        )}: ${error}`,
         error,
         logger: this.logger,
       });
@@ -219,8 +219,8 @@ export class CaseClientHandler implements CaseClient {
     } catch (error) {
       throw createCaseError({
         message: `Failed to get alerts using client ids: ${JSON.stringify(
-          args.ids
-        )} \nindices: ${JSON.stringify([...args.indices])}: ${error}`,
+          args.alertsInfo
+        )}: ${error}`,
         error,
         logger: this.logger,
       });
