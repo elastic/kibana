@@ -139,6 +139,7 @@ For example, if the `context` has one variable `foo` which is an object that has
 	]
 }
 ```
+
 ## Licensing
 
 Currently most of the alerts are free features. But some alert types are subscription features, such as the tracking containment alert.
@@ -151,11 +152,11 @@ You should create asciidoc for the new alert type.
 * Solution specific alert documentation should live within the docs for the solution. 
 
 We suggest following the template provided in `docs/alert-type-template.asciidoc`. The [Index Threshold alert type](https://www.elastic.co/guide/en/kibana/master/alert-type-index-threshold.html) is an example of documentation created following the template.
+
 ## Tests
 
 The alert type should have jest tests and optionaly functional tests. 
 In the the tests we recomend to test the expected alert execution result with a different input params, the structure of the created alert and the params validation. The rest will be guaranteed as a framework functionality.
->>>>>>> c2877a6d96791a9dd5498de80a75945b9e1c70fc
 
 ### Example
 
