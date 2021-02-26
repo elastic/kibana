@@ -24,7 +24,7 @@ import {
 } from './types';
 import * as i18n from './translations';
 
-import { GetActionTypeParams, isCommentGeneratedAlert } from '..';
+import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
 import { nullUser } from '../../common';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
@@ -136,8 +136,8 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
         ruleId: string | undefined;
         ruleName: string | undefined;
       }> = JSON.parse(
-        `${comment.alerts.substring(0, comment.alerts.lastIndexOf('__SEPARATOR__'))}]`.replace(
-          /__SEPARATOR__/gi,
+        `${comment.alerts.substring(0, comment.alerts.lastIndexOf(separator))}]`.replace(
+          new RegExp(separator, 'g'),
           ','
         )
       );
@@ -148,7 +148,7 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
           // Mutation usually leads to side effects but for this scenario it's ok to do it.
           acc.ids.push(_id);
           acc.indices.push(_index);
-          // We assume one rule per batch of alerts
+          // We assume one rule per batch of alerts, this will use the rule information from the last entry in the array
           acc.rule = { id: ruleId ?? null, name: ruleName ?? null };
           return acc;
         },

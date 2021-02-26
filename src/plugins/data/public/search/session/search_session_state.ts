@@ -69,6 +69,11 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   sessionId?: string;
 
   /**
+   * App that created this session
+   */
+  appName?: string;
+
+  /**
    * Has the session already been stored (i.e. "sent to background")?
    */
   isStored: boolean;
@@ -105,6 +110,7 @@ const createSessionDefaultState: <
   SearchDescriptor = unknown
 >() => SessionStateInternal<SearchDescriptor> = () => ({
   sessionId: undefined,
+  appName: undefined,
   isStored: false,
   isRestore: false,
   isCanceled: false,
@@ -116,7 +122,7 @@ export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
-  start: (state: S) => () => S;
+  start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
   store: (state: S) => () => S;
@@ -126,10 +132,11 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => () => ({
+  start: (state) => ({ appName }) => ({
     ...createSessionDefaultState(),
     sessionId: uuid.v4(),
     startTime: new Date(),
+    appName,
   }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),

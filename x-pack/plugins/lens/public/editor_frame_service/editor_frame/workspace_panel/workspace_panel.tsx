@@ -10,7 +10,15 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiPageContentBody,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -88,7 +96,23 @@ const dropProps = {
 };
 
 // Exported for testing purposes only.
-export const WorkspacePanel = React.memo(function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
+  const { getSuggestionForField, ...restProps } = props;
+
+  const dragDropContext = useContext(DragContext);
+
+  const suggestionForDraggedField = useMemo(
+    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
+    [dragDropContext.dragging, getSuggestionForField]
+  );
+
+  return (
+    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
+  );
+});
+
+// Exported for testing purposes only.
+export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -102,13 +126,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
-  getSuggestionForField,
-}: WorkspacePanelProps) {
-  const dragDropContext = useContext(DragContext);
-
-  const suggestionForDraggedField =
-    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
-
+  suggestionForDraggedField,
+}: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
+  suggestionForDraggedField: Suggestion | undefined;
+}) {
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -173,6 +194,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     ]
   );
 
+  const expressionExists = Boolean(expression);
+
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -202,23 +225,23 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 
   useEffect(() => {
     // reset expression error if component attempts to run it again
-    if (expression && localState.expressionBuildError) {
+    if (expressionExists && localState.expressionBuildError) {
       setLocalState((s) => ({
         ...s,
         expressionBuildError: undefined,
       }));
     }
-  }, [expression, localState.expressionBuildError]);
+  }, [expressionExists, localState.expressionBuildError]);
 
-  function onDrop() {
+  const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
+      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
-  }
+  }, [suggestionForDraggedField, expressionExists, dispatch]);
 
-  function renderEmptyWorkspace() {
+  const renderEmptyWorkspace = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -229,7 +252,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
       >
         <h2>
           <strong>
-            {expression === null
+            {!expressionExists
               ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
                   defaultMessage: 'Drop some fields here to start',
                 })
@@ -239,7 +262,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
           </strong>
         </h2>
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        {expression === null && (
+        {!expressionExists && (
           <>
             <p>
               {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
@@ -263,9 +286,9 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         )}
       </EuiText>
     );
-  }
+  };
 
-  function renderVisualization() {
+  const renderVisualization = () => {
     // we don't want to render the emptyWorkspace on visualizing field from Discover
     // as it is specific for the drag and drop functionality and can confuse the users
     if (expression === null && !visualizeTriggerFieldContext) {
@@ -283,7 +306,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
-  }
+  };
 
   return (
     <WorkspacePanelWrapper
@@ -305,10 +328,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <div>
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {renderVisualization()}
           {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
-        </div>
+        </EuiPageContentBody>
       </DragDrop>
     </WorkspacePanelWrapper>
   );
@@ -366,72 +389,84 @@ export const InnerVisualizationWrapper = ({
 
   if (localState.configurationValidationError?.length) {
     let showExtraErrors = null;
+    let showExtraErrorsAction = null;
+
     if (localState.configurationValidationError.length > 1) {
       if (localState.expandError) {
         showExtraErrors = localState.configurationValidationError
           .slice(1)
           .map(({ longMessage }) => (
-            <EuiFlexItem
+            <p
               key={longMessage}
               className="eui-textBreakAll"
               data-test-subj="configuration-failure-error"
             >
               {longMessage}
-            </EuiFlexItem>
+            </p>
           ));
       } else {
-        showExtraErrors = (
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              onClick={() => {
-                setLocalState((prevState: WorkspaceState) => ({
-                  ...prevState,
-                  expandError: !prevState.expandError,
-                }));
-              }}
-              data-test-subj="configuration-failure-more-errors"
-            >
-              {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-                defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-                values: { errors: localState.configurationValidationError.length - 1 },
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        showExtraErrorsAction = (
+          <EuiButtonEmpty
+            onClick={() => {
+              setLocalState((prevState: WorkspaceState) => ({
+                ...prevState,
+                expandError: !prevState.expandError,
+              }));
+            }}
+            data-test-subj="configuration-failure-more-errors"
+          >
+            {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+              defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+              values: { errors: localState.configurationValidationError.length - 1 },
+            })}
+          </EuiButtonEmpty>
         );
       }
     }
 
     return (
-      <EuiFlexGroup
-        style={{ maxWidth: '100%' }}
-        direction="column"
-        alignItems="center"
-        data-test-subj="configuration-failure"
-      >
+      <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
-          <EuiIcon type="alert" size="xl" color="danger" />
+          <EuiEmptyPrompt
+            actions={showExtraErrorsAction}
+            body={
+              <>
+                <p className="eui-textBreakAll" data-test-subj="configuration-failure-error">
+                  {localState.configurationValidationError[0].longMessage}
+                </p>
+
+                {showExtraErrors}
+              </>
+            }
+            iconColor="danger"
+            iconType="alert"
+          />
         </EuiFlexItem>
-        <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
-          {localState.configurationValidationError[0].longMessage}
-        </EuiFlexItem>
-        {showExtraErrors}
       </EuiFlexGroup>
     );
   }
 
   if (localState.expressionBuildError?.length) {
     return (
-      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem data-test-subj="expression-failure">
-          <FormattedMessage
-            id="xpack.lens.editorFrame.expressionFailure"
-            defaultMessage="An error occurred in the expression"
+          <EuiEmptyPrompt
+            body={
+              <>
+                <p data-test-subj="expression-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.expressionFailure"
+                    defaultMessage="An error occurred in the expression"
+                  />
+                </p>
+
+                <p>{localState.expressionBuildError[0].longMessage}</p>
+              </>
+            }
+            iconColor="danger"
+            iconType="alert"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -451,34 +486,43 @@ export const InnerVisualizationWrapper = ({
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 
           return (
-            <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+            <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiIcon type="alert" size="xl" color="danger" />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="expression-failure">
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.dataFailure"
-                  defaultMessage="An error occurred when loading data."
+                <EuiEmptyPrompt
+                  actions={
+                    visibleErrorMessage ? (
+                      <EuiButtonEmpty
+                        onClick={() => {
+                          setLocalState((prevState: WorkspaceState) => ({
+                            ...prevState,
+                            expandError: !prevState.expandError,
+                          }));
+                        }}
+                      >
+                        {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                          defaultMessage: 'Show details of error',
+                        })}
+                      </EuiButtonEmpty>
+                    ) : null
+                  }
+                  body={
+                    <>
+                      <p data-test-subj="expression-failure">
+                        <FormattedMessage
+                          id="xpack.lens.editorFrame.dataFailure"
+                          defaultMessage="An error occurred when loading data."
+                        />
+                      </p>
+
+                      {localState.expandError ? (
+                        <p className="eui-textBreakAll">visibleErrorMessage</p>
+                      ) : null}
+                    </>
+                  }
+                  iconColor="danger"
+                  iconType="alert"
                 />
               </EuiFlexItem>
-              {visibleErrorMessage ? (
-                <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      setLocalState((prevState: WorkspaceState) => ({
-                        ...prevState,
-                        expandError: !prevState.expandError,
-                      }));
-                    }}
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                      defaultMessage: 'Show details of error',
-                    })}
-                  </EuiButtonEmpty>
-
-                  {localState.expandError ? visibleErrorMessage : null}
-                </EuiFlexItem>
-              ) : null}
             </EuiFlexGroup>
           );
         }}

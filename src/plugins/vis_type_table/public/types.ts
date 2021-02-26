@@ -8,15 +8,8 @@
 
 import { IFieldFormat } from 'src/plugins/data/public';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../common';
-
-export interface Dimensions {
-  buckets: SchemaConfig[];
-  metrics: SchemaConfig[];
-  splitColumn?: SchemaConfig[];
-  splitRow?: SchemaConfig[];
-}
 
 export interface ColumnWidthData {
   colIndex: number;
@@ -40,7 +33,10 @@ export interface TableVisUseUiStateProps {
 
 export interface TableVisConfig extends TableVisParams {
   title: string;
-  dimensions: Dimensions;
+  buckets?: ExpressionValueVisDimension[];
+  metrics: ExpressionValueVisDimension[];
+  splitColumn?: ExpressionValueVisDimension;
+  splitRow?: ExpressionValueVisDimension;
 }
 
 export interface FormattedColumn {
