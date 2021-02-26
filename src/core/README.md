@@ -1,11 +1,3 @@
----
-id: kibServerAndCoreComponents
-slug: /kibana-dev-docs/getting-started/kibana-server-and-core-components
-title: Kibana server and core components
-summary: Core components consist of the main services used by the Kibana server
-date: 2021-02-25
-tags: ['kibana','dev', 'contributor', 'api docs']
----
 # Core
 
 Core is a set of systems (frontend, backend etc.) that Kibana and its plugins are built on top of.
