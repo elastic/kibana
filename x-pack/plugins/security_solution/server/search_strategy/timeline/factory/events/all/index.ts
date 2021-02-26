@@ -41,17 +41,10 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
     const edges: TimelineEdges[] = await Promise.all(
-      hits.map((hit) => {
-        const res = formatTimelineData(
-          options.fieldRequested,
-          TIMELINE_EVENTS_FIELDS,
-          hit as EventHit
-        );
-        console.log('hit, res', JSON.stringify({ hit: hit.fields }));
-        return res;
-      })
+      hits.map((hit) =>
+        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit as EventHit)
+      )
     );
-    console.log('edges??', JSON.stringify(edges.map((e) => e.node.data)));
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };

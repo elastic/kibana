@@ -52,7 +52,6 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     );
 
     const data = unionBy('field', fieldsData, sourceData);
-    console.log('details: ', JSON.stringify({ fields: { fields, _source }, result: data }));
     return {
       ...response,
       data,

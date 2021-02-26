@@ -62,18 +62,41 @@ const specialFields = ['_id', '_index', '_type', '_score'];
 
 const getValuesFromFields = async (
   fieldName: string,
-  hit: EventHit
+  hit: EventHit,
+  nestedParentFieldName?: string
 ): Promise<TimelineNonEcsData[]> => {
   if (specialFields.includes(fieldName)) {
     return [{ field: fieldName, value: toStringArray(get(fieldName, hit)) }];
   }
-  const fieldToEval = has(fieldName, hit._source)
-    ? get(fieldName, hit._source)
-    : hit.fields[fieldName];
-  const formattedData = await getDataSafety(getDataFromFieldsHits, {
-    [fieldName]: fieldToEval,
-  });
-  return formattedData.map(({ field, values }) => ({ field, value: values }));
+
+  let fieldToEval;
+  if (has(fieldName, hit._source)) {
+    fieldToEval = {
+      [fieldName]: get(fieldName, hit._source),
+    };
+  } else {
+    if (nestedParentFieldName == null || nestedParentFieldName === fieldName) {
+      fieldToEval = {
+        [fieldName]: hit.fields[fieldName],
+      };
+    } else if (nestedParentFieldName != null) {
+      fieldToEval = {
+        [nestedParentFieldName]: hit.fields[nestedParentFieldName],
+      };
+    } else {
+      // fallback, should never hit
+      fieldToEval = {
+        [fieldName]: [],
+      };
+    }
+  }
+  const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
+  return formattedData.reduce(
+    (acc: TimelineNonEcsData[], { field, values }) =>
+      // nested fields return all field values, pick only the one we asked for
+      field.includes(fieldName) ? [...acc, { field, value: values }] : acc,
+    []
+  );
 };
 
 const mergeTimelineFieldsWithHit = async <T>(
@@ -84,17 +107,24 @@ const mergeTimelineFieldsWithHit = async <T>(
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
-    // console.log('fieldName', fieldName);
+    const fieldNameAsArray = fieldName.split('.');
+    const nestedParentFieldName = Object.keys(hit.fields).find((f) => {
+      return f === fieldNameAsArray.slice(0, f.split('.').length).join('.');
+    });
     if (
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
+      nestedParentFieldName != null ||
       specialFields.includes(fieldName)
     ) {
       const objectWithProperty = {
         node: {
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
-            ? [...get('node.data', flattenedFields), ...(await getValuesFromFields(fieldName, hit))]
+            ? [
+                ...get('node.data', flattenedFields),
+                ...(await getValuesFromFields(fieldName, hit, nestedParentFieldName)),
+              ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
@@ -113,15 +143,8 @@ const mergeTimelineFieldsWithHit = async <T>(
             : get('node.ecs', flattenedFields),
         },
       };
-      // console.log('DATA!!!', {
-      //   flattenedFields: flattenedFields.node.data,
-      //   objectWithProperty: objectWithProperty.node.data,
-      // });
       return merge(flattenedFields, objectWithProperty);
     } else {
-      if (fieldName.includes('threat.indicator')) {
-        console.log('threat.indicator flattenedFields!!!', flattenedFields.node.data);
-      }
       return flattenedFields;
     }
   } else {

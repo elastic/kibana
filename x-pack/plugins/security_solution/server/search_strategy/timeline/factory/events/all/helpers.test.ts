@@ -11,7 +11,7 @@ import { formatTimelineData } from './helpers';
 import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
-  it.only('happy path', async () => {
+  it('happy path', async () => {
     const res = await formatTimelineData(
       [
         '@timestamp',
@@ -19,7 +19,7 @@ describe('#formatTimelineData', () => {
         'destination.ip',
         'source.ip',
         'source.geo.location',
-        'threat.indicator',
+        'threat.indicator.matched.field',
       ],
       TIMELINE_EVENTS_FIELDS,
       eventHit
@@ -48,42 +48,6 @@ describe('#formatTimelineData', () => {
           {
             field: 'threat.indicator.matched.field',
             value: ['matched_field', 'matched_field_2'],
-          },
-          {
-            field: 'threat.indicator.first_seen',
-            value: ['2021-02-22T17:29:25.195Z'],
-          },
-          {
-            field: 'threat.indicator.provider',
-            value: ['yourself', 'other_you'],
-          },
-          {
-            field: 'threat.indicator.type',
-            value: ['custom'],
-          },
-          {
-            field: 'threat.indicator.matched.atomic',
-            value: ['matched_atomic', 'matched_atomic_2'],
-          },
-          {
-            field: 'threat.indicator.lazer.great.field',
-            value: ['grrrrr', 'grrrrr_2'],
-          },
-          {
-            field: 'threat.indicator.lazer.great.field.wowoe.fooooo',
-            value: ['grrrrr'],
-          },
-          {
-            field: 'threat.indicator.lazer.great.field.astring',
-            value: ['cool'],
-          },
-          {
-            field: 'threat.indicator.lazer.great.field.aNumber',
-            value: ['1'],
-          },
-          {
-            field: 'threat.indicator.lazer.great.field.neat',
-            value: ['true'],
           },
         ],
         ecs: {
