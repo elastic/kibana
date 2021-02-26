@@ -17,7 +17,7 @@ import {
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
@@ -127,7 +127,7 @@ export const defaultCreateSubPost = postCollectionReq;
  * Response structure for the createSubCase and createSubCaseComment functions.
  */
 export interface CreateSubCaseResp {
-  newSubCaseInfo: CollectionWithSubCaseResponse;
+  newSubCaseInfo: CaseResponse;
   modifiedSubCases?: SubCasesResponse;
 }
 

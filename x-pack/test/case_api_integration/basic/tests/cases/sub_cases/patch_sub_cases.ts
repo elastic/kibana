@@ -59,15 +59,15 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         cases: [
           {
-            id: caseInfo.subCase!.id,
-            version: caseInfo.subCase!.version,
+            id: caseInfo.subCases![0].id,
+            version: caseInfo.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
         type: 'sub_case',
       });
       const { body: subCase }: { body: SubCaseResponse } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
+        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
         .expect(200);
 
       expect(subCase.status).to.eql(CaseStatuses['in-progress']);
@@ -104,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         cases: [
           {
-            id: caseInfo.subCase!.id,
-            version: caseInfo.subCase!.version,
+            id: caseInfo.subCases![0].id,
+            version: caseInfo.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
@@ -167,8 +167,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         cases: [
           {
-            id: caseInfo.subCase!.id,
-            version: caseInfo.subCase!.version,
+            id: caseInfo.subCases![0].id,
+            version: caseInfo.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
@@ -255,8 +255,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         cases: [
           {
-            id: collectionWithSecondSub.subCase!.id,
-            version: collectionWithSecondSub.subCase!.version,
+            id: collectionWithSecondSub.subCases![0].id,
+            version: collectionWithSecondSub.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
@@ -377,8 +377,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         cases: [
           {
-            id: caseInfo.subCase!.id,
-            version: caseInfo.subCase!.version,
+            id: caseInfo.subCases![0].id,
+            version: caseInfo.subCases![0].version,
             status: CaseStatuses['in-progress'],
           },
         ],
@@ -486,8 +486,8 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           subCases: [
             {
-              id: caseInfo.subCase!.id,
-              version: caseInfo.subCase!.version,
+              id: caseInfo.subCases![0].id,
+              version: caseInfo.subCases![0].version,
               type: 'blah',
             },
           ],
