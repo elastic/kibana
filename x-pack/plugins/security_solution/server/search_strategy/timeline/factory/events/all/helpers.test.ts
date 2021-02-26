@@ -8,54 +8,23 @@
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './helpers';
+import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
-  it('happy path', () => {
-    const response: EventHit = {
-      _index: 'auditbeat-7.8.0-2020.11.05-000003',
-      _id: 'tkCt1nUBaEgqnrVSZ8R_',
-      _score: 0,
-      _type: '',
-      fields: {
-        'event.category': ['process'],
-        'process.ppid': [3977],
-        'user.name': ['jenkins'],
-        'process.args': ['go', 'vet', './...'],
-        message: ['Process go (PID: 4313) by user jenkins STARTED'],
-        'process.pid': [4313],
-        'process.working_directory': [
-          '/var/lib/jenkins/workspace/Beats_beats_PR-22624/src/github.com/elastic/beats/libbeat',
-        ],
-        'process.entity_id': ['Z59cIkAAIw8ZoK0H'],
-        'host.ip': ['10.224.1.237', 'fe80::4001:aff:fee0:1ed', '172.17.0.1'],
-        'process.name': ['go'],
-        'event.action': ['process_started'],
-        'agent.type': ['auditbeat'],
-        '@timestamp': ['2020-11-17T14:48:08.922Z'],
-        'event.module': ['system'],
-        'event.type': ['start'],
-        'host.name': ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-        'process.hash.sha1': ['1eac22336a41e0660fb302add9d97daa2bcc7040'],
-        'host.os.family': ['debian'],
-        'event.kind': ['event'],
-        'host.id': ['e59991e835905c65ed3e455b33e13bd6'],
-        'event.dataset': ['process'],
-        'process.executable': [
-          '/var/lib/jenkins/workspace/Beats_beats_PR-22624/.gvm/versions/go1.14.7.linux.amd64/bin/go',
-        ],
-      },
-      _source: {},
-      sort: ['1605624488922', 'beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-      aggregations: {},
-    };
-
-    expect(
-      formatTimelineData(
-        ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
-        TIMELINE_EVENTS_FIELDS,
-        response
-      )
-    ).toEqual({
+  it('happy path', async () => {
+    const res = await formatTimelineData(
+      [
+        '@timestamp',
+        'host.name',
+        'destination.ip',
+        'source.ip',
+        'source.geo.location',
+        'threat.indicator',
+      ],
+      TIMELINE_EVENTS_FIELDS,
+      eventHit
+    );
+    expect(res).toEqual({
       cursor: {
         tiebreaker: 'beats-ci-immutable-ubuntu-1804-1605624279743236239',
         value: '1605624488922',
@@ -71,6 +40,50 @@ describe('#formatTimelineData', () => {
           {
             field: 'host.name',
             value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
+          },
+          {
+            field: 'source.geo.location',
+            value: [`{"lon":118.7778,"lat":32.0617}`],
+          },
+          {
+            field: 'threat.indicator.matched.field',
+            value: ['matched_field', 'matched_field_2'],
+          },
+          {
+            field: 'threat.indicator.first_seen',
+            value: ['2021-02-22T17:29:25.195Z'],
+          },
+          {
+            field: 'threat.indicator.provider',
+            value: ['yourself', 'other_you'],
+          },
+          {
+            field: 'threat.indicator.type',
+            value: ['custom'],
+          },
+          {
+            field: 'threat.indicator.matched.atomic',
+            value: ['matched_atomic', 'matched_atomic_2'],
+          },
+          {
+            field: 'threat.indicator.lazer.great.field',
+            value: ['grrrrr', 'grrrrr_2'],
+          },
+          {
+            field: 'threat.indicator.lazer.great.field.wowoe.fooooo',
+            value: ['grrrrr'],
+          },
+          {
+            field: 'threat.indicator.lazer.great.field.astring',
+            value: ['cool'],
+          },
+          {
+            field: 'threat.indicator.lazer.great.field.aNumber',
+            value: ['1'],
+          },
+          {
+            field: 'threat.indicator.lazer.great.field.neat',
+            value: ['true'],
           },
         ],
         ecs: {

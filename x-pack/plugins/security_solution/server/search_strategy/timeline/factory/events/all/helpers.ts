@@ -6,9 +6,13 @@
  */
 
 import { get, has, merge, uniq } from 'lodash/fp';
-import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
-import { formatGeoLocation, isGeoField } from '../details/helpers';
+import {
+  EventHit,
+  TimelineEdges,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy';
+import { toStringArray } from '../../../../helpers/to_array';
+import { getDataSafety, getDataFromFieldsHits } from '../details/helpers';
 
 const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {
@@ -19,13 +23,14 @@ const getTimestamp = (hit: EventHit): string => {
   return '';
 };
 
-export const formatTimelineData = (
+export const formatTimelineData = async (
   dataFields: readonly string[],
   ecsFields: readonly string[],
   hit: EventHit
 ) =>
-  uniq([...ecsFields, ...dataFields]).reduce<TimelineEdges>(
-    (flattenedFields, fieldName) => {
+  uniq([...ecsFields, ...dataFields]).reduce<Promise<TimelineEdges>>(
+    async (acc, fieldName) => {
+      const flattenedFields: TimelineEdges = await acc;
       flattenedFields.node._id = hit._id;
       flattenedFields.node._index = hit._index;
       flattenedFields.node.ecs._id = hit._id;
@@ -35,27 +40,51 @@ export const formatTimelineData = (
         flattenedFields.cursor.value = hit.sort[0];
         flattenedFields.cursor.tiebreaker = hit.sort[1];
       }
-      return mergeTimelineFieldsWithHit(fieldName, flattenedFields, hit, dataFields, ecsFields);
+      const waitForIt = await mergeTimelineFieldsWithHit(
+        fieldName,
+        flattenedFields,
+        hit,
+        dataFields,
+        ecsFields
+      );
+      return Promise.resolve(waitForIt);
     },
-    {
+    Promise.resolve({
       node: { ecs: { _id: '' }, data: [], _id: '', _index: '' },
       cursor: {
         value: '',
         tiebreaker: null,
       },
-    }
+    })
   );
 
 const specialFields = ['_id', '_index', '_type', '_score'];
 
-const mergeTimelineFieldsWithHit = <T>(
+const getValuesFromFields = async (
+  fieldName: string,
+  hit: EventHit
+): Promise<TimelineNonEcsData[]> => {
+  if (specialFields.includes(fieldName)) {
+    return [{ field: fieldName, value: toStringArray(get(fieldName, hit)) }];
+  }
+  const fieldToEval = has(fieldName, hit._source)
+    ? get(fieldName, hit._source)
+    : hit.fields[fieldName];
+  const formattedData = await getDataSafety(getDataFromFieldsHits, {
+    [fieldName]: fieldToEval,
+  });
+  return formattedData.map(({ field, values }) => ({ field, value: values }));
+};
+
+const mergeTimelineFieldsWithHit = async <T>(
   fieldName: string,
   flattenedFields: T,
-  hit: { _source: {}; fields: Record<string, unknown[]> },
+  hit: EventHit,
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
+    console.log('fieldName', fieldName);
     if (
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
@@ -65,19 +94,7 @@ const mergeTimelineFieldsWithHit = <T>(
         node: {
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
-            ? [
-                ...get('node.data', flattenedFields),
-                {
-                  field: fieldName,
-                  value: specialFields.includes(fieldName)
-                    ? toObjectArrayOfStrings(get(fieldName, hit)).map(({ str }) => str)
-                    : isGeoField(fieldName)
-                    ? formatGeoLocation(hit.fields[fieldName])
-                    : has(fieldName, hit._source)
-                    ? toObjectArrayOfStrings(get(fieldName, hit._source)).map(({ str }) => str)
-                    : toObjectArrayOfStrings(hit.fields[fieldName]).map(({ str }) => str),
-                },
-              ]
+            ? [...get('node.data', flattenedFields), ...(await getValuesFromFields(fieldName, hit))]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
@@ -86,18 +103,25 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...fieldName.split('.').reduceRight(
                   // @ts-expect-error
                   (obj, next) => ({ [next]: obj }),
-                  toObjectArrayOfStrings(
+                  toStringArray(
                     has(fieldName, hit._source)
                       ? get(fieldName, hit._source)
                       : hit.fields[fieldName]
-                  ).map(({ str }) => str)
+                  )
                 ),
               }
             : get('node.ecs', flattenedFields),
         },
       };
+      console.log('DATA!!!', {
+        flattenedFields: flattenedFields.node.data,
+        objectWithProperty: objectWithProperty.node.data,
+      });
       return merge(flattenedFields, objectWithProperty);
     } else {
+      if (fieldName.includes('threat.indicator')) {
+        console.log('flattenedFields!!!', flattenedFields.node.data);
+      }
       return flattenedFields;
     }
   } else {

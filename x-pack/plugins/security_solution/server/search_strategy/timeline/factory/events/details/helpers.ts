@@ -7,8 +7,12 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
-import { EventSource, TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import {
+  EventHit,
+  EventSource,
+  TimelineEventsDetailsItem,
+} from '../../../../../../common/search_strategy';
+import { toObjectArrayOfStrings, toStringArray } from '../../../../helpers/to_array';
 
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 
@@ -24,15 +28,15 @@ export const formatGeoLocation = (item: unknown[]) => {
   const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
   if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
     try {
-      return toObjectArrayOfStrings({
-        long: itemGeo.coordinates[0],
+      return toStringArray({
+        lon: itemGeo.coordinates[0],
         lat: itemGeo.coordinates[1],
-      }).map(({ str }) => str);
+      });
     } catch {
-      return toObjectArrayOfStrings(item).map(({ str }) => str);
+      return toStringArray(item);
     }
   }
-  return toObjectArrayOfStrings(item).map(({ str }) => str);
+  return toStringArray(item);
 };
 
 export const isGeoField = (field: string) =>
@@ -73,14 +77,27 @@ export const getDataFromSourceHits = (
   }, []);
 
 export const getDataFromFieldsHits = (
-  fields: Record<string, unknown[]>,
+  fields: EventHit['fields'],
   prependField?: string,
   prependFieldCategory?: string
 ): TimelineEventsDetailsItem[] =>
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
+
     const fieldCategory =
       prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
+    if (isGeoField(field)) {
+      return [
+        ...accumulator,
+        {
+          category: fieldCategory,
+          field,
+          values: formatGeoLocation(item),
+          originalValue: formatGeoLocation(item),
+          isObjectArray: true, // important for UI
+        },
+      ];
+    }
     const objArrStr = toObjectArrayOfStrings(item);
     const strArr = objArrStr.map(({ str }) => str);
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
@@ -93,10 +110,10 @@ export const getDataFromFieldsHits = (
         {
           category: fieldCategory,
           field: dotField,
-          values: isGeoField(field) ? formatGeoLocation(item) : strArr,
+          values: strArr,
           originalValue: strArr,
           isObjectArray,
-        } as TimelineEventsDetailsItem,
+        },
       ];
     }
 
@@ -108,10 +125,13 @@ export const getDataFromFieldsHits = (
       : getDataFromFieldsHits(item, prependField, fieldCategory);
 
     // combine duplicate fields
-    const flat = [...accumulator, ...nestedFields].reduce(
+    const flat: Record<string, TimelineEventsDetailsItem> = [
+      ...accumulator,
+      ...nestedFields,
+    ].reduce(
       (acc, f) => ({
         ...acc,
-        // acc is hashmap to determine if we already have the field or not without an array iteration
+        // acc/flat is hashmap to determine if we already have the field or not without an array iteration
         // its converted back to array in return with Object.values
         ...(acc[f.field] != null
           ? {
@@ -133,12 +153,5 @@ export const getDataFromFieldsHits = (
     return Object.values(flat);
   }, []);
 
-export const getDataFromFieldsHitsSafety = (
-  fields: Record<string, unknown[]>
-): Promise<TimelineEventsDetailsItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(getDataFromFieldsHits(fields));
-    });
-  });
-};
+export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(fn(args))));
