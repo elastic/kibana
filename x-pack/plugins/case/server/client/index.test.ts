@@ -7,6 +7,7 @@
 
 import {
   elasticsearchServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 import { nullUser } from '../common';
@@ -22,6 +23,7 @@ jest.mock('./client');
 import { CaseClientHandler } from './client';
 import { createExternalCaseClient } from './index';
 
+const logger = loggingSystemMock.create().get('case');
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 const caseConfigureService = createConfigureServiceMock();
 const alertsService = createAlertServiceMock();
@@ -41,6 +43,7 @@ describe('createExternalCaseClient()', () => {
       user: nullUser,
       savedObjectsClient,
       userActionService,
+      logger,
     });
     expect(CaseClientHandler).toHaveBeenCalledTimes(1);
   });
