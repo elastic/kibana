@@ -189,7 +189,7 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-basic/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-basic_mb/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-basic/mappings.json',
-  'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-basic_mbmappings.json',
+  'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-basic_mb/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-platinum--with-10-alerts/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-platinum--with-10-alerts_mb/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/singlecluster-yellow-platinum--with-10-alerts/mappings.json',
