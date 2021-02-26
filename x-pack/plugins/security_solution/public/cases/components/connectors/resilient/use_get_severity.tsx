@@ -7,9 +7,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
+import { ActionConnector } from '../../../containers/types';
 import { getSeverity } from './api';
 import * as i18n from './translations';
-import { ActionConnector } from '../../../containers/types';
 
 type Severity = Array<{ id: number; name: string }>;
 
@@ -31,26 +31,26 @@ export const useGetSeverity = ({ http, toastNotifications, connector }: Props): 
   const [isLoading, setIsLoading] = useState(true);
   const [severity, setSeverity] = useState<Severity>([]);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
 
   useEffect(() => {
-    let didCancel = false;
     const fetchData = async () => {
       if (!connector) {
         setIsLoading(false);
         return;
       }
 
-      abortCtrl.current = new AbortController();
-      setIsLoading(true);
-
       try {
+        abortCtrl.current = new AbortController();
+        setIsLoading(true);
+
         const res = await getSeverity({
           http,
           signal: abortCtrl.current.signal,
           connectorId: connector.id,
         });
 
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
           setSeverity(res.data ?? []);
 
@@ -62,22 +62,24 @@ export const useGetSeverity = ({ http, toastNotifications, connector }: Props): 
           }
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
-          toastNotifications.addDanger({
-            title: i18n.SEVERITY_API_ERROR,
-            text: error.message,
-          });
+          if (error.name !== 'AbortError') {
+            toastNotifications.addDanger({
+              title: i18n.SEVERITY_API_ERROR,
+              text: error.message,
+            });
+          }
         }
       }
     };
 
+    didCancel.current = false;
     abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
     };
   }, [http, connector, toastNotifications]);
