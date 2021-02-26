@@ -26,11 +26,11 @@ interface CombinedCaseParams {
   service: CaseServiceSetup;
   client: SavedObjectsClientContract;
   caseID: string;
-  subCaseID?: string;
+  subCaseId?: string;
 }
 
-async function getCommentableCase({ service, client, caseID, subCaseID }: CombinedCaseParams) {
-  if (subCaseID) {
+async function getCommentableCase({ service, client, caseID, subCaseId }: CombinedCaseParams) {
+  if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       service.getCase({
         client,
@@ -38,7 +38,7 @@ async function getCommentableCase({ service, client, caseID, subCaseID }: Combin
       }),
       service.getSubCase({
         client,
-        id: subCaseID,
+        id: subCaseId,
       }),
     ]);
     return new CommentableCase({ collection: caseInfo, service, subCase, soClient: client });
@@ -66,7 +66,7 @@ export function initPatchCommentApi({
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
         body: escapeHatch,
@@ -87,7 +87,7 @@ export function initPatchCommentApi({
           service: caseService,
           client,
           caseID: request.params.case_id,
-          subCaseID: request.query?.subCaseID,
+          subCaseId: request.query?.subCaseId,
         });
 
         const myComment = await caseService.getComment({
@@ -103,7 +103,7 @@ export function initPatchCommentApi({
           throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        const saveObjType = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const saveObjType = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
 
         const caseRef = myComment.references.find((c) => c.type === saveObjType);
         if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
@@ -144,7 +144,7 @@ export function initPatchCommentApi({
               actionAt: updatedDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseID,
+              subCaseId: request.query?.subCaseId,
               commentId: updatedComment.id,
               fields: ['comment'],
               newValue: JSON.stringify(queryRestAttributes),
