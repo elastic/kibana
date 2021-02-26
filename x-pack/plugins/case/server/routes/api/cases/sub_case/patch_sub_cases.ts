@@ -245,7 +245,7 @@ async function updateAlerts({
     []
   );
 
-  caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
+  await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
 }
 
 async function update({
