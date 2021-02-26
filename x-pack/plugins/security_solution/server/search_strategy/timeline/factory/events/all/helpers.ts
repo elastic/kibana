@@ -84,7 +84,7 @@ const mergeTimelineFieldsWithHit = async <T>(
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
-    console.log('fieldName', fieldName);
+    // console.log('fieldName', fieldName);
     if (
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
@@ -113,14 +113,14 @@ const mergeTimelineFieldsWithHit = async <T>(
             : get('node.ecs', flattenedFields),
         },
       };
-      console.log('DATA!!!', {
-        flattenedFields: flattenedFields.node.data,
-        objectWithProperty: objectWithProperty.node.data,
-      });
+      // console.log('DATA!!!', {
+      //   flattenedFields: flattenedFields.node.data,
+      //   objectWithProperty: objectWithProperty.node.data,
+      // });
       return merge(flattenedFields, objectWithProperty);
     } else {
       if (fieldName.includes('threat.indicator')) {
-        console.log('flattenedFields!!!', flattenedFields.node.data);
+        console.log('threat.indicator flattenedFields!!!', flattenedFields.node.data);
       }
       return flattenedFields;
     }

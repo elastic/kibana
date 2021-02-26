@@ -11,7 +11,7 @@ import { formatTimelineData } from './helpers';
 import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
-  it('happy path', async () => {
+  it.only('happy path', async () => {
     const res = await formatTimelineData(
       [
         '@timestamp',
