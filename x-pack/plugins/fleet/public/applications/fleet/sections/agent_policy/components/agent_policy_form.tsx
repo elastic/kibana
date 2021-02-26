@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiFieldText,
+  EuiButton,
+  EuiCheckbox,
+  EuiCheckboxGroup,
+  EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
-  EuiComboBox,
-  EuiIconTip,
-  EuiCheckbox,
-  EuiCheckboxGroup,
-  EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { dataTypes } from '../../../../../../common';
-import { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
+import { AgentPolicy, NewAgentPolicy } from '../../../types';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 interface ValidationResults {

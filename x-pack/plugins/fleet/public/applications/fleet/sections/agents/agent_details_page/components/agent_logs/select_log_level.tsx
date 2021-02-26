@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { Agent } from '../../../../../types';
+import React, { memo, useCallback, useState } from 'react';
 import { sendPostAgentAction, useStartServices } from '../../../../../hooks';
+import { Agent } from '../../../../../types';
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);

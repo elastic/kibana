@@ -6,17 +6,17 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { AgentUnenrollmentError } from '../../errors';
 import * as APIKeyService from '../api_keys';
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { bulkCreateAgentActions, createAgentAction } from './actions';
 import {
+  bulkUpdateAgents,
   getAgent,
-  updateAgent,
   getAgentPolicyForAgent,
   getAgents,
   listAllAgents,
-  bulkUpdateAgents,
+  updateAgent,
 } from './crud';
-import { AgentUnenrollmentError } from '../../errors';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
 import {
-  EuiPanel,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiIconTip,
-  EuiButtonEmpty,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
 const StyledPanel = styled(EuiPanel).attrs((props) => ({
   paddingSize: 'm',

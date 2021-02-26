@@ -7,12 +7,12 @@
 
 // handlers that handle agent actions request
 
-import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
-import { ActionsService } from '../../services/agents';
+import { RequestHandler } from 'kibana/server';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { defaultIngestErrorHandler } from '../../errors';
+import { ActionsService } from '../../services/agents';
+import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService

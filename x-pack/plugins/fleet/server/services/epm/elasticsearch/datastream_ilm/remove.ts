@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
+import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
 
 export const deleteIlms = async (callCluster: CallESAsCurrentUser, ilmPolicyIds: string[]) => {
   await Promise.all(

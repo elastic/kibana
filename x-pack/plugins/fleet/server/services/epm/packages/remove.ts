@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { appContextService, packagePolicyService } from '../..';
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
   AssetType,
   CallESAsCurrentUser,
   ElasticsearchAssetType,
   EsAssetReference,
-  KibanaAssetReference,
   Installation,
+  KibanaAssetReference,
 } from '../../../types';
-import { getInstallation, savedObjectTypes } from './index';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { deleteTransforms } from '../elasticsearch/transform/remove';
-import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
-import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
+import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
+import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { splitPkgKey } from '../registry';
+import { getInstallation, savedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;

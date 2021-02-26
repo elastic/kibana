@@ -8,21 +8,20 @@
 import deepEqual from 'fast-deep-equal';
 import {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
 } from 'src/core/server';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   Agent,
-  NewAgentEvent,
   AgentEvent,
-  AgentSOAttributes,
   AgentEventSOAttributes,
+  AgentSOAttributes,
+  NewAgentEvent,
 } from '../../../types';
-
-import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { agentCheckinState } from './state';
 import { getAgentActionsForCheckin } from '../actions';
 import { updateAgent } from '../crud';
+import { agentCheckinState } from './state';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,

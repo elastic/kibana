@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiButton,
 } from '@elastic/eui';
 import { EuiButtonProps } from '@elastic/eui/src/components/button/button';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
 
 type Props = {
   button?: {

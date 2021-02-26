@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
-import { InstallStatus } from '../../../types';
+import { InstallStatus, PackageInfo } from '../../../types';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;

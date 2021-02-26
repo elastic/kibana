@@ -6,10 +6,10 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { NewOutput, Output, OutputSOAttributes } from '../types';
-import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { appContextService } from './app_context';
 import { decodeCloudId } from '../../common';
+import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { NewOutput, Output, OutputSOAttributes } from '../types';
+import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 

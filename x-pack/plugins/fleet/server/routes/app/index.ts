@@ -6,9 +6,9 @@
  */
 
 import { IRouter, RequestHandler } from 'src/core/server';
+import { CheckPermissionsResponse } from '../../../common';
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
-import { CheckPermissionsResponse } from '../../../common';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
   const body: CheckPermissionsResponse = { success: true };

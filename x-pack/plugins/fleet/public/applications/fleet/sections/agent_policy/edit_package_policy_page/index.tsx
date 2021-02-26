@@ -5,31 +5,40 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
-  EuiButton,
   EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import { Error, Loading } from '../../../components';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import {
-  useLink,
-  useBreadcrumbs,
-  useStartServices,
-  useConfig,
-  sendUpdatePackagePolicy,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
+  sendUpdatePackagePolicy,
+  useBreadcrumbs,
+  useConfig,
+  useLink,
+  useStartServices,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import {
+  AgentPolicy,
+  PackageInfo,
+  PackagePolicyEditExtensionComponentProps,
+  UpdatePackagePolicy,
+} from '../../../types';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import {
@@ -37,17 +46,12 @@ import {
   validatePackagePolicy,
   validationHasErrors,
 } from '../create_package_policy_page/services';
-import {
-  PackagePolicyFormState,
-  CreatePackagePolicyFrom,
-} from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import {
+  CreatePackagePolicyFrom,
+  PackagePolicyFormState,
+} from '../create_package_policy_page/types';
 
 export const EditPackagePolicyPage = memo(() => {
   const {

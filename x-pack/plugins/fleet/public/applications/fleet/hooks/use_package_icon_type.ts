@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { ICON_TYPES } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../types';
+import { useEffect, useState } from 'react';
 import { useLinks } from '../sections/epm/hooks';
+import { PackageInfo, PackageListItem } from '../types';
 import { sendGetPackageInfoByKey } from './index';
 
 type Package = PackageInfo | PackageListItem;

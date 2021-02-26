@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useRequest } from './use_request';
 import { dataStreamRouteService } from '../../services';
 import { GetDataStreamsResponse } from '../../types';
+import { useRequest } from './use_request';
 
 export const useGetDataStreams = () => {
   return useRequest<GetDataStreamsResponse>({

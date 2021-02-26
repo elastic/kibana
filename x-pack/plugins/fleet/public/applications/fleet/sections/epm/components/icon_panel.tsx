@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { usePackageIconType, UsePackageIconType } from '../../../hooks';
 import { Loading } from '../../../components';
+import { usePackageIconType, UsePackageIconType } from '../../../hooks';
 
 const PanelWrapper = styled.div`
   // NOTE: changes to the width here will impact navigation tabs page layout under integration package details

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter, RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { IRouter, RequestHandler } from 'src/core/server';
 import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
-import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
-import { settingsService, agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService, appContextService, settingsService } from '../../services';
+import { GetSettingsRequestSchema, PutSettingsRequestSchema } from '../../types';
 
 export const getSettingsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;

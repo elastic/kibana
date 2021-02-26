@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { AbortController } from 'abort-controller';
+import { RequestHandler } from 'src/core/server';
 import {
   GetAgentsResponse,
-  GetOneAgentResponse,
-  GetOneAgentEventsResponse,
-  PostAgentCheckinResponse,
-  PostAgentEnrollResponse,
   GetAgentStatusResponse,
-  PutAgentReassignResponse,
+  GetOneAgentEventsResponse,
+  GetOneAgentResponse,
+  PostAgentCheckinResponse,
   PostAgentEnrollRequest,
+  PostAgentEnrollResponse,
   PostBulkAgentReassignResponse,
+  PutAgentReassignResponse,
 } from '../../../common/types';
-import {
-  GetAgentsRequestSchema,
-  GetOneAgentRequestSchema,
-  UpdateAgentRequestSchema,
-  DeleteAgentRequestSchema,
-  GetOneAgentEventsRequestSchema,
-  PostAgentCheckinRequest,
-  GetAgentStatusRequestSchema,
-  PutAgentReassignRequestSchema,
-  PostBulkAgentReassignRequestSchema,
-} from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
+import {
+  DeleteAgentRequestSchema,
+  GetAgentsRequestSchema,
+  GetAgentStatusRequestSchema,
+  GetOneAgentEventsRequestSchema,
+  GetOneAgentRequestSchema,
+  PostAgentCheckinRequest,
+  PostBulkAgentReassignRequestSchema,
+  PutAgentReassignRequestSchema,
+  UpdateAgentRequestSchema,
+} from '../../types';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>

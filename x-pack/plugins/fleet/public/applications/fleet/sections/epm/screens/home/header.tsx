@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useLinks } from '../../hooks';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import { useStartServices } from '../../../../hooks';
+import { useLinks } from '../../hooks';
 
 export const HeroCopy = memo(() => {
   return (

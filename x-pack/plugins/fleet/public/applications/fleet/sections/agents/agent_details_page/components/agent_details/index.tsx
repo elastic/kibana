@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent, AgentPolicy } from '../../../../../types';
-import { AgentDetailsOverviewSection } from './agent_details_overview';
 import { AgentDetailsIntegrationsSection } from './agent_details_integrations';
+import { AgentDetailsOverviewSection } from './agent_details_overview';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`

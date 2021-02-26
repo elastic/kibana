@@ -7,10 +7,10 @@
 
 import {
   BASE_PATH,
-  StaticPage,
   DynamicPage,
   DynamicPagePathValues,
   pagePathGetters,
+  StaticPage,
 } from '../constants';
 import { useStartServices } from './';
 

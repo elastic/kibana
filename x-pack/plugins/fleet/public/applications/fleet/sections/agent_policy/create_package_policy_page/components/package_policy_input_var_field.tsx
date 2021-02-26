@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, memo, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiCodeEditor,
+  EuiComboBox,
+  EuiFieldText,
   EuiFormRow,
   EuiSwitch,
-  EuiFieldText,
-  EuiComboBox,
   EuiText,
-  EuiCodeEditor,
 } from '@elastic/eui';
-import { RegistryVarsEntry } from '../../../../types';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
+import React, { memo, useMemo, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { RegistryVarsEntry } from '../../../../types';
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;

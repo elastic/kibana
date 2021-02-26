@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './agent_policy';
 export * from './agent';
-export * from './package_policy';
-export * from './epm';
+export * from './agent_policy';
+export * from './common';
 export * from './enrollment_api_key';
+export * from './epm';
 export * from './install_script';
 export * from './output';
+export * from './package_policy';
 export * from './settings';
 export * from './setup';

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiIcon,
+  EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent, AgentPolicy } from '../../../../../types';
+import React, { memo } from 'react';
+import styled from 'styled-components';
+import { LinkAndRevision } from '../../../../../components';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
+import { Agent, AgentPolicy } from '../../../../../types';
 import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { LinkAndRevision } from '../../../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`

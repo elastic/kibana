@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { createAPIKey } from './security';
 
-export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
+export { invalidateAPIKeys } from './security';
 
 export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,

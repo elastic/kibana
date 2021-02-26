@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiPortal } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal, EuiText } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
+import { useCapabilities, useGetAgentPolicies, useLink } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
 import { AgentEnrollmentFlyout } from '../components';
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {

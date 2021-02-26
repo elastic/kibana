@@ -6,15 +6,15 @@
  */
 
 export * from './acks';
-export * from './events';
-export * from './checkin';
-export * from './enroll';
-export * from './unenroll';
-export * from './upgrade';
-export * from './status';
-export * from './crud';
-export * from './update';
 export * from './actions';
-export * from './reassign';
 export * from './authenticate';
+export * from './checkin';
+export * from './crud';
+export * from './enroll';
+export * from './events';
+export * from './reassign';
 export * from './setup';
+export * from './status';
+export * from './unenroll';
+export * from './update';
+export * from './upgrade';

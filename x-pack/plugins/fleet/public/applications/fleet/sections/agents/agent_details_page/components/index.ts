@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { AgentLogs } from './agent_logs';
 export { AgentDetailsActionMenu } from './actions_menu';
 export { AgentDetailsContent } from './agent_details';
+export { AgentLogs } from './agent_logs';

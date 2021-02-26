@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useEffect, useState } from 'react';
 import { useStartServices } from '../../../../../hooks';
-import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
+import { AGENT_DATASET, AGENT_LOG_INDEX_PATTERN, DATASET_FIELD } from './constants';
 
 export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];

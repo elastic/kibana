@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { createAppContextStartContractMock } from '../../../mocks';
+import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
+import { appContextService } from '../../app_context';
+import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
+import { getInstallation } from './get';
 
 jest.mock('./install');
 jest.mock('./bulk_install_packages');
 jest.mock('./get');
 
-import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 const { ensureInstalledDefaultPackages } = jest.requireActual('./install');
 const { isBulkInstallError: actualIsBulkInstallError } = jest.requireActual(
   './bulk_install_packages'
 );
-import { getInstallation } from './get';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { appContextService } from '../../app_context';
-import { createAppContextStartContractMock } from '../../../mocks';
 
 // if we add this assertion, TS will type check the return value
 // and the editor will also know about .mockImplementation, .mock.calls, etc

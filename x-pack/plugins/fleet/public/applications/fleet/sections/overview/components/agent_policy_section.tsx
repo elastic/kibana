@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexItem,
   EuiI18nNumber,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { SO_SEARCH_LIMIT } from '../../../constants';
-import { useLink, useGetPackagePolicies } from '../../../hooks';
+import { useGetPackagePolicies, useLink } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
 import { Loading } from '../../agents/components';
+import { OverviewPanel } from './overview_panel';
+import { OverviewStats } from './overview_stats';
 
 export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
   agentPolicies,

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-export * from './plugin';
-export * from './routes';
-
 export * from './agent';
 export * from './agent_policy';
-export * from './package_policy';
+export * from './enrollment_api_key';
 export * from './epm';
 export * from './output';
-export * from './enrollment_api_key';
+export * from './package_policy';
+export * from './plugin';
+export * from './routes';
 export * from './settings';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates

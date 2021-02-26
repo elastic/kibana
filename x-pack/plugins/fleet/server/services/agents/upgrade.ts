@@ -6,20 +6,20 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentAction, AgentActionSOAttributes } from '../../types';
+import { isAgentUpgradeable } from '../../../common/services';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
-import { agentPolicyService } from '../../services';
 import { IngestManagerError } from '../../errors';
+import { agentPolicyService } from '../../services';
+import { AgentAction, AgentActionSOAttributes } from '../../types';
+import { appContextService } from '../app_context';
 import { bulkCreateAgentActions, createAgentAction } from './actions';
 import {
+  bulkUpdateAgents,
+  getAgentPolicyForAgent,
   getAgents,
   listAllAgents,
   updateAgent,
-  bulkUpdateAgents,
-  getAgentPolicyForAgent,
 } from './crud';
-import { isAgentUpgradeable } from '../../../common/services';
-import { appContextService } from '../app_context';
 
 export async function sendUpgradeAgentAction({
   soClient,

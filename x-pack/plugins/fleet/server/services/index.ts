@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent, EsAssetReference } from '../types';
-import * as settingsService from './settings';
+import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { Agent, AgentStatus, EsAssetReference } from '../types';
 import { getAgent, listAgents } from './agents';
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 import { agentPolicyService } from './agent_policy';
-
+import * as settingsService from './settings';
+// Saved object services
+export { agentPolicyService } from './agent_policy';
+// Plugin services
+export { appContextService } from './app_context';
 export { getRegistryUrl } from './epm/registry/registry_url';
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
+export { licenseService } from './license';
+export { outputService } from './output';
+export { packagePolicyService } from './package_policy';
+export { settingsService };
 
 /**
  * Service to return the index pattern of EPM packages
@@ -72,13 +79,3 @@ export interface AgentPolicyServiceInterface {
   getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
 }
-
-// Saved object services
-export { agentPolicyService } from './agent_policy';
-export { packagePolicyService } from './package_policy';
-export { outputService } from './output';
-export { settingsService };
-
-// Plugin services
-export { appContextService } from './app_context';
-export { licenseService } from './license';

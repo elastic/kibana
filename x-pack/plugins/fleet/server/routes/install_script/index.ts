@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { BasePath, IRouter, KibanaRequest } from 'src/core/server';
 import url from 'url';
-import { IRouter, BasePath, KibanaRequest } from 'src/core/server';
 import { INSTALL_SCRIPT_API_ROUTES } from '../../constants';
+import { appContextService, settingsService } from '../../services';
 import { getScript } from '../../services/install_script';
 import { InstallScriptRequestSchema } from '../../types';
-import { appContextService, settingsService } from '../../services';
 
 function getInternalUserSOClient(request: KibanaRequest) {
   // soClient as kibana internal users, be carefull on how you use it, security is not enabled

@@ -9,9 +9,9 @@ import {
   AssetReference,
   CategorySummaryList,
   Installable,
-  RegistrySearchResult,
   PackageInfo,
   PackageUsageStats,
+  RegistrySearchResult,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {

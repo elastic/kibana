@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiNotificationBadge } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { SimplifiedAgentStatus } from '../../../../types';
 import {
   AGENT_STATUSES,
   getColorForAgentStatus,
   getLabelForAgentStatus,
 } from '../../services/agent_status';
-import { SimplifiedAgentStatus } from '../../../../types';
 
 export const AgentStatusBadges: React.FC<{
   showInactive?: boolean;

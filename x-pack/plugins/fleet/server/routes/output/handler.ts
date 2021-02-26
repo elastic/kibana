@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
+import { RequestHandler } from 'src/core/server';
 import { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
-import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
+import { outputService } from '../../services/output';
+import { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;

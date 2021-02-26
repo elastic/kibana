@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { GetFleetStatusResponse } from '../types';
 import { useConfig } from './use_config';
 import { sendGetFleetStatus } from './use_request';
-import { GetFleetStatusResponse } from '../types';
 
 interface FleetStatusState {
   enabled: boolean;

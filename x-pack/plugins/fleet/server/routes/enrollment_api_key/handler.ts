@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { RequestHandler } from 'src/core/server';
 import {
-  GetEnrollmentAPIKeysRequestSchema,
-  PostEnrollmentAPIKeyRequestSchema,
-  DeleteEnrollmentAPIKeyRequestSchema,
-  GetOneEnrollmentAPIKeyRequestSchema,
-} from '../../types';
-import {
+  DeleteEnrollmentAPIKeyResponse,
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
-  DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
 } from '../../../common';
-import * as APIKeyService from '../../services/api_keys';
 import { defaultIngestErrorHandler } from '../../errors';
+import * as APIKeyService from '../../services/api_keys';
+import {
+  DeleteEnrollmentAPIKeyRequestSchema,
+  GetEnrollmentAPIKeysRequestSchema,
+  GetOneEnrollmentAPIKeyRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
+} from '../../types';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,

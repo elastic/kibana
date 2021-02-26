@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { kibanaPackageJson } from '@kbn/utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { kibanaPackageJson } from '@kbn/utils';
-
 import {
   ElasticsearchClient,
-  SavedObjectsServiceStart,
   HttpServiceSetup,
-  Logger,
   KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
 } from 'src/core/server';
+import { CloudSetup } from '../../../cloud/server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -23,7 +23,6 @@ import {
 import { SecurityPluginStart } from '../../../security/server';
 import { FleetConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
-import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;

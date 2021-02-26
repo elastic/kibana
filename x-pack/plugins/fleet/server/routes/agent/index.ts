@@ -5,53 +5,53 @@
  * 2.0.
  */
 
-import { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
+import { IRouter, RouteValidationResultFactory } from 'src/core/server';
+import { FleetConfigType } from '../..';
 import {
-  PLUGIN_ID,
   AGENT_API_ROUTES,
   AGENT_API_ROUTES_7_9,
-  LIMITED_CONCURRENCY_ROUTE_TAG,
   AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+  LIMITED_CONCURRENCY_ROUTE_TAG,
+  PLUGIN_ID,
 } from '../../constants';
+import { appContextService } from '../../services';
+import * as AgentService from '../../services/agents';
 import {
-  GetAgentsRequestSchema,
-  GetOneAgentRequestSchema,
-  GetOneAgentEventsRequestSchema,
-  UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
+  GetAgentsRequestSchema,
+  GetAgentStatusRequestSchema,
+  GetOneAgentEventsRequestSchema,
+  GetOneAgentRequestSchema,
+  PostAgentAcksRequestBodyJSONSchema,
+  PostAgentAcksRequestParamsJSONSchema,
   PostAgentCheckinRequestBodyJSONSchema,
   PostAgentCheckinRequestParamsJSONSchema,
-  PostAgentAcksRequestParamsJSONSchema,
-  PostAgentAcksRequestBodyJSONSchema,
+  PostAgentEnrollRequestBodyJSONSchema,
   PostAgentUnenrollRequestSchema,
+  PostAgentUpgradeRequestSchema,
+  PostBulkAgentReassignRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
-  GetAgentStatusRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
-  PostBulkAgentReassignRequestSchema,
-  PostAgentEnrollRequestBodyJSONSchema,
-  PostAgentUpgradeRequestSchema,
-  PostBulkAgentUpgradeRequestSchema,
+  UpdateAgentRequestSchema,
 } from '../../types';
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import {
-  getAgentsHandler,
-  getAgentHandler,
-  updateAgentHandler,
   deleteAgentHandler,
   getAgentEventsHandler,
+  getAgentHandler,
+  getAgentsHandler,
+  getAgentStatusForAgentPolicyHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
+  putAgentsReassignHandler,
+  updateAgentHandler,
 } from './handlers';
-import { postAgentAcksHandlerBuilder } from './acks_handlers';
-import * as AgentService from '../../services/agents';
-import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({

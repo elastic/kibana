@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiSelect,
+  EuiFlyoutHeader,
   EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent } from '../../../../types';
+import React, { useEffect, useState } from 'react';
 import {
-  sendPutAgentReassign,
   sendPostBulkAgentReassign,
-  useStartServices,
+  sendPutAgentReassign,
   useGetAgentPolicies,
+  useStartServices,
 } from '../../../../hooks';
+import { Agent } from '../../../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 interface Props {

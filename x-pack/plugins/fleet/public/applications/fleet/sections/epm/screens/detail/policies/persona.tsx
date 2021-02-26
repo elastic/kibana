@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { CSSProperties, memo, useCallback } from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiAvatarProps } from '@elastic/eui/src/components/avatar/avatar';
+import React, { CSSProperties, memo, useCallback } from 'react';
 
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../../../hooks';
+import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { sendDeletePackagePolicy, sendRequest, useConfig, useStartServices } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
 
 interface Props {

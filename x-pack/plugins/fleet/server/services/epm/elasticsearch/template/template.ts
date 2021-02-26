@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Field, Fields } from '../../fields/field';
 import {
-  RegistryDataStream,
   CallESAsCurrentUser,
-  TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
+  RegistryDataStream,
+  TemplateRef,
 } from '../../../../types';
+import { Field, Fields } from '../../fields/field';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 
 interface Properties {

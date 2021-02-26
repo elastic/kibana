@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiButtonEmpty,
   EuiI18nNumber,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo, useState } from 'react';
+import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
-import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
+import { Error, Loading } from '../../../components';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import {
+  useBreadcrumbs,
+  useFleetStatus,
   useGetOneAgentPolicy,
   useLink,
-  useBreadcrumbs,
   useStartServices,
-  useFleetStatus,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
-import { WithHeaderLayout } from '../../../layouts';
-import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
-import { PackagePoliciesView, SettingsView } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { WithHeaderLayout } from '../../../layouts';
+import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
+import { AgentPolicyActionMenu, LinkedAgentCount } from '../components';
+import { PackagePoliciesView, SettingsView } from './components';
+import { AgentPolicyRefreshContext, AgentStatusRefreshContext, useGetAgentStatus } from './hooks';
 
 const Divider = styled.div`
   width: 0;

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiTextColor,
-  EuiPortal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiLink,
+  EuiPortal,
+  EuiTextColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { Error } from '../../../components';
-import { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
-import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
 import {
-  useGetPackageInfoByKey,
-  useGetAgentPolicies,
   sendGetOneAgentPolicy,
   useCapabilities,
   useFleetStatus,
+  useGetAgentPolicies,
+  useGetPackageInfoByKey,
 } from '../../../hooks';
+import { doesAgentPolicyAlreadyIncludePackage, isPackageLimited } from '../../../services';
+import { AgentPolicy, GetAgentPoliciesResponseItem, PackageInfo } from '../../../types';
 import { CreateAgentPolicyFlyout } from '../list_page/components';
 
 const AgentPolicyWrapper = styled(EuiFormRow)`

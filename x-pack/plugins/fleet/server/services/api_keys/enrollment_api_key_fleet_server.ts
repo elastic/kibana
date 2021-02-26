@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import Boom from '@hapi/boom';
 import { GetResponse } from 'elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid';
 import { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
-import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
-import { createAPIKey, invalidateAPIKeys } from './security';
+import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
+import { createAPIKey, invalidateAPIKeys } from './security';
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,

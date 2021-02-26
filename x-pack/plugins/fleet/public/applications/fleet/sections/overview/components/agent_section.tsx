@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiI18nNumber,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexItem,
+  EuiI18nNumber,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { useGetAgentStatus, useLink } from '../../../hooks';
+import { Loading } from '../../agents/components';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
-import { useLink, useGetAgentStatus } from '../../../hooks';
-import { Loading } from '../../agents/components';
 
 export const OverviewAgentSection = () => {
   const { getHref } = useLink();

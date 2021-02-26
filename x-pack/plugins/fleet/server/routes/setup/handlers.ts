@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { outputService, appContextService } from '../../services';
+import { RequestHandler } from 'src/core/server';
 import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager, setupFleet } from '../../services/setup';
-import { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
+import { appContextService, outputService } from '../../services';
+import { setupFleet, setupIngestManager } from '../../services/setup';
+import { PostFleetSetupRequestSchema } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;

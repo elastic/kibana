@@ -12,9 +12,9 @@ import { RegistryDataStream } from '../../../../types';
 import { Field, processFields } from '../../fields/field';
 import {
   generateMappings,
+  generateTemplateIndexPattern,
   getTemplate,
   getTemplatePriority,
-  generateTemplateIndexPattern,
 } from './template';
 
 // Add our own serialiser to just do JSON.stringify

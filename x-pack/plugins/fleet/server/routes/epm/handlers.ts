@@ -8,51 +8,51 @@
 import { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import path from 'path';
-import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+import { KnownHeaders, RequestHandler, ResponseHeaders } from 'src/core/server';
 import {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-  GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetInfoResponse,
+  GetLimitedPackagesResponse,
+  GetPackagesResponse,
   GetStatsResponse,
+  IBulkInstallPackageHTTPError,
+  InstallPackageResponse,
 } from '../../../common';
-import {
-  GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageFromRegistryRequestSchema,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
-  GetStatsRequestSchema,
-} from '../../types';
-import {
-  BulkInstallResponse,
-  bulkInstallPackages,
-  getCategories,
-  getPackages,
-  getFile,
-  getPackageInfo,
-  handleInstallPackageFailure,
-  isBulkInstallError,
-  installPackage,
-  removeInstallation,
-  getLimitedPackages,
-  getInstallationObject,
-  getInstallation,
-} from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
-import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
+import {
+  bulkInstallPackages,
+  BulkInstallResponse,
+  getCategories,
+  getFile,
+  getInstallation,
+  getInstallationObject,
+  getLimitedPackages,
+  getPackageInfo,
+  getPackages,
+  handleInstallPackageFailure,
+  installPackage,
+  isBulkInstallError,
+  removeInstallation,
+} from '../../services/epm/packages';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { splitPkgKey } from '../../services/epm/registry';
+import {
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  DeletePackageRequestSchema,
+  GetCategoriesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  GetPackagesRequestSchema,
+  GetStatsRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+} from '../../types';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,

@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, LegacyScopedClusterClient } from 'src/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { appContextService } from '../../app_context';
+import { LegacyScopedClusterClient, SavedObjectsClientContract } from 'src/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { createAppContextStartContractMock } from '../../../mocks';
+import { appContextService } from '../../app_context';
+import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+import { installKibanaAssets } from '../kibana/assets/install';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { _installPackage } from './_install_package';
 
 jest.mock('../elasticsearch/template/template');
 jest.mock('../kibana/assets/install');
 jest.mock('../kibana/index_pattern/install');
 jest.mock('./install');
 jest.mock('./get');
-
-import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installKibanaAssets } from '../kibana/assets/install';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { _installPackage } from './_install_package';
 
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices

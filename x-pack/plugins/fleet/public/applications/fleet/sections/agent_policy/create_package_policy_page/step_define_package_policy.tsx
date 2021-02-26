@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFormRow,
-  EuiFieldText,
   EuiButtonEmpty,
-  EuiSpacer,
-  EuiText,
   EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
-import { packageToPackagePolicyInputs } from '../../../services';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
 import { Loading } from '../../../components';
-import { PackagePolicyValidationResults } from './services';
+import { packageToPackagePolicyInputs } from '../../../services';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { AgentPolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from '../../../types';
+import { PackagePolicyValidationResults } from './services';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;

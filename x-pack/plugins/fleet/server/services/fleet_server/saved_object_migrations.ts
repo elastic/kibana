@@ -8,21 +8,20 @@
 import { isBoom } from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
 import {
+  AgentSOAttributes,
+  AGENTS_INDEX,
+  AGENT_POLICY_INDEX,
+  AGENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_INDEX,
-  AGENTS_INDEX,
-  FleetServerEnrollmentAPIKey,
-  AGENT_SAVED_OBJECT_TYPE,
-  AgentSOAttributes,
   FleetServerAgent,
+  FleetServerEnrollmentAPIKey,
   SO_SEARCH_LIMIT,
 } from '../../../common';
-import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
-import { appContextService } from '../app_context';
-
 import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
+import { getEnrollmentAPIKey, listEnrollmentApiKeys } from '../api_keys/enrollment_api_key_so';
+import { appContextService } from '../app_context';
 
 export async function runFleetServerMigration() {
   // If Agents are not setup skip as there is nothing to migrate

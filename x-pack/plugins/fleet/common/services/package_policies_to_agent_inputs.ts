@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
+import { FullAgentPolicyInput, FullAgentPolicyInputStream, PackagePolicy } from '../types';
 
 export const storedPackagePoliciesToAgentInputs = (
   packagePolicies: PackagePolicy[]

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexItem,
   EuiI18nNumber,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { useGetDataStreams, useLink, useStartServices } from '../../../hooks';
+import { Loading } from '../../agents/components';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
-import { useLink, useGetDataStreams, useStartServices } from '../../../hooks';
-import { Loading } from '../../agents/components';
 
 export const OverviewDatastreamSection: React.FC = () => {
   const { getHref } = useLink();

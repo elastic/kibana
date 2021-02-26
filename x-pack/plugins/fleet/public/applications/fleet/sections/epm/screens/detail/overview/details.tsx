@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiNotificationBadge,
   EuiText,
   EuiTextColor,
-  EuiDescriptionList,
-  EuiNotificationBadge,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useMemo } from 'react';
+import { useGetCategories } from '../../../../../hooks';
 import {
+  AssetTypeToParts,
+  entries,
+  KibanaAssetType,
   PackageInfo,
   PackageSpecCategory,
-  AssetTypeToParts,
-  KibanaAssetType,
-  entries,
 } from '../../../../../types';
-import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
 interface Props {

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+import React, { useState } from 'react';
+import { ManualInstructions } from '../../../../components/enrollment_instructions';
 import {
+  useFleetStatus,
   useGetOneEnrollmentAPIKey,
-  useStartServices,
   useGetSettings,
   useLink,
-  useFleetStatus,
+  useStartServices,
 } from '../../../../hooks';
-import { ManualInstructions } from '../../../../components/enrollment_instructions';
-import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import { AgentPolicy } from '../../../../types';
+import { AgentPolicySelectionStep, DownloadStep } from './steps';
 
 interface Props {
   agentPolicies?: AgentPolicy[];

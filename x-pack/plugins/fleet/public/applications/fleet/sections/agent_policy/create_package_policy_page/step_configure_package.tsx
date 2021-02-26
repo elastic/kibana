@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiHorizontalRule,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { Loading } from '../../../components';
 import {
-  PackageInfo,
-  RegistryStream,
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackageInfo,
+  RegistryStream,
 } from '../../../types';
-import { Loading } from '../../../components';
-import { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
+import { PackagePolicyValidationResults } from './services';
 import { CreatePackagePolicyFrom } from './types';
 
 const findStreamsForInputType = (

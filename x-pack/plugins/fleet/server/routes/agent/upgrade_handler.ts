@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
-import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
-import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
-import * as AgentService from '../../services/agents';
-import { appContextService } from '../../services';
-import { defaultIngestErrorHandler } from '../../errors';
+import { RequestHandler } from 'src/core/server';
 import { isAgentUpgradeable } from '../../../common/services';
+import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import { defaultIngestErrorHandler } from '../../errors';
+import { appContextService } from '../../services';
+import * as AgentService from '../../services/agents';
 import { getAgent } from '../../services/agents';
+import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { appContextService, packagePolicyService } from '../../services';
-import {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-  DeletePackagePoliciesRequestSchema,
-} from '../../types';
 import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
+import { appContextService, packagePolicyService } from '../../services';
+import {
+  CreatePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+} from '../../types';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,

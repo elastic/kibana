@@ -8,24 +8,24 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
-  RegistryDataStream,
+  CallESAsCurrentUser,
   ElasticsearchAssetType,
-  TemplateRef,
-  RegistryElasticsearch,
   InstallablePackage,
+  RegistryDataStream,
+  RegistryElasticsearch,
+  TemplateRef,
 } from '../../../../types';
-import { CallESAsCurrentUser } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
+import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import {
   generateMappings,
-  generateTemplateName,
   generateTemplateIndexPattern,
+  generateTemplateName,
   getTemplate,
   getTemplatePriority,
 } from './template';
-import { getAsset, getPathParts } from '../../archive';
-import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,

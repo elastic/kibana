@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiLink,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
+import styled from 'styled-components';
 import { RedirectAppLinks } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   sendPutSettings,
+  useCapabilities,
   useGetSettings,
   useLink,
-  useCapabilities,
   useStartServices,
 } from '../../hooks';
 

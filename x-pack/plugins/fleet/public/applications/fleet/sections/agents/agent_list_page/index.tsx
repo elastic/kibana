@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiContextMenuItem,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
+  EuiPortal,
   EuiSpacer,
   EuiText,
-  EuiContextMenuItem,
-  EuiIcon,
-  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { AgentEnrollmentFlyout } from '../components';
-import { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
-import {
-  usePagination,
-  useCapabilities,
-  useGetAgentPolicies,
-  sendGetAgents,
-  sendGetAgentStatus,
-  useUrlParams,
-  useLink,
-  useBreadcrumbs,
-  useLicense,
-  useKibanaVersion,
-  useStartServices,
-} from '../../../hooks';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ContextMenuActions } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  AgentReassignAgentPolicyFlyout,
+  sendGetAgents,
+  sendGetAgentStatus,
+  useBreadcrumbs,
+  useCapabilities,
+  useGetAgentPolicies,
+  useKibanaVersion,
+  useLicense,
+  useLink,
+  usePagination,
+  useStartServices,
+  useUrlParams,
+} from '../../../hooks';
+import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
+import { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
+import {
+  AgentEnrollmentFlyout,
   AgentHealth,
+  AgentReassignAgentPolicyFlyout,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../components';
-import { AgentTableHeader } from './components/table_header';
 import { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
+import { AgentTableHeader } from './components/table_header';
 
 const REFRESH_INTERVAL_MS = 30000;
 

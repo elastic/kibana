@@ -8,14 +8,13 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-
+import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import {
   Agent,
   AgentActionSOAttributes,
-  BaseAgentActionSOAttributes,
   AgentEvent,
+  BaseAgentActionSOAttributes,
 } from '../../../common/types/models';
-import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
 
 describe('test agent acks services', () => {

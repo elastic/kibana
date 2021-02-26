@@ -7,10 +7,10 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { appContextService } from '../../../';
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { EsAssetReference, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { IngestManagerError } from '../../../../errors';
+import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
   callCluster: CallESAsCurrentUser,

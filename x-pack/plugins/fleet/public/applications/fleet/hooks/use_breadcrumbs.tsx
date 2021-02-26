@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
-import { BASE_PATH, Page, DynamicPagePathValues, pagePathGetters } from '../constants';
+import { BASE_PATH, DynamicPagePathValues, Page, pagePathGetters } from '../constants';
 import { useStartServices } from './use_core';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {

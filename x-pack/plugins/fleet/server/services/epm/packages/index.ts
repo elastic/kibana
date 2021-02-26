@@ -7,10 +7,10 @@
 
 import { SavedObject } from 'src/core/server';
 import {
+  installationStatuses,
   RequiredPackage,
   requiredPackages,
   ValueOf,
-  installationStatuses,
 } from '../../../../common';
 import { AssetType, Installable, Installation, KibanaAssetType } from '../../../types';
 
@@ -18,20 +18,19 @@ export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages
 export {
   getCategories,
   getFile,
-  getInstallationObject,
   getInstallation,
+  getInstallationObject,
+  getLimitedPackages,
   getPackageInfo,
   getPackages,
-  getLimitedPackages,
   SearchParams,
 } from './get';
-
 export {
   BulkInstallResponse,
-  IBulkInstallPackageError,
-  handleInstallPackageFailure,
-  installPackage,
   ensureInstalledPackage,
+  handleInstallPackageFailure,
+  IBulkInstallPackageError,
+  installPackage,
 } from './install';
 export { removeInstallation } from './remove';
 

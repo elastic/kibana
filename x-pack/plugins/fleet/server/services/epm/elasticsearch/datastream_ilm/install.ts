@@ -14,9 +14,9 @@ import {
 } from '../../../../../common/types/models';
 import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
-import { deleteIlmRefs, deleteIlms } from './remove';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
+import { deleteIlmRefs, deleteIlms } from './remove';
 
 interface IlmInstallation {
   installationName: string;

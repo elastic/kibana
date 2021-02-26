@@ -6,20 +6,19 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { saveInstalledEsRefs } from '../../packages/install';
-import { getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
   EsAssetReference,
   InstallablePackage,
 } from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
-import { getInstallation } from '../../packages';
-import { deleteTransforms, deleteTransformRefs } from './remove';
-import { getAsset } from './common';
-import { appContextService } from '../../../app_context';
 import { isLegacyESClientError } from '../../../../errors';
+import { CallESAsCurrentUser } from '../../../../types';
+import { appContextService } from '../../../app_context';
+import { getPathParts } from '../../archive';
+import { getInstallation } from '../../packages';
+import { saveInstalledEsRefs } from '../../packages/install';
+import { getAsset } from './common';
+import { deleteTransformRefs, deleteTransforms } from './remove';
 
 interface TransformInstallation {
   installationName: string;

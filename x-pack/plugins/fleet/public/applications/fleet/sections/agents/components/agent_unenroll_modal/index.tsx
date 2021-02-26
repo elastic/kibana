@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { EuiCheckbox, EuiConfirmModal, EuiFormFieldset } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent } from '../../../../types';
+import React, { useState } from 'react';
 import {
   sendPostAgentUnenroll,
   sendPostBulkAgentUnenroll,
   useStartServices,
 } from '../../../../hooks';
+import { Agent } from '../../../../types';
 
 interface Props {
   onClose: () => void;

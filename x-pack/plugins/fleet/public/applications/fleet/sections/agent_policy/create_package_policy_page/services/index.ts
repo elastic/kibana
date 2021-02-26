@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export { isAdvancedVar } from './is_advanced_var';
 export { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
+export { isAdvancedVar } from './is_advanced_var';
 export {
-  PackagePolicyValidationResults,
+  countValidationErrors,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
+  PackagePolicyValidationResults,
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
-  countValidationErrors,
 } from './validate_package_policy';

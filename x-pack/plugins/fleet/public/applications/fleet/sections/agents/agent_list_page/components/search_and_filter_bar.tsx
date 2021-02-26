@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -16,10 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+import React, { useState } from 'react';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENT_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useConfig } from '../../../../hooks';
+import { AgentPolicy } from '../../../../types';
 
 const statusFilters = [
   {

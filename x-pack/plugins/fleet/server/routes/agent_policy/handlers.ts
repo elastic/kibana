@@ -6,35 +6,35 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
-import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
-import { listAgents } from '../../services/agents';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import {
-  GetAgentPoliciesRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
-  CopyAgentPolicyRequestSchema,
-  DeleteAgentPolicyRequestSchema,
-  GetFullAgentPolicyRequestSchema,
-  AgentPolicy,
-  NewPackagePolicy,
-} from '../../types';
-import {
+  CopyAgentPolicyResponse,
+  CreateAgentPolicyResponse,
+  defaultPackages,
+  DeleteAgentPolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  GetOneAgentPolicyResponse,
-  CreateAgentPolicyResponse,
-  UpdateAgentPolicyResponse,
-  CopyAgentPolicyResponse,
-  DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
-  defaultPackages,
+  GetOneAgentPolicyResponse,
+  UpdateAgentPolicyResponse,
 } from '../../../common';
+import { fullAgentPolicyToYaml } from '../../../common/services';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { defaultIngestErrorHandler } from '../../errors';
+import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
+import { listAgents } from '../../services/agents';
+import {
+  AgentPolicy,
+  CopyAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
+  DeleteAgentPolicyRequestSchema,
+  GetAgentPoliciesRequestSchema,
+  GetFullAgentPolicyRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  NewPackagePolicy,
+  UpdateAgentPolicyRequestSchema,
+} from '../../types';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,

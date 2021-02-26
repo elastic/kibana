@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useStartServices } from '../../../hooks/use_core';
-import { PLUGIN_ID } from '../../../constants';
-import { epmRouteService } from '../../../services';
 import { PackageSpecIcon, PackageSpecScreenshot, RegistryImage } from '../../../../../../common';
+import { PLUGIN_ID } from '../../../constants';
+import { useStartServices } from '../../../hooks/use_core';
+import { epmRouteService } from '../../../services';
 
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;

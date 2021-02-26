@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIconTip, EuiIconProps } from '@elastic/eui';
+import { EuiIconProps, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export const UpdateIcon = ({ size = 'm' }: { size?: EuiIconProps['size'] }) => (
   <EuiIconTip

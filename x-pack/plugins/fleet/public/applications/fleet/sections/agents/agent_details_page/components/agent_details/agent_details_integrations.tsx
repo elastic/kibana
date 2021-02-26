@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import {
+  EuiAccordion,
+  EuiBasicTable,
+  EuiBasicTableProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiAccordion,
+  EuiPanel,
   EuiTitle,
   EuiToolTip,
-  EuiPanel,
-  EuiButtonIcon,
-  EuiBasicTable,
-  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
-import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
+import { useLink } from '../../../../../hooks';
+import { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`

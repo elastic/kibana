@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
+import { useBreadcrumbs, useGetCategories, useGetPackages, useLink } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';

@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode, useState } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
+
   // @ts-ignore
   EuiSearchBar,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, ReactNode, useState } from 'react';
 import { Loading } from '../../../components';
-import { PackageList } from '../../../types';
-import { useLocalSearch, searchIdField } from '../hooks';
-import { PackageCard } from './package_card';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { PackageList } from '../../../types';
+import { searchIdField, useLocalSearch } from '../hooks';
+import { PackageCard } from './package_card';
 
 interface ListProps {
   isLoading?: boolean;

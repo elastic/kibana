@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 import { agentRouteService } from '../../services';
 import {
-  GetOneAgentResponse,
-  GetOneAgentEventsResponse,
-  GetOneAgentEventsRequest,
-  PostAgentUnenrollRequest,
-  PostBulkAgentUnenrollRequest,
-  PostBulkAgentUnenrollResponse,
-  PostAgentUnenrollResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
-  PostBulkAgentReassignRequest,
-  PostBulkAgentReassignResponse,
   GetAgentsRequest,
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetOneAgentEventsRequest,
+  GetOneAgentEventsResponse,
+  GetOneAgentResponse,
+  PostAgentUnenrollRequest,
+  PostAgentUnenrollResponse,
   PostAgentUpgradeRequest,
-  PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
+  PostBulkAgentReassignRequest,
+  PostBulkAgentReassignResponse,
+  PostBulkAgentUnenrollRequest,
+  PostBulkAgentUnenrollResponse,
+  PostBulkAgentUpgradeRequest,
   PostBulkAgentUpgradeResponse,
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
+  PutAgentReassignRequest,
+  PutAgentReassignResponse,
 } from '../../types';
+import { sendRequest, useRequest, UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

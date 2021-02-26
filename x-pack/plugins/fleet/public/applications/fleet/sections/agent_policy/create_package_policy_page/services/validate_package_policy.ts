@@ -10,10 +10,10 @@ import { safeLoad } from 'js-yaml';
 import { getFlattenedObject, isValidNamespace } from '../../../../services';
 import {
   NewPackagePolicy,
+  PackageInfo,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInput,
   PackagePolicyInputStream,
-  PackagePolicyConfigRecordEntry,
-  PackageInfo,
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,

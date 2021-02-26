@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import { EuiDescriptionList } from '@elastic/eui';
+import styled from 'styled-components';
 
 export const OverviewStats = styled(EuiDescriptionList).attrs((props) => ({
   compressed: true,

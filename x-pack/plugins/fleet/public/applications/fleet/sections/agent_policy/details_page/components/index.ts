@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { PackagePoliciesTable } from './package_policies/package_policies_table';
 export { PackagePoliciesView } from './package_policies';
+export { PackagePoliciesTable } from './package_policies/package_policies_table';
 export { SettingsView } from './settings';

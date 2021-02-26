@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+import { errors as LegacyESErrors } from 'elasticsearch';
+import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 import { createAppContextStartContractMock } from '../../../../mocks';
+import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
+import { appContextService } from '../../../app_context';
+import { getInstallation, getInstallationObject } from '../../packages';
+import { getAsset } from './common';
+import { installTransform } from './install';
 
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
@@ -16,16 +25,6 @@ jest.mock('./common', () => {
     getAsset: jest.fn(),
   };
 });
-
-import { errors as LegacyESErrors } from 'elasticsearch';
-import { installTransform } from './install';
-import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
-import { getInstallation, getInstallationObject } from '../../packages';
-import { getAsset } from './common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-import { appContextService } from '../../../app_context';
 
 describe('test transform install', () => {
   let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;

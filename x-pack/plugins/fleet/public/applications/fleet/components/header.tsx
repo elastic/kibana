@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 const Container = styled.div`
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};

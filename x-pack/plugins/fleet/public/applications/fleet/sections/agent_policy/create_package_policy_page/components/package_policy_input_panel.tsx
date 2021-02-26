@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiText,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, memo, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import {
   NewPackagePolicyInput,
   PackagePolicyInputStream,
@@ -25,9 +25,9 @@ import {
   RegistryStream,
 } from '../../../../types';
 import {
-  PackagePolicyInputValidationResults,
-  hasInvalidButRequiredVar,
   countValidationErrors,
+  hasInvalidButRequiredVar,
+  PackagePolicyInputValidationResults,
 } from '../services';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';

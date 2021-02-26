@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import { EuiButtonEmpty, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
-import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useStartServices } from '../../../../hooks';
+import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 type Props = {

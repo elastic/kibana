@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { AgentPolicy } from '../../../types';
+import { LinkAndRevision, SearchBar } from '../../../components';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-import { WithHeaderLayout } from '../../../layouts';
 import {
+  useBreadcrumbs,
   useCapabilities,
+  useConfig,
   useGetAgentPolicies,
+  useLink,
   usePagination,
   useSorting,
-  useLink,
-  useConfig,
   useUrlParams,
-  useBreadcrumbs,
 } from '../../../hooks';
-import { LinkAndRevision, SearchBar } from '../../../components';
-import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+import { WithHeaderLayout } from '../../../layouts';
+import { AgentPolicy } from '../../../types';
+import { AgentPolicyActionMenu, LinkedAgentCount } from '../components';
 import { CreateAgentPolicyFlyout } from './components';
 
 const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (

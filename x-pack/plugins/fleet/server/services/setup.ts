@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid';
+import { settingsService } from '.';
+import {
+  AgentPolicy,
+  DEFAULT_AGENT_POLICIES_PACKAGES,
+  FLEET_SERVER_PACKAGE,
+  Installation,
+  Output,
+  PackagePolicy,
+  packageToPackagePolicy,
+} from '../../common';
+import { SO_SEARCH_LIMIT } from '../constants';
 import { CallESAsCurrentUser } from '../types';
+import { ensureAgentActionPolicyChangeExists } from './agents';
 import { agentPolicyService } from './agent_policy';
-import { outputService } from './output';
+import { generateEnrollmentAPIKey } from './api_keys';
+import { appContextService } from './app_context';
+import { getPackageInfo } from './epm/packages';
 import {
   ensureInstalledDefaultPackages,
   ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import {
-  packageToPackagePolicy,
-  PackagePolicy,
-  AgentPolicy,
-  Installation,
-  Output,
-  DEFAULT_AGENT_POLICIES_PACKAGES,
-  FLEET_SERVER_PACKAGE,
-} from '../../common';
-import { SO_SEARCH_LIMIT } from '../constants';
-import { getPackageInfo } from './epm/packages';
-import { packagePolicyService } from './package_policy';
-import { generateEnrollmentAPIKey } from './api_keys';
-import { settingsService } from '.';
-import { awaitIfPending } from './setup_utils';
-import { createDefaultSettings } from './settings';
-import { ensureAgentActionPolicyChangeExists } from './agents';
-import { appContextService } from './app_context';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
+import { outputService } from './output';
+import { packagePolicyService } from './package_policy';
+import { createDefaultSettings } from './settings';
+import { awaitIfPending } from './setup_utils';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';

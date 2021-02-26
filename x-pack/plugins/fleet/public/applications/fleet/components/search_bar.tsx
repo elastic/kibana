@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  QueryStringInput,
-  IFieldType,
   esKuery,
+  IFieldType,
+  QueryStringInput,
 } from '../../../../../../../src/plugins/data/public';
+import { AGENT_SAVED_OBJECT_TYPE, INDEX_NAME } from '../constants';
 import { useStartServices } from '../hooks';
-import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`, '_id', '_index'];
 

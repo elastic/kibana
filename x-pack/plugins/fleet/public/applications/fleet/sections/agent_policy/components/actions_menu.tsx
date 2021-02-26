@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import { AgentPolicy } from '../../../types';
-import { useCapabilities } from '../../../hooks';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useMemo, useState } from 'react';
 import { ContextMenuActions } from '../../../components';
+import { useCapabilities } from '../../../hooks';
+import { AgentPolicy } from '../../../types';
 import { AgentEnrollmentFlyout } from '../../agents/components';
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
+import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;

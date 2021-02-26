@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import React, { memo } from 'react';
 import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
-import { useGetPackages, useLink, useCapabilities } from '../../hooks';
+import { useCapabilities, useGetPackages, useLink } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services/pkg_key_from_package_info';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {

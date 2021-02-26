@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import {
-  useRequest,
-  sendRequest,
-  useConditionalRequest,
-  SendConditionalRequestConfig,
-} from './use_request';
 import { agentPolicyRouteService } from '../../services';
 import {
-  GetAgentPoliciesRequest,
-  GetAgentPoliciesResponse,
-  GetOneAgentPolicyResponse,
-  GetFullAgentPolicyResponse,
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  UpdateAgentPolicyRequest,
-  UpdateAgentPolicyResponse,
   CopyAgentPolicyRequest,
   CopyAgentPolicyResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
+  GetAgentPoliciesRequest,
+  GetAgentPoliciesResponse,
+  GetFullAgentPolicyResponse,
+  GetOneAgentPolicyResponse,
+  UpdateAgentPolicyRequest,
+  UpdateAgentPolicyResponse,
 } from '../../types';
+import {
+  SendConditionalRequestConfig,
+  sendRequest,
+  useConditionalRequest,
+  useRequest,
+} from './use_request';
 
 export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return useRequest<GetAgentPoliciesResponse>({

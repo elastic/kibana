@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import {
-  EuiSpacer,
   EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonIcon,
-  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiSpacer,
   EuiText,
+  EuiToolTip,
   HorizontalAlignment,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { SearchBar } from '../../../components/search_bar';
 import {
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from '../../../constants';
 import {
-  useBreadcrumbs,
-  usePagination,
-  useGetEnrollmentAPIKeys,
-  useGetAgentPolicies,
-  sendGetOneEnrollmentAPIKey,
-  useStartServices,
   sendDeleteOneEnrollmentAPIKey,
+  sendGetOneEnrollmentAPIKey,
+  useBreadcrumbs,
   useConfig,
+  useGetAgentPolicies,
+  useGetEnrollmentAPIKeys,
+  usePagination,
+  useStartServices,
 } from '../../../hooks';
 import { EnrollmentAPIKey } from '../../../types';
-import { SearchBar } from '../../../components/search_bar';
-import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
+import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
   const { notifications } = useStartServices();

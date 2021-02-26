@@ -9,13 +9,13 @@ import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import {
   Agent,
+  AgentAction,
   AgentEvent,
   AgentPolicy,
-  PackagePolicy,
   EnrollmentAPIKey,
-  Settings,
-  AgentAction,
   Installation,
+  PackagePolicy,
+  Settings,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<

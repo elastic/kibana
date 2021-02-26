@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiPageBody, EuiSpacer } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import { Header, HeaderProps } from '../components';
-import { Page, ContentWrapper } from './without_header';
+import { ContentWrapper, Page } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;

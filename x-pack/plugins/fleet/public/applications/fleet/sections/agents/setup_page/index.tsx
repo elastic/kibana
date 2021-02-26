@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiForm,
-  EuiText,
   EuiButton,
-  EuiTitle,
-  EuiSpacer,
-  EuiIcon,
   EuiCallOut,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiIcon,
   EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { useStartServices, sendPostFleetSetup } from '../../../hooks';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { sendPostFleetSetup, useStartServices } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import { GetFleetStatusResponse } from '../../../types';
 

@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
-import { Detail } from './index';
+import { act, cleanup } from '@testing-library/react';
 import React, { lazy, memo } from 'react';
-import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import { Route } from 'react-router-dom';
+import {
+  agentPolicyRouteService,
+  epmRouteService,
+  fleetSetupRouteService,
+  packagePolicyRouteService,
+} from '../../../../../../../common/services';
+import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
@@ -17,14 +22,9 @@ import {
   GetPackagePoliciesResponse,
   GetStatsResponse,
 } from '../../../../../../../common/types/rest_spec';
-import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
-import {
-  agentPolicyRouteService,
-  epmRouteService,
-  fleetSetupRouteService,
-  packagePolicyRouteService,
-} from '../../../../../../../common/services';
-import { act, cleanup } from '@testing-library/react';
+import { pagePathGetters, PAGE_ROUTING_PATHS } from '../../../../constants';
+import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
+import { Detail } from './index';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';

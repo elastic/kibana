@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
 import { useCapabilities, useLink } from '../../../../../hooks';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {

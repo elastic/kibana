@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexItem,
   EuiI18nNumber,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { installationStatuses } from '../../../../../../common/constants';
+import { useGetPackages, useLink } from '../../../hooks';
+import { Loading } from '../../agents/components';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
-import { useLink, useGetPackages } from '../../../hooks';
-import { Loading } from '../../agents/components';
-import { installationStatuses } from '../../../../../../common/constants';
 
 export const OverviewIntegrationSection: React.FC = () => {
   const { getHref } = useLink();

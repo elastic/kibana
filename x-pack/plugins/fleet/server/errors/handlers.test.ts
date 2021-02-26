@@ -11,11 +11,11 @@ import { httpServerMock } from 'src/core/server/mocks';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import {
+  defaultIngestErrorHandler,
   IngestManagerError,
-  RegistryError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
-  defaultIngestErrorHandler,
+  RegistryError,
 } from './index';
 
 const LegacyESErrors = errors as Record<string, any>;

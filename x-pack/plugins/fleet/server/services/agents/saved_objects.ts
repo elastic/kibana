@@ -9,11 +9,11 @@ import Boom from '@hapi/boom';
 import { SavedObject } from 'src/core/server';
 import {
   Agent,
-  AgentSOAttributes,
   AgentAction,
-  AgentPolicyAction,
   AgentActionSOAttributes,
+  AgentPolicyAction,
   AgentPolicyActionSOAttributes,
+  AgentSOAttributes,
   BaseAgentActionSOAttributes,
 } from '../../types';
 

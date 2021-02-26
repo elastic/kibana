@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useEffect, useState } from 'react';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
 import { RedirectAppLinks } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useLink, useCapabilities, useStartServices } from '../../hooks';
+import { useCapabilities, useLink, useStartServices } from '../../hooks';
 import { tutorialDirectoryNoticeState$ } from './tutorial_directory_notice';
 
 const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {

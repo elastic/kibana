@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiButton,
   EuiBetaBadge,
-  EuiText,
-  EuiTitle,
+  EuiButton,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { useBreadcrumbs, useGetAgentPolicies } from '../../hooks';
 import { WithHeaderLayout } from '../../layouts';
-import { useGetAgentPolicies, useBreadcrumbs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../agents/components';
-import { OverviewAgentSection } from './components/agent_section';
 import { OverviewPolicySection } from './components/agent_policy_section';
-import { OverviewIntegrationSection } from './components/integration_section';
+import { OverviewAgentSection } from './components/agent_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
+import { OverviewIntegrationSection } from './components/integration_section';
 
 export const IngestManagerOverview: React.FunctionComponent = () => {
   useBreadcrumbs('overview');

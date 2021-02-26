@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import semverGt from 'semver/functions/gt';
-import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
+import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { isRequiredPackage } from './index';
 import {
   BulkInstallPackageInfo,
+  defaultPackages,
   InstallablePackage,
   InstallSource,
-  defaultPackages,
 } from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import {
-  AssetReference,
-  Installation,
-  CallESAsCurrentUser,
-  AssetType,
-  EsAssetReference,
-  InstallType,
-  KibanaAssetType,
-} from '../../../types';
-import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
-import {
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
-import { toAssetReference, ArchiveAsset } from '../kibana/assets/install';
-import { removeInstallation } from './remove';
+import { MAX_TIME_COMPLETE_INSTALL, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
   PackageOutdatedError,
 } from '../../../errors';
-import { getPackageSavedObjects } from './get';
+import {
+  AssetReference,
+  AssetType,
+  CallESAsCurrentUser,
+  EsAssetReference,
+  Installation,
+  InstallType,
+  KibanaAssetType,
+} from '../../../types';
 import { appContextService } from '../../app_context';
+import { parseAndVerifyArchiveEntries, setPackageInfo, unpackBufferToCache } from '../archive';
+import { generateESIndexPatterns } from '../elasticsearch/template/template';
+import { ArchiveAsset, toAssetReference } from '../kibana/assets/install';
+import * as Registry from '../registry';
+import { getPackageSavedObjects } from './get';
+import {
+  bulkInstallPackages,
+  getInstallation,
+  getInstallationObject,
+  isBulkInstallError,
+  isRequiredPackage,
+} from './index';
+import { removeInstallation } from './remove';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {

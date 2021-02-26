@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiBadge,
-  EuiContextMenuItem,
   EuiButton,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
-import { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { PackageIcon, ContextMenuActions } from '../../../../../components';
-import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo } from 'react';
+import { ContextMenuActions, PackageIcon } from '../../../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
+import { AgentPolicy, PackagePolicy } from '../../../../../types';
+import { DangerEuiContextMenuItem, PackagePolicyDeleteProvider } from '../../../components';
 import { useAgentPolicyRefresh } from '../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {

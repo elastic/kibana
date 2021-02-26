@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { PackagePolicy, PackagePolicyPackage } from '../../../types';
-import { useGetOneAgentPolicy } from '../../../hooks';
+import React, { useMemo } from 'react';
 import { PackageIcon } from '../../../components/package_icon';
+import { useGetOneAgentPolicy } from '../../../hooks';
+import { PackagePolicy, PackagePolicyPackage } from '../../../types';
 
 interface Props {
   agentPolicyId: string;

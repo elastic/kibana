@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import Boom, { isBoom } from '@hapi/boom';
-import {
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'src/core/server';
-import { errors as LegacyESErrors } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import Boom, { isBoom } from '@hapi/boom';
+import { errors as LegacyESErrors } from 'elasticsearch';
+import {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { appContextService } from '../services';
 import {
-  IngestManagerError,
-  RegistryError,
-  PackageNotFoundError,
   AgentPolicyNameExistsError,
-  PackageUnsupportedMediaTypeError,
   ConcurrentInstallOperationError,
+  IngestManagerError,
+  PackageNotFoundError,
+  PackageUnsupportedMediaTypeError,
+  RegistryError,
 } from './index';
 
 type IngestErrorHandler = (

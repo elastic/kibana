@@ -6,25 +6,25 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
+import { AGENT_POLICY_API_ROUTES, PLUGIN_ID } from '../../constants';
 import {
-  GetAgentPoliciesRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
   CopyAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
+  GetAgentPoliciesRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
 } from '../../types';
 import {
-  getAgentPoliciesHandler,
-  getOneAgentPolicyHandler,
-  createAgentPolicyHandler,
-  updateAgentPolicyHandler,
   copyAgentPolicyHandler,
+  createAgentPolicyHandler,
   deleteAgentPoliciesHandler,
-  getFullAgentPolicy,
   downloadFullAgentPolicy,
+  getAgentPoliciesHandler,
+  getFullAgentPolicy,
+  getOneAgentPolicyHandler,
+  updateAgentPolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {

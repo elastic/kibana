@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackagePolicy, NewPackagePolicy, UpdatePackagePolicy } from '../models';
+import { NewPackagePolicy, PackagePolicy, UpdatePackagePolicy } from '../models';
 
 export interface GetPackagePoliciesRequest {
   query: {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { keyBy, keys, merge } from 'lodash';
-import { DataStream } from '../../types';
+import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { GetDataStreamsResponse, KibanaAssetType, KibanaSavedObjectType } from '../../../common';
-import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
+import { getKibanaSavedObject, getPackageSavedObjects } from '../../services/epm/packages/get';
+import { DataStream } from '../../types';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
 

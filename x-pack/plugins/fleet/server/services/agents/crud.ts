@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
-import { appContextService, agentPolicyService } from '../../services';
-import * as crudServiceSO from './crud_so';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { agentPolicyService, appContextService } from '../../services';
+import { Agent, AgentSOAttributes, ListWithKuery } from '../../types';
 import * as crudServiceFleetServer from './crud_fleet_server';
+import * as crudServiceSO from './crud_so';
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,

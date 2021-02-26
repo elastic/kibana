@@ -9,8 +9,8 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
-  ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
+  ASSETS_SAVED_OBJECT_TYPE,
   dataTypes,
   defaultPackages,
   installationStatuses,

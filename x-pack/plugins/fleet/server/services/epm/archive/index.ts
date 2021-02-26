@@ -8,14 +8,14 @@
 import { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
-  SharedKey,
-  getArchiveEntry,
-  setArchiveEntry,
   deleteArchiveEntry,
-  getArchiveFilelist,
-  setArchiveFilelist,
   deleteArchiveFilelist,
   deletePackageInfo,
+  getArchiveEntry,
+  getArchiveFilelist,
+  setArchiveEntry,
+  setArchiveFilelist,
+  SharedKey,
 } from './cache';
 import { getBufferExtractor } from './extract';
 

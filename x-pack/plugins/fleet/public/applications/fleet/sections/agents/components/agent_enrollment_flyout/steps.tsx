@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { AgentPolicy } from '../../../../types';
+import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 
 export const DownloadStep = () => {
   return {

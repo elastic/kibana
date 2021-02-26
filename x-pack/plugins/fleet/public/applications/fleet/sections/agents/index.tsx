@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import React from 'react';
+import { HashRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Error, Loading } from '../../components';
 import { PAGE_ROUTING_PATHS } from '../../constants';
-import { Loading, Error } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
-import { AgentListPage } from './agent_list_page';
-import { SetupPage } from './setup_page';
-import { AgentDetailsPage } from './agent_details_page';
-import { NoAccessPage } from './error_pages/no_access';
-import { EnrollmentTokenListPage } from './enrollment_token_list_page';
-import { ListLayout } from './components/list_layout';
+import { useBreadcrumbs, useCapabilities, useConfig, useFleetStatus } from '../../hooks';
 import { WithoutHeaderLayout } from '../../layouts';
+import { AgentDetailsPage } from './agent_details_page';
+import { AgentListPage } from './agent_list_page';
+import { ListLayout } from './components/list_layout';
+import { EnrollmentTokenListPage } from './enrollment_token_list_page';
+import { NoAccessPage } from './error_pages/no_access';
+import { SetupPage } from './setup_page';
 
 export const FleetApp: React.FunctionComponent = () => {
   useBreadcrumbs('fleet');

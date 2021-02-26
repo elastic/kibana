@@ -9,8 +9,8 @@ import type {
   CoreSetup,
   KibanaRequest,
   LifecycleResponseFactory,
-  OnPreAuthToolkit,
   OnPreAuthHandler,
+  OnPreAuthToolkit,
 } from 'kibana/server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
 import { FleetConfigType } from '../index';

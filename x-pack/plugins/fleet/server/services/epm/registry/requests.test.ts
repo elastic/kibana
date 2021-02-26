@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { RegistryConnectionError, RegistryError, RegistryResponseError } from '../../../errors';
 import { fetchUrl } from './requests';
-import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 jest.mock('node-fetch');
 
 const { Response, FetchError } = jest.requireActual('node-fetch');

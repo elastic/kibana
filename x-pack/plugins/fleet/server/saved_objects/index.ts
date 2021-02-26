@@ -8,32 +8,28 @@
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-  // @ts-expect-error
-} from './security_solution';
-import {
-  OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-  ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  ASSETS_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
-  migrateAgentToV7100,
+  migrateAgentActionToV7100,
   migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
+  migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
-  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
+import { migrateAgentPolicyToV7120, migrateAgentToV7120 } from './migrations/to_v7_12_0';
+import { migratePackagePolicyToV7110, migratePackagePolicyToV7120 } from './security_solution';
 
 /*
  * Saved object types and mappings

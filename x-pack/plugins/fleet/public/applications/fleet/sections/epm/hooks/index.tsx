@@ -6,11 +6,11 @@
  */
 
 export { useLinks } from './use_links';
-export { useLocalSearch, searchIdField } from './use_local_search';
+export { searchIdField, useLocalSearch } from './use_local_search';
 export {
   PackageInstallProvider,
-  useUninstallPackage,
   useGetPackageInstallStatus,
   useInstallPackage,
   useSetPackageInstallStatus,
+  useUninstallPackage,
 } from './use_package_install';

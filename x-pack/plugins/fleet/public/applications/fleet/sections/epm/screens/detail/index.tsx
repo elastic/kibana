@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -21,9 +18,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import React, { ReactEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { Redirect, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { Error, Loading } from '../../../../components';
 import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
-import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
+import {
+  useBreadcrumbs,
+  useCapabilities,
+  useGetPackageInfoByKey,
+  useLink,
+} from '../../../../hooks';
+import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
 import {
   CreatePackagePolicyRouteState,
@@ -31,17 +38,14 @@ import {
   InstallStatus,
   PackageInfo,
 } from '../../../../types';
-import { Error, Loading } from '../../../../components';
-import { useBreadcrumbs } from '../../../../hooks';
-import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 import { useSetPackageInstallStatus } from '../../hooks';
-import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { IconPanel, IntegrationAgentPolicyCount, LoadingIconPanel, UpdateIcon } from './components';
+import { CustomViewPage } from './custom';
+import './index.scss';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
-import { CustomViewPage } from './custom';
-import './index.scss';
 
 export interface DetailParams {
   pkgkey: string;

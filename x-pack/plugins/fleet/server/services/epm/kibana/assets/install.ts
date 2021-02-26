@@ -11,14 +11,14 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-import { getAsset, getPathParts } from '../../archive';
 import {
+  AssetParts,
+  AssetReference,
   AssetType,
   KibanaAssetType,
-  AssetReference,
-  AssetParts,
   KibanaSavedObjectType,
 } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
 

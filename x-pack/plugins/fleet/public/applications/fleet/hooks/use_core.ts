@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FleetStartServices } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { FleetStartServices } from '../../../plugin';
 
 export function useStartServices(): FleetStartServices {
   const { services } = useKibana<FleetStartServices>();

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 export const Page = styled(EuiPage)`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};

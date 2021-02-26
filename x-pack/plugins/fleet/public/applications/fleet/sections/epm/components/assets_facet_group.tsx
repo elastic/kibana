@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
   EuiFacetButton,
   EuiFacetGroup,
@@ -16,13 +15,14 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import styled from 'styled-components';
 import {
   AssetsGroupedByServiceByType,
   AssetTypeToParts,
-  KibanaAssetType,
   entries,
+  KibanaAssetType,
 } from '../../../types';
 import {
   AssetIcons,

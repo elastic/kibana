@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useRequest, sendRequest } from './use_request';
+import { GetStatsResponse } from '../../../../../common';
 import { epmRouteService } from '../../services';
 import {
+  DeletePackageResponse,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetInfoResponse,
+  GetLimitedPackagesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
-  GetLimitedPackagesResponse,
-  GetInfoResponse,
   InstallPackageResponse,
-  DeletePackageResponse,
 } from '../../types';
-import { GetStatsResponse } from '../../../../../common';
+import { sendRequest, useRequest } from './use_request';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAPIKey, invalidateAPIKeys } from './security';
+import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { normalizeKuery, escapeSearchQueryPhrase } from '../saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
+import { createAPIKey, invalidateAPIKeys } from './security';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export { Loading } from './loading';
+export { AlphaMessaging } from './alpha_messaging';
+export { ContextMenuActions } from './context_menu_actions';
 export { Error } from './error';
 export { Header, HeaderProps } from './header';
-export { AlphaMessaging } from './alpha_messaging';
+export * from './link_and_revision';
+export { Loading } from './loading';
 export { PackageIcon } from './package_icon';
-export { ContextMenuActions } from './context_menu_actions';
 export { SearchBar } from './search_bar';
 export * from './settings_flyout';
-export * from './link_and_revision';

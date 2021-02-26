@@ -12,12 +12,11 @@ import {
 } from 'src/core/server/mocks';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../../plugins/licensing/server/mocks';
-
-import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { PackagePolicyServiceInterface } from './services/package_policy';
+import { FleetAppContext } from './plugin';
 import { AgentPolicyServiceInterface, AgentService } from './services';
+import { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {

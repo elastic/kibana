@@ -6,11 +6,11 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../constants';
 import { Agent } from '../../../types';
 import { appContextService } from '../../app_context';
 import { agentCheckinStateConnectedAgentsFactory } from './state_connected_agents';
 import { agentCheckinStateNewActionsFactory } from './state_new_actions';
-import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../constants';
 
 function agentCheckinStateFactory() {
   const agentConnected = agentCheckinStateConnectedAgentsFactory();

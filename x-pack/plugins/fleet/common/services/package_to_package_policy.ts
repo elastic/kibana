@@ -6,15 +6,15 @@
  */
 
 import {
-  PackageInfo,
-  RegistryPolicyTemplate,
-  RegistryVarsEntry,
-  RegistryStream,
-  PackagePolicyConfigRecord,
-  PackagePolicyConfigRecordEntry,
+  NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
-  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+  RegistryPolicyTemplate,
+  RegistryStream,
+  RegistryVarsEntry,
 } from '../types';
 
 const getStreamsForInputType = (

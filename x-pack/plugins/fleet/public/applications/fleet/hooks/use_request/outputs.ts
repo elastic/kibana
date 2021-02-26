@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { sendRequest, useRequest } from './use_request';
 import { outputRoutesService } from '../../services';
-import { PutOutputRequest, GetOutputsResponse } from '../../types';
+import { GetOutputsResponse, PutOutputRequest } from '../../types';
+import { sendRequest, useRequest } from './use_request';
 
 export function useGetOutputs() {
   return useRequest<GetOutputsResponse>({

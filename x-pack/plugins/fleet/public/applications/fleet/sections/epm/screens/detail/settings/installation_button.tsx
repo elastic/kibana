@@ -6,13 +6,13 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PackageInfo, InstallStatus } from '../../../../../types';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useCapabilities } from '../../../../../hooks';
-import { useUninstallPackage, useGetPackageInstallStatus, useInstallPackage } from '../../../hooks';
-import { ConfirmPackageUninstall } from './confirm_package_uninstall';
+import { InstallStatus, PackageInfo } from '../../../../../types';
+import { useGetPackageInstallStatus, useInstallPackage, useUninstallPackage } from '../../../hooks';
 import { ConfirmPackageInstall } from './confirm_package_install';
+import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
   disabled?: boolean;

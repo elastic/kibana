@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import semverParse from 'semver/functions/parse';
-import semverLt from 'semver/functions/lt';
-
-import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
+import { EMPTY, from, Observable, of, TimeoutError, timer } from 'rxjs';
 import {
-  shareReplay,
-  share,
-  distinctUntilKeyChanged,
-  switchMap,
-  exhaustMap,
   concatMap,
-  merge,
+  distinctUntilKeyChanged,
+  exhaustMap,
   filter,
-  timeout,
+  merge,
+  share,
+  shareReplay,
+  switchMap,
   take,
+  timeout,
 } from 'rxjs/operators';
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+import semverLt from 'semver/functions/lt';
+import semverParse from 'semver/functions/parse';
+import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import {
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_UPDATE_ACTIONS_INTERVAL_MS,
+} from '../../../constants';
 import {
   Agent,
   AgentAction,
@@ -31,21 +37,14 @@ import {
   AgentSOAttributes,
 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_UPDATE_ACTIONS_INTERVAL_MS,
-  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
-  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
-  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
-} from '../../../constants';
-import {
-  getNewActionsSince,
-  getLatestConfigChangeAction,
-  getAgentPolicyActionByIds,
-} from '../actions';
 import { appContextService } from '../../app_context';
-import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
+import {
+  getAgentPolicyActionByIds,
+  getLatestConfigChangeAction,
+  getNewActionsSince,
+} from '../actions';
 import { getAgent, updateAgent } from '../crud';
+import { AbortError, createRateLimiter, toPromiseAbortable } from './rxjs_utils';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({

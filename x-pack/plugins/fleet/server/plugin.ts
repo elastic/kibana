@@ -5,84 +5,84 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
+  AsyncPlugin,
   CoreSetup,
   CoreStart,
   ElasticsearchServiceStart,
-  Logger,
-  AsyncPlugin,
-  PluginInitializerContext,
-  SavedObjectsServiceStart,
   HttpServiceSetup,
-  SavedObjectsClientContract,
-  RequestHandlerContext,
   KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
 } from 'kibana/server';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import { CloudSetup } from '../../cloud/server';
 import {
-  EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import {
-  PLUGIN_ID,
-  OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-} from './constants';
-import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
-import {
-  registerLimitedConcurrencyRoutes,
-  registerEPMRoutes,
-  registerPackagePolicyRoutes,
-  registerDataStreamRoutes,
-  registerAgentPolicyRoutes,
-  registerSetupRoutes,
-  registerAgentAPIRoutes,
-  registerElasticAgentRoutes,
-  registerEnrollmentApiKeyRoutes,
-  registerInstallScriptRoutes,
-  registerOutputRoutes,
-  registerSettingsRoutes,
-  registerAppRoutes,
-} from './routes';
+import { ILicense, LicensingPluginSetup } from '../../licensing/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EsAssetReference,
   FleetConfigType,
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
+import { registerFleetUsageCollector } from './collectors/register';
 import {
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PLUGIN_ID,
+} from './constants';
+import {
+  registerAgentAPIRoutes,
+  registerAgentPolicyRoutes,
+  registerAppRoutes,
+  registerDataStreamRoutes,
+  registerElasticAgentRoutes,
+  registerEnrollmentApiKeyRoutes,
+  registerEPMRoutes,
+  registerInstallScriptRoutes,
+  registerLimitedConcurrencyRoutes,
+  registerOutputRoutes,
+  registerPackagePolicyRoutes,
+  registerSettingsRoutes,
+  registerSetupRoutes,
+} from './routes';
+import { makeRouterEnforcingSuperuser } from './routes/security';
+import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
+import {
+  agentPolicyService,
+  AgentPolicyServiceInterface,
+  AgentService,
   appContextService,
-  licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
-  agentPolicyService,
+  licenseService,
   packagePolicyService,
   PackageService,
 } from './services';
 import {
-  getAgentStatusById,
   authenticateAgentWithAccessToken,
-  listAgents,
   getAgent,
+  getAgentStatusById,
+  listAgents,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
-import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
-import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 
 export interface FleetSetupDeps {

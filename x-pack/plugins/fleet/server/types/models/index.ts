@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './agent_policy';
 export * from './agent';
-export * from './package_policy';
-export * from './output';
+export * from './agent_policy';
 export * from './enrollment_api_key';
+export * from './output';
+export * from './package_policy';

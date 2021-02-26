@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export { IngestManagerOverview } from './overview';
-export { EPMApp } from './epm';
+export { FleetApp } from './agents';
 export { AgentPolicyApp } from './agent_policy';
 export { DataStreamApp } from './data_stream';
-export { FleetApp } from './agents';
+export { EPMApp } from './epm';
+export { IngestManagerOverview } from './overview';
 
 export type Section = 'overview' | 'epm' | 'agent_policy' | 'fleet' | 'data_stream';

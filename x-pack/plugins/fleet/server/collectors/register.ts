@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup } from 'kibana/server';
-import { getIsAgentsEnabled } from './config_collectors';
-import { AgentUsage, getAgentUsage } from './agent_collectors';
-import { getInternalClients } from './helpers';
-import { PackageUsage, getPackageUsage } from './package_collectors';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { FleetConfigType } from '..';
+import { AgentUsage, getAgentUsage } from './agent_collectors';
+import { getIsAgentsEnabled } from './config_collectors';
+import { getInternalClients } from './helpers';
+import { getPackageUsage, PackageUsage } from './package_collectors';
 
 interface Usage {
   agents_enabled: boolean;

@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
-import styled from 'styled-components';
-import url from 'url';
-import { encode } from 'rison-node';
-import { stringify } from 'query-string';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  EuiFilterGroup,
-  EuiPanel,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiPanel,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
-import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
-import semverGte from 'semver/functions/gte';
+import { stringify } from 'query-string';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import useMeasure from 'react-use/lib/useMeasure';
+import { encode } from 'rison-node';
 import semverCoerce from 'semver/functions/coerce';
-import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+import semverGte from 'semver/functions/gte';
+import styled from 'styled-components';
+import url from 'url';
+import { esKuery, TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
+import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import { LogStream } from '../../../../../../../../../infra/public';
-import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
+import { Agent } from '../../../../../types';
+import { buildQuery } from './build_query';
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
-import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`

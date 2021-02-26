@@ -8,11 +8,11 @@
 import {
   Agent,
   AgentAction,
-  NewAgentAction,
-  NewAgentEvent,
   AgentEvent,
   AgentStatus,
   AgentType,
+  NewAgentAction,
+  NewAgentEvent,
 } from '../models';
 
 export interface GetAgentsRequest {

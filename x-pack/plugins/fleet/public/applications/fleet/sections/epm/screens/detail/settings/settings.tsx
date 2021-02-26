@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import { InstallStatus, PackageInfo } from '../../../../../types';
-import { useGetPackagePolicies } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { useGetPackagePolicies } from '../../../../../hooks';
+import { InstallStatus, PackageInfo } from '../../../../../types';
 import { useGetPackageInstallStatus } from '../../../hooks';
 import { UpdateIcon } from '../components';
 import { InstallationButton } from './installation_button';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useContext, useMemo } from 'react';
 import { AppMountParameters } from 'kibana/public';
+import React, { memo, useContext, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnyIntraAppRouteState } from '../types';
 

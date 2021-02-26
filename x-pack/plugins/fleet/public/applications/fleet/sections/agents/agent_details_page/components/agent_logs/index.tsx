@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
-  createStateContainer,
-  syncState,
   createKbnUrlStateStorage,
+  createStateContainer,
+  getStateFromKbnUrl,
   INullableBaseStateContainer,
   PureTransition,
-  getStateFromKbnUrl,
+  syncState,
 } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+import { AgentLogsProps, AgentLogsState, AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
 import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
-import { AgentLogsUI, AgentLogsProps, AgentLogsState, AgentLogsUrlStateHelper } from './agent_logs';
 
 export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> = memo(
   ({ agent }) => {

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { sendRequest, useRequest } from './use_request';
+import {
+  DeletePackagePoliciesRequest,
+  DeletePackagePoliciesResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+} from '../../../../../common/types/rest_spec';
 import { packagePolicyRouteService } from '../../services';
 import {
   CreatePackagePolicyRequest,
@@ -13,13 +19,7 @@ import {
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
 } from '../../types';
-import {
-  DeletePackagePoliciesRequest,
-  DeletePackagePoliciesResponse,
-  GetPackagePoliciesRequest,
-  GetPackagePoliciesResponse,
-  GetOnePackagePolicyResponse,
-} from '../../../../../common/types/rest_spec';
+import { sendRequest, useRequest } from './use_request';
 
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({

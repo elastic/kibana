@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import LRU from 'lru-cache';
 import {
   ElasticsearchClient,
   KibanaRequest,
@@ -12,23 +14,21 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import Boom from '@hapi/boom';
-import LRU from 'lru-cache';
+import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   Agent,
   AgentAction,
-  AgentPolicyAction,
-  AgentPolicyActionV7_9,
+  AgentActionSOAttributes,
   AgentEvent,
   AgentEventSOAttributes,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
   AgentSOAttributes,
-  AgentActionSOAttributes,
 } from '../../types';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { getAgentActionByIds } from './actions';
+import { updateAgent } from './crud';
 import { forceUnenrollAgent } from './unenroll';
 import { ackAgentUpgraded } from './upgrade';
-import { updateAgent } from './crud';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 

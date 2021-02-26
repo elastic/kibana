@@ -5,55 +5,55 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSteps,
   EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiSteps,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
+import React, { ReactEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+import styled from 'styled-components';
+import { PLUGIN_ID } from '../../../../../../common/constants';
+import { Loading } from '../../../components';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import {
+  sendCreatePackagePolicy,
+  sendGetAgentStatus,
+  useBreadcrumbs,
+  useConfig,
+  useLink,
+  useStartServices,
+} from '../../../hooks';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 import {
   AgentPolicy,
-  PackageInfo,
-  NewPackagePolicy,
   CreatePackagePolicyRouteState,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicyEditExtensionComponentProps,
 } from '../../../types';
-import {
-  useLink,
-  useBreadcrumbs,
-  sendCreatePackagePolicy,
-  useStartServices,
-  useConfig,
-  sendGetAgentStatus,
-} from '../../../hooks';
-import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from './components';
-import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import {
   PackagePolicyValidationResults,
   validatePackagePolicy,
   validationHasErrors,
 } from './services';
-import { StepSelectPackage } from './step_select_package';
-import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { PLUGIN_ID } from '../../../../../../common/constants';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import { StepSelectPackage } from './step_select_package';
+import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {

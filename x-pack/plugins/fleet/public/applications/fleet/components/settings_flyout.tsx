@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCodeEditor,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiRadioGroup,
-  EuiComboBox,
-  EuiCodeEditor,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
+import React, { useEffect } from 'react';
+import { isDiffPathProtocol } from '../../../../common/';
 import {
+  sendPutSettings,
   useComboInput,
-  useStartServices,
   useGetSettings,
   useInput,
-  sendPutSettings,
+  useStartServices,
 } from '../hooks';
-import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
-import { isDiffPathProtocol } from '../../../../common/';
+import { sendPutOutput, useGetOutputs } from '../hooks/use_request/outputs';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 

@@ -6,8 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { authenticateAgentWithAccessToken } from './authenticate';
 
 const mockEsClient = elasticsearchServiceMock.createInternalClient();

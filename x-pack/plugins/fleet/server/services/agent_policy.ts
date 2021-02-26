@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
-import uuid from 'uuid/v4';
+import { uniq } from 'lodash';
 import {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsClientContract,
 } from 'src/core/server';
+import uuid from 'uuid/v4';
 import { AuthenticatedUser } from '../../../security/server';
 import {
-  DEFAULT_AGENT_POLICY,
+  agentPolicyStatuses,
+  AGENT_POLICY_INDEX,
+  dataTypes,
+  DEFAULT_FLEET_SERVER_AGENT_POLICY,
+  DeleteAgentPolicyResponse,
+  FleetServerPolicy,
+  Settings,
+  storedPackagePoliciesToAgentInputs,
+} from '../../common';
+import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
+  DEFAULT_AGENT_POLICY,
 } from '../constants';
 import {
-  PackagePolicy,
-  NewAgentPolicy,
+  AgentPolicyDeletionError,
+  AgentPolicyNameExistsError,
+  IngestManagerError,
+} from '../errors';
+import {
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
+  NewAgentPolicy,
+  PackagePolicy,
 } from '../types';
-import {
-  DeleteAgentPolicyResponse,
-  Settings,
-  agentPolicyStatuses,
-  storedPackagePoliciesToAgentInputs,
-  dataTypes,
-  FleetServerPolicy,
-  AGENT_POLICY_INDEX,
-  DEFAULT_FLEET_SERVER_AGENT_POLICY,
-} from '../../common';
-import {
-  AgentPolicyNameExistsError,
-  AgentPolicyDeletionError,
-  IngestManagerError,
-} from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
-import { packagePolicyService } from './package_policy';
-import { outputService } from './output';
-import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { getSettings } from './settings';
-import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
-import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 import { isAgentsSetup } from './agents/setup';
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { appContextService } from './app_context';
+import { outputService } from './output';
+import { packagePolicyService } from './package_policy';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
+import { getSettings } from './settings';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 

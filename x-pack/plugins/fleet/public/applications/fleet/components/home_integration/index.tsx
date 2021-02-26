@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import type {
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
+  TutorialDirectoryNoticeComponent,
   TutorialModuleNoticeComponent,
 } from 'src/plugins/home/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
 
 const TutorialDirectoryNoticeLazy = React.lazy(() => import('./tutorial_directory_notice'));
 export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = () => (

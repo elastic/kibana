@@ -9,11 +9,11 @@ import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'kibana/server';
 import url from 'url';
 import {
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  SettingsSOAttributes,
-  Settings,
-  decodeCloudId,
   BaseSettings,
+  decodeCloudId,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  Settings,
+  SettingsSOAttributes,
 } from '../../common';
 import { appContextService } from './app_context';
 

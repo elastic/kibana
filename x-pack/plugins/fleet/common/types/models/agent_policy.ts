@@ -7,8 +7,8 @@
 
 import { agentPolicyStatuses } from '../../constants';
 import { DataType, ValueOf } from '../../types';
-import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
+import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 

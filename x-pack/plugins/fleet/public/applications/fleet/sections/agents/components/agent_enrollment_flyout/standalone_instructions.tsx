@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiSteps,
-  EuiText,
-  EuiSpacer,
   EuiButton,
   EuiCode,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiCodeBlock,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { sendGetOneAgentPolicyFull, useLink, useStartServices } from '../../../../hooks';
+import { agentPolicyRouteService, fullAgentPolicyToYaml } from '../../../../services';
 import { AgentPolicy } from '../../../../types';
-import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
-import { DownloadStep, AgentPolicySelectionStep } from './steps';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
+import { AgentPolicySelectionStep, DownloadStep } from './steps';
 
 interface Props {
   agentPolicies?: AgentPolicy[];

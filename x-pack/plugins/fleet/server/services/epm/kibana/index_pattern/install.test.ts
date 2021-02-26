@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import path from 'path';
 import { readFileSync } from 'fs';
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
+import path from 'path';
+import { Field, Fields } from '../../fields/field';
 import {
-  flattenFields,
-  dedupeFields,
-  transformField,
-  findFieldByPath,
-  IndexPatternField,
   createFieldFormatMap,
-  createIndexPatternFields,
   createIndexPattern,
+  createIndexPatternFields,
+  dedupeFields,
+  findFieldByPath,
+  flattenFields,
+  IndexPatternField,
+  transformField,
 } from './install';
-import { Fields, Field } from '../../fields/field';
 import { dupeFields } from './tests/test_data';
 
 // Add our own serialiser to just do JSON.stringify

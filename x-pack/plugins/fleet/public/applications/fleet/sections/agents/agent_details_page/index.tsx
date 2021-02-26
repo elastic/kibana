@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
+  EuiIconTip,
   EuiLink,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiText,
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiIconTip } from '@elastic/eui';
-import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import React, { useCallback, useMemo } from 'react';
+import { Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { Error, Loading } from '../../../components';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { Loading, Error } from '../../../components';
 import {
+  useBreadcrumbs,
   useGetOneAgent,
   useGetOneAgentPolicy,
-  useLink,
-  useBreadcrumbs,
-  useStartServices,
   useKibanaVersion,
+  useLink,
+  useStartServices,
 } from '../../../hooks';
-import { WithHeaderLayout } from '../../../layouts';
-import { AgentHealth } from '../components';
-import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { WithHeaderLayout } from '../../../layouts';
 import { isAgentUpgradeable } from '../../../services';
+import { Agent, AgentDetailsReassignPolicyAction, AgentPolicy } from '../../../types';
+import { AgentHealth } from '../components';
+import { AgentDetailsActionMenu, AgentDetailsContent, AgentLogs } from './components';
+import { AgentRefreshContext } from './hooks';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
+  EuiButtonEmpty,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonEmpty,
   EuiIcon,
+  EuiPopover,
   EuiPortal,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
+import { useKibanaVersion } from '../../../../hooks';
 import { Agent } from '../../../../types';
 import {
   AgentReassignAgentPolicyFlyout,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useKibanaVersion } from '../../../../hooks';
 
 const Divider = styled.div`
   width: 0;

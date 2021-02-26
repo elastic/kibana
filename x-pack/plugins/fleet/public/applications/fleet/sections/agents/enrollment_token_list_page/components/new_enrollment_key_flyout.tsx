@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiSelect,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
-import { useInput, useStartServices, sendRequest } from '../../../../hooks';
+import React, { useState } from 'react';
+import { sendRequest, useInput, useStartServices } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
+import { AgentPolicy } from '../../../../types';
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,

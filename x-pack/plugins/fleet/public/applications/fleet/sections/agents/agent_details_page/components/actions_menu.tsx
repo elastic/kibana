@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
-import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent } from '../../../../types';
-import { useCapabilities, useKibanaVersion } from '../../../../hooks';
+import React, { memo, useMemo, useState } from 'react';
 import { ContextMenuActions } from '../../../../components';
+import { useCapabilities, useKibanaVersion } from '../../../../hooks';
+import { isAgentUpgradeable } from '../../../../services';
+import { Agent } from '../../../../types';
 import {
-  AgentUnenrollAgentModal,
   AgentReassignAgentPolicyFlyout,
+  AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
-import { isAgentUpgradeable } from '../../../../services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;

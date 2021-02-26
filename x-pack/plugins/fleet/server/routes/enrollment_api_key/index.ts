@@ -6,17 +6,17 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, ENROLLMENT_API_KEY_ROUTES } from '../../constants';
+import { ENROLLMENT_API_KEY_ROUTES, PLUGIN_ID } from '../../constants';
 import {
+  DeleteEnrollmentAPIKeyRequestSchema,
   GetEnrollmentAPIKeysRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
-  DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
 } from '../../types';
 import {
+  deleteEnrollmentApiKeyHandler,
   getEnrollmentApiKeysHandler,
   getOneEnrollmentApiKeyHandler,
-  deleteEnrollmentApiKeyHandler,
   postEnrollmentApiKeyHandler,
 } from './handler';
 

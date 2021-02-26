@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { AgentReassignmentError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
+import { bulkCreateAgentActions, createAgentAction } from './actions';
 import {
-  getAgents,
+  bulkUpdateAgents,
   getAgentPolicyForAgent,
+  getAgents,
   listAllAgents,
   updateAgent,
-  bulkUpdateAgents,
 } from './crud';
-import { AgentReassignmentError } from '../../errors';
-
-import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,

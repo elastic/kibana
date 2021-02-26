@@ -6,9 +6,11 @@
  */
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
+import semverValid from 'semver/functions/valid';
 import { URL } from 'url';
+import { appContextService } from '../..';
+import { PackageCacheError, PackageNotFoundError } from '../../../errors';
 import {
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -16,21 +18,19 @@ import {
   InstallSource,
   KibanaAssetType,
   RegistryPackage,
-  RegistrySearchResults,
   RegistrySearchResult,
+  RegistrySearchResults,
 } from '../../../types';
 import {
   getArchiveFilelist,
-  getPathParts,
-  unpackBufferToCache,
   getPackageInfo,
+  getPathParts,
   setPackageInfo,
+  unpackBufferToCache,
 } from '../archive';
-import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
 import { getRegistryUrl } from './registry_url';
-import { appContextService } from '../..';
-import { PackageNotFoundError, PackageCacheError } from '../../../errors';
+import { fetchUrl, getResponse, getResponseStream } from './requests';
 
 export interface SearchParams {
   category?: CategoryId;

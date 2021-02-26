@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export { setHttpClient, sendRequest, useRequest } from './use_request';
-export * from './agent_policy';
-export * from './package_policy';
-export * from './data_stream';
 export * from './agents';
+export * from './agent_policy';
+export * from './app';
+export * from './data_stream';
 export * from './enrollment_api_keys';
 export * from './epm';
 export * from './outputs';
+export * from './package_policy';
 export * from './settings';
 export * from './setup';
-export * from './app';
+export { sendRequest, setHttpClient, useRequest } from './use_request';

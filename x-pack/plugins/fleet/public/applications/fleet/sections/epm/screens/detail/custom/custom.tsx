@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useUIExtension } from '../../../../../hooks/use_ui_extension';
-import { useLink } from '../../../../../hooks';
-import { PackageInfo } from '../../../../../types';
-import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
 import { ExtensionWrapper } from '../../../../../components/extension_wrapper';
+import { useLink } from '../../../../../hooks';
+import { useUIExtension } from '../../../../../hooks/use_ui_extension';
+import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
+import { PackageInfo } from '../../../../../types';
 
 interface Props {
   packageInfo: PackageInfo;

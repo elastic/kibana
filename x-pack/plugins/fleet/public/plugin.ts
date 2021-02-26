@@ -5,34 +5,38 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   AppMountParameters,
   CoreSetup,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
-  CoreStart,
 } from 'src/core/public';
-import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
+import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
-  HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './applications/fleet/constants';
-
-import { FleetConfigType } from '../common/types';
-import { setupRouteService, appRoutesService } from '../common';
-import { licenseService } from './applications/fleet/hooks/use_license';
-import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
 import {
-  TutorialDirectoryNotice,
+  appRoutesService,
+  CheckPermissionsResponse,
+  PLUGIN_ID,
+  PostIngestSetupResponse,
+  setupRouteService,
+} from '../common';
+import { FleetConfigType } from '../common/types';
+import {
   TutorialDirectoryHeaderLink,
+  TutorialDirectoryNotice,
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
+import { BASE_PATH } from './applications/fleet/constants';
+import { licenseService } from './applications/fleet/hooks/use_license';
+import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
 import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
 import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
 

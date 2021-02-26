@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import hash from 'object-hash';
-import { setupFleetServerIndexes } from './elastic_index';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { FLEET_SERVER_INDICES } from '../../../common';
+import EsFleetActionsIndex from './elasticsearch/fleet_actions.json';
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
+import EsFleetArtifactsIndex from './elasticsearch/fleet_artifacts.json';
+import ESFleetEnrollmentApiKeysIndex from './elasticsearch/fleet_enrollment_api_keys.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';
 import ESFleetPoliciesLeaderIndex from './elasticsearch/fleet_policies_leader.json';
 import ESFleetServersIndex from './elasticsearch/fleet_servers.json';
-import ESFleetEnrollmentApiKeysIndex from './elasticsearch/fleet_enrollment_api_keys.json';
-import EsFleetActionsIndex from './elasticsearch/fleet_actions.json';
-import EsFleetArtifactsIndex from './elasticsearch/fleet_artifacts.json';
-import { FLEET_SERVER_INDICES } from '../../../common';
+import { setupFleetServerIndexes } from './elastic_index';
 
 const FLEET_INDEXES_MIGRATION_HASH: Record<typeof FLEET_SERVER_INDICES[number], string> = {
   '.fleet-actions': hash(EsFleetActionsIndex),

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useEffect, useState } from 'react';
 import {
-  QueryStringInput,
   IFieldType,
+  QueryStringInput,
 } from '../../../../../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../../../../../hooks';
 import {
-  AGENT_LOG_INDEX_PATTERN,
   AGENT_ID_FIELD,
+  AGENT_LOG_INDEX_PATTERN,
   DATASET_FIELD,
   LOG_LEVEL_FIELD,
 } from './constants';

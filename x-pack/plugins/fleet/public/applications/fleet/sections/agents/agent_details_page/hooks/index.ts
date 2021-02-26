@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useAgentRefresh, AgentRefreshContext } from './use_agent';
+export { AgentRefreshContext, useAgentRefresh } from './use_agent';

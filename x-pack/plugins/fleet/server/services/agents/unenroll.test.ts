@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
-import type { Agent, AgentPolicy } from '../../types';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { AgentUnenrollmentError } from '../../errors';
+import type { Agent, AgentPolicy } from '../../types';
 import { unenrollAgent, unenrollAgents } from './unenroll';
 
 const agentInManagedSO = {

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiCallOut,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import { Loading } from '../../../components';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { useGetOneAgentPolicy, useGetOneAgentPolicyFull, useStartServices } from '../../../hooks';
+import { agentPolicyRouteService, fullAgentPolicyToYaml } from '../../../services';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {

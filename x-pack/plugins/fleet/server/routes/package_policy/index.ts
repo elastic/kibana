@@ -6,20 +6,20 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
+import { PACKAGE_POLICY_API_ROUTES, PLUGIN_ID } from '../../constants';
 import {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
   CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestSchema,
 } from '../../types';
 import {
-  getPackagePoliciesHandler,
-  getOnePackagePolicyHandler,
   createPackagePolicyHandler,
-  updatePackagePolicyHandler,
   deletePackagePolicyHandler,
+  getOnePackagePolicyHandler,
+  getPackagePoliciesHandler,
+  updatePackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
