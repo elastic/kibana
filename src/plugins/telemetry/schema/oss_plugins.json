@@ -8089,10 +8089,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8102,10 +8108,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8115,10 +8127,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8128,10 +8146,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8141,10 +8165,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8154,10 +8184,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8167,10 +8203,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8180,10 +8222,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8193,10 +8241,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8206,10 +8260,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8219,10 +8279,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8232,10 +8298,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8245,10 +8317,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8258,10 +8336,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8271,10 +8355,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8284,10 +8374,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8297,10 +8393,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8310,10 +8412,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8323,10 +8431,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8336,10 +8450,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8349,10 +8469,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8362,10 +8488,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8375,10 +8507,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8388,10 +8526,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8401,10 +8545,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8414,10 +8564,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8427,10 +8583,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8440,10 +8602,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8453,10 +8621,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8466,10 +8640,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8479,10 +8659,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8492,10 +8678,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8505,10 +8697,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8518,10 +8716,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8531,10 +8735,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8544,10 +8754,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8557,10 +8773,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8570,10 +8792,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8583,10 +8811,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8596,10 +8830,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8609,10 +8849,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8622,10 +8868,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8635,10 +8887,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8648,10 +8906,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8661,10 +8925,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8674,10 +8944,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8687,10 +8963,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8700,10 +8982,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8713,10 +9001,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8726,10 +9020,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8739,10 +9039,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8752,10 +9058,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8765,10 +9077,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8778,10 +9096,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8791,10 +9115,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8804,10 +9134,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
@@ -8817,10 +9153,16 @@
           "items": {
             "properties": {
               "key": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
               },
               "value": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
               }
             }
           }
