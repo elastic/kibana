@@ -7,7 +7,7 @@
 
 import { StartServicesAccessor } from 'src/core/public';
 import { ManagementSetup, ManagementApp } from '../../../../../src/plugins/management/public';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
 import { spacesManagementApp } from './spaces_management_app';
 

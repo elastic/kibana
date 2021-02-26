@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public';
-import { SpaceListInternal } from './space_list_internal';
+
+const SpaceListInternal = React.lazy(() => import('./space_list_internal'));
 
 export const getSpaceListComponent = (): React.FC<SpaceListProps> => {
   return (props: SpaceListProps) => {
-    return <SpaceListInternal {...props} />;
+    return (
+      <Suspense fallback={<div />}>
+        <SpaceListInternal {...props} />{' '}
+      </Suspense>
+    );
   };
 };

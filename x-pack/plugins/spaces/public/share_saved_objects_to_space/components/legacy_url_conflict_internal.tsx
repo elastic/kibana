@@ -25,7 +25,7 @@ export interface InternalProps {
   getStartServices: StartServicesAccessor<PluginsStart>;
 }
 
-export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConflictProps) => {
+const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConflictProps) => {
   const {
     getStartServices,
     objectNoun = DEFAULT_OBJECT_NOUN,
@@ -112,3 +112,5 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
     </EuiCallOut>
   );
 };
+
+export default LegacyUrlConflictInternal;

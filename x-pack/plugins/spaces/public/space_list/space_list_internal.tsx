@@ -142,3 +142,5 @@ export const SpaceListInternal = ({
     </EuiFlexGroup>
   );
 };
+
+export default SpaceListInternal;

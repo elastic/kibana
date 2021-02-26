@@ -46,7 +46,7 @@ const INCLUDE_RELATED_DEFAULT = true;
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
-export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
+const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   const { onClose, savedObjectTarget: object, spacesManager, toastNotifications } = props;
   const savedObjectTarget = useMemo(
     () => ({
@@ -304,3 +304,5 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     </EuiFlyout>
   );
 };
+
+export default CopySavedObjectsToSpaceFlyout;

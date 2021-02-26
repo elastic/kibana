@@ -92,7 +92,7 @@ function createDefaultChangeSpacesHandler(
   };
 }
 
-export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
+const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const { spacesManager, shareToSpacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
@@ -350,3 +350,5 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     </EuiFlyout>
   );
 };
+
+export default ShareToSpaceFlyoutInternal;

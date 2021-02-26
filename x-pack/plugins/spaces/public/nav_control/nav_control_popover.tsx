@@ -37,7 +37,7 @@ interface State {
 
 const popoutContentId = 'headerSpacesMenuContent';
 
-export class NavControlPopover extends Component<Props, State> {
+class NavControlPopover extends Component<Props, State> {
   private activeSpace$?: Subscription;
 
   constructor(props: Props) {
@@ -177,3 +177,5 @@ export class NavControlPopover extends Component<Props, State> {
     });
   };
 }
+
+export default NavControlPopover;

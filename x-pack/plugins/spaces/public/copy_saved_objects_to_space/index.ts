@@ -6,4 +6,3 @@
  */
 
 export * from './summarize_copy_result';
-export { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space_service';

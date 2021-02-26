@@ -12,11 +12,12 @@ import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_man
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { FeaturesPluginStart } from '../../features/public';
+
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
-import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
-import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space';
+import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space/copy_saved_objects_to_space_service';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space/share_saved_objects_to_space_service';
 import { AdvancedSettingsService } from './advanced_settings';
 import { ManagementService } from './management';
 import { spaceSelectorApp } from './space_selector';

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
-import { CopySavedObjectsToSpaceFlyout } from './components';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
+
+const CopySavedObjectsToSpaceFlyout = React.lazy(() => import('./components/copy_to_space_flyout'));
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -56,12 +57,14 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     };
 
     return (
-      <CopySavedObjectsToSpaceFlyout
-        onClose={this.onClose}
-        savedObjectTarget={savedObjectTarget}
-        spacesManager={this.spacesManager}
-        toastNotifications={this.notifications.toasts}
-      />
+      <Suspense fallback={<div />}>
+        <CopySavedObjectsToSpaceFlyout
+          onClose={this.onClose}
+          savedObjectTarget={savedObjectTarget}
+          spacesManager={this.spacesManager}
+          toastNotifications={this.notifications.toasts}
+        />
+      </Suspense>
     );
   };
 

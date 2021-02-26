@@ -30,7 +30,7 @@ import { CoreStart } from 'src/core/public';
 import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { SpaceCards } from './components';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 
 interface Props {
   spacesManager: SpacesManager;

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { ShareToSpaceFlyoutProps } from '../../../../../../src/plugins/spaces_oss/public';
-import { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
+
+const ShareToSpaceFlyoutInternal = React.lazy(() => import('./share_to_space_flyout_internal'));
 
 export const getShareToSpaceFlyoutComponent = (): React.FC<ShareToSpaceFlyoutProps> => {
   return (props: ShareToSpaceFlyoutProps) => {
-    return <ShareToSpaceFlyoutInternal {...props} />;
+    return (
+      <Suspense fallback={<div />}>
+        <ShareToSpaceFlyoutInternal {...props} />{' '}
+      </Suspense>
+    );
   };
 };

@@ -15,11 +15,11 @@ import {
 import type { SpacesContextProps } from '../../../../../src/plugins/spaces_oss/public';
 import { createSpacesReactContext } from './context';
 import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { SpacesReactContext } from './types';
 
-interface InternalProps {
+export interface InternalProps {
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor<PluginsStart>;
 }
@@ -80,10 +80,4 @@ const SpacesContextWrapper = (props: PropsWithChildren<InternalProps & SpacesCon
   return <context.Provider>{children}</context.Provider>;
 };
 
-export const getSpacesContextWrapper = (
-  internalProps: InternalProps
-): React.FC<SpacesContextProps> => {
-  return ({ children, ...props }: PropsWithChildren<SpacesContextProps>) => {
-    return <SpacesContextWrapper {...{ ...internalProps, ...props, children }} />;
-  };
-};
+export default SpacesContextWrapper;

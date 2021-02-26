@@ -12,9 +12,9 @@ import {
   getShareToSpaceFlyoutComponent,
   getLegacyUrlConflict,
 } from '../share_saved_objects_to_space';
-import { getSpacesContextWrapper } from '../spaces_context';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import { getSpaceListComponent } from '../space_list';
+import { getSpacesContextWrapper } from '../spaces_context/lazy_wrapper';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;
