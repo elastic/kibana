@@ -97,6 +97,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   reporters: [],
   status: CaseStatuses.open,
   tags: [],
+  onlyCollectionType: false,
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -129,10 +130,13 @@ export interface UseGetCases extends UseGetCasesState {
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
-export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
+export const useGetCases = (
+  initialQueryParams?: QueryParams,
+  initialFilterOptions?: FilterOptions
+): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: DEFAULT_FILTER_OPTIONS,
+    filterOptions: initialFilterOptions ?? DEFAULT_FILTER_OPTIONS,
     isError: false,
     loading: [],
     queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,

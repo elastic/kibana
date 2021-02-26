@@ -45,7 +45,11 @@ describe('RuleActionsField', () => {
 
       return (
         <Form form={form}>
-          <RuleActionsField field={field} messageVariables={messageVariables} />
+          <RuleActionsField
+            field={field}
+            messageVariables={messageVariables}
+            hasErrorOnCreationCaseAction={false}
+          />
         </Form>
       );
     };

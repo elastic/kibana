@@ -91,7 +91,7 @@ export interface UseGetCase extends CaseState {
 
 export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: true,
+    isLoading: false,
     isError: false,
     data: initialData,
   });
