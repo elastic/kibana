@@ -27,7 +27,6 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
         obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
       }, {});
-
     return modifiedEntries;
   };
 }
