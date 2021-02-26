@@ -10,7 +10,7 @@ To track a sub view inside your application (ie a flyout, a tab, form step, etc)
 
 #### For a React Component
 
-For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component:
+For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component exposed from the `usageCollection` plugin. You will need to add the plugin to plugin's `kibana.json` file as an item in the `optionalPlugins` and `requiredBundles` declarations:
 
 kibana.json
 ```json
@@ -26,6 +26,7 @@ kibana.json
 
 At the application level, the application must be wrapped by the `ApplicationUsageTrackingProvider` provided in the `usageCollection`'s setup contract.
 
+For example:
 ```typescript jsx
 class MyPlugin implements Plugin {
   ...
@@ -74,11 +75,11 @@ The prop `viewId` is used as a unique identifier for your plugin. The Applicatio
 
 If you have a custom use case not provided by the Application Usage helpers you can use the `usageCollection.applicationUsageTracker` public api directly.
 
-To start tracking a view: `applicationUsageTracker.trackApplicationViewUsage(viewId)`
-Calling this method will marks the specified `viewId` as active. applicationUsageTracker will start tracking clicks and screen minutes for the view.
+To start tracking a view, call `applicationUsageTracker.trackApplicationViewUsage(viewId)` with an id for the view.
+Calling this method will mark the specified `viewId` as active and the `applicationUsageTracker` will start tracking clicks and screen minutes for the view.
 
-To stop tracking a view: `applicationUsageTracker.flushTrackedView(viewId)`
-Calling this method will stop tracking the clicks and screen minutes for that view. Usually once the view is no longer active.
+To stop tracking a view, call `applicationUsageTracker.flushTrackedView(viewId)`.
+Calling this method will stop tracking the clicks and screen minutes for that view. This method is usually called when the view is no longer active.
 
 
 ## Application Usage Telemetry Data

@@ -10,29 +10,80 @@ import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_collector';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
-  appId: { type: 'keyword' },
-  viewId: { type: 'keyword' },
-  clicks_total: { type: 'long' },
-  clicks_7_days: { type: 'long' },
-  clicks_30_days: { type: 'long' },
-  clicks_90_days: { type: 'long' },
-  minutes_on_screen_total: { type: 'float' },
-  minutes_on_screen_7_days: { type: 'float' },
-  minutes_on_screen_30_days: { type: 'float' },
-  minutes_on_screen_90_days: { type: 'float' },
+  appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
+  viewId: { type: 'keyword', _meta: { description: 'The application view being tracked' } },
+  clicks_total: { type: 'long', _meta: { description: 'Total clicks for the active application' } },
+  clicks_7_days: { type: 'long', _meta: { description: 'Total clicks over the last 7 days' } },
+  clicks_30_days: { type: 'long', _meta: { description: 'Total clicks over the last 30 days' } },
+  clicks_90_days: { type: 'long', _meta: { description: 'Total clicks over the last 90 days' } },
+  minutes_on_screen_total: {
+    type: 'float',
+    _meta: { description: 'Total minutes on screen for the active application' },
+  },
+  minutes_on_screen_7_days: {
+    type: 'float',
+    _meta: { description: 'Total minutes on screen over the last 7 days' },
+  },
+  minutes_on_screen_30_days: {
+    type: 'float',
+    _meta: { description: 'Total minutes on screen over the last 30 days' },
+  },
+  minutes_on_screen_90_days: {
+    type: 'float',
+    _meta: { description: 'Total minutes on screen over the last 90 days' },
+  },
   views: {
     type: 'array',
     items: {
-      appId: { type: 'keyword' },
-      viewId: { type: 'keyword' },
-      clicks_total: { type: 'long' },
-      clicks_7_days: { type: 'long' },
-      clicks_30_days: { type: 'long' },
-      clicks_90_days: { type: 'long' },
-      minutes_on_screen_total: { type: 'float' },
-      minutes_on_screen_7_days: { type: 'float' },
-      minutes_on_screen_30_days: { type: 'float' },
-      minutes_on_screen_90_days: { type: 'float' },
+      appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
+      viewId: { type: 'keyword', _meta: { description: 'The application view being tracked' } },
+      clicks_total: {
+        type: 'long',
+        _meta: { description: 'Total clicks for the active application sub view' },
+      },
+      clicks_7_days: {
+        type: 'long',
+        _meta: {
+          description: 'Total clicks for the active application sub view over the last 7 days',
+        },
+      },
+      clicks_30_days: {
+        type: 'long',
+        _meta: {
+          description: 'Total clicks for the active application sub view over the last 30 days',
+        },
+      },
+      clicks_90_days: {
+        type: 'long',
+        _meta: {
+          description: 'Total clicks for the active application sub view over the last 90 days',
+        },
+      },
+      minutes_on_screen_total: {
+        type: 'float',
+        _meta: { description: 'Total minutes on screen for the active application sub view' },
+      },
+      minutes_on_screen_7_days: {
+        type: 'float',
+        _meta: {
+          description:
+            'Total minutes on screen for the active application sub view over the last 7 days',
+        },
+      },
+      minutes_on_screen_30_days: {
+        type: 'float',
+        _meta: {
+          description:
+            'Total minutes on screen for the active application sub view over the last 30 days',
+        },
+      },
+      minutes_on_screen_90_days: {
+        type: 'float',
+        _meta: {
+          description:
+            'Total minutes on screen for the active application sub view over the last 90 days',
+        },
+      },
     },
   },
 };
