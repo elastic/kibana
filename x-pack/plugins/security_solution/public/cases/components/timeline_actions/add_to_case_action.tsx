@@ -70,7 +70,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   } = useControl();
 
   const attachAlertToCase = useCallback(
-    async (theCase: Case) => {
+    async (theCase: Case, updateCase?: (newCase: Case) => void) => {
       closeCaseFlyoutOpen();
       await postComment({
         caseId: theCase.id,
@@ -83,6 +83,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             name: rule?.name != null ? rule.name[0] : null,
           },
         },
+        updateCase,
       });
     },
     [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule]
@@ -109,9 +110,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         return;
       }
 
-      attachAlertToCase(theCase);
+      attachAlertToCase(theCase, onCaseSuccess);
     },
-    [attachAlertToCase, openCaseFlyoutOpen]
+    [attachAlertToCase, onCaseSuccess, openCaseFlyoutOpen]
   );
 
   const { modal: allCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
