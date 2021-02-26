@@ -33,22 +33,22 @@ export const WarmPhase: FunctionComponent = () => {
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
-    <Phase phase={'warm'}>
-      <ReplicasField phase={'warm'} />
+    <Phase phase="warm">
+      <ReplicasField phase="warm" />
 
-      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase={'warm'} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
-      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase={'warm'} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-      <ReadonlyField phase={'warm'} />
+      <ReadonlyField phase="warm" />
 
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase={'warm'}
+        phase="warm"
       />
 
-      <IndexPriorityField phase={'warm'} />
+      <IndexPriorityField phase="warm" />
     </Phase>
   );
 };

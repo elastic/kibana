@@ -33,8 +33,6 @@ export interface Pagination {
 
 export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
 
-export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
-
 export interface PersistHookProps {
   http: HttpStart;
   onError: (arg: Error) => void;
