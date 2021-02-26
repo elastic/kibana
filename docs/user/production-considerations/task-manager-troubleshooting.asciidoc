@@ -1,6 +1,10 @@
 [role="xpack"]
 [[task-manager-troubleshooting]]
-== Task Manager troubleshooting
+=== Task Manager troubleshooting
+
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
 
 Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
@@ -14,7 +18,7 @@ Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
-=== Tasks with small schedule intervals run late
+==== Tasks with small schedule intervals run late
 
 *Symptom*:
 
@@ -28,7 +32,7 @@ This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manag
 
 [float]
 [[task-manager-health-tasks-run-late]]
-=== Tasks Run Late
+==== Tasks Run Late
 
 *Symptoms*:
 
@@ -54,7 +58,7 @@ _Drift_ is often addressed by adjusting the scaling the deployment to better sui
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
-=== Diagnosing a root cause for drift
+==== Diagnosing a root cause for drift
 
 The following is a step-by-step guide to identifying a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
@@ -241,7 +245,7 @@ The API returns the following:
 By analyzing the different sections of the output we can evaluate the variety of different theories that might explain the _drift_ identified in a deplyment.
 
 [[task-manager-health-evaluate-the-configuration]]
-==== Evaluate the Configuration
+===== Evaluate the Configuration
 
 [[task-manager-theory-reduced-polling-rate]]
 *Theory*:
@@ -316,7 +320,7 @@ Max workers configuration is temporarily reduced after Elasticsearch returned 25
 In such a case a deeper investigation into the high error rate experienced by the {es} cluster is required.
 
 [[task-manager-health-evaluate-the-runtime]]
-==== Evaluate the Runtime
+===== Evaluate the Runtime
 
 [[task-manager-theory-actual-polling-frequently]]
 *Theory*:
@@ -568,7 +572,7 @@ We can infer from these stats that most `actions:.index` tasks, which back the `
 Resolving that would require deeper investigation into the {kib} Server Log, where the exact errors are logged, and addressing these specific errors.
 
 [[task-manager-health-evaluate-the-workload]]
-==== Evaluate the Workload
+===== Evaluate the Workload
 
 Predicting the required throughput a deplyment might need to support {kib} Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
