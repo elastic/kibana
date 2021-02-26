@@ -29,7 +29,7 @@ For more details on Task Manager, see <<task-manager-background-tasks>>.
 Alert and action tasks can run late or at an inconsistent schedule.
 This is typically a symptom of the specific usage of the cluster in question.
 
-You can address such issues by tweaking the {kib} <<task-manager,Task Manager>> or scaling the deployment to better suit your use case.
+You can address such issues by tweaking the <<task-manager-settings,Task Manager settings>> or scaling the deployment to better suit your use case.
 
 For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>>.
 ==============================================
