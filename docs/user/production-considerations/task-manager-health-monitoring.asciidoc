@@ -55,13 +55,13 @@ Additionally, the metrics are logged in the {kib} `DEBUG` logger at a regular ca
 To enable Task Manager DEBUG logging in your {kib} instance, add the following to your `kibana.yml`:
 
 [source,yml]
-```
+----
 logging:
   loggers:
       - context: plugins.taskManager
         appenders: [console]
         level: debug
-```
+----
 
 These stats are logged based the number of milliseconds set in your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which means it could add substantial noise to your logs. Only enable this level of logging temporarily.
 
