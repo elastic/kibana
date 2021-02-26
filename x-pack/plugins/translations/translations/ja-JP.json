@@ -9459,7 +9459,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle": "検索可能スナップショット",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody": "検索可能なスナップショットを作成するには、エンタープライズライセンスが必要です。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle": "エンタープライズライセンスが必要です",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody": "ロールオーバーがホットフェーズで無効な時には、検索可能なスナップショットを作成できません。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError": "スナップショットリポジトリ名が必要です。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel": "検索可能スナップショットを作成",
     "xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto": "リクエストを表示",
