@@ -14,6 +14,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const log = getService('log');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
 
@@ -28,15 +29,20 @@ export default ({ getService }: FtrProviderContext) => {
     action: string,
     expectedStatusCode: number
   ) {
-    const { body } = await supertest
+    log.debug(`Running ${action} request for ${jobId} in ${space}...`);
+    const resp = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/${action}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    const { body, status } = resp;
 
+    log.debug(`Response status is ${status} for ${action} request for ${jobId} in ${space}...`);
+    log.debug(`${JSON.stringify(body, null, 2)}`);
+
+    expect(status).to.be(expectedStatusCode);
     return body;
   }
 
