@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from '../translations';
 import { StepProps } from './';
-import { SwimlaneFieldMappingConfig } from '../types';
+
+const SINGLE_SELECTION = { asPlainText: true };
 
 export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   action,
@@ -18,37 +19,27 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
 }) => {
   const { mappings } = action.config;
 
-  const buildItem = (f: SwimlaneFieldMappingConfig) => {
-    return { label: `${f.name} (${f.key})`, value: f.id };
-  };
-
   const options = fields
     .filter((f) => f.fieldType === 'text')
-    .map((f) => buildItem(f))
+    .map((f) => ({ label: `${f.name} (${f.key})`, value: f.id }))
     .sort((a, b) => (a.label?.toLowerCase() > b.label?.toLowerCase() ? 1 : -1));
 
-  const findOption = useCallback(
-    (searchValue: string) => {
+  const findOption = (searchValue: string) => {
       return options.find((f) => searchValue === f.value);
-    },
-    [options]
-  );
+    };
 
-  const findItem = useCallback(
-    (searchValue: string) => {
-      return fields.find((f) => searchValue === f.id);
-    },
-    [fields]
-  );
+  const findItem =(searchValue: string) => {
+    return fields.find((f) => searchValue === f.id);
+  };
 
-  const [state, setState] = useState({
+  const state = {
     alertSourceConfig: findOption(mappings?.alertSourceConfig?.id),
     severityConfig: findOption(mappings?.severityConfig?.id),
     alertNameConfig: findOption(mappings?.alertNameConfig?.id),
     caseIdConfig: findOption(mappings?.caseIdConfig?.id),
     caseNameConfig: findOption(mappings?.caseNameConfig?.id),
     commentsConfig: findOption(mappings?.commentsConfig?.id),
-  });
+  };
 
   const resetConnection = () => {
     // reset fields
@@ -56,14 +47,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
     updateCurrentStep(1);
   };
 
-  const resetConnectionButton = (
-    <EuiButton color="warning" onClick={() => resetConnection()}>
-      {i18n.SW_RETRIEVE_CONFIGURATION_RESET_LABEL}
-    </EuiButton>
-  );
-
-  const editMappings = useCallback(
-    (key: string, option: EuiComboBoxOptionOption<string>) => {
+  const editMappings = (key: string, option: EuiComboBoxOptionOption<string>) => {
       if (!option?.value) {
         return;
       }
@@ -76,10 +60,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
         [key]: { id: item.id, name: item.name, key: item.key, fieldType: item.fieldType },
       };
       editActionConfig('mappings', newProps);
-      setState((currentState) => ({ ...currentState, [key]: findOption(item.id) }));
-    },
-    [editActionConfig, mappings, findItem, setState, findOption]
-  );
+    };
 
   const empty = { label: '', value: '' };
   return (
@@ -89,7 +70,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.alertSourceConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
+          singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneAlertSourceInput"
           onChange={(e) => {
             editMappings('alertSourceConfig', e[0]);
@@ -101,7 +82,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.severityConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
+          singleSelection={SINGLE_SELECTION}
           isInvalid={!state.severityConfig?.value}
           data-test-subj="swimlaneSeverityInput"
           onChange={(e) => {
@@ -114,8 +95,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.alertNameConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
-          // required={false}
+          singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneAlertNameInput"
           onChange={(e) => {
             editMappings('alertNameConfig', e[0]);
@@ -127,9 +107,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.caseIdConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
-          // required={false}
-          data-test-subj="swimlaneCaseIdNameInput"
+          singleSelection={SINGLE_SELECTION}
+          data-test-subj="swimlaneCaseIdConfig"
           onChange={(e) => {
             editMappings('caseIdConfig', e[0]);
           }}
@@ -140,9 +119,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.caseNameConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
-          // required={false}
-          data-test-subj="swimlaneCaseNameInput"
+          singleSelection={SINGLE_SELECTION}
+          data-test-subj="swimlaneCaseNameConfig"
           onChange={(e) => {
             editMappings('caseNameConfig', e[0]);
           }}
@@ -153,15 +131,16 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           fullWidth
           selectedOptions={[state.commentsConfig || empty]}
           options={options}
-          singleSelection={{ asPlainText: true }}
-          // required={false}
-          data-test-subj="swimlaneCommentsInput"
+          singleSelection={SINGLE_SELECTION}
+          data-test-subj="swimlaneCommentsConfig"
           onChange={(e) => {
             editMappings('commentsConfig', e[0]);
           }}
         />
       </EuiFormRow>
-      {resetConnectionButton}
+      <EuiButton color="warning" onClick={resetConnection}>
+        {i18n.SW_RETRIEVE_CONFIGURATION_RESET_LABEL}
+      </EuiButton>
     </Fragment>
   );
 };

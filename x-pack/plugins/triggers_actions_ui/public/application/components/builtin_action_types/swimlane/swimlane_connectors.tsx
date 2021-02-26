@@ -45,6 +45,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       onClick: () => {},
     },
   ];
+
   return (
     <Fragment>
       <EuiStepsHorizontal steps={setupSteps} />

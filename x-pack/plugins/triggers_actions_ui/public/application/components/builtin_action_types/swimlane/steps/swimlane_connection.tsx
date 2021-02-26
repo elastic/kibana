@@ -83,7 +83,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   };
 
   const connectSwimlaneButton = (
-    <EuiButton disabled={!isValid()} onClick={async () => await connectSwimlane()}>
+    <EuiButton disabled={!isValid()} onClick={connectSwimlane}>
       {i18n.SW_RETRIEVE_CONFIGURATION_LABEL}
     </EuiButton>
   );
@@ -118,7 +118,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
             editActionConfig('appId', e.target.value);
           }}
           onBlur={() => {
-            if (!apiUrl) {
+            if (!appId) {
               editActionConfig('appId', '');
             }
           }}
