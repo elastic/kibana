@@ -4844,22 +4844,40 @@
           "items": {
             "properties": {
               "appName": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the app reporting ui counts."
+                }
               },
               "eventName": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the event that happened."
+                }
               },
               "lastUpdatedAt": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
               },
               "fromTimestamp": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
               },
               "counterType": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
               },
               "total": {
-                "type": "integer"
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
+                }
               }
             }
           }
