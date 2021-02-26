@@ -13,11 +13,16 @@ WARNING: When you delete an action, _it cannot be recovered_.
 
 `DELETE <kibana host>:<port>/api/actions/action/<id>`
 
+`DELETE <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
+
 [[actions-and-connectors-api-delete-path-params]]
 ==== Path parameters
 
 `id`::
   (Required, string) The ID of the action.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
 
 [[actions-and-connectors-api-delete-response-codes]]
 ==== Response code

@@ -11,11 +11,16 @@ Disable an alert.
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_disable`
 
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_disable`
+
 [[alerts-api-disable-path-params]]
 ==== Path parameters
 
 `id`::
   (Required, string) The ID of the alert that you want to disable.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
 
 [[alerts-api-disable-response-codes]]
 ==== Response code

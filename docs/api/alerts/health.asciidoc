@@ -11,6 +11,14 @@ Retrieve the health status of the Alerting framework.
 
 `GET <kibana host>:<port>/api/alerts/_health`
 
+`GET <kibana host>:<port>/s/<space_id>/api/alerts/_health`
+
+[[alerts-api-health-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+
 [[alerts-api-health-codes]]
 ==== Response code
 

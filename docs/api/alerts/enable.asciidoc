@@ -11,11 +11,16 @@ Enable an alert.
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_enable`
 
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_enable`
+
 [[alerts-api-enable-path-params]]
 ==== Path parameters
 
 `id`::
   (Required, string) The ID of the alert that you want to enable.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
 
 [[alerts-api-enable-response-codes]]
 ==== Response code

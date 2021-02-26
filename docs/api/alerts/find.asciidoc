@@ -14,6 +14,14 @@ change. Use the find API for traditional paginated results, but avoid using it t
 
 `GET <kibana host>:<port>/api/alerts/_find`
 
+`GET <kibana host>:<port>/s/<space_id>/api/alerts/_find`
+
+[[alerts-api-find-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+
 [[alerts-api-find-query-params]]
 ==== Query Parameters
 
