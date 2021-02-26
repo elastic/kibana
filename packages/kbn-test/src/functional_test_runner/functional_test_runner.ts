@@ -72,7 +72,10 @@ export class FunctionalTestRunner {
       const runnableErrors = new WeakMap<Runnable, Error>();
 
       this.lifecycle.beforeEachRunnable.add((runnable) => {
-        transactions.set(runnable, apm.startTransaction(runnable.fullTitle(), runnable.type));
+        const transaction = apm.startTransaction(runnable.fullTitle(), runnable.type);
+        transaction?.setLabel('file', runnable.file ?? 'unknown');
+        transaction?.setLabel('ownTitle', runnable.title);
+        transactions.set(runnable, transaction);
       });
 
       this.lifecycle.failedRunnable.add((runnable, error) => {
