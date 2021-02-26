@@ -46,8 +46,6 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
-        {/* TODO SchemaConflictCallout */}
-
         <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="m">
