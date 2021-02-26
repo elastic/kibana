@@ -59,7 +59,7 @@ export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps
         });
       } catch (error) {
         logger.error(
-          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseID}: ${error}`
+          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }

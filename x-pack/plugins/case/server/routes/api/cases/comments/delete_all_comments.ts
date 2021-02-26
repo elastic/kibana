@@ -76,7 +76,7 @@ export function initDeleteAllCommentsApi({
         return response.noContent();
       } catch (error) {
         logger.error(
-          `Failed to delete all comments in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseID}: ${error}`
+          `Failed to delete all comments in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }

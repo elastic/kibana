@@ -84,7 +84,7 @@ export function initDeleteCommentApi({
         return response.noContent();
       } catch (error) {
         logger.error(
-          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseID}: ${error}`
+          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }

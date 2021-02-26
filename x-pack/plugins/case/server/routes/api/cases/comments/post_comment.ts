@@ -42,7 +42,7 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
         });
       } catch (error) {
         logger.error(
-          `Failed to post comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseID}: ${error}`
+          `Failed to post comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }
