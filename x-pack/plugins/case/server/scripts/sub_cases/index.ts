@@ -6,7 +6,8 @@
  */
 /* eslint-disable no-console */
 import yargs from 'yargs';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import {
   CaseResponse,
   CaseType,
