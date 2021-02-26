@@ -24,6 +24,9 @@ export const FieldTextSelect = ({
   onModeChange,
   allowSwitchUseKibanaIndexesMode,
 }: SelectIndexComponentProps) => {
+  const textualValue = toTextValue(value);
+  const append = [<LegacyModePopover index={textualValue} />];
+
   const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback(
     (e) => {
       onIndexChange(e.target.value);
@@ -31,17 +34,15 @@ export const FieldTextSelect = ({
     [onIndexChange]
   );
 
-  const append = [<LegacyModePopover />];
-
   if (allowSwitchUseKibanaIndexesMode) {
-    append.push(<SwitchModePopover isKibanaIndexesModeOn={false} onModeChange={onModeChange} />);
+    append.push(<SwitchModePopover isKibanaIndicesModeOn={false} onModeChange={onModeChange} />);
   }
 
   return (
     <EuiFieldText
       disabled={disabled}
       onChange={onFieldTextChange}
-      value={toTextValue(value)}
+      value={textualValue}
       placeholder={placeholder}
       append={append}
     />

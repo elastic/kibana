@@ -20,20 +20,20 @@ import { SwitchModePopover } from './switch_mode_popover';
 type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
 
 const toSelectedOptions = (
-  v: IndexPatternObject
+  value: IndexPatternObject
 ): EuiComboBoxProps<IndexPatternObject>['selectedOptions'] => {
-  if (!v) {
-    return [];
+  if (value) {
+    if (typeof value === 'string') {
+      return [{ label: value ?? '' }];
+    }
+    return [
+      {
+        id: value.id ?? '',
+        label: value.title ?? '',
+      },
+    ];
   }
-  if (typeof v === 'string') {
-    return [{ label: v ?? '' }];
-  }
-  return [
-    {
-      id: v.id ?? '',
-      label: v.title ?? '',
-    },
-  ];
+  return [];
 };
 
 export const ComboBoxSelect = ({
@@ -73,7 +73,7 @@ export const ComboBoxSelect = ({
       isDisabled={disabled}
       placeholder={placeholder}
       {...(allowSwitchUseKibanaIndexesMode && {
-        append: <SwitchModePopover isKibanaIndexesModeOn={true} onModeChange={onModeChange} />,
+        append: <SwitchModePopover isKibanaIndicesModeOn={true} onModeChange={onModeChange} />,
       })}
     />
   );

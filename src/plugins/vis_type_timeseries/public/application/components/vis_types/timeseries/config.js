@@ -556,6 +556,6 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   seriesQuantity: PropTypes.object,
 };

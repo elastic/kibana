@@ -90,5 +90,5 @@ SeriesConfigQueryBarWithIgnoreGlobalFilter.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };

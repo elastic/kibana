@@ -54,6 +54,7 @@ export const IndexPatternSelect = ({
       onChange({
         [USE_KIBANA_INDEXES_KEY]: useKibanaIndexes,
       });
+      setInputValue('');
     },
     [onChange]
   );

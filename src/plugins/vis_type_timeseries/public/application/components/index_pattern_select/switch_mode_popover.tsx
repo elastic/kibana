@@ -8,14 +8,15 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SelectIndexComponentProps } from './types';
 
 type SwitchModePopoverProps = Pick<SelectIndexComponentProps, 'onModeChange'> & {
-  isKibanaIndexesModeOn: boolean;
+  isKibanaIndicesModeOn: boolean;
 };
 
 export const SwitchModePopover = ({
-  isKibanaIndexesModeOn,
+  isKibanaIndicesModeOn,
   onModeChange,
 }: SwitchModePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -36,7 +37,12 @@ export const SwitchModePopover = ({
         <EuiButtonEmpty
           iconType={'gear'}
           size="xs"
-          aria-label="Gear this"
+          aria-label={i18n.translate(
+            'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
+            {
+              defaultMessage: 'Switch index pattern selection mode',
+            }
+          )}
           onClick={onButtonClick}
         />
       }
@@ -44,11 +50,27 @@ export const SwitchModePopover = ({
       closePopover={closePopover}
       style={{ height: 'auto' }}
     >
-      <EuiFormRow label="Use Kibana indexes?" hasChildLabel={false}>
+      <EuiFormRow
+        label={i18n.translate(
+          'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
+          {
+            defaultMessage: 'Use Kibana indices?',
+          }
+        )}
+        hasChildLabel={false}
+      >
         <EuiSwitch
           name="switch"
-          checked={isKibanaIndexesModeOn}
-          label={isKibanaIndexesModeOn ? 'Off' : 'On'}
+          checked={isKibanaIndicesModeOn}
+          label={
+            isKibanaIndicesModeOn
+              ? i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.on', {
+                  defaultMessage: 'On',
+                })
+              : i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.off', {
+                  defaultMessage: 'Off',
+                })
+          }
           onChange={onChange}
         />
       </EuiFormRow>

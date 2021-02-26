@@ -263,7 +263,7 @@ TableSeriesConfigUI.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
 
 export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);
