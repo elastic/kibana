@@ -9,9 +9,11 @@
 import { inspect } from 'util';
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 /**
  * Deletes all indices that start with `.kibana`
@@ -30,10 +32,15 @@ export async function deleteKibanaIndices({
     return;
   }
 
-  await client.indices.putSettings({
-    index: indexNames,
-    body: { index: { blocks: { read_only: false } } },
-  });
+  await client.indices.putSettings(
+    {
+      index: indexNames,
+      body: { index: { blocks: { read_only: false } } },
+    },
+    {
+      headers: ES_CLIENT_HEADERS,
+    }
+  );
 
   await deleteIndex({
     client,
@@ -50,13 +57,7 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({
-  client,
-  kbnClient,
-}: {
-  client: Client;
-  kbnClient: KbnClient;
-}) {
+export async function migrateKibanaIndex(kbnClient: KbnClient) {
   await kbnClient.savedObjects.migrate();
 }
 
@@ -67,7 +68,12 @@ export async function migrateKibanaIndex({
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
 async function fetchKibanaIndices(client: Client) {
-  const resp = await client.cat.indices<unknown>({ index: '.kibana*', format: 'json' });
+  const resp = await client.cat.indices<unknown>(
+    { index: '.kibana*', format: 'json' },
+    {
+      headers: ES_CLIENT_HEADERS,
+    }
+  );
   const isKibanaIndex = (index: string) =>
     /^\.kibana(:?_\d*)?$/.test(index) ||
     /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index);
@@ -118,6 +124,7 @@ export async function cleanKibanaIndices({
       },
       {
         ignore: [404, 409],
+        headers: ES_CLIENT_HEADERS,
       }
     );
 
@@ -160,6 +167,7 @@ export async function createDefaultSpace({ index, client }: { index: string; cli
     },
     {
       ignore: [409],
+      headers: ES_CLIENT_HEADERS,
     }
   );
 }
