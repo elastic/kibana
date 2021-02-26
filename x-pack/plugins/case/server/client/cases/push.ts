@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import Boom, { isBoom, Boom as BoomType } from '@hapi/boom';
+import Boom from '@hapi/boom';
 import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
+  Logger,
 } from 'kibana/server';
 import { ActionResult, ActionsClient } from '../../../../actions/server';
 import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../routes/api/utils';
@@ -34,16 +35,7 @@ import {
   CaseUserActionServiceSetup,
 } from '../../services';
 import { CaseClientHandler } from '../client';
-
-const createError = (e: Error | BoomType, message: string): Error | BoomType => {
-  if (isBoom(e)) {
-    e.message = message;
-    e.output.payload.message = message;
-    return e;
-  }
-
-  return Error(message);
-};
+import { createCaseError } from '../../common/error';
 
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -55,6 +47,7 @@ interface PushParams {
   connectorId: string;
   caseClient: CaseClientHandler;
   actionsClient: ActionsClient;
+  logger: Logger;
 }
 
 export const push = async ({
@@ -67,6 +60,7 @@ export const push = async ({
   connectorId,
   caseId,
   user,
+  logger,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
   let theCase: CaseResponse;
@@ -84,7 +78,7 @@ export const push = async ({
     ]);
   } catch (e) {
     const message = `Error getting case and/or connector and/or user actions: ${e.message}`;
-    throw createError(e, message);
+    throw createCaseError({ message, error: e, logger });
   }
 
   // We need to change the logic when we support subcases
@@ -101,7 +95,11 @@ export const push = async ({
       alertsInfo,
     });
   } catch (e) {
-    throw new Error(`Error getting alerts for case with id ${theCase.id}: ${e.message}`);
+    throw createCaseError({
+      message: `Error getting alerts for case with id ${theCase.id}: ${e.message}`,
+      logger,
+      error: e,
+    });
   }
 
   try {
@@ -112,7 +110,7 @@ export const push = async ({
     });
   } catch (e) {
     const message = `Error getting mapping for connector with id ${connector.id}: ${e.message}`;
-    throw createError(e, message);
+    throw createCaseError({ message, error: e, logger });
   }
 
   try {
@@ -126,7 +124,7 @@ export const push = async ({
     });
   } catch (e) {
     const message = `Error creating incident for case with id ${theCase.id}: ${e.message}`;
-    throw createError(e, message);
+    throw createCaseError({ error: e, message, logger });
   }
 
   const pushRes = await actionsClient.execute({
@@ -170,7 +168,7 @@ export const push = async ({
     ]);
   } catch (e) {
     const message = `Error getting user and/or case and/or case configuration and/or case comments: ${e.message}`;
-    throw createError(e, message);
+    throw createCaseError({ error: e, message, logger });
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -256,7 +254,7 @@ export const push = async ({
     ]);
   } catch (e) {
     const message = `Error updating case and/or comments and/or creating user action: ${e.message}`;
-    throw createError(e, message);
+    throw createCaseError({ error: e, message, logger });
   }
   /* End of update case with push information */
 

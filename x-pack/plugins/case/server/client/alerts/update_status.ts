@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import { AlertServiceContract } from '../../services';
 import { UpdateAlertRequest } from '../types';
 
@@ -13,12 +13,14 @@ interface UpdateAlertsStatusArgs {
   alertsService: AlertServiceContract;
   alerts: UpdateAlertRequest[];
   scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 export const updateAlertsStatus = async ({
   alertsService,
   alerts,
   scopedClusterClient,
+  logger,
 }: UpdateAlertsStatusArgs): Promise<void> => {
-  await alertsService.updateAlertsStatus({ alerts, scopedClusterClient });
+  await alertsService.updateAlertsStatus({ alerts, scopedClusterClient, logger });
 };

@@ -8,10 +8,11 @@
 import { KibanaRequest } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService, AlertServiceContract } from '.';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.create().get('case');
 
   describe('happy path', () => {
     let alertService: AlertServiceContract;
@@ -19,6 +20,7 @@ describe('updateAlertsStatus', () => {
       alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
       request: {} as KibanaRequest,
       scopedClusterClient: esClient,
+      logger,
     };
 
     beforeEach(async () => {
@@ -49,6 +51,7 @@ describe('updateAlertsStatus', () => {
           await alertService.updateAlertsStatus({
             alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
             scopedClusterClient: esClient,
+            logger,
           })
         ).toBeUndefined();
       });

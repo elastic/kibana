@@ -14,6 +14,7 @@ import {
   KibanaRequest,
   SavedObject,
   SavedObjectsFindResponse,
+  Logger,
 } from 'kibana/server';
 
 import { CaseClient } from '../../../../client';
@@ -47,6 +48,7 @@ import { getCaseToUpdate } from '../helpers';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 import { createAlertUpdateRequest } from '../../../../common';
 import { UpdateAlertRequest } from '../../../../client/types';
+import { createCaseError } from '../../../../common/error';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -55,6 +57,7 @@ interface UpdateArgs {
   request: KibanaRequest;
   caseClient: CaseClient;
   subCases: SubCasesPatchRequest;
+  logger: Logger;
 }
 
 function checkNonExistingOrConflict(
@@ -216,36 +219,48 @@ async function updateAlerts({
   caseService,
   client,
   caseClient,
+  logger,
 }: {
   subCasesToSync: SubCasePatchRequest[];
   caseService: CaseServiceSetup;
   client: SavedObjectsClientContract;
   caseClient: CaseClient;
+  logger: Logger;
 }) {
-  const subCasesToSyncMap = subCasesToSync.reduce((acc, subCase) => {
-    acc.set(subCase.id, subCase);
-    return acc;
-  }, new Map<string, SubCasePatchRequest>());
-  // get all the alerts for all sub cases that need to be synced
-  const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
-  // create a map of the status (open, closed, etc) to alert info that needs to be updated
-  const alertsToUpdate = totalAlerts.saved_objects.reduce(
-    (acc: UpdateAlertRequest[], alertComment) => {
-      if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
-        const id = getID(alertComment);
-        const status =
-          id !== undefined
-            ? subCasesToSyncMap.get(id)?.status ?? CaseStatuses.open
-            : CaseStatuses.open;
-
-        acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
-      }
+  try {
+    const subCasesToSyncMap = subCasesToSync.reduce((acc, subCase) => {
+      acc.set(subCase.id, subCase);
       return acc;
-    },
-    []
-  );
+    }, new Map<string, SubCasePatchRequest>());
+    // get all the alerts for all sub cases that need to be synced
+    const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
+    // create a map of the status (open, closed, etc) to alert info that needs to be updated
+    const alertsToUpdate = totalAlerts.saved_objects.reduce(
+      (acc: UpdateAlertRequest[], alertComment) => {
+        if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
+          const id = getID(alertComment);
+          const status =
+            id !== undefined
+              ? subCasesToSyncMap.get(id)?.status ?? CaseStatuses.open
+              : CaseStatuses.open;
 
-  await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
+          acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
+        }
+        return acc;
+      },
+      []
+    );
+
+    await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
+        subCasesToSync
+      )}: ${error}`,
+      logger,
+      error,
+    });
+  }
 }
 
 async function update({
@@ -255,133 +270,152 @@ async function update({
   request,
   caseClient,
   subCases,
+  logger,
 }: UpdateArgs): Promise<SubCasesResponse> {
   const query = pipe(
     excess(SubCasesPatchRequestRt).decode(subCases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  const bulkSubCases = await caseService.getSubCases({
-    client,
-    ids: query.subCases.map((q) => q.id),
-  });
+  try {
+    const bulkSubCases = await caseService.getSubCases({
+      client,
+      ids: query.subCases.map((q) => q.id),
+    });
 
-  const subCasesMap = bulkSubCases.saved_objects.reduce((acc, so) => {
-    acc.set(so.id, so);
-    return acc;
-  }, new Map<string, SavedObject<SubCaseAttributes>>());
+    const subCasesMap = bulkSubCases.saved_objects.reduce((acc, so) => {
+      acc.set(so.id, so);
+      return acc;
+    }, new Map<string, SavedObject<SubCaseAttributes>>());
 
-  checkNonExistingOrConflict(query.subCases, subCasesMap);
+    checkNonExistingOrConflict(query.subCases, subCasesMap);
 
-  const nonEmptySubCaseRequests = getValidUpdateRequests(query.subCases, subCasesMap);
+    const nonEmptySubCaseRequests = getValidUpdateRequests(query.subCases, subCasesMap);
 
-  if (nonEmptySubCaseRequests.length <= 0) {
-    throw Boom.notAcceptable('All update fields are identical to current version.');
-  }
+    if (nonEmptySubCaseRequests.length <= 0) {
+      throw Boom.notAcceptable('All update fields are identical to current version.');
+    }
 
-  const subIDToParentCase = await getParentCases({
-    client,
-    caseService,
-    subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
-    subCasesMap,
-  });
+    const subIDToParentCase = await getParentCases({
+      client,
+      caseService,
+      subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
+      subCasesMap,
+    });
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = await caseService.getUser({ request });
-  const updatedAt = new Date().toISOString();
-  const updatedCases = await caseService.patchSubCases({
-    client,
-    subCases: nonEmptySubCaseRequests.map((thisCase) => {
-      const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
-      let closedInfo: { closed_at: string | null; closed_by: User | null } = {
-        closed_at: null,
-        closed_by: null,
-      };
-
-      if (
-        updateSubCaseAttributes.status &&
-        updateSubCaseAttributes.status === CaseStatuses.closed
-      ) {
-        closedInfo = {
-          closed_at: updatedAt,
-          closed_by: { email, full_name, username },
-        };
-      } else if (
-        updateSubCaseAttributes.status &&
-        (updateSubCaseAttributes.status === CaseStatuses.open ||
-          updateSubCaseAttributes.status === CaseStatuses['in-progress'])
-      ) {
-        closedInfo = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { username, full_name, email } = await caseService.getUser({ request });
+    const updatedAt = new Date().toISOString();
+    const updatedCases = await caseService.patchSubCases({
+      client,
+      subCases: nonEmptySubCaseRequests.map((thisCase) => {
+        const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
+        let closedInfo: { closed_at: string | null; closed_by: User | null } = {
           closed_at: null,
           closed_by: null,
         };
-      }
-      return {
-        subCaseId,
-        updatedAttributes: {
-          ...updateSubCaseAttributes,
-          ...closedInfo,
-          updated_at: updatedAt,
-          updated_by: { email, full_name, username },
-        },
-        version,
-      };
-    }),
-  });
 
-  const subCasesToSyncAlertsFor = nonEmptySubCaseRequests.filter((subCaseToUpdate) => {
-    const storedSubCase = subCasesMap.get(subCaseToUpdate.id);
-    const parentCase = subIDToParentCase.get(subCaseToUpdate.id);
-    return (
-      storedSubCase !== undefined &&
-      subCaseToUpdate.status !== undefined &&
-      storedSubCase.attributes.status !== subCaseToUpdate.status &&
-      parentCase?.attributes.settings.syncAlerts
+        if (
+          updateSubCaseAttributes.status &&
+          updateSubCaseAttributes.status === CaseStatuses.closed
+        ) {
+          closedInfo = {
+            closed_at: updatedAt,
+            closed_by: { email, full_name, username },
+          };
+        } else if (
+          updateSubCaseAttributes.status &&
+          (updateSubCaseAttributes.status === CaseStatuses.open ||
+            updateSubCaseAttributes.status === CaseStatuses['in-progress'])
+        ) {
+          closedInfo = {
+            closed_at: null,
+            closed_by: null,
+          };
+        }
+        return {
+          subCaseId,
+          updatedAttributes: {
+            ...updateSubCaseAttributes,
+            ...closedInfo,
+            updated_at: updatedAt,
+            updated_by: { email, full_name, username },
+          },
+          version,
+        };
+      }),
+    });
+
+    const subCasesToSyncAlertsFor = nonEmptySubCaseRequests.filter((subCaseToUpdate) => {
+      const storedSubCase = subCasesMap.get(subCaseToUpdate.id);
+      const parentCase = subIDToParentCase.get(subCaseToUpdate.id);
+      return (
+        storedSubCase !== undefined &&
+        subCaseToUpdate.status !== undefined &&
+        storedSubCase.attributes.status !== subCaseToUpdate.status &&
+        parentCase?.attributes.settings.syncAlerts
+      );
+    });
+
+    await updateAlerts({
+      caseService,
+      client,
+      caseClient,
+      subCasesToSync: subCasesToSyncAlertsFor,
+      logger,
+    });
+
+    const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(
+      (acc, updatedSO) => {
+        const originalSubCase = subCasesMap.get(updatedSO.id);
+        if (originalSubCase) {
+          acc.push(
+            flattenSubCaseSavedObject({
+              savedObject: {
+                ...originalSubCase,
+                ...updatedSO,
+                attributes: { ...originalSubCase.attributes, ...updatedSO.attributes },
+                references: originalSubCase.references,
+                version: updatedSO.version ?? originalSubCase.version,
+              },
+            })
+          );
+        }
+        return acc;
+      },
+      []
     );
-  });
 
-  await updateAlerts({
-    caseService,
-    client,
-    caseClient,
-    subCasesToSync: subCasesToSyncAlertsFor,
-  });
+    await userActionService.postUserActions({
+      client,
+      actions: buildSubCaseUserActions({
+        originalSubCases: bulkSubCases.saved_objects,
+        updatedSubCases: updatedCases.saved_objects,
+        actionDate: updatedAt,
+        actionBy: { email, full_name, username },
+      }),
+    });
 
-  const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(
-    (acc, updatedSO) => {
-      const originalSubCase = subCasesMap.get(updatedSO.id);
-      if (originalSubCase) {
-        acc.push(
-          flattenSubCaseSavedObject({
-            savedObject: {
-              ...originalSubCase,
-              ...updatedSO,
-              attributes: { ...originalSubCase.attributes, ...updatedSO.attributes },
-              references: originalSubCase.references,
-              version: updatedSO.version ?? originalSubCase.version,
-            },
-          })
-        );
-      }
-      return acc;
-    },
-    []
-  );
-
-  await userActionService.postUserActions({
-    client,
-    actions: buildSubCaseUserActions({
-      originalSubCases: bulkSubCases.saved_objects,
-      updatedSubCases: updatedCases.saved_objects,
-      actionDate: updatedAt,
-      actionBy: { email, full_name, username },
-    }),
-  });
-
-  return SubCasesResponseRt.encode(returnUpdatedSubCases);
+    return SubCasesResponseRt.encode(returnUpdatedSubCases);
+  } catch (error) {
+    const idVersions = query.subCases.map((subCase) => ({
+      id: subCase.id,
+      version: subCase.version,
+    }));
+    throw createCaseError({
+      message: `Failed to update sub cases: ${JSON.stringify(idVersions)}: ${error}`,
+      error,
+      logger,
+    });
+  }
 }
 
-export function initPatchSubCasesApi({ router, caseService, userActionService }: RouteDeps) {
+export function initPatchSubCasesApi({
+  router,
+  caseService,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.patch(
     {
       path: SUB_CASES_PATCH_DEL_URL,
@@ -390,10 +424,10 @@ export function initPatchSubCasesApi({ router, caseService, userActionService }:
       },
     },
     async (context, request, response) => {
-      const caseClient = context.case.getCaseClient();
-      const subCases = request.body as SubCasesPatchRequest;
-
       try {
+        const caseClient = context.case.getCaseClient();
+        const subCases = request.body as SubCasesPatchRequest;
+
         return response.ok({
           body: await update({
             request,
@@ -402,9 +436,11 @@ export function initPatchSubCasesApi({ router, caseService, userActionService }:
             client: context.core.savedObjects.client,
             caseService,
             userActionService,
+            logger,
           }),
         });
       } catch (error) {
+        logger.error(`Failed to patch sub cases in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

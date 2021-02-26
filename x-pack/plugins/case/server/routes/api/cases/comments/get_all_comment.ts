@@ -14,7 +14,7 @@ import { flattenCommentSavedObjects, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { defaultSortField } from '../../../../common';
 
-export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
+export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENTS_URL,
@@ -58,6 +58,9 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
           body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
         });
       } catch (error) {
+        logger.error(
+          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }
