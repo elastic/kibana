@@ -469,7 +469,7 @@ describe('CaseView ', () => {
     );
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
-      expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
+      expect(fetchCaseUserActions).toBeCalledWith('1234', undefined);
       expect(fetchCase).toBeCalled();
     });
   });
