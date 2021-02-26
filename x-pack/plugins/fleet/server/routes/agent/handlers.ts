@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { AbortController } from 'abort-controller';
-import {
+import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
@@ -25,15 +25,13 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
-  PostAgentCheckinRequest,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
+import type { PostAgentCheckinRequest } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
-import * as AgentService from '../../services/agents';
-import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
 
 export const getAgentHandler: RequestHandler<

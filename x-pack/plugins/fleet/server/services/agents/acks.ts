@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import Boom from '@hapi/boom';
 import LRU from 'lru-cache';
-import {
+import type {
   Agent,
   AgentAction,
   AgentPolicyAction,

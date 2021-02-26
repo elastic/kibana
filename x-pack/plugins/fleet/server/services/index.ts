@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent, EsAssetReference } from '../types';
-import * as settingsService from './settings';
+import { KibanaRequest } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { AgentStatus, Agent, EsAssetReference } from '../types';
 import { getAgent, listAgents } from './agents';
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 import { agentPolicyService } from './agent_policy';
 
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
 
 /**
