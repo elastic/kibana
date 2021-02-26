@@ -50,7 +50,8 @@ export interface VisTypeTimeseriesSetup {
   getVisData: (
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     fakeRequest: FakeRequest,
-    options: VisPayload
+    // ideally this should be VisPayload type, but currently has inconsistencies with x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts
+    options: any
   ) => Promise<TimeseriesVisData>;
 }
 
