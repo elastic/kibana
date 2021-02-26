@@ -9,7 +9,7 @@
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '../../logging';
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindOptions } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { fetchNestedDependencies } from './fetch_nested_dependencies';
@@ -23,7 +23,6 @@ import {
 } from './types';
 import { SavedObjectsExportError } from './errors';
 import { applyExportTransforms } from './apply_export_transforms';
-import { createPointInTimeFinder } from './point_in_time_finder';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -168,18 +167,12 @@ export class SavedObjectsExporter {
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
-    const findOptions: SavedObjectsFindOptions = {
+    const finder = this.#savedObjectsClient.createPointInTimeFinder({
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
       namespaces: namespace ? [namespace] : undefined,
-    };
-
-    const finder = createPointInTimeFinder({
-      findOptions,
-      logger: this.#log,
-      savedObjectsClient: this.#savedObjectsClient,
     });
 
     const hits: SavedObjectsFindResult[] = [];

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository } from './lib';
+import { ISavedObjectsRepository, SavedObjectsPointInTimeFinderOptions } from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -390,6 +390,11 @@ export interface SavedObjectsClosePointInTimeResponse {
 }
 
 /**
+ * @public
+ */
+export type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions['findOptions'];
+
+/**
  *
  * @public
  */
@@ -602,5 +607,13 @@ export class SavedObjectsClient {
    */
   async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
     return await this._repository.closePointInTime(id, options);
+  }
+
+  /**
+   * Returns a generator help page through large sets of saved objects by wrapping
+   * calls to {@link SavedObjectsClient.find}
+   */
+  createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions) {
+    return this._repository.createPointInTimeFinder(findOptions);
   }
 }

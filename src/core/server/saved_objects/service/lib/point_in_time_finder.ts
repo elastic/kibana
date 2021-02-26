@@ -6,56 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../../logging';
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from '../types';
-import { SavedObjectsFindResponse } from '../service';
+import { Logger } from '../../../logging';
+import { SavedObjectsFindOptions } from '../../types';
+import { SavedObjectsFindResponse } from '../';
+import { ISavedObjectsRepository } from './repository';
 
 /**
- * Returns a generator to help page through large sets of saved objects.
- *
- * The generator wraps calls to `SavedObjects.find` and iterates over
- * multiple pages of results using `_pit` and `search_after`. This will
- * open a new Point In Time (PIT), and continue paging until a set of
- * results is received that's smaller than the designated `perPage`.
- *
- * Once you have retrieved all of the results you need, it is recommended
- * to call `close()` to clean up the PIT and prevent Elasticsearch from
- * consuming resources unnecessarily. This will automatically be done for
- * you if you reach the last page of results.
- *
- * @example
- * ```ts
- * const findOptions: SavedObjectsFindOptions = {
- *   type: 'visualization',
- *   search: 'foo*',
- *   perPage: 100,
- * };
- *
- * const finder = createPointInTimeFinder({
- *   logger,
- *   savedObjectsClient,
- *   findOptions,
- * });
- *
- * const responses: SavedObjectFindResponse[] = [];
- * for await (const response of finder.find()) {
- *   responses.push(...response);
- *   if (doneSearching) {
- *     await finder.close();
- *   }
- * }
- * ```
+ * @internal
+ */
+export interface SavedObjectsPointInTimeFinderOptions {
+  findOptions: Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
+  logger: Logger;
+  savedObjectsRepository: ISavedObjectsRepository;
+}
+
+/**
+ * @internal
  */
 export function createPointInTimeFinder({
   findOptions,
   logger,
-  savedObjectsClient,
-}: {
-  findOptions: SavedObjectsFindOptions;
-  logger: Logger;
-  savedObjectsClient: SavedObjectsClientContract;
-}) {
-  return new PointInTimeFinder({ findOptions, logger, savedObjectsClient });
+  savedObjectsRepository,
+}: SavedObjectsPointInTimeFinderOptions) {
+  return new PointInTimeFinder({ findOptions, logger, savedObjectsRepository });
 }
 
 /**
@@ -63,7 +36,7 @@ export function createPointInTimeFinder({
  */
 export class PointInTimeFinder {
   readonly #log: Logger;
-  readonly #savedObjectsClient: SavedObjectsClientContract;
+  readonly #savedObjectsRepository: ISavedObjectsRepository;
   readonly #findOptions: SavedObjectsFindOptions;
   #open: boolean = false;
   #pitId?: string;
@@ -71,14 +44,10 @@ export class PointInTimeFinder {
   constructor({
     findOptions,
     logger,
-    savedObjectsClient,
-  }: {
-    findOptions: SavedObjectsFindOptions;
-    logger: Logger;
-    savedObjectsClient: SavedObjectsClientContract;
-  }) {
-    this.#log = logger;
-    this.#savedObjectsClient = savedObjectsClient;
+    savedObjectsRepository,
+  }: SavedObjectsPointInTimeFinderOptions) {
+    this.#log = logger.get('point-in-time-finder');
+    this.#savedObjectsRepository = savedObjectsRepository;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
@@ -110,7 +79,7 @@ export class PointInTimeFinder {
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = this.getLastHitSortValue(results);
 
-      this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
+      this.#log.debug(`Collected [${lastResultsCount}] saved objects`);
 
       // Close PIT if this was our last page
       if (this.#pitId && lastResultsCount < this.#findOptions.perPage!) {
@@ -129,7 +98,7 @@ export class PointInTimeFinder {
     try {
       if (this.#pitId) {
         this.#log.debug(`Closing PIT for types [${this.#findOptions.type}]`);
-        await this.#savedObjectsClient.closePointInTime(this.#pitId);
+        await this.#savedObjectsRepository.closePointInTime(this.#pitId);
         this.#pitId = undefined;
       }
       this.#open = false;
@@ -141,11 +110,13 @@ export class PointInTimeFinder {
 
   private async open() {
     try {
-      const { id } = await this.#savedObjectsClient.openPointInTimeForType(this.#findOptions.type);
+      const { id } = await this.#savedObjectsRepository.openPointInTimeForType(
+        this.#findOptions.type
+      );
       this.#pitId = id;
       this.#open = true;
     } catch (e) {
-      // Since `find` swallows 404s, it is expected that exporter will do the same,
+      // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
       if (e.output.statusCode !== 404) {
         throw e;
@@ -164,7 +135,7 @@ export class PointInTimeFinder {
     searchAfter?: unknown[];
   }) {
     try {
-      return await this.#savedObjectsClient.find({
+      return await this.#savedObjectsRepository.find({
         // Sort fields are required to use searchAfter, so we set some defaults here
         sortField: 'updated_at',
         sortOrder: 'desc',

@@ -282,6 +282,7 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,

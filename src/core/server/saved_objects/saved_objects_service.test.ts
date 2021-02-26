@@ -274,7 +274,7 @@ describe('SavedObjectsService', () => {
         expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
@@ -292,7 +292,7 @@ describe('SavedObjectsService', () => {
         createScopedRepository(req, ['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
@@ -311,7 +311,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository();
 
         const [
-          [, , , client, includedHiddenTypes],
+          [, , , client, , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
@@ -328,7 +328,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository(['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);

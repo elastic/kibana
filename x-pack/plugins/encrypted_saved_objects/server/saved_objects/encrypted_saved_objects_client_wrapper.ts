@@ -19,6 +19,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
@@ -261,6 +262,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
     return await this.options.baseClient.closePointInTime(id, options);
+  }
+
+  public createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions) {
+    return this.options.baseClient.createPointInTimeFinder(findOptions);
   }
 
   /**

@@ -21,6 +21,7 @@ const create = () =>
     find: jest.fn(),
     get: jest.fn(),
     closePointInTime: jest.fn(),
+    createPointInTimeFinder: jest.fn(),
     openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
     resolve: jest.fn(),
     update: jest.fn(),
