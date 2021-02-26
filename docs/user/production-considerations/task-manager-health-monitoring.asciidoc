@@ -27,9 +27,7 @@ Monitoring the `_health` endpoint of each {kib} instance in the cluster is the r
 
 The health monitoring api monitors Task Manager's performance out of the box, but certain performance considerination are deployment specific and are configurable as a result.
 
-Health thresholds are configurable via the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.
-This configuration specifies the threshold of failed task executions which, once exceeded, sets a health status of `warn` or `error` on the corresponding task type execution status.
-This setting can be set as either the default level, which is applied to all task types in the system, or at a custom task type specific level. 
+A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of `warn` or `error` is set on the task type execution. To configure a health threshold, use the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.  You can apply this this setting to all task types in the system, or to a custom task type. 
 
 By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%.
 This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number.

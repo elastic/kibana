@@ -1,6 +1,10 @@
 [role="xpack"]
 [[alerting-production-considerations]]
-== Production considerations
+== Alerting Production considerations
+
+++++
+<titleabbrev>Alerting</titleabbrev>
+++++
 
 {kib} Alerting run both alert checks and actions as persistent background tasks managed by the {kib} Task Manager.
 
@@ -10,7 +14,7 @@ When relying on alerts and actions as mission critical services, make sure you f
 [[alerting-background-tasks]]
 === Running background alert checks and actions
 
-{kib} uses <<task-manager>> to run Alerts and Actions as background tasks, distributed across all {kib} instances in the cluster.
+{kib} uses <<task-manager,background tasks>> to run Alerts and Actions, distributed across all {kib} instances in the cluster.
 
 By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
 These tasks are then run on the {kib} server.
@@ -24,7 +28,7 @@ For more details on Task Manager, see <<task-manager-background-tasks>>.
 Alert and action tasks can run late or at an inconsistent schedule.
 This is typically a symptom of the specific usage of the cluster in question.
 
-You can address such issues by tweaking the {kib} <<task-manager>> or scaling the deployment to better suit your use case.
+You can address such issues by tweaking the {kib} <<task-manager,Task Manager>> or scaling the deployment to better suit your use case.
 
 For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubleshooting`>>.
 ==============================================
@@ -33,7 +37,7 @@ For detailed guidance, see <<alerting-troubleshooting,`Alerting Troubleshooting`
 [[alerting-scaling-guidance]]
 === Scaling Guidance
 
-As alerts and actions leverage <<task-manager>> to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
+As alerts and actions leverage <<task-manager,background tasks>> to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
 When estimating the required task throughput, keep the following in mind:
 

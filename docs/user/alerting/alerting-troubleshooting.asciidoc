@@ -50,6 +50,6 @@ Alerting and action tasks are identified by their type.
 * Alert tasks always begin with `alerting:`. For example, the `alerting:.index-threshold` tasks back the <<alert-type-index-threshold, index threshold stack alert>>.
 * Action tasks always begin with `actions:`. For example, the `actions:.index` tasks back the <<index-action-type, index action>>.
 
-When diagnosing Alerting related issue, this subset of the tasks in the system may be of particular interest.
+When diagnosing issues related to Alerting, focus on the thats that begin with `alerting:` and `actions:`.
 
 For more details on monitoring and diagnosing task execution in Task Manager, see <<task-manager-health-monitoring>>.
