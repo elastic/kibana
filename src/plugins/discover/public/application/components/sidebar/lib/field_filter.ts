@@ -59,6 +59,7 @@ export function isFieldFiltered(
   const scriptedOrMissing =
     !filterState.missing ||
     field.type === '_source' ||
+    field.type === 'unknown_selected' ||
     field.scripted ||
     fieldCounts[field.name] > 0;
   const needle = filterState.name ? filterState.name.toLowerCase() : '';
