@@ -75,6 +75,7 @@ export interface SearchBarOwnProps {
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  autoSubmit?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -411,6 +412,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+          autoSubmit={this.props.autoSubmit}
         />
       );
     }

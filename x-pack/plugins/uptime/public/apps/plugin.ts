@@ -29,6 +29,7 @@ import {
 import { alertTypeInitializers } from '../lib/alert_types';
 import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
+import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public/storage';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -41,6 +42,13 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
+export interface UptimePluginServices extends Partial<CoreStart> {
+  embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  storage: IStorageWrapper;
 }
 
 export type ClientSetup = void;

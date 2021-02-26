@@ -63,6 +63,7 @@ export interface QueryBarTopRowProps {
   isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  autoSubmit?: boolean;
 }
 
 // Needed for React.lazy
@@ -188,6 +189,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryInputFocus={onChangeQueryInputFocus}
+          autoSubmit={props.autoSubmit}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}

@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, RefObject, createRef } from 'react';
+import React, { Component, createRef, RefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
 import {
-  EuiTextArea,
-  EuiOutsideClickDetector,
-  PopoverAnchorPosition,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiLink,
-  htmlIdGenerator,
-  EuiPortal,
   EuiIcon,
   EuiIconProps,
+  EuiLink,
+  EuiOutsideClickDetector,
+  EuiPortal,
+  EuiTextArea,
+  htmlIdGenerator,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce, compact, isEqual, isFunction } from 'lodash';
+import { compact, debounce, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
@@ -34,7 +34,7 @@ import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { fromUser, getQueryLog, matchPairs, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
@@ -66,6 +66,7 @@ export interface QueryStringInputProps {
    */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  autoSubmit?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -387,6 +388,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     });
 
     if (type === QuerySuggestionTypes.RecentSearch) {
+      this.setState({ isSuggestionsVisible: false, index: null });
+      this.onSubmit({ query: newQueryString, language: this.props.query.language });
+    }
+
+    if (this.props.autoSubmit && (type === QuerySuggestionTypes.Value || value.trim() === ': *')) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }

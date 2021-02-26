@@ -7,7 +7,6 @@
 
 import React, { FC, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { OverviewPage } from './components/overview/overview_container';
 import { Props as PageHeaderProps, PageHeader } from './components/common/header/page_header';
 import {
   CERTIFICATES_ROUTE,
@@ -19,6 +18,7 @@ import {
 import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { OverviewPageComponent } from './pages/overview';
 
 interface RouteProps {
   path: string;
@@ -74,7 +74,7 @@ const Routes: RouteProps[] = [
   {
     title: baseTitle,
     path: OVERVIEW_ROUTE,
-    component: OverviewPage,
+    component: OverviewPageComponent,
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
     headerProps: {
