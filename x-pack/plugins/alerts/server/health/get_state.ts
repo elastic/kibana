@@ -6,14 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { interval, Observable } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { interval, Observable, Subject, throwError } from 'rxjs';
+import { catchError, finalize, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
 import { HealthStatus } from '../types';
 
+export const healthState$: Subject<ServiceStatus> = new Subject<ServiceStatus>();
+
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
+  // throw new Error('oh no');
   try {
     const result = await taskManager.get(HEALTH_TASK_ID);
     return result;
@@ -27,6 +30,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   return null;
 }
 
+const MAX_RETRY_ATTEMPTS = 5;
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: i18n.translate(
     'xpack.alerts.server.healthStatus.available',
@@ -51,8 +55,9 @@ const LEVEL_SUMMARY = {
 export const getHealthStatusStream = (
   taskManager: TaskManagerStartContract
 ): Observable<ServiceStatus<unknown>> => {
-  return interval(60000 * 5).pipe(
+  return interval(30000).pipe(
     switchMap(async () => {
+      // console.log('getting health status');
       const doc = await getLatestTaskState(taskManager);
       const level =
         doc?.state?.health_status === HealthStatus.OK
@@ -65,10 +70,27 @@ export const getHealthStatusStream = (
         summary: LEVEL_SUMMARY[level.toString()],
       };
     }),
-    catchError(async (error) => ({
-      level: ServiceStatusLevels.unavailable,
-      summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
-      meta: { error },
-    }))
+    // retryWhen((errors) => {
+    //   return errors.pipe(
+    //     mergeMap((error, i) => {
+    //       const retryAttempt = i + 1;
+    //       // if maximum number of retries have been met, throw error
+    //       if (retryAttempt > MAX_RETRY_ATTEMPTS) {
+    //         return throwError(error);
+    //       }
+    //       console.log(`Attempt ${retryAttempt}: retrying in 1000ms`);
+    //       return timer(1000);
+    //     }),
+    //     finalize(() => console.log('We are done!'))
+    //   );
+    // }),
+    catchError(async (error) => {
+      console.log('ERROR getting health status');
+      return {
+        level: ServiceStatusLevels.unavailable,
+        summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
+        meta: { error },
+      };
+    })
   );
 };
