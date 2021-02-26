@@ -4,7 +4,7 @@
 
 Alerting runs both alert checks and actions as persistent background tasks managed by the Task Manager.
 
-When relying on alerts and actions as mission critical services, make sure you follow the Task Manager <<task-manager-production-considerations>>.
+When relying on alerts and actions as mission critical services, make sure you follow the <<task-manager-production-considerations, production considerations>> for Task Manager.
 
 [float]
 [[alerting-background-tasks]]
