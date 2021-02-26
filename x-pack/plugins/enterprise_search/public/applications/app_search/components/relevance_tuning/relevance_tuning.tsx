@@ -102,7 +102,6 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
         }
       />
 
-      <EuiSpacer />
       <FlashMessages />
       {invalidBoosts && (
         <EuiCallOut
