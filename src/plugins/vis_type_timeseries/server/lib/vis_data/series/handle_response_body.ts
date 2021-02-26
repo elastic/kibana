@@ -6,16 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../response_processors/series';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { createFieldsFetcher } from './../helpers/fields_fetcher';
+import { PanelSchema } from '../../../../common/types';
+import { buildProcessorFunction } from '../build_processor_function';
+// @ts-expect-error
+import { processors } from '../response_processors/series';
+import { createFieldsFetcher, FieldsFetcherServices } from './../helpers/fields_fetcher';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-export function handleResponseBody(panel, req, searchStrategy, capabilities) {
-  return async (resp) => {
+export function handleResponseBody(
+  panel: PanelSchema,
+  req: VisTypeTimeseriesVisDataRequest,
+  services: FieldsFetcherServices
+) {
+  return async (resp: any) => {
     if (resp.error) {
       const err = new Error(resp.error.type);
+      // @ts-expect-error
       err.response = JSON.stringify(resp);
       throw err;
     }
@@ -39,7 +47,7 @@ export function handleResponseBody(panel, req, searchStrategy, capabilities) {
     const meta = get(resp, `aggregations.${seriesId}.meta`, {});
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
 
-    const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
+    const extractFields = createFieldsFetcher(req, services);
 
     const processor = buildProcessorFunction(processors, resp, panel, series, meta, extractFields);
 

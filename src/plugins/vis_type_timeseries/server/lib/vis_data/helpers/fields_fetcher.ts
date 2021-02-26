@@ -12,11 +12,15 @@ import {
 } from '../../../types';
 import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
 
+export interface FieldsFetcherServices {
+  requestContext: VisTypeTimeseriesRequestHandlerContext;
+  searchStrategy: AbstractSearchStrategy;
+  capabilities: DefaultSearchCapabilities;
+}
+
 export const createFieldsFetcher = (
-  requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  searchStrategy: AbstractSearchStrategy,
-  capabilities: DefaultSearchCapabilities
+  { capabilities, requestContext, searchStrategy }: FieldsFetcherServices
 ) => {
   const fieldsCacheMap = new Map();
 

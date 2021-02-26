@@ -7,9 +7,9 @@
  */
 
 import type { IRouter, FakeRequest, IUiSettingsClient } from 'src/core/server';
-import type { DataRequestHandlerContext } from '../../data/server';
+import type { DataRequestHandlerContext, IndexPatternsService } from '../../data/server';
 import { VisPayload } from '../common/types';
-import { Framework } from './plugin';
+import { SearchStrategyRegistry } from './lib/search_strategies';
 
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
@@ -17,9 +17,9 @@ export type VisTypeTimeseriesRequest<TPayload = unknown> = FakeRequest & { body:
 export type VisTypeTimeseriesVisDataRequest = VisTypeTimeseriesRequest<VisPayload>;
 
 export interface VisTypeTimeseriesRequestServices {
+  esShardTimeout: number;
   esQueryConfig: any;
-  capabilities: any;
-  framework: Framework;
   uiSettings: IUiSettingsClient;
-  requestContext: VisTypeTimeseriesRequestHandlerContext;
+  indexPatternsService: IndexPatternsService;
+  searchStrategyRegistry: SearchStrategyRegistry;
 }

@@ -15,19 +15,19 @@ export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
   series: SeriesItemsSchema,
+  capabilities: any,
   {
     esQueryConfig,
-    capabilities,
+    esShardTimeout,
     uiSettings,
-    framework,
-    requestContext,
+    indexPatternsService,
   }: VisTypeTimeseriesRequestServices
 ) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
-    indexPatternsService: await framework.getIndexPatternsService(requestContext),
+    indexPatternsService,
   });
 
   const request = await buildRequestBody(
@@ -39,7 +39,6 @@ export async function getSeriesRequestParams(
     capabilities,
     uiSettings
   );
-  const esShardTimeout = await framework.getEsShardTimeout();
 
   return {
     index: indexPatternString,

@@ -13,20 +13,34 @@ import { TimeseriesVisData } from '../../common/types';
 import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequestServices,
 } from '../types';
 import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
+import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
 
-export function getVisData(
+export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   request: VisTypeTimeseriesVisDataRequest,
   framework: Framework
 ): Promise<TimeseriesVisData> {
+  const uiSettings = requestContext.core.uiSettings.client;
+  const esShardTimeout = await framework.getEsShardTimeout();
+  const indexPatternsService = await framework.getIndexPatternsService(requestContext);
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
+  const services: VisTypeTimeseriesRequestServices = {
+    esQueryConfig,
+    esShardTimeout,
+    indexPatternsService,
+    uiSettings,
+    searchStrategyRegistry: framework.searchStrategyRegistry,
+  };
+
   const promises = request.body.panels.map((panel) => {
     if (panel.type === 'table') {
-      return getTableData(requestContext, request, panel, framework);
+      return getTableData(requestContext, request, panel, services);
     }
-    return getSeriesData(requestContext, request, panel, framework);
+    return getSeriesData(requestContext, request, panel, services);
   });
 
   return Promise.all(promises).then((res) => {

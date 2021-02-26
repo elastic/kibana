@@ -16,26 +16,25 @@ import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
-import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Framework } from '../../plugin';
 import type { PanelSchema } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
-  framework: Framework
+  services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndexPattern = panel.index_pattern;
 
-  const strategy = await framework.searchStrategyRegistry.getViableStrategy(
+  const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
     panelIndexPattern
@@ -50,13 +49,11 @@ export async function getTableData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const uiSettings = requestContext.core.uiSettings.client;
-  const esQueryConfig = await getEsQueryConfig(uiSettings);
   const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
-    indexPatternsService: await framework.getIndexPatternsService(requestContext),
+    indexPatternsService: services.indexPatternsService,
   });
 
-  const extractFields = createFieldsFetcher(requestContext, req, searchStrategy, capabilities);
+  const extractFields = createFieldsFetcher(req, { requestContext, searchStrategy, capabilities });
 
   const calculatePivotLabel = async () => {
     if (panel.pivot_id && indexPatternObject?.title) {
@@ -77,10 +74,10 @@ export async function getTableData(
     const body = await buildRequestBody(
       req,
       panel,
-      esQueryConfig,
+      services.esQueryConfig,
       indexPatternObject,
       capabilities,
-      uiSettings
+      services.uiSettings
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
