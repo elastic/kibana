@@ -14,12 +14,13 @@ When relying on alerts and actions as mission critical services, make sure you f
 [[alerting-background-tasks]]
 === Running background alert checks and actions
 
-{kib} uses <<task-manager,background tasks>> to run Alerts and Actions, distributed across all {kib} instances in the cluster.
+{kib} uses <<task-manager,background tasks>> to run alerts and actions, distributed across all {kib} instances in the cluster.
 
 By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
 These tasks are then run on the {kib} server.
 
-In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
+Alerts are recurring background tasks which are rescheduled according to the <<defining-alerts-general-details, check interval>> on completion.
+Actions are non-recurring backgroundtasks which are deleted on completion.
 
 For more details on Task Manager, see <<task-manager-background-tasks>>.
 
