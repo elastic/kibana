@@ -377,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('correctly counts stats including a collection without sub cases when filtering on tags', async () => {
         // delete the sub case on the collection so that it doesn't have any sub cases
         await supertest
-          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCase!.id}"]`)
+          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(204);
@@ -408,7 +408,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('does not return empty collections when filtering on status', async () => {
         // delete the sub case on the collection so that it doesn't have any sub cases
         await supertest
-          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCase!.id}"]`)
+          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(204);
