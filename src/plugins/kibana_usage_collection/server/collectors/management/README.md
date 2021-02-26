@@ -5,10 +5,13 @@ All user changed UI Settings are automatically collected.
 
 After adding a new setting you will be required to do the following steps:
 
-1. Update the [schema](./schema.ts) to include the setting name and schema type.
+1. Update the schema to include the setting name, schema type and a short description.
 ```
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'MY_UI_SETTING': { type: 'keyword' },
+  _meta: {
+    description: 'Non default value of MY_UI_SETTING'
+  }
 }
 ```
 
