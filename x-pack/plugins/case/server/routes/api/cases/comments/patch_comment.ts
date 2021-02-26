@@ -27,17 +27,17 @@ interface CombinedCaseParams {
   client: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
-  subCaseID?: string;
+  subCaseId?: string;
 }
 
 async function getCommentableCase({
   service,
   client,
   caseID,
-  subCaseID,
+  subCaseId,
   logger,
 }: CombinedCaseParams) {
-  if (subCaseID) {
+  if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       service.getCase({
         client,
@@ -45,7 +45,7 @@ async function getCommentableCase({
       }),
       service.getSubCase({
         client,
-        id: subCaseID,
+        id: subCaseId,
       }),
     ]);
     return new CommentableCase({
@@ -74,7 +74,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
         body: escapeHatch,
@@ -95,7 +95,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
           service: caseService,
           client,
           caseID: request.params.case_id,
-          subCaseID: request.query?.subCaseID,
+          subCaseId: request.query?.subCaseId,
           logger,
         });
 
@@ -112,7 +112,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
           throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        const saveObjType = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const saveObjType = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
 
         const caseRef = myComment.references.find((c) => c.type === saveObjType);
         if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
@@ -153,7 +153,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
               actionAt: updatedDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseID,
+              subCaseId: request.query?.subCaseId,
               commentId: updatedComment.id,
               fields: ['comment'],
               newValue: JSON.stringify(queryRestAttributes),
@@ -171,7 +171,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         });
       } catch (error) {
         logger.error(
-          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseID}: ${error}`
+          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
         );
         return response.customError(wrapError(error));
       }

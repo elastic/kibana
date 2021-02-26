@@ -18,8 +18,8 @@ import {
   CaseSettings,
   CaseStatuses,
   CaseType,
-  CollectionWithSubCaseResponse,
-  CollectWithSubCaseResponseRt,
+  CaseResponse,
+  CaseResponseRt,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
@@ -285,7 +285,7 @@ export class CommentableCase {
     };
   }
 
-  public async encode(): Promise<CollectionWithSubCaseResponse> {
+  public async encode(): Promise<CaseResponse> {
     try {
       const collectionCommentStats = await this.service.getAllCaseComments({
         client: this.soClient,
@@ -297,22 +297,6 @@ export class CommentableCase {
         },
       });
 
-      if (this.subCase) {
-        const subCaseComments = await this.service.getAllSubCaseComments({
-          client: this.soClient,
-          id: this.subCase.id,
-        });
-
-        return CollectWithSubCaseResponseRt.encode({
-          subCase: flattenSubCaseSavedObject({
-            savedObject: this.subCase,
-            comments: subCaseComments.saved_objects,
-            totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
-          }),
-          ...this.formatCollectionForEncoding(collectionCommentStats.total),
-        });
-      }
-
       const collectionComments = await this.service.getAllCaseComments({
         client: this.soClient,
         id: this.collection.id,
@@ -323,11 +307,47 @@ export class CommentableCase {
         },
       });
 
-      return CollectWithSubCaseResponseRt.encode({
+      const collectionTotalAlerts =
+        countAlertsForID({ comments: collectionComments, id: this.collection.id }) ?? 0;
+
+      const caseResponse = {
         comments: flattenCommentSavedObjects(collectionComments.saved_objects),
-        totalAlerts: countAlertsForID({ comments: collectionComments, id: this.collection.id }),
+        totalAlerts: collectionTotalAlerts,
         ...this.formatCollectionForEncoding(collectionCommentStats.total),
-      });
+      };
+
+      if (this.subCase) {
+        const subCaseComments = await this.service.getAllSubCaseComments({
+          client: this.soClient,
+          id: this.subCase.id,
+        });
+        const totalAlerts =
+          countAlertsForID({ comments: subCaseComments, id: this.subCase.id }) ?? 0;
+
+        return CaseResponseRt.encode({
+          ...caseResponse,
+          /**
+           * For now we need the sub case comments and totals to be exposed on the top level of the response so that the UI
+           * functionality can stay the same. Ideally in the future we can refactor this so that the UI will look for the
+           * comments either in the top level for a case or a collection or in the subCases field if it is a sub case.
+           *
+           * If we ever need to return both the collection's comments and the sub case comments we'll need to refactor it then
+           * as well.
+           */
+          comments: flattenCommentSavedObjects(subCaseComments.saved_objects),
+          totalComment: subCaseComments.saved_objects.length,
+          totalAlerts,
+          subCases: [
+            flattenSubCaseSavedObject({
+              savedObject: this.subCase,
+              totalComment: subCaseComments.saved_objects.length,
+              totalAlerts,
+            }),
+          ],
+        });
+      }
+
+      return CaseResponseRt.encode(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,

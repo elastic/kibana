@@ -28,7 +28,7 @@ export function initDeleteAllCommentsApi({
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
       },
@@ -40,11 +40,11 @@ export function initDeleteAllCommentsApi({
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        const id = request.query?.subCaseID ?? request.params.case_id;
+        const id = request.query?.subCaseId ?? request.params.case_id;
         const comments = await caseService.getCommentsByAssociation({
           client,
           id,
-          associationType: request.query?.subCaseID
+          associationType: request.query?.subCaseId
             ? AssociationType.subCase
             : AssociationType.case,
         });
@@ -66,7 +66,7 @@ export function initDeleteAllCommentsApi({
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseID,
+              subCaseId: request.query?.subCaseId,
               commentId: comment.id,
               fields: ['comment'],
             })

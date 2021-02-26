@@ -27,7 +27,7 @@ import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
-  subCaseID: rt.string,
+  subCaseId: rt.string,
 });
 
 export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
@@ -49,8 +49,8 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const id = query.subCaseID ?? request.params.case_id;
-        const associationType = query.subCaseID ? AssociationType.subCase : AssociationType.case;
+        const id = query.subCaseId ?? request.params.case_id;
+        const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
         const args = query
           ? {
               caseService,

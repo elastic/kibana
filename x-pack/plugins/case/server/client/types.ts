@@ -13,7 +13,6 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
-  CollectionWithSubCaseResponse,
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
@@ -90,7 +89,7 @@ export interface ConfigureFields {
  * This represents the interface that other plugins can access.
  */
 export interface CaseClient {
-  addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
+  addComment(args: CaseClientAddComment): Promise<CaseResponse>;
   create(theCase: CasePostRequest): Promise<CaseResponse>;
   get(args: CaseClientGet): Promise<CaseResponse>;
   getAlerts(args: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse>;

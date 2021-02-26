@@ -30,7 +30,7 @@ export function initDeleteCommentApi({
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
       },
@@ -51,8 +51,8 @@ export function initDeleteCommentApi({
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const type = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-        const id = request.query?.subCaseID ?? request.params.case_id;
+        const type = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const id = request.query?.subCaseId ?? request.params.case_id;
 
         const caseRef = myComment.references.find((c) => c.type === type);
         if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
@@ -74,7 +74,7 @@ export function initDeleteCommentApi({
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              subCaseId: request.query?.subCaseID,
+              subCaseId: request.query?.subCaseId,
               commentId: request.params.comment_id,
               fields: ['comment'],
             }),
