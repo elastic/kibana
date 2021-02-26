@@ -61,7 +61,7 @@ const ServiceNowConnectorFields: React.FC<
             label={i18n.API_URL_LABEL}
             helpText={
               <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`}
+                href={`${docLinks.links.alerting.serviceNowAction}#configuring-servicenow`}
                 target="_blank"
               >
                 <FormattedMessage

@@ -26,7 +26,7 @@ const TeamsActionFields: React.FunctionComponent<
         fullWidth
         helpText={
           <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/teams-action-type.html#configuring-teams`}
+            href={`${docLinks.links.alerting.teamsAction}#configuring-teams`}
             target="_blank"
           >
             <FormattedMessage

@@ -62,7 +62,7 @@ export const IndexParamsFields = ({
       onDocumentsChange={onDocumentsChange}
       helpText={
         <EuiLink
-          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
+          href={`${docLinks.links.alerting.indexAction}#index-action-configuration`}
           target="_blank"
         >
           <FormattedMessage

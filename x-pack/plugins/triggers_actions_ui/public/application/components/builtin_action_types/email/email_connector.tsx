@@ -56,7 +56,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             )}
             helpText={
               <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
+                href={`${docLinks.links.alerting.emailAction}#configuring-email`}
                 target="_blank"
               >
                 <FormattedMessage

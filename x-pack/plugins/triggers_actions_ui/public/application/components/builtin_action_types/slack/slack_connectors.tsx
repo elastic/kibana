@@ -26,7 +26,7 @@ const SlackActionFields: React.FunctionComponent<
         fullWidth
         helpText={
           <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`}
+            href={`${docLinks.links.alerting.slackAction}#configuring-slack`}
             target="_blank"
           >
             <FormattedMessage
