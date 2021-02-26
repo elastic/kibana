@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-
 import { patchCase, patchSubCase } from './api';
 import { UpdateKey, UpdateByKey, CaseStatuses } from './types';
 import * as i18n from './translations';
@@ -70,8 +69,8 @@ export const useUpdateCase = ({
     updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
-  const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({
@@ -84,24 +83,27 @@ export const useUpdateCase = ({
       onError,
     }: UpdateByKey) => {
       try {
-        didCancel.current = false;
-        abortCtrl.current = new AbortController();
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
+
         const response = await (updateKey === 'status' && subCaseId
           ? patchSubCase(
               caseId,
               subCaseId,
               { status: updateValue as CaseStatuses },
               caseData.version,
-              abortCtrl.current.signal
+              abortCtrlRef.current.signal
             )
           : patchCase(
               caseId,
               { [updateKey]: updateValue },
               caseData.version,
-              abortCtrl.current.signal
+              abortCtrlRef.current.signal
             ));
-        if (!didCancel.current) {
+
+        if (!isCancelledRef.current) {
           if (fetchCaseUserActions != null) {
             fetchCaseUserActions(caseId, subCaseId);
           }
@@ -119,7 +121,7 @@ export const useUpdateCase = ({
           }
         }
       } catch (error) {
-        if (!didCancel.current) {
+        if (!isCancelledRef.current) {
           if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
@@ -140,8 +142,8 @@ export const useUpdateCase = ({
 
   useEffect(() => {
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
   }, []);
 
