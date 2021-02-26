@@ -117,25 +117,22 @@ export const RelevanceTuningForm: React.FC = () => {
                 )}
               </h3>
             </EuiTitle>
-            <EuiSpacer />
-            <EuiFlexGroup direction="column">
-              {filteredSchemaFieldsWithConflicts.map((fieldName) => (
-                <EuiFlexItem key={fieldName} style={{ alignItems: 'flex-start' }}>
-                  <EuiTitle size="xs">
-                    <h4 data-test-subj="DisabledField">{fieldName}</h4>
-                  </EuiTitle>
-                  <EuiHealth color="warning">
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.disabledFieldsExplanationMessage',
-                      {
-                        defaultMessage: 'Inactive due to field-type conflict',
-                      }
-                    )}
-                  </EuiHealth>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer />
+            <EuiSpacer size="s" />
+            {filteredSchemaFieldsWithConflicts.map((fieldName) => (
+              <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+                <EuiTitle size="xs">
+                  <h4 data-test-subj="DisabledField">{fieldName}</h4>
+                </EuiTitle>
+                <EuiHealth color="warning">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.disabledFieldsExplanationMessage',
+                    {
+                      defaultMessage: 'Inactive due to field-type conflict',
+                    }
+                  )}
+                </EuiHealth>
+              </EuiPanel>
+            ))}
           </>
         )}
       </form>
