@@ -2,9 +2,9 @@
 [[task-manager]]
 == Task Manager
 
-{kib} uses background tasks to distribute work across multiple {kib} instances.
-
-{kib} Task Manager is leveraged by features such as Alerting, Actions and Reporting to run mission critical work as persistent background tasks. This has three major benefits:
+{kib} Task Manager is leveraged by features such as Alerting, Actions, and Reporting to run mission critical work as persistent background tasks.
+These background tasks distribute work across multiple {kib} instances.
+This has three major benefits:
 
 * *Persistence*: all task state and scheduling is stored in {es}, so if {kib} is restarted, tasks will pick up where they left off. Task definitions are stored in the index specified by `xpack.task_manager.index` (defaults to `.kibana_task_manager`).  It is important to have at least 1 replica of this index for production deployments, since if you lose this index all scheduled tasks are also lost.
 * *Scaling*: multiple {kib} instances can read from and update the same task queue in {es}, allowing the work load to be distributed across instances. In cases where a {kib} instance no longer has capacity to run tasks, capacity can be increased by adding additional {kib} instances.
@@ -37,11 +37,6 @@ For details on the settings that can influence the performance and throughput of
 
 For detailed troubleshooting guidance, see <<task-manager-troubleshooting>>.
 ==============================================
-
-[role="xpack"]
-[float]
-[[task-manager-production-considerations]]
-== Production considerations
 
 [float]
 === Deployment considerations
