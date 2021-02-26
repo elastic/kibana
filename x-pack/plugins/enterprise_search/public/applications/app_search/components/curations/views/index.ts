@@ -6,3 +6,4 @@
  */
 
 export { Curations } from './curations';
+export { CurationCreation } from './curation_creation';
