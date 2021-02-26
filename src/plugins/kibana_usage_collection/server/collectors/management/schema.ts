@@ -9,7 +9,7 @@
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { UsageStats } from './types';
 
-export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
+export const stackManagementSchema: MakeSchemaFrom<UsageStats | any> = {
   // sensitive
   'timelion:quandl.key': {
     type: 'keyword',
@@ -179,11 +179,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of visualize:enableLabs' },
+    _meta: { description: 'Non-default value of doc_table:hideTimeColumn' },
   },
   'discover:sampleSize': {
     type: 'long',
-    _meta: { description: 'Non-default value of visualize:enableLabs' },
+    _meta: { description: 'Non-default value of discover:sampleSize' },
   },
   defaultColumns: {
     type: 'array',
