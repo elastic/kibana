@@ -7,7 +7,11 @@
  */
 
 import type { IRouter, FakeRequest, IUiSettingsClient } from 'src/core/server';
-import type { DataRequestHandlerContext, IndexPatternsService } from '../../data/server';
+import type {
+  DataRequestHandlerContext,
+  EsQueryConfig,
+  IndexPatternsService,
+} from '../../data/server';
 import { VisPayload } from '../common/types';
 import { SearchStrategyRegistry } from './lib/search_strategies';
 
@@ -18,7 +22,7 @@ export type VisTypeTimeseriesVisDataRequest = VisTypeTimeseriesRequest<VisPayloa
 
 export interface VisTypeTimeseriesRequestServices {
   esShardTimeout: number;
-  esQueryConfig: any;
+  esQueryConfig: EsQueryConfig;
   uiSettings: IUiSettingsClient;
   indexPatternsService: IndexPatternsService;
   searchStrategyRegistry: SearchStrategyRegistry;

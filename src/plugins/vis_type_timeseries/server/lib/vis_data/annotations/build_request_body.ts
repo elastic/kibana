@@ -7,6 +7,7 @@
  */
 
 import { buildProcessorFunction } from '../build_processor_function';
+// @ts-expect-error
 import { processors } from '../request_processors/annotations';
 
 /**
@@ -22,7 +23,7 @@ import { processors } from '../request_processors/annotations';
  * ]
  * @returns {Object} doc - processed body
  */
-export async function buildAnnotationRequest(...args) {
+export async function buildAnnotationRequest(...args: any[]) {
   const processor = buildProcessorFunction(processors, ...args);
   const doc = await processor({});
   return doc;

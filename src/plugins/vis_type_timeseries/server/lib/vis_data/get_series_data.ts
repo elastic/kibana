@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 // not typed yet
 // @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
-// @ts-expect-error
 import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
@@ -76,9 +75,12 @@ export async function getSeriesData(
         req,
         panel,
         series,
-        esQueryConfig: services.esQueryConfig,
-        searchStrategy,
-        capabilities,
+        services: {
+          ...services,
+          requestContext,
+          searchStrategy,
+          capabilities,
+        },
       });
     }
 
@@ -87,7 +89,7 @@ export async function getSeriesData(
       [panel.id]: {
         annotations,
         id: panel.id,
-        series,
+        series: series.reduce((acc, s) => acc.concat(s), []),
       },
     };
   } catch (err) {
