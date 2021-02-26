@@ -46,6 +46,21 @@ function loadApm() {
   return (LOADED_APM = unloadedApm);
 }
 
+function printTitle(runnable: Runnable) {
+  const titles: string[] = [];
+
+  let cursor: Suite | Runnable | undefined = runnable;
+  while (cursor) {
+    const title = cursor.title?.trim();
+    if (title && titles[0] !== title) {
+      titles.unshift(title);
+    }
+    cursor = cursor.parent;
+  }
+
+  return titles.join(' > ');
+}
+
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
@@ -72,9 +87,14 @@ export class FunctionalTestRunner {
       const runnableErrors = new WeakMap<Runnable, Error>();
 
       this.lifecycle.beforeEachRunnable.add((runnable) => {
-        const transaction = apm.startTransaction(runnable.fullTitle(), runnable.type);
-        transaction?.setLabel('file', runnable.file ?? 'unknown');
-        transaction?.setLabel('ownTitle', runnable.title);
+        let transaction: ApmTransaction | null = null;
+
+        if (apm.isStarted()) {
+          transaction = apm.startTransaction(printTitle(runnable), runnable.type);
+          transaction?.setLabel('file', runnable.file ?? 'unknown');
+          transaction?.setLabel('ownTitle', runnable.title);
+        }
+
         transactions.set(runnable, transaction);
       });
 
