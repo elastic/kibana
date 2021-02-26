@@ -7,10 +7,7 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__/kea.mock';
 
-// We mock this because otherwise we will get an EngineLogic not mounted error
-jest.mock('../engine', () => ({
-  generateEnginePath: jest.fn(),
-}));
+ import '../../__mocks__/engine_logic.mock'; 
 
 import React from 'react';
 
