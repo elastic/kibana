@@ -17,7 +17,7 @@ export default function ({ getService }) {
 
   describe('overview mb', () => {
     describe('with green platinum cluster', () => {
-      const archive = 'monitoring/singlecluster-green-platinum-mb';
+      const archive = 'monitoring/singlecluster-green-platinum_mb';
       const timeRange = {
         min: '2018-02-13T17:04:50.000Z',
         max: '2018-02-13T17:51:55.000Z',

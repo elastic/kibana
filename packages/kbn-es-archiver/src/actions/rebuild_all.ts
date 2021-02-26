@@ -96,8 +96,8 @@ export async function rebuildAllAction({
     const gzip = isGzip(childPath);
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
-    if (childName.includes('data.json') && !archiveName.includes('-mb')) {
-      const mbDir = `${rootDir}/${archiveName}-mb`;
+    if (childName.includes('data.json') && !archiveName.includes('_mb')) {
+      const mbDir = `${rootDir}/${archiveName}_mb`;
       const mbTempFile = `${mbDir}/${childName + (gzip ? '.rebuilding.gz' : '.rebuilding')}`;
       const mbFile = mbTempFile.replace('.rebuilding.gz', '');
       if (!existsSync(mbDir)) {

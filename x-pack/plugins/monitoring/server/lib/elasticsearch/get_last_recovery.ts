@@ -57,7 +57,7 @@ export function handleLegacyLastRecoveries(resp: ElasticsearchResponse, start: n
   return [];
 }
 
-function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
+export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
   const data = (resp.hits?.hits ?? [])
     .map((hit) => hit._source.elasticsearch?.index?.recovery)
     .filter(filterOldShardActivity(moment.utc(start).valueOf()));

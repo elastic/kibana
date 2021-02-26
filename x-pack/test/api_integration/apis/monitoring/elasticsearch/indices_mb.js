@@ -17,7 +17,7 @@ export default function ({ getService }) {
 
   describe('indices mb', () => {
     describe('shard-relocation', () => {
-      const archive = 'monitoring/singlecluster-three-nodes-shard-relocation-mb';
+      const archive = 'monitoring/singlecluster-three-nodes-shard-relocation_mb';
       const timeRange = {
         min: '2017-10-05T20:31:48.000Z',
         max: '2017-10-05T20:35:12.000Z',
