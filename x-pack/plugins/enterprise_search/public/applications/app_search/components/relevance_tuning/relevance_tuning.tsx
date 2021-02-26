@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { DOCS_PREFIX } from '../../routes';
 
@@ -63,26 +64,36 @@ const EmptyCallout: React.FC = () => {
 };
 
 export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
   const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();
   }, []);
 
+  const body = () => {
+    if (dataLoading) {
+      return <Loading />;
+    }
+
+    if (!engineHasSchemaFields) {
+      return <EmptyCallout />;
+    }
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <RelevanceTuningForm />
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <RelevanceTuningLayout engineBreadcrumb={engineBreadcrumb}>
       <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
-      {engineHasSchemaFields ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <RelevanceTuningForm />
-          </EuiFlexItem>
-          <EuiFlexItem />
-        </EuiFlexGroup>
-      ) : (
-        <EmptyCallout />
-      )}
+      {body()}
     </RelevanceTuningLayout>
   );
 };

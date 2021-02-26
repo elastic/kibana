@@ -13,6 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
 import { RelevanceTuning } from './relevance_tuning';
@@ -27,6 +28,7 @@ describe('RelevanceTuning', () => {
     },
     schemaFieldsWithConflicts: [],
     unsavedChanges: false,
+    dataLoading: false,
   };
 
   const actions = {
@@ -46,6 +48,8 @@ describe('RelevanceTuning', () => {
   it('renders', () => {
     const wrapper = subject();
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(true);
+    expect(wrapper.find(Loading).exists()).toBe(false);
+    expect(wrapper.find('EmptyCallout').exists()).toBe(false);
   });
 
   it('initializes relevance tuning data', () => {
@@ -60,6 +64,18 @@ describe('RelevanceTuning', () => {
     });
     const wrapper = subject();
     expect(wrapper.find('EmptyCallout').dive().find(EuiEmptyPrompt).exists()).toBe(true);
+    expect(wrapper.find(Loading).exists()).toBe(false);
+    expect(wrapper.find(RelevanceTuningForm).exists()).toBe(false);
+  });
+
+  it('will show a loading message if data is loading', () => {
+    setMockValues({
+      ...values,
+      dataLoading: true,
+    });
+    const wrapper = subject();
+    expect(wrapper.find(Loading).exists()).toBe(true);
+    expect(wrapper.find('EmptyCallout').exists()).toBe(false);
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(false);
   });
 
