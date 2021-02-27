@@ -7,7 +7,16 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getHttp, getUiSettings } from '../kibana_services';
@@ -19,71 +28,62 @@ const services = {
 
 interface Props {
   importResp?: ImportResponse;
-  indexPatternResp?: unknown;
+  indexPatternResp?: object;
 }
 
 export class ImportCompleteView extends Component<Props, {}> {
-  _renderCodeEditor(value: unknown) {
-    return (
-      <div style={{ height: '200px' }}>
-        <CodeEditor
-          languageId="json"
-          value={JSON.stringify(value, null, 2)}
-          onChange={() => {}}
-          options={{
-            readOnly: true,
-            lineNumbers: 'off',
-            fontSize: 12,
-            minimap: {
-              enabled: false,
-            },
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            automaticLayout: true,
-          }}
-        />
-      </div>
-    );
-  }
-
-  _renderIndexResp() {
-    if (!this.props.importResp) {
+  _renderCodeEditor(json: object | undefined, title: string, copyButtonDataTestSubj: string) {
+    if (!json) {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiTitle size="xxs">
-          <h4>
-            <FormattedMessage
-              id="xpack.fileUpload.jsonImport.indexingResponse"
-              defaultMessage="Import response"
-            />
-          </h4>
-        </EuiTitle>
-        {this._renderCodeEditor(this.props.importResp)}
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
-
-  _renderIndexPatternResp() {
-    if (!this.props.indexPatternResp) {
-      return null;
-    }
+    const jsonAsString = JSON.stringify(json, null, 2);
 
     return (
       <Fragment>
-        <EuiTitle size="xxs">
-          <h4>
-            <FormattedMessage
-              id="xpack.fileUpload.jsonImport.indexPatternResponse"
-              defaultMessage="Index pattern response"
-            />
-          </h4>
-        </EuiTitle>
-        {this._renderCodeEditor(this.props.indexPatternResp)}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h4>{title}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={jsonAsString}>
+              {(copy) => (
+                <EuiButtonIcon
+                  size="s"
+                  onClick={copy}
+                  iconType="copy"
+                  color="text"
+                  data-test-subj={copyButtonDataTestSubj}
+                  aria-label={i18n.translate('xpack.fileUpload.copyButtonAriaLabel', {
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div style={{ height: '200px' }}>
+          <CodeEditor
+            languageId="json"
+            value={jsonAsString}
+            onChange={() => {}}
+            options={{
+              readOnly: true,
+              lineNumbers: 'off',
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+          />
+        </div>
         <EuiSpacer size="m" />
       </Fragment>
     );
@@ -121,8 +121,20 @@ export class ImportCompleteView extends Component<Props, {}> {
         <EuiText>
           <p>{this._getStatusMsg()}</p>
         </EuiText>
-        {this._renderIndexResp()}
-        {this._renderIndexPatternResp()}
+        {this._renderCodeEditor(
+          this.props.importResp,
+          i18n.translate('xpack.fileUpload.jsonImport.indexingResponse', {
+            defaultMessage: 'Import response',
+          }),
+          'indexRespCopyButton'
+        )}
+        {this._renderCodeEditor(
+          this.props.indexPatternResp,
+          i18n.translate('xpack.fileUpload.jsonImport.indexPatternResponse', {
+            defaultMessage: 'Index pattern response',
+          }),
+          'indexPatternRespCopyButton'
+        )}
         <EuiCallOut>
           <div>
             <FormattedMessage
