@@ -38,6 +38,7 @@ function useUiFilters(params: IUrlParams): UIFilters {
 
   return useDeepObjectIdentity({
     kuery,
+    environment: params.environment,
     ...localUiFilters,
   });
 }
