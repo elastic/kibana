@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
@@ -82,7 +83,43 @@ it('test extractImportReference with unknown imports', () => {
   expect(results.length).toBe(3);
   expect(results[0]).toBe('<I extends ');
   expect(results[1]).toBe('FooFoo');
-  expect(results[2]).toBe('>');
+});
+
+it('test full file imports with no matching plugin', () => {
+  const refs = extractImportReferences(
+    `typeof import("${REPO_ROOT}/src/plugins/data/common/es_query/kuery/node_types/function")`,
+    plugins,
+    log
+  );
+  expect(refs).toMatchInlineSnapshot(`
+    Array [
+      "typeof ",
+      "src/plugins/data/common/es_query/kuery/node_types/function",
+    ]
+  `);
+  expect(refs.length).toBe(2);
+});
+
+it('test full file imports with a matching plugin', () => {
+  const refs = extractImportReferences(
+    `typeof import("${plugin.directory}/public/foo/index") something`,
+    plugins,
+    log
+  );
+  expect(refs).toMatchInlineSnapshot(`
+    Array [
+      "typeof ",
+      Object {
+        "docId": "kibPluginAPluginApi",
+        "pluginId": "pluginA",
+        "scope": "public",
+        "section": undefined,
+        "text": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index",
+      },
+      " something",
+    ]
+  `);
+  expect(refs.length).toBe(3);
 });
 
 it('test single link', () => {
