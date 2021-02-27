@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { curry } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeExecutorResult } from '../../actions/server/types';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -50,6 +53,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     initSavedObjects(core.savedObjects);
     defineRoutes(router, osqueryContext);
 
+    plugins.actions.registerType({
+      id: '.osquery',
+      name: 'Osquery',
+      minimumLicenseRequired: 'gold',
+      executor: curry(executor)({}),
+    });
+
     core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
 
@@ -79,4 +89,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Stopped');
     this.osqueryAppContextService.stop();
   }
+}
+
+// @ts-expect-error update types
+async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
+  return { status: 'ok', data: {}, actionId: execOptions.actionId };
 }

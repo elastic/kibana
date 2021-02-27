@@ -16,6 +16,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
+  SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
@@ -25,6 +26,7 @@ import {
   LazyOsqueryManagedCustomExtension,
   LazyOsqueryManagedPolicyEditExtension,
 } from './fleet_integration';
+import { getActionType } from './osquery_action_type';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -34,7 +36,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): OsqueryPluginSetup {
+  public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
 
     if (!config.enabled) {
@@ -62,6 +64,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
       },
     });
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
 
     // Return methods that should be available to other plugins
     return {};
