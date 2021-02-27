@@ -457,11 +457,6 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     async clickCopyButton(dataTestSubj: string): Promise<string> {
       log.debug(`Click ${dataTestSubj} copy button`);
 
-      // The "clipboard-read" permission of the Permissions API must be granted
-      if (!(await browser.checkBrowserPermission('clipboard-read'))) {
-        throw new Error(`Unable to get browser clipboard read permission`);
-      }
-
       await testSubjects.click(dataTestSubj);
 
       return await browser.getClipboardValue();
