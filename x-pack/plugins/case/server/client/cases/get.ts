@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { CaseResponseRt, CaseResponse } from '../../../common/api';
 import { CaseServiceSetup } from '../../services';
 import { countAlertsForID } from '../../common';
+import { createCaseError } from '../../common/error';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -17,50 +18,59 @@ interface GetParams {
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
+  logger: Logger;
 }
 
+/**
+ * Retrieves a case and optionally its comments and sub case comments.
+ */
 export const get = async ({
   savedObjectsClient,
   caseService,
   id,
+  logger,
   includeComments = false,
   includeSubCaseComments = false,
 }: GetParams): Promise<CaseResponse> => {
-  const [theCase, subCasesForCaseId] = await Promise.all([
-    caseService.getCase({
+  try {
+    const [theCase, subCasesForCaseId] = await Promise.all([
+      caseService.getCase({
+        client: savedObjectsClient,
+        id,
+      }),
+      caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
+    ]);
+
+    const subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+
+    if (!includeComments) {
+      return CaseResponseRt.encode(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          subCaseIds,
+        })
+      );
+    }
+    const theComments = await caseService.getAllCaseComments({
       client: savedObjectsClient,
       id,
-    }),
-    caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
-  ]);
+      options: {
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      },
+      includeSubCaseComments,
+    });
 
-  const subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
-
-  if (!includeComments) {
     return CaseResponseRt.encode(
       flattenCaseSavedObject({
         savedObject: theCase,
+        comments: theComments.saved_objects,
         subCaseIds,
+        totalComment: theComments.total,
+        totalAlerts: countAlertsForID({ comments: theComments, id }),
       })
     );
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
-  const theComments = await caseService.getAllCaseComments({
-    client: savedObjectsClient,
-    id,
-    options: {
-      sortField: 'created_at',
-      sortOrder: 'asc',
-    },
-    includeSubCaseComments,
-  });
-
-  return CaseResponseRt.encode(
-    flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      subCaseIds,
-      totalComment: theComments.total,
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-    })
-  );
 };

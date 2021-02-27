@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '../tooling_log';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
