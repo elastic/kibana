@@ -35,7 +35,7 @@ export const statuses: Statuses = {
     },
     button: {
       label: i18n.REOPEN_CASE,
-      icon: 'folderCheck',
+      icon: 'folderOpen' as const,
     },
     stats: {
       title: i18n.OPEN_CASES,
@@ -49,7 +49,7 @@ export const statuses: Statuses = {
     },
     button: {
       label: i18n.MARK_CASE_IN_PROGRESS,
-      icon: 'folderExclamation',
+      icon: 'folderExclamation' as const,
     },
     stats: {
       title: i18n.IN_PROGRESS_CASES,
@@ -63,7 +63,7 @@ export const statuses: Statuses = {
     },
     button: {
       label: i18n.CLOSE_CASE,
-      icon: 'folderCheck',
+      icon: 'folderCheck' as const,
     },
     stats: {
       title: i18n.CLOSED_CASES,
