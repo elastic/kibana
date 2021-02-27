@@ -32,6 +32,8 @@ import {
 import type { PostAgentCheckinRequest } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
+import * as AgentService from '../../services/agents';
+import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
 
 export const getAgentHandler: RequestHandler<

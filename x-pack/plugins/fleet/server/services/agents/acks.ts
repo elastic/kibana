@@ -10,7 +10,6 @@ import type {
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
-  SavedObjectsBulkResponse,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import Boom from '@hapi/boom';

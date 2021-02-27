@@ -31,7 +31,7 @@ import type {
   InstallType,
 } from '../../../types';
 import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveBuffer, unpackBufferToCache } from '../archive';
+import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { removeInstallation } from './remove';

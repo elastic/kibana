@@ -13,6 +13,7 @@ import type {
 } from '../../../common/types';
 import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
 import { licenseService } from '../../services';
+import * as AgentService from '../../services/agents';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<

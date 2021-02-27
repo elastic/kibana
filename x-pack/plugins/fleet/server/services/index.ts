@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/ser
 import type { AgentStatus, Agent, EsAssetReference } from '../types';
 import { getAgent, listAgents } from './agents';
 import { agentPolicyService } from './agent_policy';
+import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';

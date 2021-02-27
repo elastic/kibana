@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import {
   getAgent,
