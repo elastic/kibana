@@ -139,6 +139,7 @@ export class DashboardStateManager {
     // setup initial state by merging defaults with state from url & panels storage
     // also run migration, as state in url could be of older version
     const initialUrlState = this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY);
+
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
@@ -345,7 +346,7 @@ export class DashboardStateManager {
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
-  public resetState(resetViewMode: boolean) {
+  public resetState() {
     // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
@@ -368,12 +369,8 @@ export class DashboardStateManager {
     this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
     this.isDirty = false;
 
-    if (resetViewMode) {
-      this.stateContainer.set(this.stateDefaults);
-    } else {
-      const currentViewMode = this.stateContainer.get().viewMode;
-      this.stateContainer.set({ ...this.stateDefaults, viewMode: currentViewMode });
-    }
+    const currentViewMode = this.stateContainer.get().viewMode;
+    this.stateContainer.set({ ...this.stateDefaults, viewMode: currentViewMode });
   }
 
   /**

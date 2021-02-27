@@ -28,9 +28,10 @@ export function ServiceOverviewThroughputChart({
 }) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, start, end },
+  } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { environment, start, end } = urlParams;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -43,16 +44,16 @@ export function ServiceOverviewThroughputChart({
             },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [environment, serviceName, start, end, uiFilters, transactionType]
+    [environment, kuery, serviceName, start, end, transactionType]
   );
 
   return (
