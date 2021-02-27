@@ -97,11 +97,13 @@ export class CasePlugin {
         connectorMappingsService: this.connectorMappingsService,
         userActionService: this.userActionService,
         alertsService: this.alertsService,
+        logger: this.log,
       })
     );
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     initCaseApi({
+      logger: this.log,
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
       connectorMappingsService: this.connectorMappingsService,
@@ -137,6 +139,7 @@ export class CasePlugin {
         connectorMappingsService: this.connectorMappingsService!,
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
+        logger: this.log,
       });
     };
 
@@ -156,6 +159,7 @@ export class CasePlugin {
     connectorMappingsService,
     userActionService,
     alertsService,
+    logger,
   }: {
     core: CoreSetup;
     caseService: CaseServiceSetup;
@@ -163,6 +167,7 @@ export class CasePlugin {
     connectorMappingsService: ConnectorMappingsServiceSetup;
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
+    logger: Logger;
   }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
     return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
@@ -178,6 +183,7 @@ export class CasePlugin {
             userActionService,
             alertsService,
             user,
+            logger,
           });
         },
       };
