@@ -29,6 +29,7 @@ import {
   migrateSettingsToV7100,
 } from './migrations/to_v7_10_0';
 import { migrateAgentPolicyToV7120, migrateAgentToV7120 } from './migrations/to_v7_12_0';
+// @ts-expect-error
 import { migratePackagePolicyToV7110, migratePackagePolicyToV7120 } from './security_solution';
 
 /*
