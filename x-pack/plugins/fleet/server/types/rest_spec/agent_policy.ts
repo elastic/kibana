@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { NewAgentPolicySchema } from '../models';
-import { ListWithKuerySchema } from './index';
+import { ListWithKuerySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
