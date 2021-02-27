@@ -25,7 +25,7 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         query: schema.maybe(
           schema.object({
             includeSubCaseComments: schema.maybe(schema.boolean()),
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
       },
@@ -35,10 +35,10 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         const client = context.core.savedObjects.client;
         let comments: SavedObjectsFindResponse<CommentAttributes>;
 
-        if (request.query?.subCaseID) {
+        if (request.query?.subCaseId) {
           comments = await caseService.getAllSubCaseComments({
             client,
-            id: request.query.subCaseID,
+            id: request.query.subCaseId,
             options: {
               sortField: defaultSortField,
             },
