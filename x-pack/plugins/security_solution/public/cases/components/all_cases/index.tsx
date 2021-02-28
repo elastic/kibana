@@ -19,11 +19,12 @@ import {
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import * as i18n from './translations';
+import classnames from 'classnames';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import * as i18n from './translations';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
-import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
+import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -58,6 +59,7 @@ import { getExpandedRowMap } from './expanded_row';
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
+
 const FlexItemDivider = styled(EuiFlexItem)`
   ${({ theme }) => css`
     .euiFlexGroup--gutterMedium > &.euiFlexItem {
@@ -75,6 +77,7 @@ const ProgressLoader = styled(EuiProgress)`
     z-index: ${theme.eui.euiZHeader};
   `}
 `;
+
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
@@ -86,19 +89,39 @@ const getSortField = (field: string): SortFieldCase => {
 
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 const BasicTable = styled(EuiBasicTable)`
-  .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
-    padding: 8px 0 8px 32px;
-  }
+  ${({ theme }) => `
+    .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
+      padding: 8px 0 8px 32px;
+    }
+
+    &.isModal .euiTableRow.isDisabled {
+      cursor: not-allowed;
+      background-color: ${theme.eui.euiTableHoverClickableColor};
+    }
+
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow:hover {
+      background-color: transparent;
+    }
+
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow {
+      .subCase:hover {
+        background-color: ${theme.eui.euiTableHoverClickableColor};
+      }
+    }
+  `}
 `;
 BasicTable.displayName = 'BasicTable';
 
 interface AllCasesProps {
-  onRowClick?: (theCase?: Case) => void;
+  onRowClick?: (theCase?: Case | SubCase) => void;
   isModal?: boolean;
   userCanCrud: boolean;
+  disabledStatuses?: CaseStatuses[];
+  disabledCases?: CaseType[];
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ onRowClick, isModal = false, userCanCrud }) => {
+  ({ onRowClick, isModal = false, userCanCrud, disabledStatuses, disabledCases = [] }) => {
     const { navigateToApp } = useKibana().services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
@@ -334,8 +357,10 @@ export const AllCases = React.memo<AllCasesProps>(
         getExpandedRowMap({
           columns: memoizedGetCasesColumns,
           data: data.cases,
+          isModal,
+          onSubCaseClick: onRowClick,
         }),
-      [data.cases, memoizedGetCasesColumns]
+      [data.cases, isModal, memoizedGetCasesColumns, onRowClick]
     );
 
     const memoizedPagination = useMemo(
@@ -356,6 +381,7 @@ export const AllCases = React.memo<AllCasesProps>(
       () => ({
         selectable: (theCase) => isEmpty(theCase.subCases),
         onSelectionChange: setSelectedCases,
+        selectableMessage: (selectable) => (!selectable ? i18n.SELECTABLE_MESSAGE_COLLECTIONS : ''),
       }),
       [setSelectedCases]
     );
@@ -377,7 +403,8 @@ export const AllCases = React.memo<AllCasesProps>(
 
         return {
           'data-test-subj': `cases-table-row-${theCase.id}`,
-          ...(isModal ? { onClick: onTableRowClick } : {}),
+          className: classnames({ isDisabled: theCase.type === CaseType.collection }),
+          ...(isModal && theCase.type !== CaseType.collection ? { onClick: onTableRowClick } : {}),
         };
       },
       [isModal, onRowClick]
@@ -462,6 +489,7 @@ export const AllCases = React.memo<AllCasesProps>(
               status: filterOptions.status,
             }}
             setFilterRefetch={setFilterRefetch}
+            disabledStatuses={disabledStatuses}
           />
           {isCasesLoading && isDataEmpty ? (
             <Div>
@@ -530,6 +558,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 rowProps={tableRowProps}
                 selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
+                className={classnames({ isModal })}
               />
             </Div>
           )}
