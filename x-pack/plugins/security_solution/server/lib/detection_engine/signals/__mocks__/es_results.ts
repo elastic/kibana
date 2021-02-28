@@ -434,8 +434,12 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       threshold: {
         field: ['host.name'],
         value: 5,
-        cardinality_field: ['process.name'],
-        cardinality_value: 2,
+        cardinality: [
+          {
+            field: 'process.name',
+            value: 2,
+          },
+        ],
       },
       updated_by: 'elastic_kibana',
       tags: ['some fake tag 1', 'some fake tag 2'],

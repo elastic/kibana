@@ -6,7 +6,6 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { isEmpty } from 'lodash/fp';
 
 import {
   Threshold,
@@ -87,12 +86,12 @@ export const findThresholdSignals = async ({
           },
         });
         if (i === (thresholdFields.length ?? 0) - 1) {
-          if (!isEmpty(threshold.cardinality_field)) {
+          if (threshold.cardinality?.length) {
             set(acc, `${aggPath}['aggs']`, {
               top_threshold_hits: topHitsAgg,
               cardinality_count: {
                 cardinality: {
-                  field: threshold.cardinality_field![0],
+                  field: threshold.cardinality[0].field,
                 },
               },
               cardinality_check: {
@@ -100,7 +99,7 @@ export const findThresholdSignals = async ({
                   buckets_path: {
                     cardinalityCount: 'cardinality_count',
                   },
-                  script: `params.cardinalityCount >= ${threshold.cardinality_value}`, // TODO: cardinality operator
+                  script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
                 },
               },
             });
@@ -123,11 +122,11 @@ export const findThresholdSignals = async ({
           },
           aggs: {
             top_threshold_hits: topHitsAgg,
-            ...(!isEmpty(threshold.cardinality_field)
+            ...(threshold.cardinality?.length
               ? {
                   cardinality_count: {
                     cardinality: {
-                      field: threshold.cardinality_field![0],
+                      field: threshold.cardinality[0].field,
                     },
                   },
                   cardinality_check: {
@@ -135,7 +134,7 @@ export const findThresholdSignals = async ({
                       buckets_path: {
                         cardinalityCount: 'cardinality_count',
                       },
-                      script: `params.cardinalityCount >= ${threshold.cardinality_value}`, // TODO: cardinality operator
+                      script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
                     },
                   },
                 }

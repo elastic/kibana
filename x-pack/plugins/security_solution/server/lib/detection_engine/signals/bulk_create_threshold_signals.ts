@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import set from 'set-value';
 
 import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
@@ -144,10 +144,10 @@ const getTransformedHits = (
               value: bucket.key,
             },
           ],
-          cardinality: !isEmpty(threshold.cardinality_field)
+          cardinality: threshold.cardinality?.length
             ? [
                 {
-                  field: threshold.cardinality_field![0],
+                  field: threshold.cardinality[0].field,
                   value: bucket.cardinality_count!.value,
                 },
               ]

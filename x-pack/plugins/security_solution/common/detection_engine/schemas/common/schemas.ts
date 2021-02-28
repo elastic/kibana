@@ -482,14 +482,21 @@ export const thresholdFieldNormalized = t.exact(
 export type ThresholdFieldNormalized = t.TypeOf<typeof thresholdFieldNormalized>;
 
 export const thresholdCardinalityField = t.exact(
-  t.partial({
-    cardinality_field: t.array(t.string),
-    cardinality_value: PositiveInteger,
+  t.type({
+    field: t.string,
+    value: PositiveInteger,
   })
 );
 export type ThresholdCardinalityField = t.TypeOf<typeof thresholdCardinalityField>;
 
-export const threshold = t.intersection([thresholdField, thresholdCardinalityField]);
+export const threshold = t.intersection([
+  thresholdField,
+  t.exact(
+    t.partial({
+      cardinality: t.array(thresholdCardinalityField),
+    })
+  ),
+]);
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);
@@ -497,7 +504,11 @@ export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
 
 export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
-  thresholdCardinalityField,
+  t.exact(
+    t.partial({
+      cardinality: t.array(thresholdCardinalityField),
+    })
+  ),
 ]);
 export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 

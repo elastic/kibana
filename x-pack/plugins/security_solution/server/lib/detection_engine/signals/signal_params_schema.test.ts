@@ -120,8 +120,12 @@ describe('signal_params_schema', () => {
     const schema = signalParamsSchema();
     const threshold = {
       field: 'agent.id',
-      cardinality_field: ['host.name'],
-      cardinality_value: 5,
+      cardinality: [
+        {
+          field: ['host.name'],
+          value: 5,
+        },
+      ],
     };
     const mock = {
       ...getSignalParamsSchemaMock(),
@@ -130,57 +134,20 @@ describe('signal_params_schema', () => {
     expect(() => schema.validate(mock)).toThrow();
   });
 
-  test('threshold `cardinality_value` cannot be supplied without `cardinality_field`', () => {
+  test('threshold `cardinality` cannot currently be greater than length 1', () => {
     const schema = signalParamsSchema();
     const threshold = {
       value: 100,
-      cardinality_value: 5,
-    };
-    const mock = {
-      ...getSignalParamsSchemaMock(),
-      threshold,
-    };
-    expect(() => schema.validate(mock)).toThrow();
-  });
-
-  test('threshold `cardinality_field` cannot be supplied without `cardinality_value`', () => {
-    const schema = signalParamsSchema();
-    const threshold = {
-      value: 100,
-      cardinality_field: ['host.name'],
-    };
-    const mock = {
-      ...getSignalParamsSchemaMock(),
-      threshold,
-    };
-    expect(() => schema.validate(mock)).toThrow();
-  });
-
-  test('threshold validates when both `cardinality_field` and `cardinality_value` are supplied', () => {
-    const schema = signalParamsSchema();
-    const threshold = {
-      value: 100,
-      cardinality_field: ['host.name'],
-      cardinality_value: 5,
-    };
-    const mock = {
-      ...getSignalParamsSchemaMock(),
-      threshold,
-    };
-    expect(schema.validate(mock).threshold).toEqual({
-      field: null,
-      value: 100,
-      cardinality_field: ['host.name'],
-      cardinality_value: 5,
-    });
-  });
-
-  test('threshold `cardinality_field` cannot currently be greater than length 1', () => {
-    const schema = signalParamsSchema();
-    const threshold = {
-      value: 100,
-      cardinality_field: ['host.name', 'user.name'],
-      cardinality_value: 5,
+      cardinality: [
+        {
+          field: 'host.name',
+          value: 5,
+        },
+        {
+          field: 'user.name',
+          value: 5,
+        },
+      ],
     };
     const mock = {
       ...getSignalParamsSchemaMock(),

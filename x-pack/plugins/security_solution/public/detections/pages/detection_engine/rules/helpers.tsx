@@ -102,8 +102,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   threshold: {
     field: normalizeThresholdField(rule.threshold?.field),
     value: `${rule.threshold?.value || 100}`,
-    cardinality_field: rule.threshold?.cardinality_field ?? [],
-    cardinality_value: `${rule.threshold?.cardinality_value ?? ''}`,
+    cardinality: {
+      field: `${rule.threshold?.cardinality?.length ? rule.threshold.cardinality[0].field : ''}`,
+      value: `${rule.threshold?.cardinality?.length ? rule.threshold.cardinality[0].value : ''}`,
+    },
   },
 });
 

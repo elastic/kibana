@@ -97,8 +97,12 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
     const threshold: ThresholdNormalized = {
       field: ['source.ip', 'host.name'],
       value: 1,
-      cardinality_field: ['destination.ip'],
-      cardinality_value: 5,
+      cardinality: [
+        {
+          field: 'destination.ip',
+          value: 5,
+        },
+      ],
     };
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(

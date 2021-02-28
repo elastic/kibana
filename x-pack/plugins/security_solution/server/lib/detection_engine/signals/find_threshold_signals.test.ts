@@ -305,8 +305,12 @@ describe('findThresholdSignals', () => {
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
-        cardinality_field: ['destination.ip'],
-        cardinality_value: 2,
+        cardinality: [
+          {
+            field: 'destination.ip',
+            value: 2,
+          },
+        ],
       },
       buildRuleMessage,
       timestampOverride: undefined,
@@ -377,8 +381,12 @@ describe('findThresholdSignals', () => {
       logger: mockLogger,
       filter: queryFilter,
       threshold: {
-        cardinality_field: ['source.ip'],
-        cardinality_value: 5,
+        cardinality: [
+          {
+            field: 'source.ip',
+            value: 5,
+          },
+        ],
         field: [],
         value: 200,
       },
