@@ -8,6 +8,7 @@
 import { get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
@@ -61,7 +62,7 @@ const getTransformedHits = (
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
 ) => {
-  if (isEmpty(threshold.field)) {
+  if (threshold.field.length === 0) {
     const totalResults =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
 
@@ -111,7 +112,7 @@ const getTransformedHits = (
 
   const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
     return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
-      if (i < threshold.field!.length - 1) {
+      if (i < threshold.field.length - 1) {
         const nextLevelIdx = i + 1;
         const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
         if (nextLevelAggParts == null) {
@@ -261,12 +262,8 @@ export const bulkCreateThresholdSignals = async (
     params.filter,
     params.logger,
     {
-      ...threshold!,
-      field: Array.isArray(threshold.field)
-        ? threshold.field
-        : isEmpty(threshold.field)
-        ? []
-        : [threshold.field],
+      ...threshold,
+      field: normalizeThresholdField(threshold.field),
     },
     params.ruleParams.ruleId,
     params.timestampOverride

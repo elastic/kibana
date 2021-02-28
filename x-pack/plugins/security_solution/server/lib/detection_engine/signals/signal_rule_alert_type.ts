@@ -375,8 +375,6 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
 
-          const thresholdFields = normalizeThresholdField(threshold.field);
-
           const {
             filters: bucketFilters,
             searchErrors: previousSearchErrors,
@@ -387,7 +385,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByFields: thresholdFields,
+            bucketByFields: normalizeThresholdField(threshold.field),
             timestampOverride,
             buildRuleMessage,
           });
