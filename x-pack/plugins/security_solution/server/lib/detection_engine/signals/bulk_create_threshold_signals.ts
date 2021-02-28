@@ -9,7 +9,7 @@ import { get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
@@ -56,7 +56,7 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
@@ -98,15 +98,7 @@ const getTransformedHits = (
     return [
       {
         _index: inputIndex,
-        _id: calculateThresholdSignalUuid(
-          ruleId,
-          startedAt,
-          Array.isArray(threshold.field)
-            ? threshold.field
-            : isEmpty(threshold.field)
-            ? []
-            : [threshold.field!]
-        ),
+        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
         _source: source,
       },
     ];
@@ -123,7 +115,7 @@ const getTransformedHits = (
         const nextLevelIdx = i + 1;
         const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
         if (nextLevelAggParts == null) {
-          throw new Error('Something went horribly wrong');
+          throw new Error('Unable to parse aggregation.');
         }
         const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
         const nextBuckets = get(nextLevelPath, bucket);
@@ -154,9 +146,7 @@ const getTransformedHits = (
           cardinality: !isEmpty(threshold.cardinality_field)
             ? [
                 {
-                  field: Array.isArray(threshold.cardinality_field)
-                    ? threshold.cardinality_field[0]
-                    : threshold.cardinality_field!,
+                  field: threshold.cardinality_field![0],
                   value: bucket.cardinality_count!.value,
                 },
               ]
@@ -212,11 +202,7 @@ const getTransformedHits = (
         _id: calculateThresholdSignalUuid(
           ruleId,
           startedAt,
-          Array.isArray(threshold.field)
-            ? threshold.field
-            : isEmpty(threshold.field)
-            ? []
-            : [threshold.field!],
+          threshold.field,
           bucket.terms.map((term) => term.value).join(',')
         ),
         _source: source,
@@ -234,7 +220,7 @@ export const transformThresholdResultsToEcs = (
   startedAt: Date,
   filter: unknown,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   timestampOverride: TimestampOverrideOrUndefined
 ): SignalSearchResponse => {
@@ -267,13 +253,21 @@ export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
+  const threshold = params.ruleParams.threshold!;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.filter,
     params.logger,
-    params.ruleParams.threshold!,
+    {
+      ...threshold!,
+      field: Array.isArray(threshold.field)
+        ? threshold.field
+        : isEmpty(threshold.field)
+        ? []
+        : [threshold.field],
+    },
     params.ruleParams.ruleId,
     params.timestampOverride
   );

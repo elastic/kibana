@@ -337,7 +337,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: 'agent.hostname',
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'threshold',
@@ -355,7 +355,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: undefined,
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'threshold',
@@ -373,7 +373,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: '    ',
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'threshold',
@@ -391,7 +391,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: 'agent.hostname',
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'eql',
@@ -408,7 +408,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: 'agent.hostname',
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'query',
@@ -425,7 +425,7 @@ describe('queryPreviewReducer', () => {
         threshold: {
           field: 'agent.hostname',
           value: 200,
-          cardinality_field: 'user.name',
+          cardinality_field: ['user.name'],
           cardinality_value: 2,
         },
         ruleType: 'saved_query',

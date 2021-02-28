@@ -462,22 +462,37 @@ export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 export const threshold = t.intersection([
   t.exact(
     t.type({
-      field: t.union([t.string, t.array(t.string)]),
+      field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
       value: PositiveIntegerGreaterThanZero,
     })
   ),
   t.exact(
     t.partial({
-      cardinality_field: t.union([t.string, t.array(t.string), t.undefined, t.null]),
-      cardinality_value: t.union([PositiveInteger, t.undefined, t.null]),
+      cardinality_field: t.array(t.string),
+      cardinality_value: PositiveInteger,
     })
   ),
 ]);
-// TODO: codec to transform threshold field string to string[] ?
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);
 export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
+
+export const thresholdNormalized = t.intersection([
+  t.exact(
+    t.type({
+      field: t.array(t.string),
+      value: PositiveIntegerGreaterThanZero,
+    })
+  ),
+  t.exact(
+    t.partial({
+      cardinality_field: t.array(t.string),
+      cardinality_value: PositiveInteger,
+    })
+  ),
+]);
+export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

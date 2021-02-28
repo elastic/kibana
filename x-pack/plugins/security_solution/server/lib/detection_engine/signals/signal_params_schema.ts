@@ -46,11 +46,13 @@ export const signalSchema = schema.object({
       // Always required
       value: schema.number(),
       // Can be null, but if set, `cardinality_value` must also be set
-      cardinality_field: schema.nullable(schema.string()),
+      cardinality_field: schema.nullable(schema.arrayOf(schema.string())),
       // Can be null, but if set, `cardinality_field` must also be set
       cardinality_value: schema.conditional(
         schema.siblingRef('cardinality_field'),
-        schema.nullable(schema.literal('')), // If `cardinality_field` is null or an empty string...
+        schema.nullable(
+          schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 0 }), schema.literal('')])
+        ), // If `cardinality_field` is null or an empty string...
         schema.nullable(schema.never()), // ...then `cardinality_value` should be null or not supplied at all
         schema.number() // ...else, `cardinality_value` should be a number
       ),

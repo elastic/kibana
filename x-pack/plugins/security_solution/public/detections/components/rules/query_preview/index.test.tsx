@@ -291,7 +291,7 @@ describe('PreviewQuery', () => {
             threshold={{
               field: 'agent.hostname',
               value: 200,
-              cardinality_field: 'user.name',
+              cardinality_field: ['user.name'],
               cardinality_value: 2,
             }}
             isDisabled={false}
@@ -338,7 +338,7 @@ describe('PreviewQuery', () => {
             threshold={{
               field: 'agent.hostname',
               value: 200,
-              cardinality_field: 'user.name',
+              cardinality_field: ['user.name'],
               cardinality_value: 2,
             }}
             isDisabled={false}
@@ -382,7 +382,7 @@ describe('PreviewQuery', () => {
             threshold={{
               field: undefined,
               value: 200,
-              cardinality_field: 'user.name',
+              cardinality_field: ['user.name'],
               cardinality_value: 2,
             }}
             isDisabled={false}
@@ -414,7 +414,7 @@ describe('PreviewQuery', () => {
             threshold={{
               field: '   ',
               value: 200,
-              cardinality_field: 'user.name',
+              cardinality_field: ['user.name'],
               cardinality_value: 2,
             }}
             isDisabled={false}

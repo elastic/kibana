@@ -192,9 +192,9 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   },
   threatIndex: [],
   threshold: {
-    field: [''],
+    field: [],
     value: '100',
-    cardinality_field: [''],
+    cardinality_field: [],
     cardinality_value: '2',
   },
 });

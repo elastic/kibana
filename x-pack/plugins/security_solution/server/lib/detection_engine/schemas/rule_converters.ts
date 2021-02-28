@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import isEmpty from 'lodash';
 import uuid from 'uuid';
 import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
@@ -207,7 +208,14 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        threshold: params.threshold,
+        threshold: {
+          ...params.threshold,
+          field: Array.isArray(params.threshold.field)
+            ? params.threshold.field
+            : isEmpty(params.threshold.field)
+            ? []
+            : [params.threshold.field],
+        },
       };
     }
     case 'machine_learning': {

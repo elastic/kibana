@@ -376,6 +376,8 @@ export const signalRulesAlertType = ({
 
           const thresholdFields = Array.isArray(threshold.field)
             ? threshold.field
+            : isEmpty(threshold.field)
+            ? []
             : [threshold.field];
 
           const {

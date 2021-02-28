@@ -92,7 +92,7 @@ export const findThresholdSignals = async ({
                 top_threshold_hits: topHitsAgg,
                 cardinality_count: {
                   cardinality: {
-                    field: threshold.cardinality_field,
+                    field: threshold.cardinality_field![0],
                   },
                 },
                 cardinality_check: {
@@ -127,7 +127,7 @@ export const findThresholdSignals = async ({
                 ? {
                     cardinality_count: {
                       cardinality: {
-                        field: threshold.cardinality_field,
+                        field: threshold.cardinality_field![0],
                       },
                     },
                     cardinality_check: {

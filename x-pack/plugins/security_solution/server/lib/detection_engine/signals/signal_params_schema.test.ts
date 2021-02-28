@@ -120,7 +120,7 @@ describe('signal_params_schema', () => {
     const schema = signalParamsSchema();
     const threshold = {
       field: 'agent.id',
-      cardinality_field: 'host.name',
+      cardinality_field: ['host.name'],
       cardinality_value: 5,
     };
     const mock = {
@@ -147,7 +147,7 @@ describe('signal_params_schema', () => {
     const schema = signalParamsSchema();
     const threshold = {
       value: 100,
-      cardinality_field: 'host.name',
+      cardinality_field: ['host.name'],
     };
     const mock = {
       ...getSignalParamsSchemaMock(),
@@ -160,7 +160,7 @@ describe('signal_params_schema', () => {
     const schema = signalParamsSchema();
     const threshold = {
       value: 100,
-      cardinality_field: 'host.name',
+      cardinality_field: ['host.name'],
       cardinality_value: 5,
     };
     const mock = {
@@ -170,7 +170,7 @@ describe('signal_params_schema', () => {
     expect(schema.validate(mock).threshold).toEqual({
       field: null,
       value: 100,
-      cardinality_field: 'host.name',
+      cardinality_field: ['host.name'],
       cardinality_value: 5,
     });
   });

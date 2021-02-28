@@ -294,8 +294,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           field: formThresholdField?.length ? formThresholdField[0] : [],
           value: formThresholdValue,
           cardinality_field: formThresholdCardinalityField?.length
-            ? formThresholdCardinalityField[0]
-            : '',
+            ? formThresholdCardinalityField
+            : [],
           cardinality_value: formThresholdCardinalityValue,
         }
       : undefined;
