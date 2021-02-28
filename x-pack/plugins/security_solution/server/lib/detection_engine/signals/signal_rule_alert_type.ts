@@ -24,6 +24,7 @@ import {
   isThresholdRule,
   isEqlRule,
   isThreatMatchRule,
+  hasLargeValueItem,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
@@ -37,11 +38,8 @@ import {
   WrappedSignalHit,
 } from './types';
 import {
-  getGapBetweenRuns,
   getListsClient,
   getExceptions,
-  getGapMaxCatchupRatio,
-  MAX_RULE_GAP_RATIO,
   wrapSignal,
   createErrorsFromShard,
   createSearchAfterReturnType,
@@ -50,6 +48,7 @@ import {
   checkPrivileges,
   hasTimestampFields,
   hasReadIndexPrivileges,
+  getRuleRangeTuples,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -230,29 +229,24 @@ export const signalRulesAlertType = ({
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
-
-      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-      if (gap != null && gap.asMilliseconds() > 0) {
-        const fromUnit = from[from.length - 1];
-        const { ratio } = getGapMaxCatchupRatio({
-          logger,
-          buildRuleMessage,
-          previousStartedAt,
-          ruleParamsFrom: from,
-          interval,
-          unit: fromUnit,
-        });
-        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
-          const gapString = gap.humanize();
-          const gapMessage = buildRuleMessage(
-            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-            'Consider increasing your look behind time or adding more Kibana instances.'
-          );
-          logger.warn(gapMessage);
-
-          hasError = true;
-          await ruleStatusService.error(gapMessage, { gap: gapString });
-        }
+      const { tuples, remainingGap } = getRuleRangeTuples({
+        logger,
+        previousStartedAt,
+        from,
+        to,
+        interval,
+        maxSignals,
+        buildRuleMessage,
+      });
+      if (remainingGap.asMilliseconds() > 0) {
+        const gapString = remainingGap.humanize();
+        const gapMessage = buildRuleMessage(
+          `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
+          'Consider increasing your look behind time or adding more Kibana instances.'
+        );
+        logger.warn(gapMessage);
+        hasError = true;
+        await ruleStatusService.error(gapMessage, { gap: gapString });
       }
       try {
         const { listClient, exceptionsClient } = getListsClient({
@@ -372,6 +366,12 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
+            );
+            wroteWarningStatus = true;
+          }
           const inputIndex = await getInputIndex(services, version, index);
 
           const thresholdFields = Array.isArray(threshold.field)
@@ -481,6 +481,7 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
           result = await createThreatSignals({
+            tuples,
             threatMapping,
             query,
             inputIndex,
@@ -491,8 +492,6 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             exceptionItems: exceptionItems ?? [],
-            gap,
-            previousStartedAt,
             listClient,
             logger,
             eventsTelemetry,
@@ -533,8 +532,7 @@ export const signalRulesAlertType = ({
           });
 
           result = await searchAfterAndBulkCreate({
-            gap,
-            previousStartedAt,
+            tuples,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
@@ -562,6 +560,12 @@ export const signalRulesAlertType = ({
         } else if (isEqlRule(type)) {
           if (query === undefined) {
             throw new Error('EQL query rule must have a query defined');
+          }
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
+            );
+            wroteWarningStatus = true;
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);

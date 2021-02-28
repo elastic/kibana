@@ -22,15 +22,19 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
  my-slack:
    name: preconfigured-slack-action-type
    actionTypeId: .slack
-   config:
+   secrets:
      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-[[slack-connector-config-properties]]
-`config` defines the action type specific to the configuration.
-`config` contains
-`webhookUrl`, a string that corresponds to *Webhook URL*.
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
+[cols="2*<"]
+|===
+
+| `webhookUrl`
+| A string that corresponds to *Webhook URL*.
+
+|===
 
 [float]
 [[slack-action-configuration]]
