@@ -1,5 +1,8 @@
 [[<ACTION-TYPE>-action-type]]
 === <ACTION-TYPE> action
+++++
+<titleabbrev><ACTION-TYPE></titleabbrev>
+++++
 
 Include a short description of the action type.
 

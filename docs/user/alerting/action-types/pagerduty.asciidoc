@@ -1,6 +1,9 @@
 [role="xpack"]
 [[pagerduty-action-type]]
 === PagerDuty action
+++++
+<titleabbrev>PagerDuty</titleabbrev>
+++++
 
 The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 

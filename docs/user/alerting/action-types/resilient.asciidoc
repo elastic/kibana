@@ -1,6 +1,9 @@
 [role="xpack"]
 [[resilient-action-type]]
 === IBM Resilient action
+++++
+<titleabbrev>IBM Resilient</titleabbrev>
+++++
 
 The IBM Resilient action type uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
 

@@ -1,6 +1,9 @@
 [role="xpack"]
 [[index-action-type]]
 === Index action
+++++
+<titleabbrev>Index</titleabbrev>
+++++
 
 The index action type will index a document into {es}. See also the {ref}/indices-create-index.html[create index API].
 

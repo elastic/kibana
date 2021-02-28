@@ -1,6 +1,9 @@
 [role="xpack"]
 [[slack-action-type]]
 === Slack action
+++++
+<titleabbrev>Slack</titleabbrev>
+++++
 
 The Slack action type uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
 

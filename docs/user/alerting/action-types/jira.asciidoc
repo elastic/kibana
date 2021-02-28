@@ -1,6 +1,9 @@
 [role="xpack"]
 [[jira-action-type]]
 === Jira action
+++++
+<titleabbrev>Jira</titleabbrev>
+++++
 
 The Jira action type uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
 

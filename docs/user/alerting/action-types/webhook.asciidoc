@@ -1,6 +1,9 @@
 [role="xpack"]
 [[webhook-action-type]]
 === Webhook action
+++++
+<titleabbrev>Webhook</titleabbrev>
+++++
 
 The Webhook action type uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
 

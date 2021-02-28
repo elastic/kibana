@@ -1,6 +1,9 @@
 [role="xpack"]
 [[server-log-action-type]]
 === Server log action
+++++
+<titleabbrev>Server log</titleabbrev>
+++++
 
 This action type writes an entry to the {kib} server log.
 

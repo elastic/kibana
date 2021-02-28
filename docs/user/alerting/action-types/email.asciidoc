@@ -1,6 +1,9 @@
 [role="xpack"]
 [[email-action-type]]
 === Email action
+++++
+<titleabbrev>Email</titleabbrev>
+++++
 
 The email action type uses the SMTP protocol to send mail message, using an integration of https://nodemailer.com/[Nodemailer]. Email message text is sent as both plain text and html text.
 
