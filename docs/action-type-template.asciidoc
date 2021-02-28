@@ -66,5 +66,5 @@ Property2:: A short description of this property with format hints. This can be 
 ////
 Optional - additional configuration details here
 [[configuring-<ACTION-TYPE>]]
-==== Configuring <ACTION-TYPE>
+==== Configure <ACTION-TYPE>
 ////

@@ -5,9 +5,9 @@
 {kib} alerts can be created in a variety of apps including <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>> and from <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring alerts that this section describes in more detail.
 
 [float]
-=== Creating an alert
+=== Create an alert
 
-When you create an alert, you need to define the alert details, the conditions and the actions.
+When you create an alert, you must define the alert details, conditions, and actions.
 
 . <<defining-alerts-general-details, General alert details>>
 . <<defining-alerts-type-conditions, Alert type and conditions>>

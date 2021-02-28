@@ -40,9 +40,9 @@ Password::  Password for login type authentication.
      password: passwordkeystorevalue
 --
 
-Config defines information for the action type
+Config defines information for the action type.
 
-`service`:: The name of a https://nodemailer.com/smtp/well-known/[well-known email service provider]. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value, see the (https://nodemailer.com/usage/using-gmail/)[Nodemailer Gmail documentation].
+`service`:: The name of a https://nodemailer.com/smtp/well-known/[well-known email service provider]. If `service` is provided, `host`, `port`, and `secure` properties are ignored. For more information on the `gmail` service value, see the https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation].
 `from`:: An email address that corresponds to *Sender*.
 `host`:: A string that corresponds to *Host*.
 `port`:: A number that corresponds to *Port*.
@@ -61,7 +61,7 @@ Secrets defines sensitive information for the action type.
 
 Email actions have the following configuration properties.
 
-To, CC, BCC::    Each is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
+To, CC, BCC::    Each item is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
 Subject::       The subject line of the email.
 Message::       The message text of the email. Markdown format is supported.
 
