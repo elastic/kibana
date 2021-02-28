@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../../common/utils/queries';
+import { rangeQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';

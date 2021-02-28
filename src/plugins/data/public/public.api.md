@@ -60,7 +60,6 @@ import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { Moment } from 'moment';
 import moment from 'moment';
 import { NameList } from 'elasticsearch';
@@ -1532,6 +1531,7 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
+    maxIndexPatterns?: number;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

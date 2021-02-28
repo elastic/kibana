@@ -12,10 +12,10 @@ Webhook connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Method::    HTTP request method, either `post`(default) or `put`.
+Method::    HTTP request method, either `POST`(default) or `PUT`.
 Headers::   A set of key-value pairs sent as headers with the request
-User::      An optional username. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
-Password::  An optional password. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
+User::      Username for HTTP basic authentication.
+Password::  Password for HTTP basic authentication.
 
 [float]
 [[Preconfigured-webhook-configuration]]
@@ -37,7 +37,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 --
 
 [[webhook-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -51,18 +51,21 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 |`headers`
 |A record<string, string> that corresponds to *Headers*.
 
+| `hasAuth`
+| If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
 
 |`user`
-|A string that corresponds to *User*.
+|A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
 
 |`password`
-|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 |===
 

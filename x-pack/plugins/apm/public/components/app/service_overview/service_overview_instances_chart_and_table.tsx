@@ -25,8 +25,7 @@ export function ServiceOverviewInstancesChartAndTable({
   const { transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { environment, latencyAggregationType, start, end },
-    uiFilters,
+    urlParams: { environment, kuery, latencyAggregationType, start, end },
   } = useUrlParams();
 
   const { data = [], status } = useFetcher(
@@ -44,11 +43,11 @@ export function ServiceOverviewInstancesChartAndTable({
           },
           query: {
             environment,
+            kuery,
             latencyAggregationType,
             start,
             end,
             transactionType,
-            uiFilters: JSON.stringify(uiFilters),
             numBuckets: 20,
           },
         },
@@ -56,12 +55,12 @@ export function ServiceOverviewInstancesChartAndTable({
     },
     [
       environment,
+      kuery,
       latencyAggregationType,
       start,
       end,
       serviceName,
       transactionType,
-      uiFilters,
     ]
   );
 
