@@ -46,7 +46,7 @@ export const signalSchema = schema.object({
       // Always required
       value: schema.number(),
       // Can be null, but if set, `cardinality_value` must also be set
-      cardinality_field: schema.nullable(schema.arrayOf(schema.string())),
+      cardinality_field: schema.nullable(schema.arrayOf(schema.string(), { maxSize: 1 })),
       // Can be null, but if set, `cardinality_field` must also be set
       cardinality_value: schema.conditional(
         schema.siblingRef('cardinality_field'),

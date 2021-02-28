@@ -174,4 +174,18 @@ describe('signal_params_schema', () => {
       cardinality_value: 5,
     });
   });
+
+  test('threshold `cardinality_field` cannot currently be greater than length 1', () => {
+    const schema = signalParamsSchema();
+    const threshold = {
+      value: 100,
+      cardinality_field: ['host.name', 'user.name'],
+      cardinality_value: 5,
+    };
+    const mock = {
+      ...getSignalParamsSchemaMock(),
+      threshold,
+    };
+    expect(() => schema.validate(mock)).toThrow();
+  });
 });
