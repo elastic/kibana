@@ -465,40 +465,44 @@ export type Threats = t.TypeOf<typeof threats>;
 export const threatsOrUndefined = t.union([threats, t.undefined]);
 export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
-export const threshold = t.intersection([
-  t.exact(
-    t.type({
-      field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
-      value: PositiveIntegerGreaterThanZero,
-    })
-  ),
-  t.exact(
-    t.partial({
-      cardinality_field: t.array(t.string),
-      cardinality_value: PositiveInteger,
-    })
-  ),
-]);
+export const thresholdField = t.exact(
+  t.type({
+    field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type ThresholdField = t.TypeOf<typeof thresholdField>;
+
+export const thresholdFieldNormalized = t.exact(
+  t.type({
+    field: t.array(t.string),
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type ThresholdFieldNormalized = t.TypeOf<typeof thresholdFieldNormalized>;
+
+export const thresholdCardinalityField = t.exact(
+  t.partial({
+    cardinality_field: t.array(t.string),
+    cardinality_value: PositiveInteger,
+  })
+);
+export type ThresholdCardinalityField = t.TypeOf<typeof thresholdCardinalityField>;
+
+export const threshold = t.intersection([thresholdField, thresholdCardinalityField]);
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);
 export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
 
 export const thresholdNormalized = t.intersection([
-  t.exact(
-    t.type({
-      field: t.array(t.string),
-      value: PositiveIntegerGreaterThanZero,
-    })
-  ),
-  t.exact(
-    t.partial({
-      cardinality_field: t.array(t.string),
-      cardinality_value: PositiveInteger,
-    })
-  ),
+  thresholdFieldNormalized,
+  thresholdCardinalityField,
 ]);
 export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
+
+export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
+export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

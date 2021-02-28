@@ -25,6 +25,7 @@ import {
   isEqlRule,
   isThreatMatchRule,
   hasLargeValueItem,
+  normalizeThresholdField,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
@@ -374,11 +375,7 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
 
-          const thresholdFields = Array.isArray(threshold.field)
-            ? threshold.field
-            : isEmpty(threshold.field)
-            ? []
-            : [threshold.field];
+          const thresholdFields = normalizeThresholdField(threshold.field);
 
           const {
             filters: bucketFilters,
@@ -390,7 +387,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByFields: thresholdFields as string[], // FIXME
+            bucketByFields: thresholdFields,
             timestampOverride,
             buildRuleMessage,
           });

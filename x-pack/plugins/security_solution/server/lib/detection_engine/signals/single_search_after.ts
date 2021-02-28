@@ -71,8 +71,6 @@ export const singleSearchAfter = async ({
       excludeDocsWithTimestampOverride,
     });
 
-    // console.log(JSON.stringify(searchAfterQuery));
-
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',

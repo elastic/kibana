@@ -94,7 +94,7 @@ describe('patch_rules_type_dependents', () => {
       ...getPatchRulesSchemaMock(),
       type: 'threshold',
       threshold: {
-        field: [],
+        field: '',
         value: -1,
       },
     };

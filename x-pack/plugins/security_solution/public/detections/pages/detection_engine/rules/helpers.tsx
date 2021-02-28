@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
@@ -26,7 +27,6 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import { normalizeThresholdField } from './utils';
 import {
   SeverityMapping,
   Type,

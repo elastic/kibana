@@ -84,7 +84,7 @@ describe('add_prepackaged_rules_type_dependents', () => {
       ...getAddPrepackagedRulesSchemaMock(),
       type: 'threshold',
       threshold: {
-        field: [],
+        field: '',
         value: -1,
       },
     };

@@ -81,7 +81,7 @@ describe('import_rules_type_dependents', () => {
       ...getImportRulesSchemaMock(),
       type: 'threshold',
       threshold: {
-        field: [],
+        field: '',
         value: -1,
       },
     };
