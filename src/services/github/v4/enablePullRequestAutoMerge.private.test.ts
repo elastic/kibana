@@ -15,7 +15,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let options: ValidConfigOptions;
 
-describe('enablePullRequestAutoMerge', () => {
+// causes flaky test runs on CI because parallel builds are racing each other
+// might also be an issue with Github's API being slow at updating after a mutation happens
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('enablePullRequestAutoMerge', () => {
   beforeEach(async () => {
     options = {
       accessToken: await getDevAccessToken(),
