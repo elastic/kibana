@@ -220,7 +220,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
 }) {
   const { start, end } = setup;
 
-  const commomProps = {
+  const commonProps = {
     setup,
     serviceName,
     transactionNames,
@@ -233,7 +233,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
   };
 
   const currentPeriodPromise = getServiceTransactionGroupComparisonStatistics({
-    ...commomProps,
+    ...commonProps,
     start,
     end,
   });
@@ -241,7 +241,7 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
       ? getServiceTransactionGroupComparisonStatistics({
-          ...commomProps,
+          ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
           getOffsetXCoordinate: (x: number) =>

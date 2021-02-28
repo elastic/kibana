@@ -75,7 +75,7 @@ export function SparkPlot({
     width: compact ? px(unit * 3) : px(unit * 4),
   };
 
-  const SparklinesSeries = hasComparisonSeries ? LineSeries : AreaSeries;
+  const SparkelineSeries = hasComparisonSeries ? LineSeries : AreaSeries;
 
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -98,8 +98,8 @@ export function SparkPlot({
               showLegend={false}
               tooltip="none"
             />
-            <SparklinesSeries
-              id="sparklinesSeries"
+            <SparkelineSeries
+              id="sparkelineSeries"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}

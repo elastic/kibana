@@ -199,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           previousPeriod = response.body.previousPeriod;
         });
 
-        it('returns corrent number of items', () => {
+        it('returns correct number of items', () => {
           expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
           expect(Object.keys(previousPeriod)).to.be.eql(transactionNames);
 

@@ -155,19 +155,19 @@ export function getColumns({
       ),
       width: px(unit * 5),
       render: (_, { name }) => {
-        const currenIimpact =
+        const currentImpact =
           transactionGroupComparisonStatistics?.currentPeriod?.[name]?.impact ??
           0;
-        const previousIimpact =
+        const previousImpact =
           transactionGroupComparisonStatistics?.previousPeriod?.[name]
             ?.impact ?? 0;
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem>
-              <ImpactBar value={currenIimpact} size="m" />
+              <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <ImpactBar value={previousIimpact} size="s" color="subdued" />
+              <ImpactBar value={previousImpact} size="s" color="subdued" />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
