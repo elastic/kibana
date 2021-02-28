@@ -42,10 +42,7 @@ Slack actions have the following properties.
 Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
 
 [[configuring-slack]]
-==== Configuring Slack Accounts
-
-You configure the accounts Slack action type can use to communicate with Slack in the
-connector form.
+==== Configure a Slack account
 
 You need a https://api.slack.com/incoming-webhooks[Slack webhook URL] to 
 configure a Slack account. To create a webhook

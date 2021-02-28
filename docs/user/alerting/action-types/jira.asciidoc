@@ -92,6 +92,6 @@ ID:: The ID of the issue in Jira.
 The `getFields` subaction has no parameters. Provide an empty object `{}`.
 
 [[configuring-jira]]
-==== Configuring and testing Jira
+==== Configure Jira
 
 Jira offers free https://www.atlassian.com/software/jira/free[Instances], which you can use to test incidents.

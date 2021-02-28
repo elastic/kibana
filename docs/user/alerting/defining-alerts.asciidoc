@@ -126,6 +126,6 @@ Here's a list of the available global configuration options and an explanation o
 *NOTE:* As an alternative to both `xpack.actions.proxyRejectUnauthorizedCertificates` and `xpack.actions.rejectUnauthorized`, the OS level environment variable `NODE_EXTRA_CA_CERTS` can be set to point to a file that contains the root CA(s) needed for certificates to be trusted. 
 
 [float]
-=== Managing alerts
+=== Manage alerts
 
 To modify an alert after it was created, including muting or disabling it, use the <<alert-management, alert listing in the Management UI>>.

@@ -78,6 +78,6 @@ The `incidentTypes` subaction has no parameters. Provide an empty object `{}`.
 The `severity` subaction has no parameters. Provide an empty object `{}`.
 
 [[configuring-resilient]]
-==== Configuring and testing IBM Resilient
+==== Configure IBM Resilient
 
 IBM Resilient offers https://www.ibm.com/security/intelligent-orchestration/resilient[Instances], which you can use to test incidents.

@@ -78,6 +78,6 @@ External ID:: The ID of the incident in ServiceNow.
 Fields:: An array of fields. Example: `[priority, category, impact]`.
 
 [[configuring-servicenow]]
-==== Configuring and testing ServiceNow
+==== Configure ServiceNow
 
 ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

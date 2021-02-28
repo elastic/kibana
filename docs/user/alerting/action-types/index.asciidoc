@@ -47,6 +47,10 @@ Index actions have the following properties.
 
 Document::  The document to index in JSON format.
 
+[float]
+[[index-action-example]]
+==== Example
+
 Example of the index document for Index Threshold alert:
 
 [source,text]
