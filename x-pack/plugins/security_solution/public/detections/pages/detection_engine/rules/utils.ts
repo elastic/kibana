@@ -116,3 +116,13 @@ export const getBreadcrumbs = (
 
   return breadcrumb;
 };
+
+export const normalizeThresholdField = (
+  thresholdField: string | string[] | null | undefined
+): string[] => {
+  return Array.isArray(thresholdField)
+    ? thresholdField
+    : isEmpty(thresholdField)
+    ? []
+    : [thresholdField!];
+};

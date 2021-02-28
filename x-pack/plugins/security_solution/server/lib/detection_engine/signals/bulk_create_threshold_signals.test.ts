@@ -9,14 +9,14 @@ import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from './__mocks__/es_results';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
 import { calculateThresholdSignalUuid } from './utils';
-import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
+import { ThresholdNormalized } from '../../../../common/detection_engine/schemas/common/schemas';
 
-describe('transformThresholdResultsToEcs', () => {
+describe('transformThresholdNormalizedResultsToEcs', () => {
   it('should return transformed threshold results', () => {
-    const threshold: Threshold = {
+    const threshold: ThresholdNormalized = {
       field: ['source.ip', 'host.name'],
       value: 1,
-      cardinality_field: 'destination.ip',
+      cardinality_field: ['destination.ip'],
       cardinality_value: 5,
     };
     const startedAt = new Date('2020-12-17T16:27:00Z');

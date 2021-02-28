@@ -214,7 +214,7 @@ describe('findThresholdSignals', () => {
         aggregations: {
           'threshold_0:host.name': {
             terms: {
-              field: ['host.name'],
+              field: 'host.name',
               min_doc_count: 100,
               size: 10000,
             },

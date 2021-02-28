@@ -26,6 +26,7 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { normalizeThresholdField } from './utils';
 import {
   SeverityMapping,
   Type,
@@ -99,13 +100,9 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: rule.threshold?.field
-      ? Array.isArray(rule.threshold.field)
-        ? rule.threshold.field
-        : [rule.threshold.field]
-      : [],
+    field: normalizeThresholdField(rule.threshold?.field),
     value: `${rule.threshold?.value || 100}`,
-    cardinality_field: rule.threshold?.cardinality_field,
+    cardinality_field: rule.threshold?.cardinality_field ?? [],
     cardinality_value: `${rule.threshold?.cardinality_value ?? ''}`,
   },
 });
