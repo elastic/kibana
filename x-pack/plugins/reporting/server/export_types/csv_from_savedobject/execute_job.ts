@@ -35,13 +35,19 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
   return async function runTask(jobId, jobPayload, context, req) {
     const generateCsv = createGenerateCsv(logger);
-    const { panel, visType } = jobPayload;
+    const { panel } = jobPayload;
 
-    logger.debug(`Execute job generating [${visType}] csv`);
+    logger.debug(`Execute job generating saved search CSV`);
 
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobPayload, panel, savedObjectsClient, uiSettingsClient);
+    const job = await getGenerateCsvParams(
+      jobPayload,
+      panel,
+      savedObjectsClient,
+      uiSettingsClient,
+      logger
+    );
 
     const elasticsearch = reporting.getElasticsearchService();
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
