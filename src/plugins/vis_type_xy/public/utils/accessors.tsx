@@ -27,9 +27,7 @@ const getFieldName = (fieldName: string, index?: number) => {
 };
 
 export const isRangeAggType = (type: string | null) =>
-  [BUCKET_TYPES.DATE_RANGE, BUCKET_TYPES.RANGE, BUCKET_TYPES.IP_RANGE].includes(
-    type as BUCKET_TYPES
-  );
+  type === BUCKET_TYPES.DATE_RANGE || type === BUCKET_TYPES.RANGE || type === BUCKET_TYPES.IP_RANGE;
 
 /**
  * Returns accessor function for complex accessor types
