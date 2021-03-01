@@ -13,7 +13,7 @@ import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-import { BootstrapTemplateInterpolator } from './render_template';
+import { BootstrapTemplateInterpolator } from './template_interpolator';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;

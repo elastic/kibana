@@ -14,3 +14,11 @@ jest.doMock('./bootstrap', () => ({
   registerBootstrapRoute: registerBootstrapRouteMock,
   bootstrapRendererFactory: bootstrapRendererFactoryMock,
 }));
+
+export const getSettingValueMock = jest.fn();
+export const getStylesheetPathsMock = jest.fn();
+
+jest.doMock('./render_utils', () => ({
+  getSettingValue: getSettingValueMock,
+  getStylesheetPaths: getStylesheetPathsMock,
+}));

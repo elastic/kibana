@@ -7,6 +7,19 @@
  */
 
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import { PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
+
+export const getSettingValue = <T>(
+  settingName: string,
+  settings: {
+    user?: Record<string, UserProvidedValues<unknown>>;
+    defaults: Readonly<Record<string, PublicUiSettingsParams>>;
+  },
+  convert: (raw: unknown) => T
+): T => {
+  const value = settings.user?.[settingName]?.userValue ?? settings.defaults[settingName].value;
+  return convert(value);
+};
 
 export const getStylesheetPaths = ({
   themeVersion,

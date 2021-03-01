@@ -21,7 +21,7 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getStylesheetPaths } from './bootstrap/get_stylesheet_paths';
+import { getSettingValue, getStylesheetPaths } from './render_utils';
 
 /** @internal */
 export class RenderingService {
@@ -60,12 +60,8 @@ export class RenderingService {
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
 
-        const darkMode = settings.user?.['theme:darkMode']?.userValue
-          ? Boolean(settings.user['theme:darkMode'].userValue)
-          : false;
-        const themeVersion = settings.user?.['theme:version']?.userValue
-          ? String(settings.user['theme:version'].userValue)
-          : 'v7';
+        const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+        const themeVersion = getSettingValue('theme:version', settings, String);
 
         const stylesheetPaths = getStylesheetPaths({
           darkMode,

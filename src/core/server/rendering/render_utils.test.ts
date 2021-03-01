@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getStylesheetPaths } from './get_stylesheet_paths';
+import { getStylesheetPaths } from './render_utils';
 
 describe('getStylesheetPaths', () => {
   describe('when darkMode is `true`', () => {

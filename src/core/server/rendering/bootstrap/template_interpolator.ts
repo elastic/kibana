@@ -10,6 +10,8 @@ import Handlebars, { TemplateDelegate } from 'handlebars';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
+const templateFileName = 'bootstrap.js.template.hbs';
+
 export interface BootstrapTemplateData {
   themeTag: string;
   jsDependencyPaths: string[];
@@ -25,7 +27,7 @@ export class BootstrapTemplateInterpolator {
   }
 
   private async loadTemplate() {
-    const templatePath = resolve(__dirname, 'template.js.hbs');
+    const templatePath = resolve(__dirname, templateFileName);
     const rawTemplate = await readFile(templatePath, { encoding: 'utf-8' });
     this.template = Handlebars.compile(rawTemplate, {
       knownHelpersOnly: true,

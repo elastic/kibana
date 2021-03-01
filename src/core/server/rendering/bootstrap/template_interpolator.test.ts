@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BootstrapTemplateInterpolator } from './render_template';
+import { BootstrapTemplateInterpolator } from './template_interpolator';
 
 function mockParams() {
   return {
