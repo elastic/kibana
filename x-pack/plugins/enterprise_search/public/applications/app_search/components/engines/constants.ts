@@ -41,6 +41,6 @@ export const META_ENGINE_EMPTY_PROMPT_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptDescription',
   {
     defaultMessage:
-      'Meta engines allow you to combine multiple engines into one, searchable engine.',
+      'Meta engines allow you to combine multiple engines into one searchable engine.',
   }
 );
