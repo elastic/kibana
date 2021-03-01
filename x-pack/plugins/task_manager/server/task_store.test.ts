@@ -1688,6 +1688,7 @@ const asApiResponse = (body: Pick<estypes.SearchResponse, 'hits'>) =>
       failed: 0,
       successful: body.hits.hits.length,
       total: 0,
+      skipped: 0,
     },
   });
 

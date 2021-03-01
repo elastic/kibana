@@ -86,9 +86,11 @@ export interface WorkloadAggregation {
 
 // The type of a bucket in the scheduleDensity range aggregation
 type ScheduleDensityResult = AggregationResultOf<
+  // @ts-expect-error
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
+// @ts-expect-error
 type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 
 // Set an upper bound just in case a customer sets a really high refresh rate
@@ -237,7 +239,9 @@ export function padBuckets(
   pollInterval: number,
   scheduleDensity: ScheduleDensityResult
 ): number[] {
+  // @ts-expect-error
   if (scheduleDensity.from && scheduleDensity.to && scheduleDensity.histogram?.buckets?.length) {
+    // @ts-expect-error
     const { histogram, from, to } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
