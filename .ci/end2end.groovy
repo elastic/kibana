@@ -37,26 +37,8 @@ pipeline {
         deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
-
-        // Filter when to run based on the below reasons:
-        //  - On a PRs when:
-        //    - There are changes related to the APM UI project
-        //      - only when the owners of those changes are members of the given GitHub teams
-        //  - On merges to branches when:
-        //    - There are changes related to the APM UI project
-        //  - FORCE parameter is set to true.
-        script {
-          def apm_updated = false
-          dir("${BASE_DIR}"){
-            apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
-          }
-          if (isPR()) {
-            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
-            setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
-          } else {
-            setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)
-          }
-        }
+        analyseBuildReasonForApmUI()
+        analyseBuildReasonForUptimeUI()
       }
     }
     stage('Prepare Kibana') {
@@ -126,4 +108,48 @@ def notifyStatus(String description, String status) {
 
 def notifyTestStatus(String description, String status) {
   withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
+}
+
+/**
+* Filter when to run based on the below reasons:
+*  - On a PRs when:
+*    - There are changes related to the APM UI project
+*      - only when the owners of those changes are members of the given GitHub teams
+*  - On merges to branches when:
+*    - There are changes related to the APM UI project
+*  - FORCE parameter is set to true.
+*/
+def analyseBuildReasonForApmUI() {
+  def apm_updated = false
+  dir("${BASE_DIR}"){
+    apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
+  }
+  if (isPR()) {
+    def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
+    setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
+  } else {
+    setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)
+  }
+}
+
+/**
+* Filter when to run based on the below reasons:
+*  - On a PRs when:
+*    - There are changes related to the Uptime UI project
+*      - only when the owners of those changes are members of the given GitHub teams
+*  - On merges to branches when:
+*    - There are changes related to the Uptime UI project
+*  - FORCE parameter is set to true.
+*/
+def analyseBuildReasonForUptimeUI() {
+  def uptime_updated = false
+  dir("${BASE_DIR}"){
+    uptime_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
+  }
+  if (isPR()) {
+    def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['uptime'])
+    setEnvVar('RUN_UPTIME_E2E', params.FORCE || (uptime_updated && isMember))
+  } else {
+    setEnvVar('RUN_UPTIME_E2E', params.FORCE || uptime_updated)
+  }
 }
