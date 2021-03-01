@@ -11,7 +11,7 @@ import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
 import { addFieldToDSL, getField, hitsToGeoJson } from '../../../../common/elasticsearch_util';
@@ -399,6 +399,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
+        resultsCount: resp.hits.hits.length,
         areResultsTrimmed: resp.hits.total > resp.hits.hits.length,
       },
     };
@@ -589,11 +590,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    const featureCollection: FeatureCollection | null = sourceDataRequest
-      ? (sourceDataRequest.getData() as FeatureCollection)
-      : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
-    if (!featureCollection || !meta) {
+    if (!meta) {
       // no tooltip content needed when there is no feature collection or meta
       return {
         tooltipContent: null,
@@ -631,7 +629,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: featureCollection.features.length },
+          values: { count: meta.resultsCount },
         }),
         areResultsTrimmed: true,
       };
@@ -640,7 +638,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: featureCollection.features.length },
+        values: { count: meta.resultsCount },
       }),
       areResultsTrimmed: false,
     };
