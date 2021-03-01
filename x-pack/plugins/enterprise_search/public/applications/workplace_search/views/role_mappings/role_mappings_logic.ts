@@ -28,7 +28,7 @@ interface RoleMappingServerDetails {
   availableGroups: RoleGroup[];
   elasticsearchRoles: string[];
   multipleAuthProvidersConfig: boolean;
-  roleMapping: WSRoleMapping;
+  roleMapping?: WSRoleMapping;
 }
 
 interface RoleMappingsActions {
