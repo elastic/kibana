@@ -10,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiToolTip,
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -33,12 +32,12 @@ import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
 const StyledEuiModal = styled(EuiModal)`
-  margin: 0 auto;
+${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
   max-width: 95vw;
-  min-height: 95vh;
+  min-height: 90vh;
 
   > .euiModal__flex {
-    max-height: 95vh;
+    max-height: 90vh;
   }
 `;
 
@@ -65,14 +64,6 @@ const StyledEuiModalBody = styled(EuiModalBody)`
   }
 `;
 
-const StyledEuiOverlayMask = styled(EuiOverlayMask)`
-  z-index: 8001;
-  padding-bottom: 0;
-
-  > div {
-    width: 100%;
-  }
-`;
 
 interface StatefulRowRenderersBrowserProps {
   timelineId: string;
@@ -125,7 +116,6 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-        <StyledEuiOverlayMask>
           <StyledEuiModal onClose={hideFieldBrowser}>
             <EuiModalHeader>
               <EuiFlexGroup
@@ -172,7 +162,6 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
               />
             </StyledEuiModalBody>
           </StyledEuiModal>
-        </StyledEuiOverlayMask>
       )}
     </>
   );
