@@ -12,11 +12,12 @@
 import { get, union, sortBy, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
+import { getEntityFieldList } from '@kbn/ml-utils';
+
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
 import {
   isSourceDataChartableForDetector,

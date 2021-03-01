@@ -29,6 +29,7 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PartitionFieldsType, PARTITION_FIELDS } from '@kbn/ml-utils';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -46,8 +47,6 @@ import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
-import { PartitionFieldsType } from '../../../../../common/types/anomalies';
-import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface ViewableDetector {

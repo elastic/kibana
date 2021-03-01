@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -11,10 +12,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
-import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import type { AnomalyRecordDoc } from '../types/anomalies';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './constants/detector_rule';
+import { MULTI_BUCKET_IMPACT } from './constants/multi_bucket_impact';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants/anomalies';
+import type { AnomalyRecordDoc } from './types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;

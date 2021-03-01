@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '@kbn/ml-utils';
 import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';

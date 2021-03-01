@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '@kbn/ml-utils';
 import { ActionGroup } from '../../alerts/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.

@@ -15,6 +15,12 @@ import React, { Component, Fragment } from 'react';
 import { get, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  getMultiBucketImpactLabel,
+  getSeverity,
+  showActualForFunction,
+  showTypicalForFunction,
+} from '@kbn/ml-utils';
 
 import {
   EuiDescriptionList,
@@ -30,12 +36,6 @@ import {
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
 import { EntityCell } from '../entity_cell';
-import {
-  getMultiBucketImpactLabel,
-  getSeverity,
-  showActualForFunction,
-  showTypicalForFunction,
-} from '../../../../common/util/anomaly_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
 import { MAX_CHARS } from './anomalies_table_constants';

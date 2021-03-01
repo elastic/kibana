@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomalyRecordDoc } from './anomalies';
+import { AnomalyRecordDoc } from '@kbn/ml-utils';
 
 /**
  * Base Interface for basic custom URL.

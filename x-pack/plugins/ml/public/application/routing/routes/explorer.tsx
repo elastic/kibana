@@ -10,6 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
+import { JOB_ID } from '@kbn/ml-utils';
 import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
@@ -33,7 +34,6 @@ import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
-import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';

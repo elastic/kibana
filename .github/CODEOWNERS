@@ -123,6 +123,7 @@
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
+/packages/kbn-ml-utils/ @elastic/ml-ui
 
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui

@@ -21,6 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
@@ -30,10 +31,6 @@ import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
 import { toLocaleString } from '../../../util/string_utils';
-import {
-  getFormattedSeverityScore,
-  getSeverityColor,
-} from '../../../../../common/util/anomaly_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {

@@ -3464,6 +3464,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-utils@link:packages/kbn-ml-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:packages/kbn-monaco":
   version "0.0.0"
   uid ""

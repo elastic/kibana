@@ -14,13 +14,13 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isRuleSupported } from '@kbn/ml-utils';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
-import { isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';

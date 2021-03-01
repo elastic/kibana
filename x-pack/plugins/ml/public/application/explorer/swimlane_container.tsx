@@ -30,15 +30,14 @@ import {
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { getFormattedSeverityScore, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '@kbn/ml-utils';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';

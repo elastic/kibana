@@ -9,6 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { EntityFieldType } from '@kbn/ml-utils';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -26,7 +27,6 @@ import {
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
 import { useStorage } from '../../../contexts/ml/use_storage';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';

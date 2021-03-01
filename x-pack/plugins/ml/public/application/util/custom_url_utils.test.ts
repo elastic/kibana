@@ -12,7 +12,7 @@ import {
   isValidTimeRange,
   openCustomUrlWindow,
 } from './custom_url_utils';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import { AnomalyRecordDoc } from '@kbn/ml-utils';
 import {
   CustomUrlAnomalyRecordDoc,
   KibanaUrlConfig,

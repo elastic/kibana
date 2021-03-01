@@ -19,6 +19,7 @@ import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { aggregationTypeTransform } from '@kbn/ml-utils';
 
 import {
   EuiCallOut,
@@ -82,7 +83,6 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
 import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
-import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 

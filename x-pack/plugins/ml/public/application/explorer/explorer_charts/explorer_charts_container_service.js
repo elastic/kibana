@@ -14,11 +14,12 @@
 
 import { get, each, find, sortBy, map, reduce } from 'lodash';
 
+import { getEntityFieldList } from '@kbn/ml-utils';
+
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
 import { getTimefilter } from '../../util/dependency_cache';
 
-import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,

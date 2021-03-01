@@ -8,15 +8,16 @@
 import { sortBy, slice, get } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import {
   AnomaliesTableRecord,
   AnomalyCategorizerStatsDoc,
   AnomalyRecordDoc,
-} from '../../../common/types/anomalies';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
+  JOB_ID,
+  PARTITION_FIELD_VALUE,
+} from '@kbn/ml-utils';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';

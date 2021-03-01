@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { AnomalyResultType } from './anomalies';
-import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import { AnomalyResultType, ANOMALY_RESULT_TYPE } from '@kbn/ml-utils';
 import { AlertTypeParams } from '../../../alerts/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';

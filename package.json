@@ -126,6 +126,7 @@
     "@kbn/interpreter": "link:packages/kbn-interpreter",
     "@kbn/legacy-logging": "link:packages/kbn-legacy-logging",
     "@kbn/logging": "link:packages/kbn-logging",
+    "@kbn/ml-utils": "link:packages/kbn-ml-utils",
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/std": "link:packages/kbn-std",
     "@kbn/tinymath": "link:packages/kbn-tinymath",

@@ -12,12 +12,12 @@ import moment, { Duration } from 'moment';
 import numeral from '@elastic/numeral';
 
 import { i18n } from '@kbn/i18n';
+import { EntityField } from '@kbn/ml-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
-import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';

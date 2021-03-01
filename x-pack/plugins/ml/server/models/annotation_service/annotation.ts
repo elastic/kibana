@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 
+import { PARTITION_FIELDS } from '@kbn/ml-utils';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,

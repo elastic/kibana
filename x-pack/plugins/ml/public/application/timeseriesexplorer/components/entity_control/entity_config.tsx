@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EntityFieldType } from '@kbn/ml-utils';
 import { Entity } from './entity_control';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
 
 interface EntityConfigProps {
   entity: Entity;

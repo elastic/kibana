@@ -9,8 +9,8 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { ANOMALY_THRESHOLD } from '@kbn/ml-utils';
 import { SEVERITY_OPTIONS } from '../../application/components/controls/select_severity/select_severity';
-import { ANOMALY_THRESHOLD } from '../../../common';
 import './styles.scss';
 
 export interface SeveritySelectorProps {

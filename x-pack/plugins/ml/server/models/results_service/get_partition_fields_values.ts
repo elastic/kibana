@@ -6,8 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
-import { PartitionFieldsType } from '../../../common/types/anomalies';
+import { PartitionFieldsType, PARTITION_FIELDS } from '@kbn/ml-utils';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import { Job } from '../../../common/types/anomaly_detection_jobs';

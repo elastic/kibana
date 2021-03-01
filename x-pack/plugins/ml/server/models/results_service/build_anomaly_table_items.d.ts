@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomaliesTableRecord } from '../../../common/types/anomalies';
+import { AnomaliesTableRecord } from '@kbn/ml-utils';
 
 export function buildAnomalyTableItems(
   anomalyRecords: any,

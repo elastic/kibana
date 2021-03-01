@@ -6,12 +6,9 @@
  */
 
 import { createAction } from 'redux-actions';
+import { AnomaliesTableRecord } from '@kbn/ml-utils';
 import { createAsyncAction } from './utils';
-import {
-  MlCapabilitiesResponse,
-  AnomaliesTableRecord,
-  JobExistResult,
-} from '../../../../../plugins/ml/public';
+import { MlCapabilitiesResponse, JobExistResult } from '../../../../../plugins/ml/public';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,

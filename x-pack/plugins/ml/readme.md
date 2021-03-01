@@ -162,12 +162,13 @@ import { MlPluginSetup } from '../../../../ml/server';
 or
 
 ```
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils';
 ```
 
 Functions are shared from the following directories:
 
 ```
+@kbn/ml-utils
 ml/common
 ml/public
 ml/server

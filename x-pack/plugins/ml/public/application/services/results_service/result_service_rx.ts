@@ -15,6 +15,7 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
+import { aggregationTypeTransform } from '@kbn/ml-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -22,7 +23,6 @@ import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 

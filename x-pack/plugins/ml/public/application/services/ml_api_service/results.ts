@@ -6,11 +6,11 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import { JOB_ID, PARTITION_FIELD_VALUE } from '@kbn/ml-utils';
 import { GetStoppedPartitionResult } from '../../../../common/types/results';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { PartitionFieldsConfig } from '../../../../common/types/storage';
 

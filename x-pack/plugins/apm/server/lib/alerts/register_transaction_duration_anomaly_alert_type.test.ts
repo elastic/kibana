@@ -11,7 +11,7 @@ import { toArray, map } from 'rxjs/operators';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { APMConfig } from '../..';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils';
 import { Job, MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
 

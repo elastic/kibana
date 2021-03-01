@@ -10,13 +10,17 @@ import rison from 'rison-node';
 import { ElasticsearchClient } from 'kibana/server';
 import moment from 'moment';
 import { Duration } from 'moment/moment';
+import {
+  getEntityFieldName,
+  getEntityFieldValue,
+  AnomalyResultType,
+  ANOMALY_RESULT_TYPE,
+} from '@kbn/ml-utils';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -28,7 +32,6 @@ import {
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
-import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**

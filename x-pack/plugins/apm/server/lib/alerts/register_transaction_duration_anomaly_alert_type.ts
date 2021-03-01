@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { isEmpty } from 'lodash';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils';
 import { getSeverity } from '../../../common/anomaly_detection';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
   AlertType,

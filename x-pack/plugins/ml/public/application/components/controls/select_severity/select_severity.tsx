@@ -11,12 +11,11 @@
 import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getSeverityColor, ANOMALY_THRESHOLD } from '@kbn/ml-utils';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { usePageUrlState } from '../../../util/url_state';
-import { ANOMALY_THRESHOLD } from '../../../../../common';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

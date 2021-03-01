@@ -11,6 +11,7 @@ import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 
+import { AnomalyRecordDoc } from '@kbn/ml-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
@@ -18,7 +19,6 @@ import {
   KibanaUrlConfig,
   CustomUrlAnomalyRecordDoc,
 } from '../../../common/types/custom_urls';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.

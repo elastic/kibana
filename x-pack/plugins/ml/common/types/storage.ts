@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityFieldType } from './anomalies';
+import { EntityFieldType } from '@kbn/ml-utils';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
