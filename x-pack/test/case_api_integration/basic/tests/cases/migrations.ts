@@ -58,7 +58,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     // tests upgrading a 7.11.1 saved object to the latest version
     describe('7.11.1 -> latest stack version', () => {
-      const caseID = '2ea28c10-7855-11eb-9ca6-83ec5acb735f';
       before(async () => {
         await esArchiver.load('cases/migrations/7.11.1');
       });
@@ -68,6 +67,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('adds rule info to only alert comments for 7.12', async () => {
+        const caseID = '2ea28c10-7855-11eb-9ca6-83ec5acb735f';
         // user comment
         let { body } = await supertest
           .get(`${CASES_URL}/${caseID}/comments/34a20a00-7855-11eb-9ca6-83ec5acb735f`)
@@ -87,20 +87,20 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       it('adds category and subcategory to the ITSM connector', async () => {
         const { body } = await supertest
-          .get(`${CASES_URL}/e1900ac0-017f-11eb-93f8-d161651bf509`)
+          .get(`${CASES_URL}/6f973440-7abd-11eb-9ca6-83ec5acb735f`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
         expect(body).key('connector');
         expect(body.connector).to.eql({
-          id: 'connector-1',
+          id: '444ebab0-7abd-11eb-9ca6-83ec5acb735f',
           name: 'SN',
           type: '.servicenow',
           fields: {
-            impact: '1',
-            severity: '1',
-            urgency: '1',
+            impact: '2',
+            severity: '2',
+            urgency: '2',
             category: null,
             subcategory: null,
           },
