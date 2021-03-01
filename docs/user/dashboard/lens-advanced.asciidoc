@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Disclaimer - shameless copy from the first tutorial! Tutorial: Create a dashboard of panels with time series ecommerce data
+== Time series tutorial: Create a dashboard of panels with ecommerce data
 
 You have data coming from tracking your eCommerce, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
 create the visualization panels that best display the data.
@@ -73,7 +73,7 @@ image::images/lens_advanced_1_2.png[Orders per day]
 
 . Open *Lens*, then set the <<set-time-filter,time filter>> to *Last 30 days*.
 
-. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
+. From the *Chart Type* dropdown, select *Line*.
 
 . Configure cumulative sum of orders.
 
@@ -89,7 +89,9 @@ image::images/lens_advanced_1_2.png[Orders per day]
 
 . From the editor, click the *Drop a field or click to add* field for *Break down by*. 
 
-. From *Select a function*, click *Filters* to filter the data by weekend days.
+. Filter results to display cumulative sum for weekend days only.
+
+.. From *Select a function*, click *Filters* to filter the data by weekend days.
 
 .. Click *All records*.
 
@@ -111,13 +113,15 @@ image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders mad
 [[add-a-data-layer]]
 === View the key percentiles of prices of products over time
 
-To view the distribution of the prices of products that are being sold, create a percentile chart.
+To view the distribution of the prices of sold products over time, create a percentile chart.
 
 . Open *Lens*.
 
-. From the new layer editor, click the *Chart type* dropdown, then click the area chart.
+. From the *Chart Type* dropdown, select *Area*.
 
 . From the *Available fields* list, drag and drop *products.price* to *Vertical axis* in the editor.
+
+. Create first percentile.
 
 .. Click *Median of products.price*.
 
@@ -125,17 +129,19 @@ To view the distribution of the prices of products that are being sold, create a
 
 .. Change the display name to *95th*
 
-.. Copy the percentile metric by dragging it to *Drop a field or click to add*.
+. Create another percentile by duplication.
 
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
+.. Drag the item `95th` to *Drop a field or click to add* to duplicate it.
 
-.. Click on the newly created item to open a configuration panel and type `90` in the *percentile* setting.
+.. Click on the duplicated item to open a configuration panel and type `90` in the *percentile* setting.
 
 .. Change the display name to *90th*
 
 .. Repeat copying and modifying the item for remaining percentiles: `50` and `10`.
+
++
+[role="screenshot"]
+image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
 
 . For the left axis, change the name to *Percentiles for product prices*
 
@@ -153,7 +159,7 @@ This data can be helpful to analyze prices in each category of the offered produ
 
 . Open *Lens*.
 
-. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
+. From the *Chart Type* dropdown, select *Line*.
 
 .. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
 
@@ -186,7 +192,7 @@ This data can be helpful to analyze prices in each category of the offered produ
 [role="screenshot"]
 image::images/lens_advanced_4_1.png[Median prices chart for different categories]
 
-To focus more on the general trends and not get distracted by the peaks in the data, smooth the chart by applying moving average on top of the metric.
+To focus on the general trends rather than on the peaks in the data, smooth the chart by applying moving average on top of the metric.
 
 . From the editor, click the *Median of products.price*.
 
@@ -201,7 +207,9 @@ To focus more on the general trends and not get distracted by the peaks in the d
 [role="screenshot"]
 image::images/lens_advanced_4_2.png[Moving average prices chart for different categories]
 
-===Result
+=== Result
+
+Your dashboard provides you with an timeseries data from your ecommerce.
 
 [role="screenshot"]
 image::images/lens_advanced_result.png[Dashboard view]
