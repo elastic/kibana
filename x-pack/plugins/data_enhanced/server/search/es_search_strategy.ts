@@ -65,8 +65,9 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
             ...request.params,
           };
-      const promise = id ? client.get({ ...params, id }) : client.submit(params);
+      const promise = id ? client.get({ id, body: params }) : client.submit({ body: params });
       const { body } = await shimAbortSignal(promise, options.abortSignal);
+      // @ts-expect-error AsyncSearchGetResponse currently missing all properties
       const response = shimHitsTotal(body.response, options);
       // @ts-expect-error AsyncSearchGetResponse currently missing all properties
       return toAsyncKibanaSearchResponse({ ...body, response });
