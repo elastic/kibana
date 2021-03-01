@@ -7,6 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -21,7 +22,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 const ID = 'firstLastSeenHostQuery';
 
@@ -47,6 +47,7 @@ export const useFirstLastSeenHost = ({
 }: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [
     firstLastSeenHostRequest,
@@ -71,12 +72,10 @@ export const useFirstLastSeenHost = ({
 
   const firstLastSeenHostSearch = useCallback(
     (request: HostFirstLastSeenRequestOptions) => {
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostFirstLastSeenRequestOptions, HostFirstLastSeenStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -84,45 +83,38 @@ export const useFirstLastSeenHost = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setFirstLastSeenHostResponse((prevResponse) => ({
-                    ...prevResponse,
-                    errorMessage: null,
-                    firstSeen: response.firstSeen,
-                    lastSeen: response.lastSeen,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setFirstLastSeenHostResponse((prevResponse) => ({
+                  ...prevResponse,
+                  errorMessage: null,
+                  firstSeen: response.firstSeen,
+                  lastSeen: response.lastSeen,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+                setLoading(false);
                 // TODO: Make response error status clearer
                 notifications.toasts.addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
-                searchSubscription$.unsubscribe();
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                setFirstLastSeenHostResponse((prevResponse) => ({
-                  ...prevResponse,
-                  errorMessage: msg,
-                }));
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_FIRST_LAST_SEEN_HOST,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              setFirstLastSeenHostResponse((prevResponse) => ({
+                ...prevResponse,
+                errorMessage: msg,
+              }));
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_FIRST_LAST_SEEN_HOST,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -144,6 +136,10 @@ export const useFirstLastSeenHost = ({
 
   useEffect(() => {
     firstLastSeenHostSearch(firstLastSeenHostRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [firstLastSeenHostRequest, firstLastSeenHostSearch]);
 
   return [loading, firstLastSeenHostResponse];

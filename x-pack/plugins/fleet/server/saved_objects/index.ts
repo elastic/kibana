@@ -124,6 +124,8 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
+  // TODO: Remove this saved object type. Core will drop any saved objects of
+  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_EVENT_SAVED_OBJECT_TYPE,
     hidden: false,

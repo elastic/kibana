@@ -11,7 +11,7 @@ import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 
 import { IField } from '../fields/field';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
