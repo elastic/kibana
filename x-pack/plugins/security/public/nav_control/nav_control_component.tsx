@@ -43,7 +43,6 @@ interface State {
   isOpen: boolean;
   authenticatedUser: AuthenticatedUser | null;
   userMenuLinks: UserMenuLink[];
-  profileOverridden: boolean;
 }
 
 export class SecurityNavControl extends Component<Props, State> {
@@ -56,7 +55,6 @@ export class SecurityNavControl extends Component<Props, State> {
       isOpen: false,
       authenticatedUser: null,
       userMenuLinks: [],
-      profileOverridden: false,
     };
 
     props.user.then((authenticatedUser) => {
