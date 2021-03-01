@@ -13,11 +13,12 @@ import { coreMock } from 'src/core/public/mocks';
 
 import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
 import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
-import { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
-import { PrivilegeSummaryTable, PrivilegeSummaryTableProps } from './privilege_summary_table';
+import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
+import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpServiceSetup, Logger } from 'src/core/server';
+import type { HttpServiceSetup, Logger } from 'src/core/server';
 
-import { AuthorizationServiceSetup } from './authorization_service';
+import type { AuthorizationServiceSetup } from './authorization_service';
 
 export function initAPIAuthorization(
   http: HttpServiceSetup,

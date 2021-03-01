@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';

@@ -10,8 +10,8 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 
-import { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
-import { Role } from '../../../../../../../common/model';
+import type { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
+import type { Role } from '../../../../../../../common/model';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';

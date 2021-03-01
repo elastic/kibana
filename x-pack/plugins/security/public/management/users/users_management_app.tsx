@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import React, { FunctionComponent } from 'react';
+import type { History } from 'history';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, StartServicesAccessor } from 'src/core/public';
-import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import type { CoreStart, StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { AuthenticationServiceSetup } from '../../authentication';
-import {
-  Breadcrumb,
-  BreadcrumbsChangeHandler,
-  BreadcrumbsProvider,
-  getDocTitle,
-} from '../../components/breadcrumb';
+import type { AuthenticationServiceSetup } from '../../authentication';
+import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
+import { Breadcrumb, BreadcrumbsProvider, getDocTitle } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
-import { PluginStartDependencies } from '../../plugin';
+import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {

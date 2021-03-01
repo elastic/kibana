@@ -6,9 +6,10 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React, { FunctionComponent, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback } from 'react';
 
-import { CoreStart } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 

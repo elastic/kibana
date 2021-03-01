@@ -23,10 +23,11 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from 'src/core/public';
 
-import { RoleMapping } from '../../../../../common/model';
-import { generateRulesFromRaw, Rule } from '../../model';
+import type { RoleMapping } from '../../../../../common/model';
+import type { Rule } from '../../model';
+import { generateRulesFromRaw } from '../../model';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { validateRoleMappingRules } from '../services/role_mapping_validation';
 import { JSONRuleEditor } from './json_rule_editor';

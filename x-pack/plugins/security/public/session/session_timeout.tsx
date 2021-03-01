@@ -7,10 +7,10 @@
 
 import { BroadcastChannel } from 'broadcast-channel';
 
-import { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
+import type { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
 
-import { SessionInfo } from '../../common/types';
-import { ISessionExpired } from './session_expired';
+import type { SessionInfo } from '../../common/types';
+import type { ISessionExpired } from './session_expired';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,7 +18,6 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,20 +26,20 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ScopedHistory } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart, ScopedHistory } from 'src/core/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role } from '../../../../common/model';
 import {
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
-  Role,
 } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
-import { RolesAPIClient } from '../roles_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
 

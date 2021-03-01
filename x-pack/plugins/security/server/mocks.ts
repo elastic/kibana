@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { ApiResponse } from '@elastic/elasticsearch';
 
 import { licenseMock } from '../common/licensing/index.mock';
 import { auditServiceMock } from './audit/index.mock';

@@ -9,14 +9,15 @@ import { deepFreeze } from '@kbn/std';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { GetAllSpacesPurpose, Space } from '../../../spaces/server';
+import type { GetAllSpacesPurpose, Space } from '../../../spaces/server';
 import { spacesClientMock } from '../../../spaces/server/mocks';
-import { AuditEvent, AuditLogger, EventOutcome, SpaceAuditAction } from '../audit';
+import type { AuditEvent, AuditLogger } from '../audit';
+import { EventOutcome, SpaceAuditAction } from '../audit';
 import { auditServiceMock } from '../audit/index.mock';
-import { AuthorizationServiceSetup } from '../authorization';
+import type { AuthorizationServiceSetup } from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
-import { CheckPrivilegesResponse } from '../authorization/types';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import type { CheckPrivilegesResponse } from '../authorization/types';
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Opts {

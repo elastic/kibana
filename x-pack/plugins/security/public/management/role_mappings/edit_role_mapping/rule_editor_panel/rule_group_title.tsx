@@ -17,7 +17,8 @@ import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule, RuleGroup } from '../../model';
+import type { RuleGroup } from '../../model';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 interface Props {
   rule: RuleGroup;

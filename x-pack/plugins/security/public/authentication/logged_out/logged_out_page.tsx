@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, IBasePath } from 'src/core/public';
+import type { CoreStart, IBasePath } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';

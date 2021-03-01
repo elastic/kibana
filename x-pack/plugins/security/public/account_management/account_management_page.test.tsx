@@ -11,7 +11,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userAPIClientMock } from '../management/users/index.mock';
 import { securityMock } from '../mocks';

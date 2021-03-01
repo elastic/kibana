@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { SecurityLicense } from '../../../common/licensing';
+import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { securityMock } from '../../mocks';
 import { APIKeys } from './api_keys';

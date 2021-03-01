@@ -22,7 +22,7 @@ import {
 
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { AuthorizationService } from './authorization_service';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';

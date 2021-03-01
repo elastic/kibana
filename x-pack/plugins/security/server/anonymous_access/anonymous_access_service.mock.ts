@@ -7,7 +7,7 @@
 
 import { capabilitiesServiceMock } from 'src/core/server/mocks';
 
-import { AnonymousAccessServiceStart } from './anonymous_access_service';
+import type { AnonymousAccessServiceStart } from './anonymous_access_service';
 
 export const anonymousAccessServiceMock = {
   createStart: (): jest.Mocked<AnonymousAccessServiceStart> => ({

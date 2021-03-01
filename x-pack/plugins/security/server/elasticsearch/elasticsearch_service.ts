@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
 
-import { Logger, StatusServiceSetup } from 'src/core/server';
+import type { Logger, StatusServiceSetup } from 'src/core/server';
 
 import { ServiceStatusLevels } from '../../../../../src/core/server';
-import { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common/licensing';
 
 export interface ElasticsearchServiceSetupParams {
   readonly status: StatusServiceSetup;

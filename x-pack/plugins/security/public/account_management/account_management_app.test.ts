@@ -7,7 +7,8 @@
 
 jest.mock('./account_management_page');
 
-import { AppMount, AppNavLinkStatus } from 'src/core/public';
+import type { AppMount } from 'src/core/public';
+import { AppNavLinkStatus } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { UserAPIClient } from '../management';

@@ -7,13 +7,13 @@
 
 import { uniq } from 'lodash';
 
-import {
+import type {
   KibanaFeature,
   PluginSetupContract as FeaturesPluginSetup,
 } from '../../../../features/server';
-import { SecurityLicense } from '../../../common/licensing';
-import { RawKibanaPrivileges } from '../../../common/model';
-import { Actions } from '../actions';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { RawKibanaPrivileges } from '../../../common/model';
+import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import {
   featurePrivilegeIterator,

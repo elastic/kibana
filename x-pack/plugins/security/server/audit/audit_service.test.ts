@@ -14,10 +14,12 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import { SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { ConfigSchema, ConfigType } from '../config';
-import { AuditEvent, EventCategory, EventOutcome, EventType } from './audit_events';
+import type { ConfigType } from '../config';
+import { ConfigSchema } from '../config';
+import type { AuditEvent } from './audit_events';
+import { EventCategory, EventOutcome, EventType } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,

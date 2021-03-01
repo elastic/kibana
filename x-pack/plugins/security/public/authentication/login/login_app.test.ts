@@ -7,7 +7,7 @@
 
 jest.mock('./login_page');
 
-import { AppMount } from 'src/core/public';
+import type { AppMount } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { loginApp } from './login_app';

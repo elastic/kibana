@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
+import type { KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
 
-import { SecurityRequestHandlerContext } from '../types';
+import type { SecurityRequestHandlerContext } from '../types';
 
 export const createLicensedRouteHandler = <
   P,

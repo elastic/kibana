@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { Session, SessionValue } from './session';
+import type { Session, SessionValue } from './session';
 import { sessionIndexMock } from './session_index.mock';
 
 export const sessionMock = {

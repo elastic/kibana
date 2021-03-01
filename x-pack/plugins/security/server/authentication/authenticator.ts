@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
@@ -15,26 +15,26 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import { SecurityLicense } from '../../common/licensing';
-import {
-  AuthenticatedUser,
-  AuthenticationProvider,
-  shouldProviderUseLoginForm,
-} from '../../common/model';
-import { AuditServiceSetup, SecurityAuditLogger, userLoginEvent } from '../audit';
-import { ConfigType } from '../config';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { userLoginEvent } from '../audit';
+import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { Session, SessionValue } from '../session_management';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session, SessionValue } from '../session_management';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
 import { HTTPAuthorizationHeader } from './http_authentication';
-import {
-  AnonymousAuthenticationProvider,
+import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
   HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,

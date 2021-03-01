@@ -8,7 +8,7 @@
 import constate from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 
-import { AuthenticationServiceSetup } from '../authentication';
+import type { AuthenticationServiceSetup } from '../authentication';
 
 export interface AuthenticationProviderProps {
   authc: AuthenticationServiceSetup;

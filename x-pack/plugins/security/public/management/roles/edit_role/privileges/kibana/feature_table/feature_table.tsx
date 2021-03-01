@@ -7,9 +7,9 @@
 
 import './feature_table.scss';
 
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
@@ -21,17 +21,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AppCategory } from 'src/core/public';
+import type { AppCategory } from 'src/core/public';
 
-import { Role } from '../../../../../../../common/model';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTableCell } from '../feature_table_cell';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 

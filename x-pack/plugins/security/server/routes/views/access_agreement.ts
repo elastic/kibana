@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../';
-import { ConfigType } from '../../config';
+import type { RouteDefinitionParams } from '../';
+import type { ConfigType } from '../../config';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**

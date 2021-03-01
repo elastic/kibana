@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../../features/common';
-import { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
+import type { KibanaFeature } from '../../../../../features/common';
+import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';

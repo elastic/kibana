@@ -7,8 +7,8 @@
 
 import { of } from 'rxjs';
 
-import { SecurityLicenseFeatures } from './license_features';
-import { SecurityLicense } from './license_service';
+import type { SecurityLicenseFeatures } from './license_features';
+import type { SecurityLicense } from './license_service';
 
 export const licenseMock = {
   create: (features?: Partial<SecurityLicenseFeatures>): jest.Mocked<SecurityLicense> => ({

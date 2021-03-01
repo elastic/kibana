@@ -6,10 +6,10 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { HttpResources, HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
+import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
 import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import { SecurityRequestHandlerContext } from '../../types';
+import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCaptureURLRoutes } from './capture_url';
 

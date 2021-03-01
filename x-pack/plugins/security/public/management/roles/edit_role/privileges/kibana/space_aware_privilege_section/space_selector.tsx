@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiHealth, EuiHighlight } from '@elastic/eui';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { getSpaceColor, Space } from '../../../../../../../../spaces/public';
+import type { Space } from '../../../../../../../../spaces/public';
+import { getSpaceColor } from '../../../../../../../../spaces/public';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {

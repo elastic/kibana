@@ -9,11 +9,11 @@ import { EuiConfirmModal } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
 
-import { ApiKeyToInvalidate } from '../../../../../common/model';
-import { APIKeysAPIClient } from '../../api_keys_api_client';
+import type { ApiKeyToInvalidate } from '../../../../../common/model';
+import type { APIKeysAPIClient } from '../../api_keys_api_client';
 
 interface Props {
   isAdmin: boolean;

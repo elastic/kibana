@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+import type { Crypto } from '@elastic/node-crypto';
+import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { KibanaRequest, Logger } from 'src/core/server';
 
-import { AuthenticationProvider } from '../../common/model';
-import { ConfigType } from '../config';
-import { SessionCookie } from './session_cookie';
-import { SessionIndex, SessionIndexValue } from './session_index';
+import type { AuthenticationProvider } from '../../common/model';
+import type { ConfigType } from '../config';
+import type { SessionCookie } from './session_cookie';
+import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
  * The shape of the value that represents user's session information.

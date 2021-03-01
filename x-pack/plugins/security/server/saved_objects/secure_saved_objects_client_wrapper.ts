@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -25,16 +25,11 @@ import {
 
 import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import {
-  AuditLogger,
-  EventOutcome,
-  SavedObjectAction,
-  savedObjectEvent,
-  SecurityAuditLogger,
-} from '../audit';
-import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { CheckPrivilegesResponse } from '../authorization/types';
-import { SpacesService } from '../plugin';
+import type { AuditLogger, SecurityAuditLogger } from '../audit';
+import { EventOutcome, SavedObjectAction, savedObjectEvent } from '../audit';
+import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import type { CheckPrivilegesResponse } from '../authorization/types';
+import type { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;

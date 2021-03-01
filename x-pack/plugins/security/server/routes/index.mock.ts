@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { httpResourcesMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -13,7 +13,7 @@ import { authenticationServiceMock } from '../authentication/authentication_serv
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { sessionMock } from '../session_management/session.mock';
-import { RouteDefinitionParams } from './';
+import type { RouteDefinitionParams } from './';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) =>

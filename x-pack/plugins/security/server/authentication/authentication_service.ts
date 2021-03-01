@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   HttpServiceSetup,
   HttpServiceStart,
   IClusterClient,
@@ -15,17 +15,18 @@ import {
   LoggerFactory,
 } from 'src/core/server';
 
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticatedUser } from '../../common/model';
-import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { ConfigType } from '../config';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser } from '../../common/model';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { Session } from '../session_management';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session } from '../session_management';
 import { APIKeys } from './api_keys';
-import { AuthenticationResult } from './authentication_result';
-import { Authenticator, ProviderLoginAttempt } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
+import type { AuthenticationResult } from './authentication_result';
+import type { ProviderLoginAttempt } from './authenticator';
+import { Authenticator } from './authenticator';
+import type { DeauthenticationResult } from './deauthentication_result';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'registerAuth'>;

@@ -8,14 +8,15 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { KibanaRequest, ScopeableRequest } from 'src/core/server';
+import type { KibanaRequest, ScopeableRequest } from 'src/core/server';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { KerberosAuthenticationProvider } from './kerberos';
 
 function expectAuthenticateCall(

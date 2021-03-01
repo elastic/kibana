@@ -13,13 +13,13 @@ import '@kbn/test/target/jest/utils/stub_web_worker';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { Role } from '../../../../common/model';
+import type { Role } from '../../../../common/model';
 import { RoleComboBox } from '../../role_combo_box';
-import { RolesAPIClient } from '../../roles';
+import type { RolesAPIClient } from '../../roles';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';

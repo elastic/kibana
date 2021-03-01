@@ -6,14 +6,20 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Headers, HttpServiceSetup, IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  Headers,
+  HttpServiceSetup,
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+} from 'src/core/server';
 
-import { AuthenticatedUser } from '../../../common/model';
-import { AuthenticationInfo } from '../../elasticsearch';
+import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
-import { Tokens } from '../tokens';
+import type { DeauthenticationResult } from '../deauthentication_result';
+import type { Tokens } from '../tokens';
 
 /**
  * Represents available provider options.

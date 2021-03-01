@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Role } from '../../common/model';
 import {
   copyRole,
   getExtendedRoleDeprecationNotice,
@@ -13,7 +14,6 @@ import {
   isRoleReadOnly,
   isRoleReserved,
   prepareRoleClone,
-  Role,
 } from '../../common/model';
 
 describe('role', () => {

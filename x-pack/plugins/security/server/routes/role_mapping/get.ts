@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDefinitionParams } from '../';
-import { RoleMapping } from '../../../common/model';
+import type { RouteDefinitionParams } from '../';
+import type { RoleMapping } from '../../../common/model';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

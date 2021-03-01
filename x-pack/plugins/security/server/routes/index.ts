@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResources, IBasePath, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 
-import { KibanaFeature } from '../../../features/server';
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticationServiceStart } from '../authentication';
-import { AuthorizationServiceSetup } from '../authorization';
-import { ConfigType } from '../config';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { Session } from '../session_management';
-import { SecurityRouter } from '../types';
+import type { KibanaFeature } from '../../../features/server';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceStart } from '../authentication';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { ConfigType } from '../config';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session } from '../session_management';
+import type { SecurityRouter } from '../types';
 import { defineApiKeysRoutes } from './api_keys';
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';

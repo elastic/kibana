@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDefinitionParams } from '../';
-import { ApiKey } from '../../../common/model';
+import type { RouteDefinitionParams } from '../';
+import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 

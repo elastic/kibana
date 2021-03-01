@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { DetailedPeerCertificate } from 'tls';
+import type { DetailedPeerCertificate } from 'tls';
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
-import { AuthenticationInfo } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';

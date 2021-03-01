@@ -6,11 +6,11 @@
  */
 
 import { EuiTableRow } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test/jest';
 
-import { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { FeatureTableCell } from '../../feature_table_cell';
 import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 

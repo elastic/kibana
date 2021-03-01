@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { SessionCookie, SessionCookieValue } from './session_cookie';
+import type { SessionCookie, SessionCookieValue } from './session_cookie';
 
 export const sessionCookieMock = {
   create: (): jest.Mocked<PublicMethodsOf<SessionCookie>> => ({

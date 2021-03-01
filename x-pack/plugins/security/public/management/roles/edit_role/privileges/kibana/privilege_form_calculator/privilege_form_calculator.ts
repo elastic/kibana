@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Role } from '../../../../../../../common/model';
-import { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 /**

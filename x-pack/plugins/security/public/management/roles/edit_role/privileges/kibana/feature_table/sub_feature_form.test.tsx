@@ -12,7 +12,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { KibanaFeature } from '../../../../../../../../features/public';
-import { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { SecuredSubFeature } from '../../../../model';

@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { ScopeableRequest } from 'src/core/server';
+import type { ScopeableRequest } from 'src/core/server';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';

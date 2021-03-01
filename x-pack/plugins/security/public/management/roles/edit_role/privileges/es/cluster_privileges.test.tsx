@@ -10,7 +10,7 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
-import { Role } from '../../../../../../common/model';
+import type { Role } from '../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
 
 test('it renders without crashing', () => {

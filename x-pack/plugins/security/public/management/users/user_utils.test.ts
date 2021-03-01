@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { User } from '../../../common/model';
+import type { User } from '../../../common/model';
 import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from './user_utils';
 
 describe('#isUserReserved', () => {

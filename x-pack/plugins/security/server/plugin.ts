@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { combineLatest, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { TypeOf } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -18,29 +19,37 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import {
+import type {
   PluginSetupContract as FeaturesSetupContract,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { SecurityLicense, SecurityLicenseService } from '../common/licensing';
-import { AuthenticatedUser } from '../common/model';
-import { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous_access';
-import { AuditService, AuditServiceSetup, SecurityAuditLogger } from './audit';
-import { AuthenticationService, AuthenticationServiceStart } from './authentication';
-import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
-import { ConfigSchema, ConfigType, createConfig } from './config';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { SecurityLicense } from '../common/licensing';
+import { SecurityLicenseService } from '../common/licensing';
+import type { AuthenticatedUser } from '../common/model';
+import type { AnonymousAccessServiceStart } from './anonymous_access';
+import { AnonymousAccessService } from './anonymous_access';
+import type { AuditServiceSetup } from './audit';
+import { AuditService, SecurityAuditLogger } from './audit';
+import type { AuthenticationServiceStart } from './authentication';
+import { AuthenticationService } from './authentication';
+import type { AuthorizationServiceSetup } from './authorization';
+import { AuthorizationService } from './authorization';
+import type { ConfigSchema, ConfigType } from './config';
+import { createConfig } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
+import type { SecurityFeatureUsageServiceStart } from './feature_usage';
+import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
-import { Session, SessionManagementService } from './session_management';
+import type { Session } from './session_management';
+import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 

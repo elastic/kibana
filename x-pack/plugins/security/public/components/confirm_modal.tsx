@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiButtonProps, EuiModalProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -16,9 +16,9 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalProps,
 } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 

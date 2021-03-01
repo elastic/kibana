@@ -16,13 +16,13 @@ import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { LoginState } from '../../../common/login_state';
+import type { LoginState } from '../../../common/login_state';
 import { DisabledLoginForm, LoginForm } from './components';
 
 interface Props {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
+import type { Request } from '@hapi/hapi';
 
-import {
+import type {
   Capabilities,
   CapabilitiesStart,
   IBasePath,
@@ -17,10 +17,11 @@ import {
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
-import { SpacesServiceStart } from '../../../spaces/server';
+import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import { AnonymousAuthenticationProvider, HTTPAuthorizationHeader } from '../authentication';
-import { ConfigType } from '../config';
+import type { HTTPAuthorizationHeader } from '../authentication';
+import { AnonymousAuthenticationProvider } from '../authentication';
+import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export interface AnonymousAccessServiceStart {

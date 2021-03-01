@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Rule } from './rule';
+import type { Rule } from './rule';
 import { RuleGroup } from './rule_group';
 
 /**

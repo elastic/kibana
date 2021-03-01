@@ -7,7 +7,7 @@
 
 jest.mock('./logged_out_page');
 
-import { AppMount } from 'src/core/public';
+import type { AppMount } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { loggedOutApp } from './logged_out_app';

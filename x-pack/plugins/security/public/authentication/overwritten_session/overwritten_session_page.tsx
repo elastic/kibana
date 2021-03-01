@@ -10,10 +10,10 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, IBasePath } from 'src/core/public';
+import type { CoreStart, IBasePath } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';
-import { AuthenticationServiceSetup } from '../authentication_service';
+import type { AuthenticationServiceSetup } from '../authentication_service';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {

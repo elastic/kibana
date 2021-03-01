@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SecuredFeature } from '../../../../model';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import type { SecuredFeature } from '../../../../model';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { SubFeatureForm } from './sub_feature_form';
 
 interface Props {

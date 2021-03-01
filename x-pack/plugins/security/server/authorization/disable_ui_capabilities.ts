@@ -7,18 +7,18 @@
 
 import { flatten, isObject, mapValues } from 'lodash';
 
-import { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
-import { KibanaRequest, Logger } from 'src/core/server';
-import { Capabilities as UICapabilities } from 'src/core/types';
+import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
+import type { KibanaRequest, Logger } from 'src/core/server';
+import type { Capabilities as UICapabilities } from 'src/core/types';
 
-import {
+import type {
   ElasticsearchFeature,
   FeatureElasticsearchPrivileges,
   KibanaFeature,
 } from '../../../features/server';
-import { AuthenticatedUser } from '../../common/model';
-import { AuthorizationServiceSetup } from './authorization_service';
-import { CheckPrivilegesResponse } from './types';
+import type { AuthenticatedUser } from '../../common/model';
+import type { AuthorizationServiceSetup } from './authorization_service';
+import type { CheckPrivilegesResponse } from './types';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,

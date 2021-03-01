@@ -6,14 +6,15 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestHandler, RouteConfig } from 'src/core/server';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { AuthenticationResult, AuthenticationServiceStart, SAMLLogin } from '../../authentication';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
-import { SecurityRouter } from '../../types';
+import type { SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineSAMLRoutes } from './saml';
 

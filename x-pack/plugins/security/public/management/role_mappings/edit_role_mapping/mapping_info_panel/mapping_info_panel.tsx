@@ -17,15 +17,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DocLinksStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart } from 'src/core/public';
 
-import { RoleMapping } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
+import type { RoleMapping } from '../../../../../common/model';
+import type { RolesAPIClient } from '../../../roles';
 import { RoleSelector } from '../role_selector';
 import {
   validateRoleMappingName,

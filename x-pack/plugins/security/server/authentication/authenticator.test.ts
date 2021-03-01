@@ -12,7 +12,7 @@ jest.mock('./providers/http');
 
 import Boom from '@hapi/boom';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -20,18 +20,19 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import { SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { SessionValue } from '../session_management';
+import type { SessionValue } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import { AuthenticationResult } from './authentication_result';
-import { Authenticator, AuthenticatorOptions } from './authenticator';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
-import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
+import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
 function getMockOptions({
   providers,

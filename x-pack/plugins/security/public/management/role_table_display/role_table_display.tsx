@@ -8,9 +8,10 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from 'src/core/public';
 
-import { getExtendedRoleDeprecationNotice, isRoleDeprecated, Role } from '../../../common/model';
+import type { Role } from '../../../common/model';
+import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
   role: Role | string;

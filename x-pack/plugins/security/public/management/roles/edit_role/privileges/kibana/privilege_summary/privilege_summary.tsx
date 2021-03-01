@@ -18,11 +18,11 @@ import {
 import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { Space } from '../../../../../../../../spaces/public';
-import { Role } from '../../../../../../../common/model';
-import { KibanaPrivileges } from '../../../../model';
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 interface Props {

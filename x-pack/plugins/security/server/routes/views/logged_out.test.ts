@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
 import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import { Session } from '../../session_management';
+import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineLoggedOutRoutes } from './logged_out';

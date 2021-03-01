@@ -7,9 +7,9 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
+import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { authorizationModeFactory } from './mode';
 
 describe(`#useRbacForRequest`, () => {

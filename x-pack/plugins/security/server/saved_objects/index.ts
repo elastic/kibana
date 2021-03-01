@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, LegacyRequest } from 'src/core/server';
+import type { CoreSetup, LegacyRequest } from 'src/core/server';
 
 import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
-import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { AuthorizationServiceSetup } from '../authorization';
-import { SpacesService } from '../plugin';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { SpacesService } from '../plugin';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {

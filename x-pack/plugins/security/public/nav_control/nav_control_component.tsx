@@ -7,24 +7,23 @@
 
 import './nav_control_component.scss';
 
+import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiText,
-  IconType,
 } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model';
 
 export interface UserMenuLink {
   label: string;

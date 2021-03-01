@@ -6,18 +6,18 @@
  */
 
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 import { KibanaFeature } from '../../../../../features/public';
-import { Space } from '../../../../../spaces/public';
+import type { Space } from '../../../../../spaces/public';
 import { licenseMock } from '../../../../common/licensing/index.mock';
-import { Role } from '../../../../common/model';
+import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';

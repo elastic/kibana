@@ -18,7 +18,7 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldRule, Rule, RuleGroup } from '../../model';
+import type { FieldRule, Rule, RuleGroup } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
 import { AddRuleButton } from './add_rule_button';
 import { FieldRuleEditor } from './field_rule_editor';

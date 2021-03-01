@@ -7,14 +7,14 @@
 
 import React, { Component } from 'react';
 
-import { Capabilities } from 'src/core/public';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { Space } from '../../../../../../../spaces/public';
-import { Role } from '../../../../../../common/model';
-import { KibanaPrivileges } from '../../../model';
+import type { Space } from '../../../../../../../spaces/public';
+import type { Role } from '../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
-import { RoleValidator } from '../../validate_role';
+import type { RoleValidator } from '../../validate_role';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';

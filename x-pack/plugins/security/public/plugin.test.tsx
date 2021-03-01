@@ -8,16 +8,17 @@
 import BroadcastChannel from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
-import { CoreSetup } from 'src/core/public';
+import type { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { managementPluginMock } from 'src/plugins/management/public/mocks';
 import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
 
-import { FeaturesPluginStart } from '../../features/public';
+import type { FeaturesPluginStart } from '../../features/public';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
-import { PluginStartDependencies, SecurityPlugin } from './plugin';
+import type { PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 import { SessionTimeout } from './session';
 
 describe('Security Plugin', () => {

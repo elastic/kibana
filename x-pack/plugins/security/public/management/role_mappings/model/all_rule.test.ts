@@ -10,7 +10,7 @@ import { AnyRule } from './any_rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
 import { FieldRule } from './field_rule';
-import { RuleGroup } from './rule_group';
+import type { RuleGroup } from './rule_group';
 
 describe('All rule', () => {
   it('can be constructed without sub rules', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '../';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
 import { defineInvalidateApiKeysRoutes } from './invalidate';

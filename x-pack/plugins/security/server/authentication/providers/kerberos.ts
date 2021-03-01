@@ -8,15 +8,16 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
-import { AuthenticationInfo } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { RefreshTokenResult, TokenPair, Tokens } from '../tokens';
+import type { RefreshTokenResult, TokenPair } from '../tokens';
+import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
 /**

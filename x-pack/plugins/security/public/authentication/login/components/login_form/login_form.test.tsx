@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 

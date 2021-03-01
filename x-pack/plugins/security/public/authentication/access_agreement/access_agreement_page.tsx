@@ -16,13 +16,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
+import type { FormEvent, MouseEvent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';

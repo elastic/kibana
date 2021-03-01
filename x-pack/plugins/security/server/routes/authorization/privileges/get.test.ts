@@ -8,9 +8,9 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { LicenseCheck } from '../../../../../licensing/server';
-import { RawKibanaPrivileges } from '../../../../common/model';
-import { SecurityRequestHandlerContext } from '../../../types';
+import type { LicenseCheck } from '../../../../../licensing/server';
+import type { RawKibanaPrivileges } from '../../../../common/model';
+import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineGetPrivilegesRoutes } from './get';
 

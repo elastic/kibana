@@ -10,11 +10,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, Switch, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
-import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
-import { SecurityLicense } from '../../../common/licensing';
-import { PluginStartDependencies } from '../../plugin';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {

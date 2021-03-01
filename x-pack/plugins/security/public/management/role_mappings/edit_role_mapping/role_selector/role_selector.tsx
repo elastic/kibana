@@ -10,11 +10,12 @@ import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { isRoleDeprecated, Role, RoleMapping } from '../../../../../common/model';
+import type { Role, RoleMapping } from '../../../../../common/model';
+import { isRoleDeprecated } from '../../../../../common/model';
 import { RoleComboBox } from '../../../role_combo_box';
-import { RolesAPIClient } from '../../../roles';
+import type { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
 

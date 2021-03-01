@@ -21,18 +21,18 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { RoleMapping } from '../../../../common/model';
-import { RolesAPIClient } from '../../roles';
+import type { RoleMapping } from '../../../../common/model';
+import type { RolesAPIClient } from '../../roles';
 import {
   DeleteProvider,
   NoCompatibleRealms,
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { MappingInfoPanel } from './mapping_info_panel';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';

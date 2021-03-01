@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from 'src/plugins/usage_collection/server/mocks';
 
-import { SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { registerSecurityUsageCollector } from './security_usage_collector';

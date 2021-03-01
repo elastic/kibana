@@ -7,7 +7,7 @@
 
 jest.mock('./overwritten_session_page');
 
-import { AppMount } from 'src/core/public';
+import type { AppMount } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { securityMock } from '../../mocks';

@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
 import { AppNavLinkStatus } from '../../../../../src/core/public';
-import { AuthenticationServiceSetup } from '../authentication';
+import type { AuthenticationServiceSetup } from '../authentication';
 
 interface CreateDeps {
   application: ApplicationSetup;

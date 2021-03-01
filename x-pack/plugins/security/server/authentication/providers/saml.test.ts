@@ -10,12 +10,13 @@ import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
-import { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common/model';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 
 describe('SAMLAuthenticationProvider', () => {

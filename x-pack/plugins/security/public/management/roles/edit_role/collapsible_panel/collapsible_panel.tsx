@@ -7,6 +7,7 @@
 
 import './collapsible_panel.scss';
 
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,9 +16,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  IconType,
 } from '@elastic/eui';
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 

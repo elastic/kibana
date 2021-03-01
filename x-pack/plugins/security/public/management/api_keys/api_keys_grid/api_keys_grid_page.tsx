@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
@@ -29,12 +28,12 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
 
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
-import { APIKeysAPIClient } from '../api_keys_api_client';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
+import type { APIKeysAPIClient } from '../api_keys_api_client';
 import { EmptyPrompt } from './empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
 import { NotEnabled } from './not_enabled';

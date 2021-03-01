@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
+import type { RouteDefinitionParams } from '../..';
 import { defineDeleteRolesRoutes } from './delete';
 import { defineGetRolesRoutes } from './get';
 import { defineGetAllRolesRoutes } from './get_all';

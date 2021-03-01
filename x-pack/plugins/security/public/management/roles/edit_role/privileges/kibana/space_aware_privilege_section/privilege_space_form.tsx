@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ButtonColor } from '@elastic/eui';
 import {
-  ButtonColor,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -30,9 +30,10 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Space } from '../../../../../../../../spaces/public';
-import { copyRole, Role } from '../../../../../../../common/model';
-import { KibanaPrivileges } from '../../../../model';
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import { copyRole } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';

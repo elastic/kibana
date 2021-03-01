@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiCheckbox,
-  EuiCheckboxProps,
-} from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
+import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test/jest';
 

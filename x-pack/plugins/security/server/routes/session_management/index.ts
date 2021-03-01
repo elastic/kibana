@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '../';
 import { defineSessionExtendRoutes } from './extend';
 import { defineSessionInfoRoutes } from './info';
 

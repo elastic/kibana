@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
@@ -15,12 +15,8 @@ import {
 
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
-import {
-  PluginSetupDependencies,
-  SecurityPlugin,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from './plugin';
+import type { PluginSetupDependencies, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.

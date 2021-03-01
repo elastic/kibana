@@ -10,7 +10,8 @@ import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AllRule, FieldRule, Rule } from '../../model';
+import type { Rule } from '../../model';
+import { AllRule, FieldRule } from '../../model';
 
 interface Props {
   onClick: (newRule: Rule) => void;

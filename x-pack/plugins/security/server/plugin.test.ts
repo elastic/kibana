@@ -14,7 +14,8 @@ import { featuresPluginMock } from '../../features/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ConfigSchema } from './config';
-import { PluginSetupDependencies, PluginStartDependencies, SecurityPlugin } from './plugin';
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
   let plugin: SecurityPlugin;

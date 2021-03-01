@@ -8,7 +8,7 @@
 import { EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { SecuredFeature } from '../../../../model';
+import type { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

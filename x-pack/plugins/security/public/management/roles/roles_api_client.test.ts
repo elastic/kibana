@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from 'src/core/public/mocks';
 
-import { Role } from '../../../common/model';
+import type { Role } from '../../../common/model';
 import { RolesAPIClient } from './roles_api_client';
 
 describe('RolesAPIClient', () => {

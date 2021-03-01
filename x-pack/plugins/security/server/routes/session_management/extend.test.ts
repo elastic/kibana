@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineSessionExtendRoutes } from './extend';
 

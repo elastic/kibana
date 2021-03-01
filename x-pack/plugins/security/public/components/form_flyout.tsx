@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { EuiButtonProps, EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFlyoutProps,
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import React, { FunctionComponent, RefObject, useEffect } from 'react';
+import type { FunctionComponent, RefObject } from 'react';
+import React, { useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 

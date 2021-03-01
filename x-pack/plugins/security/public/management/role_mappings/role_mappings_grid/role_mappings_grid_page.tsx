@@ -26,8 +26,8 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   ApplicationStart,
   DocLinksStart,
   NotificationsStart,
@@ -35,18 +35,18 @@ import {
 } from 'src/core/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { Role, RoleMapping } from '../../../../common/model';
+import type { Role, RoleMapping } from '../../../../common/model';
 import { DisabledBadge, EnabledBadge } from '../../badges';
 import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
 import { RoleTableDisplay } from '../../role_table_display';
-import { RolesAPIClient } from '../../roles';
+import type { RolesAPIClient } from '../../roles';
 import {
   DeleteProvider,
   NoCompatibleRealms,
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { EmptyPrompt } from './empty_prompt';
 
 interface Props {

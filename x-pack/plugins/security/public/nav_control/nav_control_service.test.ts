@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
-import { ILicense } from '../../../licensing/public';
+import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';

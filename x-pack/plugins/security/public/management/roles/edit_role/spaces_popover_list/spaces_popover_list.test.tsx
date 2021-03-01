@@ -17,7 +17,7 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SpaceAvatarInternal } from '../../../../../../spaces/public/space_avatar/space_avatar_internal';
 import { spacesManagerMock } from '../../../../../../spaces/public/spaces_manager/mocks';

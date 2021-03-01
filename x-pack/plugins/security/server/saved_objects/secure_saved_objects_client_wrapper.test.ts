@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import { AuditEvent, EventOutcome } from '../audit';
+import type { AuditEvent } from '../audit';
+import { EventOutcome } from '../audit';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { Actions } from '../authorization';
-import { SavedObjectActions } from '../authorization/actions/saved_object';
+import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 jest.mock('src/core/server/saved_objects/service/lib/utils', () => {

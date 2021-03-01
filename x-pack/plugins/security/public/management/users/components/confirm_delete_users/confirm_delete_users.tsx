@@ -10,10 +10,10 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
 
-import { UserAPIClient } from '../../user_api_client';
+import type { UserAPIClient } from '../../user_api_client';
 
 interface Props {
   usersToDelete: string[];

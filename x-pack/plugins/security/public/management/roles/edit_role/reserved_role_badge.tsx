@@ -10,7 +10,8 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { isRoleReserved, Role } from '../../../../common/model';
+import type { Role } from '../../../../common/model';
+import { isRoleReserved } from '../../../../common/model';
 
 interface Props {
   role: Role;

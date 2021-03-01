@@ -8,19 +8,19 @@
 import { URL } from 'url';
 
 import { Type } from '@kbn/config-schema';
-import {
+import type {
   HttpResources,
   HttpResourcesRequestHandler,
-  kibanaResponseFactory,
   RequestHandler,
   RouteConfig,
 } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import { SecurityLicense } from '../../../common/licensing';
-import { LoginSelectorProvider } from '../../../common/login_state';
-import { ConfigType } from '../../config';
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { LoginSelectorProvider } from '../../../common/login_state';
+import type { ConfigType } from '../../config';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineLoginRoutes } from './login';
 

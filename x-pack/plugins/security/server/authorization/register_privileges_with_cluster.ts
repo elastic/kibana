@@ -7,9 +7,9 @@
 
 import { difference, isEqual, isEqualWith } from 'lodash';
 
-import { IClusterClient, Logger } from 'src/core/server';
+import type { IClusterClient, Logger } from 'src/core/server';
 
-import { PrivilegesService } from './privileges';
+import type { PrivilegesService } from './privileges';
 import { serializePrivileges } from './privileges_serializer';
 
 export async function registerPrivilegesWithCluster(

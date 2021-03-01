@@ -7,7 +7,7 @@
 
 jest.mock('./access_agreement_page');
 
-import { AppMount } from 'src/core/public';
+import type { AppMount } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { accessAgreementApp } from './access_agreement_app';

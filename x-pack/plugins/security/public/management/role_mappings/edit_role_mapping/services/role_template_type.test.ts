@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common/model';
 import {
   isInlineRoleTemplate,
   isInvalidRoleTemplate,

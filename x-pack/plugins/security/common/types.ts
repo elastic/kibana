@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticationProvider } from './model';
+import type { AuthenticationProvider } from './model';
 
 export interface SessionInfo {
   now: number;

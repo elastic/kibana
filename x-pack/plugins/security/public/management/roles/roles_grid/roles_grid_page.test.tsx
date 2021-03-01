@@ -6,16 +6,16 @@
  */
 
 import { EuiBasicTable, EuiIcon } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { DisabledBadge, ReservedBadge } from '../../badges';
 import { rolesAPIClientMock } from '../index.mock';
-import { RolesAPIClient } from '../roles_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
 

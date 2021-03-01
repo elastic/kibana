@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   ApplicationSetup,
   FatalErrorsSetup,
   HttpSetup,
   StartServicesAccessor,
 } from 'src/core/public';
 
-import { AuthenticatedUser } from '../../common/model';
-import { ConfigType } from '../config';
-import { PluginStartDependencies } from '../plugin';
+import type { AuthenticatedUser } from '../../common/model';
+import type { ConfigType } from '../config';
+import type { PluginStartDependencies } from '../plugin';
 import { accessAgreementApp } from './access_agreement';
 import { captureURLApp } from './capture_url';
 import { loggedOutApp } from './logged_out';

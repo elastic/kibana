@@ -21,7 +21,7 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common/model';
 import {
   isInlineRoleTemplate,
   isInvalidRoleTemplate,

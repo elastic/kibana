@@ -7,18 +7,20 @@
 
 import { errors } from 'elasticsearch';
 
-import { ObjectType } from '@kbn/config-schema';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { Headers, kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
-import { Session } from '../../session_management';
+import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineChangeUserPasswordRoutes } from './change_password';
 

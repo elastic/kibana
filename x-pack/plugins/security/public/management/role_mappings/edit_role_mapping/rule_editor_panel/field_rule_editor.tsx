@@ -17,11 +17,13 @@ import {
   EuiIcon,
   EuiSelect,
 } from '@elastic/eui';
-import React, { ChangeEvent, Component } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { FieldRule, FieldRuleValue } from '../../model';
+import type { FieldRuleValue } from '../../model';
+import { FieldRule } from '../../model';
 
 interface Props {
   rule: FieldRule;

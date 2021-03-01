@@ -19,21 +19,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, {
-  ChangeEvent,
-  Fragment,
-  FunctionComponent,
-  HTMLProps,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
@@ -42,35 +34,38 @@ import {
   NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { IndexPatternsContract } from 'src/plugins/data/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { KibanaFeature } from '../../../../../features/common';
-import { FeaturesPluginStart } from '../../../../../features/public';
-import { Space } from '../../../../../spaces/public';
-import { SecurityLicense } from '../../../../common/licensing';
-import {
+import type { KibanaFeature } from '../../../../../features/common';
+import type { FeaturesPluginStart } from '../../../../../features/public';
+import type { Space } from '../../../../../spaces/public';
+import type { SecurityLicense } from '../../../../common/licensing';
+import type {
   BuiltinESPrivileges,
+  RawKibanaPrivileges,
+  Role,
+  RoleIndexPrivilege,
+} from '../../../../common/model';
+import {
   copyRole,
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
   prepareRoleClone,
-  RawKibanaPrivileges,
-  Role,
-  RoleIndexPrivilege,
 } from '../../../../common/model';
-import { UserAPIClient } from '../../users';
-import { IndicesAPIClient } from '../indices_api_client';
+import type { UserAPIClient } from '../../users';
+import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
-import { PrivilegesAPIClient } from '../privileges_api_client';
-import { RolesAPIClient } from '../roles_api_client';
+import type { PrivilegesAPIClient } from '../privileges_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
-import { RoleValidationResult, RoleValidator } from './validate_role';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';

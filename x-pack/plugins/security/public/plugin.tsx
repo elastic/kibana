@@ -6,25 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type {
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
+} from 'src/plugins/security_oss/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { FeaturesPluginStart } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { SpacesPluginStart } from '../../spaces/public';
+import type { FeaturesPluginStart } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import { accountManagementApp } from './account_management';
-import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
-import { ConfigType } from './config';
+import type { AuthenticationServiceSetup } from './authentication';
+import { AuthenticationService } from './authentication';
+import type { ConfigType } from './config';
 import { ManagementService } from './management';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
+import type { ISessionTimeout } from './session';
 import {
-  ISessionTimeout,
   SessionExpired,
   SessionTimeout,
   SessionTimeoutHttpInterceptor,

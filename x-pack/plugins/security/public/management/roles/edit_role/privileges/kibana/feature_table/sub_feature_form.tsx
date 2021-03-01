@@ -10,13 +10,13 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   SecuredSubFeature,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
 } from '../../../../model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   featureId: string;

@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Role } from '../../../../../../common/model';
+import type { Role } from '../../../../../../common/model';
 import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';

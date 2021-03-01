@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';

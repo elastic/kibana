@@ -7,10 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDefinitionParams } from '../..';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
+import type { ElasticsearchRole } from './model';
+import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(

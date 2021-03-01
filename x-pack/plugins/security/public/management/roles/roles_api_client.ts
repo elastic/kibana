@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
+import type { HttpStart } from 'src/core/public';
 
-import { copyRole, Role, RoleIndexPrivilege } from '../../../common/model';
+import type { Role, RoleIndexPrivilege } from '../../../common/model';
+import { copyRole } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {

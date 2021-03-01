@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,

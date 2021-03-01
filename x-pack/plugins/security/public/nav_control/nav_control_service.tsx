@@ -8,14 +8,16 @@
 import { sortBy } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { CoreStart } from 'src/core/public';
+import type { CoreStart } from 'src/core/public';
 
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticationServiceSetup } from '../authentication';
-import { SecurityNavControl, UserMenuLink } from './nav_control_component';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserMenuLink } from './nav_control_component';
+import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;

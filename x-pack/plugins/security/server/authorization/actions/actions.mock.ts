@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions } from './actions';
+import type { Actions } from './actions';
 import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';

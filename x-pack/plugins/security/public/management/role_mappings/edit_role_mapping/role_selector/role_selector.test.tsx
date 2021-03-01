@@ -9,10 +9,10 @@ import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { Role, RoleMapping } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
+import type { Role, RoleMapping } from '../../../../../common/model';
+import type { RolesAPIClient } from '../../../roles';
 import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleSelector } from './role_selector';

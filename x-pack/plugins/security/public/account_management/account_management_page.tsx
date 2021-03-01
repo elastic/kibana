@@ -9,12 +9,13 @@ import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart, NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { CoreStart, NotificationsStart } from 'src/core/public';
 
-import { AuthenticatedUser, getUserDisplayName } from '../../common/model';
-import { AuthenticationServiceSetup } from '../authentication';
-import { UserAPIClient } from '../management';
+import type { AuthenticatedUser } from '../../common/model';
+import { getUserDisplayName } from '../../common/model';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserAPIClient } from '../management';
 import { ChangePassword } from './change_password';
 import { PersonalInfo } from './personal_info';
 

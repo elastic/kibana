@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'src/core/public';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
+import type { DocLinksStart } from 'src/core/public';
+import type {
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
+} from 'src/plugins/security_oss/public';
 
 import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 

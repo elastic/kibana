@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoleKibanaPrivilege } from '../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../common/model';
 import { kibanaFeatures } from '../__fixtures__/kibana_features';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { KibanaPrivilege } from './kibana_privilege';

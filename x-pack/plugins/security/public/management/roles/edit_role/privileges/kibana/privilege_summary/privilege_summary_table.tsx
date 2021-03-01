@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,17 +20,15 @@ import {
 import React, { Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { Space } from '../../../../../../../../spaces/public';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
-import {
-  EffectiveFeaturePrivileges,
-  PrivilegeSummaryCalculator,
-} from './privilege_summary_calculator';
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
 import { SpaceColumnHeader } from './space_column_header';
 

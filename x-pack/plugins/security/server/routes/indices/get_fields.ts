@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { RouteDefinitionParams } from '../index';
+import type { RouteDefinitionParams } from '../index';
 
 interface FieldMappingResponse {
   [indexName: string]: {

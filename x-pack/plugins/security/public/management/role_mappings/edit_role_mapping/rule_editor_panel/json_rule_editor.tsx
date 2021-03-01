@@ -15,7 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { generateRulesFromRaw, Rule, RuleBuilderError } from '../../model';
+import type { Rule } from '../../model';
+import { generateRulesFromRaw, RuleBuilderError } from '../../model';
 
 interface Props {
   rules: Rule | null;

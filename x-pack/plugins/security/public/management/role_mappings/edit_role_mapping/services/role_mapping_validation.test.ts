@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoleMapping } from '../../../../../common/model';
+import type { RoleMapping } from '../../../../../common/model';
 import {
   validateRoleMappingForSave,
   validateRoleMappingName,

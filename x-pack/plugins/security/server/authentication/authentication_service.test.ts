@@ -9,8 +9,8 @@ jest.mock('./authenticator');
 
 import Boom from '@hapi/boom';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   AuthenticationHandler,
   AuthToolkit,
   HttpServiceSetup,
@@ -27,16 +27,17 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
-import { ConfigSchema, ConfigType, createConfig } from '../config';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { ConfigType } from '../config';
+import { ConfigSchema, createConfig } from '../config';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { Session } from '../session_management';
+import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';

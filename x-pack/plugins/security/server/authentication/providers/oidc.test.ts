@@ -8,16 +8,18 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
-import { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common/model';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
-import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import type { ProviderLoginAttempt } from './oidc';
+import { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;

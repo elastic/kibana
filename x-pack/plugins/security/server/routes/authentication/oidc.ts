@@ -7,14 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import type { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 
-import { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '../';
 import { OIDCLogin } from '../../authentication';
-import {
-  OIDCAuthenticationProvider,
-  ProviderLoginAttempt,
-} from '../../authentication/providers/oidc';
+import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
+import { OIDCAuthenticationProvider } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
+import type { HttpStart } from 'src/core/public';
 
-import { RoleMapping } from '../../../common/model';
+import type { RoleMapping } from '../../../common/model';
 
 interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;

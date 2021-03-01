@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '../';
 import { SAMLLogin } from '../../authentication';
 import { SAMLAuthenticationProvider } from '../../authentication/providers';
 

@@ -6,15 +6,15 @@
  */
 
 import { EuiBasicTable } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
-import { LocationDescriptorObject } from 'history';
+import type { ReactWrapper } from 'enzyme';
+import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { CoreStart, ScopedHistory } from 'src/core/public';
+import type { CoreStart, ScopedHistory } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { User } from '../../../../common/model';
+import type { User } from '../../../../common/model';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 import { UsersGridPage } from './users_grid_page';

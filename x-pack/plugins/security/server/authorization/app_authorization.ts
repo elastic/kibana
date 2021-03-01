@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpServiceSetup, Logger } from 'src/core/server';
+import type { HttpServiceSetup, Logger } from 'src/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
-import { AuthorizationServiceSetup } from './authorization_service';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
+import type { AuthorizationServiceSetup } from './authorization_service';
 
 class ProtectedApplications {
   private applications: Set<string> | null = null;

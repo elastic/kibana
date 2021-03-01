@@ -10,11 +10,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, Switch, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
-import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { PluginStartDependencies } from '../../plugin';
+import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {

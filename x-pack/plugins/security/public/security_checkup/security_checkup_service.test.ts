@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MountPoint } from 'src/core/public';
+import type { MountPoint } from 'src/core/public';
 import { docLinksServiceMock } from 'src/core/public/mocks';
 import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
 

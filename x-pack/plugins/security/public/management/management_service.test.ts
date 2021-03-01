@@ -8,11 +8,15 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { coreMock } from 'src/core/public/mocks';
-import { DefinedSections, ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+import type {
+  DefinedSections,
+  ManagementApp,
+  ManagementSetup,
+} from 'src/plugins/management/public';
 import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
+import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { securityMock } from '../mocks';
 import { apiKeysManagementApp } from './api_keys';
 import { ManagementService } from './management_service';

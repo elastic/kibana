@@ -9,11 +9,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
-import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { PluginStartDependencies } from '../../plugin';
+import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;

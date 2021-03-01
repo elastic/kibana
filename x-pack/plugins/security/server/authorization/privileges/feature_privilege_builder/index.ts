@@ -7,8 +7,8 @@
 
 import { flatten } from 'lodash';
 
-import { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
-import { Actions } from '../../actions';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';

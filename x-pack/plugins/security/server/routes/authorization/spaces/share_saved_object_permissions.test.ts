@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
-import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { RouteDefinitionParams } from '../..';
-import { CheckPrivileges } from '../../../authorization/types';
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
+import type { RouteDefinitionParams } from '../..';
+import type { CheckPrivileges } from '../../../authorization/types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 

@@ -19,13 +19,14 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Capabilities } from 'src/core/public';
-import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import type { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { Space } from '../../../../../../../../spaces/public';
-import { isRoleReserved, Role } from '../../../../../../../common/model';
-import { KibanaPrivileges } from '../../../../model';
-import { RoleValidator } from '../../../validate_role';
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import { isRoleReserved } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
+import type { RoleValidator } from '../../../validate_role';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
 import { PrivilegeSpaceForm } from './privilege_space_form';

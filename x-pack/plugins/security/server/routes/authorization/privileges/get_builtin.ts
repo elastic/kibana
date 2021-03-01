@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
-import { BuiltinESPrivileges } from '../../../../common/model';
+import type { RouteDefinitionParams } from '../..';
+import type { BuiltinESPrivileges } from '../../../../common/model';
 
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(

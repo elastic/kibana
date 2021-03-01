@@ -7,10 +7,9 @@
 
 import './privilege_space_table.scss';
 
+import type { EuiBadgeProps, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBadgeProps,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -24,11 +23,13 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getSpaceColor, Space } from '../../../../../../../../spaces/public';
-import { copyRole, FeaturesPrivileges, Role } from '../../../../../../../common/model';
+import type { Space } from '../../../../../../../../spaces/public';
+import { getSpaceColor } from '../../../../../../../../spaces/public';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
+import { copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;

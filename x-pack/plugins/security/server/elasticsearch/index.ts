@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model';
 
 export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
 export {

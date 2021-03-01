@@ -10,10 +10,13 @@ import { Subject } from 'rxjs';
 import { nextTick } from '@kbn/test/jest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../task_manager/server';
+import type {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '../../../task_manager/server';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
 import { SessionIndex } from './session_index';
 import {

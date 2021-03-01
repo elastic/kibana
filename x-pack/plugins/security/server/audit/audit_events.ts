@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
-import { AuthenticationResult } from '../authentication/authentication_result';
+import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
  * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html

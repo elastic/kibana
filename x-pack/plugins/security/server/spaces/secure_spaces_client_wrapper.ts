@@ -7,19 +7,20 @@
 
 import Boom from '@hapi/boom';
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
-import {
+import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   ISpacesClient,
   Space,
 } from '../../../spaces/server';
-import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
-import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityPluginSetup } from '../plugin';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import type { AuditLogger } from '../audit';
+import { EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { SecurityPluginSetup } from '../plugin';
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,
