@@ -30,7 +30,7 @@ const FindQueryParamsRt = rt.partial({
   subCaseId: rt.string,
 });
 
-export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
+export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASE_COMMENTS_URL}/_find`,
@@ -82,6 +82,9 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
         const theComments = await caseService.getCommentsByAssociation(args);
         return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
       } catch (error) {
+        logger.error(
+          `Failed to find comments in route case id: ${request.params.case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }
