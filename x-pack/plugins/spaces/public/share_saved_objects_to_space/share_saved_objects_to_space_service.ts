@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
+import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
 
