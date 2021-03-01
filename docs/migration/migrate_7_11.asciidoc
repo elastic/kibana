@@ -38,4 +38,15 @@ will fail and Kibana will not start.
 
 *via https://github.com/elastic/kibana/pull/80766[#80766]*
 
+[discrete]
+[[glibc_212_unsupported]]
+=== Dropped support for glibc 2.12
+
+*Details:* {kib} 7.11.0 upgrades the Node.js runtime to version `14.16.0`. This updated runtime requires glibc `2.16`,
+wich drops support for glibc `2.12`-based operating systems.
+
+*Impact*: Supported versions of {kib} will not be impacted. Users will no longer be able to run {kib} on older operating systems wich require glibc `2.12` (example: CentOS 6). Please see our https://www.elastic.co/support/matrix[support matrix] for a list of currently supported operating systems.
+
+*via https://github.com/elastic/kibana/pull/83425[#83425]*
+
 // end::notable-breaking-changes[]
