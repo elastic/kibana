@@ -18,6 +18,7 @@ import { FormProps } from './schema';
 
 interface Props {
   isLoading: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 interface ConnectorsFieldProps {
@@ -41,7 +42,7 @@ const ConnectorFields = ({ connectors, isEdit, field }: ConnectorsFieldProps) =>
   );
 };
 
-const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
+const ConnectorComponent: React.FC<Props> = ({ hideConnectorServiceNowSir = false, isLoading }) => {
   const { getFields } = useFormContext();
   const { loading: isLoadingConnectors, connectors } = useConnectors();
   const handleConnectorChange = useCallback(
@@ -61,6 +62,7 @@ const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
           componentProps={{
             connectors,
             handleChange: handleConnectorChange,
+            hideConnectorServiceNowSir,
             dataTestSubj: 'caseConnectors',
             disabled: isLoading || isLoadingConnectors,
             idAria: 'caseConnectors',

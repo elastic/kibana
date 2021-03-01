@@ -27,7 +27,7 @@ describe('useGetCase', () => {
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: initialData,
-        isLoading: true,
+        isLoading: false,
         isError: false,
         fetchCase: result.current.fetchCase,
         updateCase: result.current.updateCase,

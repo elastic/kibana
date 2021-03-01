@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes, CaseType } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -439,6 +439,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}

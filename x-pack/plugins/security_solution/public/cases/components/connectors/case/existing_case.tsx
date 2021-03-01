@@ -27,7 +27,13 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
 
   const onCaseCreated = useCallback(() => refetchCases(), [refetchCases]);
 
-  const { modal, openModal } = useCreateCaseModal({ onCaseCreated });
+  const { modal, openModal } = useCreateCaseModal({
+    onCaseCreated,
+    // FUTURE DEVELOPER
+    // We are making the assumption that this component is only used in rules creation
+    // that's why we want to hide ServiceNow SIR
+    hideConnectorServiceNowSir: true,
+  });
 
   const onChange = useCallback(
     (id: string) => {
