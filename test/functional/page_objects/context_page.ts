@@ -7,6 +7,7 @@
  */
 
 import rison from 'rison-node';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const DEFAULT_INITIAL_STATE = {
@@ -14,6 +15,8 @@ const DEFAULT_INITIAL_STATE = {
 };
 
 export function ContextPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
+  const config = getService('config');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -25,14 +28,14 @@ export function ContextPageProvider({ getService, getPageObjects }: FtrProviderC
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get('apps.context'),
+        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
+      });
 
-      await PageObjects.common.navigateToUrl(
-        'discover',
-        `#/context/${indexPattern}/${anchorId}?_a=${initialState}`,
-        {
-          useActualUrl: true,
-        }
-      );
+      log.debug(`browser.get(${appUrl})`);
+
+      await browser.get(appUrl);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await this.waitUntilContextLoadingHasFinished();
       // For lack of a better way, using a sleep to ensure page is loaded before proceeding
