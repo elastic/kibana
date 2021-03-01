@@ -146,16 +146,6 @@ describe('EnginesLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
-
-      it('calls onDeleteEngineSuccess on success', async () => {
-        http.delete.mockReturnValueOnce(Promise.resolve());
-        mount();
-
-        EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
-        await nextTick();
-
-        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/hello-world');
-      });
     });
 
     describe('loadEngines', () => {
