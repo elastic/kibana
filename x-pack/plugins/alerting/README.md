@@ -63,8 +63,8 @@ When we update, enable, or disable an alert, we must invalidate the old API key 
 
 To manage the invalidation process for API keys, we use the saved object `api_key_pending_invalidation`.  This object stores all API keys that were marked for invalidation when alerts were updated.
 For security plugin invalidation, we schedule a task to check if the`api_key_pending_invalidation` saved object contains new API keys that are marked for invalidation earlier than the configured delay.  The default value for running the task is 5 mins.
-To change the schedule for the invalidation task, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.interval`.
-To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.removalDelay`.
+To change the schedule for the invalidation task, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.interval`.
+To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.removalDelay`.
 
 ## Limitations
 
@@ -99,7 +99,7 @@ core.status.set(
         )
       );
 ```
-To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerts.healthCheck.interval`.
+To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerting.healthCheck.interval`.
 
 ## Alert types
 
