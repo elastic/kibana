@@ -33,7 +33,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { RuleActionPanel } from './rule_action_panel';
-import { ACTION } from '../../../../../common/constants/detector_rule';
+import { ACTION } from '@kbn/ml-utils/src/constants/detector_rule';
 
 describe('RuleActionPanel', () => {
   const job = {

@@ -12,7 +12,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ConditionExpression } from './condition_expression';
-import { APPLIES_TO, OPERATOR } from '../../../../common/constants/detector_rule';
+import { APPLIES_TO, OPERATOR } from '@kbn/ml-utils/src/constants/detector_rule';
 
 describe('ConditionExpression', () => {
   const updateCondition = jest.fn(() => {});

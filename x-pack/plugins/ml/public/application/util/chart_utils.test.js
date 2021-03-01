@@ -33,6 +33,8 @@ import moment from 'moment';
 import React from 'react';
 import { render } from '@testing-library/react';
 
+import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/src/constants/multi_bucket_impact';
+
 import {
   chartLimits,
   getChartType,
@@ -45,7 +47,6 @@ import {
   showMultiBucketAnomalyTooltip,
 } from './chart_utils';
 
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 
 timefilter.setTime({

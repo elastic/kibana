@@ -21,6 +21,7 @@ import {
   showActualForFunction,
   showTypicalForFunction,
 } from '@kbn/ml-utils';
+import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/src/constants/multi_bucket_impact';
 
 import {
   EuiDescriptionList,
@@ -36,7 +37,6 @@ import {
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
 import { EntityCell } from '../entity_cell';
-import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
 import { MAX_CHARS } from './anomalies_table_constants';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
