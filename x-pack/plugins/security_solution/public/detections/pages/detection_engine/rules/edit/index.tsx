@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -252,7 +251,7 @@ const EditRulePageComponent: FC = () => {
           rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
-        ...(rule != null ? rule.max_signals : DEFAULT_MAX_SIGNALS),
+        ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
     }
   }, [
