@@ -36,5 +36,6 @@ export {
   AnomalyRecordDoc,
   AnomalyResultType,
   EntityFieldType,
+  Influencer,
   PartitionFieldsType,
 } from './types/anomalies';
