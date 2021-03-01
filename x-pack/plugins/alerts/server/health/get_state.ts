@@ -5,18 +5,29 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { interval, Observable, Subject, throwError } from 'rxjs';
-import { catchError, finalize, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
+import { defer, of, interval, Observable } from 'rxjs';
+import { catchError, retry, switchMap } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
 import { HealthStatus } from '../types';
 
-export const healthState$: Subject<ServiceStatus> = new Subject<ServiceStatus>();
+const HEALTH_STATUS_INTERVAL = 15000; // 60000 * 5; // Five minutes
+const MAX_RETRY_ATTEMPTS = 3;
 
+const shouldReturnError = [false, false, true, true, true, false, false, false];
+let counter = 0;
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
-  // throw new Error('oh no');
+  console.log('GET LATEST TASK STATE');
+  if (counter < shouldReturnError.length && shouldReturnError[counter++]) {
+    console.log('throwing error for task state');
+    throw new Boom.Boom(`error! ${counter}`, {
+      statusCode: 503,
+    });
+  }
+  console.log('successful task state');
   try {
     const result = await taskManager.get(HEALTH_TASK_ID);
     return result;
@@ -30,7 +41,6 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   return null;
 }
 
-const MAX_RETRY_ATTEMPTS = 5;
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: i18n.translate(
     'xpack.alerts.server.healthStatus.available',
@@ -52,45 +62,42 @@ const LEVEL_SUMMARY = {
   ),
 };
 
-export const getHealthStatusStream = (
+const getHealthServiceStatus = async (
+  taskManager: TaskManagerStartContract
+): Promise<ServiceStatus<unknown>> => {
+  console.log('GETTING HEALTH STATUS');
+  const doc = await getLatestTaskState(taskManager);
+  const level =
+    doc?.state?.health_status === HealthStatus.OK
+      ? ServiceStatusLevels.available
+      : doc?.state?.health_status === HealthStatus.Warning
+      ? ServiceStatusLevels.degraded
+      : ServiceStatusLevels.unavailable;
+  return {
+    level,
+    summary: LEVEL_SUMMARY[level.toString()],
+  };
+};
+
+const getHealthServiceStatusWithRetryAndErrorHandling = (
   taskManager: TaskManagerStartContract
 ): Observable<ServiceStatus<unknown>> => {
-  return interval(30000).pipe(
-    switchMap(async () => {
-      // console.log('getting health status');
-      const doc = await getLatestTaskState(taskManager);
-      const level =
-        doc?.state?.health_status === HealthStatus.OK
-          ? ServiceStatusLevels.available
-          : doc?.state?.health_status === HealthStatus.Warning
-          ? ServiceStatusLevels.degraded
-          : ServiceStatusLevels.unavailable;
-      return {
-        level,
-        summary: LEVEL_SUMMARY[level.toString()],
-      };
-    }),
-    // retryWhen((errors) => {
-    //   return errors.pipe(
-    //     mergeMap((error, i) => {
-    //       const retryAttempt = i + 1;
-    //       // if maximum number of retries have been met, throw error
-    //       if (retryAttempt > MAX_RETRY_ATTEMPTS) {
-    //         return throwError(error);
-    //       }
-    //       console.log(`Attempt ${retryAttempt}: retrying in 1000ms`);
-    //       return timer(1000);
-    //     }),
-    //     finalize(() => console.log('We are done!'))
-    //   );
-    // }),
-    catchError(async (error) => {
-      console.log('ERROR getting health status');
-      return {
+  return defer(() => getHealthServiceStatus(taskManager)).pipe(
+    retry(MAX_RETRY_ATTEMPTS),
+    catchError((error) => {
+      console.log(`ERROR getting health status ${JSON.stringify(error)}`);
+      return of({
         level: ServiceStatusLevels.unavailable,
         summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
         meta: { error },
-      };
+      });
     })
   );
 };
+
+export const getHealthStatusStream = (
+  taskManager: TaskManagerStartContract
+): Observable<ServiceStatus<unknown>> =>
+  interval(HEALTH_STATUS_INTERVAL).pipe(
+    switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(taskManager))
+  );
