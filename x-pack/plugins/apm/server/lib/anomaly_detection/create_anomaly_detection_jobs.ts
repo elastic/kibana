@@ -19,6 +19,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
@@ -38,14 +39,32 @@ export async function createAnomalyDetectionJobs(
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
+  // skip creation of duplicate ML jobs
+  const jobs = await getAnomalyDetectionJobs(setup, logger);
+  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const requestedExistingMlJobEnvs = environments.filter((env) =>
+    existingMlJobEnvs.includes(env)
+  );
+  const newMlJobEnvs = environments.filter(
+    (env) => !existingMlJobEnvs.includes(env)
+  );
+  if (requestedExistingMlJobEnvs.length) {
+    logger.warn(
+      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`
+    );
+  }
+  if (newMlJobEnvs.length === 0) {
+    return [];
+  }
+
   return withApmSpan('create_anomaly_detection_jobs', async () => {
     logger.info(
-      `Creating ML anomaly detection jobs for environments: [${environments}].`
+      `Creating ML anomaly detection jobs for environments: [${newMlJobEnvs}].`
     );
 
     const indexPatternName = indices['apm_oss.transactionIndices'];
     const responses = await Promise.all(
-      environments.map((environment) =>
+      newMlJobEnvs.map((environment) =>
         createAnomalyDetectionJob({ ml, environment, indexPatternName })
       )
     );

@@ -65,7 +65,28 @@ export const createAnomalyDetectionJobsRoute = createRoute({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
+    // const jobs = await getAnomalyDetectionJobs(setup, context.logger);
+    // const existingMLJobEnvironments = jobs.map(
+    //   ({ environment }) => environment
+    // );
+    // const requestedEnvironmentsWithoutMLJobs = environments.filter(
+    //   (env) => !existingMLJobEnvironments.includes(env)
+    // );
+    // if (requestedEnvironmentsWithoutMLJobs.length) {
+    //   await createAnomalyDetectionJobs(
+    //     setup,
+    //     requestedEnvironmentsWithoutMLJobs,
+    //     context.logger
+    //   );
+    // } else {
+    //   context.logger.warn(
+    //     `ML jobs already exist for environments: ${JSON.stringify(
+    //       environments
+    //     )}`
+    //   );
+    // }
     await createAnomalyDetectionJobs(setup, environments, context.logger);
+
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
       featureName: 'ml',
