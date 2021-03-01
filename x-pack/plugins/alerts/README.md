@@ -13,10 +13,15 @@ Table of Contents
 - [Kibana alerting](#kibana-alerting)
 	- [Terminology](#terminology)
 	- [Usage](#usage)
+	- [Alerts API keys](#alerts-api-keys)
 	- [Limitations](#limitations)
+	- [Plugin status](#plugin-status)
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
+		- [Licensing](#licensing)
+		- [Documentation](#documentation)
+		- [Tests](#tests)
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
@@ -50,6 +55,17 @@ A Kibana alert detects a condition and executes one or more actions when that co
 2. Configure feature level privileges using RBAC 
 3. Create an alert using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html) (see alerts -> create).
 
+## Alerts API keys
+
+When we create an alert, we generate a new API key.
+
+When we update, enable, or disable an alert, we must invalidate the old API key and create a new one.
+
+To manage the invalidation process for API keys, we use the saved object `api_key_pending_invalidation`.  This object stores all API keys that were marked for invalidation when alerts were updated.
+For security plugin invalidation, we schedule a task to check if the`api_key_pending_invalidation` saved object contains new API keys that are marked for invalidation earlier than the configured delay.  The default value for running the task is 5 mins.
+To change the schedule for the invalidation task, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.interval`.
+To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerts.invalidateApiKeysTask.removalDelay`.
+
 ## Limitations
 
 When security is enabled, an SSL connection to Elasticsearch is required in order to use alerting.
@@ -63,6 +79,27 @@ Note that the `manage_own_api_key` cluster privilege is not enough - it can be u
     action [cluster:admin/xpack/security/api_key/invalidate] \
     is unauthorized for user [user-name-here]
 ```
+
+## Plugin status
+
+The plugin status of an alert is customized by including information about checking failures for the framework decryption:
+```
+core.status.set(
+        combineLatest([
+          core.status.derivedStatus$,
+          getHealthStatusStream(startPlugins.taskManager),
+        ]).pipe(
+          map(([derivedStatus, healthStatus]) => {
+            if (healthStatus.level > derivedStatus.level) {
+              return healthStatus as ServiceStatus;
+            } else {
+              return derivedStatus;
+            }
+          })
+        )
+      );
+```
+To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerts.healthCheck.interval`.
 
 ## Alert types
 
@@ -123,6 +160,19 @@ For example, if the `context` has one variable `foo` which is an object that has
 	]
 }
 ```
+
+## Licensing
+
+Currently most of the alerts are free features. But some alert types are subscription features, such as the tracking containment alert.
+
+## Documentation
+
+You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the proper application directory.
+
+## Tests
+
+The alert type should have jest tests and optionaly functional tests. 
+In the the tests we recomend to test the expected alert execution result with a different input params, the structure of the created alert and the params validation. The rest will be guaranteed as a framework functionality.
 
 ### Example
 
