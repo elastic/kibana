@@ -194,6 +194,8 @@ export const existingRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  // Please do not change, or if you do, needs
+  // to be any number other than default value
   maxSignals: 500,
 };
 
