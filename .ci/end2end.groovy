@@ -41,61 +41,86 @@ pipeline {
         analyseBuildReasonForUptimeUI()
       }
     }
-    stage('Prepare Kibana') {
-      options { skipDefaultCheckout() }
-      when { expression { return env.RUN_APM_E2E != "false" } }
-      environment {
-        JENKINS_NODE_COOKIE = 'dontKillMe'
-      }
-      steps {
-        notifyStatus('Preparing kibana', 'PENDING')
-        dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/ci/prepare-kibana.sh"
+    stage('e2e') {
+      when {
+        anyOf {
+          expression { return env.RUN_APM_E2E != "false" }
+          expression { return env.RUN_UPTIME_E2E != "false" }
         }
       }
-      post {
-        unsuccessful {
-          notifyStatus('Kibana warm up failed', 'FAILURE')
-        }
-      }
-    }
-    stage('Smoke Tests'){
-      options { skipDefaultCheckout() }
-      when { expression { return env.RUN_APM_E2E != "false" } }
-      steps{
-        notifyTestStatus('Running smoke tests', 'PENDING')
-        dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/ci/run-e2e.sh"
-        }
-      }
-      post {
-        always {
-          dir("${BASE_DIR}/${E2E_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: 'cypress/screenshots/**,cypress/videos/**,cypress/test-results/*e2e-tests.xml')
-            junit(allowEmptyResults: true, testResults: 'cypress/test-results/*e2e-tests.xml')
-            dir('tmp/apm-integration-testing'){
-              sh 'docker-compose logs > apm-its-docker.log || true'
-              sh 'docker-compose down -v || true'
-              archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its-docker.log')
+      parallel {
+        // One or more stages need to be included within the parallel block.
+        stage('APM-UI') {
+          stages {
+            stage('Prepare Kibana') {
+              options { skipDefaultCheckout() }
+              when { expression { return env.RUN_APM_E2E != "false" } }
+              environment {
+                JENKINS_NODE_COOKIE = 'dontKillMe'
+              }
+              steps {
+                notifyStatus('Preparing kibana', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${E2E_DIR}/ci/prepare-kibana.sh"
+                }
+              }
+              post {
+                unsuccessful {
+                  notifyStatus('Kibana warm up failed', 'FAILURE')
+                }
+              }
             }
-            archiveArtifacts(allowEmptyArchive: true, artifacts: 'tmp/*.log')
+            stage('Smoke Tests'){
+              options { skipDefaultCheckout() }
+              when { expression { return env.RUN_APM_E2E != "false" } }
+              steps{
+                notifyTestStatus('Running smoke tests', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${E2E_DIR}/ci/run-e2e.sh"
+                }
+              }
+              post {
+                always {
+                  dir("${BASE_DIR}/${E2E_DIR}"){
+                    archiveArtifacts(allowEmptyArchive: false, artifacts: 'cypress/screenshots/**,cypress/videos/**,cypress/test-results/*e2e-tests.xml')
+                    junit(allowEmptyResults: true, testResults: 'cypress/test-results/*e2e-tests.xml')
+                    dir('tmp/apm-integration-testing'){
+                      sh 'docker-compose logs > apm-its-docker.log || true'
+                      sh 'docker-compose down -v || true'
+                      archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its-docker.log')
+                    }
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: 'tmp/*.log')
+                  }
+                }
+                unsuccessful {
+                  notifyTestStatus('Test failures', 'FAILURE')
+                }
+                success {
+                  notifyTestStatus('Tests passed', 'SUCCESS')
+                }
+              }
+            }
+          }
+          post {
+            always {
+              dir("${BASE_DIR}"){
+                archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
+              }
+            }
           }
         }
-        unsuccessful {
-          notifyTestStatus('Test failures', 'FAILURE')
-        }
-        success {
-          notifyTestStatus('Tests passed', 'SUCCESS')
+        stage('UPTIME-UI') {
+          agent { label 'linux && immutable' }
+          options { skipDefaultCheckout() }
+          when { expression { return env.RUN_UPTIME_E2E != "false" } }
+          steps {
+            echo 'TBC'
+          }
         }
       }
     }
   }
   post {
-    always {
-      dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
-      }
-    }
     cleanup {
       notifyBuildResult(prComment: false, analyzeFlakey: false, shouldNotify: false)
     }
