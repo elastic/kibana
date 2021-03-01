@@ -1,0 +1,244 @@
+- Start Date: 2020-03-01
+- RFC PR: (leave this empty)
+- Kibana Issue: (leave this empty)
+
+---
+- [1. Summary](#1-summary)
+- [2. Motivation](#2-motivation)
+- [3. Detailed design](#3-detailed-design)
+- [4. Drawbacks](#4-drawbacks)
+- [5. Alternatives](#5-alternatives)
+- [6. Adoption strategy](#6-adoption-strategy)
+- [7. How we teach this](#7-how-we-teach-this)
+- [8. Unresolved questions](#8-unresolved-questions)
+
+# 1. Summary
+
+Object-level security ("OLS") authorizes Saved Object CRUD operations on a per-object basis.
+This RFC focuses on the [phase 1](https://github.com/elastic/kibana/issues/82725), which introduces "private" saved object types. These private types
+are owned by individual users, and are _generally_ only accessible by their owners.
+
+This RFC does not address any [followup phases](https://github.com/elastic/kibana/issues/39259), which may support sharing, and ownership of "public" objects.
+
+# 2. Motivation
+
+OLS allows saved objects to be owned by individual users. This allows Kibana to store information that is specific
+to each user, which enables further customization and collaboration throughout our solutions.
+
+The most immediate feature this unlocks is [User settings and preferences (#17888)](https://github.com/elastic/kibana/issues/17888),
+which is a very popular and long-standing request.
+
+# 3. Detailed design
+
+Phase 1 of OLS allows consumers to register "private" saved object types.
+These saved objects are owned by individual end users, and are subject to additional security controls.
+
+Public (non-private) saved object types are not impacted by this RFC. This proposal does not allow types to transition to/from `public`/`private`, and is considered out of scope for phase 1.
+
+## 3.1 Saved Objects Service
+
+### 3.1.1 Type registry
+The [saved objects type registry](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/saved_objects_type_registry.ts) will allow consumers to register "private" saved object types via a new `classification` property:
+
+```ts
+/**
+ * The classification dictates the protection level of the saved object:
+ *  * public (default): instances of this saved object type will be accessible to all users within the given namespace, who are authorized to act on objects of this type.
+ *  * private: instances of this saved object type will belong to the user who created them, and will not be accessible by other users, except for administrators.
+ */
+export type SavedObjectsClassification = 'public' | 'private';
+
+// Note: some existing properties have been omitted for brevity.
+export interface SavedObjectsType {
+  name: string;
+  hidden: boolean;
+  namespaceType: SavedObjectsNamespaceType;
+  mappings: SavedObjectsTypeMappingDefinition;
+
+  /**
+   * The {@link SavedObjectsClassification | classification} for the type.
+   */
+  classification?: SavedObjectsClassification;
+}
+
+// Example consumer
+class MyPlugin {
+  setup(core: CoreSetup) {
+    core.savedObjects.registerType({
+      name: 'user-settings',
+      classification: 'private',
+      namespaceType: 'single',
+      hidden: false,
+      mappings,
+    })
+  }
+}
+```
+
+### 3.1.2 Schema
+Saved object ownership will be recorded as metadata within each `private` saved object. We do so by adding a top-level `acl` property ("access control list") with a singular `owner` property:
+
+```ts
+/**
+ * The "Access Control List" describing which users should be authorized to access this SavedObject.
+ *
+ * @public
+ */
+export interface SavedObjectACL {
+  /** The owner of this SavedObject. */
+  owner: string;
+}
+
+// Note: some existing fields have been omitted for brevity
+export interface SavedObject<T = unknown> {
+  id: string;
+  type: string;
+  attributes: T;
+  references: SavedObjectReference[];
+  namespaces?: string[];
+  /** The "Access Control List" describing which users should be authorized to access this SavedObject. */
+  acl?: SavedObjectACL;
+}
+```
+
+### 3.1.3 Saved Objects Client: Security wrapper
+
+The [security wrapper](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts) authorizes and audits operations against saved objects.
+
+There are two primary changes to this wrapper:
+
+#### Attaching ACLs
+
+This wrapper will be responsible for attaching an ACL to all private objects before they are created.
+It will also allow users to provide their own ACL in order to support the import/export use cases.
+
+Similar to the way we treat `namespaces`, it will not be possible to change an ACL via the `update`/`bulk_update` functions in this first phase. We may consider adding a dedicated function to update the ACL, similar to what we've done for sharing to spaces.
+
+#### Authorization changes
+
+This wrapper will be updated to ensure that access to private objects is only granted to authorized users. A user is authorized to operate on a private saved object if **all of the following** are true:
+Step 1) The user is authorized to perform the operation on saved objects of the requested type, within the requested space. (Example: `update` a `user-settings` saved object in the `marketing` space)
+Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's ACL. For this first phase, the `acl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [unresolved question 2](#82-authorization-for-private-objects))
+
+Step 1 of this authorization check is the same check we perform today for all existing saved object types. Step 2 is a new authorization check, and **introduces additional overhead and complexity**. We explore the logic for this step in more detail later in this RFC.
+
+![High-level authorization model for private objects](../images/ols_phase_1_auth.png)
+
+## 3.2 Saved Objects API
+
+OLS Phase 1 does not introduce any new APIs, but rather augments the existing Saved Object APIs.
+
+APIs which return saved objects are augmented to include the top-level `acl` property when it exists. This includes the `export` API.
+
+APIs that create saved objects are augmented to accept an `acl` property. This includes the `import` API.
+
+### `get` / `bulk_get`
+
+The security wrapper will ensure the user is authorized to access private objects before returning them to the consumer.
+
+#### Performance considerations
+None. The retrieved object contains all of the necessary information to authorize the current user, with no additional round trips to Elasticsearch.
+
+### `create` / `bulk_create`
+
+The security wrapper will ensure that an ACL is attached to all private objects.
+
+If the caller has requested to overwrite existing `private` objects, then the security wrapper must ensure that the user is authorized to do so.
+
+#### Performance considerations
+When overwriting existing objects, the security wrapper must first retrieve all of the existing `private` objects to ensure that the user is authorized. This requires another round-trip to `get`/`bulk-get` all `private` objects so we can authorize the operation.
+
+This overhead does not impact overwriting "public" objects. We only need to retrieve objects that are registered as `private`. As such, we do not expect any meaningful performance hit initially, but this will grow over time as the feature is used.
+
+### `update` / `bulk_update`
+
+The security wrapper will ensure that the user is authorized to update all existing `private` objects. It will also ensure that an ACL is not provided, as updates to the ACL are not permitted via `update`/`bulk_update`.
+
+#### Performance considerations
+Similar to the "create / override" scenario above, the security wrapper must first retrieve all of the existing `private` objects to ensure that the user is authorized. This requires another round-trip to `get`/`bulk-get` all `private` objects so we can authorize the operation.
+
+This overhead does not impact updating "public" objects. We only need to retrieve objects that are registered as `private`. As such, we do not expect any meaningful performance hit initially, but this will grow over time as the feature is used.
+
+### `delete`
+
+The security wrapper will first retrieve the requested `private` object to ensure the user is authorized.
+
+#### Performance considerations
+The security wrapper must first retrieve the existing `private` object to ensure that the user is authorized. This requires another round-trip to `get` the `private` object so we can authorize the operation.
+
+This overhead does not impact deleting "public" objects. We only need to retrieve objects that are registered as `private`. As such, we do not expect any meaningful performance hit initially, but this will grow over time as the feature is used.
+
+
+### `find`
+The security wrapper will supply or augment a [KQL `filter`](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/types.ts#L118) which describes the objects the current user is authorized to see.
+
+```ts
+// Sample KQL filter
+const filterClauses = typesToFind.reduce((acc, type) => {
+  if (this.typeRegistry.isPrivate(type)) {
+    return [
+      ...acc,
+      // note: this relies on specific behavior of the SO service's `filter_utils`,
+      // which automatically wraps this in an `and` node to ensure the type is accounted for.
+      // we have added additional safeguards there, and functional tests will ensure that changes
+      // to this logic will not accidentally alter our authorization model.
+
+      // This is equivalent to writing the following, if this syntax was allowed by the SO `filter` option:
+      // esKuery.nodeTypes.function.buildNode('and', [
+      //   esKuery.nodeTypes.function.buildNode('is', `acl.owner`, this.getOwner()),
+      //   esKuery.nodeTypes.function.buildNode('is', `type`, type),
+      // ])
+      esKuery.nodeTypes.function.buildNode('is', `${type}.acl.owner`, this.getOwner()),
+    ];
+  }
+  return acc;
+}, []);
+
+const privateObjectsFilter =
+  filterClauses.length > 0 ? esKuery.nodeTypes.function.buildNode('or', filterClauses) : null;
+```
+
+#### Performance considerations
+We are sending a more complex query to Elasticsearch for any find request which requests a `private` saved object. This has the potential to hurt query performance, but at this point it hasn't been quantified.
+
+Since we are only requesting saved objects that the user is authorized to see, there is no additional overhead for Kibana once Elasticsearch has returned the results of the query.
+
+
+# 4. Drawbacks
+
+As outlined above, this approach introduces additional overhead to many of the saved object APIs. We minimize this by denoting which saved object types require this additional authorization.
+
+This first phase also does not allow a public object to become private. Search sessions may migrate to OLS in the future, but this will likely be a coordinated effort with Elasticsearch, due to the differing ownership models between OLS and async searches.
+
+# 5. Alternatives
+
+OLS can be thought of as a Kibana-specific implementation of [Document level security](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html) ("DLS"). As such, we could consider enhancing the existing DLS feature to fit our needs. This would involve considerable work from the Elasticsearch security team before we could consider this, and may not scale to subsequent phases of OLS.
+
+# 6. Adoption strategy
+
+Adoption for net-new features is hopefully straightforward. Like most saved object features, the saved objects service will transparently handle all authorization and auditing of these objects, so long as they are properly registered.
+
+Adoption for existing features (public saved object types) is not addressed in this first phase.
+
+# 7. How we teach this
+
+Updates to the saved object service's documentation to describe the different `classification`s would be required. Like other saved object security controls, we want to ensure that engineers understand that this only "works" when the security wrapper is applied. Creating a bespoke instance of the saved objects client, or using the raw repository will intentionally bypass these authorization checks.
+
+# 8. Unresolved questions
+
+## 8.1 `acl.owner`
+
+The `acl.owner` property will uniquely identify the owner of each `private` saved object. We are still iterating with the Elasticsearch security team on what this value will ultimately look like. It is highly likely that this will not be a human-readable piece of text, but rather a GUID-style identifier.
+
+## 8.2 Authorization for private objects
+
+The user identified by `acl.owner` will be authorized for all operations against that instance, provided they pass the existing type/space/action authorization checks.
+
+In addition to the object owner, we also need to allow administrators to manage these saved objects. This is beneficial if they need to perform a bulk import/export of private objects, or if they wish to remove private objects from users that no longer exist. The open question is: **who counts as an administrator?**
+
+We have historically used the `Saved Objects Management` feature for these administrative tasks. This feature grants access to all saved objects, even if you're not authorized to access the "owning" application. Do we consider this privilege sufficient to see and potentially manipulate private saved objects?
+
+
+
+
+
