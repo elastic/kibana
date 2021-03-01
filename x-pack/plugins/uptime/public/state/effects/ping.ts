@@ -6,14 +6,7 @@
  */
 
 import { takeLatest } from 'redux-saga/effects';
-import {
-  getPingHistogram,
-  getPingHistogramSuccess,
-  getPingHistogramFail,
-  getPings,
-  getPingsSuccess,
-  getPingsFail,
-} from '../actions';
+import { getPingHistogram, getPings, getPingsSuccess, getPingsFail } from '../actions';
 import { fetchPingHistogram, fetchPings } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
@@ -23,7 +16,7 @@ export function* fetchPingsEffect() {
 
 export function* fetchPingHistogramEffect() {
   yield takeLatest(
-    String(getPingHistogram),
-    fetchEffectFactory(fetchPingHistogram, getPingHistogramSuccess, getPingHistogramFail)
+    String(getPingHistogram.get),
+    fetchEffectFactory(fetchPingHistogram, getPingHistogram.success, getPingHistogram.fail)
   );
 }
