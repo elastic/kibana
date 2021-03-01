@@ -20,11 +20,13 @@ interface Props {
     geoFieldTypes,
     importer,
     indexName,
+    previewCoverage,
   }: {
     features: Feature[];
     indexName: string;
     importer: GeoJsonImporter;
     geoFieldTypes: string[];
+    previewCoverage: number;
   }) => void;
   onClear: () => void;
 }

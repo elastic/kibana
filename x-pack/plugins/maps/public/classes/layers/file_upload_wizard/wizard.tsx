@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
@@ -70,7 +71,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
   }
 
-  _onFileUpload = (geojsonFile: FeatureCollection, name: string) => {
+  _onFileUpload = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
       return;
     }
@@ -80,8 +81,19 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
+    const areResultsTrimmed = previewCoverage < 100;
     const sourceDescriptor = GeoJsonFileSource.createDescriptor({
       __featureCollection: geojsonFile,
+      areResultsTrimmed,
+      tooltipContent: areResultsTrimmed
+        ? i18n.translate('xpack.maps.fileUpload.trimmedResultsMsg', {
+            defaultMessage: `Results limited to {numFeatures} features, {previewCoverage}% of file.`,
+            values: {
+              numFeatures: geojsonFile.features.length,
+              previewCoverage,
+            },
+          })
+        : null,
       name,
     });
     const layerDescriptor = VectorLayer.createDescriptor(

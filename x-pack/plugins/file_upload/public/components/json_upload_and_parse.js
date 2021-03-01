@@ -201,7 +201,7 @@ export class JsonUploadAndParse extends Component {
     });
   };
 
-  _onFileSelect = ({ features, geoFieldTypes, importer, indexName }) => {
+  _onFileSelect = ({ features, geoFieldTypes, importer, indexName, previewCoverage }) => {
     this._geojsonImporter = importer;
 
     const newState = {
@@ -225,7 +225,8 @@ export class JsonUploadAndParse extends Component {
         type: 'FeatureCollection',
         features,
       },
-      indexName
+      indexName,
+      previewCoverage
     );
   };
 
