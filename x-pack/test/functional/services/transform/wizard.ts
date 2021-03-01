@@ -314,11 +314,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertRuntimeMappingsEditorSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState =
-        (await testSubjects.getAttribute(
-          'transformAdvancedRuntimeMappingsEditorSwitch',
-          'aria-checked'
-        )) === 'true';
+      const actualCheckState = await this.getRuntimeMappingsEditorSwitchCheckedState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Advanced runtime mappings editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
