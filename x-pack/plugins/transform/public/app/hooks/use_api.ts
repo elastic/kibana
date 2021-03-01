@@ -205,7 +205,6 @@ export const useApi = () => {
             body: JSON.stringify({
               query,
               fields,
-              runtimeMappings,
               samplerShardSize,
               ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
             }),
