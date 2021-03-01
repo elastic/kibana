@@ -448,6 +448,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Clear the value
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
+
+        // Make sure the toast button closes so the save button on the sticky footer is visible
+        await (await testSubjects.find('toastCloseButton')).click();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
