@@ -117,7 +117,7 @@ export const MetaEngineCreationLogic = kea<
       });
 
       try {
-        const response = await http.post('/api/app_search/engines', { body });
+        await http.post('/api/app_search/engines', { body });
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
