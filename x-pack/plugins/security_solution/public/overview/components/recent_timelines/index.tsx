@@ -113,7 +113,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filte
         <RecentTimelines
           noTimelinesMessage={noTimelinesMessage}
           onOpenTimeline={onOpenTimeline}
-          timelines={timelines}
+          timelines={timelines ?? []}
         />
       )}
       <EuiHorizontalRule margin="s" />
