@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
-import { CopyToSpaceForm } from './copy_to_space_form';
-import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { findTestSubject } from '@kbn/test/jest';
-import { SelectableSpacesControl } from './selectable_spaces_control';
-import { CopyModeControl } from './copy_mode_control';
 import { act } from '@testing-library/react';
-import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { ToastsApi } from 'src/core/public';
-import { SavedObjectTarget } from '../types';
+import type { SavedObjectTarget } from '../types';
+import { CopyModeControl } from './copy_mode_control';
+import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
+import { CopyToSpaceForm } from './copy_to_space_form';
+import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -32,13 +33,14 @@ const setup = async (opts: SetupOpts = {}) => {
 
   const mockSpacesManager = spacesManagerMock.create();
 
-  mockSpacesManager.getActiveSpace.mockResolvedValue({
+  const getActiveSpace = Promise.resolve({
     id: 'my-active-space',
     name: 'my active space',
     disabledFeatures: [],
   });
+  mockSpacesManager.getActiveSpace.mockReturnValue(getActiveSpace);
 
-  mockSpacesManager.getSpaces.mockResolvedValue(
+  const getSpaces = Promise.resolve(
     opts.mockSpaces || [
       {
         id: 'space-1',
@@ -62,11 +64,18 @@ const setup = async (opts: SetupOpts = {}) => {
       },
     ]
   );
+  mockSpacesManager.getSpaces.mockReturnValue(getSpaces);
 
-  const mockToastNotifications = {
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
+  const { getStartServices } = coreMock.createSetup();
+  const startServices = coreMock.createStart();
+  startServices.application.capabilities = {
+    ...startServices.application.capabilities,
+    spaces: { manage: true },
   };
+  const mockToastNotifications = startServices.notifications.toasts;
+  const getStartServicesPromise = Promise.resolve<any>([startServices, , ,]);
+  getStartServices.mockReturnValue(getStartServicesPromise);
+
   const savedObjectToCopy = {
     type: 'dashboard',
     id: 'my-dash',
@@ -75,21 +84,29 @@ const setup = async (opts: SetupOpts = {}) => {
     title: 'foo',
   } as SavedObjectTarget;
 
+  const SpacesContext = await getSpacesContextProviderWrapper({
+    getStartServices,
+    spacesManager: mockSpacesManager,
+  });
+  const CopyToSpaceFlyout = await getCopyToSpaceFlyoutComponent();
+
   const wrapper = mountWithIntl(
-    <CopySavedObjectsToSpaceFlyout
-      savedObjectTarget={savedObjectToCopy}
-      spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
-      onClose={onClose}
-    />
+    <SpacesContext>
+      <CopyToSpaceFlyout savedObjectTarget={savedObjectToCopy} onClose={onClose} />
+    </SpacesContext>
   );
 
+  // wait for context wrapper to rerender
+  await act(async () => {
+    await getStartServicesPromise;
+    wrapper.update();
+  });
+
+  await getActiveSpace;
+  await getSpaces;
   if (!opts.returnBeforeSpacesLoad) {
-    // Wait for spaces manager to complete and flyout to rerender
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    // rerender after spaces manager API calls are completed
+    wrapper.update();
   }
 
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
@@ -103,10 +120,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
