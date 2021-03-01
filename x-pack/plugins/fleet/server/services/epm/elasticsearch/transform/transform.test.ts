@@ -20,12 +20,7 @@ jest.mock('./common', () => {
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
 import { installTransform } from './install';
-import {
-  ElasticsearchClient,
-  ILegacyScopedClusterClient,
-  SavedObject,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
@@ -36,15 +31,10 @@ import { elasticsearchClientMock } from '../../../../../../../../src/core/server
 import { appContextService } from '../../../app_context';
 
 describe('test transform install', () => {
-  let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let esClient: DeeplyMockedKeys<ElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    legacyScopedClusterClient = {
-      callAsInternalUser: jest.fn(),
-      callAsCurrentUser: jest.fn(),
-    };
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
@@ -302,7 +292,7 @@ describe('test transform install', () => {
         attributes: { installed_es: [] },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
+
     await installTransform(
       ({
         name: 'endpoint',
