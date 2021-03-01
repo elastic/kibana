@@ -169,6 +169,12 @@ export interface PluginManifest {
    * @deprecated
    */
   readonly extraPublicDirs?: string[];
+
+  /**
+   * Only used for the automatically generated API documentation. Specifying service
+   * folders will cause your plugin API reference to be broken up into sub sections.
+   */
+  readonly serviceFolders?: readonly string[];
 }
 
 /**

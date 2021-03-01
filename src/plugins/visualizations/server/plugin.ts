@@ -63,6 +63,7 @@ export class VisualizationsPlugin
           }
         ),
         value: false,
+        requiresPageReload: true,
         description: i18n.translate(
           'visualizations.advancedSettings.visualization.legacyChartsLibrary.description',
           {

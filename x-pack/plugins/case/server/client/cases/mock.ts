@@ -11,6 +11,7 @@ import {
   ConnectorMappingsAttributes,
   CaseUserActionsResponse,
   AssociationType,
+  CommentResponseAlertsType,
 } from '../../../common/api';
 
 import { BasicParams } from './types';
@@ -74,6 +75,20 @@ export const commentAlert: CommentResponse = {
     username: 'elastic',
   },
   version: 'WzEsMV0=',
+};
+
+export const commentAlertMultipleIds: CommentResponseAlertsType = {
+  ...commentAlert,
+  id: 'mock-comment-2',
+  alertId: ['alert-id-1', 'alert-id-2'],
+  index: 'alert-index-1',
+  type: CommentType.alert as const,
+};
+
+export const commentGeneratedAlert: CommentResponseAlertsType = {
+  ...commentAlertMultipleIds,
+  id: 'mock-comment-3',
+  type: CommentType.generatedAlert as const,
 };
 
 export const defaultPipes = ['informationCreated'];
