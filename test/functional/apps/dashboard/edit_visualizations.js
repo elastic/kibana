@@ -110,6 +110,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 
