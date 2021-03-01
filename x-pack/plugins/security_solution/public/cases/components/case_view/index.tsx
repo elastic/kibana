@@ -236,7 +236,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       connector: {
         ...caseData.connector,
-        name: isEmpty(caseData.connector.name) ? connectorName : caseData.connector.name,
+        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
       },
       caseServices,
       caseId: caseData.id,
