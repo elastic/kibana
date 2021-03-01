@@ -23,7 +23,7 @@ import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type {
-  PluginSetupContract as FeaturesSetupContract,
+  PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
@@ -59,7 +59,7 @@ export type SpacesService = Pick<
 >;
 
 export type FeaturesService = Pick<
-  FeaturesSetupContract,
+  FeaturesPluginSetup,
   'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
