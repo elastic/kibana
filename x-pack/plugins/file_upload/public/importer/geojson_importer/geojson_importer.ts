@@ -24,6 +24,7 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { ImportFailure, ImportResponse, MB } from '../../../common';
 
+const IMPORT_CHUNK_SIZE_MB = 10 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export class GeoJsonImporter extends Importer {
@@ -87,16 +88,12 @@ export class GeoJsonImporter extends Importer {
       };
     }
 
-    const ingestPipeline = {
-      id: pipelineId,
-    };
-
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
 
     while (this._features.length > 0 || (this._hasNext && this._isActive)) {
-      await this._readUntil(undefined, 10 * MB);
+      await this._readUntil(undefined, IMPORT_CHUNK_SIZE_MB);
       if (!this._isActive) {
         return {
           success: false,
@@ -127,7 +124,9 @@ export class GeoJsonImporter extends Importer {
             data,
             settings: {},
             mappings: {},
-            ingestPipeline,
+            ingestPipeline: {
+              id: pipelineId,
+            },
           });
 
           if (retries < IMPORT_RETRIES) {
