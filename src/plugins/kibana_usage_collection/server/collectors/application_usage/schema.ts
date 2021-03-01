@@ -11,26 +11,43 @@ import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_c
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
-  viewId: { type: 'keyword', _meta: { description: 'The application view being tracked' } },
-  clicks_total: { type: 'long', _meta: { description: 'Total clicks for the active application' } },
-  clicks_7_days: { type: 'long', _meta: { description: 'Total clicks over the last 7 days' } },
-  clicks_30_days: { type: 'long', _meta: { description: 'Total clicks over the last 30 days' } },
-  clicks_90_days: { type: 'long', _meta: { description: 'Total clicks over the last 90 days' } },
+  viewId: { type: 'keyword', _meta: { description: 'Always `main`' } },
+  clicks_total: {
+    type: 'long',
+    _meta: {
+      description: 'General number of clicks in the application since we started counting them',
+    },
+  },
+  clicks_7_days: {
+    type: 'long',
+    _meta: { description: 'General number of clicks in the application over the last 7 days' },
+  },
+  clicks_30_days: {
+    type: 'long',
+    _meta: { description: 'General number of clicks in the application over the last 30 days' },
+  },
+  clicks_90_days: {
+    type: 'long',
+    _meta: { description: 'General number of clicks in the application over the last 90 days' },
+  },
   minutes_on_screen_total: {
     type: 'float',
-    _meta: { description: 'Total minutes on screen for the active application' },
+    _meta: {
+      description:
+        'Minutes the application is active and on-screen since we started counting them.',
+    },
   },
   minutes_on_screen_7_days: {
     type: 'float',
-    _meta: { description: 'Total minutes on screen over the last 7 days' },
+    _meta: { description: 'Minutes the application is active and on-screen over the last 7 days' },
   },
   minutes_on_screen_30_days: {
     type: 'float',
-    _meta: { description: 'Total minutes on screen over the last 30 days' },
+    _meta: { description: 'Minutes the application is active and on-screen over the last 30 days' },
   },
   minutes_on_screen_90_days: {
     type: 'float',
-    _meta: { description: 'Total minutes on screen over the last 90 days' },
+    _meta: { description: 'Minutes the application is active and on-screen over the last 90 days' },
   },
   views: {
     type: 'array',
@@ -39,49 +56,58 @@ const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
       viewId: { type: 'keyword', _meta: { description: 'The application view being tracked' } },
       clicks_total: {
         type: 'long',
-        _meta: { description: 'Total clicks for the active application sub view' },
+        _meta: {
+          description:
+            'General number of clicks in the application sub view since we started counting them',
+        },
       },
       clicks_7_days: {
         type: 'long',
         _meta: {
-          description: 'Total clicks for the active application sub view over the last 7 days',
+          description:
+            'General number of clicks in the active application sub view over the last 7 days',
         },
       },
       clicks_30_days: {
         type: 'long',
         _meta: {
-          description: 'Total clicks for the active application sub view over the last 30 days',
+          description:
+            'General number of clicks in the active application sub view over the last 30 days',
         },
       },
       clicks_90_days: {
         type: 'long',
         _meta: {
-          description: 'Total clicks for the active application sub view over the last 90 days',
+          description:
+            'General number of clicks in the active application sub view over the last 90 days',
         },
       },
       minutes_on_screen_total: {
         type: 'float',
-        _meta: { description: 'Total minutes on screen for the active application sub view' },
+        _meta: {
+          description:
+            'Minutes the application sub view is active and on-screen since we started counting them.',
+        },
       },
       minutes_on_screen_7_days: {
         type: 'float',
         _meta: {
           description:
-            'Total minutes on screen for the active application sub view over the last 7 days',
+            'Minutes the application is active and on-screen active application sub view over the last 7 days',
         },
       },
       minutes_on_screen_30_days: {
         type: 'float',
         _meta: {
           description:
-            'Total minutes on screen for the active application sub view over the last 30 days',
+            'Minutes the application is active and on-screen active application sub view over the last 30 days',
         },
       },
       minutes_on_screen_90_days: {
         type: 'float',
         _meta: {
           description:
-            'Total minutes on screen for the active application sub view over the last 90 days',
+            'Minutes the application is active and on-screen active application sub view over the last 90 days',
         },
       },
     },
