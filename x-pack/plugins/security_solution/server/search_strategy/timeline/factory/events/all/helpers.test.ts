@@ -99,7 +99,7 @@ describe('#formatTimelineData', () => {
     });
   });
 
-  it('rule signal results', () => {
+  it('rule signal results', async () => {
     const response: EventHit = {
       _index: '.siem-signals-patrykkopycinski-default-000007',
       _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
@@ -267,7 +267,7 @@ describe('#formatTimelineData', () => {
     };
 
     expect(
-      formatTimelineData(
+      await formatTimelineData(
         ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
         TIMELINE_EVENTS_FIELDS,
         response

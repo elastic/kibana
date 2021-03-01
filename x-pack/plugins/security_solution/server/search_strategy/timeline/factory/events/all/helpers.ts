@@ -108,7 +108,7 @@ const mergeTimelineFieldsWithHit = async <T>(
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
     const fieldNameAsArray = fieldName.split('.');
-    const nestedParentFieldName = Object.keys(hit.fields).find((f) => {
+    const nestedParentFieldName = Object.keys(hit.fields ?? []).find((f) => {
       return f === fieldNameAsArray.slice(0, f.split('.').length).join('.');
     });
     if (

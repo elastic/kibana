@@ -379,8 +379,8 @@ const EXPECTED_DATA = [
   {
     category: 'source',
     field: 'source.geo.location',
-    values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
+    values: ['{"lon":-122.3341,"lat":47.6103}'],
+    originalValue: ['{"lon":-122.3341,"lat":47.6103}'],
     isObjectArray: true,
   },
   {
@@ -611,8 +611,8 @@ const EXPECTED_DATA = [
   {
     category: 'traefik',
     field: 'traefik.access.geoip.location',
-    values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
+    values: ['{"lon":-122.3341,"lat":47.6103}'],
+    originalValue: ['{"lon":-122.3341,"lat":47.6103}'],
     isObjectArray: true,
   },
   {
