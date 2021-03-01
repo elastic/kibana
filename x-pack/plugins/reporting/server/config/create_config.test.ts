@@ -24,6 +24,7 @@ describe('Reporting server createConfig$', () => {
     mockLogger = ({
       warn: jest.fn(),
       debug: jest.fn(),
+      info: jest.fn(),
       clone: jest.fn().mockImplementation(() => mockLogger),
     } as unknown) as LevelLogger;
   });
@@ -111,7 +112,8 @@ describe('Reporting server createConfig$', () => {
   it('show warning when kibanaServer.hostName === "0"', async () => {
     mockInitContext = coreMock.createPluginInitializerContext({
       encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
-      kibanaServer: { hostname: '0' },
+      kibanaServer: { hostname: '0', port: 5601 },
+      capture: { browser: { chromium: {} } },
     });
     const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
