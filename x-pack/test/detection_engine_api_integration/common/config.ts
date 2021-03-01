@@ -47,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: [require.resolve(`../${name}/tests/create_machine_learning`)],
       servers,
       services,
       junit: {

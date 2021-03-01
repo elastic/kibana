@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  createListsIndex,
+  deleteAllExceptions,
+  deleteListsIndex,
+} from '../../../lists_api_integration/utils';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import {
@@ -30,18 +35,28 @@ import {
   waitForAlertToComplete,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
+  createSavedQuery,
+  deleteAllSavedQueries,
+  createRule,
+  getSignalsById,
+  createRuleWithExceptionEntries,
+  getSavedQueryRuleForSignalTesting,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
+
+const SAVED_QUERY_ID = 'host_saved_query_id';
+const SAVED_QUERY = 'host.name:"host_1';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
-  describe('create_rules', () => {
+  describe('create_custom_rule', () => {
     describe('validation errors', () => {
       it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
         const { body } = await supertest
@@ -341,6 +356,99 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(statusBody[bodyId].current_status.status).to.eql('warning');
+      });
+    });
+
+    describe('signal testing', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+        await createListsIndex(supertest);
+        await createSavedQuery(supertest, SAVED_QUERY_ID, SAVED_QUERY);
+        await esArchiver.load('rules');
+      });
+
+      afterEach(async () => {
+        await deleteAllSavedQueries(supertest);
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await deleteAllExceptions(es);
+        await deleteListsIndex(supertest);
+        await esArchiver.unload('rules');
+      });
+
+      it('should generate an alert that matches query', async () => {
+        const rule = getRuleForSignalTesting(['basic'], 'rule-1', true, 'host.name: "host_1"');
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const hosts = signalsOpen.hits.hits.map((hit) => hit._source['host.name']).sort();
+        expect(hosts).to.eql(['host_1', 'host_1']);
+      });
+
+      it('should generate an alert that matches query + exceptions', async () => {
+        const rule = getRuleForSignalTesting(['basic'], 'rule-1', true, 'host.name: "host_1"');
+        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          [
+            {
+              field: 'host.ip',
+              operator: 'included',
+              type: 'match',
+              value: '192.164.1.100',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, id);
+        const hosts = signalsOpen.hits.hits.map((hit) => hit._source['host.ip']).sort();
+        expect(hosts).to.eql([['192.168.1.100']]);
+      });
+
+      describe('with saved query', () => {
+        it('should generate an alert that matches saved query', async () => {
+          const rule = getSavedQueryRuleForSignalTesting(
+            ['basic'],
+            SAVED_QUERY_ID,
+            SAVED_QUERY,
+            'rule-1',
+            true
+          );
+          console.log('RULE', rule);
+          const { id } = await createRule(supertest, rule);
+          console.log('RULE ID', id);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, id);
+          const hosts = signalsOpen.hits.hits.map((hit) => hit._source['host.name']).sort();
+          console.log('HOSTS', hosts);
+          expect(hosts).to.eql(['host_1', 'host_1']);
+        });
+
+        it('should generate an alert that matches saved query + exceptions', async () => {
+          const rule = getSavedQueryRuleForSignalTesting(
+            ['basic'],
+            SAVED_QUERY_ID,
+            SAVED_QUERY,
+            'rule-1',
+            true
+          );
+          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'host.ip',
+                operator: 'included',
+                type: 'match',
+                value: '192.164.1.100',
+              },
+            ],
+          ]);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, id);
+          const hosts = signalsOpen.hits.hits.map((hit) => hit._source['host.ip']).sort();
+          expect(hosts).to.eql([['192.168.1.100']]);
+        });
       });
     });
   });

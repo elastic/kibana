@@ -19,6 +19,7 @@ import {
   UpdateRulesSchema,
   FullResponseSchema,
   QueryCreateSchema,
+  SavedQueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
@@ -99,6 +100,23 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 });
 
 /**
+ * This is a typical saved query rule for testing
+ * @param ruleId
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getSavedQueryRule = (ruleId = 'rule-1', enabled = true): QueryCreateSchema => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index: ['auditbeat-*'],
+  type: 'saved_query',
+  query: 'user.name: root or user.name: admin',
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
  * It starts out in an enabled true state. The from is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
@@ -108,7 +126,8 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 export const getRuleForSignalTesting = (
   index: string[],
   ruleId = 'rule-1',
-  enabled = true
+  enabled = true,
+  query = '*:*'
 ): QueryCreateSchema => ({
   name: 'Signal Testing Query',
   description: 'Tests a simple query',
@@ -118,7 +137,34 @@ export const getRuleForSignalTesting = (
   severity: 'high',
   index,
   type: 'query',
-  query: '*:*',
+  query,
+  from: '1900-01-01T00:00:00.000Z',
+});
+
+/**
+ * This is a typical signal testing rule that is easy for most basic testing of output of signals.
+ * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * creation and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is rule-1 by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getSavedQueryRuleForSignalTesting = (
+  index: string[],
+  savedId: string,
+  query: string,
+  ruleId = 'rule-1',
+  enabled = true
+): SavedQueryCreateSchema => ({
+  name: 'Signal Testing Saved Query',
+  description: 'Tests a simple saved query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index,
+  type: 'saved_query',
+  saved_id: savedId,
+  query,
   from: '1900-01-01T00:00:00.000Z',
 });
 
@@ -163,7 +209,11 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateR
  * @param ruleId The rule id
  * @param enabled Set to tru to enable it, by default it is off
  */
-export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRulesSchema => ({
+export const getSimpleMlRule = (
+  ruleId = 'rule-1',
+  enabled = false,
+  jobId = 'some_job_id'
+): CreateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   enabled,
@@ -171,7 +221,7 @@ export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRules
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: jobId,
   type: 'machine_learning',
 });
 
@@ -361,7 +411,6 @@ export const deleteAllAlerts = async (
         .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
         .set('kbn-xsrf', 'true')
         .send();
-
       const ids = body.data.map((rule: FullResponseSchema) => ({
         id: rule.id,
       }));
@@ -375,9 +424,44 @@ export const deleteAllAlerts = async (
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
         .send();
+
       return finalCheck.data.length === 0;
     },
     'deleteAllAlerts',
+    50,
+    1000
+  );
+};
+
+export const deleteAllSavedQueries = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const { body } = await supertest
+        .get('/api/kibana/management/saved_objects/_find?perPage=50&page=1&fields=id&type=query')
+        .set('kbn-xsrf', 'true')
+        .send();
+
+      const ids = body.saved_objects.map(({ id }) => id);
+
+      await Promise.all(
+        ids.map((so) =>
+          supertest
+            .delete(`/api/saved_objects/query/${so}?force=true`)
+            .send(ids)
+            .set('kbn-xsrf', 'true')
+            .expect(200)
+        )
+      );
+
+      const { body: finalCheck } = await supertest
+        .get('/api/kibana/management/saved_objects/_find?perPage=50&page=1&fields=id&type=query')
+        .set('kbn-xsrf', 'true')
+        .send();
+      return finalCheck.total === 0;
+    },
+    'deleteAllSavedQueries',
     50,
     1000
   );
@@ -1104,7 +1188,7 @@ export const installPrePackagedRules = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: QueryCreateSchema,
+  rule: QueryCreateSchema | SavedQueryCreateSchema,
   entries: NonEmptyEntriesArray[]
 ): Promise<FullResponseSchema> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1138,7 +1222,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: QueryCreateSchema = {
+  const ruleWithException: QueryCreateSchema | SavedQueryCreateSchema = {
     ...rule,
     enabled: false,
     exceptions_list: [
@@ -1198,4 +1282,30 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+/**
+ * Creates the signals index for use inside of beforeEach blocks of tests
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * @param supertest The supertest client library
+ */
+export const createSavedQuery = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  title: string,
+  query = 'host.name:*'
+): Promise<void> => {
+  await countDownTest(async () => {
+    await supertest
+      .post(`/api/saved_objects/query/${title}`)
+      .set('kbn-xsrf', 'true')
+      .send({
+        attributes: {
+          description: '',
+          filters: [],
+          query: { query, language: 'kuery' },
+          title,
+        },
+      });
+    return true;
+  }, 'createSavedQuery');
 };
