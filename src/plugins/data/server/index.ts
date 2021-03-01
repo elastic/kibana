@@ -233,7 +233,6 @@ export {
   SearchUsage,
   SearchSessionService,
   ISearchSessionService,
-  SearchRequestHandlerContext,
 } from './search';
 
 export { DataRequestHandlerContext } from './types';
