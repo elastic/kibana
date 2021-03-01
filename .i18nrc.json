@@ -27,6 +27,7 @@
       "src/plugins/management"
     ],
     "maps_legacy": "src/plugins/maps_legacy",
+    "mlUtils": "packages/kbn-ml-utils",
     "monaco": "packages/kbn-monaco/src",
     "presentationUtil": "src/plugins/presentation_util",
     "indexPatternFieldEditor": "src/plugins/index_pattern_field_editor",
