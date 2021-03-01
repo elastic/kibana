@@ -23,6 +23,7 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { RuleTypeParams } from '../types';
 
 describe('buildRule', () => {
   beforeEach(() => {
@@ -104,6 +105,9 @@ describe('buildRule', () => {
       ],
       exceptions_list: getListArrayMock(),
       version: 1,
+      threat_filters: [],
+      threat_index: [],
+      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -162,6 +166,9 @@ describe('buildRule', () => {
       created_at: rule.created_at,
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
+      threat_filters: [],
+      threat_index: [],
+      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -220,6 +227,9 @@ describe('buildRule', () => {
       created_at: rule.created_at,
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
+      threat_filters: [],
+      threat_index: [],
+      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -282,8 +292,73 @@ describe('buildRule', () => {
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
       version: 1,
+      threat_filters: [],
+      threat_index: [],
+      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
+  });
+
+  test('it creates a indicator/threat_mapping/threat_matching rule', () => {
+    const ruleParams: RuleTypeParams = {
+      ...sampleRuleAlertParams(),
+      threatMapping: [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'host.name',
+              type: 'mapping',
+            },
+          ],
+        },
+      ],
+      threatFilters: [
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  query_string: {
+                    query: 'host.name: linux',
+                    analyze_wildcard: true,
+                    time_zone: 'Zulu',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+      threatIndicatorPath: 'some.path',
+      threatQuery: 'threat_query',
+      threatIndex: ['threat_index'],
+      threatLanguage: 'kuery',
+    };
+    const threatMatchRule = buildRule({
+      actions: [],
+      doc: sampleDocNoSortId(),
+      ruleParams,
+      name: 'some-name',
+      id: sampleRuleGuid,
+      enabled: false,
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: 'some interval',
+      tags: [],
+      throttle: 'no_actions',
+    });
+    const expected: Partial<RulesSchema> = {
+      threat_mapping: ruleParams.threatMapping,
+      threat_filters: ruleParams.threatFilters,
+      threat_indicator_path: ruleParams.threatIndicatorPath,
+      threat_query: ruleParams.threatQuery,
+      threat_index: ruleParams.threatIndex,
+      threat_language: ruleParams.threatLanguage,
+    };
+    expect(threatMatchRule).toEqual(expect.objectContaining(expected));
   });
 });
 
