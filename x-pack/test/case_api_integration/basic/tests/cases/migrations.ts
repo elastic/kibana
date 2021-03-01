@@ -15,7 +15,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('migrations', () => {
-    describe('7.10.0', () => {
+    // tests upgrading a 7.10.0 saved object to the latest version
+    describe('7.10.0 -> latest stack version', () => {
       before(async () => {
         await esArchiver.load('cases/migrations/7.10.0');
       });
@@ -55,7 +56,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('7.11.1', () => {
+    // tests upgrading a 7.11.1 saved object to the latest version
+    describe('7.11.1 -> latest stack version', () => {
       const caseID = '2ea28c10-7855-11eb-9ca6-83ec5acb735f';
       before(async () => {
         await esArchiver.load('cases/migrations/7.11.1');
@@ -65,7 +67,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         await esArchiver.unload('cases/migrations/7.11.1');
       });
 
-      it('adds rule info to only alert comments', async () => {
+      it('adds rule info to only alert comments for 7.12', async () => {
         // user comment
         let { body } = await supertest
           .get(`${CASES_URL}/${caseID}/comments/34a20a00-7855-11eb-9ca6-83ec5acb735f`)
