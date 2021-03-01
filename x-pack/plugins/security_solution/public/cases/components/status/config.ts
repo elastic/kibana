@@ -83,7 +83,7 @@ export const statuses: Statuses = {
   [CaseStatuses.closed]: {
     color: 'default',
     label: i18n.CLOSED,
-    icon: 'folderClosed' as const,
+    icon: 'folderCheck' as const,
     actions: {
       bulk: {
         title: i18n.BULK_ACTION_CLOSE_SELECTED,

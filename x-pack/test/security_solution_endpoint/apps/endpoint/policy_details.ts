@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/92567
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
     describe('with an invalid policy id', () => {
