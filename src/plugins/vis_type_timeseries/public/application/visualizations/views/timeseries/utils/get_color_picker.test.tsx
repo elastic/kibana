@@ -11,7 +11,7 @@ import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import { useColorPicker } from './use_color_picker';
+import { getColorPicker } from './get_color_picker';
 import type { PersistedState } from '../../../../../../../visualizations/public';
 import { ColorPicker } from '../../../../components/color_picker';
 import { PanelData } from '../../../../../../common/types';
@@ -46,7 +46,7 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-describe('useColorPicker', function () {
+describe('getColorPicker', function () {
   let wrapperProps: LegendColorPickerProps;
   const mockState = new Map();
   const uiState = ({
@@ -59,7 +59,7 @@ describe('useColorPicker', function () {
     on: jest.fn(),
     off: jest.fn(),
   } as unknown) as PersistedState;
-  const Component: ComponentType<LegendColorPickerProps> = useColorPicker(
+  const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
     'left',
     seriesWithTermsSplit,
     uiState

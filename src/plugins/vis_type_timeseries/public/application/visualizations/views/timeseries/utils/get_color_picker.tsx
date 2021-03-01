@@ -27,7 +27,7 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
-export const useColorPicker = (
+export const getColorPicker = (
   legendPosition: Position,
   series: PanelData[],
   uiState: PersistedState

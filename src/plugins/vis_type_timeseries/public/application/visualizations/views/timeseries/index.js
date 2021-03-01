@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -31,7 +31,7 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { useColorPicker } from './utils/use_color_picker';
+import { getColorPicker } from './utils/get_color_picker';
 import { emptyLabel } from '../../../../../common/empty_label';
 
 const generateAnnotationData = (values, formatter) =>
@@ -116,13 +116,19 @@ export const TimeSeries = ({
     };
   }, [uiState]);
 
+  const legendColorPicker = useMemo(() => getColorPicker(legendPosition, series, uiState), [
+    legendPosition,
+    series,
+    uiState,
+  ]);
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
-        legendColorPicker={useColorPicker(legendPosition, series, uiState)}
+        legendColorPicker={legendColorPicker}
         onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
