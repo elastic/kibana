@@ -14,18 +14,19 @@ import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/pub
 import { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
 import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
+import { TimeseriesVisParams } from '../types';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 
 export class EditorController implements IEditorController {
   constructor(
     private el: HTMLElement,
-    private vis: Vis,
+    private vis: Vis<TimeseriesVisParams>,
     private eventEmitter: EventEmitter,
     private embeddableHandler: VisualizeEmbeddableContract
   ) {}
 
-  render({ timeRange }: EditorRenderProps) {
+  render({ timeRange, uiState }: EditorRenderProps) {
     const I18nContext = getI18n().Context;
 
     render(
@@ -33,10 +34,10 @@ export class EditorController implements IEditorController {
         <VisEditor
           config={getUISettings()}
           vis={this.vis}
-          visParams={this.vis.params}
           timeRange={timeRange}
           embeddableHandler={this.embeddableHandler}
           eventEmitter={this.eventEmitter}
+          uiState={uiState}
         />
       </I18nContext>,
       this.el
