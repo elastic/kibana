@@ -108,6 +108,35 @@ test('#requestHeadersWhitelist accepts both string and array of strings', () => 
   expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
+describe('reserved headers', () => {
+  test('throws if customHeaders contains reserved headers', () => {
+    expect(() => {
+      config.schema.validate({
+        customHeaders: { foo: 'bar', 'x-elastic-product-origin': 'beats' },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]"`
+    );
+  });
+
+  test('throws if requestHeadersWhitelist contains reserved headers', () => {
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: ['foo', 'x-elastic-product-origin'] });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: expected value of type [string] but got [Array]
+      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]"
+    `);
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: 'x-elastic-product-origin' });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-product-origin]
+      - [requestHeadersWhitelist.1]: could not parse array value from json input"
+    `);
+  });
+});
+
 describe('reads files', () => {
   beforeEach(() => {
     mockReadFileSync.mockReset();

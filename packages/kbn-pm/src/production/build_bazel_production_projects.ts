@@ -60,8 +60,16 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
+  const bazelFilesToExclude = [
+    '!*.sh.runfiles*',
+    '!*.params',
+    '!*_mappings.json',
+    '!*_options.optionsvalid.d.ts',
+    '!*_loader.js',
+    '!*_require_patch.js',
+    '!*.sh',
+  ];
 
-  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
   await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
     cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
     dot: true,
