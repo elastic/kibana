@@ -24,7 +24,6 @@ import {
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
-// @ts-expect-error
 import { injectReferences } from '././../../common/migrations/references';
 
 interface Settings {
@@ -314,7 +313,10 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
     MAP_SAVED_OBJECT_TYPE,
     (savedObjects) => {
       const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
-        return injectReferences(savedObject);
+        return {
+          ...savedObject,
+          ...injectReferences(savedObject),
+        };
       });
       return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
     }
