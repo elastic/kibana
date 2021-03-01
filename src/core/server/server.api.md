@@ -990,6 +990,7 @@ export type Headers = {
 export interface HttpAuth {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
+    isEnabled: () => boolean;
 }
 
 // @public
@@ -1019,6 +1020,7 @@ export interface HttpResourcesServiceToolkit {
 // @public
 export interface HttpResponseOptions {
     body?: HttpResponsePayload;
+    etag?: string;
     headers?: ResponseHeaders;
 }
 
@@ -1976,7 +1978,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean | 'optional';
+    authRequired?: boolean | 'optional' | 'try';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
     timeout?: {
@@ -3198,7 +3200,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/http/router/response.ts:299:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:289:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts

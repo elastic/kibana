@@ -17,5 +17,6 @@ export interface HttpResponseOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [body](./kibana-plugin-core-server.httpresponseoptions.body.md) | <code>HttpResponsePayload</code> | HTTP message to send to the client |
+|  [etag](./kibana-plugin-core-server.httpresponseoptions.etag.md) | <code>string</code> | HTTP ETag value for the response |
 |  [headers](./kibana-plugin-core-server.httpresponseoptions.headers.md) | <code>ResponseHeaders</code> | HTTP Headers with additional information about response |
 
