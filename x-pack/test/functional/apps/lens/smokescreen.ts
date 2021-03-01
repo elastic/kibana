@@ -447,7 +447,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
-        dimension: 'lnsDatatable_column > lns-empty-dimension',
+        dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
