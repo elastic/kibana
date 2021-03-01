@@ -1776,3 +1776,51 @@ describe('Response factory', () => {
     });
   });
 });
+
+describe('ETag', () => {
+  it('returns the `etag` header', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          etag: 'etag-1',
+        })
+    );
+
+    await server.start();
+    const response = await supertest(innerServer.listener)
+      .get('/route')
+      .expect(200, { foo: 'bar' });
+    expect(response.get('etag')).toEqual('"etag-1"');
+  });
+
+  it('returns a 304 when the etag value matches', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          etag: 'etag-1',
+        })
+    );
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .get('/route')
+      .set('If-None-Match', '"etag-1"')
+      .expect(304, '');
+  });
+});
