@@ -8,42 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { CaseType } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
-
-async function unremovableCases({
-  caseService,
-  client,
-  ids,
-  force,
-}: {
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
-  ids: string[];
-  force: boolean | undefined;
-}): Promise<string[]> {
-  // if the force flag was included then we can skip checking whether the cases are collections and go ahead
-  // and delete them
-  if (force) {
-    return [];
-  }
-
-  const cases = await caseService.getCases({ caseIds: ids, client });
-  const parentCases = cases.saved_objects.filter(
-    /**
-     * getCases will return an array of saved_objects and some can be successful cases where as others
-     * might have failed to find the ID. If it fails to find it, it will set the error field but not
-     * the attributes so check that we didn't receive an error.
-     */
-    (caseObj) => !caseObj.error && caseObj.attributes.type === CaseType.collection
-  );
-
-  return parentCases.map((parentCase) => parentCase.id);
-}
 
 async function deleteSubCases({
   caseService,
@@ -77,32 +46,19 @@ async function deleteSubCases({
   );
 }
 
-export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,
       validate: {
         query: schema.object({
           ids: schema.arrayOf(schema.string()),
-          force: schema.maybe(schema.boolean()),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const unremovable = await unremovableCases({
-          caseService,
-          client,
-          ids: request.query.ids,
-          force: request.query.force,
-        });
-
-        if (unremovable.length > 0) {
-          return response.badRequest({
-            body: `Case IDs: [${unremovable.join(' ,')}] are not removable`,
-          });
-        }
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({
@@ -155,6 +111,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete cases in route ids: ${JSON.stringify(request.query.ids)}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

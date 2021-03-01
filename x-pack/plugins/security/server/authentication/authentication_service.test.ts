@@ -149,7 +149,6 @@ describe('AuthenticationService', () => {
         expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
         expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).not.toHaveBeenCalled();
       });
@@ -172,7 +171,6 @@ describe('AuthenticationService', () => {
           requestHeaders: mockAuthHeaders,
         });
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -201,7 +199,6 @@ describe('AuthenticationService', () => {
           responseHeaders: mockAuthResponseHeaders,
         });
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -223,7 +220,6 @@ describe('AuthenticationService', () => {
           'WWW-Authenticate': 'Negotiate',
         });
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
       });
 
       it('rejects with `Internal Server Error` and log error when `authenticate` throws unhandled exception', async () => {
@@ -231,15 +227,12 @@ describe('AuthenticationService', () => {
         const failureReason = new Error('something went wrong');
         authenticate.mockRejectedValue(failureReason);
 
-        await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
-
-        expect(mockResponse.internalError).toHaveBeenCalledTimes(1);
-        const [[error]] = mockResponse.internalError.mock.calls;
-        expect(error).toBeUndefined();
+        await expect(
+          authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit)
+        ).rejects.toThrow(failureReason);
 
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(logger.error).toHaveBeenCalledWith(failureReason);
       });
 
       it('rejects with original `badRequest` error when `authenticate` fails to authenticate user', async () => {

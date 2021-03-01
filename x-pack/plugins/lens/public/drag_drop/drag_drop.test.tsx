@@ -14,7 +14,7 @@ import {
   ReorderProvider,
   DragDropIdentifier,
   DraggingIdentifier,
-  DropTargets,
+  DropIdentifier,
 } from './providers';
 import { act } from 'react-dom/test-utils';
 import { DropType } from '../types';
@@ -32,6 +32,7 @@ describe('DragDrop', () => {
     setDragging: jest.fn(),
     setActiveDropTarget: jest.fn(),
     activeDropTarget: undefined,
+    dropTargetsByOrder: undefined,
     keyboardMode: false,
     setKeyboardMode: () => {},
     setA11yMessage: jest.fn(),
@@ -255,11 +256,10 @@ describe('DragDrop', () => {
           dragging = { id: '1', humanData: { label: 'Label1' } };
         }}
         setActiveDropTarget={setActiveDropTarget}
-        activeDropTarget={
-          ({ activeDropTarget: value } as unknown) as DragContextState['activeDropTarget']
-        }
+        activeDropTarget={value as DragContextState['activeDropTarget']}
         keyboardMode={false}
         setKeyboardMode={(keyboardMode) => true}
+        dropTargetsByOrder={undefined}
         registerDropTarget={jest.fn()}
       >
         <DragDrop
@@ -349,12 +349,10 @@ describe('DragDrop', () => {
           dragging: { ...items[0].value, ghost: { children: <div />, style: {} } },
           setActiveDropTarget,
           setA11yMessage,
-          activeDropTarget: {
-            activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
-            dropTargetsByOrder: {
-              '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
-              '2,0,2,0': { ...items[2].value, onDrop, dropType: 'replace_compatible' },
-            },
+          activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
+          dropTargetsByOrder: {
+            '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
+            '2,0,2,0': { ...items[2].value, onDrop, dropType: 'replace_compatible' },
           },
           keyboardMode: true,
         }}
@@ -463,11 +461,9 @@ describe('DragDrop', () => {
           dragging: { ...items[0].value, ghost: { children: <div>Hello</div>, style: {} } },
           setActiveDropTarget,
           setA11yMessage,
-          activeDropTarget: {
-            activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
-            dropTargetsByOrder: {
-              '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
-            },
+          activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
+          dropTargetsByOrder: {
+            '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
           },
           keyboardMode: true,
         }}
@@ -525,11 +521,12 @@ describe('DragDrop', () => {
           keyboardMode = mode;
         }),
         setActiveDropTarget: (target?: DragDropIdentifier) => {
-          activeDropTarget = { activeDropTarget: target } as DropTargets;
+          activeDropTarget = target as DropIdentifier;
         },
         activeDropTarget,
         setA11yMessage,
         registerDropTarget,
+        dropTargetsByOrder: undefined,
       };
 
       const dragDropSharedProps = {
@@ -665,13 +662,11 @@ describe('DragDrop', () => {
       const component = mountComponent({
         dragging: { ...items[0] },
         keyboardMode: true,
-        activeDropTarget: {
-          activeDropTarget: undefined,
-          dropTargetsByOrder: {
-            '2,0,0': undefined,
-            '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
-            '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
-          },
+        activeDropTarget: undefined,
+        dropTargetsByOrder: {
+          '2,0,0': undefined,
+          '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
+          '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
         },
         setActiveDropTarget,
         setA11yMessage,
@@ -693,15 +688,12 @@ describe('DragDrop', () => {
     test(`Keyboard navigation: user can drop element to an activeDropTarget`, () => {
       const component = mountComponent({
         dragging: { ...items[0] },
-        activeDropTarget: {
-          activeDropTarget: { ...items[2], dropType: 'reorder', onDrop },
-          dropTargetsByOrder: {
-            '2,0,0': { ...items[0], onDrop, dropType: 'reorder' },
-            '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
-            '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
-          },
+        activeDropTarget: { ...items[2], dropType: 'reorder', onDrop },
+        dropTargetsByOrder: {
+          '2,0,0': { ...items[0], onDrop, dropType: 'reorder' },
+          '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
+          '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
         },
-
         keyboardMode: true,
       });
       const keyboardHandler = component
@@ -747,13 +739,11 @@ describe('DragDrop', () => {
       const component = mountComponent({
         dragging: { ...items[0] },
         keyboardMode: true,
-        activeDropTarget: {
-          activeDropTarget: undefined,
-          dropTargetsByOrder: {
-            '2,0,0': undefined,
-            '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
-            '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
-          },
+        activeDropTarget: undefined,
+        dropTargetsByOrder: {
+          '2,0,0': undefined,
+          '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
+          '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
         },
         setA11yMessage,
       });
@@ -799,15 +789,13 @@ describe('DragDrop', () => {
           {...defaultContext}
           keyboardMode={true}
           activeDropTarget={{
-            activeDropTarget: {
-              ...items[1],
-              onDrop,
-              dropType: 'reorder',
-            },
-            dropTargetsByOrder: {
-              '2,0,1,0': undefined,
-              '2,0,1,1': { ...items[1], onDrop, dropType: 'reorder' },
-            },
+            ...items[1],
+            onDrop,
+            dropType: 'reorder',
+          }}
+          dropTargetsByOrder={{
+            '2,0,1,0': undefined,
+            '2,0,1,1': { ...items[1], onDrop, dropType: 'reorder' },
           }}
           dragging={{ ...items[0] }}
           setActiveDropTarget={setActiveDropTarget}

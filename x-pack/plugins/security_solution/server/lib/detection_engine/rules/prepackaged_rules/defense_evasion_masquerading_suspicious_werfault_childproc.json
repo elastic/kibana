@@ -9,7 +9,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -17,7 +18,8 @@
   "query": "event.category:process and event.type:(start or process_started) and process.parent.name:WerFault.exe and not process.name:(cofire.exe or psr.exe or VsJITDebugger.exe or TTTracer.exe or rundll32.exe)",
   "references": [
     "https://www.hexacorn.com/blog/2019/09/19/silentprocessexit-quick-look-under-the-hood/",
-    "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Persistence/persistence_SilentProcessExit_ImageHijack_sysmon_13_1.evtx"
+    "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Persistence/persistence_SilentProcessExit_ImageHijack_sysmon_13_1.evtx",
+    "https://blog.menasec.net/2021/01/"
   ],
   "risk_score": 47,
   "rule_id": "ac5012b8-8da8-440b-aaaf-aedafdea2dff",
@@ -48,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

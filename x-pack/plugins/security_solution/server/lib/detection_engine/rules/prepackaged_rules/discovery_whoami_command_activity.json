@@ -6,9 +6,11 @@
   "false_positives": [
     "Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by non-engineers and ordinary users is unusual."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -43,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Both ~/.bash_profile and ~/.bashrc are files containing shell commands that are run when Bash is invoked. These files are executed in a user's context, either interactively or non-interactively, when a user logs in so that their environment is set correctly. Adversaries may abuse this to establish persistence by executing malicious content triggered by a user\u2019s shell.",
+  "false_positives": [
+    "Changes to the Shell Profile tend to be noisy, a tuning per your environment will be required."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Bash Shell Profile Modification",
+  "query": "event.category:file and event.type:change and process.name:(* and not (sudo or vim or zsh or env or nano or bash or Terminal or xpcproxy or login or cat or cp or launchctl or java)) and not process.executable:(/Applications/* or /private/var/folders/* or /usr/local/*) and file.path:(/private/etc/rc.local or /etc/rc.local or /home/*/.profile or /home/*/.profile1 or /home/*/.bash_profile or /home/*/.bash_profile1 or /home/*/.bashrc or /Users/*/.bash_profile or /Users/*/.zshenv)",
+  "references": [
+    "https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat"
+  ],
+  "risk_score": 47,
+  "rule_id": "e6c1a552-7776-44ad-ae0f-8746cc07773c",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.004",
+              "name": ".bash_profile and .bashrc",
+              "reference": "https://attack.mitre.org/techniques/T1546/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

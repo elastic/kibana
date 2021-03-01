@@ -14,4 +14,11 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
+  webpackFinal: (config, options) => {
+    if (process.env.CI) {
+      config.parallelism = 4;
+      config.cache = true;
+    }
+    return config;
+  },
 };
