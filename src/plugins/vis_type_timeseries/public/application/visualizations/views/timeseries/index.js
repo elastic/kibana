@@ -9,7 +9,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 import { getSeriesColor } from '../../../components/lib/get_series_color';
 
@@ -33,6 +32,7 @@ import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
 import { useColorPicker } from './utils/use_color_picker';
+import { emptyLabel } from '../../../../../common/empty_label';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -236,12 +236,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={
-                  seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextValue', {
-                    defaultMessage: '(empty)',
-                  })
-                }
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -266,12 +261,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={
-                  seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextValue', {
-                    defaultMessage: '(empty)',
-                  })
-                }
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

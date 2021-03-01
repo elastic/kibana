@@ -757,7 +757,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
-          reloadAlerts={loadAlertsData}
+          onSave={loadAlertsData}
         />
       )}
     </section>

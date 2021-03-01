@@ -8,16 +8,15 @@ include::report-intervals.asciidoc[]
 [float]
 === Create a POST URL
 
-Create the POST
-URL that triggers a report to generate.
+Create the POST URL that triggers a report to generate PDF and CSV reports.
 
 To create the POST URL for PDF reports:
 
-. Open then main menu, click *Dashboard*, then open a dashboard.
-+
-To specify a relative or absolute time period, use the time filter.
+. Open the  dashboard, visualization, or **Canvas** workpad.
 
 . From the {kib} toolbar, click *Share*, then select *PDF Reports*.
+
+. If you are using **Canvas**,  click *Advanced options*.
 
 . Click *Copy POST URL*.
 +
@@ -27,9 +26,7 @@ image::images/report-automate-pdf.png[Generate Visualize and Dashboard reports]
 
 To create the POST URL for CSV reports:
 
-. Load the saved search in *Discover*.
-+
-To specify a relative or absolute time period, use the time filter.
+. In *Discover*, open the saved search.
 
 . From the {kib} toolbar, click *Share*, then select *CSV Reports*.
 

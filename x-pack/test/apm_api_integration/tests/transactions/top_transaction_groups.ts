@@ -24,7 +24,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
   const transactionType = 'request';
 
   registry.when(
@@ -33,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
@@ -51,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let response: any;
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&transactionType=${transactionType}`
         );
       });
 

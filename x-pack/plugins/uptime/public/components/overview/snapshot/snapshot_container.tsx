@@ -21,7 +21,7 @@ interface Props {
 }
 
 export const Snapshot: React.FC<Props> = ({ height }: Props) => {
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, query } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -31,7 +31,7 @@ export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getSnapshotCountAction({ dateRangeStart, dateRangeEnd, filters: esKuery }));
-  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch]);
+    dispatch(getSnapshotCountAction.get({ query, dateRangeStart, dateRangeEnd, filters: esKuery }));
+  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch, query]);
   return <SnapshotComponent count={count} height={height} loading={loading} />;
 };

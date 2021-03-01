@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const testSubjects = getService('testSubjects');
 
   describe('context link in discover', () => {
     before(async () => {
@@ -68,6 +69,30 @@ export default function ({ getService, getPageObjects }) {
         }
       }
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
+    });
+
+    // bugfix: https://github.com/elastic/kibana/issues/92099
+    it('should navigate to the first document and then back to discover', async () => {
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      // navigate to the doc view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
+
+      const hasDocHit = await testSubjects.exists('doc-hit');
+      expect(hasDocHit).to.be(true);
+
+      await testSubjects.click('breadcrumb first');
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
     });
   });
 }
