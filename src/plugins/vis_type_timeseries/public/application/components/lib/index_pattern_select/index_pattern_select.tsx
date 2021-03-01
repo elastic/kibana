@@ -50,11 +50,11 @@ export const IndexPatternSelect = ({
   );
 
   const onModeChange = useCallback(
-    (useKibanaIndexes: boolean) => {
+    (useKibanaIndexes: boolean, index?: IndexPatternObject) => {
       onChange({
         [USE_KIBANA_INDEXES_KEY]: useKibanaIndexes,
       });
-      setInputValue('');
+      setInputValue(index ?? '');
     },
     [onChange]
   );

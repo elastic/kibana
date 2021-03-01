@@ -24,7 +24,7 @@ export const FieldTextSelect = ({
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const textualValue = convertIndexPatternObjectToStringRepresentation(value);
-  const append = [<LegacyModePopover index={textualValue} />];
+  const append = [<LegacyModePopover index={textualValue} onModeChange={onModeChange} />];
 
   const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback(
     (e) => {

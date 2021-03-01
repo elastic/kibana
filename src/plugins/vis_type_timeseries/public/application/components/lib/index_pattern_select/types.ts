@@ -10,7 +10,7 @@ import type { IndexPatternObject } from '../../../../../common/types';
 export interface SelectIndexComponentProps {
   value: IndexPatternObject;
   onIndexChange: (value: IndexPatternObject) => void;
-  onModeChange: (useKibanaIndexes: boolean) => void;
+  onModeChange: (useKibanaIndexes: boolean, value?: IndexPatternObject) => void;
   'data-test-subj': string;
   placeholder?: string;
   disabled?: boolean;

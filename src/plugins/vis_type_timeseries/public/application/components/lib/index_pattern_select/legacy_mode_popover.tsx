@@ -11,10 +11,12 @@ import { EuiTextColor, EuiButtonIcon, EuiPopover, EuiButton, EuiCallOut } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../../../services';
+import type { IndexPatternObject } from '../../../../../common/types';
+import { SelectIndexComponentProps } from './types';
 
-interface LegacyModePopoverProps {
+type LegacyModePopoverProps = Pick<SelectIndexComponentProps, 'onModeChange'> & {
   index: string;
-}
+};
 
 const getDeprecationCallOut = () => (
   <EuiCallOut
@@ -34,7 +36,7 @@ const getDeprecationCallOut = () => (
   </EuiCallOut>
 );
 
-const getReadyToMigrateCallOut = (index: string) => (
+const getReadyToMigrateCallOut = (index: string, switchToUseKibanaIndices: () => void) => (
   <EuiCallOut
     title={i18n.translate('visTypeTimeseries.indexPatternSelect.readyToMigrateCallOut.title', {
       defaultMessage: 'You are ready for switching mode.',
@@ -52,6 +54,12 @@ const getReadyToMigrateCallOut = (index: string) => (
         }}
       />
     </p>
+    <EuiButton fullWidth={true} iconType="gear" size="s" onClick={switchToUseKibanaIndices}>
+      <FormattedMessage
+        id="visTypeTimeseries.indexPatternSelect.useKibanaIndex.label"
+        defaultMessage="Use Kibana index"
+      />
+    </EuiButton>
   </EuiCallOut>
 );
 
@@ -82,13 +90,13 @@ const getNoMatchedIndicesCallOut = (index: string, onCreateIndexClick: () => voi
   </EuiCallOut>
 );
 
-export const LegacyModePopover = ({ index }: LegacyModePopoverProps) => {
+export const LegacyModePopover = ({ index, onModeChange }: LegacyModePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showReadyToMigrateCallOut, setShowReadyToMigrateCallOut] = useState(false);
-  const [showNoMatchedIndicesCallOut, setNoMatchedIndicesCallOut] = useState(false);
+  const [matchedIndex, setMatchedIndex] = useState<IndexPatternObject>();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
+
   const navigateToCreateIndexPatterns = useCallback(() => {
     const core = getCoreStart();
     core.application.navigateToApp('management', {
@@ -96,18 +104,18 @@ export const LegacyModePopover = ({ index }: LegacyModePopoverProps) => {
     });
   }, [index]);
 
+  const switchToUseKibanaIndices = useCallback(() => {
+    onModeChange(true, index);
+  }, [onModeChange, index]);
+
   useEffect(() => {
     async function retrieveIndex() {
-      const shouldShowExtraCallOuts = Boolean(index);
-      let hasIndex = false;
-
-      if (shouldShowExtraCallOuts) {
+      if (index) {
         const { indexPatterns } = getDataStart();
-        hasIndex = Boolean((await indexPatterns.find(index)).find((i) => i.title === index));
-      }
+        const mIndex = (await indexPatterns.find(index)).find((i) => i.title === index);
 
-      setShowReadyToMigrateCallOut(shouldShowExtraCallOuts && hasIndex);
-      setNoMatchedIndicesCallOut(shouldShowExtraCallOuts && !hasIndex);
+        setMatchedIndex(mIndex ? { id: mIndex.id!, title: mIndex.title } : undefined);
+      }
     }
 
     retrieveIndex();
@@ -132,9 +140,8 @@ export const LegacyModePopover = ({ index }: LegacyModePopoverProps) => {
       closePopover={closePopover}
     >
       {getDeprecationCallOut()}
-      {showReadyToMigrateCallOut && getReadyToMigrateCallOut(index)}
-      {showNoMatchedIndicesCallOut &&
-        getNoMatchedIndicesCallOut(index, navigateToCreateIndexPatterns)}
+      {index && matchedIndex && getReadyToMigrateCallOut(index, switchToUseKibanaIndices)}
+      {index && !matchedIndex && getNoMatchedIndicesCallOut(index, navigateToCreateIndexPatterns)}
     </EuiPopover>
   );
 };
