@@ -70,18 +70,6 @@ const MyTrackedComponent = () => {
 Application Usage will automatically track the active minutes on screen and clicks for both the application and the `MyComponent` component whenever it is mounted on the screen. Application Usage pauses counting screen minutes whenever the user is tabbed to another browser window.
 
 The prop `viewId` is used as a unique identifier for your plugin. The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via `core.application.register`.
-
-#### Advanced Usage
-
-If you have a custom use case not provided by the Application Usage helpers you can use the `usageCollection.applicationUsageTracker` public api directly.
-
-To start tracking a view, call `applicationUsageTracker.trackApplicationViewUsage(viewId)` with an id for the view.
-Calling this method will mark the specified `viewId` as active and the `applicationUsageTracker` will start tracking clicks and screen minutes for the view.
-
-To stop tracking a view, call `applicationUsageTracker.flushTrackedView(viewId)`.
-Calling this method will stop tracking the clicks and screen minutes for that view. This method is usually called when the view is no longer active.
-
-
 ## Application Usage Telemetry Data
 
 This collector reports the number of general clicks and minutes on screen for each registered application in Kibana.
