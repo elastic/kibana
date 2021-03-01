@@ -1530,6 +1530,7 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
+    maxIndexPatterns?: number;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
