@@ -18,7 +18,7 @@ import {
   Logger,
   PluginInitializerContext,
   Plugin,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import {

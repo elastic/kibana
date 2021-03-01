@@ -12,7 +12,7 @@ import {
   kibanaResponseFactory,
   HttpResources,
   HttpResourcesRequestHandler,
-} from '../../../../../../src/core/server';
+} from 'src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import type { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
@@ -20,7 +20,7 @@ import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';
 import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
-import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 

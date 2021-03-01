@@ -6,7 +6,7 @@
  */
 
 import { LocationDescriptorObject } from 'history';
-import { CoreStart, ScopedHistory } from 'kibana/public';
+import { CoreStart, ScopedHistory } from 'src/core/public';
 
 import { User } from '../../../../common/model';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -14,7 +14,7 @@ import { UsersGridPage } from './users_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { userAPIClientMock } from '../index.mock';
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiBasicTable } from '@elastic/eui';
@@ -236,26 +236,13 @@ describe('UsersGridPage', () => {
 
     await waitForRender(wrapper);
 
-    const deprecationTooltip = wrapper.find('[data-test-subj="roleDeprecationTooltip"]').props();
+    const deprecationTooltip = wrapper
+      .find('[data-test-subj="roleDeprecationTooltip"]')
+      .prop('content');
 
-    expect(deprecationTooltip).toMatchInlineSnapshot(`
-      Object {
-        "children": <div>
-          kibana_user
-           
-          <EuiIcon
-            className="eui-alignTop"
-            color="warning"
-            size="s"
-            type="alert"
-          />
-        </div>,
-        "content": "The kibana_user role is deprecated. I don't like you.",
-        "data-test-subj": "roleDeprecationTooltip",
-        "delay": "regular",
-        "position": "top",
-      }
-    `);
+    expect(deprecationTooltip).toMatchInlineSnapshot(
+      `"The kibana_user role is deprecated. I don't like you."`
+    );
   });
 
   it('hides reserved users when instructed to', async () => {

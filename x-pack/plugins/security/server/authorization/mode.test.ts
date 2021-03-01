@@ -7,7 +7,7 @@
 
 import { authorizationModeFactory } from './mode';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { SecurityLicense } from '../../common/licensing';

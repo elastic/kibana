@@ -7,8 +7,8 @@
 
 import React, { useCallback, FunctionComponent } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { CoreStart } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../src/core/public';
 
 export type DocLinks = CoreStart['docLinks']['links'];
 export type GetDocLinkFunction = (app: string, doc: string) => string;

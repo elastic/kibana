@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 
-import { httpServerMock } from '../../../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { RouteDefinitionParams } from '../..';
 import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';

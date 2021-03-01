@@ -14,7 +14,7 @@ import {
   within,
 } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';

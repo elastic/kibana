@@ -13,7 +13,7 @@ import {
   KibanaRequest,
   HttpServiceSetup,
   LoggerContextConfigInput,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigType } from '../config';
 import { SpacesPluginSetup } from '../../../spaces/server';

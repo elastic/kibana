@@ -7,7 +7,7 @@
 
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 
 test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const expectedResult = Symbol();

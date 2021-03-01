@@ -16,7 +16,7 @@ import { RoleTemplateEditor } from '../role_selector/role_template_editor';
 import { MappingInfoPanel } from '.';
 
 import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('MappingInfoPanel', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;

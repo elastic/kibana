@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { kibanaResponseFactory, RequestHandler } from '../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 import type { AuthenticationServiceStart } from '../../authentication';

@@ -9,7 +9,7 @@ jest.mock('./api_keys_grid', () => ({
   APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
 import { apiKeysManagementApp } from './api_keys_management_app';
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {

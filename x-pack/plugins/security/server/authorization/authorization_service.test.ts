@@ -24,11 +24,7 @@ import { privilegesFactory } from './privileges';
 import { AuthorizationService } from '.';
 
 import { nextTick } from '@kbn/test/jest';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 

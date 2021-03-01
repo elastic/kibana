@@ -6,12 +6,8 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import {
-  ElasticsearchClient,
-  HttpServiceSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+import { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../task_manager/server';
 import { ConfigType } from '../config';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';

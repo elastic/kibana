@@ -6,12 +6,12 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { definePutRolesRoutes } from './put';
 
-import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { KibanaFeature } from '../../../../../features/server';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';

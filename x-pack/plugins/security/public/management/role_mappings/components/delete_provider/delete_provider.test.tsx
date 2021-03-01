@@ -14,7 +14,7 @@ import { RoleMapping } from '../../../../../common/model';
 import { DeleteProvider } from '.';
 
 import { roleMappingsAPIClientMock } from '../../index.mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {

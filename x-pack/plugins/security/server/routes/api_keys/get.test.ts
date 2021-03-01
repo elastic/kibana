@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { LicenseCheck } from '../../../../licensing/server';
 import { defineGetApiKeysRoutes } from './get';
 
-import { httpServerMock, coreMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, coreMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 import Boom from '@hapi/boom';
 

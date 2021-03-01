@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';

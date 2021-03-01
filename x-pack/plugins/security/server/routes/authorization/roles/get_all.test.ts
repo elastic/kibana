@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { kibanaResponseFactory } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { defineGetAllRolesRoutes } from './get_all';
 
-import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';

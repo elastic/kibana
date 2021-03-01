@@ -6,11 +6,7 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import {
-  httpServiceMock,
-  loggingSystemMock,
-  httpResourcesMock,
-} from '../../../../../src/core/server/mocks';
+import { httpServiceMock, loggingSystemMock, httpResourcesMock } from 'src/core/server/mocks';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { licenseMock } from '../../common/licensing/index.mock';

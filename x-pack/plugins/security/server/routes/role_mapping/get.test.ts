@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { defineRoleMappingGetRoutes } from './get';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 
 const mockRoleMappingResponse = {
   mapping1: {

@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { Component, ReactElement } from 'react';
-import { AppCategory } from 'kibana/public';
+import { AppCategory } from 'src/core/public';
 import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';

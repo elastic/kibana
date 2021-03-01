@@ -14,7 +14,7 @@ import { RolesAPIClient } from '../roles_api_client';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { rolesAPIClientMock } from '../index.mock';
 import { ReservedBadge, DisabledBadge } from '../../badges';
 import { findTestSubject } from '@kbn/test/jest';

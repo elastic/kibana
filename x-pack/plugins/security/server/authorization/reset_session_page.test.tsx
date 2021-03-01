@@ -9,7 +9,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ResetSessionPage } from './reset_session_page';
 
-jest.mock('../../../../../src/core/server/rendering/views/fonts', () => ({
+jest.mock('src/core/server/rendering/views/fonts', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 

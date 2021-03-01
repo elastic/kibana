@@ -6,8 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 import type { KibanaFeature } from '../../../features/server';
-import type { HttpResources, IBasePath, Logger } from '../../../../../src/core/server';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetup } from '../authorization';

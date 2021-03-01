@@ -17,7 +17,7 @@ import {
   httpServiceMock,
   httpServerMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';

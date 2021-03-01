@@ -11,7 +11,7 @@ import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { OverwrittenSessionPage } from './overwritten_session_page';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { authenticationMock } from '../index.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationStatePage } from '../components/authentication_state_page';

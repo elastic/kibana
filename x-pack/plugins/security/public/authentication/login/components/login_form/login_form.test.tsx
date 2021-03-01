@@ -13,7 +13,7 @@ import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@kbn/test/jest';
 import { LoginForm, PageMode } from './login_form';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 
 function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {

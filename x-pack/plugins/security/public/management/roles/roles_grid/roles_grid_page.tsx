@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart } from 'src/core/public';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'src/core/public';
 import {
   Role,
   isRoleEnabled,

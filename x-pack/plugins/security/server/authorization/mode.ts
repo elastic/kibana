@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 
 export interface AuthorizationMode {

@@ -10,7 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigSchema } from './config';
 import { SecurityPlugin, PluginSetupDependencies, PluginStartDependencies } from './plugin';
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';

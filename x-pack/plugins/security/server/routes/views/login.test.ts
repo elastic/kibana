@@ -13,18 +13,14 @@ import {
   RequestHandler,
   kibanaResponseFactory,
   RouteConfig,
-} from '../../../../../../src/core/server';
+} from 'src/core/server';
 import { SecurityLicense } from '../../../common/licensing';
 import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
 import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
-import {
-  coreMock,
-  httpServerMock,
-  httpResourcesMock,
-} from '../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock, httpResourcesMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {

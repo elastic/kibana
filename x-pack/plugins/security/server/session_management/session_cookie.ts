@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  HttpServiceSetup,
-  KibanaRequest,
-  Logger,
-  SessionStorageFactory,
-} from '../../../../../src/core/server';
+import { HttpServiceSetup, KibanaRequest, Logger, SessionStorageFactory } from 'src/core/server';
 import { ConfigType } from '../config';
 
 /**

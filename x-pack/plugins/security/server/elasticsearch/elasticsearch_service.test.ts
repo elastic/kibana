@@ -6,11 +6,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ServiceStatusLevels, CoreStatus } from '../../../../../src/core/server';
+import { ServiceStatusLevels, CoreStatus } from 'src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { ElasticsearchService } from './elasticsearch_service';
 
-import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { nextTick } from '@kbn/test/jest';
 

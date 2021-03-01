@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
+import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import { OIDCLogin } from '../../authentication';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../errors';

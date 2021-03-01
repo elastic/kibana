@@ -24,7 +24,7 @@ jest.mock('./edit_role_mapping', () => ({
 }));
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 async function mountApp(basePath: string, pathname: string) {
   const container = document.createElement('div');

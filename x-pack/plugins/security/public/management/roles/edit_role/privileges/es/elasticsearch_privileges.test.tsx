@@ -14,7 +14,7 @@ import { IndexPrivileges } from './index_privileges';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 function getProps() {
   const license = licenseMock.create();

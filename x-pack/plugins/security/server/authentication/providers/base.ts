@@ -7,13 +7,7 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  KibanaRequest,
-  Logger,
-  HttpServiceSetup,
-  Headers,
-  IClusterClient,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, Logger, HttpServiceSetup, Headers, IClusterClient } from 'src/core/server';
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';

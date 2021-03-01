@@ -12,7 +12,7 @@ import { nextTick } from '@kbn/test/jest';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { DisabledLoginForm, LoginForm } from './components';
 
 const createLoginState = (options?: Partial<LoginState>) => {

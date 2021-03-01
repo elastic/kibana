@@ -10,7 +10,7 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { createConfig, ConfigSchema } from './config';
 
 describe('config schema', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 

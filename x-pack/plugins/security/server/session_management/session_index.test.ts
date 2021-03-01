@@ -7,11 +7,11 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from '../../../../../src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { ConfigSchema, createConfig } from '../config';
 import { getSessionIndexTemplate, SessionIndex } from './session_index';
 
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { securityMock } from '../mocks';
 import { sessionIndexMock } from './session_index.mock';
 

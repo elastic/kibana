@@ -16,8 +16,8 @@ import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';

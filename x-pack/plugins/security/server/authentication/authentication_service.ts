@@ -13,7 +13,7 @@ import type {
   HttpServiceSetup,
   IClusterClient,
   HttpServiceStart,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';

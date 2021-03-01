@@ -7,21 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FeaturesPluginStart } from '../../features/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import {
   ISessionTimeout,
   SessionExpired,

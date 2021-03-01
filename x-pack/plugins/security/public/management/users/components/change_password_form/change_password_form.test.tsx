@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { User } from '../../../../../common/model';
 import { ChangePasswordForm } from './change_password_form';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { userAPIClientMock } from '../../index.mock';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {

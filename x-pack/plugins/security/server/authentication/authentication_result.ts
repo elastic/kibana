@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthHeaders } from '../../../../../src/core/server';
+import { AuthHeaders } from 'src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { isInternalURL } from '../../../common/is_internal_url';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';

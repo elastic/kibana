@@ -8,7 +8,7 @@
 import { AppMount } from 'src/core/public';
 import { logoutApp } from './logout_app';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 describe('logoutApp', () => {
   beforeAll(() => {

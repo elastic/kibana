@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreStart, ScopedHistory } from 'kibana/public';
+import { CoreStart, ScopedHistory } from 'src/core/public';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { RoleMappingsGridPage } from '.';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
@@ -14,9 +14,9 @@ import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 
@@ -238,25 +238,12 @@ describe('RoleMappingsGridPage', () => {
     await nextTick();
     wrapper.update();
 
-    const deprecationTooltip = wrapper.find('[data-test-subj="roleDeprecationTooltip"]').props();
+    const deprecationTooltip = wrapper
+      .find('[data-test-subj="roleDeprecationTooltip"]')
+      .prop('content');
 
-    expect(deprecationTooltip).toMatchInlineSnapshot(`
-      Object {
-        "children": <div>
-          kibana_user
-           
-          <EuiIcon
-            className="eui-alignTop"
-            color="warning"
-            size="s"
-            type="alert"
-          />
-        </div>,
-        "content": "The kibana_user role is deprecated. I don't like you.",
-        "data-test-subj": "roleDeprecationTooltip",
-        "delay": "regular",
-        "position": "top",
-      }
-    `);
+    expect(deprecationTooltip).toMatchInlineSnapshot(
+      `"The kibana_user role is deprecated. I don't like you."`
+    );
   });
 });

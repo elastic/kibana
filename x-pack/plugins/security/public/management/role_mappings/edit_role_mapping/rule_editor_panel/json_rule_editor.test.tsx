@@ -18,10 +18,10 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('JSONRuleEditor', () => {
   const renderView = (props: React.ComponentProps<typeof JSONRuleEditor>) => {

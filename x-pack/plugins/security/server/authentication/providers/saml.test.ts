@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  KibanaRequest,
-  LegacyRequest,
-  SavedObjectsClient,
-} from '../../../../../src/core/server';
+import { CoreSetup, LegacyRequest } from 'src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { SavedObjectsClient } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { AuthorizationServiceSetup } from '../authorization';
 import { SecurityAuditLogger, AuditServiceSetup } from '../audit';

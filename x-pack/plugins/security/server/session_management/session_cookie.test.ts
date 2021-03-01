@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SessionStorage } from '../../../../../src/core/server';
+import { SessionStorage } from 'src/core/server';
 import { SessionCookie, SessionCookieOptions } from './session_cookie';
 
 import {
@@ -13,7 +13,7 @@ import {
   httpServiceMock,
   sessionStorageMock,
   httpServerMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { sessionCookieMock } from './session_cookie.mock';
 
 describe('Session cookie', () => {

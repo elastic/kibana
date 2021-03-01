@@ -16,11 +16,7 @@ import { Session } from './session';
 import { SessionIndex } from './session_index';
 
 import { nextTick } from '@kbn/test/jest';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../task_manager/server';
 

@@ -10,7 +10,7 @@ jest.mock('./logged_out_page');
 import { AppMount } from 'src/core/public';
 import { loggedOutApp } from './logged_out_app';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 describe('loggedOutApp', () => {
   it('properly registers application', () => {

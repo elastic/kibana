@@ -14,7 +14,7 @@ import {
   coreMock,
   httpServerMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {

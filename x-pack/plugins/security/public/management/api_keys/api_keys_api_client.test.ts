@@ -7,7 +7,7 @@
 
 import { APIKeysAPIClient } from './api_keys_api_client';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 describe('APIKeysAPIClient', () => {
   it('checkPrivileges() queries correct endpoint', async () => {

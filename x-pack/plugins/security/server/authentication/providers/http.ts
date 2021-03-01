@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';

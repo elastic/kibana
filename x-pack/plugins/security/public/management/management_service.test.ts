@@ -6,17 +6,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  ManagementApp,
-  ManagementSetup,
-  DefinedSections,
-} from '../../../../../src/plugins/management/public';
-import { createManagementSectionMock } from '../../../../../src/plugins/management/public/mocks';
+import { ManagementApp, ManagementSetup, DefinedSections } from 'src/plugins/management/public';
+import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
 import { usersManagementApp } from './users';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';
 import { rolesManagementApp } from './roles';

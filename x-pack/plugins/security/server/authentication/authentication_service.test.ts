@@ -16,7 +16,7 @@ import {
   httpServerMock,
   httpServiceMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
@@ -31,7 +31,7 @@ import type {
   LoggerFactory,
   HttpServiceSetup,
   HttpServiceStart,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import type { AuthenticatedUser } from '../../common/model';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';

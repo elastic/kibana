@@ -6,7 +6,7 @@
  */
 
 import { isEqual, isEqualWith, difference } from 'lodash';
-import { IClusterClient, Logger } from '../../../../../src/core/server';
+import { IClusterClient, Logger } from 'src/core/server';
 
 import { serializePrivileges } from './privileges_serializer';
 import { PrivilegesService } from './privileges';

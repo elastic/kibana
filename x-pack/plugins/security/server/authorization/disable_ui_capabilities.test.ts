@@ -8,7 +8,7 @@
 import { Actions } from '.';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
-import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
 import { AuthenticatedUser } from '..';

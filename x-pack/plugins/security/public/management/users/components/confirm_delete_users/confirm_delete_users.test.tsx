@@ -9,7 +9,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { userAPIClientMock } from '../../index.mock';
 
 describe('ConfirmDeleteUsers', () => {

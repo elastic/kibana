@@ -10,7 +10,7 @@ jest.mock('./access_agreement_page');
 import { AppMount } from 'src/core/public';
 import { accessAgreementApp } from './access_agreement_app';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 describe('accessAgreementApp', () => {
   it('properly registers application', () => {

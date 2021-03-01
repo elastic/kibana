@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpServiceSetup, Logger } from '../../../../../src/core/server';
+import { HttpServiceSetup, Logger } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 import { AuthorizationServiceSetup } from '.';
 

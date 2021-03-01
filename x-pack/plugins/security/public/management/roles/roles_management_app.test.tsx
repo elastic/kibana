@@ -19,7 +19,7 @@ jest.mock('./edit_role', () => ({
 
 import { rolesManagementApp } from './roles_management_app';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 
 async function mountApp(basePath: string, pathname: string) {

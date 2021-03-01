@@ -7,11 +7,7 @@
 
 import { Subscription } from 'rxjs';
 import { StartServicesAccessor, FatalErrorsSetup, Capabilities } from 'src/core/public';
-import {
-  ManagementApp,
-  ManagementSetup,
-  ManagementSection,
-} from '../../../../../src/plugins/management/public';
+import { ManagementApp, ManagementSetup, ManagementSection } from 'src/plugins/management/public';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceSetup } from '../authentication';
 import { PluginStartDependencies } from '../plugin';

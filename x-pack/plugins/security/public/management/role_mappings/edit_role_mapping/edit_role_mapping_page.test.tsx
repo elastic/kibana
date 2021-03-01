@@ -21,9 +21,9 @@ import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { RoleComboBox } from '../../role_combo_box';

@@ -8,14 +8,14 @@
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { Actions } from '../authorization';
 import { securityAuditLoggerMock, auditServiceMock } from '../audit/index.mock';
-import { savedObjectsClientMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
 import { AuditEvent, EventOutcome } from '../audit';
 
-jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    '../../../../../src/core/server/saved_objects/service/lib/utils'
+    'src/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {

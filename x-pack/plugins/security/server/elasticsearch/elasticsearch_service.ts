@@ -7,7 +7,8 @@
 
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
-import { Logger, ServiceStatusLevels, StatusServiceSetup } from '../../../../../src/core/server';
+import { Logger, StatusServiceSetup } from 'src/core/server';
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 
 export interface ElasticsearchServiceSetupParams {

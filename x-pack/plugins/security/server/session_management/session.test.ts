@@ -13,7 +13,7 @@ import { Session, SessionValueContentToEncrypt } from './session';
 import { SessionIndex } from './session_index';
 import { SessionCookie } from './session_cookie';
 
-import { loggingSystemMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, httpServerMock } from 'src/core/server/mocks';
 import { sessionMock, sessionCookieMock, sessionIndexMock } from './index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 

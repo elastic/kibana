@@ -21,8 +21,8 @@ import {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
-  SavedObjectsUtils,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import {
   AuditLogger,

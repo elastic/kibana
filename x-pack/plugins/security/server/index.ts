@@ -11,7 +11,7 @@ import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
 import {

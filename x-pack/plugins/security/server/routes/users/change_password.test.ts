@@ -10,17 +10,12 @@ import { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-import {
-  Headers,
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../src/core/server';
+import { Headers, kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
 import { Session } from '../../session_management';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';

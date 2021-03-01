@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from 'src/core/public';
 import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
 
 interface Props {

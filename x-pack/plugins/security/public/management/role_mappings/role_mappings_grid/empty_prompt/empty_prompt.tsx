@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'src/core/public';
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
 interface EmptyPromptProps {

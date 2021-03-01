@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Session } from '../../session_management';
 import { defineSessionInfoRoutes } from './info';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 

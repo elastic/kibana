@@ -7,7 +7,7 @@
 
 import { Role } from '../../../common/model';
 import { RolesAPIClient } from './roles_api_client';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 describe('RolesAPIClient', () => {
   async function saveRole(role: Role, spacesEnabled: boolean) {

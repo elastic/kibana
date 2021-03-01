@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { spacesMock } from '../../../spaces/server/mocks';
 

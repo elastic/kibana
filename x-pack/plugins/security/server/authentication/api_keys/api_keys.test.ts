@@ -8,11 +8,7 @@
 import type { SecurityLicense } from '../../../common/licensing';
 import { APIKeys } from './api_keys';
 
-import {
-  httpServerMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { securityMock } from '../../mocks';
 

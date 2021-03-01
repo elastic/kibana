@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from 'src/core/public';
 
-import {
-  SecurityOssPluginSetup,
-  SecurityOssPluginStart,
-} from '../../../../../src/plugins/security_oss/public';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
 import { insecureClusterAlertTitle, insecureClusterAlertText } from './components';
 
 interface SetupDeps {

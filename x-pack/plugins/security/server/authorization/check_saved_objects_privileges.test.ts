@@ -7,7 +7,7 @@
 
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
 import { SpacesService } from '../plugin';
 

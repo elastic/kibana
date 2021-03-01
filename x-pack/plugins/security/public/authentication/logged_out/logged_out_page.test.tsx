@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { LoggedOutPage } from './logged_out_page';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('LoggedOutPage', () => {
   beforeAll(() => {

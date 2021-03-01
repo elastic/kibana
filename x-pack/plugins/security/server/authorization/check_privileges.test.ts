@@ -10,7 +10,7 @@ import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { HasPrivilegesResponse } from './types';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
 const application = 'kibana-our_application';
 

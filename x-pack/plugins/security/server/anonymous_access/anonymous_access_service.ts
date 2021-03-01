@@ -9,11 +9,11 @@ import type { Request } from '@hapi/hapi';
 import {
   CapabilitiesStart,
   IBasePath,
-  KibanaRequest,
   Logger,
   Capabilities,
   IClusterClient,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';

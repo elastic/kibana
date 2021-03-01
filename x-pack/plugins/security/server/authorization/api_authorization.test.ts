@@ -12,7 +12,7 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 
 describe('initAPIAuthorization', () => {

@@ -18,9 +18,9 @@ import '@kbn/test/target/jest/utils/stub_web_worker';
 
 import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
   const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {

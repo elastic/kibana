@@ -11,13 +11,13 @@ import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import { APIKeysGridPage } from './api_keys_grid_page';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { apiKeysAPIClientMock } from '../index.mock';
 
 const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });

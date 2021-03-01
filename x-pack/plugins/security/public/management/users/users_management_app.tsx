@@ -11,8 +11,8 @@ import { Router, Route, Switch, Redirect, RouteComponentProps } from 'react-rout
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { StartServicesAccessor, CoreStart } from '../../../../../../src/core/public';
-import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import { StartServicesAccessor, CoreStart } from 'src/core/public';
+import { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';

@@ -7,8 +7,8 @@
 
 import { flatten, isObject, mapValues } from 'lodash';
 import { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
-import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
-import { KibanaRequest, Logger } from '../../../../../src/core/server';
+import type { Capabilities as UICapabilities } from 'src/core/types';
+import { KibanaRequest, Logger } from 'src/core/server';
 import {
   KibanaFeature,
   ElasticsearchFeature,
