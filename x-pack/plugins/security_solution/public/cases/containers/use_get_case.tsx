@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { useEffect, useReducer, useCallback, useRef } from 'react';
-import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getCase, getSubCase } from './api';
-import { getNoneConnector } from '../components/configure_cases/utils';
 
 interface CaseState {
-  data: Case;
+  data: Case | null;
   isLoading: boolean;
   isError: boolean;
 }
@@ -57,32 +54,6 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       return state;
   }
 };
-export const initialData: Case = {
-  id: '',
-  closedAt: null,
-  closedBy: null,
-  createdAt: '',
-  comments: [],
-  connector: { ...getNoneConnector(), fields: null },
-  createdBy: {
-    username: '',
-  },
-  description: '',
-  externalService: null,
-  status: CaseStatuses.open,
-  tags: [],
-  title: '',
-  totalAlerts: 0,
-  totalComment: 0,
-  type: CaseType.individual,
-  updatedAt: null,
-  updatedBy: null,
-  version: '',
-  subCaseIds: [],
-  settings: {
-    syncAlerts: true,
-  },
-};
 
 export interface UseGetCase extends CaseState {
   fetchCase: () => void;
@@ -93,51 +64,51 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    data: initialData,
+    data: null,
   });
   const [, dispatchToaster] = useStateToaster();
-  const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const updateCase = useCallback((newCase: Case) => {
     dispatch({ type: 'UPDATE_CASE', payload: newCase });
   }, []);
 
   const callFetch = useCallback(async () => {
-    const fetchData = async () => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
-      try {
-        const response = await (subCaseId
-          ? getSubCase(caseId, subCaseId, true, abortCtrl.current.signal)
-          : getCase(caseId, true, abortCtrl.current.signal));
-        if (!didCancel.current) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response });
-        }
-      } catch (error) {
-        if (!didCancel.current) {
+
+      const response = await (subCaseId
+        ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
+        : getCase(caseId, true, abortCtrlRef.current.signal));
+
+      if (!isCancelledRef.current) {
+        dispatch({ type: 'FETCH_SUCCESS', payload: response });
+      }
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    };
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
-    fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, subCaseId]);
 
   useEffect(() => {
-    if (!isEmpty(caseId)) {
-      callFetch();
-    }
+    callFetch();
+
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, subCaseId]);

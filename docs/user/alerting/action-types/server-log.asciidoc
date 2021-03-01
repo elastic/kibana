@@ -30,3 +30,4 @@ Name::      The name of the connector. The name is used to identify a  connector
 Server log actions have the following properties:
 
 Message::   The message to log.
+Level::     The log level of the message: `trace`, `debug`, `info`, `warn`, `error` or `fatal`. Defaults to `info`.

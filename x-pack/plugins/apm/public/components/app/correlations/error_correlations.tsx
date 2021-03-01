@@ -23,7 +23,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { px } from '../../../style/variables';
-import { CorrelationsTable } from './correlations_table';
+import {
+  CorrelationsTable,
+  SelectedSignificantTerm,
+} from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
@@ -35,10 +38,6 @@ type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
 >;
 
-type SignificantTerm = NonNullable<
-  CorrelationsApiResponse['significantTerms']
->[0];
-
 interface Props {
   onClose: () => void;
 }
@@ -47,12 +46,13 @@ export function ErrorCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<SignificantTerm | null>(null);
+  ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const {
     environment,
+    kuery,
     transactionName,
     transactionType,
     start,
@@ -72,12 +72,12 @@ export function ErrorCorrelations({ onClose }: Props) {
           params: {
             query: {
               environment,
+              kuery,
               serviceName,
               transactionName,
               transactionType,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               fieldNames: fieldNames.join(','),
             },
           },
@@ -86,12 +86,12 @@ export function ErrorCorrelations({ onClose }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       fieldNames,
     ]
   );
@@ -103,7 +103,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.error.description', {
                 defaultMessage:
@@ -148,13 +148,30 @@ export function ErrorCorrelations({ onClose }: Props) {
   );
 }
 
+function getSelectedTimeseries(
+  data: CorrelationsApiResponse,
+  selectedSignificantTerm: SelectedSignificantTerm
+) {
+  const { significantTerms } = data;
+  if (!significantTerms) {
+    return [];
+  }
+  return (
+    significantTerms.find(
+      ({ fieldName, fieldValue }) =>
+        selectedSignificantTerm.fieldName === fieldName &&
+        selectedSignificantTerm.fieldValue === fieldValue
+    )?.timeseries || []
+  );
+}
+
 function ErrorTimeseriesChart({
   data,
   selectedSignificantTerm,
   status,
 }: {
   data?: CorrelationsApiResponse;
-  selectedSignificantTerm: SignificantTerm | null;
+  selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
   const theme = useTheme();
@@ -191,7 +208,7 @@ function ErrorTimeseriesChart({
           curve={CurveType.CURVE_MONOTONE_X}
         />
 
-        {selectedSignificantTerm !== null ? (
+        {data && selectedSignificantTerm ? (
           <LineSeries
             id={i18n.translate(
               'xpack.apm.correlations.error.chart.selectedTermErrorRateLabel',
@@ -208,7 +225,7 @@ function ErrorTimeseriesChart({
             xAccessor={'x'}
             yAccessors={['y']}
             color={theme.eui.euiColorAccent}
-            data={selectedSignificantTerm.timeseries}
+            data={getSelectedTimeseries(data, selectedSignificantTerm)}
             curve={CurveType.CURVE_MONOTONE_X}
           />
         ) : null}

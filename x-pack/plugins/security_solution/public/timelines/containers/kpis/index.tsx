@@ -8,6 +8,7 @@
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -20,7 +21,6 @@ import {
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
@@ -40,7 +40,7 @@ export const useTimelineKpis = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineRequestBasicOptions | null>(
     null
@@ -54,12 +54,11 @@ export const useTimelineKpis = ({
       if (request == null) {
         return;
       }
-      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<TimelineRequestBasicOptions, TimelineKpiStrategyResponse>(request, {
             strategy: 'securitySolutionTimelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -67,29 +66,23 @@ export const useTimelineKpis = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel.current) {
-                  setLoading(false);
-                  setTimelineKpiResponse(response);
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setTimelineKpiResponse(response);
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel.current) {
-                  setLoading(false);
-                }
+                setLoading(false);
                 notifications.toasts.addWarning('An error has occurred');
-                searchSubscription$.unsubscribe();
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel.current) {
-                setLoading(false);
-              }
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger('Failed to load KPIs');
-              }
+              setLoading(false);
+              notifications.toasts.addDanger('Failed to load KPIs');
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -122,7 +115,7 @@ export const useTimelineKpis = ({
       setTimelineKpiResponse(null);
     }
     return () => {
-      didCancel.current = true;
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [isBlankTimeline, timelineKpiRequest, timelineKpiSearch]);

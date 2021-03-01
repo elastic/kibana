@@ -31,7 +31,7 @@ export const useCreateCaseModal = ({
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onSuccess = useCallback(
-    (theCase) => {
+    async (theCase) => {
       onCaseCreated(theCase);
       closeModal();
     },
