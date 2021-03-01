@@ -40,10 +40,7 @@ export const spacesManagementApp = Object.freeze({
           import('./edit_space'),
         ]);
 
-        const [
-          { notifications, i18n: i18nStart, application },
-          { features },
-        ] = startServices;
+        const [{ notifications, i18n: i18nStart, application }, { features }] = startServices;
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
