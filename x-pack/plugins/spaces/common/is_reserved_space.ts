@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { Space } from '../../../../src/plugins/spaces_oss/common';
+
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 /**
  * Returns whether the given Space is reserved or not.
