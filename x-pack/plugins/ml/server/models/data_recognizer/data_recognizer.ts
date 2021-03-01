@@ -136,7 +136,7 @@ export class DataRecognizer {
   /**
    * List of the module jobs that require model memory estimation
    */
-  jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
+  private _jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
   constructor(
     mlClusterClient: IScopedClusterClient,
@@ -498,7 +498,7 @@ export class DataRecognizer {
       savedObjects: [] as KibanaObjectResponse[],
     };
 
-    this.jobsForModelMemoryEstimation = moduleConfig.jobs.map((job) => ({
+    this._jobsForModelMemoryEstimation = moduleConfig.jobs.map((job) => ({
       job,
       query: moduleConfig.datafeeds.find((d) => d.config.job_id === job.id)?.config.query ?? null,
     }));
@@ -1126,12 +1126,12 @@ export class DataRecognizer {
       return;
     }
 
-    if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
+    if (estimateMML && this._jobsForModelMemoryEstimation.length > 0) {
       try {
         // Checks if all jobs in the module have the same time field configured
-        const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
+        const firstJobTimeField = this._jobsForModelMemoryEstimation[0].job.config.data_description
           .time_field;
-        const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
+        const isSameTimeFields = this._jobsForModelMemoryEstimation.every(
           ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
 
@@ -1147,7 +1147,7 @@ export class DataRecognizer {
           end = fallbackEnd;
         }
 
-        for (const { job, query } of this.jobsForModelMemoryEstimation) {
+        for (const { job, query } of this._jobsForModelMemoryEstimation) {
           let earliestMs = start;
           let latestMs = end;
           if (earliestMs === undefined || latestMs === undefined) {
@@ -1262,9 +1262,9 @@ export class DataRecognizer {
     });
 
     if (generalOverrides.some((override) => !!override.analysis_limits?.model_memory_limit)) {
-      this.jobsForModelMemoryEstimation = [];
+      this._jobsForModelMemoryEstimation = [];
     } else {
-      this.jobsForModelMemoryEstimation = moduleConfig.jobs
+      this._jobsForModelMemoryEstimation = moduleConfig.jobs
         .filter((job) => {
           const override = jobSpecificOverrides.find((o) => `${jobPrefix}${o.job_id}` === job.id);
           return override?.analysis_limits?.model_memory_limit === undefined;
