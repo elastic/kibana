@@ -4,5 +4,5 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["licensing", "mapsLegacy"]
+  "requiredPlugins": ["licensing", "mapsEms"]
 }

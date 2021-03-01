@@ -45,4 +45,7 @@ export interface IServiceSettings {
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;
   getUrlForRegionLayer(layer: FileLayer): Promise<string | undefined>;
+  setQueryParams(params: { [p: string]: string }): void;
+  enableZoomMessage(): void;
+  disableZoomMessage(): void;
 }
