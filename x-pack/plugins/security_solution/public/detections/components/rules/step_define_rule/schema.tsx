@@ -240,8 +240,8 @@ export const schema: FormSchema<DefineStepRule> = {
       ],
     },
     cardinality: {
-      label: 'test',
       field: {
+        defaultValue: [],
         fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate(

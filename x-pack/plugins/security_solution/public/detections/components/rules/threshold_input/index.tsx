@@ -20,7 +20,7 @@ export interface FieldValueThreshold {
   field: string[];
   value: string;
   cardinality?: {
-    field: string;
+    field: string[];
     value: string;
   };
 }

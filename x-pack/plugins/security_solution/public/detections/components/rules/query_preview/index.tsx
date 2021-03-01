@@ -60,8 +60,8 @@ export type Threshold =
   | {
       field: string | string[] | undefined;
       value: number;
-      cardinality: {
-        field: string;
+      cardinality?: {
+        field: string[];
         value: number;
       };
     }

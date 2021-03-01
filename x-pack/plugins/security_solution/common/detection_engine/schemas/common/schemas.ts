@@ -496,6 +496,13 @@ export const threshold = t.intersection([
       cardinality: t.array(thresholdCardinalityField),
     })
   ),
+  // To avoid breaking pre-existing 7.12 builds
+  t.exact(
+    t.partial({
+      cardinality_field: t.union([t.array(t.string), t.null]),
+      cardinality_value: t.union([t.number, t.null]),
+    })
+  ),
 ]);
 export type Threshold = t.TypeOf<typeof threshold>;
 

@@ -83,7 +83,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     field: [],
     value: '200',
     cardinality: {
-      field: '',
+      field: [],
       value: '',
     },
   },
@@ -163,7 +163,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     DefineStepRule & {
       'threshold.field': string[] | undefined;
       'threshold.value': number | undefined;
-      'threshold.cardinality.field': string | undefined;
+      'threshold.cardinality.field': string[] | undefined;
       'threshold.cardinality.value': number | undefined;
     }
   >({
@@ -296,7 +296,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           field: formThresholdField ?? [],
           value: formThresholdValue,
           cardinality: {
-            field: formThresholdCardinalityField ?? '',
+            field: formThresholdCardinalityField ?? [],
             value: formThresholdCardinalityValue ?? 0, // FIXME
           },
         }

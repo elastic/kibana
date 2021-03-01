@@ -217,7 +217,6 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
-          cardinality: [],
         },
         threatIndex: [],
         threatMapping: [],
@@ -260,7 +259,6 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
-          cardinality: [],
         },
         threatIndex: [],
         threatMapping: [],

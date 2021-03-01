@@ -41,7 +41,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
         field: string | string[] | undefined;
         value: number;
         cardinality?: {
-          field: string;
+          field: string[];
           value: number;
         };
       }
