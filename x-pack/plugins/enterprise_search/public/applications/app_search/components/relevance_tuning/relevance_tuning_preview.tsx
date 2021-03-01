@@ -20,10 +20,23 @@ import { RelevanceTuningLogic } from '.';
 
 const emptyCallout = (
   <EuiEmptyPrompt
+    data-test-subj="EnterAQueryPrompt"
     body={i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
       {
         defaultMessage: 'Enter a query to see search results',
+      }
+    )}
+  />
+);
+
+const noResultsCallout = (
+  <EuiEmptyPrompt
+    data-test-subj="NoResultsPrompt"
+    body={i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
+      {
+        defaultMessage: 'No matching content found',
       }
     )}
   />
@@ -58,6 +71,7 @@ export const RelevanceTuningPreview: React.FC = () => {
         fullWidth
       />
       {!searchResults && emptyCallout}
+      {searchResults && searchResults.length === 0 && noResultsCallout}
       {searchResults &&
         searchResults.map((result) => {
           return (

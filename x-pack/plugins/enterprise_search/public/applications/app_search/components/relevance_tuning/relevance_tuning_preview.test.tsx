@@ -54,7 +54,8 @@ describe('RelevanceTuningPreview', () => {
     expect(results.at(2).prop('result')).toBe(result3);
     expect(results.at(2).prop('isMetaEngine')).toBe(false);
 
-    expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(false);
   });
 
   it('correctly indicates whether or not this is a meta engine in results', () => {
@@ -71,7 +72,7 @@ describe('RelevanceTuningPreview', () => {
     expect(results.at(2).prop('isMetaEngine')).toBe(true);
   });
 
-  it('will update search results whenever the user changes text in search box', () => {
+  it('renders a search box that will update search results whenever it is changed', () => {
     const wrapper = shallow(<RelevanceTuningPreview />);
 
     wrapper.find(EuiFieldSearch).simulate('change', { target: { value: 'some search text' } });
@@ -89,6 +90,19 @@ describe('RelevanceTuningPreview', () => {
 
     const wrapper = shallow(<RelevanceTuningPreview />);
 
-    expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(false);
+  });
+
+  it('will show user a no results message if their query returns no results', () => {
+    setMockValues({
+      ...values,
+      searchResults: [],
+    });
+
+    const wrapper = shallow(<RelevanceTuningPreview />);
+
+    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(true);
   });
 });
