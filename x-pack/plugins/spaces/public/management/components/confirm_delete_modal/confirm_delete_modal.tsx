@@ -7,8 +7,8 @@
 
 import './confirm_delete_modal.scss';
 
+import type { CommonProps, EuiModalProps } from '@elastic/eui';
 import {
-  CommonProps,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,14 +19,17 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalProps,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component } from 'react';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
-import { SpacesManager } from '../../../spaces_manager';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpacesManager } from '../../../spaces_manager';
 
 interface Props {
   space: Space;
