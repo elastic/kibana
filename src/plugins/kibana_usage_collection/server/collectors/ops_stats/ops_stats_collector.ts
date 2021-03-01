@@ -12,7 +12,7 @@ import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
-interface OpsStatsMetricsUsage {
+interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;
   response_times: {
     average: number;
@@ -27,7 +27,7 @@ export function getOpsStatsCollector(
   usageCollection: UsageCollectionSetup,
   metrics$: Observable<OpsMetrics>
 ) {
-  let lastMetrics: OpsStatsMetricsUsage | null = null;
+  let lastMetrics: OpsStatsMetrics | null = null;
   metrics$.subscribe((_metrics) => {
     const metrics = cloneDeep(_metrics);
     // Ensure we only include the same data that Metricbeat collection would get
@@ -50,22 +50,6 @@ export function getOpsStatsCollector(
     type: KIBANA_STATS_TYPE,
     isReady: () => !!lastMetrics,
     fetch: () => lastMetrics,
-    schema: {
-      timestamp: {
-        type: 'text',
-        _meta: { description: 'Timestamp of metrics reported.' },
-      },
-      response_times: {
-        average: {
-          type: 'long',
-          _meta: { description: 'Average response times of host.' },
-        },
-        max: {
-          type: 'long',
-          _meta: { description: 'Maximum response time of host.' },
-        },
-      },
-    },
   });
 }
 
