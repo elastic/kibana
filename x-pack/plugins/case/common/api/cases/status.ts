@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const AllCaseType = 'all';
+export const AllCaseType = 'all' as const;
 
 export enum CaseStatuses {
   open = 'open',
@@ -23,12 +23,7 @@ export const CaseStatusRt = rt.union([
 
 export const caseStatuses = Object.values(CaseStatuses);
 
-export const CaseStatusFilterRt = rt.union([
-  rt.literal(AllCaseType),
-  rt.literal(CaseStatuses.open),
-  rt.literal(CaseStatuses['in-progress']),
-  rt.literal(CaseStatuses.closed),
-]);
+export const CaseStatusFilterRt = rt.union([rt.literal(AllCaseType), ...CaseStatusRt.types]);
 
 export const caseStatusFilter = Object.values(CaseStatusFilterRt);
 export type CaseStatusFilter = rt.TypeOf<typeof CaseStatusFilterRt>;

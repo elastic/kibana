@@ -44,7 +44,7 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
 const defaultInitial = {
   search: '',
   reporters: [],
-  status: AllCaseType as CaseStatusFilter,
+  status: AllCaseType,
   tags: [],
 };
 

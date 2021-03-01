@@ -21,7 +21,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -54,6 +54,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { Stats } from '../status';
 import { getExpandedRowMap } from './expanded_row';
+import { isSelectedCasesIncludeCollections } from './helpers';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -245,9 +246,7 @@ export const AllCases = React.memo<AllCasesProps>(
             deleteCasesAction: toggleBulkDeleteModal,
             selectedCaseIds,
             updateCaseStatus: handleUpdateCaseStatus,
-            includeCollections:
-              selectedCases.length > 0 &&
-              selectedCases.some((caseObj: Case) => caseObj.type === CaseType.collection),
+            includeCollections: isSelectedCasesIncludeCollections(selectedCases),
           })}
         />
       ),

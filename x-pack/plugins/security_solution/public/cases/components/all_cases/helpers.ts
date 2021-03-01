@@ -6,9 +6,13 @@
  */
 
 import { filter } from 'lodash/fp';
-import { AssociationType, CaseStatuses } from '../../../../../case/common/api';
+import { AssociationType, CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { statuses } from '../status';
+
+export const isSelectedCasesIncludeCollections = (selectedCases: Case[]) =>
+  selectedCases.length > 0 &&
+  selectedCases.some((caseObj: Case) => caseObj.type === CaseType.collection);
 
 export const isSubCase = (theCase: Case | SubCase): theCase is SubCase =>
   (theCase as SubCase).caseParentId !== undefined &&

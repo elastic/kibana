@@ -22,4 +22,5 @@ export const getStatusDate = (theCase: Case): string | null => {
   return null;
 };
 
-export const getStatusTitle = (status: CaseStatuses) => get(statuses, `${status}.actionBar.title`);
+export const getStatusTitle = (status: CaseStatuses): string =>
+  get(statuses, `${status}.actionBar.title`);
