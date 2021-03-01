@@ -540,6 +540,7 @@ describe('utils', () => {
         },
         {
           comment: 'Elastic Security Alerts attached to the case: 3',
+          commentId: 'mock-id-1-total-alerts',
         },
       ]);
     });
@@ -569,6 +570,7 @@ describe('utils', () => {
         },
         {
           comment: 'Elastic Security Alerts attached to the case: 4',
+          commentId: 'mock-id-1-total-alerts',
         },
       ]);
     });
