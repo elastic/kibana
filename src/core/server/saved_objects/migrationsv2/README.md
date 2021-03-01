@@ -143,7 +143,7 @@ Set a write block on the source index to prevent any older Kibana instances from
 This operation is idempotent, if the index already exist, we wait until its status turns yellow. 
 
 - Because we will be transforming documents before writing them into this index, we can already set the mappings to the target mappings for this version. The source index might contain documents belonging to a disabled plugin. So set `dynamic: false` mappings for any unknown saved object types.
-- (optionally disable refresh to speed up indexing performance ?)
+- (Since we never query the temporary index we can potentially disable refresh to speed up indexing performance. Profile to see if gains justify complexity)
 
 ### New control state
   → `REINDEX_SOURCE_TO_TEMP_OPEN_PIT`
@@ -173,7 +173,7 @@ Read the next batch of outdated documents from the source index by using search 
 `transformRawDocs` + `bulkIndexTransformedDocuments`
 
 1. Transform the current batch of documents
-2. Use the bulk API create action to write a batch of up-to-date documents. The create action ensures that there will be only one write per reindexed document even if multiple Kibana instances are performing this step. Use `wait_for=false` to speed up the create actions. Ignore any create errors because of documents that already exist in the temporary index.
+2. Use the bulk API create action to write a batch of up-to-date documents. The create action ensures that there will be only one write per reindexed document even if multiple Kibana instances are performing this step. Ignore any create errors because of documents that already exist in the temporary index. Use `refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS` step will ensure that the index is refreshed before we start serving traffic.
 ### New control state
   → `REINDEX_SOURCE_TO_TEMP_READ`
    
@@ -247,9 +247,9 @@ Atomically apply the `versionIndexReadyActions` using the _alias actions API. By
 
 ### New control state
 1. If all the actions succeed we’re ready to serve traffic
-  → DONE
+  → `DONE`
 2. If action (1) fails with alias_not_found_exception or action (3) fails with index_not_found_exception another instance already completed the migration
-  → MARK_VERSION_INDEX_READY_CONFLICT
+  → `MARK_VERSION_INDEX_READY_CONFLICT`
 
 ## MARK_VERSION_INDEX_READY_CONFLICT
 ### Next action
@@ -261,9 +261,9 @@ Fetch the saved object indices
 If another instance completed a migration from the same source we need to verify that it is running the same version.
 
 1. If the current and version aliases are pointing to the same index the instance that completed the migration was on the same version and it’s safe to start serving traffic.
-  → DONE
+  → `DONE`
 2. If the other instance was running a different version we fail the migration. Once we restart one of two things can happen: the other instance is an older version and we will restart the migration, or, it’s a newer version and we will refuse to start up.
-  → FATAL
+  → `FATAL`
 
 # Manual QA Test Plan
 ## 1. Legacy pre-migration
