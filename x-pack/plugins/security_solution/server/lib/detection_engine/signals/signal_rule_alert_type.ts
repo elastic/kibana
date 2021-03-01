@@ -24,6 +24,8 @@ import {
   isThresholdRule,
   isEqlRule,
   isThreatMatchRule,
+  hasLargeValueItem,
+  normalizeThresholdField,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
@@ -365,11 +367,13 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
+            );
+            wroteWarningStatus = true;
+          }
           const inputIndex = await getInputIndex(services, version, index);
-
-          const thresholdFields = Array.isArray(threshold.field)
-            ? threshold.field
-            : [threshold.field];
 
           const {
             filters: bucketFilters,
@@ -381,7 +385,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByFields: thresholdFields,
+            bucketByFields: normalizeThresholdField(threshold.field),
             timestampOverride,
             buildRuleMessage,
           });
@@ -551,6 +555,12 @@ export const signalRulesAlertType = ({
         } else if (isEqlRule(type)) {
           if (query === undefined) {
             throw new Error('EQL query rule must have a query defined');
+          }
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
+            );
+            wroteWarningStatus = true;
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);

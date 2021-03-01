@@ -63,7 +63,8 @@ describe('ExpressionRow', () => {
       timeUnit: 'm',
       aggType: 'avg',
     };
-    const { wrapper } = await setup(expression as MetricExpression);
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    await update();
     const [valueMatch] = wrapper.html().match('<span class="euiExpression__value">50</span>') ?? [];
     expect(valueMatch).toBeTruthy();
   });
@@ -95,7 +96,7 @@ describe('ExpressionRow', () => {
 
     const { wrapper } = await setup(expression as MetricExpression);
 
-    const helpText = wrapper.find('[data-test-subj="ofExpression"]').prop('helpText');
+    const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
 
     expect(helpText).toMatchSnapshot();
   });
