@@ -40,7 +40,7 @@ describe('EnginesOverview', () => {
       },
     },
     metaEnginesLoading: false,
-    myRole: { canViewMetaEngines: false },
+    hasPlatinumLicense: false,
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -105,13 +105,13 @@ describe('EnginesOverview', () => {
       ).toEqual('/engine_creation');
     });
 
-    describe('when myRole.canViewMetaEngines is true', () => {
+    describe('when user has a platinum license', () => {
       let wrapper: ShallowWrapper;
 
       beforeEach(() => {
         setMockValues({
           ...valuesWithEngines,
-          myRole: { canViewMetaEngines: true },
+          hasPlatinumLicense: true,
         });
         wrapper = shallow(<EnginesOverview />);
       });
@@ -133,7 +133,7 @@ describe('EnginesOverview', () => {
       it('contains an EuiEmptyPrompt that takes users to the create meta when metaEngines is empty', () => {
         setMockValues({
           ...valuesWithEngines,
-          myRole: { canViewMetaEngines: true },
+          hasPlatinumLicense: true,
           metaEngines: [],
         });
         wrapper = shallow(<EnginesOverview />);
@@ -181,7 +181,7 @@ describe('EnginesOverview', () => {
       it('calls onPagination handlers', async () => {
         setMockValues({
           ...valuesWithEngines,
-          myRole: { canViewMetaEngines: true },
+          hasPlatinumLicense: true,
           metaEngines: ['test-meta-engine'],
         });
         const wrapper = shallow(<EnginesOverview />);
