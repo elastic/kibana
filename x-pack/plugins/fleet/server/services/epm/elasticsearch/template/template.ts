@@ -13,6 +13,7 @@ import {
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
+import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 
 interface Properties {
@@ -331,6 +332,8 @@ function getBaseTemplate(
   ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
+  const logger = appContextService.getLogger();
+
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
     package: {
@@ -345,6 +348,11 @@ function getBaseTemplate(
   const defaultFields = flattenFieldsToNameAndType(fields).filter(
     (field) => field.type && DEFAULT_FIELD_TYPES.includes(field.type)
   );
+  if (defaultFields.length > DEFAULT_FIELD_LIMIT) {
+    logger.warn(
+      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${DEFAULT_FIELD_LIMIT} fields`
+    );
+  }
   const defaultFieldNames = (defaultFields.length > DEFAULT_FIELD_LIMIT
     ? defaultFields.slice(0, DEFAULT_FIELD_LIMIT)
     : defaultFields
