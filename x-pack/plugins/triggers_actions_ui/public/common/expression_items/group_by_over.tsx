@@ -22,7 +22,7 @@ import { GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface GroupByExpressionProps {
+export interface GroupByExpressionProps {
   groupBy: string;
   errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
@@ -208,3 +208,6 @@ export const GroupByExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { GroupByExpression as default };
