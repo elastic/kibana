@@ -8,7 +8,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
-import { ConnectorTypes, CommentType, CaseType, AssociationType } from '../../common/api';
+import {
+  ConnectorTypes,
+  CommentType,
+  CaseType,
+  AssociationType,
+  ESConnectorFields,
+} from '../../common/api';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -24,7 +30,7 @@ interface SanitizedCaseConnector {
     id: string;
     name: string | null;
     type: string | null;
-    fields: null;
+    fields: null | ESConnectorFields;
   };
 }
 
@@ -88,13 +94,21 @@ export const caseMigrations = {
     };
   },
   '7.12.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseType> => {
+    doc: SavedObjectUnsanitizedDoc<SanitizedCaseConnector>
+  ): SavedObjectSanitizedDoc<SanitizedCaseType & SanitizedCaseConnector> => {
+    const { fields, type } = doc.attributes.connector;
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
         type: CaseType.individual,
+        connector: {
+          ...doc.attributes.connector,
+          fields:
+            Array.isArray(fields) && fields.length > 0 && type === ConnectorTypes.serviceNowITSM
+              ? [...fields, { key: 'category', value: null }, { key: 'subcategory', value: null }]
+              : fields,
+        },
       },
       references: doc.references || [],
     };
