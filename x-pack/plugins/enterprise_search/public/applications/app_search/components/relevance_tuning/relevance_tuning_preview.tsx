@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFieldSearch, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFieldSearch, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +17,17 @@ import { EngineLogic } from '../engine';
 import { Result } from '../result/result';
 
 import { RelevanceTuningLogic } from '.';
+
+const emptyCallout = (
+  <EuiEmptyPrompt
+    body={i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
+      {
+        defaultMessage: 'Enter a query to see search results',
+      }
+    )}
+  />
+);
 
 export const RelevanceTuningPreview: React.FC = () => {
   const { updateSearchValue } = useActions(RelevanceTuningLogic);
@@ -36,7 +47,7 @@ export const RelevanceTuningPreview: React.FC = () => {
       <EuiFieldSearch
         onChange={(e) => updateSearchValue(e.target.value)}
         placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.texxtPlaceholder',
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.textPlaceholder',
           {
             defaultMessage: 'Search {engineName}',
             values: {
@@ -46,6 +57,7 @@ export const RelevanceTuningPreview: React.FC = () => {
         )}
         fullWidth
       />
+      {!searchResults && emptyCallout}
       {searchResults &&
         searchResults.map((result) => {
           return (

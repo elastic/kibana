@@ -10,7 +10,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFieldSearch } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
 import { Result } from '../result/result';
 
@@ -53,6 +53,8 @@ describe('RelevanceTuningPreview', () => {
     expect(results.at(1).prop('isMetaEngine')).toBe(false);
     expect(results.at(2).prop('result')).toBe(result3);
     expect(results.at(2).prop('isMetaEngine')).toBe(false);
+
+    expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(false);
   });
 
   it('correctly indicates whether or not this is a meta engine in results', () => {
@@ -75,5 +77,18 @@ describe('RelevanceTuningPreview', () => {
     wrapper.find(EuiFieldSearch).simulate('change', { target: { value: 'some search text' } });
 
     expect(actions.updateSearchValue).toHaveBeenCalledWith('some search text');
+  });
+
+  it('will show user a prompt to enter a query if they have not entered one', () => {
+    setMockValues({
+      ...values,
+      // Since `searchResults` is initialized as undefined, an undefined value indicates
+      // that no query has been performed, which means they have no yet entered a query
+      searchResults: undefined,
+    });
+
+    const wrapper = shallow(<RelevanceTuningPreview />);
+
+    expect(wrapper.find(EuiEmptyPrompt).exists()).toBe(true);
   });
 });
