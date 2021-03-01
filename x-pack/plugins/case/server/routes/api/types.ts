@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
+
 import type {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
@@ -20,6 +22,7 @@ export interface RouteDeps {
   connectorMappingsService: ConnectorMappingsServiceSetup;
   router: CasesRouter;
   userActionService: CaseUserActionServiceSetup;
+  logger: Logger;
 }
 
 export enum SortFieldCase {
