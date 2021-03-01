@@ -5,5 +5,5 @@
   "configPath": ["map"],
   "ui": true,
   "server": true,
-  "extraPublicDirs": ["common"],
+  "extraPublicDirs": ["common"]
 }
