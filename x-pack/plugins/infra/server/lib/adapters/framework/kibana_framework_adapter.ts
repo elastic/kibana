@@ -26,7 +26,7 @@ import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
-import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/common/types';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
