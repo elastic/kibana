@@ -15,33 +15,39 @@
   - [CREATE_REINDEX_TEMP](#create_reindex_temp)
     - [Next action](#next-action-4)
     - [New control state](#new-control-state-4)
-  - [REINDEX_SOURCE_TO_TEMP](#reindex_source_to_temp)
+  - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
     - [Next action](#next-action-5)
     - [New control state](#new-control-state-5)
-  - [REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK](#reindex_source_to_temp_wait_for_task)
+  - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
     - [Next action](#next-action-6)
     - [New control state](#new-control-state-6)
-  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
+  - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
     - [Next action](#next-action-7)
     - [New control state](#new-control-state-7)
-  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
+  - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
     - [Next action](#next-action-8)
     - [New control state](#new-control-state-8)
-  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
+  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
     - [Next action](#next-action-9)
     - [New control state](#new-control-state-9)
-  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
+  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
     - [Next action](#next-action-10)
     - [New control state](#new-control-state-10)
-  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
     - [Next action](#next-action-11)
     - [New control state](#new-control-state-11)
-  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
     - [Next action](#next-action-12)
     - [New control state](#new-control-state-12)
-  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
     - [Next action](#next-action-13)
     - [New control state](#new-control-state-13)
+  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+    - [Next action](#next-action-14)
+    - [New control state](#new-control-state-14)
+  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+    - [Next action](#next-action-15)
+    - [New control state](#new-control-state-15)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -134,48 +140,58 @@ Set a write block on the source index to prevent any older Kibana instances from
 ### Next action
 `createIndex`
 
-This operation is idempotent, if the index already exist, we wait until its status turns yellow.
+This operation is idempotent, if the index already exist, we wait until its status turns yellow. 
 
-Create a new temporary index with special mappings that allows us to write untransformed documents to the index which might have fields which have been removed from the latest mappings defined by the plugin:
-
-- `dynamic: false` to allow for any kind of outdated document to be written to the index
-- `migrationVersion` and `type` fields so that we can still search for and transform outdated documents.
-
-We need to reindex instead of cloning to be able to modify the mappings of the index.
+- Because we will be transforming documents before writing them into this index, we can already set the mappings to the target mappings for this version. The source index might contain documents belonging to a disabled plugin. So set `dynamic: false` mappings for any unknown saved object types.
+- (optionally disable refresh to speed up indexing performance ?)
 
 ### New control state
-  → `REINDEX_SOURCE_TO_TEMP`
+  → `REINDEX_SOURCE_TO_TEMP_OPEN_PIT`
 
-## REINDEX_SOURCE_TO_TEMP
+## REINDEX_SOURCE_TO_TEMP_OPEN_PIT
 ### Next action
-`reindex`
+`openPIT`
 
-Let elasticsearch reindex the source index into the temporary index. This action is idempotent allowing several Kibana instances to run this in parallel. By using `op_type: 'create', conflicts: 'proceed'` there will be only one write per reindexed document.
-
+Open a PIT. Since there is a write block on the source index there is basically no overhead to keeping the PIT so we can lean towards a larger `keep_alive` value like 10 minutes.
 ### New control state
-  → `REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK`
+  → `REINDEX_SOURCE_TO_TEMP_READ`
 
-## REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK
+## REINDEX_SOURCE_TO_TEMP_READ
 ### Next action
-`waitForReindexTask`
+`readNextBatchOfSourceDocuments`
 
-Wait up to 60s for the reindex task to complete.
+Read the next batch of outdated documents from the source index by using search after with our PIT.
 
 ### New control state
-1. If the task has completed
+1. If the batch contained > 0 documents
+  → `REINDEX_SOURCE_TO_TEMP_INDEX`
+2. If there are no more documents returned
+  → `REINDEX_SOURCE_TO_TEMP_CLOSE_PIT`
+
+## REINDEX_SOURCE_TO_TEMP_INDEX
+### Next action
+`transformRawDocs` + `bulkIndexTransformedDocuments`
+
+1. Transform the current batch of documents
+2. Use the bulk API create action to write a batch of up-to-date documents. The create action ensures that there will be only one write per reindexed document even if multiple Kibana instances are performing this step. Use `wait_for=false` to speed up the create actions. Ignore any create errors because of documents that already exist in the temporary index.
+### New control state
+  → `REINDEX_SOURCE_TO_TEMP_READ`
+   
+## REINDEX_SOURCE_TO_TEMP_CLOSE_PIT
+### Next action
+`closePIT`
+
+### New control state
   → `SET_TEMP_WRITE_BLOCK`
-2. If the task is still running wait again
-  → `REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK`
 
 ## SET_TEMP_WRITE_BLOCK
 ### Next action
 `setWriteBlock`
 
-Set a write block so that we can clone this index.
-
+Set a write block on the temporary index so that we can clone it.
 ### New control state
   → `CLONE_TEMP_TO_TARGET`
-
+  
 ## CLONE_TEMP_TO_TARGET
 ### Next action
 `cloneIndex`
@@ -185,7 +201,8 @@ Ask elasticsearch to clone the temporary index into the target index. If the tar
 We can’t use the temporary index as our target index because one instance can complete the migration, delete a document, and then a second instance starts the reindex operation and re-creates the deleted document. By cloning the temporary index and only accepting writes/deletes from the cloned target index, we prevent lost acknowledged deletes.
 
 ### New control state
-  → OUTDATED_DOCUMENTS_SEARCH
+If another instance has some plugins disabled it will reindex that plugin's documents without transforming them. Search for outdated documents to ensure that everything is up to date.
+  → `OUTDATED_DOCUMENTS_SEARCH`
 
 ## OUTDATED_DOCUMENTS_SEARCH
 ### Next action
@@ -206,13 +223,14 @@ Search for outdated saved object documents. Will return one batch of documents.
 Once transformed we use an index operation to overwrite the outdated document with the up-to-date version. Optimistic concurrency control ensures that we only overwrite the document once so that any updates/writes by another instance which already completed the migration aren’t overwritten and lost.
 
 ### New control state
-  → OUTDATED_DOCUMENTS_SEARCH
+  → `OUTDATED_DOCUMENTS_SEARCH`
 
 ## UPDATE_TARGET_MAPPINGS
 ### Next action
 `updateAndPickupMappings`
 
-Update the mappings and then use an update_by_query to ensure that all fields are “picked-up” and ready to be searched over
+If another instance has some plugins disabled it will disable the mappings of that plugin's types when creating the temporary index. This action will
+update the mappings and then use an update_by_query to ensure that all fields are “picked-up” and ready to be searched over.
 
 ### New control state
   → `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK`
