@@ -48,3 +48,12 @@ export interface ParsedExpression {
 }
 
 export const parseTimelionExpression = (input: string): ParsedExpression => parse(input);
+
+export const getIndexArgs = (expression: string) => {
+  const args = parseTimelionExpression(expression)?.args ?? [];
+  const indexArgs = args.filter(
+    ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
+  );
+
+  return indexArgs;
+}

@@ -10,12 +10,13 @@ import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { IndexPattern } from '../../data/public';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
 
-import { parseTimelionExpression } from '../common/parser';
+import { getIndexArgs } from '../common/parser';
 
 import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
 
@@ -50,16 +51,19 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
     },
-    getUsedIndexPattern: (params: VisParams) => {
+    getUsedIndexPattern: async (params: VisParams) => {
       try {
-        const args = parseTimelionExpression(params.expression)?.args ?? [];
-        const indexArg = args.find(
-          ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
-        );
+        let indexPatterns: IndexPattern[] = [];
+        const indexArgs = getIndexArgs(params.expression);
 
-        if (indexArg?.value.text) {
-          return getIndexPatterns().find(indexArg.value.text);
+        for (const index in indexArgs) {
+          if (indexArgs[index]?.value.text) {
+            const foundIndexPatterns = await getIndexPatterns().find(indexArgs[index]?.value.text);
+            indexPatterns = indexPatterns.concat(foundIndexPatterns);
+          }
         }
+
+        return indexPatterns;
       } catch {
         // timelion expression is invalid
       }

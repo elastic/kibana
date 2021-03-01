@@ -6,24 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { parse } from 'hjson';
 import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
+import { getIndexArgs } from '../../common/parser';
+import { getIndexPatternsService } from '../services';
 
-import { VisTypeTimelionPluginSetupDependencies } from '../types';
-
-type UsageCollectorDependencies = VisTypeTimelionPluginSetupDependencies;
-
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type ESResponse = SearchResponse<{ visualization: { visState: string }, updated_at: string }>;
 
 export interface TimelionUsage {
   timelion_use_scripted_fields_total: number;
 }
 
+const getPastDays = (dateString: string): number => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const diff = Math.abs(date.getTime() - today.getTime());
+  return Math.trunc(diff / (1000 * 60 * 60 * 24));
+};
+
 export const getStats = async (
   esClient: ElasticsearchClient,
+  soClient: any,
   index: string,
 ): Promise<TimelionUsage | undefined> => {
+  const indexPatternsServiceFactory = getIndexPatternsService();
+  const indexPatternsService = await indexPatternsServiceFactory(
+    soClient,
+    esClient
+  );
+
   const timelionUsage = {
     timelion_use_scripted_fields_total: 0,
   };
@@ -32,7 +43,11 @@ export const getStats = async (
     size: 10000,
     index,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
+    filterPath: [
+      'hits.hits._id',
+      'hits.hits._source.visualization',
+      'hits.hits._source.updated_at'
+    ],
     body: {
       query: {
         bool: {
@@ -41,21 +56,41 @@ export const getStats = async (
       },
     },
   };
-  console.log('timelion-usage')
 
   const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
   const size = esResponse?.hits?.hits?.length ?? 0;
 
-  // if (!size) {
-  //   return;
-  // }
-  console.log(esResponse);
+  if (!size) {
+    return;
+  }
 
   for (const hit of esResponse.hits.hits) {
     const visualization = hit._source?.visualization;
+    const lastUpdated = hit._source?.updated_at;
     const visState = JSON.parse(visualization?.visState ?? '{}');
 
+    if (visState.type === 'timelion' && getPastDays(lastUpdated) <= 90) {
+      const indexArgs = getIndexArgs(visState.params.expression);
+
+      for (const index in indexArgs) {
+        const indexPatternId = indexArgs[index]?.value.text;
+
+        if (indexPatternId) {
+          const indexPatternSpec = (await indexPatternsService.find(indexPatternId)).find(
+            (index) => index.title === indexPatternId
+          );
+        
+          const scriptedFields = indexPatternSpec?.getScriptedFields() ?? [];
+          const isScriptedFieldinExpession = scriptedFields.some((field) => visState.params.expression.includes(field.name));
+
+          if (isScriptedFieldinExpession) {
+            timelionUsage.timelion_use_scripted_fields_total++;
+            break;
+          }
+        }
+      }
+    }
   }
 
-  return timelionUsage;
+  return timelionUsage.timelion_use_scripted_fields_total ? timelionUsage: undefined;
 };

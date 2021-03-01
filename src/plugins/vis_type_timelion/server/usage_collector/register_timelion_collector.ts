@@ -9,12 +9,11 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { first } from 'rxjs/operators';
 import { getStats, TimelionUsage } from './get_usage_collector';
-import { ConfigObservable, VisTypeTimelionPluginSetupDependencies } from '../types';
+import { ConfigObservable } from '../types';
 
 export function registerTimelionUsageCollector(
   collectorSet: UsageCollectionSetup,
   config: ConfigObservable,
-  dependencies: VisTypeTimelionPluginSetupDependencies
 ) {
   const collector = collectorSet.makeUsageCollector<TimelionUsage | undefined>({
     type: 'vis_type_timelion',
@@ -22,10 +21,10 @@ export function registerTimelionUsageCollector(
     schema: {
       timelion_use_scripted_fields_total: { type: 'long' },
     },
-    fetch: async ({ esClient }) => {
+    fetch: async ({ esClient, soClient }) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
-      return await getStats(esClient, index);
+      return await getStats(esClient, soClient, index);
     },
   });
 

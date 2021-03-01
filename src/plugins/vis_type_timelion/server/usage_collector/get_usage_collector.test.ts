@@ -7,54 +7,57 @@
  */
 
 import { getStats } from './get_usage_collector';
-import { HomeServerPluginSetup } from '../../../home/server';
+import { setIndexPatternsService } from '../services';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { IndexPatternsServiceStart } from '../../../../plugins/data/server/index_patterns';
 
 const mockedSavedObjects = [
-  // vega-lite lib spec
   {
-    _id: 'visualization:vega-1',
+    _id: 'visualization:timelion-123',
     _source: {
       type: 'visualization',
       visualization: {
         visState: JSON.stringify({
-          type: 'vega',
+          type: 'timelion',
+          title: 'timelion visualization 1',
           params: {
-            spec: '{"$schema": "https://vega.github.io/schema/vega-lite/v4.json" }',
+            expression: '.es(index=my-test,metric=avg:scripted-test-field)',
           },
         }),
       },
+      updated_at: new Date().toUTCString(),
     },
   },
-  // vega lib spec
   {
-    _id: 'visualization:vega-2',
+    _id: 'visualization:timelion-321',
     _source: {
       type: 'visualization',
       visualization: {
         visState: JSON.stringify({
-          type: 'vega',
+          type: 'timelion',
+          title: 'timelion visualization 1',
           params: {
-            spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
+            expression: '.es(index=my-test,metric=avg:scripted-test-field)',
           },
         }),
       },
+      updated_at: '2020-10-17T00:00:00',
     },
   },
-  // map layout
   {
-    _id: 'visualization:vega-3',
+    _id: 'visualization:timelion-456',
     _source: {
       type: 'visualization',
       visualization: {
         visState: JSON.stringify({
-          type: 'vega',
+          type: 'timelion',
+          title: 'timelion visualization 2',
           params: {
-            spec:
-              '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
+            expression: '.es(index=my-test,metric=avg:test-field)',
           },
         }),
       },
+      updated_at: new Date().toUTCString(),
     },
   },
 ];
@@ -66,41 +69,25 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
   return fetchParamsMock;
 };
 
-describe('Vega visualization usage collector', () => {
+describe('Timelion visualization usage collector', () => {
   const mockIndex = 'mock_index';
-  const mockDeps = {
-    home: ({
-      sampleData: {
-        getSampleDatasets: jest.fn().mockReturnValue([
-          {
-            savedObjects: [
-              {
-                type: 'visualization',
-                attributes: {
-                  visState: JSON.stringify({
-                    type: 'vega',
-                    title: 'sample vega visualization',
-                    params: {
-                      spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
-                    },
-                  }),
-                },
-              },
-            ],
-          },
-        ]),
-      },
-    } as unknown) as HomeServerPluginSetup,
-  };
+  const indexPatternServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'] = (() => {
+    return {
+      find: () => [{ title: 'my-test', getScriptedFields: () => [{ name: 'scripted-test-field' }] }]
+    };
+  }) as unknown as IndexPatternsServiceStart['indexPatternsServiceFactory'];
+  setIndexPatternsService({
+    indexPatternsServiceFactory: indexPatternServiceFactory
+  });
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockCollectorFetchContext().esClient, mockIndex, mockDeps);
+    const result = await getStats(getMockCollectorFetchContext().esClient, getMockCollectorFetchContext().soClient, mockIndex);
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(getMockCollectorFetchContext([]).esClient, mockIndex, mockDeps);
+    const result = await getStats(getMockCollectorFetchContext([]).esClient, getMockCollectorFetchContext().soClient, mockIndex);
 
     expect(result).toBeUndefined();
   });
@@ -115,7 +102,7 @@ describe('Vega visualization usage collector', () => {
         },
       },
     ]);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
 
     expect(result).toBeUndefined();
   });
@@ -128,10 +115,10 @@ describe('Vega visualization usage collector', () => {
           type: 'visualization',
           visualization: {
             visState: JSON.stringify({
-              type: 'vega',
-              title: 'sample vega visualization',
+              type: 'timelion',
+              title: 'sample timelion visualization',
               params: {
-                spec: '{"$schema": "https://vega.github.io/schema/vega/v5.json" }',
+                expression: '.es(*)',
               },
             }),
           },
@@ -139,19 +126,17 @@ describe('Vega visualization usage collector', () => {
       },
     ]);
 
-    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
 
     expect(result).toMatchObject({
-      vega_lib_specs_total: 2,
-      vega_lite_lib_specs_total: 1,
-      vega_use_map_total: 1,
+      timelion_use_scripted_fields_total: 1,
     });
   });
 });
