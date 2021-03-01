@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { I18nStart } from 'src/core/public';
-import { UA_READONLY_MODE } from '../../common/constants';
 import { AppContextProvider, ContextValue } from './app_context';
 import { PageContent } from './components/page_content';
 
@@ -18,7 +17,7 @@ export interface AppDependencies extends ContextValue {
 export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
   return (
     <i18n.Context>
-      <AppContextProvider value={{ ...contextValue, isReadOnlyMode: UA_READONLY_MODE }}>
+      <AppContextProvider value={{ ...contextValue }}>
         <div data-test-subj="upgradeAssistantRoot">
           <PageContent />
         </div>
