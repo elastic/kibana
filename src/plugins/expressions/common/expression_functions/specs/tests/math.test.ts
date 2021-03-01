@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { getFunctionErrors } from '../../../i18n';
-import { emptyTable, testTable } from './__fixtures__/test_tables';
-import { math } from './math';
-
-const errors = getFunctionErrors().math;
+import { errors, math } from '../math';
+import { emptyTable, functionWrapper, testTable } from './utils';
 
 describe('math', () => {
-  const fn = functionWrapper(math);
+  const fn = functionWrapper<unknown>(math);
 
   it('evaluates math expressions without reference to context', () => {
     expect(fn(null, { expression: '10.5345' })).toBe(10.5345);
@@ -46,6 +43,19 @@ describe('math', () => {
         expect(fn(23.23, { expression: 'floor(value)' })).toBe(23);
         expect(fn(testTable, { expression: 'count(price)' })).toBe(9);
         expect(fn(testTable, { expression: 'count(name)' })).toBe(9);
+      });
+    });
+
+    describe('onError', () => {
+      it('should return the desired fallback value, for invalid expressions', () => {
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'zero' })).toBe(0);
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'null' })).toBe(null);
+        expect(fn(testTable, { expression: 'mean(name)', onError: 'false' })).toBe(false);
+      });
+      it('should return the desired fallback value, for division by zero', () => {
+        expect(fn(testTable, { expression: '1/0', onError: 'zero' })).toBe(0);
+        expect(fn(testTable, { expression: '1/0', onError: 'null' })).toBe(null);
+        expect(fn(testTable, { expression: '1/0', onError: 'false' })).toBe(false);
       });
     });
   });
@@ -86,6 +96,24 @@ describe('math', () => {
     it('throws when passing a context variable from an empty datatable', () => {
       expect(() => fn(emptyTable, { expression: 'mean(foo)' })).toThrow(
         new RegExp(errors.emptyDatatable().message)
+      );
+    });
+
+    it('should not throw when requesting fallback values for invalid expression', () => {
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'zero' })).not.toThrow();
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'false' })).not.toThrow();
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'null' })).not.toThrow();
+    });
+
+    it('should throw when declared in the onError argument', () => {
+      expect(() => fn(testTable, { expression: 'mean(name)', onError: 'throw' })).toThrow(
+        new RegExp(errors.executionFailed().message)
+      );
+    });
+
+    it('should throw when dividing by zero', () => {
+      expect(() => fn(testTable, { expression: '1/0', onError: 'throw' })).toThrow(
+        new RegExp('Cannot divide by 0')
       );
     });
   });

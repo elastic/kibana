@@ -46,9 +46,7 @@ import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
 import { help as mapCenter } from './dict/map_center';
-import { help as mapColumn } from './dict/map_column';
 import { help as markdown } from './dict/markdown';
-import { help as math } from './dict/math';
 import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
 import { help as pie } from './dict/pie';
@@ -209,9 +207,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   lt,
   lte,
   mapCenter,
-  mapColumn,
   markdown,
-  math,
   metric,
   neq,
   pie,

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
@@ -25,8 +23,6 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
 describe('DraggableLegendItem', () => {
   describe('rendering a regular (non "All others") legend item', () => {
     const legendItem: LegendItem = {
@@ -41,11 +37,9 @@ describe('DraggableLegendItem', () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <DraggableLegendItem legendItem={legendItem} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableLegendItem legendItem={legendItem} />
+        </TestProviders>
       );
     });
 
@@ -79,11 +73,9 @@ describe('DraggableLegendItem', () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <DraggableLegendItem legendItem={allOthersLegendItem} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableLegendItem legendItem={allOthersLegendItem} />
+        </TestProviders>
       );
     });
 
@@ -118,11 +110,9 @@ describe('DraggableLegendItem', () => {
     };
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <DraggableLegendItem legendItem={noColorLegendItem} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <DraggableLegendItem legendItem={noColorLegendItem} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="legend-color"]').exists()).toBe(false);

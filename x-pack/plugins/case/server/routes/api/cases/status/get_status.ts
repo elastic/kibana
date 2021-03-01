@@ -12,7 +12,7 @@ import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 
-export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
+export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_STATUS_URL,
@@ -41,6 +41,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
           }),
         });
       } catch (error) {
+        logger.error(`Failed to get status stats in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
