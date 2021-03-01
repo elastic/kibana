@@ -38,6 +38,7 @@ const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
 const DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const DEFAULT_FIELD_LIMIT = 1024;
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -339,9 +340,15 @@ function getBaseTemplate(
     managed: true,
   };
 
-  const defaultFields = flattenFieldsToNameAndType(fields)
-    .filter((field) => field.type && DEFAULT_FIELD_TYPES.includes(field.type))
-    .map((field) => field.name);
+  // Find all field names to set `index.query.default_field` to, which will be
+  // the first 1024 keyword or text fields
+  const defaultFields = flattenFieldsToNameAndType(fields).filter(
+    (field) => field.type && DEFAULT_FIELD_TYPES.includes(field.type)
+  );
+  const defaultFieldNames = (defaultFields.length > DEFAULT_FIELD_LIMIT
+    ? defaultFields.slice(0, DEFAULT_FIELD_LIMIT)
+    : defaultFields
+  ).map((field) => field.name);
 
   return {
     priority: templatePriority,
@@ -371,10 +378,10 @@ function getBaseTemplate(
           // All the default fields which should be queried have to be added here.
           // So far we add all keyword and text fields here if there are any, otherwise
           // this setting is skipped.
-          ...(defaultFields.length
+          ...(defaultFieldNames.length
             ? {
                 query: {
-                  default_field: defaultFields,
+                  default_field: defaultFieldNames,
                 },
               }
             : {}),
