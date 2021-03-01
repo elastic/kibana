@@ -11,6 +11,10 @@ import { queryToAst } from './query_to_ast';
 describe('queryToAst', () => {
   it('returns an object with the correct structure', () => {
     const actual = queryToAst({ language: 'lucene', query: 'country: US' });
-    expect(actual).toMatchSnapshot();
+    expect(actual).toHaveProperty('functions');
+    expect(actual.functions[0]).toHaveProperty('name', 'lucene');
+    expect(actual.functions[0]).toHaveProperty('arguments', {
+      q: ['country: US'],
+    });
   });
 });

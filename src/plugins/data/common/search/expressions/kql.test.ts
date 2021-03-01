@@ -30,10 +30,14 @@ describe('interpreter/functions#kql', () => {
 
   it('returns an object with the correct structure', () => {
     const actual = fn(input, { q: 'test' }, context);
-    expect(actual).toMatchInlineSnapshot({
-      type: 'kibana_query',
-      language: 'kql',
-      query: 'test',
-    });
+    expect(actual).toMatchInlineSnapshot(
+      `
+      Object {
+        "language": "kql",
+        "query": "test",
+        "type": "kibana_query",
+      }
+    `
+    );
   });
 });

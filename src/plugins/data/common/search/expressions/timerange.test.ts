@@ -30,11 +30,15 @@ describe('interpreter/functions#timerange', () => {
 
   it('returns an object with the correct structure', () => {
     const actual = fn(input, { from: 'now', to: 'now-7d', mode: 'absolute' }, context);
-    expect(actual).toMatchInlineSnapshot({
-      type: 'timerange',
-      from: 'now',
-      to: 'now-7d',
-      mode: 'absolute',
-    });
+    expect(actual).toMatchInlineSnapshot(
+      `
+      Object {
+        "from": "now",
+        "mode": "absolute",
+        "to": "now-7d",
+        "type": "timerange",
+      }
+    `
+    );
   });
 });
