@@ -70,7 +70,7 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed Bar horizontal');
+      expect(desc.label).toEqual('Mixed bar horizontal');
     });
 
     it('should show bar chart when bar only', () => {
