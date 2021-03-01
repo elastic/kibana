@@ -22,7 +22,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
-export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
+export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,
@@ -77,6 +77,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           ),
         });
       } catch (error) {
+        logger.error(`Failed to find cases in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

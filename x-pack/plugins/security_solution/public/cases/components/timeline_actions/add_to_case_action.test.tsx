@@ -30,12 +30,18 @@ jest.mock('../../../common/components/toasters', () => {
 
 jest.mock('../all_cases', () => {
   return {
-    AllCases: ({ onRowClick }: { onRowClick: ({ id }: { id: string }) => void }) => {
+    AllCases: ({ onRowClick }: { onRowClick: (theCase: Partial<Case>) => void }) => {
       return (
         <button
           type="button"
           data-test-subj="all-cases-modal-button"
-          onClick={() => onRowClick({ id: 'selected-case' })}
+          onClick={() =>
+            onRowClick({
+              id: 'selected-case',
+              title: 'the selected case',
+              settings: { syncAlerts: true },
+            })
+          }
         >
           {'case-row'}
         </button>
@@ -49,18 +55,25 @@ jest.mock('../create/form_context', () => {
     FormContext: ({
       children,
       onSuccess,
+      afterCaseCreated,
     }: {
       children: ReactNode;
-      onSuccess: (theCase: Partial<Case>) => void;
+      onSuccess: (theCase: Partial<Case>) => Promise<void>;
+      afterCaseCreated: (theCase: Partial<Case>) => Promise<void>;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() =>
-              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } })
-            }
+            onClick={() => {
+              afterCaseCreated({
+                id: 'new-case',
+                title: 'the new case',
+                settings: { syncAlerts: true },
+              });
+              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } });
+            }}
           >
             {'submit'}
           </button>
@@ -212,14 +225,7 @@ describe('AddToCaseAction', () => {
     });
   });
 
-  it('navigates to case view', async () => {
-    usePostCommentMock.mockImplementation(() => {
-      return {
-        ...defaultPostComment,
-        postComment: jest.fn().mockImplementation(({ caseId, data, updateCase }) => updateCase()),
-      };
-    });
-
+  it('navigates to case view when attach to a new case', async () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -243,5 +249,46 @@ describe('AddToCaseAction', () => {
       .simulate('click');
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/new-case' });
+  });
+
+  it('navigates to case view when attach to an existing case', async () => {
+    usePostCommentMock.mockImplementation(() => {
+      return {
+        ...defaultPostComment,
+        postComment: jest.fn().mockImplementation(({ caseId, data, updateCase }) => {
+          updateCase({
+            id: 'selected-case',
+            title: 'the selected case',
+            settings: { syncAlerts: true },
+          });
+        }),
+      };
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AddToCaseAction {...props} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="all-cases-modal-button"]`).first().simulate('click');
+
+    expect(mockDispatchToaster).toHaveBeenCalled();
+    const toast = mockDispatchToaster.mock.calls[0][0].toast;
+
+    const toastWrapper = mount(
+      <EuiGlobalToastList toasts={[toast]} toastLifeTimeMs={6000} dismissToast={() => {}} />
+    );
+
+    toastWrapper
+      .find('[data-test-subj="toaster-content-case-view-link"]')
+      .first()
+      .simulate('click');
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', {
+      path: '/selected-case',
+    });
   });
 });

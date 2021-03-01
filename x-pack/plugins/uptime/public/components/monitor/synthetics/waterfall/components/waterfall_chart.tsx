@@ -120,8 +120,12 @@ export const WaterfallChart = ({
           </WaterfallChartAxisOnlyContainer>
         </WaterfallChartTopContainer>
       </WaterfallChartFixedTopContainer>
-      <WaterfallChartOuterContainer height={height} data-test-subj="waterfallOuterContainer">
-        <EuiFlexGroup gutterSize="none" responsive={false} ref={chartWrapperDivRef}>
+      <WaterfallChartOuterContainer
+        height={height}
+        data-test-subj="waterfallOuterContainer"
+        ref={chartWrapperDivRef}
+      >
+        <EuiFlexGroup gutterSize="none" responsive={false}>
           {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
 
           <WaterfallChartAxisOnlyContainer

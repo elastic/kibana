@@ -14,6 +14,10 @@ import { ExceptionsBuilderExceptionItem } from '../types';
 import { Action, State, exceptionsBuilderReducer } from './reducer';
 import { getDefaultEmptyEntry } from './helpers';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
+
 const initialState: State = {
   disableAnd: false,
   disableNested: false,

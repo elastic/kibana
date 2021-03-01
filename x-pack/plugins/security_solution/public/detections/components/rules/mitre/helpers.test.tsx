@@ -8,7 +8,7 @@
 import { getValidThreat } from '../../../mitre/valid_threat_mock';
 import { hasSubtechniqueOptions } from './helpers';
 
-const mockTechniques = getValidThreat()[0].technique;
+const mockTechniques = getValidThreat()[0].technique ?? [];
 
 describe('helpers', () => {
   describe('hasSubtechniqueOptions', () => {

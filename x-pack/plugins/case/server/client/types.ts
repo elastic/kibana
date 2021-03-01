@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
@@ -13,7 +13,6 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
-  CollectionWithSubCaseResponse,
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
@@ -77,6 +76,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
+  logger: Logger;
 }
 
 export interface ConfigureFields {
@@ -89,7 +89,7 @@ export interface ConfigureFields {
  * This represents the interface that other plugins can access.
  */
 export interface CaseClient {
-  addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
+  addComment(args: CaseClientAddComment): Promise<CaseResponse>;
   create(theCase: CasePostRequest): Promise<CaseResponse>;
   get(args: CaseClientGet): Promise<CaseResponse>;
   getAlerts(args: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse>;
