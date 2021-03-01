@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
@@ -125,12 +124,10 @@ const customElementCollector: TelemetryCollector = async function customElementC
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<SearchResponse<CustomElementSearch>>(
-    customElementParams
-  );
+  const { body: esResponse } = await esClient.search<CustomElementSearch>(customElementParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
+    const customElements = esResponse.hits.hits.map((hit) => hit._source![CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 
