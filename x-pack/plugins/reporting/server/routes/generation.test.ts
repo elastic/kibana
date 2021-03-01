@@ -158,7 +158,6 @@ describe('POST /api/reporting/generate', () => {
 
   it(`returns 200 if job handler doesn't error`, async () => {
     callClusterStub.withArgs('index').resolves({ _id: 'foo', _index: 'foo-index' });
-
     registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
@@ -180,9 +179,7 @@ describe('POST /api/reporting/generate', () => {
                 test1: 'yes',
               },
             },
-            priority: 10,
             status: 'pending',
-            timeout: 10000,
           },
           path: 'undefined/api/reporting/jobs/download/foo',
         });

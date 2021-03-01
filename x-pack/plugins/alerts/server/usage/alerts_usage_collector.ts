@@ -57,7 +57,7 @@ export function createAlertsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: AlertsUsage = get(doc, 'state') as AlertsUsage;
+        const { runs, ...state } = get(doc, 'state') as AlertsUsage & { runs: number };
 
         return {
           ...state,
@@ -68,14 +68,14 @@ export function createAlertsUsageCollector(
           count_active_total: 0,
           count_disabled_total: 0,
           throttle_time: {
-            min: 0,
-            avg: 0,
-            max: 0,
+            min: '0s',
+            avg: '0s',
+            max: '0s',
           },
           schedule_time: {
-            min: 0,
-            avg: 0,
-            max: 0,
+            min: '0s',
+            avg: '0s',
+            max: '0s',
           },
           connectors_per_alert: {
             min: 0,
@@ -92,14 +92,14 @@ export function createAlertsUsageCollector(
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },
       throttle_time: {
-        min: { type: 'long' },
-        avg: { type: 'float' },
-        max: { type: 'long' },
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
       },
       schedule_time: {
-        min: { type: 'long' },
-        avg: { type: 'float' },
-        max: { type: 'long' },
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
       },
       connectors_per_alert: {
         min: { type: 'long' },
