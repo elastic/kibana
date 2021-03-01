@@ -28,7 +28,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
   const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList(true);
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('policies');
+    breadcrumbService.setBreadcrumbs({ type: 'policies' });
   }, [breadcrumbService]);
 
   if (isLoading) {

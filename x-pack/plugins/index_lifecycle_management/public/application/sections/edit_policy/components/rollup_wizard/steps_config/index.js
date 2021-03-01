@@ -19,11 +19,11 @@ export const STEP_HISTOGRAM = 'STEP_HISTOGRAM';
 export const STEP_METRICS = 'STEP_METRICS';
 
 export const stepIds = [
-  STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
   STEP_TERMS,
   STEP_HISTOGRAM,
   STEP_METRICS,
+  STEP_LOGISTICS,
 ];
 
 /**
@@ -52,7 +52,7 @@ export const stepIdToStepConfigMap = {
   [STEP_DATE_HISTOGRAM]: {
     getDefaultFields: (overrides = {}) => {
       const defaults = {
-        dateHistogramField: null,
+        dateHistogramField: '@timestamp',
         dateHistogramInterval: null,
         dateHistogramTimeZone: 'UTC',
       };
