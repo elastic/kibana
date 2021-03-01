@@ -24,18 +24,15 @@ import {
   WhenExpression,
   OfExpression,
   ThresholdExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
+} from '../../../../../triggers_actions_ui/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import { IErrorObject } from '../../../../../triggers_actions_ui/public';
 import { MetricExpression, AGGREGATION_TYPES } from '../types';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { builtInComparators } from '../../../../../triggers_actions_ui/public/common/constants';
+import { builtInComparators } from '../../../../../triggers_actions_ui/public';
 
 const customComparators = {
   ...builtInComparators,
