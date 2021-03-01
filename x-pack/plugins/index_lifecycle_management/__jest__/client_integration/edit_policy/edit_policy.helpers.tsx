@@ -207,19 +207,21 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
 
-  const setReadonly = (phase: Phases) => async (value: boolean) => {
-    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  const createReadonlyActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-readonlySwitch`;
+    return {
+      readonlyExists: () => exists(toggleSelector),
+      toggleReadonly: createFormToggleAction(toggleSelector),
+    };
   };
 
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
-    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
-      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
       searchableSnapshotDisabled: () =>
         exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
       searchableSnapshotsExists: () => exists(fieldSelector),
@@ -254,7 +256,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setIndexPriority: setIndexPriority('hot'),
         setShrink: setShrink('hot'),
         shrinkExists: shrinkExists('hot'),
-        setReadonly: setReadonly('hot'),
+        ...createReadonlyActions('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
@@ -269,7 +271,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setShrink: setShrink('warm'),
         shrinkExists: shrinkExists('warm'),
         ...createForceMergeActions('warm'),
-        setReadonly: setReadonly('warm'),
+        ...createReadonlyActions('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
