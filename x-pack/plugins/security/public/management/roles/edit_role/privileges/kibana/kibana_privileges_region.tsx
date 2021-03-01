@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../spaces/public';
 import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
@@ -26,6 +27,7 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   validator: RoleValidator;
+  spacesApiUi?: SpacesApiUi;
 }
 
 export class KibanaPrivilegesRegion extends Component<Props, {}> {
@@ -48,6 +50,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       onChange,
       editable,
       validator,
+      spacesApiUi,
     } = this.props;
 
     if (role._transform_error && role._transform_error.includes('kibana')) {
@@ -65,6 +68,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           editable={editable}
           canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
           validator={validator}
+          spacesApiUi={spacesApiUi!}
         />
       );
     } else {
