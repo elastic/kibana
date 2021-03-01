@@ -25,7 +25,7 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { UseField } from '../../../../form';
+import { useConfigurationIssues, UseField } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
@@ -52,6 +52,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
@@ -242,7 +243,21 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const renderInfoCallout = (): JSX.Element | undefined => {
     let infoCallout: JSX.Element | undefined;
 
-    if (isDisabledDueToLicense) {
+    if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
+      infoCallout = (
+        <EuiCallOut
+          size="s"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
+            {
+              defaultMessage:
+                'Force merge, shrink and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
+            }
+          )}
+          data-test-subj="searchableSnapshotFieldsDisabledCallout"
+        />
+      );
+    } else if (isDisabledDueToLicense) {
       infoCallout = (
         <EuiCallOut
           data-test-subj="searchableSnapshotDisabledDueToLicense"
