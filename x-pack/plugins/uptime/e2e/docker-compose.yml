@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: uptime-e2e-es
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'curl -s http://localhost:9220/_cluster/health | grep -vq ''"status":"red"''']
+      retries: 10
+      interval: 20s
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - ELASTICSEARCH_PORT=9220
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=changeme
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - '9220:9200'
+      - '9320:9300'
+    expose:
+      - '9220'
+    networks:
+      - elastic
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:${STACK_VERSION}
+    container_name: uptime-e2e-heartbeat
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./heartbeat.docker.yml:/usr/share/heartbeat/heartbeat.yml:ro
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge

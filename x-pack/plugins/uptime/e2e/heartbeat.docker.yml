@@ -1,0 +1,139 @@
+heartbeat.monitors:
+  - type: http
+    id: elastic-co
+    name: Elastic Homepage
+    urls: ["https://www.elastic.co"]
+    schedule: "@every 60s"
+    mode: all
+    ipv6: false
+    tags: ["org:elastic"]
+  - type: http
+    id: elastic-observability
+    name: Elastic Forums
+    urls: ["https://www.elastic.co/observability"]
+    schedule: "@every 60s"
+    tags: ["org:elastic"]
+  - type: http
+    id: ir-elastic-co
+    name: Elastic Investor Relations
+    urls: ["https://ir.elastic.co"]
+    schedule: "@every 60s"
+    tags: ["org:elastic"]
+  - type: http
+    id: elastic-community
+    name: Elastic Community
+    urls: ["https://community.elastic.co"]
+    schedule: "@every 5m"
+    tags: ["org:elastic"]
+  - type: http
+    id: elastic-training
+    name: Elastic Training
+    urls: ["https://training.elastic.co"]
+    schedule: "@every 5m"
+    tags: ["org:elastic"]
+  - type: http
+    id: hacker-news
+    name: Hacker News
+    urls: ["http://news.ycombinator.com"]
+    schedule: "@every 30s"
+  - type: http
+    id: nytimes
+    name: New York Times
+    urls: ["https://nytimes.com"]
+    schedule: "@every 30s"
+  - type: http
+    id: google-homepage
+    name: Google Homepage
+    urls: https://www.google.com
+    tags: ["org:google"]
+    schedule: '@every 30s'
+  - type: http
+    id: youtube-homepage
+    name: Youtube Homepage
+    urls: https://www.youtube.com
+    tags:  ["org:google"]
+    schedule: '@every 30s'
+  - type: http
+    id: android-homepage
+    name: Android Homepage
+    urls: https://www.android.com
+    tags: ["org:google"]
+    schedule: "@every 30s"
+  - type: icmp
+    id: google-dns
+    name: Google DNS
+    hosts: ["8.8.8.8"]
+    schedule: "@every 30s"
+    tags: ["service:dns", "org:google"]
+  - type: icmp
+    name: Cloudflare DNS
+    hosts: ["1.1.1.1"]
+    schedule: "@every 30s"
+    tags: ["service:dns", "org:cloudflare"]
+  - type: tcp
+    id: gmail-smtp
+    name: GMail SMTP
+    hosts: ["smtp.gmail.com:587"]
+    schedule: "@every 30s"
+    tags: ["service:smtp", "org:google"]
+  - type: tcp
+    id: o365-smtp
+    name: Office 365 SMTP
+    hosts: ["smtp.office365.com:587"]
+    schedule: "@every 30s"
+    tags: ["service:smtp", "org:microsoft"]
+  - type: http
+    id: example.net
+    urls: ["https://example.net"]
+    schedule: "@every 30s"
+    mode: all
+    ipv6: false
+  - type: tcp
+    hosts: ["localhost:18278"]
+    id: always-down
+    name: Always Down Local Port
+    schedule: "@every 30s"
+  - type: http
+    urls: ["https://www.cloudflare.com"]
+    id: cloudflare-home
+    name: Cloudflare Homepage
+    schedule: "@every 30s"
+    tags: [ "org:cloudflare" ]
+  - type: http
+    urls: ["https://developers.cloudflare.com"]
+    id: cloudflare-developers
+    name: Cloudflare Developers
+    schedule: "@every 30s"
+    tags: [ "org:cloudflare" ]
+  - type: http
+    urls: ["https://blog.cloudflare.com"]
+    id: cloudflare-blog
+    name: Cloudflare Blog
+    schedule: "@every 30s"
+    tags: [ "org:cloudflare" ]
+  - type: http
+    urls: ["https://expired.badssl.com/"]
+    id: expired-badssl
+    name: BadSSL Expired
+    schedule: "@every 30s"
+    tags: [ "org:badssl" ]
+  - type: http
+    urls: ["https://wrong.host.badssl.com/"]
+    id: badhost-badssl
+    name: BadSSL Wrong Host
+    schedule: "@every 30s"
+    tags: [ "org:badssl" ]
+processors:
+  - add_observer_metadata:
+      geo:
+        name: minneapolis
+        location: 44.986656, -93.258133
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+
+output.elasticsearch:
+  hosts: ["uptime-e2e-es:9200"]
+  username: "elastic"
+  password: "changeme"
