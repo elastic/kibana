@@ -10,7 +10,7 @@ import { mockTelemetryActions, mountWithIntl, setMockValues } from '../../../__m
 
 import React from 'react';
 
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiIcon, EuiTableRow } from '@elastic/eui';
 
@@ -174,7 +174,7 @@ describe('EnginesTable', () => {
   });
 
   describe('actions', () => {
-    it('when AppLogic.values.myRole.canManageEngines is false actions are hidden', () => {
+    it('will hide the action buttons if the user does not have permissions to manage this the engine', () => {
       jest.clearAllMocks();
       setMockValues({
         // AppLogic
@@ -182,13 +182,13 @@ describe('EnginesTable', () => {
           canManageEngines: false,
         },
       });
-      const wrapper = mountWithIntl(<EnginesTable {...props} />);
+      const wrapper = shallow(<EnginesTable {...props} />);
       const tableRow = wrapper.find(EuiTableRow).first();
 
       expect(tableRow.find(EuiIcon)).toHaveLength(0);
     });
 
-    describe('when AppLogic.values.myRole.canManageEngines is true', () => {
+    describe('when user can manage engines', () => {
       let wrapper: ReactWrapper<any>;
       let tableRow: ReactWrapper<any>;
       let actions: ReactWrapper<any>;
@@ -201,7 +201,7 @@ describe('EnginesTable', () => {
             canManageEngines: true,
           },
         });
-        wrapper = mountWithIntl(<EnginesTable {...props} />);
+        wrapper = shallow(<EnginesTable {...props} />);
         tableRow = wrapper.find(EuiTableRow).first();
         actions = tableRow.find(EuiIcon);
         EnginesLogic.mount();
@@ -217,13 +217,13 @@ describe('EnginesTable', () => {
       });
 
       describe('delete action', () => {
-        it('has an onClick action that calls window.confirm', () => {
+        it('shows the user a confirm message when the action is clicked', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
           actions.at(1).simulate('click');
           expect(global.confirm).toHaveBeenCalled();
         });
 
-        it('clicking the action and confirming calls EnginesLogic.deleteEngine', () => {
+        it('clicking the action and confirming deletes the engine', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
           jest.spyOn(EnginesLogic.actions, 'deleteEngine');
 
@@ -232,7 +232,7 @@ describe('EnginesTable', () => {
           expect(onDeleteEngine).toHaveBeenCalled();
         });
 
-        it('clicking the action and not confirming does not call EnginesLogic.deleteEngine', () => {
+        it('clicking the action and not confirming does not delete the engine', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(false);
           jest.spyOn(EnginesLogic.actions, 'deleteEngine');
 
