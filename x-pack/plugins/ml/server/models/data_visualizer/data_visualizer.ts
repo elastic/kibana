@@ -16,7 +16,7 @@ import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
-import { AggCardinality } from '../../../common/types/fields';
+import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { isPopulatedObject } from '../../../common/util/object_utils';
@@ -240,7 +240,8 @@ export const getHistogramsForFields = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ) => {
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
@@ -293,6 +294,7 @@ export const getHistogramsForFields = async (
       query,
       aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
       size: 0,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -607,7 +609,7 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
-    const runtimeMappings: any = {};
+    const runtimeMappings: { runtime_mappings?: RuntimeMappings } = {};
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);

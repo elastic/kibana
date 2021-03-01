@@ -16,7 +16,10 @@ import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import type { FieldHistogramsResponseSchema } from '../../../common/api_schemas/field_histograms';
+import type {
+  FieldHistogramsRequestSchema,
+  FieldHistogramsResponseSchema,
+} from '../../../common/api_schemas/field_histograms';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -194,6 +197,7 @@ export const useApi = () => {
         indexPatternTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
+        runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
         try {
@@ -201,7 +205,9 @@ export const useApi = () => {
             body: JSON.stringify({
               query,
               fields,
+              runtimeMappings,
               samplerShardSize,
+              ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
             }),
           });
         } catch (e) {
