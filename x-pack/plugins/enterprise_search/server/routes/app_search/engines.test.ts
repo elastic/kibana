@@ -183,6 +183,21 @@ describe('engine routes', () => {
         path: '/as/engines/:name',
       });
     });
+
+    it('validates correctly with name', () => {
+      const request = { params: { name: 'test-engine' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation with a non-string name', () => {
+      const request = { params: { name: 1 } };
+      mockRouter.shouldThrow(request);
+    });
   });
 
   describe('GET /api/app_search/engines/{name}/overview', () => {
