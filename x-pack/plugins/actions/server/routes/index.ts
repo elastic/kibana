@@ -9,6 +9,7 @@ import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
+import { deleteActionRoute } from './delete';
 import * as legacy from './legacy';
 
 export function defineRoutes(
@@ -17,7 +18,10 @@ export function defineRoutes(
 ) {
   legacy.createActionRoute(router, licenseState);
   createActionRoute(router, licenseState);
+
   legacy.deleteActionRoute(router, licenseState);
+  deleteActionRoute(router, licenseState);
+
   legacy.getActionRoute(router, licenseState);
   legacy.getAllActionRoute(router, licenseState);
   legacy.updateActionRoute(router, licenseState);
