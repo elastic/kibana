@@ -37,7 +37,10 @@ export const rolesManagementApp = Object.freeze({
         ];
 
         const [
-          [{ application, docLinks, http, i18n: i18nStart, notifications }, { data, features }],
+          [
+            { application, docLinks, http, i18n: i18nStart, notifications },
+            { data, features, spaces },
+          ],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -84,6 +87,8 @@ export const rolesManagementApp = Object.freeze({
                 },
           ]);
 
+          const spacesApiUi = spaces?.ui;
+
           return (
             <EditRolePage
               action={action}
@@ -101,6 +106,7 @@ export const rolesManagementApp = Object.freeze({
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
               history={history}
+              spacesApiUi={spacesApiUi}
             />
           );
         };
