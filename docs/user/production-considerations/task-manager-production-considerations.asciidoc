@@ -6,10 +6,16 @@
 These background tasks distribute work across multiple {kib} instances.
 This has three major benefits:
 
-* *Persistence*: All task state and scheduling is stored in {es}, so if you restart {kib}, tasks will pick up where they left off. Task definitions are stored in the index specified by `xpack.task_manager.index`, which defaults to `.kibana_task_manager`.  You must have at least one replica of this index for production deployments. If you lose this index, all scheduled tasks are lost.
+* *Persistence*: All task state and scheduling is stored in {es}, so if you restart {kib}, tasks will pick up where they left off.
 * *Scaling*: Multiple {kib} instances can read from and update the same task queue in {es}, allowing the work load to be distributed across instances. If a {kib} instance no longer has capacity to run tasks, you can increase capacity by adding additional {kib} instances.
 * *Load Balancing*: Task Manager is equipped with a reactive self-healing mechanism, which allows it to reduce the amount of work it executes in reaction to an increased load related error rate in {es}. Additionally, when Task Manager experiences an increase in recurring tasks, it attempts to space out the work to better balance the load.
 
+[IMPORTANT]
+==============================================
+Task definitions are stored in the index specified by `xpack.task_manager.index`, which defaults to `.kibana_task_manager`.
+
+You must have at least one replica of this index for production deployments. If you lose this index, all scheduled tasks are lost.
+==============================================
 
 [float]
 [[task-manager-background-tasks]]

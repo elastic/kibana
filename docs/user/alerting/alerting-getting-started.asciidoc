@@ -168,7 +168,9 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 [[alerting-setup-production]]
 == Production considerations and scaling guidance
 
-For <<alerting-scaling-guidance>> when relying on alerts and actions as mission critical services, see <<alerting-production-considerations,Alerting production considerations>>.
+When relying on alerts and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
+
+See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
 
 [float]
 [[alerting-security]]
