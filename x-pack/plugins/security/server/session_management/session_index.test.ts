@@ -6,13 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
-import { ConfigSchema, createConfig } from '../config';
-import { getSessionIndexTemplate, SessionIndex } from './session_index';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
+import { getSessionIndexTemplate, SessionIndex } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {

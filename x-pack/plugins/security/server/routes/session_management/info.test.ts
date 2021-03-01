@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { Session } from '../../session_management';
-import { defineSessionInfoRoutes } from './info';
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-
+import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
+
+import { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
+import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineSessionInfoRoutes } from './info';
 
 describe('Info session routes', () => {
   let router: jest.Mocked<SecurityRouter>;

@@ -17,10 +17,12 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, Fragment } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { RoleIndexPrivilege } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
 

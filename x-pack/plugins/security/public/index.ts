@@ -6,12 +6,13 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+
 import {
+  PluginSetupDependencies,
+  PluginStartDependencies,
   SecurityPlugin,
   SecurityPluginSetup,
   SecurityPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
 } from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };

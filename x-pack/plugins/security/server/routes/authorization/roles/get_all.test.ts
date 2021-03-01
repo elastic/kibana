@@ -6,12 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { kibanaResponseFactory } from 'src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { defineGetAllRolesRoutes } from './get_all';
 
+import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetAllRolesRoutes } from './get_all';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';

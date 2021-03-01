@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useEffect, useRef, useContext, FunctionComponent } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
+import React, { createContext, FunctionComponent, useContext, useEffect, useRef } from 'react';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {

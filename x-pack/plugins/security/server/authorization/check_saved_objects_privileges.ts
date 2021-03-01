@@ -6,9 +6,10 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+
 import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './types';
+import { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest

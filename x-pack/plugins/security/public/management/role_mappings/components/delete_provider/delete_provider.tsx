@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState, ReactElement } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
+import React, { Fragment, ReactElement, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart } from 'src/core/public';
+
 import { RoleMapping } from '../../../../../common/model';
 import { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 

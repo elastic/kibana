@@ -6,18 +6,19 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ManagementApp, ManagementSetup, DefinedSections } from 'src/plugins/management/public';
-import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
-import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
-import { ManagementService } from './management_service';
-import { usersManagementApp } from './users';
 
 import { coreMock } from 'src/core/public/mocks';
+import { DefinedSections, ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
+
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { securityMock } from '../mocks';
-import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
+import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
+import { rolesManagementApp } from './roles';
+import { usersManagementApp } from './users';
 
 const mockSection = createManagementSectionMock();
 

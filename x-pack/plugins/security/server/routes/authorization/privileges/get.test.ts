@@ -6,13 +6,13 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import { LicenseCheck } from '../../../../../licensing/server';
 import { RawKibanaPrivileges } from '../../../../common/model';
-import { defineGetPrivilegesRoutes } from './get';
 import { SecurityRequestHandlerContext } from '../../../types';
-
-import { httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetPrivilegesRoutes } from './get';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {

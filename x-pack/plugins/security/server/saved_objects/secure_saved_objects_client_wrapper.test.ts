@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
-import { Actions } from '../authorization';
-import { securityAuditLoggerMock, auditServiceMock } from '../audit/index.mock';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { SavedObjectsClientContract } from 'src/core/server';
-import { SavedObjectActions } from '../authorization/actions/saved_object';
+import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
 import { AuditEvent, EventOutcome } from '../audit';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { Actions } from '../authorization';
+import { SavedObjectActions } from '../authorization/actions/saved_object';
+import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(

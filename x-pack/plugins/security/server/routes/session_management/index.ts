@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { RouteDefinitionParams } from '../';
 import { defineSessionExtendRoutes } from './extend';
 import { defineSessionInfoRoutes } from './info';
-import { RouteDefinitionParams } from '..';
 
 export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);

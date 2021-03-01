@@ -6,8 +6,10 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
+
+import { i18n } from '@kbn/i18n';
+
 import { getSpaceColor, Space } from '../../../../../../../../spaces/public';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {

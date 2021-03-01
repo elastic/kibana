@@ -15,11 +15,13 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import React, { Component, memo } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from 'src/plugins/spaces_oss/common';
 import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
 
 interface Props {

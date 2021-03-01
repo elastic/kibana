@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import React, { Component, ChangeEvent } from 'react';
 import {
   EuiButtonIcon,
+  EuiComboBox,
   EuiExpression,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
-  EuiSelect,
-  EuiFieldNumber,
   EuiIcon,
+  EuiSelect,
 } from '@elastic/eui';
+import React, { ChangeEvent, Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
+
 import { FieldRule, FieldRuleValue } from '../../model';
 
 interface Props {

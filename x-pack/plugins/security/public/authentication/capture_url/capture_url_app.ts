@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'url';
+
 import { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
 
 interface CreateDeps {

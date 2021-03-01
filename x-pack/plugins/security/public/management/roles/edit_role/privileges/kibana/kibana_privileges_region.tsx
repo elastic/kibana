@@ -6,16 +6,18 @@
  */
 
 import React, { Component } from 'react';
+
 import { Capabilities } from 'src/core/public';
 import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { Space } from '../../../../../../../spaces/public';
 import { Role } from '../../../../../../common/model';
-import { RoleValidator } from '../../validate_role';
+import { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
+import { RoleValidator } from '../../validate_role';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import { KibanaPrivileges } from '../../../model';
 
 interface Props {
   role: Role;

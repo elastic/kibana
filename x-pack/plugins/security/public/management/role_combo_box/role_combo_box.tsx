@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
   EuiComboBox,
-  EuiComboBoxProps,
   EuiComboBoxOptionOption,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import React from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
-  Role,
-  isRoleSystem,
   isRoleAdmin,
-  isRoleReserved,
   isRoleDeprecated,
+  isRoleReserved,
+  isRoleSystem,
+  Role,
 } from '../../../common/model';
 
 interface Props

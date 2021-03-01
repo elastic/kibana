@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiText } from '@elastic/eui';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { AuthenticatedUser } from '../../../common/model';
 
 interface Props {

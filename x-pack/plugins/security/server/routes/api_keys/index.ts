@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { defineGetApiKeysRoutes } from './get';
-import { defineCheckPrivilegesRoutes } from './privileges';
-import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { RouteDefinitionParams } from '../';
 import { defineEnabledApiKeysRoutes } from './enabled';
-import { RouteDefinitionParams } from '..';
+import { defineGetApiKeysRoutes } from './get';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { defineCheckPrivilegesRoutes } from './privileges';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);

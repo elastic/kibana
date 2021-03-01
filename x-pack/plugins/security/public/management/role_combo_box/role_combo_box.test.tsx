@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallowWithIntl } from '@kbn/test/jest';
+
 import { RoleComboBox } from './role_combo_box';
 
 describe('RoleComboBox', () => {

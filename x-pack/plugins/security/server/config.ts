@@ -7,9 +7,11 @@
 
 import crypto from 'crypto';
 import { Duration } from 'moment';
+
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
+
 import { config as coreConfig } from '../../../../src/core/server';
 import { AuthenticationProvider } from '../common/model';
 

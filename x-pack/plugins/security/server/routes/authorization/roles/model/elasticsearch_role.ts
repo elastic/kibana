@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Role, RoleKibanaPrivilege } from '../../../../../common/model';
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../../../common/constants';
+import { Role, RoleKibanaPrivilege } from '../../../../../common/model';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
 

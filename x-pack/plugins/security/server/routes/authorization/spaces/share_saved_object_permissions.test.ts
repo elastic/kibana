@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
-import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
-
-import { httpServerMock } from 'src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../../index.mock';
-import { RouteDefinitionParams } from '../..';
 import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
+import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
+import { RouteDefinitionParams } from '../..';
 import { CheckPrivileges } from '../../../authorization/types';
 import { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
+import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 
 describe('Share Saved Object Permissions', () => {
   let router: jest.Mocked<SecurityRouter>;

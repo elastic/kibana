@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
+
 import { RoleMapping } from '../../../common/model';
 
 interface CheckRoleMappingFeaturesResponse {

@@ -6,6 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+
 import { SessionIndex, SessionIndexValue } from './session_index';
 
 export const sessionIndexMock = {

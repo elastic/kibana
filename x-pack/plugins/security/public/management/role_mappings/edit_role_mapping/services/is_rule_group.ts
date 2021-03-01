@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, FieldRule } from '../../model';
+import { FieldRule, Rule } from '../../model';
 
 export function isRuleGroup(rule: Rule) {
   return !(rule instanceof FieldRule);

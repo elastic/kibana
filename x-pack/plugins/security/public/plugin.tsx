@@ -6,15 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
+
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FeaturesPluginStart } from '../../features/public';
-import { SpacesPluginStart } from '../../spaces/public';
 import { LicensingPluginSetup } from '../../licensing/public';
+import { SpacesPluginStart } from '../../spaces/public';
+import { SecurityLicenseService } from '../common/licensing';
+import { accountManagementApp } from './account_management';
+import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
+import { ConfigType } from './config';
+import { ManagementService } from './management';
+import { SecurityNavControlService } from './nav_control';
+import { SecurityCheckupService } from './security_checkup';
 import {
   ISessionTimeout,
   SessionExpired,
@@ -22,13 +30,6 @@ import {
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
-import { SecurityLicenseService } from '../common/licensing';
-import { SecurityNavControlService } from './nav_control';
-import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
-import { ConfigType } from './config';
-import { ManagementService } from './management';
-import { accountManagementApp } from './account_management';
-import { SecurityCheckupService } from './security_checkup';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;

@@ -6,7 +6,8 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { User, EditUser } from '../../../common/model';
+
+import { EditUser, User } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
 

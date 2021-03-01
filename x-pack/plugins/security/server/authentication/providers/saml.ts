@@ -6,15 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+
 import { KibanaRequest } from 'src/core/server';
-import { isInternalURL } from '../../../common/is_internal_url';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import { isInternalURL } from '../../../common/is_internal_url';
 import { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
+import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
+import { RefreshTokenResult, TokenPair, Tokens } from '../tokens';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 /**

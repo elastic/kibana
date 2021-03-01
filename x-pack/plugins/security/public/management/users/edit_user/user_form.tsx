@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,17 +18,20 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
+import { throttle } from 'lodash';
+import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { throttle } from 'lodash';
+
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { User, Role, isRoleDeprecated } from '../../../../common/model';
-import { NAME_REGEX, MAX_NAME_LENGTH } from '../../../../common/constants';
-import { useForm, ValidationErrors } from '../../../components/use_form';
+import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
+import { isRoleDeprecated, Role, User } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
-import { RolesAPIClient } from '../../roles';
+import { useForm, ValidationErrors } from '../../../components/use_form';
 import { RoleComboBox } from '../../role_combo_box';
+import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '../user_api_client';
 
 export const THROTTLE_USERS_WAIT = 10000;

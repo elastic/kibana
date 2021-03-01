@@ -8,36 +8,36 @@
 jest.mock('./authenticator');
 
 import Boom from '@hapi/boom';
+
 import { PublicMethodsOf } from '@kbn/utility-types';
-
-import {
-  loggingSystemMock,
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  elasticsearchServiceMock,
-} from 'src/core/server/mocks';
-import { licenseMock } from '../../common/licensing/index.mock';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
-import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { sessionMock } from '../session_management/session.mock';
-
 import {
   AuthenticationHandler,
   AuthToolkit,
+  HttpServiceSetup,
+  HttpServiceStart,
   KibanaRequest,
   Logger,
   LoggerFactory,
-  HttpServiceSetup,
-  HttpServiceStart,
 } from 'src/core/server';
-import { AuthenticatedUser } from '../../common/model';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
 import { SecurityLicense } from '../../common/licensing';
+import { licenseMock } from '../../common/licensing/index.mock';
+import { AuthenticatedUser } from '../../common/model';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { Session } from '../session_management';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { ConfigSchema, ConfigType, createConfig } from '../config';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { Session } from '../session_management';
+import { sessionMock } from '../session_management/session.mock';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 

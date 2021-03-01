@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+
 import { CustomHttpResponseOptions, ResponseError } from 'src/core/server';
 
 export function wrapError(error: any) {

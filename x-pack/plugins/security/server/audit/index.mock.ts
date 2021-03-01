@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SecurityAuditLogger } from './security_audit_logger';
 import { AuditService } from './audit_service';
+import { SecurityAuditLogger } from './security_audit_logger';
 
 export const securityAuditLoggerMock = {
   create() {

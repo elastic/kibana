@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '..';
+import { RouteDefinitionParams } from '../';
 
 export function resetSessionPageRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(

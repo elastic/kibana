@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { authorizationModeFactory } from './mode';
-
 import { httpServerMock } from 'src/core/server/mocks';
+
+import { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
-import { SecurityLicense } from '../../common/licensing';
+import { authorizationModeFactory } from './mode';
 
 describe(`#useRbacForRequest`, () => {
   let mockLicense: jest.Mocked<SecurityLicense>;

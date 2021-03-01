@@ -6,6 +6,7 @@
  */
 
 import { of } from 'rxjs';
+
 import { SecurityLicenseFeatures } from './license_features';
 import { SecurityLicense } from './license_service';
 

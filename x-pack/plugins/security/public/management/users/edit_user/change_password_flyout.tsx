@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
   EuiCallOut,
   EuiFieldPassword,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiLoadingContent,
   EuiSpacer,
   EuiText,
-  EuiFlexItem,
 } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useForm, ValidationErrors } from '../../../components/use_form';
-import { useCurrentUser } from '../../../components/use_current_user';
 import { FormFlyout } from '../../../components/form_flyout';
+import { useCurrentUser } from '../../../components/use_current_user';
+import { useForm, ValidationErrors } from '../../../components/use_form';
 import { UserAPIClient } from '../user_api_client';
 
 export interface ChangePasswordFormValues {

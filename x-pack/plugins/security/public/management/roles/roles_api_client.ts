@@ -6,7 +6,8 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { Role, RoleIndexPrivilege, copyRole } from '../../../common/model';
+
+import { copyRole, Role, RoleIndexPrivilege } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {

@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import { deepFreeze } from '@kbn/std';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
-
+import { GetAllSpacesPurpose, Space } from '../../../spaces/server';
 import { spacesClientMock } from '../../../spaces/server/mocks';
+import { AuditEvent, AuditLogger, EventOutcome, SpaceAuditAction } from '../audit';
 import { auditServiceMock } from '../audit/index.mock';
-import { deepFreeze } from '@kbn/std';
-import { Space } from '../../../spaces/server';
-import { authorizationMock } from '../authorization/index.mock';
 import { AuthorizationServiceSetup } from '../authorization';
-import { GetAllSpacesPurpose } from '../../../spaces/server';
+import { authorizationMock } from '../authorization/index.mock';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { AuditLogger, AuditEvent, EventOutcome, SpaceAuditAction } from '../audit';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Opts {
   securityEnabled?: boolean;

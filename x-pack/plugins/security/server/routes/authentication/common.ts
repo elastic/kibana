@@ -6,19 +6,20 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+
+import { RouteDefinitionParams } from '../';
 import { parseNext } from '../../../common/parse_next';
 import {
-  canRedirectRequest,
-  OIDCLogin,
-  SAMLLogin,
   BasicAuthenticationProvider,
+  canRedirectRequest,
   OIDCAuthenticationProvider,
+  OIDCLogin,
   SAMLAuthenticationProvider,
+  SAMLLogin,
   TokenAuthenticationProvider,
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes that are common to various authentication mechanisms.

@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { History } from 'history';
 import React, { FunctionComponent } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { History } from 'history';
+import { Redirect, Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { StartServicesAccessor, CoreStart } from 'src/core/public';
+import { CoreStart, StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from 'src/plugins/management/public';
+
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { AuthenticationServiceSetup } from '../../authentication';
-import { PluginStartDependencies } from '../../plugin';
 import {
-  BreadcrumbsProvider,
-  BreadcrumbsChangeHandler,
   Breadcrumb,
+  BreadcrumbsChangeHandler,
+  BreadcrumbsProvider,
   getDocTitle,
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
+import { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {

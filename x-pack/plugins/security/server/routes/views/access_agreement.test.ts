@@ -7,22 +7,22 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
   HttpResources,
   HttpResourcesRequestHandler,
+  kibanaResponseFactory,
+  RequestHandler,
+  RouteConfig,
 } from 'src/core/server';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
 import { Session } from '../../session_management';
-import { defineAccessAgreementRoutes } from './access_agreement';
-import { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
-
-import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
+import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineAccessAgreementRoutes } from './access_agreement';
 
 describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

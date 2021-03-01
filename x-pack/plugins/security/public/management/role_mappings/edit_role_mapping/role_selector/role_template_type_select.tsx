@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
+import React from 'react';
+
+import { i18n } from '@kbn/i18n';
+
 import { RoleTemplate } from '../../../../../common/model';
 import { isInlineRoleTemplate, isStoredRoleTemplate } from '../services/role_template_type';
 

@@ -7,18 +7,19 @@
 
 import './access_agreement_page.scss';
 
-import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import ReactMarkdown from 'react-markdown';
 import {
   EuiButton,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import ReactMarkdown from 'react-markdown';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';

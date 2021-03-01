@@ -8,7 +8,10 @@
 import { Type } from '@kbn/config-schema';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   AuthenticationResult,
   AuthenticationServiceStart,
@@ -16,13 +19,10 @@ import {
   OIDCLogin,
   SAMLLogin,
 } from '../../authentication';
-import { defineCommonRoutes } from './common';
-import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-
-import { httpServerMock } from 'src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;

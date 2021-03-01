@@ -11,7 +11,8 @@ jest.mock('crypto', () => ({
 }));
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { createConfig, ConfigSchema } from './config';
+
+import { ConfigSchema, createConfig } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {

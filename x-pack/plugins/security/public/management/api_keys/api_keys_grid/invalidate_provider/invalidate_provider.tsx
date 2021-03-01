@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import React, { Fragment, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart } from 'src/core/public';
+
 import { ApiKeyToInvalidate } from '../../../../../common/model';
 import { APIKeysAPIClient } from '../../api_keys_api_client';
 

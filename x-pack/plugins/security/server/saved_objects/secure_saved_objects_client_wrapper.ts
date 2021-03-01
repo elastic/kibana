@@ -14,14 +14,15 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
-  SavedObjectsClosePointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
+
 import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import {

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ILicense } from '../../../licensing/public';
-import { SecurityNavControlService } from './nav_control_service';
-import { SecurityLicenseService } from '../../common/licensing';
+
 import { nextTick } from '@kbn/test/jest';
-import { securityMock } from '../mocks';
+import { coreMock } from 'src/core/public/mocks';
+
+import { ILicense } from '../../../licensing/public';
+import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { securityMock } from '../mocks';
+import { SecurityNavControlService } from './nav_control_service';
 
 const validLicense = {
   isAvailable: true,

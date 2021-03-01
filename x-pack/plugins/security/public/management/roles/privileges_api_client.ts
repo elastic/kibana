@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
+
 import { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
 
 export class PrivilegesAPIClient {

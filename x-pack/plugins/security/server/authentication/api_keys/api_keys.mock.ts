@@ -6,6 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+
 import { APIKeys } from './api_keys';
 
 export const apiKeysMock = {

@@ -6,6 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+
 import { SessionCookie, SessionCookieValue } from './session_cookie';
 
 export const sessionCookieMock = {

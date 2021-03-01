@@ -7,7 +7,8 @@
 
 import { EuiIcon, EuiText, PropsOf } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactNode, FC } from 'react';
+import React, { FC, ReactNode } from 'react';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {

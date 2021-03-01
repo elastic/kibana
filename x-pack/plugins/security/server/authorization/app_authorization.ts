@@ -6,6 +6,7 @@
  */
 
 import { HttpServiceSetup, Logger } from 'src/core/server';
+
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 import { AuthorizationServiceSetup } from './authorization_service';
 

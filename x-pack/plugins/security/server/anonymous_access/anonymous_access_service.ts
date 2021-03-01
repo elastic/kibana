@@ -6,13 +6,15 @@
  */
 
 import { Request } from '@hapi/hapi';
+
 import {
+  Capabilities,
   CapabilitiesStart,
   IBasePath,
-  Logger,
-  Capabilities,
   IClusterClient,
+  Logger,
 } from 'src/core/server';
+
 import { KibanaRequest } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import { SpacesServiceStart } from '../../../spaces/server';

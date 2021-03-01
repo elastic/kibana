@@ -7,11 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  StartServicesAccessor,
-  AppMountParameters,
   ApplicationSetup,
+  AppMountParameters,
   HttpSetup,
+  StartServicesAccessor,
 } from 'src/core/public';
+
 import { ConfigType } from '../../config';
 
 interface CreateDeps {

@@ -8,10 +8,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { Logger } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (

@@ -6,30 +6,34 @@
  */
 
 import querystring from 'querystring';
-
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Subscription, Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-
-import { Capabilities as UICapabilities } from 'src/core/types';
-
 import {
-  LoggerFactory,
+  CapabilitiesSetup,
+  HttpServiceSetup,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  CapabilitiesSetup,
-  IClusterClient,
+  LoggerFactory,
 } from 'src/core/server';
+import { Capabilities as UICapabilities } from 'src/core/types';
 
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../../features/server';
-
+import { APPLICATION_PREFIX } from '../../common/constants';
+import { SecurityLicense } from '../../common/licensing';
+import { AuthenticatedUser } from '../../common/model';
+import { canRedirectRequest } from '../authentication';
+import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { SpacesService } from '../plugin';
 import { Actions } from './actions';
+import { initAPIAuthorization } from './api_authorization';
+import { initAppAuthorization } from './app_authorization';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import {
   CheckPrivilegesDynamicallyWithRequest,
@@ -39,21 +43,14 @@ import {
   CheckSavedObjectsPrivilegesWithRequest,
   checkSavedObjectsPrivilegesWithRequestFactory,
 } from './check_saved_objects_privileges';
+import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { AuthorizationMode, authorizationModeFactory } from './mode';
 import { privilegesFactory, PrivilegesService } from './privileges';
-import { initAppAuthorization } from './app_authorization';
-import { initAPIAuthorization } from './api_authorization';
-import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
+import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+import { ResetSessionPage } from './reset_session_page';
+import { CheckPrivilegesWithRequest } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
-import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-import { APPLICATION_PREFIX } from '../../common/constants';
-import { SecurityLicense } from '../../common/licensing';
-import { CheckPrivilegesWithRequest } from './types';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
-import { canRedirectRequest } from '../authentication';
-import { ResetSessionPage } from './reset_session_page';
-import { AuthenticatedUser } from '../../common/model';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';

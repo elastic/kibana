@@ -6,9 +6,13 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
-import { CheckPrivilegesPayload } from './types';
+import {
+  CheckPrivilegesPayload,
+  CheckPrivilegesResponse,
+  CheckPrivilegesWithRequest,
+} from './types';
 
 export type CheckPrivilegesDynamically = (
   privileges: CheckPrivilegesPayload

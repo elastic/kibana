@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
+
 import { AuthenticationProvider } from '../../common/model';
 import { ConfigType } from '../config';
 

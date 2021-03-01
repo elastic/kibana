@@ -7,12 +7,14 @@
 
 import Boom from '@hapi/boom';
 import { DetailedPeerCertificate } from 'tls';
+
 import { KibanaRequest } from 'src/core/server';
+
 import { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 

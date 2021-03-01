@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { HasPrivilegesResponse } from './types';
 
 /**

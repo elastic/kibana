@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, FunctionComponent, RefObject } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiTitle,
-  EuiFlyout,
-  EuiFlyoutProps,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiButtonProps,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutProps,
   EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { FunctionComponent, RefObject, useEffect } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useHtmlId } from './use_html_id';
 
 export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {

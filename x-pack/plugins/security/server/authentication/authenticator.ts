@@ -6,7 +6,8 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { LoggerFactory, IBasePath, IClusterClient } from 'src/core/server';
+import { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -15,32 +16,34 @@ import {
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
-import { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
-import { shouldProviderUseLoginForm } from '../../common/model';
-import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
+import {
+  AuthenticatedUser,
+  AuthenticationProvider,
+  shouldProviderUseLoginForm,
+} from '../../common/model';
+import { AuditServiceSetup, SecurityAuditLogger, userLoginEvent } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { SessionValue, Session } from '../session_management';
-
+import { Session, SessionValue } from '../session_management';
+import { AuthenticationResult } from './authentication_result';
+import { canRedirectRequest } from './can_redirect_request';
+import { DeauthenticationResult } from './deauthentication_result';
+import { HTTPAuthorizationHeader } from './http_authentication';
 import {
   AnonymousAuthenticationProvider,
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,
-  SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
-  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
 } from './providers';
-import { AuthenticationResult } from './authentication_result';
-import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { canRedirectRequest } from './can_redirect_request';
-import { HTTPAuthorizationHeader } from './http_authentication';
 
 /**
  * The shape of the login attempt.

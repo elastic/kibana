@@ -6,12 +6,12 @@
  */
 
 import { CoreSetup, LegacyRequest } from 'src/core/server';
-import { KibanaRequest } from '../../../../../src/core/server';
-import { SavedObjectsClient } from '../../../../../src/core/server';
-import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
+
+import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
+import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
 import { SpacesService } from '../plugin';
+import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
   legacyAuditLogger: SecurityAuditLogger;

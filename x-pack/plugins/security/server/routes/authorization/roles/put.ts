@@ -6,10 +6,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+
 import { KibanaFeature } from '../../../../../features/common';
+import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { wrapIntoCustomErrorResponse } from '../../../errors';
 import {
   ElasticsearchRole,
   getPutPayloadSchema,

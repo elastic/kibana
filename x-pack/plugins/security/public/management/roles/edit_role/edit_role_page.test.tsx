@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { act } from '@testing-library/react';
+
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { Capabilities } from 'src/core/public';
-import { KibanaFeature } from '../../../../../features/public';
-import { Role } from '../../../../common/model';
-import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { licenseMock } from '../../../../common/licensing/index.mock';
-import { userAPIClientMock } from '../../users/index.mock';
-import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
+
+import { KibanaFeature } from '../../../../../features/public';
 import { Space } from '../../../../../spaces/public';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { licenseMock } from '../../../../common/licensing/index.mock';
+import { Role } from '../../../../common/model';
+import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
+import { EditRolePage } from './edit_role_page';
+import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const buildFeatures = () => {
   return [

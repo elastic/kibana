@@ -6,6 +6,7 @@
  */
 
 import { HttpServiceSetup, Logger } from 'src/core/server';
+
 import { AuthorizationServiceSetup } from './authorization_service';
 
 export function initAPIAuthorization(

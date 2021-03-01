@@ -6,11 +6,12 @@
  */
 
 import { uniq } from 'lodash';
-import { SecurityLicense } from '../../../common/licensing';
+
 import {
   KibanaFeature,
   PluginSetupContract as FeaturesPluginSetup,
 } from '../../../../features/server';
+import { SecurityLicense } from '../../../common/licensing';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';

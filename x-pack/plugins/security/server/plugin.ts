@@ -7,42 +7,42 @@
 
 import { combineLatest, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { TypeOf } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
   CoreSetup,
   CoreStart,
   KibanaRequest,
   Logger,
-  PluginInitializerContext,
   Plugin,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import {
-  PluginSetupContract as FeaturesPluginSetup,
+  PluginSetupContract as FeaturesSetupContract,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-
+import { SecurityLicense, SecurityLicenseService } from '../common/licensing';
+import { AuthenticatedUser } from '../common/model';
+import { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous_access';
+import { AuditService, AuditServiceSetup, SecurityAuditLogger } from './audit';
 import { AuthenticationService, AuthenticationServiceStart } from './authentication';
 import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
-import { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous_access';
 import { ConfigSchema, ConfigType, createConfig } from './config';
-import { defineRoutes } from './routes';
-import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
-import { AuthenticatedUser } from '../common/model';
-import { setupSavedObjects } from './saved_objects';
-import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
+import { ElasticsearchService } from './elasticsearch';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
 import { securityFeatures } from './features';
-import { ElasticsearchService } from './elasticsearch';
+import { defineRoutes } from './routes';
+import { setupSavedObjects } from './saved_objects';
 import { Session, SessionManagementService } from './session_management';
-import { registerSecurityUsageCollector } from './usage_collector';
 import { setupSpacesClient } from './spaces';
+import { registerSecurityUsageCollector } from './usage_collector';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],

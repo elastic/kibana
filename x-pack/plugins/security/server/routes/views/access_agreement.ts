@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { RouteDefinitionParams } from '../';
 import { ConfigType } from '../../config';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Access Agreement view.

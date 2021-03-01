@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
-import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 
 const version = '1.0.0-zeta1';
 

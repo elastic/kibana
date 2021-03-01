@@ -6,6 +6,7 @@
  */
 
 import { AuthHeaders } from 'src/core/server';
+
 import { AuthenticatedUser } from '../../common/model';
 
 /**

@@ -6,10 +6,10 @@
  */
 
 import {
-  RoleTemplate,
-  StoredRoleTemplate,
   InlineRoleTemplate,
   InvalidRoleTemplate,
+  RoleTemplate,
+  StoredRoleTemplate,
 } from '../../../../../common/model';
 
 export function isStoredRoleTemplate(

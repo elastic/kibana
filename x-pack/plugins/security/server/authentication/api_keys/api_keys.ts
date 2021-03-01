@@ -6,10 +6,11 @@
  */
 
 import { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+
 import { SecurityLicense } from '../../../common/licensing';
 import {
-  HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
 } from '../http_authentication';
 
 /**

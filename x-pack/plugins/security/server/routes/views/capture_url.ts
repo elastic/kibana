@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '..';
+
+import { RouteDefinitionParams } from '../';
 
 /**
  * Defines routes required for the Capture URL view.

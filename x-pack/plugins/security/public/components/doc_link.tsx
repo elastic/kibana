@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, FunctionComponent } from 'react';
 import { EuiLink } from '@elastic/eui';
+import React, { FunctionComponent, useCallback } from 'react';
+
 import { CoreStart } from 'src/core/public';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export type DocLinks = CoreStart['docLinks']['links'];

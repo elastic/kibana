@@ -6,9 +6,9 @@
  */
 
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
 import { PrivilegeCollection } from '../../../../model/privilege_collection';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 export interface EffectiveFeaturePrivileges {
   [featureId: string]: {

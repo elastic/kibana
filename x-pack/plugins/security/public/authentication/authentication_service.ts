@@ -7,19 +7,20 @@
 
 import {
   ApplicationSetup,
-  StartServicesAccessor,
-  HttpSetup,
   FatalErrorsSetup,
+  HttpSetup,
+  StartServicesAccessor,
 } from 'src/core/public';
+
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { PluginStartDependencies } from '../plugin';
 import { accessAgreementApp } from './access_agreement';
+import { captureURLApp } from './capture_url';
+import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
-import { loggedOutApp } from './logged_out';
 import { overwrittenSessionApp } from './overwritten_session';
-import { captureURLApp } from './capture_url';
 
 interface SetupParams {
   application: ApplicationSetup;

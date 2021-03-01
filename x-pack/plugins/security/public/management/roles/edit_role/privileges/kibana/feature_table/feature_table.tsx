@@ -5,32 +5,35 @@
  * 2.0.
  */
 
+import './feature_table.scss';
+
 import {
+  EuiAccordion,
   EuiAccordionProps,
   EuiButtonGroup,
-  EuiIconTip,
-  EuiText,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiCallOut,
   EuiHorizontalRule,
-  EuiAccordion,
   EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import React, { Component, ReactElement } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AppCategory } from 'src/core/public';
+
 import { Role } from '../../../../../../../common/model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { FeatureTableCell } from '../feature_table_cell';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { FeatureTableCell } from '../feature_table_cell';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
-import './feature_table.scss';
 
 interface Props {
   role: Role;

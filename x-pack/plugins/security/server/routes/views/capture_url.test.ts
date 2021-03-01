@@ -6,12 +6,12 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { RouteConfig, HttpResources, HttpResourcesRequestHandler } from 'src/core/server';
-import { defineCaptureURLRoutes } from './capture_url';
-
+import { HttpResources, HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
 import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../index.mock';
+
 import { SecurityRequestHandlerContext } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineCaptureURLRoutes } from './capture_url';
 
 describe('Capture URL view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

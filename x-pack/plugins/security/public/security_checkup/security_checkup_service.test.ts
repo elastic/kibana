@@ -6,9 +6,9 @@
  */
 
 import { MountPoint } from 'src/core/public';
-
 import { docLinksServiceMock } from 'src/core/public/mocks';
 import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
+
 import { insecureClusterAlertTitle } from './components';
 import { SecurityCheckupService } from './security_checkup_service';
 

@@ -7,6 +7,7 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpResources, IBasePath, Logger } from 'src/core/server';
+
 import { KibanaFeature } from '../../../features/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceStart } from '../authentication';
@@ -15,14 +16,13 @@ import { ConfigType } from '../config';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { Session } from '../session_management';
 import { SecurityRouter } from '../types';
-
+import { defineApiKeysRoutes } from './api_keys';
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
-import { defineApiKeysRoutes } from './api_keys';
 import { defineIndicesRoutes } from './indices';
-import { defineUsersRoutes } from './users';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSessionManagementRoutes } from './session_management';
+import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 
 /**

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { CoreStart, ScopedHistory } from 'src/core/public';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { RoleMappingsGridPage } from './role_mappings_grid_page';
-import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
-import { EmptyPrompt } from './empty_prompt';
-import { findTestSubject } from '@kbn/test/jest';
 import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { CoreStart, ScopedHistory } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/index.mock';
+import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
+import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
+import { EmptyPrompt } from './empty_prompt';
+import { RoleMappingsGridPage } from './role_mappings_grid_page';
 
 describe('RoleMappingsGridPage', () => {
   let history: ScopedHistory;

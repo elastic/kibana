@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from '@testing-library/react';
+import React from 'react';
+
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { AuthenticatedUser } from '../../common/model';
-import { AccountManagementPage } from './account_management_page';
 import { coreMock } from 'src/core/public/mocks';
+
+import { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { securityMock } from '../mocks';
 import { userAPIClientMock } from '../management/users/index.mock';
+import { securityMock } from '../mocks';
+import { AccountManagementPage } from './account_management_page';
 
 interface Options {
   withFullName?: boolean;

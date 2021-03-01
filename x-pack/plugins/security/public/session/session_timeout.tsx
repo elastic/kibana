@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
+
+import { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
+
 import { SessionInfo } from '../../common/types';
+import { ISessionExpired } from './session_expired';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
-import { ISessionExpired } from './session_expired';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server

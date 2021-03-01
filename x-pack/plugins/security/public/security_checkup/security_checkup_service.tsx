@@ -6,9 +6,9 @@
  */
 
 import { DocLinksStart } from 'src/core/public';
-
 import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
-import { insecureClusterAlertTitle, insecureClusterAlertText } from './components';
+
+import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 
 interface SetupDeps {
   securityOssSetup: SecurityOssPluginSetup;

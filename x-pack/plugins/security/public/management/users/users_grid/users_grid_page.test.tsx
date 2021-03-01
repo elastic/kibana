@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiBasicTable } from '@elastic/eui';
+import { ReactWrapper } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CoreStart, ScopedHistory } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { User } from '../../../../common/model';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { UsersGridPage } from './users_grid_page';
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { userAPIClientMock } from '../index.mock';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
-import { findTestSubject } from '@kbn/test/jest';
-import { EuiBasicTable } from '@elastic/eui';
+import { userAPIClientMock } from '../index.mock';
+import { UsersGridPage } from './users_grid_page';
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;

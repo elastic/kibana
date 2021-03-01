@@ -6,7 +6,9 @@
  */
 
 import _ from 'lodash';
+
 import { schema, TypeOf } from '@kbn/config-schema';
+
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';

@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiOverlayMask,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiOverlayMask, EuiButton } from '@elastic/eui';
-import { EuiFlyout } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { Space } from '../../../../../../../../spaces/public';
 import { Role } from '../../../../../../../common/model';
-import { PrivilegeSummaryTable } from './privilege_summary_table';
 import { KibanaPrivileges } from '../../../../model';
+import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 interface Props {
   role: Role;

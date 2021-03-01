@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
   EuiHorizontalRule,
   EuiPageContent,
@@ -14,8 +13,11 @@ import {
   EuiPageContentHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { UserForm } from './user_form';
 
 export const CreateUserPage: FunctionComponent = () => {

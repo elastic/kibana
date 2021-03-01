@@ -8,14 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+
+import { RouteDefinitionParams } from '../';
 import { OIDCLogin } from '../../authentication';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { wrapIntoCustomErrorResponse } from '../../errors';
 import {
   OIDCAuthenticationProvider,
   ProviderLoginAttempt,
 } from '../../authentication/providers/oidc';
-import { RouteDefinitionParams } from '..';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**
  * Defines routes required for SAML authentication.

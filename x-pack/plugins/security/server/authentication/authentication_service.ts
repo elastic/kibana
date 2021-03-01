@@ -7,24 +7,25 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  LoggerFactory,
+  HttpServiceSetup,
+  HttpServiceStart,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  IClusterClient,
-  HttpServiceStart,
+  LoggerFactory,
 } from 'src/core/server';
+
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { Session } from '../session_management';
-import { DeauthenticationResult } from './deauthentication_result';
-import { AuthenticationResult } from './authentication_result';
-import { getErrorStatusCode } from '../errors';
 import { APIKeys } from './api_keys';
+import { AuthenticationResult } from './authentication_result';
 import { Authenticator, ProviderLoginAttempt } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'registerAuth'>;

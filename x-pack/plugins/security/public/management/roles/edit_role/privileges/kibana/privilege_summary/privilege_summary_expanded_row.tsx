@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
-import { SecuredFeature, SubFeaturePrivilegeGroup, SubFeaturePrivilege } from '../../../../model';
+
+import { SecuredFeature, SubFeaturePrivilege, SubFeaturePrivilegeGroup } from '../../../../model';
 import { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 
 interface Props {

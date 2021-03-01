@@ -6,14 +6,14 @@
  */
 
 import {
-  Role,
-  isRoleEnabled,
-  isRoleReserved,
-  isRoleDeprecated,
-  isRoleReadOnly,
   copyRole,
-  prepareRoleClone,
   getExtendedRoleDeprecationNotice,
+  isRoleDeprecated,
+  isRoleEnabled,
+  isRoleReadOnly,
+  isRoleReserved,
+  prepareRoleClone,
+  Role,
 } from '../../common/model';
 
 describe('role', () => {

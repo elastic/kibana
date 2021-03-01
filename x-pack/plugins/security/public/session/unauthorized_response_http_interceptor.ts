@@ -8,8 +8,8 @@
 import {
   HttpInterceptor,
   HttpInterceptorResponseError,
-  IHttpInterceptController,
   IAnonymousPaths,
+  IHttpInterceptController,
 } from 'src/core/public';
 
 import { SessionExpired } from './session_expired';

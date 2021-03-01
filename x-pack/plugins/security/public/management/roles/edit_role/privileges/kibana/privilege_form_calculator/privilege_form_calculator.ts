@@ -6,8 +6,8 @@
  */
 
 import { Role } from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 /**
  * Calculator responsible for determining the displayed and effective privilege values for the following interfaces:

@@ -6,9 +6,9 @@
  */
 
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { AuthenticationServiceStart } from './authentication_service';
 
 import { apiKeysMock } from './api_keys/api_keys.mock';
+import { AuthenticationServiceStart } from './authentication_service';
 
 export const authenticationServiceMock = {
   createStart: (): DeeplyMockedKeys<AuthenticationServiceStart> => ({

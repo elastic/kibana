@@ -6,9 +6,9 @@
  */
 
 import {
-  loggingSystemMock,
-  httpServiceMock,
   elasticsearchServiceMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 
 export type MockAuthenticationProviderOptions = ReturnType<

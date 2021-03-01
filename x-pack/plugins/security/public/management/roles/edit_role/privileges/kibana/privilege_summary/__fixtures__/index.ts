@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiTableRow } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 
-import { EuiTableRow } from '@elastic/eui';
-
 import { findTestSubject } from '@kbn/test/jest';
+
 import { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
-import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 import { FeatureTableCell } from '../../feature_table_cell';
+import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 
 interface DisplayedFeaturePrivileges {
   [featureId: string]: {

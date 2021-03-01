@@ -6,13 +6,13 @@
  */
 
 import { RouteDefinitionParams } from '../index';
-import { defineGetUserRoutes } from './get';
-import { defineGetAllUsersRoutes } from './get_all';
+import { defineChangeUserPasswordRoutes } from './change_password';
 import { defineCreateOrUpdateUserRoutes } from './create_or_update';
 import { defineDeleteUserRoutes } from './delete';
 import { defineDisableUserRoutes } from './disable';
 import { defineEnableUserRoutes } from './enable';
-import { defineChangeUserPasswordRoutes } from './change_password';
+import { defineGetUserRoutes } from './get';
+import { defineGetAllUsersRoutes } from './get_all';
 
 export function defineUsersRoutes(params: RouteDefinitionParams) {
   defineGetUserRoutes(params);

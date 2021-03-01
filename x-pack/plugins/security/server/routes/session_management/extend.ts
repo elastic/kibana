@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '..';
+import { RouteDefinitionParams } from '../';
 
 /**
  * Defines routes required for the session extension.

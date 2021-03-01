@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,10 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   ChangeEvent,
   Fragment,
@@ -31,43 +29,48 @@ import React, {
   useRef,
   useState,
 } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Capabilities,
+  DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
   IHttpFetchError,
   NotificationsStart,
+  ScopedHistory,
 } from 'src/core/public';
-import { DocLinksStart, ScopedHistory } from 'src/core/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
-import { FeaturesPluginStart } from '../../../../../features/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { KibanaFeature } from '../../../../../features/common';
+import { FeaturesPluginStart } from '../../../../../features/public';
 import { Space } from '../../../../../spaces/public';
+import { SecurityLicense } from '../../../../common/licensing';
 import {
-  RawKibanaPrivileges,
-  Role,
   BuiltinESPrivileges,
+  copyRole,
+  getExtendedRoleDeprecationNotice,
+  isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
-  isRoleDeprecated as checkIfRoleDeprecated,
-  copyRole,
   prepareRoleClone,
+  RawKibanaPrivileges,
+  Role,
   RoleIndexPrivilege,
-  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
-import { RoleValidationResult, RoleValidator } from './validate_role';
+import { UserAPIClient } from '../../users';
+import { IndicesAPIClient } from '../indices_api_client';
+import { KibanaPrivileges } from '../model';
+import { PrivilegesAPIClient } from '../privileges_api_client';
+import { RolesAPIClient } from '../roles_api_client';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
-import { SecurityLicense } from '../../../../common/licensing';
-import { UserAPIClient } from '../../users';
-import { IndicesAPIClient } from '../indices_api_client';
-import { RolesAPIClient } from '../roles_api_client';
-import { PrivilegesAPIClient } from '../privileges_api_client';
-import { KibanaPrivileges } from '../model';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { RoleValidationResult, RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';

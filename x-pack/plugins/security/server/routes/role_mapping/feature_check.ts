@@ -6,8 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
+
+import { RouteDefinitionParams } from '../';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 interface NodeSettingsResponse {
   nodes: {

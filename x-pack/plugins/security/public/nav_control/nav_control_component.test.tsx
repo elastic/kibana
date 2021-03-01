@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiHeaderSectionItemButton, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { shallowWithIntl, nextTick, mountWithIntl } from '@kbn/test/jest';
-import { SecurityNavControl } from './nav_control_component';
-import { AuthenticatedUser } from '../../common/model';
-import { EuiPopover, EuiHeaderSectionItemButton } from '@elastic/eui';
-import { findTestSubject } from '@kbn/test/jest';
 
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+
+import { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { SecurityNavControl } from './nav_control_component';
 
 describe('SecurityNavControl', () => {
   it(`renders a loading spinner when the user promise hasn't resolved yet.`, async () => {

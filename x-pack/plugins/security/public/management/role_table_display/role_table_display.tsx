@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
+
 import { ApplicationStart } from 'src/core/public';
-import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
+
+import { getExtendedRoleDeprecationNotice, isRoleDeprecated, Role } from '../../../common/model';
 
 interface Props {
   role: Role | string;

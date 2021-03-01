@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
+
 import { AuthenticationInfo } from '../elasticsearch';
 import { getErrorStatusCode } from '../errors';
 

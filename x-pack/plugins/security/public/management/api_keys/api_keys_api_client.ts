@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
+
 import { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
 
 interface CheckPrivilegesResponse {

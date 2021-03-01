@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+
 import { AuthenticationResult } from '../authentication/authentication_result';
 
 /**

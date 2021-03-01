@@ -16,16 +16,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import React, { Component, Fragment } from 'react';
 import { DocLinksStart } from 'src/core/public';
-import { Role, BuiltinESPrivileges } from '../../../../../../common/model';
+
 import { SecurityLicense } from '../../../../../../common/licensing';
+import { BuiltinESPrivileges, Role } from '../../../../../../common/model';
 import { IndicesAPIClient } from '../../../indices_api_client';
-import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
+import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
 

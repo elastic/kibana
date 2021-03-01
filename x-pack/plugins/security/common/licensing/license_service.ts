@@ -7,6 +7,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaPrivilege } from './kibana_privilege';
 import { FeatureKibanaPrivileges } from '../../../../../features/public';
+import { KibanaPrivilege } from './kibana_privilege';
 
 export class PrimaryFeaturePrivilege extends KibanaPrivilege {
   constructor(

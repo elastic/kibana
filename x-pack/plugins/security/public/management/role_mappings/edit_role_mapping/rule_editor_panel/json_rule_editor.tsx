@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
-
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiButton, EuiCodeEditor, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../model';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { generateRulesFromRaw, Rule, RuleBuilderError } from '../../model';
 
 interface Props {
   rules: Rule | null;

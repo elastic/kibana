@@ -6,13 +6,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ServiceStatusLevels, CoreStatus } from 'src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { ElasticsearchService } from './elasticsearch_service';
 
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
-import { licenseMock } from '../../common/licensing/index.mock';
 import { nextTick } from '@kbn/test/jest';
+import { CoreStatus, ServiceStatusLevels } from 'src/core/server';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import { licenseMock } from '../../common/licensing/index.mock';
+import { ElasticsearchService } from './elasticsearch_service';
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;

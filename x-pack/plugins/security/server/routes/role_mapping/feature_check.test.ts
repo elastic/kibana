@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { routeDefinitionParamsMock } from '../index.mock';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
 import { LicenseCheck } from '../../../../licensing/server';
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 
 interface TestOptions {

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallowWithIntl } from '@kbn/test/jest';
+
 import { SectionLoading } from './section_loading';
 
 describe('SectionLoading', () => {

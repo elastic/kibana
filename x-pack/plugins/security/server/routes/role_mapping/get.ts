@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import { RouteDefinitionParams } from '../';
 import { RoleMapping } from '../../../common/model';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapError } from '../../errors';
-import { RouteDefinitionParams } from '..';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 interface RoleMappingsResponse {
   [roleMappingName: string]: Omit<RoleMapping, 'name'>;

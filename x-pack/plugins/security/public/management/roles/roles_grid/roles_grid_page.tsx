@@ -5,43 +5,44 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
 import {
+  EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
   EuiTitle,
-  EuiButtonIcon,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
-  EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import _ from 'lodash';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
-import { ScopedHistory } from 'src/core/public';
+import { NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import {
-  Role,
+  getExtendedRoleDeprecationNotice,
+  isRoleDeprecated,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
-  isRoleDeprecated,
-  getExtendedRoleDeprecationNotice,
+  Role,
 } from '../../../../common/model';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
-import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   notifications: NotificationsStart;

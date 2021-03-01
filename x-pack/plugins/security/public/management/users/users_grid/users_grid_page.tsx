@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import {
+  EuiBasicTableColumn,
   EuiButton,
-  EuiLink,
+  EuiEmptyPrompt,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
+  EuiLink,
   EuiPageContent,
-  EuiTitle,
+  EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiEmptyPrompt,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
   EuiSwitch,
-  EuiFlexItem,
+  EuiSwitchEvent,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
-import { User, Role } from '../../../../common/model';
-import { ConfirmDeleteUsers } from '../components';
-import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
-import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
+import { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { Role, User } from '../../../../common/model';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { ConfirmDeleteUsers } from '../components';
 import { UserAPIClient } from '../user_api_client';
+import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;

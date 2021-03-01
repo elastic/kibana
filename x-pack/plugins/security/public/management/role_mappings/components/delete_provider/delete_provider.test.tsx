@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
-import { RoleMapping } from '../../../../../common/model';
-import { DeleteProvider } from './delete_provider';
+import React from 'react';
 
-import { roleMappingsAPIClientMock } from '../../index.mock';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
+
+import { RoleMapping } from '../../../../../common/model';
+import { roleMappingsAPIClientMock } from '../../index.mock';
+import { DeleteProvider } from './delete_provider';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
 
+import { mountWithIntl } from '@kbn/test/jest';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+
+import { APIKeysAPIClient } from '../api_keys_api_client';
+import { apiKeysAPIClientMock } from '../index.mock';
+import { APIKeysGridPage } from './api_keys_grid_page';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
-import { APIKeysAPIClient } from '../api_keys_api_client';
-import { APIKeysGridPage } from './api_keys_grid_page';
-
-import { coreMock } from 'src/core/public/mocks';
-import { apiKeysAPIClientMock } from '../index.mock';
 
 const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
 

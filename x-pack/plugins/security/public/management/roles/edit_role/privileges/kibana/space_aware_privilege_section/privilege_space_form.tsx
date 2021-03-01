@@ -9,7 +9,9 @@ import {
   ButtonColor,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,19 +24,19 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiErrorBoundary,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+
 import { Space } from '../../../../../../../../spaces/public';
-import { Role, copyRole } from '../../../../../../../common/model';
-import { SpaceSelector } from './space_selector';
-import { FeatureTable } from '../feature_table';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import { copyRole, Role } from '../../../../../../../common/model';
 import { KibanaPrivileges } from '../../../../model';
+import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
+import { FeatureTable } from '../feature_table';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   role: Role;

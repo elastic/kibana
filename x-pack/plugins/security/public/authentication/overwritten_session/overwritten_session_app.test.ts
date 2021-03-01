@@ -8,10 +8,10 @@
 jest.mock('./overwritten_session_page');
 
 import { AppMount } from 'src/core/public';
-import { overwrittenSessionApp } from './overwritten_session_app';
-
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+
 import { securityMock } from '../../mocks';
+import { overwrittenSessionApp } from './overwritten_session_app';
 
 describe('overwrittenSessionApp', () => {
   it('properly registers application', () => {

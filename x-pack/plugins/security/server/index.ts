@@ -12,13 +12,14 @@ import {
   PluginInitializer,
   PluginInitializerContext,
 } from 'src/core/server';
+
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
 import {
+  PluginSetupDependencies,
   SecurityPlugin,
   SecurityPluginSetup,
   SecurityPluginStart,
-  PluginSetupDependencies,
 } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported

@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+import { RouteDefinitionParams } from '../';
 import { ApiKey } from '../../../common/model';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
-import { RouteDefinitionParams } from '..';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 interface ResponseType {
   itemsInvalidated: Array<Pick<ApiKey, 'id' | 'name'>>;

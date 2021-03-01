@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
+import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 import { Role, RoleIndexPrivilege } from '../../../../common/model';
-import { NAME_REGEX, MAX_NAME_LENGTH } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
