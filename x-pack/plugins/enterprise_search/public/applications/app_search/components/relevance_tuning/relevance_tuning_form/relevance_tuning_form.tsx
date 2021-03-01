@@ -10,8 +10,6 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiFieldSearch,
   EuiSpacer,
@@ -44,20 +42,17 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.title',
-                  {
-                    defaultMessage: 'Manage fields',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.title',
+              {
+                defaultMessage: 'Manage fields',
+              }
+            )}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer />
         {schemaFields.length > FIELD_FILTER_CUTOFF && (
           <EuiFieldSearch
             value={filterInputValue}

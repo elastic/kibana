@@ -19,6 +19,8 @@ import { DOCS_PREFIX } from '../../routes';
 import { RelevanceTuningForm } from './relevance_tuning_form';
 import { RelevanceTuningLayout } from './relevance_tuning_layout';
 
+import { RelevanceTuningPreview } from './relevance_tuning_preview';
+
 import { RelevanceTuningLogic } from '.';
 
 interface Props {
@@ -82,10 +84,12 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
 
     return (
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={3}>
           <RelevanceTuningForm />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem grow={4}>
+          <RelevanceTuningPreview />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
