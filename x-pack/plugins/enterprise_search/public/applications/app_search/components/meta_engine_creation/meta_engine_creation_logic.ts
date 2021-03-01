@@ -116,15 +116,11 @@ export const MetaEngineCreationLogic = kea<
         source_engines: selectedIndexedEngineNames,
       });
 
-      let response;
       try {
-        response = await http.post('/api/app_search/engines', { body });
+        const response = await http.post('/api/app_search/engines', { body });
+        actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
-      }
-
-      if (response) {
-        actions.onEngineCreationSuccess();
       }
     },
   }),
