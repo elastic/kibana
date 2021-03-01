@@ -16,54 +16,26 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 describe('getSharingData', () => {
   test('returns valid data for sharing', async () => {
     const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
-    const result = await getSharingData(
-      searchSourceMock,
-      { columns: [] },
-      ({
-        get: (key: string) => {
-          if (key === SORT_DEFAULT_ORDER_SETTING) {
-            return 'desc';
-          }
-          return false;
-        },
-      } as unknown) as IUiSettingsClient,
-      () => Promise.resolve({})
-    );
+    const result = await getSharingData(searchSourceMock, { columns: [] }, ({
+      get: (key: string) => {
+        if (key === SORT_DEFAULT_ORDER_SETTING) {
+          return 'desc';
+        }
+        return false;
+      },
+    } as unknown) as IUiSettingsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "conflictedTypesFields": Array [],
-        "fields": Array [],
-        "indexPatternId": "the-index-pattern-id",
-        "metaFields": Array [
-          "_index",
-          "_score",
-        ],
-        "searchRequest": Object {
-          "body": Object {
-            "_source": Object {},
-            "fields": Array [],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [],
-                "must": Array [],
-                "must_not": Array [],
-                "should": Array [],
-              },
+        "searchSource": Object {
+          "fields": Array [
+            "*",
+          ],
+          "index": "the-index-pattern-id",
+          "sort": Array [
+            Object {
+              "_score": "desc",
             },
-            "runtime_mappings": Object {},
-            "script_fields": Object {},
-            "sort": Array [
-              Object {
-                "_score": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-            "stored_fields": Array [
-              "*",
-            ],
-          },
-          "index": "the-index-pattern-title",
+          ],
         },
       }
     `);

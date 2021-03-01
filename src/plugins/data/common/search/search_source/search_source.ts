@@ -439,6 +439,8 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
+      case 'pit':
+        return addToRoot(key, val);
       default:
         return addToBody(key, val);
     }

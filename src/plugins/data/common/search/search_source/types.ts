@@ -100,7 +100,10 @@ export interface SearchSourceFields {
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
-
+  pit?: {
+    id: string;
+    keep_alive?: string;
+  };
   parent?: SearchSourceFields;
 }
 

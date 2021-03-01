@@ -11,6 +11,7 @@ import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
+  IClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -28,6 +29,7 @@ import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ReportingPluginRouter } from './types';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -45,6 +47,8 @@ export interface ReportingInternalStart {
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  esClient: IClusterClient;
+  data: DataPluginStart;
 }
 
 export class ReportingCore {
@@ -238,5 +242,15 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getSearchService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data.search;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
   }
 }

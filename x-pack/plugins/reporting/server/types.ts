@@ -80,13 +80,16 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
+export interface ExportTypeDefinition<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }

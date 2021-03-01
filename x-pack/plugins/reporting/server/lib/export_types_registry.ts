@@ -6,8 +6,9 @@
  */
 
 import { isString } from 'lodash';
-import { getExportType as getTypeCsv } from '../export_types/csv';
-import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_from_savedobject';
+import { getExportType as getTypeCsvDeprecated } from '../export_types/csv';
+import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_searchsource_immediate';
+import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
 import { CreateJobFn, ExportTypeDefinition } from '../types';
@@ -82,8 +83,9 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
   type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
   type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
-  const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType, RunFnType>> = [
+  const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
     getTypeCsv,
+    getTypeCsvDeprecated,
     getTypeCsvFromSavedObject,
     getTypePng,
     getTypePrintablePdf,

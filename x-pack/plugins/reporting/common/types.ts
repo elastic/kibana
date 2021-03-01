@@ -47,9 +47,10 @@ export interface ReportDocumentHead {
 export interface TaskRunResult {
   content_type: string | null;
   content: string | null;
-  csv_contains_formulas?: boolean;
   size: number;
+  csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
+  needs_sorting?: boolean;
   warnings?: string[];
 }
 

@@ -118,11 +118,13 @@ export class ReportingPlugin
       const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
 
       reportingCore.pluginStart({
+        data: plugins.data,
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         esqueue,
         store,
+        esClient: core.elasticsearch.client,
       });
 
       this.logger.debug('Start complete');

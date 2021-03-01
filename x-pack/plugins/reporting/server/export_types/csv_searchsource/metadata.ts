@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE } from '../../../common/constants';
 
 export const metadata = {
-  id: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  name: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  id: 'csv_searchsource',
+  name: CSV_JOB_TYPE,
 };

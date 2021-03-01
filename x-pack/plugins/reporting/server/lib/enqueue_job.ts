@@ -47,12 +47,16 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
+    if (!exportType.createJobFnFactory) {
+      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+    }
+
     const [createJob, { store }] = await Promise.all([
       exportType.createJobFnFactory(reporting, logger),
       reporting.getPluginStartDeps(),
     ]);
 
-    const job = await createJob(jobParams, context, request);
+    const job = await createJob!(jobParams, context, request);
     const pendingReport = new Report({
       jobtype: exportType.jobType,
       created_by: user ? user.username : false,

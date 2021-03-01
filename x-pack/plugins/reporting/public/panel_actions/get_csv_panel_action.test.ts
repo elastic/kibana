@@ -52,7 +52,20 @@ describe('GetCsvReportPanelAction', () => {
     context = {
       embeddable: {
         type: 'search',
-        getSavedSearch: () => ({ id: 'lebowski' }),
+        getSavedSearch: () => {
+          const searchSource = {
+            createCopy: () => searchSource,
+            removeField: jest.fn(),
+            setField: jest.fn(),
+            getField: jest.fn().mockImplementation((key: string) => {
+              if (key === 'index') {
+                return 'my-test-index-*';
+              }
+            }),
+            getSerializedFields: jest.fn().mockImplementation(() => ({})),
+          };
+          return { searchSource };
+        },
         getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({

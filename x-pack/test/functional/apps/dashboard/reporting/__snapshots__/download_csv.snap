@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`discover Discover Generate CSV: archived search generates a report with data 1`] = `
+exports[`dashboard Reporting Download CSV E-Commerce Data Downloads a CSV export of a saved search panel 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"order_date\\",\\"products.created_on\\",sku
 \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,19,716724,5,\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\"
 \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",EUR,45,591503,5,\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0006400064, ZO0150601506\\"
@@ -18,7 +18,7 @@ exports[`discover Discover Generate CSV: archived search generates a report with
 "
 `;
 
-exports[`discover Discover Generate CSV: archived search generates a report with filtered data 1`] = `
+exports[`dashboard Reporting Download CSV E-Commerce Data Downloads a filtered CSV export of a saved search panel 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"order_date\\",\\"products.created_on\\",sku
 \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,19,716724,5,\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\"
 \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",EUR,45,591503,5,\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0006400064, ZO0150601506\\"
@@ -36,14 +36,12 @@ exports[`discover Discover Generate CSV: archived search generates a report with
 "
 `;
 
-exports[`discover Discover Generate CSV: new search generates a report with data 1`] = `
-"\\"products.manufacturer\\",\\"products.discount_amount\\",\\"products.base_unit_price\\",type,\\"products.discount_percentage\\",\\"products._id.keyword\\",\\"day_of_week_i\\",\\"total_quantity\\",\\"taxless_total_price\\",\\"total_unique_products\\",\\"geoip.continent_name\\",sku,\\"customer_full_name.keyword\\",\\"category.keyword\\",\\"products.taxless_price\\",\\"products.quantity\\",\\"products.price\\",\\"customer_first_name\\",\\"customer_phone\\",\\"geoip.region_name\\",\\"customer_full_name\\",\\"geoip.country_iso_code\\",\\"order_id\\",\\"products._id\\",\\"products.product_name.keyword\\",\\"products.product_id\\",\\"products.category\\",\\"products.manufacturer.keyword\\",manufacturer,\\"products.unit_discount_amount\\",\\"customer_last_name\\",\\"geoip.location\\",\\"products.tax_amount\\",\\"products.product_name\\",\\"products.min_price\\",\\"manufacturer.keyword\\",\\"products.taxful_price\\",currency,\\"products.base_price\\",email,\\"day_of_week\\",\\"products.sku\\",\\"customer_last_name.keyword\\",\\"products.category.keyword\\",\\"geoip.city_name\\",\\"customer_first_name.keyword\\",\\"order_date\\",\\"products.created_on\\",category,\\"customer_id\\",user,\\"customer_gender\\",\\"taxful_total_price\\",\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\"
-\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"0, 0, 0, 0\\",\\"79.99, 59.99, 21.99, 11.99\\",order,\\"0, 0, 0, 0\\",\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",5,4,\\"173.96\\",4,Asia,\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",\\"Sultan Al Boone\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"79.99, 59.99, 21.99, 11.99\\",\\"1, 1, 1, 1\\",\\"79.99, 59.99, 21.99, 11.99\\",\\"Sultan Al\\",,\\"Abu Dhabi\\",\\"Sultan Al Boone\\",AE,716724,\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"23,975, 6,338, 14,116, 15,290\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"0, 0, 0, 0\\",Boone,\\"{
-  \\"\\"coordinates\\"\\": [
-    54.4,
-    24.5
-  ],
-  \\"\\"type\\"\\": \\"\\"Point\\"\\"
-}\\",\\"0, 0, 0, 0\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"42.39, 32.99, 10.34, 6.11\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"79.99, 59.99, 21.99, 11.99\\",EUR,\\"79.99, 59.99, 21.99, 11.99\\",\\"sultan al@boone-family.zzz\\",Saturday,\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",Boone,\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Abu Dhabi\\",\\"Sultan Al\\",\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",19,sultan,MALE,\\"173.96\\",3AMtOW0BH63Xcmy432DJ,ecommerce,,\\" - \\"
+exports[`dashboard Reporting Download CSV Field Formatters and Scripted Fields Downloads a CSV export of a saved search panel 1`] = `
+"date,\\"_id\\",name,gender,value,year,\\"years_ago\\",\\"date_informal\\"
+\\"Jan 1, 1984 @ 00:00:00.000\\",\\"1984-Fethany-F\\",Fethany,F,5,1984,\\"35.00000000000000000000\\",\\"Jan 1st 84\\"
+\\"Jan 1, 1983 @ 00:00:00.000\\",\\"1983-Fethany-F\\",Fethany,F,\\"1,043\\",1983,\\"36.00000000000000000000\\",\\"Jan 1st 83\\"
+\\"Jan 1, 1982 @ 00:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Jan 1st 82\\"
+\\"Jan 1, 1981 @ 00:00:00.000\\",\\"1981-Fethany-F\\",Fethany,F,655,1981,\\"38.00000000000000000000\\",\\"Jan 1st 81\\"
+\\"Jan 1, 1980 @ 00:00:00.000\\",\\"1980-Fethany-F\\",Fethany,F,702,1980,\\"39.00000000000000000000\\",\\"Jan 1st 80\\"
 "
 `;

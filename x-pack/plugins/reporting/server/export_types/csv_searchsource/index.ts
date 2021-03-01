@@ -6,7 +6,7 @@
  */
 
 import {
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  CSV_JOB_TYPE as jobType,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -14,24 +14,18 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportTypeDefinition } from '../../types';
-import { createJobFnFactory, ImmediateCreateJobFn } from './create_job';
-import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { createJobFnFactory } from './create_job';
+import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-
-/*
- * These functions are exported to share with the API route handler that
- * generates csv from saved object immediately on request.
- */
-export { createJobFnFactory } from './create_job';
-export { runTaskFnFactory } from './execute_job';
+import { JobParamsCSV, TaskPayloadCSV } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  ImmediateCreateJobFn,
-  ImmediateExecuteFn
+  CreateJobFn<JobParamsCSV>,
+  RunTaskFn<TaskPayloadCSV>
 > => ({
   ...metadata,
-  jobType: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  jobType,
   jobContentExtension: 'csv',
   createJobFnFactory,
   runTaskFnFactory,
