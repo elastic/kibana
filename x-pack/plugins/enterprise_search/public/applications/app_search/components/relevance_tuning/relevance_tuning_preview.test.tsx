@@ -10,7 +10,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
 
 import { Result } from '../result/result';
 
