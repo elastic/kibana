@@ -166,6 +166,7 @@ export const userActionsMigrations = {
 
 interface UnsanitizedComment {
   comment: string;
+  type?: CommentType;
 }
 
 interface SanitizedComment {
@@ -173,9 +174,9 @@ interface SanitizedComment {
   type: CommentType;
 }
 
-interface SanitizedCommentFoSubCases {
+interface SanitizedCommentForSubCases {
   associationType: AssociationType;
-  rule: { id: string | null; name: string | null };
+  rule?: { id: string | null; name: string | null };
 }
 
 export const commentsMigrations = {
@@ -193,14 +194,21 @@ export const commentsMigrations = {
   },
   '7.12.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-  ): SavedObjectSanitizedDoc<SanitizedCommentFoSubCases> => {
+  ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
+    let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+      ...doc.attributes,
+      associationType: AssociationType.case,
+    };
+
+    // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+    // introduced in 7.12.
+    if (doc.attributes.type === CommentType.alert) {
+      attributes = { ...attributes, rule: { id: null, name: null } };
+    }
+
     return {
       ...doc,
-      attributes: {
-        ...doc.attributes,
-        rule: { id: null, name: null },
-        associationType: AssociationType.case,
-      },
+      attributes,
       references: doc.references || [],
     };
   },
