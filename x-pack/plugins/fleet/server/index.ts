@@ -23,6 +23,7 @@ export {
   AgentPolicyServiceInterface,
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
+export { AgentNotFoundError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {

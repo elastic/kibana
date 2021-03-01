@@ -16,7 +16,7 @@ import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
-import { IngestManagerError, isESClientError } from '../../errors';
+import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -168,7 +168,7 @@ export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
     return agent;
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
-      throw Boom.notFound('Agent not found');
+      throw new AgentNotFoundError(`Agent ${agentId} not found`);
     }
     throw err;
   }
@@ -200,7 +200,7 @@ export async function getAgentByAccessAPIKeyId(
   const [agent] = res.body.hits.hits.map(searchHitToAgent);
 
   if (!agent) {
-    throw Boom.notFound('Agent not found');
+    throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {
     throw new Error('Agent api key id is not matching');
@@ -273,7 +273,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
     });
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
-      throw Boom.notFound('Agent not found');
+      throw new AgentNotFoundError('Agent not found');
     }
     throw err;
   }

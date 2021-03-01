@@ -19,6 +19,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
+import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -206,11 +207,7 @@ async function findAgent(
         hostMetadata.elastic.agent.id
       );
   } catch (e) {
-    if (
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
-        e
-      )
-    ) {
+    if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -281,11 +278,7 @@ export async function enrichHostMetadata(
       );
     hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
   } catch (e) {
-    if (
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
-        e
-      )
-    ) {
+    if (e instanceof AgentNotFoundError) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);
