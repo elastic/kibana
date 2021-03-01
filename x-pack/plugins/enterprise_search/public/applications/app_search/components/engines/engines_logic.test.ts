@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { EngineDetails } from '../engine/types';
+import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { EnginesLogic } from './';
 
@@ -204,7 +204,7 @@ describe('EnginesLogic', () => {
       it('should call loadEngines if engine.type === default', () => {
         jest.spyOn(EnginesLogic.actions, 'loadEngines');
 
-        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: 'default' });
+        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: EngineTypes.default });
 
         expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
       });
@@ -212,7 +212,7 @@ describe('EnginesLogic', () => {
       it('should call loadMetaEngines if engine.type === meta', () => {
         jest.spyOn(EnginesLogic.actions, 'loadMetaEngines');
 
-        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: 'meta' });
+        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: EngineTypes.meta });
 
         expect(EnginesLogic.actions.loadMetaEngines).toHaveBeenCalled();
       });

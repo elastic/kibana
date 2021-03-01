@@ -13,7 +13,7 @@ import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
-import { EngineDetails } from '../engine/types';
+import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { DELETE_ENGINE_MESSAGE } from './constants';
 
@@ -145,9 +145,9 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     },
     onDeleteEngineSuccess: async ({ engine }) => {
       setSuccessMessage(DELETE_ENGINE_MESSAGE(engine.name));
-      if (engine.type === 'default') {
+      if ([EngineTypes.default, EngineTypes.indexed].includes(engine.type)) {
         actions.loadEngines();
-      } else if (engine.type === 'meta') {
+      } else if (engine.type === EngineTypes.meta) {
         actions.loadMetaEngines();
       }
     },
