@@ -23,6 +23,8 @@ import {
   TickFormatter,
   VerticalAlignment,
   HorizontalAlignment,
+  SortSeriesByConfig,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
@@ -39,6 +41,9 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
+
+const getSplitSeriesKey = ({ splitAccessors }: XYChartSeriesIdentifier) =>
+  [...splitAccessors.entries()].map((v) => v.join('-')).join(',');
 
 type XYSettingsProps = Pick<
   VisConfig,
@@ -156,8 +161,21 @@ export const XYSettings: FC<XYSettingsProps> = ({
       }
     : { ...tooltip, headerFormatter };
 
+  const seenSplitValueIndex = new Map<string, number>();
+  const sortSeriesBy: SortSeriesByConfig['default'] = (s1, s2) => {
+    const s1Name = getSplitSeriesKey(s1 as XYChartSeriesIdentifier);
+    const s2Name = getSplitSeriesKey(s2 as XYChartSeriesIdentifier);
+
+    if (!seenSplitValueIndex.has(s1Name)) seenSplitValueIndex.set(s1Name, seenSplitValueIndex.size);
+    if (!seenSplitValueIndex.has(s2Name)) seenSplitValueIndex.set(s2Name, seenSplitValueIndex.size);
+
+    return (seenSplitValueIndex.get(s1Name) ?? 0) - (seenSplitValueIndex.get(s2Name) ?? 0);
+  };
+
   return (
     <Settings
+      // @ts-ignore -- temporary prop for vislib sort compatibility
+      sortSeriesBy={sortSeriesBy}
       debugState={window._echDebugStateFlag ?? false}
       xDomain={adjustedXDomain}
       rotation={rotation}
