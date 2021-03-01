@@ -32,6 +32,11 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/uptime/e2e/tsconfig.json'), {
+    name: 'uptime/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
   // both took closer to 1000ms.
