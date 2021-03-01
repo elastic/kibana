@@ -84,6 +84,28 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('rule');
         expect(body.rule).to.eql({ id: null, name: null });
       });
+
+      it('adds category and subcategory to the ITSM connector', async () => {
+        const { body } = await supertest
+          .get(`${CASES_URL}/e1900ac0-017f-11eb-93f8-d161651bf509`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body).key('connector');
+        expect(body.connector).to.eql({
+          id: 'connector-1',
+          name: 'SN',
+          type: '.servicenow',
+          fields: {
+            impact: '1',
+            severity: '1',
+            urgency: '1',
+            category: null,
+            subcategory: null,
+          },
+        });
+      });
     });
   });
 }
