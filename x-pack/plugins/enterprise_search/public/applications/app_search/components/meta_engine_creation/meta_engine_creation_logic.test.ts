@@ -163,10 +163,12 @@ describe('MetaEngineCreationLogic', () => {
       });
 
       it('calls flashAPIErrors on API Error', async () => {
+        jest.spyOn(MetaEngineCreationLogic.actions, 'setIndexedEngineNames');
         http.post.mockReturnValueOnce(Promise.reject());
         MetaEngineCreationLogic.actions.submitEngine();
         await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        expect(MetaEngineCreationLogic.actions.setIndexedEngineNames).not.toHaveBeenCalled();
       });
     });
   });
