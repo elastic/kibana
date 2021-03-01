@@ -146,7 +146,6 @@ export class APIKeys {
     try {
       await this.clusterClient.asInternalUser.security.invalidateApiKey({
         body: {
-          // @ts-expect-error `InvalidateApiKeyRequest` type doesn't support `ids` property.
           ids: [id],
         },
       });
@@ -177,7 +176,6 @@ export class APIKeys {
     // User needs `manage_api_key` privilege to use this API
     let result: CreateAPIKeyResult;
     try {
-      // @ts-expect-error `CreateApiKeyResponse['expiration']` has incorrect `Date` type, it should be `number`.
       result = (
         await this.clusterClient
           .asScoped(request)
@@ -247,7 +245,6 @@ export class APIKeys {
       result = (
         await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
           body: {
-            // @ts-expect-error `InvalidateApiKeyRequest` type doesn't support `ids` property.
             ids: params.ids,
           },
         })
@@ -284,7 +281,6 @@ export class APIKeys {
       result = (
         await this.clusterClient.asInternalUser.security.invalidateApiKey({
           body: {
-            // @ts-expect-error `InvalidateApiKeyRequest` type doesn't support `ids` property.
             ids: params.ids,
           },
         })

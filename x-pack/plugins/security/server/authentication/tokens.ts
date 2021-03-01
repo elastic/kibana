@@ -56,9 +56,7 @@ export class Tokens {
       // Token should be refreshed by the same user that obtained that token.
       const {
         access_token: accessToken,
-        // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `refresh_token`.
         refresh_token: refreshToken,
-        // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `authentication`.
         authentication: authenticationInfo,
       } = (
         await this.options.client.security.getToken<{
@@ -67,7 +65,6 @@ export class Tokens {
           authentication: AuthenticationInfo;
         }>({
           body: {
-            // @ts-expect-error `GetUserAccessTokenRequest['grant_type']` doesn't support `refresh_token` grant.
             grant_type: 'refresh_token',
             refresh_token: existingRefreshToken,
           },
@@ -76,6 +73,7 @@ export class Tokens {
 
       this.logger.debug('Access token has been successfully refreshed.');
 
+      // @ts-expect-error types declare authenticationInfo as string
       return { accessToken, refreshToken, authenticationInfo };
     } catch (err) {
       this.logger.debug(`Failed to refresh access token: ${err.message}`);
@@ -120,7 +118,6 @@ export class Tokens {
       try {
         invalidatedTokensCount = (
           await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
-            // @ts-expect-error `InvalidateUserAccessTokenRequest` doesn't support any parameters.
             body: { refresh_token: refreshToken },
           })
         ).body.invalidated_tokens;
@@ -153,7 +150,6 @@ export class Tokens {
       try {
         invalidatedTokensCount = (
           await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
-            // @ts-expect-error `InvalidateUserAccessTokenRequest` doesn't support any parameters.
             body: { token: accessToken },
           })
         ).body.invalidated_tokens;

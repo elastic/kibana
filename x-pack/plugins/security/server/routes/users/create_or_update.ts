@@ -31,7 +31,6 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
       try {
         await context.core.elasticsearch.client.asCurrentUser.security.putUser({
           username: request.params.username,
-          // @ts-expect-error `PutUserRequest` type doesn't allow `null` values for `email` and `full_name`.
           body: request.body,
         });
 

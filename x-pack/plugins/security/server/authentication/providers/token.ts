@@ -65,15 +65,12 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       // First attempt to exchange login credentials for an access token
       const {
         access_token: accessToken,
-        // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `refresh_token`.
         refresh_token: refreshToken,
-        // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `authentication`.
         authentication: authenticationInfo,
       } = (
         await this.options.client.asInternalUser.security.getToken({
           body: {
             grant_type: 'password',
-            // @ts-expect-error `GetUserAccessTokenRequest` doesn't support `username` parameter.
             username,
             password,
           },
@@ -82,6 +79,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
+        // @ts-expect-error response declares it as string
         this.authenticationInfoToAuthenticatedUser(authenticationInfo),
         {
           authHeaders: {

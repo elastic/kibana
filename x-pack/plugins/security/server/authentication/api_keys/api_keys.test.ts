@@ -151,6 +151,7 @@ describe('API Keys', () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResolvedValueOnce(
+        // @ts-expect-error expiration is number in d.ts
         securityMock.createApiResponse({
           body: {
             id: '123',
