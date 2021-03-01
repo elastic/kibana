@@ -12,7 +12,8 @@ import { EuiPopover } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { useColorPicker } from './use_color_picker';
-import { ColorPicker } from '../../../../../../../charts/public';
+import type { PersistedState } from '../../../../../../../visualizations/public';
+import { ColorPicker } from '../../../../components/color_picker';
 import { PanelData } from '../../../../../../common/types';
 
 const seriesWithTermsSplit = [
@@ -47,10 +48,21 @@ jest.mock('@elastic/charts', () => {
 
 describe('useColorPicker', function () {
   let wrapperProps: LegendColorPickerProps;
+  const mockState = new Map();
+  const uiState = ({
+    get: jest
+      .fn()
+      .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+    set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+    emit: jest.fn(),
+    setSilent: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+  } as unknown) as PersistedState;
   const Component: ComponentType<LegendColorPickerProps> = useColorPicker(
     'left',
     seriesWithTermsSplit,
-    jest.fn()
+    uiState
   );
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
@@ -78,7 +90,7 @@ describe('useColorPicker', function () {
     expect(wrapper.find(ColorPicker).length).toBe(0);
   });
 
-  it('renders the color picker if series are grouped by terms', () => {
+  it('renders the color picker if series id and specId match', () => {
     wrapper = mount(<Component {...wrapperProps} />);
     expect(wrapper.find(ColorPicker).length).toBe(1);
   });
@@ -86,5 +98,19 @@ describe('useColorPicker', function () {
   it('renders the picker on the correct position', () => {
     wrapper = mount(<Component {...wrapperProps} />);
     expect(wrapper.find(EuiPopover).prop('anchorPosition')).toEqual('rightCenter');
+  });
+
+  it('overwrites the color on the uiState', () => {
+    wrapper = mount(<Component {...wrapperProps} />);
+    wrapper.find('.euiColorPicker__swatchSelect').at(0).simulate('click');
+    const colors = uiState.get('vis.colors', []);
+    expect(colors).toStrictEqual([
+      {
+        id: '61ca57f1-469d-11e7-af02-69e470af7417:0',
+        overwrite: {
+          false: '#54B399',
+        },
+      },
+    ]);
   });
 });

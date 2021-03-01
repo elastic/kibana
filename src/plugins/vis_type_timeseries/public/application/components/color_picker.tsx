@@ -21,7 +21,7 @@ export interface OverwriteColors {
   overwrite: { [key: string]: string };
 }
 
-interface ColorProps {
+export interface ColorProps {
   [key: string]: string | null;
 }
 
@@ -33,6 +33,7 @@ export interface ColorPickerProps {
   seriesName?: string;
   uiState?: PersistedState;
   seriesId?: string;
+  hideButton?: boolean;
 }
 
 const getOverwrittenColor = (uiState: PersistedState, seriesId: string, seriesName?: string) => {
@@ -50,10 +51,9 @@ export function ColorPicker({
   seriesName,
   uiState,
   seriesId,
+  hideButton = false,
 }: ColorPickerProps) {
-  const initialColorValue = value?.includes('rgba')
-    ? value.replace(COMMAS_NUMS_ONLY_RE, '')
-    : value;
+  const initialColorValue = value?.includes('rgb') ? value.replace(COMMAS_NUMS_ONLY_RE, '') : value;
   const initialOverwrittenColor =
     uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
   const [color, setColor] = useState(initialOverwrittenColor || initialColorValue || '');
@@ -115,10 +115,11 @@ export function ColorPicker({
     <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
       <EuiColorPicker
         onChange={handleColorChange}
+        display={hideButton ? 'inline' : 'default'}
         color={color}
         secondaryInputDisplay="top"
         showAlpha
-        button={<EuiColorPickerSwatch color={color} aria-label={label} />}
+        button={!hideButton ? <EuiColorPickerSwatch color={color} aria-label={label} /> : undefined}
       />
       {!disableTrash && (
         <div className="tvbColorPicker__clear" onClick={handleClear}>

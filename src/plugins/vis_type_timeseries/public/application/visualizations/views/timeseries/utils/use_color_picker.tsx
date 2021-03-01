@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { BaseSyntheticEvent, useCallback } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { LegendColorPicker, Position } from '@elastic/charts';
-import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import Color from 'color';
+import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
+import type { PersistedState } from '../../../../../../../visualizations/public';
 import { PanelData } from '../../../../../../common/types';
-import { ColorPicker } from '../../../../../../../charts/public';
+import { ColorPicker, ColorProps, OverwriteColors } from '../../../../components/color_picker';
 import { labelDateFormatter } from '../../../../components/lib/label_date_formatter';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
@@ -28,12 +30,7 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
 export const useColorPicker = (
   legendPosition: Position,
   series: PanelData[],
-  setColor: (
-    newColor: string | null,
-    seriesKey: string | number,
-    id: string,
-    event: BaseSyntheticEvent
-  ) => void
+  uiState: PersistedState
 ): LegendColorPicker => ({
   anchor,
   color,
@@ -50,36 +47,54 @@ export const useColorPicker = (
     seriesName = labelDateFormatter(selectedSeries[0].labelFormatted);
   }
 
-  const handleChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-    if (newColor) {
-      onChange(newColor);
-    }
-    setColor(newColor, seriesName, seriesIdentifier.specId, event);
-    // must be called after onChange
-    onClose();
-  };
+  const handleChange = (newColor: ColorProps | null) => {
+    if (newColor?.color) {
+      const hexColor = new Color(newColor.color).hex();
+      onChange(hexColor);
+      const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
+      const colors: OverwriteColors | undefined = seriesColors.find(
+        ({ id }) => id === seriesIdentifier.specId
+      );
 
-  // rule doesn't know this is inside a functional component
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const handleOutsideClick = useCallback(() => {
-    onClose?.();
-  }, [onClose]);
+      if (!colors) {
+        seriesColors.push({
+          id: seriesIdentifier.specId,
+          overwrite: { [seriesName]: hexColor },
+        });
+      } else {
+        if ((colors && colors.overwrite[seriesName] === hexColor) || !hexColor) {
+          delete colors?.overwrite[seriesName];
+        } else {
+          colors.overwrite[seriesName] = hexColor;
+        }
+      }
+
+      if (uiState?.set) {
+        uiState.setSilent('vis.colors', null);
+        uiState.set('vis.colors', seriesColors);
+        uiState.emit('colorChanged');
+      }
+    }
+  };
 
   return (
     <I18nProvider>
-      <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-        <EuiWrappingPopover
-          isOpen
-          ownFocus
-          display="block"
-          button={anchor}
-          anchorPosition={getAnchorPosition(legendPosition)}
-          closePopover={onClose}
-          panelPaddingSize="s"
-        >
-          <ColorPicker color={color} onChange={handleChange} label={seriesName} />
-        </EuiWrappingPopover>
-      </EuiOutsideClickDetector>
+      <EuiWrappingPopover
+        closePopover={onClose}
+        isOpen
+        ownFocus
+        button={anchor}
+        anchorPosition={getAnchorPosition(legendPosition)}
+        panelPaddingSize="s"
+      >
+        <ColorPicker
+          disableTrash={true}
+          onChange={handleChange}
+          name="color"
+          value={color}
+          hideButton={true}
+        />
+      </EuiWrappingPopover>
     </I18nProvider>
   );
 };

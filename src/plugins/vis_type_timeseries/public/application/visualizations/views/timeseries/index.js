@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -22,7 +22,7 @@ import {
   TooltipType,
   StackMode,
 } from '@elastic/charts';
-import { EuiIcon, keys } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { activeCursor$ } from '../../lib/active_cursor';
 import { getUISettings, getChartsSetup } from '../../../../services';
@@ -64,6 +64,7 @@ export const TimeSeries = ({
   uiState,
 }) => {
   const chartRef = useRef();
+  const [overwrittenColors, setOverwrittenColors] = useState(uiState.get('vis.colors', []));
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -104,43 +105,16 @@ export const TimeSeries = ({
   };
 
   useEffect(() => {
-    const fn = () => {
-      uiState?.emit?.('reload');
+    const updateColor = () => {
+      const overwriteColors = uiState.get('vis.colors', []);
+      setOverwrittenColors(overwriteColors);
     };
-    uiState?.on?.('change', fn);
+    uiState?.on('change', updateColor);
 
     return () => {
-      uiState?.off?.('change', fn);
+      uiState?.off('change', updateColor);
     };
   }, [uiState]);
-
-  const setColor = useCallback(
-    (newColor, seriesLabel, seriesId, event) => {
-      if (event.key && event.key !== keys.ENTER) {
-        return;
-      }
-      const seriesColors = uiState.get('vis.colors', []);
-      const colors = seriesColors.find(({ id }) => id === seriesId) || {};
-
-      if (Object.keys(colors).length === 0 && colors.constructor === Object) {
-        colors[seriesLabel] = newColor;
-        seriesColors.push({ id: seriesId, overwrite: colors });
-      } else {
-        if (colors.overwrite[seriesLabel] === newColor || !newColor) {
-          delete colors.overwrite[seriesLabel];
-        } else {
-          colors.overwrite[seriesLabel] = newColor;
-        }
-      }
-
-      if (uiState?.set) {
-        uiState.setSilent('vis.colors', null);
-        uiState.set('vis.colors', seriesColors);
-        uiState.emit('colorChanged');
-      }
-    },
-    [uiState]
-  );
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -148,7 +122,7 @@ export const TimeSeries = ({
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
-        legendColorPicker={useColorPicker(legendPosition, series, setColor)}
+        legendColorPicker={useColorPicker(legendPosition, series, uiState)}
         onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
@@ -221,7 +195,7 @@ export const TimeSeries = ({
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
-          const overwriteColors = uiState.get('vis.colors', []).filter((color) => color.id === id);
+          const overwriteColors = overwrittenColors.filter((color) => color.id === id);
           const overwriteColor = getSeriesColor(overwriteColors, label, labelFormatted);
           const finalColor = overwriteColor
             ? overwriteColor
