@@ -169,7 +169,7 @@ def analyseBuildReasonForApmUI() {
 def analyseBuildReasonForUptimeUI() {
   def uptime_updated = false
   dir("${BASE_DIR}"){
-    uptime_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
+    uptime_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/uptime/.*" ])
   }
   if (isPR()) {
     def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['uptime'])
