@@ -47,8 +47,8 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageVersion: pkg.version,
     packageName: pkg.name,
   });
-  // @ts-ignore
-  const sentTemplate = callCluster.mock.calls[1][1].body;
+
+  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
@@ -91,8 +91,9 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageVersion: pkg.version,
     packageName: pkg.name,
   });
-  // @ts-ignore
-  const sentTemplate = callCluster.mock.calls[1][1].body;
+
+  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
@@ -135,8 +136,8 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageVersion: pkg.version,
     packageName: pkg.name,
   });
-  // @ts-ignore
-  const sentTemplate = callCluster.mock.calls[1][1].body;
+  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
@@ -189,11 +190,10 @@ test('tests installPackage remove the aliases property if the property existed',
     packageName: pkg.name,
   });
 
-  // @ts-ignore
-  const removeAliases = callCluster.mock.calls[1][1].body;
+  const removeAliases = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
   expect(removeAliases.template.aliases).not.toBeDefined();
-  // @ts-ignore
-  const sentTemplate = callCluster.mock.calls[2][1].body;
+
+  const sentTemplate = esClient.transport.request.mock.calls[2][0].body as Record<string, any>;
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
