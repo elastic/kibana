@@ -14,22 +14,33 @@ interface Props {
   stats: Record<CaseStatusFilter, number | null>;
   selectedStatus: CaseStatusFilter;
   onStatusChanged: (status: CaseStatusFilter) => void;
+  disabledStatuses?: CaseStatusFilter[];
 }
 
-const StatusFilterComponent: React.FC<Props> = ({ stats, selectedStatus, onStatusChanged }) => {
+const StatusFilterComponent: React.FC<Props> = ({
+  stats,
+  selectedStatus,
+  onStatusChanged,
+  disabledStatuses = [],
+}) => {
   const caseStatuses = Object.keys(statuses) as CaseStatusFilter[];
-  const options: Array<EuiSuperSelectOption<CaseStatusFilter>> = caseStatuses.map((status) => ({
-    value: status,
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
-        <EuiFlexItem grow={false}>
-          <Status type={status} />
-        </EuiFlexItem>
-        {status !== AllCaseType && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
-      </EuiFlexGroup>
-    ),
-    'data-test-subj': `case-status-filter-${status}`,
-  }));
+  const options: Array<EuiSuperSelectOption<CaseStatusFilter>> = [AllCaseType, ...caseStatuses].map(
+    (status) => ({
+      value: status,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
+          <EuiFlexItem grow={false}>
+            <Status type={status} />
+          </EuiFlexItem>
+          {status !== AllCaseType && (
+            <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
+      disabled: disabledStatuses.includes(status),
+      'data-test-subj': `case-status-filter-${status}`,
+    })
+  );
 
   return (
     <EuiSuperSelect

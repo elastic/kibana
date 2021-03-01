@@ -6,7 +6,6 @@
  */
 
 import { Dispatch } from 'react';
-import { get } from 'lodash';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { CaseStatuses, CaseType } from '../../../../../case/common/api';
@@ -32,9 +31,9 @@ export const getActions = ({
   const openCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open,
     enabled: (item: Case | SubCase) => !isCollection(item),
-    description: get(statuses, `${CaseStatuses.open}.actions.single.title`),
-    icon: get(statuses, `${CaseStatuses.open}.actions.single.icon`),
-    name: get(statuses, `${CaseStatuses.open}.actions.single.title`),
+    description: statuses[CaseStatuses.open].actions.single.title,
+    icon: statuses[CaseStatuses.open].icon,
+    name: statuses[CaseStatuses.open].actions.single.title,
     onClick: (theCase: Case) =>
       dispatchUpdate({
         updateKey: 'status',
@@ -49,9 +48,9 @@ export const getActions = ({
   const makeInProgressAction = {
     available: (item: Case) => caseStatus !== CaseStatuses['in-progress'],
     enabled: (item: Case | SubCase) => !isCollection(item),
-    description: get(statuses, `${CaseStatuses['in-progress']}.actions.single.title`),
-    icon: get(statuses, `${CaseStatuses['in-progress']}.actions.single.icon`),
-    name: get(statuses, `${CaseStatuses['in-progress']}.actions.single.title`),
+    description: statuses[CaseStatuses['in-progress']].actions.single.title,
+    icon: statuses[CaseStatuses['in-progress']].icon,
+    name: statuses[CaseStatuses['in-progress']].actions.single.title,
     onClick: (theCase: Case) =>
       dispatchUpdate({
         updateKey: 'status',
@@ -66,9 +65,9 @@ export const getActions = ({
   const closeCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.closed,
     enabled: (item: Case | SubCase) => !isCollection(item),
-    description: get(statuses, `${CaseStatuses.closed}.actions.single.title`),
-    icon: get(statuses, `${CaseStatuses.closed}.actions.single.icon`),
-    name: get(statuses, `${CaseStatuses.closed}.actions.single.title`),
+    description: statuses[CaseStatuses.closed].actions.single.title,
+    icon: statuses[CaseStatuses.closed].icon,
+    name: statuses[CaseStatuses.closed].actions.single.title,
     onClick: (theCase: Case) =>
       dispatchUpdate({
         updateKey: 'status',

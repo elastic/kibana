@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
   EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
@@ -100,9 +101,9 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
     }));
   };
 
-  const { docLinks } = useAppContext();
-  const { ELASTIC_WEBSITE_URL } = docLinks;
-  const observabilityDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/observability`;
+  const { docLinks, kibanaVersionInfo } = useAppContext();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
 
   return (
     <>
@@ -128,25 +129,31 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {warnings.includes(ReindexWarning.apmReindex) && (
+        {kibanaVersionInfo.currentMajor === 7 && warnings.includes(ReindexWarning.customTypeName) && (
           <WarningCheckbox
             checkedIds={checkedIds}
             onChange={onChange}
-            warning={ReindexWarning.apmReindex}
+            warning={ReindexWarning.customTypeName}
             label={
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
-                defaultMessage="This index will be converted to ECS format"
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
+                defaultMessage="Mapping type will be changed to {defaultType}"
+                values={{
+                  defaultType: <EuiCode>_doc</EuiCode>,
+                }}
               />
             }
             description={
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
-                defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema.
-                      Historical APM data will not visible until it's reindexed."
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
+                defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the
+                    default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
+                values={{
+                  defaultType: <EuiCode>_doc</EuiCode>,
+                }}
               />
             }
-            documentationUrl={`${observabilityDocBasePath}/master/whats-new.html`}
+            documentationUrl={`${esDocBasePath}/${DOC_LINK_VERSION}/removal-of-types.html`}
           />
         )}
       </EuiFlyoutBody>

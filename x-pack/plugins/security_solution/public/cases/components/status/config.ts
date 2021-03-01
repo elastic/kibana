@@ -5,16 +5,18 @@
  * 2.0.
  */
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { AllCaseType, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
+import { AllCaseType, CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from './translations';
 
+type AllCaseStatus = Record<typeof AllCaseType, { color: string; label: string }>;
+
 type Statuses = Record<
-  CaseStatusFilter,
+  CaseStatuses,
   {
     color: string;
     label: string;
-    icon?: EuiIconType;
-    actions?: {
+    icon: EuiIconType;
+    actions: {
       bulk: {
         title: string;
       };
@@ -23,20 +25,23 @@ type Statuses = Record<
         description?: string;
       };
     };
-    actionBar?: {
+    actionBar: {
       title: string;
     };
-    button?: {
+    button: {
       label: string;
     };
-    stats?: {
+    stats: {
       title: string;
     };
   }
 >;
 
-export const statuses: Statuses = {
+export const allCaseStatus: AllCaseStatus = {
   [AllCaseType]: { color: 'hollow', label: i18n.ALL },
+};
+
+export const statuses: Statuses = {
   [CaseStatuses.open]: {
     color: 'primary',
     label: i18n.OPEN,
@@ -84,7 +89,7 @@ export const statuses: Statuses = {
   [CaseStatuses.closed]: {
     color: 'default',
     label: i18n.CLOSED,
-    icon: 'folderClosed' as const,
+    icon: 'folderCheck' as const,
     actions: {
       bulk: {
         title: i18n.BULK_ACTION_CLOSE_SELECTED,

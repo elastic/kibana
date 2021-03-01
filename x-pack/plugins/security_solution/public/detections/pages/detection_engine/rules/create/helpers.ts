@@ -182,7 +182,7 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     .map((threat) => {
       return {
         ...threat,
-        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique ?? []).map((technique) => {
           return {
             ...technique,
             subtechnique:

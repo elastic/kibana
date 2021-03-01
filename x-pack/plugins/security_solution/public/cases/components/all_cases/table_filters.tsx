@@ -25,6 +25,7 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
+  disabledStatuses?: CaseStatuses[];
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -55,6 +56,7 @@ const CasesTableFiltersComponent = ({
   onFilterChanged,
   initial = defaultInitial,
   setFilterRefetch,
+  disabledStatuses,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
@@ -164,6 +166,7 @@ const CasesTableFiltersComponent = ({
               selectedStatus={initial.status}
               onStatusChanged={onStatusChanged}
               stats={stats}
+              disabledStatuses={disabledStatuses}
             />
           </StatusFilterWrapper>
         </EuiFlexGroup>

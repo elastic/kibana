@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { casesStatus, useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { AllCaseType, CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -251,7 +251,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('should render correct actions for case (with type individual)', async () => {
+  it('should render correct actions for case (with type individual and filter status open)', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
@@ -460,7 +460,32 @@ describe('AllCases', () => {
     });
   });
 
-  it('Renders correct bulk actoins for case collection - enable only bulk delete if any collection is selected', async () => {
+  it('Renders only bulk delete on status all', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: AllCaseType },
+      selectedCases: [...useGetCasesMockState.data.cases],
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').exists()).toEqual(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
+      expect(
+        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
+      ).toEqual(false);
+    });
+  });
+
+  it('Renders correct bulk actoins for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },

@@ -62,4 +62,24 @@ describe('StatusFilter', () => {
       expect(onStatusChanged).toBeCalledWith('closed');
     });
   });
+
+  it('should disabled selected statuses', () => {
+    const wrapper = mount(
+      <StatusFilter {...defaultProps} disabledStatuses={[CaseStatuses.closed]} />
+    );
+
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-open"]').prop('disabled')
+    ).toBeFalsy();
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').prop('disabled')
+    ).toBeFalsy();
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-closed"]').prop('disabled')
+    ).toBeTruthy();
+  });
 });

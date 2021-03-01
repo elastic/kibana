@@ -9,8 +9,8 @@ import React, { memo, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
-import { CaseStatusFilter } from '../../../../../case/common/api';
-import { statuses } from './config';
+import { AllCaseType, CaseStatusFilter } from '../../../../../case/common/api';
+import { allCaseStatus, statuses } from './config';
 import * as i18n from './translations';
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
 const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = noop }) => {
   const props = useMemo(
     () => ({
-      color: statuses[type].color,
+      color: type === AllCaseType ? allCaseStatus[AllCaseType].color : statuses[type].color,
       ...(withArrow ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
     }),
     [withArrow, type]
@@ -35,7 +35,7 @@ const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = n
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
     >
-      {statuses[type].label}
+      {type === AllCaseType ? allCaseStatus[AllCaseType].label : statuses[type].label}
     </EuiBadge>
   );
 };
