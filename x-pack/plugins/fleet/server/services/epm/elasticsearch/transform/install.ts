@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
@@ -18,7 +19,6 @@ import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
 import { appContextService } from '../../../app_context';
-import { isLegacyESClientError } from '../../../../errors';
 
 interface TransformInstallation {
   installationName: string;
@@ -131,7 +131,8 @@ async function handleTransformInstall({
   } catch (err) {
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
-      isLegacyESClientError(err) && err?.body?.error?.type === 'resource_already_exists_exception';
+      err instanceof ResponseError &&
+      err?.body?.error?.type === 'resource_already_exists_exception';
     if (!isAlreadyExistError) {
       throw err;
     }

@@ -17,7 +17,7 @@ jest.mock('./common', () => {
   };
 });
 
-import { errors as LegacyESErrors } from 'elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
 import { installTransform } from './install';
 import {
@@ -508,23 +508,18 @@ describe('test transform install', () => {
         attributes: { installed_es: [] },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
 
-    legacyScopedClusterClient.callAsCurrentUser.mockImplementation(
-      async (endpoint, clientParams, options) => {
-        if (
-          endpoint === 'transport.request' &&
-          clientParams?.method === 'PUT' &&
-          clientParams?.path === '/_transform/endpoint.metadata_current-default-0.16.0-dev.0'
-        ) {
-          const err: LegacyESErrors._Abstract & { body?: any } = new LegacyESErrors.BadRequest();
-          err.body = {
-            error: { type: 'resource_already_exists_exception' },
-          };
-          throw err;
-        }
-      }
+    esClient.transport.request.mockImplementationOnce(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(
+        new ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: 400,
+            body: { error: { type: 'resource_already_exists_exception' } },
+          })
+        )
+      )
     );
+
     await installTransform(
       ({
         name: 'endpoint',
