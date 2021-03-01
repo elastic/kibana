@@ -40,11 +40,10 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
           <EuiText data-test-subj={'userDisplayName'}>
             <h1>
               <FormattedMessage
-                id="xpack.security.account.titleSegment"
-                defaultMessage="Settings for"
+                id="xpack.security.account.pageTitle"
+                defaultMessage="Settings for {strongUsername}"
+                values={{ strongUsername: <strong>{getUserDisplayName(currentUser)}</strong> }}
               />
-              &nbsp;
-              <strong>{getUserDisplayName(currentUser)}</strong>
             </h1>
           </EuiText>
 
