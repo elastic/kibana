@@ -9,7 +9,7 @@ import { KibanaRequest, Logger } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginStart } from '../../../spaces/server';
-import { Access } from '../../common/types';
+import { ProductAccess } from '../../common/types';
 import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
@@ -42,7 +42,7 @@ export const checkAccess = async ({
   spaces,
   request,
   log,
-}: CheckAccess): Promise<Access> => {
+}: CheckAccess): Promise<ProductAccess> => {
   const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
 
   // We can only retrieve the active space when either:

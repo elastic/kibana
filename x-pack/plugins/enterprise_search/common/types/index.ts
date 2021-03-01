@@ -19,7 +19,7 @@ export interface InitialAppData {
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
   configuredLimits?: ConfiguredLimits;
-  access?: Access;
+  access?: ProductAccess;
   appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
@@ -29,7 +29,7 @@ export interface ConfiguredLimits {
   workplaceSearch: WorkplaceSearchConfiguredLimits;
 }
 
-export interface Access {
+export interface ProductAccess {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
