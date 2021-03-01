@@ -338,7 +338,7 @@ describe('queryPreviewReducer', () => {
           field: 'agent.hostname',
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },
@@ -358,7 +358,7 @@ describe('queryPreviewReducer', () => {
           field: undefined,
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },
@@ -378,7 +378,7 @@ describe('queryPreviewReducer', () => {
           field: '    ',
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },
@@ -398,7 +398,7 @@ describe('queryPreviewReducer', () => {
           field: 'agent.hostname',
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },
@@ -417,7 +417,7 @@ describe('queryPreviewReducer', () => {
           field: 'agent.hostname',
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },
@@ -436,7 +436,7 @@ describe('queryPreviewReducer', () => {
           field: 'agent.hostname',
           value: 200,
           cardinality: {
-            field: 'user.name',
+            field: ['user.name'],
             value: 2,
           },
         },

@@ -199,7 +199,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     field: [],
     value: '100',
     cardinality: {
-      field: 'process.name',
+      field: ['process.name'],
       value: '2',
     },
   },

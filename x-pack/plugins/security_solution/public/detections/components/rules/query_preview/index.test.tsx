@@ -297,7 +297,7 @@ describe('PreviewQuery', () => {
               field: 'agent.hostname',
               value: 200,
               cardinality: {
-                field: 'user.name',
+                field: ['user.name'],
                 value: 2,
               },
             }}
@@ -346,7 +346,7 @@ describe('PreviewQuery', () => {
               field: 'agent.hostname',
               value: 200,
               cardinality: {
-                field: 'user.name',
+                field: ['user.name'],
                 value: 2,
               },
             }}
@@ -392,7 +392,7 @@ describe('PreviewQuery', () => {
               field: undefined,
               value: 200,
               cardinality: {
-                field: 'user.name',
+                field: ['user.name'],
                 value: 2,
               },
             }}
@@ -426,7 +426,7 @@ describe('PreviewQuery', () => {
               field: '   ',
               value: 200,
               cardinality: {
-                field: 'user.name',
+                field: ['user.name'],
                 value: 2,
               },
             }}

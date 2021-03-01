@@ -85,7 +85,7 @@ describe('rule helpers', () => {
           field: ['host.name'],
           value: '50',
           cardinality: {
-            field: 'process.name',
+            field: ['process.name'],
             value: '2',
           },
         },
