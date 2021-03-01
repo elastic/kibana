@@ -18,7 +18,7 @@ interface Props {
 export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
   return (
     <>
-      <InlineStyle darkMode={darkMode} />
+      <InlineStyles darkMode={darkMode} />
       {stylesheetPaths.map((path) => (
         <link key={path} rel="stylesheet" type="text/css" href={path} />
       ))}
@@ -26,7 +26,7 @@ export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
   );
 };
 
-const InlineStyle: FC<{ darkMode: boolean }> = ({ darkMode }) => {
+const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
