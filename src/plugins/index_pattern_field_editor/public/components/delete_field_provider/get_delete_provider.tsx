@@ -9,6 +9,7 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { NotificationsStart } from 'src/core/public';
 import { IndexPattern, UsageCollectionStart } from '../../shared_imports';
 import { pluginName } from '../../constants';
@@ -33,11 +34,7 @@ export const getDeleteProvider = (
         });
 
         try {
-          usageCollection.reportUiCounter(
-            pluginName,
-            usageCollection.METRIC_TYPE.COUNT,
-            'delete_runtime'
-          );
+          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'delete_runtime');
           // eslint-disable-next-line no-empty
         } catch {}
 

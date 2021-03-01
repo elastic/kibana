@@ -11,12 +11,17 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getServiceErrorGroupComparisonStatistics({
+  kuery,
   serviceName,
   setup,
   numBuckets,
@@ -24,6 +29,7 @@ export async function getServiceErrorGroupComparisonStatistics({
   groupIds,
   environment,
 }: {
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   numBuckets: number;
@@ -34,7 +40,7 @@ export async function getServiceErrorGroupComparisonStatistics({
   return withApmSpan(
     'get_service_error_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end, esFilter } = setup;
+      const { apmEventClient, start, end } = setup;
 
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -52,7 +58,7 @@ export async function getServiceErrorGroupComparisonStatistics({
                 { term: { [TRANSACTION_TYPE]: transactionType } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
-                ...esFilter,
+                ...kqlQuery(kuery),
               ],
             },
           },

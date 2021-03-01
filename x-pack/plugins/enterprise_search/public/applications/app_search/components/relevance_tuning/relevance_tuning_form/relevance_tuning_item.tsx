@@ -13,8 +13,7 @@ import { SchemaTypes } from '../../../../shared/types';
 
 import { BoostIcon } from '../boost_icon';
 import { Boost, SearchField } from '../types';
-
-import { ValueBadge } from './value_badge';
+import { ValueBadge } from '../value_badge';
 
 interface Props {
   name: string;
