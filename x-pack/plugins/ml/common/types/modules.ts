@@ -68,6 +68,7 @@ export interface KibanaObjectResponse extends ResultItem {
 
 export interface DatafeedResponse extends ResultItem {
   started: boolean;
+  awaitingMlNodeAllocation?: boolean;
   error?: ErrorType;
 }
 

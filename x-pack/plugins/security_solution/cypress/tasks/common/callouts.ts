@@ -12,13 +12,11 @@ export const getCallOut = (id: string, options?: Cypress.Timeoutable) => {
 };
 
 export const waitForCallOutToBeShown = (id: string, color: string) => {
-  getCallOut(id, { timeout: 10000 })
-    .should('be.visible')
-    .should('have.class', `euiCallOut--${color}`);
+  getCallOut(id).should('be.visible').should('have.class', `euiCallOut--${color}`);
 };
 
 export const dismissCallOut = (id: string) => {
-  getCallOut(id, { timeout: 10000 }).within(() => {
+  getCallOut(id).within(() => {
     cy.get(CALLOUT_DISMISS_BTN).should('be.visible').click();
     cy.root().should('not.exist');
   });

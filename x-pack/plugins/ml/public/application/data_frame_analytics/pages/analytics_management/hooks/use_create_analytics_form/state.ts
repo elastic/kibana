@@ -16,6 +16,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalysisConfigType,
 } from '../../../../../../../common/types/data_frame_analytics';
+import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -47,8 +48,10 @@ export interface State {
   advancedEditorRawString: string;
   disableSwitchToForm: boolean;
   form: {
+    alpha: undefined | number;
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
+    classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
     description: string;
     destinationIndex: EsIndexName;
@@ -56,7 +59,10 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    earlyStoppingEnabled: undefined | boolean;
+    downsampleFactor: undefined | number;
     eta: undefined | number;
+    etaGrowthRatePerTree: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
     gamma: undefined | number;
@@ -72,6 +78,7 @@ export interface State {
     lambda: number | undefined;
     loadingFieldOptions: boolean;
     maxNumThreads: undefined | number;
+    maxOptimizationRoundsPerHyperparameter: undefined | number;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -87,6 +94,8 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
+    softTreeDepthLimit: undefined | number;
+    softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -116,8 +125,10 @@ export const getInitialState = (): State => ({
   advancedEditorRawString: '',
   disableSwitchToForm: false,
   form: {
+    alpha: undefined,
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
+    classAssignmentObjective: undefined,
     dependentVariable: '',
     description: '',
     destinationIndex: '',
@@ -125,7 +136,10 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    earlyStoppingEnabled: undefined,
+    downsampleFactor: undefined,
     eta: undefined,
+    etaGrowthRatePerTree: undefined,
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
     gamma: undefined,
@@ -141,6 +155,7 @@ export const getInitialState = (): State => ({
     lambda: undefined,
     loadingFieldOptions: false,
     maxNumThreads: DEFAULT_MAX_NUM_THREADS,
+    maxOptimizationRoundsPerHyperparameter: undefined,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -156,6 +171,8 @@ export const getInitialState = (): State => ({
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     resultsField: undefined,
+    softTreeDepthLimit: undefined,
+    softTreeDepthTolerance: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -231,15 +248,32 @@ export const getJobConfigFromFormState = (
 
     analysis = Object.assign(
       analysis,
-      formState.predictionFieldName && { prediction_field_name: formState.predictionFieldName },
+      formState.alpha && { alpha: formState.alpha },
       formState.eta && { eta: formState.eta },
+      formState.etaGrowthRatePerTree && {
+        eta_growth_rate_per_tree: formState.etaGrowthRatePerTree,
+      },
+      formState.downsampleFactor && { downsample_factor: formState.downsampleFactor },
       formState.featureBagFraction && {
         feature_bag_fraction: formState.featureBagFraction,
       },
       formState.gamma && { gamma: formState.gamma },
       formState.lambda && { lambda: formState.lambda },
+      formState.maxOptimizationRoundsPerHyperparameter && {
+        max_optimization_rounds_per_hyperparameter:
+          formState.maxOptimizationRoundsPerHyperparameter,
+      },
       formState.maxTrees && { max_trees: formState.maxTrees },
-      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed }
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.earlyStoppingEnabled !== undefined && {
+        early_stopping_enabled: formState.earlyStoppingEnabled,
+      },
+      formState.predictionFieldName && { prediction_field_name: formState.predictionFieldName },
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.softTreeDepthLimit && { soft_tree_depth_limit: formState.softTreeDepthLimit },
+      formState.softTreeDepthTolerance && {
+        soft_tree_depth_tolerance: formState.softTreeDepthTolerance,
+      }
     );
 
     jobConfig.analysis = {
@@ -247,13 +281,14 @@ export const getJobConfigFromFormState = (
     };
   }
 
-  if (
-    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    jobConfig?.analysis?.classification !== undefined &&
-    formState.numTopClasses !== undefined
-  ) {
-    // @ts-ignore
-    jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+  if (jobConfig?.analysis !== undefined && isClassificationAnalysis(jobConfig?.analysis)) {
+    if (formState.numTopClasses !== undefined) {
+      jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+    }
+    if (formState.classAssignmentObjective !== undefined) {
+      jobConfig.analysis.classification.class_assignment_objective =
+        formState.classAssignmentObjective;
+    }
   }
 
   if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {

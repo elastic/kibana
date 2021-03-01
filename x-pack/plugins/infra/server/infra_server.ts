@@ -12,7 +12,6 @@ import {
   initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryCategoryDatasetsStatsRoute,
   initGetLogEntryCategoryExamplesRoute,
-  initGetLogEntryRateRoute,
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
@@ -27,7 +26,6 @@ import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
 import {
-  initLogEntriesRoute,
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
@@ -46,7 +44,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetLogEntryCategoryDatasetsRoute(libs);
   initGetLogEntryCategoryDatasetsStatsRoute(libs);
   initGetLogEntryCategoryExamplesRoute(libs);
-  initGetLogEntryRateRoute(libs);
   initGetLogEntryAnomaliesRoute(libs);
   initGetLogEntryAnomaliesDatasetsRoute(libs);
   initGetK8sAnomaliesRoute(libs);
@@ -56,7 +53,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSourceRoute(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
-  initLogEntriesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);

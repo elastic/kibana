@@ -45,7 +45,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         <>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
-            defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+            defaultMessage="Reduce the number of segments in each index shard and clean up deleted documents."
           />{' '}
           <LearnMoreLink docPath="ilm-forcemerge.html" />
         </>

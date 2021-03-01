@@ -16,7 +16,7 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { copyPersistentState } from '../../../reducers/util';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';

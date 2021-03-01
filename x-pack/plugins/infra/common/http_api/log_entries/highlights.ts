@@ -7,37 +7,37 @@
 
 import * as rt from 'io-ts';
 import { logEntryCursorRT, logEntryRT } from '../../log_entry';
-import {
-  logEntriesBaseRequestRT,
-  logEntriesBeforeRequestRT,
-  logEntriesAfterRequestRT,
-  logEntriesCenteredRequestRT,
-} from './entries';
+import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 
-const highlightsRT = rt.type({
-  highlightTerms: rt.array(rt.string),
-});
-
 export const logEntriesHighlightsBaseRequestRT = rt.intersection([
-  logEntriesBaseRequestRT,
-  highlightsRT,
+  rt.type({
+    sourceId: rt.string,
+    startTimestamp: rt.number,
+    endTimestamp: rt.number,
+    highlightTerms: rt.array(rt.string),
+  }),
+  rt.partial({
+    query: rt.union([rt.string, rt.null]),
+    size: rt.number,
+    columns: rt.array(logSourceColumnConfigurationRT),
+  }),
 ]);
 
 export const logEntriesHighlightsBeforeRequestRT = rt.intersection([
-  logEntriesBeforeRequestRT,
-  highlightsRT,
+  logEntriesHighlightsBaseRequestRT,
+  rt.type({ before: rt.union([logEntryCursorRT, rt.literal('last')]) }),
 ]);
 
 export const logEntriesHighlightsAfterRequestRT = rt.intersection([
-  logEntriesAfterRequestRT,
-  highlightsRT,
+  logEntriesHighlightsBaseRequestRT,
+  rt.type({ after: rt.union([logEntryCursorRT, rt.literal('first')]) }),
 ]);
 
 export const logEntriesHighlightsCenteredRequestRT = rt.intersection([
-  logEntriesCenteredRequestRT,
-  highlightsRT,
+  logEntriesHighlightsBaseRequestRT,
+  rt.type({ center: logEntryCursorRT }),
 ]);
 
 export const logEntriesHighlightsRequestRT = rt.union([

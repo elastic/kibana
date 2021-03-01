@@ -1,0 +1,35 @@
+[[actions-and-connectors-api-delete]]
+=== Delete action API
+++++
+<titleabbrev>Delete action API</titleabbrev>
+++++
+
+Deletes an action by ID.
+
+WARNING: When you delete an action, _it cannot be recovered_.
+
+[[actions-and-connectors-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/actions/action/<id>`
+
+[[actions-and-connectors-api-delete-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the action.
+
+[[actions-and-connectors-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+--------------------------------------------------
+// KIBANA
+

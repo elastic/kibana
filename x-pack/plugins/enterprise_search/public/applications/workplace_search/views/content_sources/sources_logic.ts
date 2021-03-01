@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { cloneDeep, findIndex } from 'lodash';
-
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../shared/http';
+import { AppLogic } from '../../app_logic';
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
 import { staticSourceData } from './source_data';
-
-import { AppLogic } from '../../app_logic';
 
 interface ServerStatuses {
   [key: string]: string;

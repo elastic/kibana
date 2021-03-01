@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
-import { ConnectorTypes, CommentType } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseType, AssociationType } from '../../common/api';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -49,6 +49,10 @@ interface SanitizedCaseSettings {
   };
 }
 
+interface SanitizedCaseType {
+  type: string;
+}
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -79,6 +83,18 @@ export const caseMigrations = {
         settings: {
           syncAlerts: true,
         },
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseType> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        type: CaseType.individual,
       },
       references: doc.references || [],
     };
@@ -157,6 +173,11 @@ interface SanitizedComment {
   type: CommentType;
 }
 
+interface SanitizedCommentFoSubCases {
+  associationType: AssociationType;
+  rule: { id: string | null; name: string | null };
+}
+
 export const commentsMigrations = {
   '7.11.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
@@ -166,6 +187,19 @@ export const commentsMigrations = {
       attributes: {
         ...doc.attributes,
         type: CommentType.user,
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+  ): SavedObjectSanitizedDoc<SanitizedCommentFoSubCases> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        rule: { id: null, name: null },
+        associationType: AssociationType.case,
       },
       references: doc.references || [],
     };

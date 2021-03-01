@@ -79,11 +79,10 @@ export const createPackagePolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  let newData = { ...request.body };
   try {
-    newData = await packagePolicyService.runExternalCallbacks(
+    const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newData,
+      { ...request.body },
       context,
       request
     );

@@ -39,11 +39,8 @@ describe('Team Assignment', () => {
       const { stdout } = await execa('grep', ['tre', teamAssignmentsPath], { cwd: ROOT_DIR });
       const lines = stdout.split('\n').filter((line) => !line.includes('/target'));
       expect(lines).toEqual([
-        'x-pack/plugins/code/jest.config.js kibana-tre',
-        'x-pack/plugins/code/server/config.ts kibana-tre',
-        'x-pack/plugins/code/server/index.ts kibana-tre',
-        'x-pack/plugins/code/server/plugin.test.ts kibana-tre',
-        'x-pack/plugins/code/server/plugin.ts kibana-tre',
+        'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/index.ts kibana-tre',
+        'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/plugin.ts kibana-tre',
       ]);
     });
   });

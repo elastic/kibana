@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../id_generator';
-import { DragDrop, DragDropIdentifier } from '../../../drag_drop';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+
 import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
@@ -47,6 +48,8 @@ export function EmptyDimensionButton({
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
+  const { dragging } = useContext(DragContext);
+
   const itemIndex = group.accessors.length;
 
   const [newColumnId, setNewColumnId] = useState<string>(generateId());
@@ -54,12 +57,16 @@ export function EmptyDimensionButton({
     setNewColumnId(generateId());
   }, [itemIndex]);
 
-  const dropType = layerDatasource.getDropTypes({
+  const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
+    dragging,
     columnId: newColumnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
   });
+
+  const dropType = dropProps?.dropType;
+  const nextLabel = dropProps?.nextLabel;
 
   const value = useMemo(
     () => ({
@@ -72,9 +79,15 @@ export function EmptyDimensionButton({
         label,
         groupLabel: group.groupLabel,
         position: itemIndex + 1,
+        nextLabel: nextLabel || '',
       },
     }),
-    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]
+    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
+  );
+
+  const handleOnDrop = React.useCallback(
+    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    [value, onDrop]
   );
 
   return (
@@ -82,9 +95,8 @@ export function EmptyDimensionButton({
       <DragDrop
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
-        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
         order={[2, layerIndex, groupIndex, itemIndex]}
-        onDrop={(droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType)}
+        onDrop={handleOnDrop}
         dropType={dropType}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">

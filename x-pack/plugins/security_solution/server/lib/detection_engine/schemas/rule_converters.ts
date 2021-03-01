@@ -53,6 +53,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         threatMapping: params.threat_mapping,
         threatLanguage: params.threat_language,
         threatIndex: params.threat_index,
+        threatIndicatorPath: params.threat_indicator_path,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
       };

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { users } from '../../../__mocks__/users.mock';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
-
-import { users } from '../../../__mocks__/users.mock';
 
 import { UserRow } from './';
 

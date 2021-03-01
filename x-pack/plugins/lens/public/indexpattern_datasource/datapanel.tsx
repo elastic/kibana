@@ -57,7 +57,15 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
+const supportedFieldTypes = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+  'ip',
+  'histogram',
+  'document',
+]);
 
 const fieldTypeNames: Record<DataType, string> = {
   document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
@@ -66,6 +74,7 @@ const fieldTypeNames: Record<DataType, string> = {
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
 };
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by

@@ -23,12 +23,16 @@ import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 
 export async function fetchAndTransformGcMetrics({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
   chartBase,
   fieldName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -40,6 +44,8 @@ export async function fetchAndTransformGcMetrics({
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,

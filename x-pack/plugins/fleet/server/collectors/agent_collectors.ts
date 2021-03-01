@@ -7,7 +7,8 @@
 
 import { ElasticsearchClient, SavedObjectsClient } from 'kibana/server';
 import * as AgentService from '../services/agents';
-import { isFleetServerSetup } from '../services/fleet_server_migration';
+import { isFleetServerSetup } from '../services/fleet_server';
+
 export interface AgentUsage {
   total: number;
   online: number;

@@ -6,3 +6,5 @@
  */
 
 export { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space_service';
+export { getShareToSpaceFlyoutComponent, getLegacyUrlConflict } from './components';
+export { createRedirectLegacyUrl } from './utils';

@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
+
 import { EuiSpacer, EuiTitle, EuiText, EuiButton, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { DOCS_PREFIX } from '../../routes';
 
 import GettingStarted from './assets/getting_started.png';
 
-import { DOCS_PREFIX } from '../../routes';
 const GETTING_STARTED_LINK_URL = `${DOCS_PREFIX}/workplace-search-getting-started.html`;
 
 export const SetupGuide: React.FC = () => {

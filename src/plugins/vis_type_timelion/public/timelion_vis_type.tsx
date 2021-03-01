@@ -13,8 +13,11 @@ import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
+import { getIndexPatterns } from './helpers/plugin_services';
 
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { parseTimelionExpression } from '../common/parser';
+
+import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
 
 const TimelionOptions = lazy(() => import('./timelion_options'));
 
@@ -46,6 +49,21 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     inspectorAdapters: {},
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    },
+    getUsedIndexPattern: (params: VisParams) => {
+      try {
+        const args = parseTimelionExpression(params.expression)?.args ?? [];
+        const indexArg = args.find(
+          ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
+        );
+
+        if (indexArg?.value.text) {
+          return getIndexPatterns().find(indexArg.value.text);
+        }
+      } catch {
+        // timelion expression is invalid
+      }
+      return [];
     },
     options: {
       showIndexSelection: false,

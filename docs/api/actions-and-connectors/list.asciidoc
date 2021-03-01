@@ -1,0 +1,59 @@
+[[actions-and-connectors-api-list]]
+=== List action types API
+++++
+<titleabbrev>List all action types API</titleabbrev>
+++++
+
+Retrieves a list of all action types.
+
+[[actions-and-connectors-api-list-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/list_action_types`
+
+[[actions-and-connectors-api-list-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-list-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/list_action_types
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": ".email", <1>
+    "name": "Email", <2>
+    "minimumLicenseRequired": "gold", <3>
+    "enabled": false, <4>
+    "enabledInConfig": true, <5>
+    "enabledInLicense": false <6>
+  },
+  {
+    "id": ".index",
+    "name": "Index",
+    "minimumLicenseRequired": "basic",
+    "enabled": true,
+    "enabledInConfig": true,
+    "enabledInLicense": true
+  }
+]
+--------------------------------------------------
+
+
+<1> `id` - The unique ID of the action type.
+<2> `name` - The name of the action type.
+<3> `minimumLicenseRequired` - The license required to use the action type.
+<4> `enabled` - Specifies if the action type is enabled or disabled in {kib}.
+<5> `enabledInConfig` - Specifies if the action type is enabled or enabled in the {kib} .yml file.
+<6> `enabledInLicense` - Specifies if the action type is enabled or disabled in the license.

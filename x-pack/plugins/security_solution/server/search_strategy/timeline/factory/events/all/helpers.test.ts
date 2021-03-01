@@ -320,6 +320,7 @@ describe('#formatTimelineData', () => {
           signal: {
             original_time: ['2021-01-09T13:39:32.595Z'],
             status: ['open'],
+            threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
             rule: {
               building_block_type: [],
               exceptions_list: [],

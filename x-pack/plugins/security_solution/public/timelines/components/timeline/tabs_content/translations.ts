@@ -14,6 +14,10 @@ export const QUERY_TAB = i18n.translate(
   }
 );
 
+export const EQL_TAB = i18n.translate('xpack.securitySolution.timeline.tabs.eqlTabTimelineTitle', {
+  defaultMessage: 'Correlation',
+});
+
 export const ANALYZER_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle',
   {

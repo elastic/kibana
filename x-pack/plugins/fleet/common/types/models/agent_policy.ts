@@ -17,6 +17,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
+  is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
 }

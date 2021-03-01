@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { ResultFieldValue } from '.';
+
 import { FieldType, Raw, Snippet } from './types';
+
+import { ResultFieldValue } from '.';
 
 import './result_field.scss';
 

@@ -325,7 +325,7 @@ export const job_status = t.keyof({
   succeeded: null,
   failed: null,
   'going to run': null,
-  'partial failure': null,
+  warning: null,
 });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
@@ -444,13 +444,19 @@ export const threat_technique = t.intersection([
 ]);
 export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
 export const threat_techniques = t.array(threat_technique);
-export const threat = t.exact(
-  t.type({
-    framework: threat_framework,
-    tactic: threat_tactic,
-    technique: threat_techniques,
-  })
-);
+export const threat = t.intersection([
+  t.exact(
+    t.type({
+      framework: threat_framework,
+      tactic: threat_tactic,
+    })
+  ),
+  t.exact(
+    t.partial({
+      technique: threat_techniques,
+    })
+  ),
+]);
 export type Threat = t.TypeOf<typeof threat>;
 
 export const threats = t.array(threat);
@@ -459,12 +465,21 @@ export type Threats = t.TypeOf<typeof threats>;
 export const threatsOrUndefined = t.union([threats, t.undefined]);
 export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
-export const threshold = t.exact(
-  t.type({
-    field: t.string,
-    value: PositiveIntegerGreaterThanZero,
-  })
-);
+export const threshold = t.intersection([
+  t.exact(
+    t.type({
+      field: t.union([t.string, t.array(t.string)]),
+      value: PositiveIntegerGreaterThanZero,
+    })
+  ),
+  t.exact(
+    t.partial({
+      cardinality_field: t.union([t.string, t.array(t.string), t.undefined, t.null]),
+      cardinality_value: t.union([PositiveInteger, t.undefined, t.null]), // TODO: cardinality_value should be set if cardinality_field is set
+    })
+  ),
+]);
+// TODO: codec to transform threshold field string to string[] ?
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);

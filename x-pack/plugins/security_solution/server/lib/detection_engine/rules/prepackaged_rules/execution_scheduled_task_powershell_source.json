@@ -9,12 +9,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Outbound Scheduled Task Activity via PowerShell",
-  "query": "sequence by host.id, process.entity_id with maxspan = 5s\n [library where file.name: \"taskschd.dll\" and process.name: (\"powershell.exe\", \"pwsh.exe\")]\n [network where process.name : (\"powershell.exe\", \"pwsh.exe\") and destination.port == 135 and not destination.address in (\"127.0.0.1\", \"::1\")]\n",
+  "query": "sequence by host.id, process.entity_id with maxspan = 5s\n [library where dll.name : \"taskschd.dll\" and process.name : (\"powershell.exe\", \"pwsh.exe\")]\n [network where process.name : (\"powershell.exe\", \"pwsh.exe\") and destination.port == 135 and not destination.address in (\"127.0.0.1\", \"::1\")]\n",
   "references": [
     "https://www.volexity.com/blog/2020/12/14/dark-halo-leverages-solarwinds-compromise-to-breach-organizations/"
   ],
@@ -47,5 +48,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

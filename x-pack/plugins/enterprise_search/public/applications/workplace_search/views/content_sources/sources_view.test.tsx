@@ -9,9 +9,9 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
 
-import { shallow } from 'enzyme';
-
 import React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { EuiModal } from '@elastic/eui';
 

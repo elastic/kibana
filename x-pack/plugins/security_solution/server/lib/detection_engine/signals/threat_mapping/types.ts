@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Duration } from 'moment';
+import { SearchResponse } from 'elasticsearch';
+
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -19,6 +20,7 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import {
@@ -31,11 +33,12 @@ import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { RuleRangeTuple, SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
+  tuples: RuleRangeTuple[];
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
@@ -45,8 +48,6 @@ export interface CreateThreatSignalsOptions {
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -68,6 +69,7 @@ export interface CreateThreatSignalsOptions {
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   concurrentSearches: ConcurrentSearches;
@@ -75,7 +77,9 @@ export interface CreateThreatSignalsOptions {
 }
 
 export interface CreateThreatSignalOptions {
+  tuples: RuleRangeTuple[];
   threatMapping: ThreatMapping;
+  threatEnrichment: SignalsEnrichment;
   query: string;
   inputIndex: string[];
   type: Type;
@@ -84,8 +88,6 @@ export interface CreateThreatSignalOptions {
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -177,14 +179,41 @@ export interface GetSortWithTieBreakerOptions {
   listItemIndex: string;
 }
 
+export interface ThreatListDoc {
+  [key: string]: unknown;
+}
+
 /**
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export interface ThreatListItem {
+export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
+
+export interface ThreatIndicator {
   [key: string]: unknown;
 }
 
 export interface SortWithTieBreaker {
   [key: string]: string;
+}
+
+export interface ThreatMatchNamedQuery {
+  id: string;
+  field: string;
+  value: string;
+}
+
+export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
+
+export interface BuildThreatEnrichmentOptions {
+  buildRuleMessage: BuildRuleMessage;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatFilters: PartialFilter[];
+  threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatQuery: ThreatQuery;
 }

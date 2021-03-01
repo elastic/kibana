@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { omit } from 'lodash';
 import React, {
   createContext,
   FunctionComponent,
@@ -150,12 +150,21 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           });
           break;
         case 'managingProcessor':
+          // These are the option names we get back from our UI
+          const knownOptionNames = Object.keys(processorTypeAndOptions.options);
+          // The processor that we are updating may have options configured the UI does not know about
+          const unknownOptions = omit(mode.arg.processor.options, knownOptionNames);
+          // In order to keep the options we don't get back from our UI, we merge the known and unknown options
+          const updatedProcessorOptions = {
+            ...processorTypeAndOptions.options,
+            ...unknownOptions,
+          };
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
               processor: {
                 ...mode.arg.processor,
-                ...processorTypeAndOptions,
+                options: updatedProcessorOptions,
               },
               selector: mode.arg.selector,
             },

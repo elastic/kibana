@@ -25,11 +25,11 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../store/timeline/model';
-import { EventDetails } from '../event_details';
-import { ToggleExpandedEvent } from '../../../store/timeline/actions';
+import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { DetailsPanel } from '../../side_panel';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -90,7 +90,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   pinnedEventIds,
   onEventClosed,
-  showEventDetails,
+  showExpandedDetails,
   sort,
 }) => {
   const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
@@ -169,7 +169,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timerangeKind: undefined,
   });
 
-  const handleOnEventClosed = useCallback(() => {
+  const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
@@ -217,16 +217,16 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
-        {showEventDetails && (
+        {showExpandedDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
-              <EventDetails
+              <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                handleOnPanelClosed={handleOnPanelClosed}
                 tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
-                handleOnEventClosed={handleOnEventClosed}
               />
             </ScrollableFlexItem>
           </>
@@ -242,7 +242,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const {
       columns,
-      expandedEvent,
+      expandedDetail,
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
@@ -255,7 +255,8 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
-      showEventDetails: !!expandedEvent[TimelineTabs.pinned]?.eventId,
+      showExpandedDetails:
+        !!expandedDetail[TimelineTabs.pinned] && !!expandedDetail[TimelineTabs.pinned]?.panelView,
       sort,
     };
   };
@@ -263,8 +264,8 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  onEventClosed: (args: ToggleExpandedEvent) => {
-    dispatch(timelineActions.toggleExpandedEvent(args));
+  onEventClosed: (args: ToggleDetailPanel) => {
+    dispatch(timelineActions.toggleDetailPanel(args));
   },
 });
 
@@ -278,7 +279,7 @@ const PinnedTabContent = connector(
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
-      prevProps.showEventDetails === nextProps.showEventDetails &&
+      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

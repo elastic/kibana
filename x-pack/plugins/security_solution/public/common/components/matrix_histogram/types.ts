@@ -74,7 +74,14 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
-  threshold?: { field: string | undefined; value: number } | undefined;
+  threshold?:
+    | {
+        field: string | string[] | undefined;
+        value: number;
+        cardinality_field?: string | undefined;
+        cardinality_value?: number | undefined;
+      }
+    | undefined;
   skip?: boolean;
   isPtrIncluded?: boolean;
 }

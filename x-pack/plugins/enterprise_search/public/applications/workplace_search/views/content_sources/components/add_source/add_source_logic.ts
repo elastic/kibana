@@ -5,33 +5,27 @@
  * 2.0.
  */
 
+import { Search } from 'history';
+import { kea, MakeLogicType } from 'kea';
 import { keys, pickBy } from 'lodash';
 
-import { kea, MakeLogicType } from 'kea';
-
-import { Search } from 'history';
-
 import { i18n } from '@kbn/i18n';
-
 import { HttpFetchQuery } from 'src/core/public';
-
-import { HttpLogic } from '../../../../../shared/http';
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { parseQueryParams } from '../../../../../shared/query_params';
 
 import {
   flashAPIErrors,
   setSuccessMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
-
-import { staticSourceData } from '../../source_data';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
-import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
-
+import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
-import { SourcesLogic } from '../../sources_logic';
+import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { CustomSource } from '../../../../types';
+import { staticSourceData } from '../../source_data';
+import { SourcesLogic } from '../../sources_logic';
 
 export interface AddSourceProps {
   sourceIndex: number;

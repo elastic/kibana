@@ -10,7 +10,15 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../../common/api';
+import {
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  CaseType,
+  AssociationType,
+  CaseResponse,
+  CasesResponse,
+} from '../../../common/api';
 import {
   connectorMappingsServiceMock,
   createCaseServiceMock,
@@ -20,12 +28,12 @@ import {
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
-import { createCaseClientMock } from '../../client/mocks';
+import { createExternalCaseClientMock } from '../../client/mocks';
 
-const mockCaseClient = createCaseClientMock();
+const mockCaseClient = createExternalCaseClientMock();
 
 jest.mock('../../client', () => ({
-  createCaseClient: () => mockCaseClient,
+  createExternalCaseClient: () => mockCaseClient,
 }));
 
 const services = actionsMock.createServices();
@@ -153,6 +161,8 @@ describe('case connector', () => {
                     impact: 'Medium',
                     severity: 'Medium',
                     urgency: 'Medium',
+                    category: 'software',
+                    subcategory: 'os',
                   },
                 },
                 settings: {
@@ -218,7 +228,13 @@ describe('case connector', () => {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
               },
               settings: {
                 syncAlerts: true,
@@ -293,6 +309,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
               },
@@ -470,6 +488,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                 },
               },
             },
@@ -517,7 +537,13 @@ describe('case connector', () => {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
               },
             },
           });
@@ -590,6 +616,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
               },
@@ -679,9 +707,7 @@ describe('case connector', () => {
         expect(validateParams(caseActionType, params)).toEqual(params);
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('succeeds when type is an alert', () => {
+      it('succeeds when type is an alert', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
           subActionParams: {
@@ -690,6 +716,10 @@ describe('case connector', () => {
               type: CommentType.alert,
               alertId: 'test-id',
               index: 'test-index',
+              rule: {
+                id: null,
+                name: null,
+              },
             },
           },
         };
@@ -700,26 +730,6 @@ describe('case connector', () => {
       it('fails when params is not valid', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
-        };
-
-        expect(() => {
-          validateParams(caseActionType, params);
-        }).toThrow();
-      });
-
-      // TODO: Remove it when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it('fails when type is an alert', () => {
-        const params: Record<string, unknown> = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: 'case-id',
-            comment: {
-              type: CommentType.alert,
-              alertId: 'test-id',
-              index: 'test-index',
-            },
-          },
         };
 
         expect(() => {
@@ -749,9 +759,7 @@ describe('case connector', () => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('fails when missing attributes: type alert', () => {
+      it('fails when missing attributes: type alert', () => {
         const allParams = {
           type: CommentType.alert,
           comment: 'a comment',
@@ -793,9 +801,7 @@ describe('case connector', () => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('fails when excess attributes are provided: type alert', () => {
+      it('fails when excess attributes are provided: type alert', () => {
         ['comment'].forEach((attribute) => {
           const params: Record<string, unknown> = {
             subAction: 'addComment',
@@ -843,10 +849,11 @@ describe('case connector', () => {
 
     describe('create', () => {
       it('executes correctly', async () => {
-        const createReturn = {
+        const createReturn: CaseResponse = {
           id: 'mock-it',
           comments: [],
           totalComment: 0,
+          totalAlerts: 0,
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
@@ -858,6 +865,7 @@ describe('case connector', () => {
           },
           title: 'Case from case connector!!',
           tags: ['case', 'connector'],
+          type: CaseType.collection,
           description: 'Yo fields!!',
           external_service: null,
           status: CaseStatuses.open,
@@ -906,17 +914,15 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: createReturn });
         expect(mockCaseClient.create).toHaveBeenCalledWith({
-          theCase: {
-            ...params.subActionParams,
-            connector: {
-              id: 'jira',
-              name: 'Jira',
-              type: '.jira',
-              fields: {
-                issueType: '10006',
-                priority: 'High',
-                parent: null,
-              },
+          ...params.subActionParams,
+          connector: {
+            id: 'jira',
+            name: 'Jira',
+            type: '.jira',
+            fields: {
+              issueType: '10006',
+              priority: 'High',
+              parent: null,
             },
           },
         });
@@ -925,7 +931,7 @@ describe('case connector', () => {
 
     describe('update', () => {
       it('executes correctly', async () => {
-        const updateReturn = [
+        const updateReturn: CasesResponse = [
           {
             closed_at: '2019-11-25T21:54:48.952Z',
             closed_by: {
@@ -953,6 +959,8 @@ describe('case connector', () => {
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
+            totalAlerts: 0,
+            type: CaseType.collection,
             updated_at: '2019-11-25T21:54:48.952Z',
             updated_by: {
               email: 'd00d@awesome.com',
@@ -995,41 +1003,46 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
         expect(mockCaseClient.update).toHaveBeenCalledWith({
-          caseClient: mockCaseClient,
           // Null values have been striped out.
-          cases: {
-            cases: [
-              {
-                id: 'case-id',
-                version: '123',
-                title: 'Update title',
-              },
-            ],
-          },
+          cases: [
+            {
+              id: 'case-id',
+              version: '123',
+              title: 'Update title',
+            },
+          ],
         });
       });
     });
 
     describe('addComment', () => {
       it('executes correctly', async () => {
-        const commentReturn = {
+        const commentReturn: CaseResponse = {
           id: 'mock-it',
           totalComment: 0,
+          totalAlerts: 0,
+          version: 'WzksMV0=',
+
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
           created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
+          created_by: {
+            full_name: 'Awesome D00d',
+            email: 'd00d@awesome.com',
+            username: 'awesome',
+          },
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
           status: CaseStatuses.open,
           tags: ['defacement'],
+          type: CaseType.collection,
           updated_at: null,
           updated_by: null,
-          version: 'WzksMV0=',
           comments: [
             {
+              associationType: AssociationType.case,
               comment: 'a comment',
               type: CommentType.user as const,
               created_at: '2020-10-23T21:54:48.952Z',
@@ -1077,7 +1090,6 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
-          caseClient: mockCaseClient,
           caseId: 'case-id',
           comment: {
             comment: 'a comment',

@@ -8,15 +8,19 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlyoutBody, EuiCallOut, EuiButton } from '@elastic/eui';
 
+import { FlyoutHeader, FlyoutBody, FlyoutFooter } from './summary';
 import {
   InvalidDocumentsSummary,
   ValidDocumentsSummary,
   SchemaFieldsSummary,
 } from './summary_sections';
-import { Summary, FlyoutHeader, FlyoutBody, FlyoutFooter } from './summary';
+
+import { Summary } from './';
 
 describe('Summary', () => {
   const values = {

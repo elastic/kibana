@@ -7,8 +7,8 @@
 
 import { flatten } from 'lodash';
 
-import { Fields, SortOption, SortDirection } from './types';
 import { ASCENDING, DESCENDING } from './constants';
+import { Fields, SortOption, SortDirection } from './types';
 
 const fieldNameToSortOptions = (fieldName: string): SortOption[] =>
   ['asc', 'desc'].map((direction) => ({

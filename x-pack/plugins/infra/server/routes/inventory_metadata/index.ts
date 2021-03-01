@@ -33,33 +33,27 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { sourceId, nodeType, currentTime } = pipe(
-          InventoryMetaRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const { sourceId, nodeType, currentTime } = pipe(
+        InventoryMetaRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
 
-        const awsMetadata = await getCloudMetadata(
-          framework,
-          requestContext,
-          configuration,
-          nodeType,
-          currentTime
-        );
+      const awsMetadata = await getCloudMetadata(
+        framework,
+        requestContext,
+        configuration,
+        nodeType,
+        currentTime
+      );
 
-        return response.ok({
-          body: InventoryMetaResponseRT.encode(awsMetadata),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: InventoryMetaResponseRT.encode(awsMetadata),
+      });
     }
   );
 };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
 import { users } from '../../../__mocks__/users.mock';
+
+import React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { UserIcon } from './user_icon';
 

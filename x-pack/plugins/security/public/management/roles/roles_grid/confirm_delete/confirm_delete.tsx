@@ -14,7 +14,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,65 +54,61 @@ export class ConfirmDelete extends Component<Props, State> {
     // to disable the buttons since this could be a long-running operation
 
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.props.onCancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-              {title}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText>
-              {moreThanOne ? (
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
-                      defaultMessage="You are about to delete these roles:"
-                    />
-                  </p>
-                  <ul>
-                    {rolesToDelete.map((roleName) => (
-                      <li key={roleName}>{roleName}</li>
-                    ))}
-                  </ul>
-                </Fragment>
-              ) : null}
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.roles.deletingRolesWarningMessage"
-                  defaultMessage="You can't undo this operation."
-                />
-              </p>
-            </EuiText>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              data-test-subj="confirmModalCancelButton"
-              onClick={this.props.onCancel}
-              isDisabled={this.state.deleteInProgress}
-            >
+      <EuiModal onClose={this.props.onCancel}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText>
+            {moreThanOne ? (
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
+                    defaultMessage="You are about to delete these roles:"
+                  />
+                </p>
+                <ul>
+                  {rolesToDelete.map((roleName) => (
+                    <li key={roleName}>{roleName}</li>
+                  ))}
+                </ul>
+              </Fragment>
+            ) : null}
+            <p>
               <FormattedMessage
-                id="xpack.security.management.roles.confirmDelete.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.security.management.roles.deletingRolesWarningMessage"
+                defaultMessage="You can't undo this operation."
               />
-            </EuiButtonEmpty>
+            </p>
+          </EuiText>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            data-test-subj="confirmModalCancelButton"
+            onClick={this.props.onCancel}
+            isDisabled={this.state.deleteInProgress}
+          >
+            <FormattedMessage
+              id="xpack.security.management.roles.confirmDelete.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-            <EuiButton
-              data-test-subj="confirmModalConfirmButton"
-              onClick={this.onConfirmDelete}
-              fill
-              color={'danger'}
-              isLoading={this.state.deleteInProgress}
-            >
-              <FormattedMessage
-                id="xpack.security.management.roles.confirmDelete.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+          <EuiButton
+            data-test-subj="confirmModalConfirmButton"
+            onClick={this.onConfirmDelete}
+            fill
+            color={'danger'}
+            isLoading={this.state.deleteInProgress}
+          >
+            <FormattedMessage
+              id="xpack.security.management.roles.confirmDelete.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 

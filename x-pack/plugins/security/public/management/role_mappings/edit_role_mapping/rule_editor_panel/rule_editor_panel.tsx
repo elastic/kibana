@@ -9,7 +9,6 @@ import React, { Component, Fragment } from 'react';
 import {
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiErrorBoundary,
   EuiIcon,
@@ -228,40 +227,38 @@ export class RuleEditorPanel extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
-              defaultMessage="Switch with invalid rules?"
-            />
-          }
-          onCancel={() => this.setState({ showConfirmModeChange: false })}
-          onConfirm={() => {
-            this.setState({ mode: 'visual', showConfirmModeChange: false });
-            this.onValidityChange(true);
-          }}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptCancelButton"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptConfirmButton"
-              defaultMessage="Switch anyway"
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.confirmModeChangePromptBody"
-              defaultMessage="The rules defined are not valid, and cannot be translated to the visual editor. You may lose some or all of your changes during the conversion. Do you wish to continue?"
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
+            defaultMessage="Switch with invalid rules?"
+          />
+        }
+        onCancel={() => this.setState({ showConfirmModeChange: false })}
+        onConfirm={() => {
+          this.setState({ mode: 'visual', showConfirmModeChange: false });
+          this.onValidityChange(true);
+        }}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptCancelButton"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptConfirmButton"
+            defaultMessage="Switch anyway"
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmModeChangePromptBody"
+            defaultMessage="The rules defined are not valid, and cannot be translated to the visual editor. You may lose some or all of your changes during the conversion. Do you wish to continue?"
+          />
+        </p>
+      </EuiConfirmModal>
     );
   };
 

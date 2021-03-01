@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or execution of a cron job. Adversaries may abuse cron jobs to perform task scheduling for initial or recurring execution of malicious code.",
+  "false_positives": [
+    "Legitimate software or scripts using cron jobs for recurring tasks."
+  ],
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Potential Persistence via Cron Job",
+  "query": "event.category:process and event.type:(start or process_started or info) and not user.name:root and ((process.name:crontab and not process.args:(\"-l\" or \"-r\" or \"-e\" or \"-help\" or \"-h\")) or (process.parent.name:cron and not process.name:\"running job\" and not process.executable:(/Applications/Docker.app/Contents/Resources/bin/docker or /usr/bin/killall or /usr/sbin/sendmail or /usr/bin/env or /usr/bin/timeshift or /bin/rm)))",
+  "references": [
+    "https://archive.f-secure.com/weblog/archives/00002576.html",
+    "https://ss64.com/osx/crontab.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "b1c14366-f4f8-49a0-bcbb-51d2de8b0bb8",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.003",
+              "name": "Cron",
+              "reference": "https://attack.mitre.org/techniques/T1053/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

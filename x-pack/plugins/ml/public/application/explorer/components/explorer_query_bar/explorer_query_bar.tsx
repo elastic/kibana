@@ -155,7 +155,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
       closePopover={() => setErrorMessage(undefined)}
       input={
         <QueryStringInput
-          bubbleSubmitEvent
+          bubbleSubmitEvent={false}
           query={searchInput}
           indexPatterns={[indexPattern]}
           onChange={searchChangeHandler}

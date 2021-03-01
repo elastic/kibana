@@ -157,17 +157,12 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>,
-      splitChartAccessor?: Accessor | AccessorFn
+      splitSeriesAccessors: Array<Accessor | AccessorFn>
     ) => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (series: XYChartSeriesIdentifier): ClickTriggerEvent | null => {
         if (xAccessor !== null) {
-          return getFilterFromSeriesFn(visData)(
-            series,
-            splitSeriesAccessorFnMap,
-            splitChartAccessor
-          );
+          return getFilterFromSeriesFn(visData)(series, splitSeriesAccessorFnMap);
         }
 
         return null;
@@ -373,12 +368,7 @@ const VisComponent = (props: VisComponentProps) => {
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(
-                    visData,
-                    xAccessor,
-                    splitSeriesAccessors,
-                    splitChartColumnAccessor ?? splitChartRowAccessor
-                  ),
+                  getFilterEventData(visData, xAccessor, splitSeriesAccessors),
                   handleFilterAction,
                   getSeriesName
                 )

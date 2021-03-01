@@ -36,6 +36,16 @@ def test() {
   ])
 }
 
+def ossCiGroups() {
+  def ciGroups = 1..12
+  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+}
+
+def xpackCiGroups() {
+  def ciGroups = 1..13
+  tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
+}
+
 def functionalOss(Map params = [:]) {
   def config = params ?: [
     serverIntegration: true,
@@ -50,8 +60,7 @@ def functionalOss(Map params = [:]) {
     kibanaPipeline.buildOss(6)
 
     if (config.ciGroups) {
-      def ciGroups = 1..12
-      tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+      ossCiGroups()
     }
 
     if (config.firefox) {
@@ -91,8 +100,7 @@ def functionalXpack(Map params = [:]) {
     kibanaPipeline.buildXpack(10)
 
     if (config.ciGroups) {
-      def ciGroups = 1..13
-      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
+      xpackCiGroups()
     }
 
     if (config.firefox) {
@@ -118,9 +126,17 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
     ]) {
       if (githubPr.isPr()) {
-        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))
+        // Temporarily disabled to figure out test flake
+        // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
       }
     }
+  }
+}
+
+def storybooksCi() {
+  task {
+    storybooks.buildAndUpload()
   }
 }
 

@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { isColorDark, hexToRgb } from '@elastic/eui';
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
+import { isColorDark, hexToRgb } from '@elastic/eui';
+
 import { DESCRIPTION_LABEL } from '../../../../constants';
 
-import { DisplaySettingsLogic } from './display_settings_logic';
-
 import { CustomSourceIcon } from './custom_source_icon';
+import { DisplaySettingsLogic } from './display_settings_logic';
 import { SubtitleField } from './subtitle_field';
 import { TitleField } from './title_field';
 

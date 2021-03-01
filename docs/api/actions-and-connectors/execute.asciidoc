@@ -1,0 +1,83 @@
+[[actions-and-connectors-api-execute]]
+=== Execute action API
+++++
+<titleabbrev>Execute action API</titleabbrev>
+++++
+
+Executes an action by ID.
+
+[[actions-and-connectors-api-execute-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/actions/action/<id>/_execute`
+
+[[actions-and-connectors-api-execute-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the action.
+
+[[actions-and-connectors-api-execute-request-body]]
+==== Request body
+
+`params`::
+  (Required, object) The parameters of the action. Parameter properties vary depending on
+  the action type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
+
+[[actions-and-connectors-api-execute-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-execute-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "params": {
+    "documents": [
+      {
+        "id": "test_doc_id",
+        "name": "test_doc_name",
+        "message": "hello, world"
+      }
+    ]
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status": "ok",
+  "data": {
+    "took": 197,
+    "errors": false,
+    "items": [
+      {
+        "index": {
+          "_index": "updated-index",
+          "_id": "iKyijHcBKCsmXNFrQe3T",
+          "_version": 1,
+          "result": "created",
+          "_shards": {
+            "total": 2,
+            "successful": 1,
+            "failed": 0
+          },
+          "_seq_no": 0,
+          "_primary_term": 1,
+          "status": 201
+        }
+      }
+    ]
+  },
+  "actionId": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+}
+--------------------------------------------------

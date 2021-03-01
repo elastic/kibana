@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-import { act, fireEvent } from '@testing-library/react';
-import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
-
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
+import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
+import { networkItems as mockNetworkItems } from './data_formatting.test';
 
 import { extractItems, isHighlightedItem } from './data_formatting';
-
-import 'jest-canvas-mock';
 import { BAR_HEIGHT } from '../../waterfall/components/constants';
 import { MimeType } from './types';
 import {
@@ -26,8 +24,10 @@ const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));
 };
 
-describe('waterfall chart wrapper', () => {
-  jest.useFakeTimers();
+describe('WaterfallChartWrapper', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
   it('renders the correct sidebar items', () => {
     const { getAllByTestId } = render(
@@ -128,6 +128,69 @@ describe('waterfall chart wrapper', () => {
     // no resources items are in the chart as none match filter
     expect(queryAllByTestId('sideBarHighlightedItem')).toHaveLength(0);
     expect(queryAllByTestId('sideBarDimmedItem')).toHaveLength(0);
+  });
+
+  it('opens flyout on sidebar click and closes on flyout close button', async () => {
+    const { getByText, getAllByText, getByTestId, queryByText, getByRole } = render(
+      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
+    );
+
+    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(queryByText('Content type')).not.toBeInTheDocument();
+    expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+
+    // open flyout
+    // selecter matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getAllByText(/1./)[1];
+    fireEvent.click(sidebarButton);
+
+    // check for sample flyout items
+    await waitFor(() => {
+      const waterfallFlyout = getByRole('dialog');
+      expect(waterfallFlyout).toBeInTheDocument();
+      expect(getByText('Content type')).toBeInTheDocument();
+      expect(getByText(`${mockNetworkItems[0]?.mimeType}`)).toBeInTheDocument();
+      // close flyout
+      const closeButton = getByTestId('euiFlyoutCloseButton');
+      fireEvent.click(closeButton);
+    });
+
+    /* check that sample flyout items are gone from the DOM */
+    await waitFor(() => {
+      expect(queryByText('Content type')).not.toBeInTheDocument();
+      expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+    });
+  });
+
+  it('opens flyout on sidebar click and closes on second sidebar click', async () => {
+    const { getByText, getAllByText, getByTestId, queryByText } = render(
+      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
+    );
+
+    expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
+    expect(queryByText('Content type')).not.toBeInTheDocument();
+    expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+
+    // open flyout
+    // selecter matches both button and accessible text. Button is the second element in the array;
+    const sidebarButton = getAllByText(/1./)[1];
+    fireEvent.click(sidebarButton);
+
+    // check for sample flyout items and that the flyout is focused
+    await waitFor(() => {
+      const waterfallFlyout = getByTestId('waterfallFlyout');
+      expect(waterfallFlyout).toBeInTheDocument();
+      expect(getByText('Content type')).toBeInTheDocument();
+      expect(getByText(`${mockNetworkItems[0]?.mimeType}`)).toBeInTheDocument();
+    });
+
+    fireEvent.click(sidebarButton);
+
+    /* check that sample flyout items are gone from the DOM */
+    await waitFor(() => {
+      expect(queryByText('Content type')).not.toBeInTheDocument();
+      expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+    });
   });
 });
 

@@ -50,6 +50,7 @@ export class SearchSessionsMgmtApp {
       notifications,
       urls: share.urlGenerators,
       application,
+      usageCollector: pluginsSetup.data.search.usageCollector,
     });
 
     const documentation = new AsyncSearchIntroDocumentation(docLinks);

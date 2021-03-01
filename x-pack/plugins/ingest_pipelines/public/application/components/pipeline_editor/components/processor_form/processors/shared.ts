@@ -64,9 +64,11 @@ export const from = {
         // Ignore
       }
     }
+    return undefined;
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  undefinedIfValue: (value: any) => (v: boolean) => (v === value ? undefined : v),
+  undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
+  emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
 };
 
 export const EDITOR_PX_HEIGHT = {
@@ -78,4 +80,6 @@ export const EDITOR_PX_HEIGHT = {
 
 export type FieldsConfig = Record<string, FieldConfig<any>>;
 
-export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;
+export type FormFieldsComponent = FunctionComponent<{
+  initialFieldValues?: Record<string, any>;
+}>;

@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiOverlayMask,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -124,15 +123,13 @@ export const TransformManagement: FC = () => {
         </EuiPageContentBody>
       </EuiPageContent>
       {isSearchSelectionVisible && (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={onCloseModal}
-            className="transformCreateTransformSearchDialog"
-            data-test-subj="transformSelectSourceModal"
-          >
-            <SearchSelection onSearchSelected={onSearchSelected} />
-          </EuiModal>
-        </EuiOverlayMask>
+        <EuiModal
+          onClose={onCloseModal}
+          className="transformCreateTransformSearchDialog"
+          data-test-subj="transformSelectSourceModal"
+        >
+          <SearchSelection onSearchSelected={onSearchSelected} />
+        </EuiModal>
       )}
     </Fragment>
   );

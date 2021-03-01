@@ -22,7 +22,7 @@ hits: {
             highlight?: any;
             inner_hits?: any;
             matched_queries?: string[];
-            sort?: string[];
+            sort?: unknown[];
         }>;
     };
 ```

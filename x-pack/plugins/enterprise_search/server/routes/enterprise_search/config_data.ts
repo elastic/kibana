@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../plugin';
 import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
+import { RouteDependencies } from '../../plugin';
 
 export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
   router.get(

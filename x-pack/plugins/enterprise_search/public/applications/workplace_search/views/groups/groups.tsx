@@ -8,26 +8,22 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
-
-import { AppLogic } from '../../app_logic';
-
-import { Loading } from '../../../shared/loading';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { getGroupPath, USERS_PATH } from '../../routes';
+import { i18n } from '@kbn/i18n';
 
 import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
-
-import { GroupsLogic } from './groups_logic';
+import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { AppLogic } from '../../app_logic';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { getGroupPath, USERS_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
 import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
+import { GroupsLogic } from './groups_logic';
 
 export const Groups: React.FC = () => {
   const { messages } = useValues(FlashMessagesLogic);

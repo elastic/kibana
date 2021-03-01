@@ -68,7 +68,6 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
       )}
       confirmButtonColor="danger"
       isLoading={state.loading}
-      ownFocus
     >
       <EuiText>
         <p>

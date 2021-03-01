@@ -18,7 +18,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalProps,
-  EuiOverlayMask,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -29,13 +28,11 @@ export interface ConfirmModalProps extends Omit<EuiModalProps, 'onClose' | 'init
   isDisabled?: EuiButtonProps['isDisabled'];
   onCancel(): void;
   onConfirm(): void;
-  ownFocus?: boolean;
 }
 
 /**
  * Component that renders a confirmation modal similar to `EuiConfirmModal`, except that
- * it adds `isLoading` prop, which renders a loading spinner and disables action buttons,
- * and `ownFocus` prop to render overlay mask.
+ * it adds `isLoading` prop, which renders a loading spinner and disables action buttons.
  */
 export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
   children,
@@ -45,51 +42,42 @@ export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
   isDisabled,
   onCancel,
   onConfirm,
-  ownFocus = true,
   title,
   ...rest
-}) => {
-  const modal = (
-    <EuiModal role="dialog" title={title} onClose={onCancel} {...rest}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody data-test-subj="confirmModalBodyText">{children}</EuiModalBody>
-      <EuiModalFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="confirmModalCancelButton"
-              flush="right"
-              isDisabled={isLoading}
-              onClick={onCancel}
-            >
-              <FormattedMessage
-                id="xpack.security.confirmModal.cancelButton"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="confirmModalConfirmButton"
-              color={buttonColor}
-              fill
-              isLoading={isLoading}
-              isDisabled={isDisabled}
-              onClick={onConfirm}
-            >
-              {confirmButtonText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalFooter>
-    </EuiModal>
-  );
-
-  return ownFocus ? (
-    <EuiOverlayMask onClick={!isLoading ? onCancel : undefined}>{modal}</EuiOverlayMask>
-  ) : (
-    modal
-  );
-};
+}) => (
+  <EuiModal role="dialog" title={title} onClose={onCancel} {...rest}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody data-test-subj="confirmModalBodyText">{children}</EuiModalBody>
+    <EuiModalFooter>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="confirmModalCancelButton"
+            flush="right"
+            isDisabled={isLoading}
+            onClick={onCancel}
+          >
+            <FormattedMessage
+              id="xpack.security.confirmModal.cancelButton"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="confirmModalConfirmButton"
+            color={buttonColor}
+            fill
+            isLoading={isLoading}
+            isDisabled={isDisabled}
+            onClick={onConfirm}
+          >
+            {confirmButtonText}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalFooter>
+  </EuiModal>
+);

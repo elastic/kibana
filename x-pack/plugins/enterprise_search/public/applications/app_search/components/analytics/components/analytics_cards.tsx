@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 interface Props {

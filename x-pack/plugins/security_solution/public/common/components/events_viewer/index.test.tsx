@@ -16,6 +16,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
+import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useTimelineEvents } from '../../../timelines/containers';
 
@@ -36,7 +37,7 @@ const testProps = {
   defaultModel: eventsDefaultModel,
   end: to,
   indexNames: [],
-  id: 'test-stateful-events-viewer',
+  id: TimelineId.test,
   scopeId: SourcererScopeName.default,
   start: from,
 };

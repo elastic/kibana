@@ -47,6 +47,7 @@ export const getAnomalies = async (
                   analyze_wildcard: false,
                 },
               },
+              { term: { is_interim: false } },
               {
                 bool: {
                   must: boolCriteria,

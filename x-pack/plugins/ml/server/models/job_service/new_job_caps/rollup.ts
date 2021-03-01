@@ -9,10 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { SavedObject } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { FieldId } from '../../../../common/types/fields';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-
-export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+import { RollupFields } from '../../../../common/types/fields';
 
 export interface RollupJob {
   job_id: string;

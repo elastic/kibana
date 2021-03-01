@@ -21,9 +21,17 @@ export const createSavedObjectsMigrationLoggerMock = (): jest.Mocked<SavedObject
   return mock;
 };
 
-const createContextMock = (): jest.Mocked<SavedObjectMigrationContext> => {
+const createContextMock = ({
+  migrationVersion = '8.0.0',
+  convertToMultiNamespaceTypeVersion,
+}: {
+  migrationVersion?: string;
+  convertToMultiNamespaceTypeVersion?: string;
+} = {}): jest.Mocked<SavedObjectMigrationContext> => {
   const mock = {
     log: createSavedObjectsMigrationLoggerMock(),
+    migrationVersion,
+    convertToMultiNamespaceTypeVersion,
   };
   return mock;
 };

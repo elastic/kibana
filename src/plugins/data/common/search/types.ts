@@ -8,6 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { IndexPattern } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -111,4 +112,10 @@ export interface ISearchOptions {
    * rather than starting from scratch)
    */
   isRestore?: boolean;
+
+  /**
+   * Index pattern reference is used for better error messages
+   */
+
+  indexPattern?: IndexPattern;
 }

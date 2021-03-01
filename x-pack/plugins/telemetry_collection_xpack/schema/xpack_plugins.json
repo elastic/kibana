@@ -2219,13 +2219,6 @@
         }
       }
     },
-    "fileUploadTelemetry": {
-      "properties": {
-        "filesUploadedTotalCount": {
-          "type": "long"
-        }
-      }
-    },
     "maps": {
       "properties": {
         "settings": {
@@ -3187,6 +3180,19 @@
               }
             }
           }
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
         }
       }
     },

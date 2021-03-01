@@ -53,6 +53,13 @@ export class Plugin {
       mappings,
     });
     core.savedObjects.registerType({
+      name: 'sharecapabletype',
+      hidden: false,
+      namespaceType: 'multiple-isolated',
+      management,
+      mappings,
+    });
+    core.savedObjects.registerType({
       name: 'globaltype',
       hidden: false,
       namespaceType: 'agnostic',

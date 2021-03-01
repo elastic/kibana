@@ -56,7 +56,13 @@ export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
 nodeBin="$nodeDir/bin"
-classifier="x64.tar.gz"
+hostArch="$(command uname -m)"
+case "${hostArch}" in
+  x86_64 | amd64) nodeArch="x64" ;;
+  aarch64) nodeArch="arm64" ;;
+  *) nodeArch="${hostArch}" ;;
+esac
+classifier="$nodeArch.tar.gz"
 
 UNAME=$(uname)
 OS="linux"

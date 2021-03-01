@@ -354,7 +354,7 @@ export const schema: FormSchema<FormInternal> = {
     },
     delete: {
       min_age: {
-        defaultValue: '0',
+        defaultValue: '365',
         validations: [
           {
             validator: minAgeValidator,

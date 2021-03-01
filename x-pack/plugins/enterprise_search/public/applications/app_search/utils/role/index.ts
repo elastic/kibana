@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RoleMapping } from '../../../shared/types';
+import { Engine } from '../../components/engine/types';
 import { Account } from '../../types';
 
 export type RoleTypes = 'owner' | 'admin' | 'dev' | 'editor' | 'analyst';
@@ -103,3 +105,11 @@ export const getRoleAbilities = (role: Account['role']): Role => {
 
   return Object.assign(myRole, topLevelProps, abilities);
 };
+
+export interface ASRoleMapping extends RoleMapping {
+  accessAllEngines: boolean;
+  engines: Engine[];
+  toolTip?: {
+    content: string;
+  };
+}

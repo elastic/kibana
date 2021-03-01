@@ -12,7 +12,7 @@ import { DisposableAppender, LogRecord } from '@kbn/logging';
 import { LegacyVars } from '../../types';
 
 export interface LegacyAppenderConfig {
-  kind: 'legacy-appender';
+  type: 'legacy-appender';
   legacyLoggingConfig?: any;
 }
 
@@ -22,7 +22,7 @@ export interface LegacyAppenderConfig {
  */
 export class LegacyAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('legacy-appender'),
+    type: schema.literal('legacy-appender'),
     legacyLoggingConfig: schema.any(),
   });
 

@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { RECENT_QUERIES } from '../constants';
+import { AnalyticsLogic } from '../';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, RecentQueriesTable } from '../components';
-import { AnalyticsLogic } from '../';
+import { RECENT_QUERIES } from '../constants';
 
 export const RecentQueries: React.FC = () => {
   const { recentQueries } = useValues(AnalyticsLogic);

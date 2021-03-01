@@ -46,6 +46,9 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -189,12 +192,19 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
             title: indexPatternName,
             timeFieldName,
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
           },
           false,
           true

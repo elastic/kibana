@@ -1,0 +1,50 @@
+[[actions-and-connectors-api-get]]
+=== Get action API
+++++
+<titleabbrev>Get action API</titleabbrev>
+++++
+
+Retrieves an action by ID.
+
+[[actions-and-connectors-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/action/<id>`
+
+[[actions-and-connectors-api-get-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the action.
+
+[[actions-and-connectors-api-get-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-get-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "my-action",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false
+}
+--------------------------------------------------

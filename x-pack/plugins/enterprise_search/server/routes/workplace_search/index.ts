@@ -7,11 +7,11 @@
 
 import { RouteDependencies } from '../../plugin';
 
-import { registerOverviewRoute } from './overview';
 import { registerGroupsRoutes } from './groups';
-import { registerSourcesRoutes } from './sources';
-import { registerSettingsRoutes } from './settings';
+import { registerOverviewRoute } from './overview';
 import { registerSecurityRoutes } from './security';
+import { registerSettingsRoutes } from './settings';
+import { registerSourcesRoutes } from './sources';
 
 export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) => {
   registerOverviewRoute(dependencies);

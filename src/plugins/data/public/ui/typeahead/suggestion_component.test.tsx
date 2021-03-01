@@ -27,6 +27,7 @@ describe('SuggestionComponent', () => {
   it('Should display the suggestion and use the provided ariaId', () => {
     const component = shallow(
       <SuggestionComponent
+        index={0}
         onClick={noop}
         onMouseEnter={noop}
         selected={false}
@@ -43,6 +44,7 @@ describe('SuggestionComponent', () => {
   it('Should make the element active if the selected prop is true', () => {
     const component = shallow(
       <SuggestionComponent
+        index={0}
         onClick={noop}
         onMouseEnter={noop}
         selected={true}
@@ -64,6 +66,7 @@ describe('SuggestionComponent', () => {
 
     mount(
       <SuggestionComponent
+        index={0}
         onClick={noop}
         onMouseEnter={noop}
         selected={false}
@@ -80,6 +83,7 @@ describe('SuggestionComponent', () => {
 
     const component = shallow(
       <SuggestionComponent
+        index={0}
         onClick={mockHandler}
         onMouseEnter={noop}
         selected={false}
@@ -92,7 +96,7 @@ describe('SuggestionComponent', () => {
 
     component.simulate('click');
     expect(mockHandler).toHaveBeenCalledTimes(1);
-    expect(mockHandler).toHaveBeenCalledWith(mockSuggestion);
+    expect(mockHandler).toHaveBeenCalledWith(mockSuggestion, 0);
   });
 
   it('Should call onMouseEnter when user mouses over the element', () => {
@@ -100,6 +104,7 @@ describe('SuggestionComponent', () => {
 
     const component = shallow(
       <SuggestionComponent
+        index={0}
         onClick={noop}
         onMouseEnter={mockHandler}
         selected={false}

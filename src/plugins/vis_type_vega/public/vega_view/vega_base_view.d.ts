@@ -10,6 +10,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { IServiceSettings } from 'src/plugins/maps_legacy/public';
 import { VegaParser } from '../data_model/vega_parser';
+import { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
@@ -18,6 +19,7 @@ interface VegaViewParams {
   serviceSettings: IServiceSettings;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+  vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
 }
 
 export class VegaBaseView {
@@ -34,5 +36,6 @@ export class VegaBaseView {
   _$container: any;
   _parser: any;
   _vegaViewConfig: any;
-  _serviceSettings: any;
+  _serviceSettings: VegaViewParams['serviceSettings'];
+  _vegaStateRestorer: VegaViewParams['vegaStateRestorer'];
 }

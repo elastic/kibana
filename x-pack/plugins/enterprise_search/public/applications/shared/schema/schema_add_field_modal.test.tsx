@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+
 import { shallow, mount } from 'enzyme';
+
+import { EuiFieldText, EuiModal, EuiSelect } from '@elastic/eui';
 
 import { NUMBER } from '../constants/field_types';
 
 import { FIELD_NAME_CORRECTED_PREFIX } from './constants';
 
 import { SchemaAddFieldModal } from './';
-
-import { EuiFieldText, EuiModal, EuiSelect } from '@elastic/eui';
 
 describe('SchemaAddFieldModal', () => {
   const addNewField = jest.fn();

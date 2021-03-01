@@ -9,6 +9,7 @@ import { setMockValues } from '../../../../__mocks__';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import {
@@ -18,6 +19,7 @@ import {
   AnalyticsTable,
   RecentQueriesTable,
 } from '../components';
+
 import { Analytics, ViewAllButton } from './analytics';
 
 describe('Analytics overview', () => {

@@ -6,6 +6,7 @@
  */
 
 import { Schema } from '../../../../shared/types';
+
 import { Fields } from './types';
 
 export const buildSearchUIConfig = (apiConnector: object, schema: Schema, fields: Fields) => {

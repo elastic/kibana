@@ -7,19 +7,29 @@
 
 import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
-import { getAppSearchUrl } from '../shared/enterprise_search_url';
-import { KibanaLogic } from '../shared/kibana';
-import { HttpLogic } from '../shared/http';
-import { AppLogic } from './app_logic';
-import { InitialAppData } from '../../../common/types';
-
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
+import { InitialAppData } from '../../../common/types';
+import { getAppSearchUrl } from '../shared/enterprise_search_url';
+import { HttpLogic } from '../shared/http';
+import { KibanaLogic } from '../shared/kibana';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { EngineNav, EngineRouter } from './components/engine';
+import { NotFound } from '../shared/not_found';
 
+import { AppLogic } from './app_logic';
+import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
+import { EngineNav, EngineRouter } from './components/engine';
+import { EngineCreation } from './components/engine_creation';
+import { EnginesOverview, ENGINES_TITLE } from './components/engines';
+import { ErrorConnecting } from './components/error_connecting';
+import { Library } from './components/library';
+import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
+import { Settings, SETTINGS_TITLE } from './components/settings';
+import { SetupGuide } from './components/setup_guide';
 import {
+  ENGINE_CREATION_PATH,
   ROOT_PATH,
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
@@ -29,15 +39,6 @@ import {
   ENGINE_PATH,
   LIBRARY_PATH,
 } from './routes';
-
-import { SetupGuide } from './components/setup_guide';
-import { ErrorConnecting } from './components/error_connecting';
-import { NotFound } from '../shared/not_found';
-import { EnginesOverview, ENGINES_TITLE } from './components/engines';
-import { Settings, SETTINGS_TITLE } from './components/settings';
-import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
-import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
-import { Library } from './components/library';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -57,7 +58,10 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
-  const { hasInitialized } = useValues(AppLogic);
+  const {
+    hasInitialized,
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -97,6 +101,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
               <Route exact path={CREDENTIALS_PATH}>
                 <Credentials />
               </Route>
+              {canManageEngines && (
+                <Route exact path={ENGINE_CREATION_PATH}>
+                  <EngineCreation />
+                </Route>
+              )}
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>

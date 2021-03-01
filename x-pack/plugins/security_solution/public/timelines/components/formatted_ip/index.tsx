@@ -6,9 +6,11 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
@@ -16,13 +18,21 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
 import {
   DataProvider,
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import {
+  TimelineExpandedDetailType,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
+import { activeTimeline } from '../../containers/active_timeline_context';
+import { timelineActions } from '../../store/timeline';
+import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
+import { LinkAnchor } from '../../../common/components/links';
 
 const getUniqueId = ({
   contextId,
@@ -128,20 +138,50 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   fieldName,
   truncate,
 }) => {
-  const key = useMemo(
-    () =>
-      `address-links-draggable-wrapper-${getUniqueId({
-        contextId,
-        eventId,
-        fieldName,
-        address,
-      })}`,
-    [address, contextId, eventId, fieldName]
-  );
+  const key = `address-links-draggable-wrapper-${getUniqueId({
+    contextId,
+    eventId,
+    fieldName,
+    address,
+  })}`;
 
   const dataProviderProp = useMemo(
     () => getDataProvider({ contextId, eventId, fieldName, address }),
     [address, contextId, eventId, fieldName]
+  );
+
+  const dispatch = useDispatch();
+  const eventContext = useContext(StatefulEventContext);
+
+  const openNetworkDetailsSidePanel = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (address && eventContext?.timelineID && eventContext?.tabType) {
+        const { tabType, timelineID } = eventContext;
+        const updatedExpandedDetail: TimelineExpandedDetailType = {
+          panelView: 'networkDetail',
+          params: {
+            ip: address,
+            flowTarget: fieldName.includes(FlowTarget.destination)
+              ? FlowTarget.destination
+              : FlowTarget.source,
+          },
+        };
+
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            ...updatedExpandedDetail,
+            tabType,
+            timelineId: timelineID,
+          })
+        );
+
+        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+        }
+      }
+    },
+    [dispatch, eventContext, address, fieldName]
   );
 
   const render = useCallback(
@@ -152,10 +192,16 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         </DragEffects>
       ) : (
         <Content field={fieldName} tooltipContent={address}>
-          <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+          <LinkAnchor
+            href="#"
+            data-test-subj="network-details"
+            onClick={openNetworkDetailsSidePanel}
+          >
+            {address}
+          </LinkAnchor>
         </Content>
       ),
-    [address, dataProviderProp, fieldName]
+    [address, dataProviderProp, openNetworkDetailsSidePanel, fieldName]
   );
 
   return (

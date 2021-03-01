@@ -41,6 +41,19 @@ export const getAllExceptionListsColumns = (
     ),
   },
   {
+    align: 'left',
+    field: 'name',
+    name: i18n.EXCEPTION_LIST_NAME,
+    truncateText: true,
+    dataType: 'string',
+    width: '10%',
+    render: (value: ExceptionListInfo['name']) => (
+      <EuiToolTip position="left" content={value}>
+        <p data-test-subj="exceptionsTableName">{value}</p>
+      </EuiToolTip>
+    ),
+  },
+  {
     align: 'center',
     field: 'rules',
     name: i18n.NUMBER_RULES_ASSIGNED_TO_TITLE,
@@ -109,6 +122,7 @@ export const getAllExceptionListsColumns = (
         })}
         aria-label="Export exception list"
         iconType="exportAction"
+        data-test-subj="exceptionsTableExportButton"
       />
     ),
   },

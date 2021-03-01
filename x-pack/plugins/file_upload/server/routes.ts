@@ -52,7 +52,7 @@ export function fileUploadRoutes(router: IRouter) {
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:ml:canFindFileStructure'],
+        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ApplicationUsageTracker } from '@kbn/analytics';
-import { UsageCollectionSetup, METRIC_TYPE } from '.';
+import { UsageCollectionSetup } from '.';
 import { ApplicationUsageContext } from './components/track_application_view';
 
 export type Setup = jest.Mocked<UsageCollectionSetup>;
@@ -33,12 +33,7 @@ const createSetupContract = (): Setup => {
       ),
     },
     applicationUsageTracker: applicationUsageTrackerMock,
-    allowTrackUserAgent: jest.fn(),
     reportUiCounter: jest.fn(),
-    METRIC_TYPE,
-    __LEGACY: {
-      appChanged: jest.fn(),
-    },
   };
 
   return setupContract;
