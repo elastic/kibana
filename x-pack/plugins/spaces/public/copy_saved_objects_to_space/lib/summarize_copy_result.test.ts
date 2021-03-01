@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { summarizeCopyResult } from './summarize_copy_result';
-import {
-  ProcessedImportResponse,
+import type {
   FailedImport,
+  ProcessedImportResponse,
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
-import { SavedObjectTarget } from './types';
+
+import { summarizeCopyResult } from './summarize_copy_result';
+import type { SavedObjectTarget } from '../types';
 
 // Sample data references:
 //
