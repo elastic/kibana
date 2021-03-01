@@ -4,6 +4,11 @@
 You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
 create the visualization panels that best display the data.
 
+When you've completed the tutorial, you'll have a dashboard that provides you with a complete overview of your web server data.
+
+[role="screenshot"]
+image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
+
 [discrete]
 [[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
@@ -54,7 +59,7 @@ image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected
 [role="screenshot"]
 image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 
-. From the editor, click *Unique count of clientip*.
+. In the editor, click *Unique count of clientip*.
 
 .. In the *Display name* field, enter `Unique visitors`.
 
@@ -63,7 +68,7 @@ image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
 [role="screenshot"]
 image::images/lens_end_to_end_1_4.png[Flyout config open]
 
-. *Save* the panel, enter `Unique visitors` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
@@ -87,7 +92,7 @@ image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os
 
 . Change the color palette. 
 
-.. From the editor, click *Top values of machine.os.keyword*. 
+.. In the editor, click *Top values of machine.os.keyword*. 
 
 .. From the *Color palette* dropdown, select *Compatibility*.
 
@@ -96,7 +101,7 @@ image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os
 [role="screenshot"]
 image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
 
-. *Save* the panel, enter `Visitors by OS` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[mixed-multiaxis]]
@@ -116,7 +121,7 @@ image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
 
 . Change the *timestamp* interval.
 
-.. From the editor, click *timestamp*.
+.. In the editor, click *timestamp*.
 
 .. Select *Customize time interval*.
 
@@ -133,7 +138,7 @@ image::images/lens_end_to_end_3_1.png[Customize time interval]
 
 To compare the average of bytes transfer to the number of users that visit your website, add a line chart layer.
 
-. From the editor, click *+*.
+. In the editor, click *+*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_2.png[Add new layer button]
@@ -153,7 +158,7 @@ The chart type for the visualization changes to *Mixed XY*.
 
 . Change the *timestamp* interval.
 
-.. From the editor, click *timestamp* in the line chart layer.
+.. In the editor, click *timestamp* in the line chart layer.
 
 .. Select *Customize time interval*.
 
@@ -161,7 +166,7 @@ The chart type for the visualization changes to *Mixed XY*.
 
 . Change the *Unique count of clientip* label and color.
 
-.. From the editor, click *Unique count of clientip*.
+.. In the editor, click *Unique count of clientip*.
 
 .. In the *Display name* field, enter `Unique visitors` in the line chart layer.
 
@@ -174,7 +179,7 @@ The chart type for the visualization changes to *Mixed XY*.
 There is a significant difference between the *timestamp per day* and *Unique visitors* data, which makes the *Unique visitors* data difficult to read. To improve the readability, 
 display the *Unique visitors* data along a second y-axis, then change the formatting. When functions contain multiple formats, separate axes are created by default. 
 
-. From the editor, click *Unique visitors* in the line chart layer.
+. In the editor, click *Unique visitors* in the line chart layer.
 
 . For *Axis side*, click *Right*, then click *Close*.
 
@@ -182,7 +187,7 @@ display the *Unique visitors* data along a second y-axis, then change the format
 [[change-the-visualization-type]]
 ==== Change the visualization type
 
-. From the editor, click *Average of bytes* in the area chart layer. 
+. In the editor, click *Average of bytes* in the area chart layer. 
 
 . From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 +
@@ -200,7 +205,7 @@ The visualization is done, but the legend uses a lot of space. Change the legend
 [role="screenshot"]
 image::images/lens_end_to_end_3_5.png[legend position]
 
-. *Save* the panel, enter `Average Bytes vs. Unique Visitors` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[percentage-stacked-area]]
@@ -229,7 +234,7 @@ image::images/lens_end_to_end_4_3.png[Turn off axis name]
 
 For each response code that you want to display, create a filter. 
 
-. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
+. In the editor, click the *Drop a field or click to add* field for *Break down by*. 
 
 . From *Select a function*, click *Filters*.
 
@@ -270,7 +275,7 @@ image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
 
 . To change the color palette, select *Status* from the *Color palette* dropdown, then click *Close*.
 
-. *Save* the panel, enter `Response Codes Over Time` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[histogram]]
@@ -299,7 +304,7 @@ To find the best time to shut down your website for maintenance, create a histog
 [role="screenshot"]
 image::images/lens_end_to_end_5_2.png[Create custom ranges]
 
-. *Save* the panel, enter `Hourly Traffic Distribution` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[custom-ranges]]
@@ -341,7 +346,7 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 [role="screenshot"]
 image::images/lens_end_to_end_6_2.png[Files size distribution]
 
-. *Save* the panel, enter `File size distribution` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[treemap]]
@@ -356,7 +361,7 @@ enter your website from specific social media websites, and the top countries wh
 
 . From the *Available fields* list, drag and drop *Records* to the *Size by* field in the editor. 
 
-. From the editor, click the *Drop a field or click to add* field for *Group by*, then create a filter for each website traffic source.
+. In the editor, click the *Drop a field or click to add* field for *Group by*, then create a filter for each website traffic source.
 
 .. From *Select a function*, click *Filters*.
 
@@ -397,19 +402,20 @@ image::images/lens_end_to_end_7_2.png[Treemap vis]
 
 . To view only the Facebook and Twitter data, remove the *Other* category. 
 
-.. From the editor, click *Top values of geo.src*.
+.. In the editor, click *Top values of geo.src*.
 
 .. From the *Advanced* dropdown, deselect *Group other values as "Other"*, then click *Close*.
 +
 [role="screenshot"]
 image::images/lens_end_to_end_7_3.png[Group other values as Other]
 
-. *Save* the panel, enter `Traffic Source For Top 3 Countries` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
-[float]
-== What's next?
+[discrete]
+=== Save the dashboard
 
-Your dashboard is complete and provides you with an overall picture of the data from your web server.
+Now that you have a complete overview of your web server data, save the dashboard.
 
-[role="screenshot"]
-image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
+. In the toolbar, click *Save*.
+
+. On the *Save dashboard* window, enter `Web server data`, then click *Save*.

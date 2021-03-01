@@ -1,28 +1,34 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Time series tutorial: Create a dashboard of panels with ecommerce data
+== Tutorial: Create a dashboard of panels with ecommerce sales data
 
-You have data coming from tracking your eCommerce, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
+You collected sales data from your store, and you want to visualize and analyze the data on a dashboard. 
+To create dashboard panels of the data, open the *Lens* visualization builder, then  
 create the visualization panels that best display the data.
+
+When you've completed the tutorial, you'll have a dashboard that provides you with a complete overview of your ecommerce sales data.
+
+[role="screenshot"]
+image::images/lens_advanced_result.png[Dashboard view]
 
 [discrete]
 [[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
-To create visualizations of the data from the web server, add the data set, then create the dashboard.
+To create visualizations of the data from your store, add the data set, then create the dashboard.
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
 . From *Sample eCommerce orders*, click *Add data*.
 
-. Open the main menu, click *Dashboard*.
+. Open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. On the *Dashboards* page, click *Create dashboard*.
 
 [float]
 [[open-and-set-up-lens]]
 === Open and set up Lens
 
-With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as *Lens* uses heuristics to apply the fields and create a visualization for you.
+Open the *Lens* editor, then make sure the correct fields appear.
 
 . From the dashboard, click *Create panel*.
 
@@ -33,13 +39,13 @@ image::images/lens_end_to_end_1_1.png[New visualization popover]
 
 . Make sure the *kibana_sample_data_ecommerce_* index appears.
 +
-The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
+The list of fields that appear depend on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]
 === View the number of transactions per day
 
-To determine how many orders are made during the day, create a bar chart, then add it to the dashboard.
+To determine the number of orders made each day, create a bar chart, then add it to the dashboard.
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
@@ -48,124 +54,156 @@ To determine how many orders are made during the day, create a bar chart, then a
 [role="screenshot"]
 image::images/lens_advanced_1_1.png[Added records to the workspace]
 
-. Now let's get the pace of orders per day. From the editor, click *Count of Records*.
+. Change the *Vertical axis* title and display the number of orders per day. 
+
+.. From the editor, click *Count of Records*.
 
 .. In the *Display name* field, enter `Number of orders`.
 
-.. Click on *Add advanced options* and *Normalize by unit*.
+.. Click *Add advanced options > Normalize by unit*.
 
-.. From the select list, choose `per day`.
+.. From the *Normalize by unit* dropdown, select *per day*, then click *Close*.
 
-.. Click *Close*.
-
-. Hide the label of the bottom axis as it doesn't provide any useful information. 
-
-.. From the *Bottom Axis* popover on the top of the chart, unselect *Show* setting.
+. To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then deselect *Show*.
++
+[role="screenshot"]
+image::images/lens_advanced_1_1_2.png[Bottom axis menu]
++
+You have a bar chart that shows you how many orders were made at your store each day.
 +
 [role="screenshot"]
 image::images/lens_advanced_1_2.png[Orders per day]
 
-. *Save* the panel, enter `Orders per day` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[view-the-cumulative-number-of-products-sold-over-time]]
-=== View the cumulative number of products sold during weekends
+=== View the cumulative number of products sold on weekends
 
-. Open *Lens*, then set the <<set-time-filter,time filter>> to *Last 30 days*.
+To determine the number of orders made only on Saturday and Sunday, create a line chart, then add it to the dashboard.
+
+. Open *Lens*.
 
 . From the *Chart Type* dropdown, select *Line*.
++
+[role="screenshot"]
+image::images/lens_advanced_2_1_1.png[Chart type menu with Line selected]
 
-. Configure cumulative sum of orders.
+. Configure the cumulative sum of the store orders.
 
 .. From the *Available fields* list, drag and drop *Records* to the visualization builder.
 
-.. Click on the *Count of Records* in the *Vertical Axis*.
+.. From the editor, click *Count of Records*.
 
 .. From *Select a function*, click *Cumulative sum*.
 
-.. Change the Display name to `Cumulative orders during weekend days`.
+.. In the *Display name* field, enter `Cumulative orders during weekend days`, then click *Close*.
 
-.. Click *Close*.
+. Filter the results to display the data for only Saturday and Sunday.
 
-. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
+.. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
 
-. Filter results to display cumulative sum for weekend days only.
-
-.. From *Select a function*, click *Filters* to filter the data by weekend days.
+.. From *Select a function*, click *Filters*.
 
 .. Click *All records*.
 
-.. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`. 
+.. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`, then press Return.
 +
 [role="screenshot"]
 image::images/lens_advanced_2_1.png[Filter aggregation to filter weekend days]
 
-. Hide the legend by choosing `Hide` in the settings on the top of the chart.
-
+. To hide the legend, open the *Legend* menu, then click *Hide*.
++
+[role="screenshot"]
+image::images/lens_advanced_2_2_1.png[Legend menu]
++
+You have a line chart that shows you how many orders your store received during the weekend.
 +
 [role="screenshot"]
 image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders made on the weekend]
 
-
-. *Save* the panel, enter `Cumulative sum of products sold over weekend` in the *Title* field, then add the panel to the dashboard.
+. Click *Save and return*.
 
 [discrete]
 [[add-a-data-layer]]
-=== View the key percentiles of prices of products over time
+=== View the key percentiles of product prices over time
 
-To view the distribution of the prices of sold products over time, create a percentile chart.
-
-. Open *Lens*.
-
-. From the *Chart Type* dropdown, select *Area*.
-
-. From the *Available fields* list, drag and drop *products.price* to *Vertical axis* in the editor.
-
-. Create first percentile.
-
-.. Click *Median of products.price*.
-
-.. From *Select a function*, click *Percentile*.
-
-.. Change the display name to *95th*
-
-. Create another percentile by duplication.
-
-.. Drag the item `95th` to *Drop a field or click to add* to duplicate it.
-
-.. Click on the duplicated item to open a configuration panel and type `90` in the *percentile* setting.
-
-.. Change the display name to *90th*
-
-.. Repeat copying and modifying the item for remaining percentiles: `50` and `10`.
-
-+
-[role="screenshot"]
-image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
-
-. For the left axis, change the name to *Percentiles for product prices*
-
-+
-[role="screenshot"]
-image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
-
-. *Save* the panel, enter `Percentiles for product prices` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[add-the-response-code-filters]]
-=== View the moving average of prices of clothing, shoes and accessories.
-
-This data can be helpful to analyze prices in each category of the offered products.
+To view the price distribution of products sold over time, create a percentile chart, then add it to the dashboard.
 
 . Open *Lens*.
 
 . From the *Chart Type* dropdown, select *Line*.
 
-.. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
+. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
 
-. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
+* Drag and drop *products.price* to the *Vertical axis* field.
 
-.. From *Select a function*, click *Filters*.
+* Drag and drop *order_date* to the *Horizontal axis* field.
+
+. Create the 95th percentile.
+
+.. In the editor, click *Median of products.price*.
+
+.. From *Select a function*, click *Percentile*.
+
+.. In the *Display name* field, enter `95th`, then click *Close*.
+
+. To create the 90th percentile, duplicate the `95th` percentile.
+
+.. Drag and drop *95th* to *Drop a field or click to add*.
+
+.. Click *95th [1]*, then enter `90` in the *Percentile* field.
+
+.. In the *Display name* field enter `90th`, then click *Close*.
++
+[role="screenshot"]
+image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
+
+. Create the 50th percentile. 
+
+.. Drag and drop *90th* to *Drop a field or click to add*.
+
+.. Click *90th [1]*, then enter `50` in the *Percentile* field.
+
+.. In the *Display name* field enter `50th`, then click *Close*.
+
+. Create the 10th percentile. 
+
+.. Drag and drop *50th* to *Drop a field or click to add*.
+
+.. Click *50th [1]*, then enter `10` in the *Percentile* field.
+
+.. In the *Display name* field enter `10th`, then click *Close*.
+
+. To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
++
+[role="screenshot"]
+image::images/lens_advanced_3_1_1.png[Left Axis menu]
++
+You have a line chart that shows you the price distribution of products sold over time.
++
+[role="screenshot"]
+image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
+
+. Click *Save and return*.
+
+[discrete]
+[[add-the-response-code-filters]]
+=== View the moving average of inventory prices
+
+To view and analyze the prices of shoes, accessories, and clothing in the store inventory, create a line chart.
+
+. Open *Lens*.
+
+. From the *Chart Type* dropdown, select *Line*.
+
+. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
+
+. In the editor, click the *Drop a field or click to add* field for *Break down by*. 
+
+. From *Select a function*, click *Filters*.
+
+. Add a filter for shoes.
 
 .. Click *All records*.
 
@@ -173,13 +211,15 @@ This data can be helpful to analyze prices in each category of the offered produ
 
 .. In the *Label* field, enter `Shoes`, then press Return.
 
+. Add a filter for accessories.
+
 .. Click *Add a filter*.
 
 .. In the *KQL* field, enter `category.keyword : *Accessories*`. 
 
 .. In the *Label* field, enter `Accessories`, then press Return.
 
-. Add the filter for the server error codes. 
+. Add a filter for clothing.
 
 .. Click *Add a filter*.
 
@@ -187,29 +227,33 @@ This data can be helpful to analyze prices in each category of the offered produ
 
 .. In the *Label* field, enter `Clothing`, then press Return.
 
-. Click on *Close*
-
+. Click *Close*
++
 [role="screenshot"]
 image::images/lens_advanced_4_1.png[Median prices chart for different categories]
 
-To focus on the general trends rather than on the peaks in the data, smooth the chart by applying moving average on top of the metric.
+[discrete]
+[[add-the-moving-average]]
+==== Add the moving average
 
-. From the editor, click the *Median of products.price*.
+To focus on the general trends rather than on the peaks in the data, add the moving average, then add the visualization to the dashboard.
+
+. In the editor, click the *Median of products.price*.
 
 . From *Select a function*, click *Moving average*.
 
-. Change the *window* to 7.
-
-. Click on *Close*
-
-. *Save* the panel, enter `Moving average of prices by categories` in the *Title* field, then add the panel to the dashboard.
-
+. In the *Window size* field, enter `7`, then click *Close*.
++
 [role="screenshot"]
 image::images/lens_advanced_4_2.png[Moving average prices chart for different categories]
 
-=== Result
+. Click *Save and return*.
 
-Your dashboard provides you with an timeseries data from your ecommerce.
+[discrete]
+=== Save the dashboard
 
-[role="screenshot"]
-image::images/lens_advanced_result.png[Dashboard view]
+Now that you have a complete overview of your ecommerce sales data, save the dashboard.
+
+. In the toolbar, click *Save*.
+
+. On the *Save dashboard* window, enter `Ecommerce sales data`, then click *Save*.
