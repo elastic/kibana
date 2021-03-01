@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import type { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable } from 'rxjs';
-import { PluginsSetup } from '../plugin';
-import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
+
+import type { ElasticsearchClient } from 'src/core/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from 'src/plugins/usage_collection/server';
+
+import type { PluginsSetup } from '../plugin';
+import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 interface SpacesAggregationResponse {
   hits: {
