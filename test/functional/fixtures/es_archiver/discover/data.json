@@ -22,6 +22,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields": "[]",
         "timeFieldName": "@timestamp",
         "title": "discover-routing-*"
       },
