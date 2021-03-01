@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   return {
     /**
