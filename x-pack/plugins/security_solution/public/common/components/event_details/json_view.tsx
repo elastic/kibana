@@ -55,7 +55,7 @@ JsonView.displayName = 'JsonView';
 
 export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
   data
-    .sort((a, b) => (a.field > b.field ? 1 : b.field > a.field ? -1 : 0))
+    .sort((a, b) => a.field.localeCompare(b.field))
     .reduce(
       (accumulator, item) =>
         set(
