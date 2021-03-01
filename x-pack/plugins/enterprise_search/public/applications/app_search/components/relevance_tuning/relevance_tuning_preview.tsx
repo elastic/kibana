@@ -44,7 +44,7 @@ const noResultsCallout = (
 
 export const RelevanceTuningPreview: React.FC = () => {
   const { updateSearchValue } = useActions(RelevanceTuningLogic);
-  const { searchResults } = useValues(RelevanceTuningLogic);
+  const { searchResults, schema } = useValues(RelevanceTuningLogic);
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
   return (
@@ -77,7 +77,12 @@ export const RelevanceTuningPreview: React.FC = () => {
           return (
             <React.Fragment key={result.id.raw}>
               <EuiSpacer size="m" />
-              <Result result={result} showScore isMetaEngine={isMetaEngine} />
+              <Result
+                result={result}
+                showScore
+                isMetaEngine={isMetaEngine}
+                schemaForTypeHighlights={schema}
+              />
             </React.Fragment>
           );
         })}

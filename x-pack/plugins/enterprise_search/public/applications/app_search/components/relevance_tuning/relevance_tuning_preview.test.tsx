@@ -29,6 +29,7 @@ describe('RelevanceTuningPreview', () => {
     searchResults: [result1, result2, result3],
     engineName: 'foo',
     isMetaEngine: false,
+    schema: {},
   };
 
   beforeAll(() => {
@@ -49,10 +50,11 @@ describe('RelevanceTuningPreview', () => {
     expect(results.length).toBe(3);
     expect(results.at(0).prop('result')).toBe(result1);
     expect(results.at(0).prop('isMetaEngine')).toBe(false);
+    expect(results.at(0).prop('showScore')).toBe(true);
+    expect(results.at(0).prop('schemaForTypeHighlights')).toBe(values.schema);
+
     expect(results.at(1).prop('result')).toBe(result2);
-    expect(results.at(1).prop('isMetaEngine')).toBe(false);
     expect(results.at(2).prop('result')).toBe(result3);
-    expect(results.at(2).prop('isMetaEngine')).toBe(false);
 
     expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(false);
