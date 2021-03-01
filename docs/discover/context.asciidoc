@@ -52,7 +52,7 @@ Advanced Settings>> and search for Context.
 
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
-`context:step`:: The default number of documents to load with each button click.
+`context:step`:: The default number of documents to load with each button click. The default is 5.
 `context:tieBreakerFields`:: The field to use for tiebreaking in case of equal time field values.
 The default is the `_doc` field.
 +
