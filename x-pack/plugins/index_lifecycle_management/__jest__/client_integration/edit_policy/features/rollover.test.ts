@@ -79,7 +79,6 @@ describe('<EditPolicy /> timeline', () => {
     await actions.cold.enable(true);
 
     expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
-    expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
   });
 
   test('shows rollover tip on minimum age', async () => {
