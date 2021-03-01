@@ -22,7 +22,7 @@ import {
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[%date][%level][%logger]%meta %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
 
 export const patternSchema = schema.string({
   validate: (string) => {

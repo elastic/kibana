@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Suspicious Explorer Child Process",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\"\n",
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "9a5b4e31-6cde-4295-9ff7-6be1b8567e1b",
   "severity": "medium",
   "tags": [
@@ -53,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

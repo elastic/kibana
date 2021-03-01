@@ -6,8 +6,10 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 interface Props {
   onCancel: () => void;

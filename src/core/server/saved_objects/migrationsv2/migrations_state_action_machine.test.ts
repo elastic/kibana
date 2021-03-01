@@ -314,20 +314,25 @@ describe('migrationsStateActionMachine', () => {
         next: () => {
           throw new ResponseError(
             elasticsearchClientMock.createApiResponse({
-              body: { error: { type: 'snapshot_in_progress_exception', reason: 'error reason' } },
+              body: {
+                error: {
+                  type: 'snapshot_in_progress_exception',
+                  reason: 'Cannot delete indices that are being snapshotted',
+                },
+              },
             })
           );
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. ResponseError: snapshot_in_progress_exception]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
         "debug": Array [],
         "error": Array [
           Array [
-            "[.my-so-index] [snapshot_in_progress_exception]: error reason",
+            "[.my-so-index] [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted",
           ],
           Array [
             "[.my-so-index] migration failed, dumping execution log:",
@@ -352,7 +357,7 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: this action throws]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Error: this action throws]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {

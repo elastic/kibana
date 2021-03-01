@@ -40,7 +40,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -69,7 +68,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -153,7 +151,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );

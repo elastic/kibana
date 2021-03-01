@@ -17,6 +17,7 @@ don't forget to check our other troubleshooting guides or discussion forum:
 * {apm-go-ref}/troubleshooting.html[Go agent troubleshooting]
 * {apm-java-ref}/trouble-shooting.html[Java agent troubleshooting]
 * {apm-node-ref}/troubleshooting.html[Node.js agent troubleshooting]
+* {apm-php-ref}/troubleshooting.html[PHP agent troubleshooting]
 * {apm-py-ref}/troubleshooting.html[Python agent troubleshooting]
 * {apm-ruby-ref}/debugging.html[Ruby agent troubleshooting]
 * {apm-rum-ref/troubleshooting.html[RUM troubleshooting]

@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Potential Secure File Deletion via SDelete Utility",
   "note": "Verify process details such as command line and hash to confirm this activity legitimacy.",
-  "query": "file where event.type == \"change\" and wildcard(file.name,\"*AAA.AAA\")\n",
+  "query": "file where event.type == \"change\" and file.name : \"*AAA.AAA\"\n",
   "risk_score": 21,
   "rule_id": "5aee924b-6ceb-4633-980e-1bde8cdb40c5",
   "severity": "low",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

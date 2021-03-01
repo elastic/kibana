@@ -49,6 +49,7 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
   &.euiDescriptionList--column .euiDescriptionList__description {
     width: 70%;
+    overflow-wrap: anywhere;
   }
 `;
 

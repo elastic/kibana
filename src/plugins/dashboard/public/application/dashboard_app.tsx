@@ -294,6 +294,7 @@ export function DashboardApp({
             }}
             viewMode={viewMode}
             lastDashboardId={savedDashboardId}
+            clearUnsavedChanges={() => setUnsavedChanges(false)}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {
               if (isUpdate === false) {

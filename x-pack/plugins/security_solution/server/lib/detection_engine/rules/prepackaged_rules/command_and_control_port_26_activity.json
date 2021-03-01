@@ -6,6 +6,7 @@
   "false_positives": [
     "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
@@ -57,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
@@ -30,6 +30,7 @@ export interface Field {
   isMeta: boolean;
   lang?: string;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
 export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
@@ -77,11 +78,9 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -138,6 +137,7 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
       isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });
 }
@@ -181,6 +181,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
+  const runtimeFields = fields.filter((f) => f.runtimeField);
   const { body: result } = await client.search({
     index,
     body: {
@@ -189,6 +190,11 @@ async function fetchIndexPatternStats({
       sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       fields: ['*'],
       _source: false,
+      runtime_mappings: runtimeFields.reduce((acc, field) => {
+        if (!field.runtimeField) return acc;
+        acc[field.name] = field.runtimeField;
+        return acc;
+      }, {} as Record<string, unknown>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {

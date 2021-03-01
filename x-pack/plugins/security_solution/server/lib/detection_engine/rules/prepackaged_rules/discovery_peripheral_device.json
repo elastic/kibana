@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Identifies use of the Windows file system utility (fsutil.exe ) to gather information about attached peripheral devices and components connected to a computer system.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -40,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

@@ -124,6 +124,7 @@ export const renderApp = (
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
+    fileUpload: deps.fileUpload,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

@@ -11,6 +11,7 @@ import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_t
 import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
+import { statuses } from '../status';
 import * as i18n from './translations';
 
 interface GetActions {
@@ -26,35 +27,12 @@ export const getActions = ({
   caseStatus,
   dispatchUpdate,
   deleteCaseOnClick,
-}: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
-  {
-    description: i18n.DELETE_CASE,
-    icon: 'trash',
-    name: i18n.DELETE_CASE,
-    onClick: deleteCaseOnClick,
-    type: 'icon',
-    'data-test-subj': 'action-delete',
-  },
-  {
-    available: (item) => caseStatus === CaseStatuses.open && !hasSubCases(item.subCases),
-    description: i18n.CLOSE_CASE,
-    icon: 'folderCheck',
-    name: i18n.CLOSE_CASE,
-    onClick: (theCase: Case) =>
-      dispatchUpdate({
-        updateKey: 'status',
-        updateValue: CaseStatuses.closed,
-        caseId: theCase.id,
-        version: theCase.version,
-      }),
-    type: 'icon',
-    'data-test-subj': 'action-close',
-  },
-  {
-    available: (item) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
-    description: i18n.REOPEN_CASE,
-    icon: 'folderExclamation',
-    name: i18n.REOPEN_CASE,
+}: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
+  const openCaseAction = {
+    available: (item: Case) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
+    description: statuses[CaseStatuses.open].actions.single.title,
+    icon: statuses[CaseStatuses.open].icon,
+    name: statuses[CaseStatuses.open].actions.single.title,
     onClick: (theCase: Case) =>
       dispatchUpdate({
         updateKey: 'status',
@@ -62,7 +40,54 @@ export const getActions = ({
         caseId: theCase.id,
         version: theCase.version,
       }),
-    type: 'icon',
+    type: 'icon' as const,
     'data-test-subj': 'action-open',
-  },
-];
+  };
+
+  const makeInProgressAction = {
+    available: (item: Case) =>
+      caseStatus !== CaseStatuses['in-progress'] && !hasSubCases(item.subCases),
+    description: statuses[CaseStatuses['in-progress']].actions.single.title,
+    icon: statuses[CaseStatuses['in-progress']].icon,
+    name: statuses[CaseStatuses['in-progress']].actions.single.title,
+    onClick: (theCase: Case) =>
+      dispatchUpdate({
+        updateKey: 'status',
+        updateValue: CaseStatuses['in-progress'],
+        caseId: theCase.id,
+        version: theCase.version,
+      }),
+    type: 'icon' as const,
+    'data-test-subj': 'action-in-progress',
+  };
+
+  const closeCaseAction = {
+    available: (item: Case) => caseStatus !== CaseStatuses.closed && !hasSubCases(item.subCases),
+    description: statuses[CaseStatuses.closed].actions.single.title,
+    icon: statuses[CaseStatuses.closed].icon,
+    name: statuses[CaseStatuses.closed].actions.single.title,
+    onClick: (theCase: Case) =>
+      dispatchUpdate({
+        updateKey: 'status',
+        updateValue: CaseStatuses.closed,
+        caseId: theCase.id,
+        version: theCase.version,
+      }),
+    type: 'icon' as const,
+    'data-test-subj': 'action-close',
+  };
+
+  return [
+    {
+      description: i18n.DELETE_CASE,
+      icon: 'trash',
+      name: i18n.DELETE_CASE,
+      onClick: deleteCaseOnClick,
+      type: 'icon',
+      'data-test-subj': 'action-delete',
+    },
+    openCaseAction,
+    makeInProgressAction,
+    closeCaseAction,
+  ];
+};

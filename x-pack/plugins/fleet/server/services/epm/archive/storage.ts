@@ -83,9 +83,10 @@ export async function archiveEntryToESDocument(opts: {
 
 export async function removeArchiveEntries(opts: {
   savedObjectsClient: SavedObjectsClientContract;
-  refs: PackageAssetReference[];
+  refs?: PackageAssetReference[];
 }) {
   const { savedObjectsClient, refs } = opts;
+  if (!refs) return;
   const results = await Promise.all(
     refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
   );

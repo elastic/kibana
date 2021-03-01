@@ -35,44 +35,31 @@ export const initLogEntriesSummaryHighlightsRoute = ({
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          logEntriesSummaryHighlightsRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const {
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          query,
-          highlightTerms,
-        } = payload;
+      const payload = pipe(
+        logEntriesSummaryHighlightsRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+      const { sourceId, startTimestamp, endTimestamp, bucketSize, query, highlightTerms } = payload;
 
-        const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
-          requestContext,
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          highlightTerms,
-          parseFilterQuery(query)
-        );
+      const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
+        requestContext,
+        sourceId,
+        startTimestamp,
+        endTimestamp,
+        bucketSize,
+        highlightTerms,
+        parseFilterQuery(query)
+      );
 
-        return response.ok({
-          body: logEntriesSummaryHighlightsResponseRT.encode({
-            data: bucketsPerHighlightTerm.map((buckets) => ({
-              start: startTimestamp,
-              end: endTimestamp,
-              buckets,
-            })),
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: logEntriesSummaryHighlightsResponseRT.encode({
+          data: bucketsPerHighlightTerm.map((buckets) => ({
+            start: startTimestamp,
+            end: endTimestamp,
+            buckets,
+          })),
+        }),
+      });
     }
   );
 };

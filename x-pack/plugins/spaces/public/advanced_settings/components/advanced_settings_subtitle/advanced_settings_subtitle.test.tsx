@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { AdvancedSettingsSubtitle } from './advanced_settings_subtitle';
 import { EuiCallOut } from '@elastic/eui';
 import { act } from '@testing-library/react';
+import React from 'react';
+
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+
+import { AdvancedSettingsSubtitle } from './advanced_settings_subtitle';
 
 describe('AdvancedSettingsSubtitle', () => {
   it('renders as expected', async () => {

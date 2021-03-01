@@ -3,14 +3,19 @@
     "Elastic"
   ],
   "description": "Enumeration of files and directories using built-in tools. Adversaries may use the information discovered to plan follow-on activity.",
+  "false_positives": [
+    "Enumeration of files and directories may not be inherently malicious and noise may come from scripts, automation tools, or normal command line usage. It's important to baseline your environment to determine the amount of expected noise and exclude any known FP's from the rule."
+  ],
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "File and Directory Discovery",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and\n  process.args : (\"dir\", \"tree\")\n",
+  "query": "sequence by agent.id, user.name with maxspan=1m\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n",
   "risk_score": 21,
   "rule_id": "7b08314d-47a0-4b71-ae4e-16544176924f",
   "severity": "low",
@@ -40,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

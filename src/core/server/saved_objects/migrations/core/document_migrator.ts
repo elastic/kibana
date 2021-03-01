@@ -678,10 +678,11 @@ function wrapWithTry(
     } catch (error) {
       const failedTransform = `${type.name}:${version}`;
       const failedDoc = JSON.stringify(doc);
-      log.warn(
+      log.error(error);
+
+      throw new Error(
         `Failed to transform document ${doc?.id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
       );
-      throw error;
     }
   };
 }

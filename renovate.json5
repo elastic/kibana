@@ -38,7 +38,7 @@
         packageNames: ['@elastic/charts'],
         reviewers: ['markov00'],
         matchBaseBranches: ['master'],
-        labels: ['release_note:skip', 'v8.0.0', 'v7.12.0'],
+        labels: ['release_note:skip', 'v8.0.0', 'v7.13.0'],
         enabled: true,
       },
       {
@@ -54,7 +54,7 @@
         packageNames: ['@elastic/elasticsearch'],
         reviewers: ['team:kibana-operations'],
         matchBaseBranches: ['7.x'],
-        labels: ['release_note:skip', 'v7.12.0', 'Team:Operations', 'backport:skip'],
+        labels: ['release_note:skip', 'v7.13.0', 'Team:Operations', 'backport:skip'],
         enabled: true,
       },
       {

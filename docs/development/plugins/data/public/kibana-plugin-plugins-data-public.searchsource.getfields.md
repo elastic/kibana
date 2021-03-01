@@ -9,15 +9,8 @@ returns all search source fields
 <b>Signature:</b>
 
 ```typescript
-getFields(recurse?: boolean): SearchSourceFields;
+getFields(): SearchSourceFields;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  recurse | <code>boolean</code> |  |
-
 <b>Returns:</b>
 
 `SearchSourceFields`

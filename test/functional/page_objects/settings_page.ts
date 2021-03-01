@@ -249,7 +249,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-          td:last-child button`
+          td:nth-last-child(2) button`
       );
     }
 

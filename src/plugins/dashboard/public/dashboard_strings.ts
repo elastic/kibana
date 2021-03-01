@@ -199,6 +199,25 @@ export const getNewDashboardTitle = () =>
     defaultMessage: 'New Dashboard',
   });
 
+export const getDashboard60Warning = () =>
+  i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+    defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+  });
+
+export const dashboardReadonlyBadge = {
+  getText: () =>
+    i18n.translate('dashboard.badge.readOnly.text', {
+      defaultMessage: 'Read only',
+    }),
+  getTooltip: () =>
+    i18n.translate('dashboard.badge.readOnly.tooltip', {
+      defaultMessage: 'Unable to save dashboards',
+    }),
+};
+
+/*
+  Modals
+*/
 export const shareModalStrings = {
   getTopMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -222,22 +241,6 @@ export const shareModalStrings = {
     }),
 };
 
-export const getDashboard60Warning = () =>
-  i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
-    defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
-  });
-
-export const dashboardReadonlyBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save dashboards',
-    }),
-};
-
 export const leaveConfirmStrings = {
   getLeaveTitle: () =>
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
@@ -247,33 +250,51 @@ export const leaveConfirmStrings = {
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
       defaultMessage: 'Leave Dashboard with unsaved work?',
     }),
-  getKeepChangesText: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.keepUnsavedChangesButtonLabel', {
-      defaultMessage: 'Keep unsaved changes',
+  getLeaveCancelButtonText: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
+};
+
+export const leaveEditModeConfirmStrings = {
   getLeaveEditModeTitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditMode', {
-      defaultMessage: 'Leave edit mode with unsaved work?',
+    i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditModeTitle', {
+      defaultMessage: 'You have unsaved changes',
     }),
   getLeaveEditModeSubtitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesOptionalDescription', {
-      defaultMessage: `If you discard your changes, there's no getting them back.`,
+    i18n.translate('dashboard.changeViewModeConfirmModal.description', {
+      defaultMessage: `You can keep or discard your changes on return to view mode.  You can't recover discarded changes.`,
     }),
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
+  getLeaveEditModeKeepChangesText: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.keepUnsavedChangesButtonLabel', {
+      defaultMessage: 'Keep changes',
     }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
-    }),
-  getConfirmButtonText: () =>
+  getLeaveEditModeDiscardButtonText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Discard changes',
     }),
-  getCancelButtonText: () =>
+  getLeaveEditModeCancelButtonText: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.cancelButtonLabel', {
       defaultMessage: 'Continue editing',
+    }),
+};
+
+export const discardConfirmStrings = {
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
+      defaultMessage: 'Discard changes to dashboard?',
+    }),
+  getDiscardSubtitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+    }),
+  getDiscardConfirmButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Discard changes',
+    }),
+  getDiscardCancelButtonText: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
 };
 
@@ -290,12 +311,19 @@ export const createConfirmStrings = {
     i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Start over',
     }),
-  getContinueButtonText: () => leaveConfirmStrings.getCancelButtonText(),
+  getContinueButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.continueButtonLabel', {
+      defaultMessage: 'Continue editing',
+    }),
   getCancelButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     }),
 };
+
+/*
+  Error Messages
+*/
 
 export const panelStorageErrorStrings = {
   getPanelsGetError: (message: string) =>

@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { stringify } from 'query-string';
-import url from 'url';
 import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -58,11 +57,11 @@ export const useLinkProps = (
   }, [pathname, encodedSearch]);
 
   const href = useMemo(() => {
-    const link = url.format({
-      pathname,
-      hash: mergedHash,
-      search: !hash ? encodedSearch : undefined,
-    });
+    const builtPathname = pathname ?? '';
+    const builtHash = mergedHash ? `#${mergedHash}` : '';
+    const builtSearch = !hash ? (encodedSearch ? `?${encodedSearch}` : '') : '';
+
+    const link = `${builtPathname}${builtSearch}${builtHash}`;
 
     return prefixer(app, link);
   }, [mergedHash, hash, encodedSearch, pathname, prefixer, app]);

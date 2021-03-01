@@ -78,10 +78,16 @@ describe('GET remote clusters', () => {
       const mockContext = xpackMocks.createRequestHandlerContext();
       mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      if (asserts.statusCode === 500) {
+        await expect(handler(mockContext, mockRequest, kibanaResponseFactory)).rejects.toThrowError(
+          asserts.result as Error
+        );
+      } else {
+        const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
-      expect(response.status).toBe(asserts.statusCode);
-      expect(response.payload).toEqual(asserts.result);
+        expect(response.status).toBe(asserts.statusCode);
+        expect(response.payload).toEqual(asserts.result);
+      }
 
       if (Array.isArray(asserts.apiArguments)) {
         for (const apiArguments of asserts.apiArguments) {

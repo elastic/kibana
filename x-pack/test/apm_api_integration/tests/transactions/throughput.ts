@@ -20,7 +20,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // url parameters
   const { start, end } = metadata;
-  const uiFilters = JSON.stringify({});
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
@@ -31,7 +30,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment: 'testing',
             start,
             end,
-            uiFilters,
             transactionType: 'request',
           },
         })
@@ -57,7 +55,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'testing',
               start,
               end,
-              uiFilters,
               transactionType: 'request',
             },
           })
