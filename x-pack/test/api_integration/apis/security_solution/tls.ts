@@ -109,9 +109,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -139,9 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -174,9 +176,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
@@ -203,9 +206,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);

@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../common/utils/queries';
+import { rangeQuery } from '../../../server/utils/queries';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';

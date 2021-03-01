@@ -28,6 +28,7 @@ export {
   ActionVariables,
   ActionConnector,
   IErrorObject,
+  AlertFlyoutCloseReason,
 } from './types';
 export {
   ConnectorAddFlyout,

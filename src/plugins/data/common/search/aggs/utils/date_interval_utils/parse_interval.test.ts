@@ -7,17 +7,41 @@
  */
 
 import { Duration, unitOfTime } from 'moment';
-import { parseInterval } from './parse_interval';
+import { parseInterval, splitStringInterval } from './parse_interval';
 
-const validateDuration = (duration: Duration | null, unit: unitOfTime.Base, value: number) => {
-  expect(duration).toBeDefined();
+describe('splitStringInterval', () => {
+  test('should correctly split 1d interval', () => {
+    expect(splitStringInterval('1d')).toMatchInlineSnapshot(`
+      Object {
+        "unit": "d",
+        "value": 1,
+      }
+    `);
+  });
 
-  if (duration) {
-    expect(duration.as(unit)).toBe(value);
-  }
-};
+  test('should correctly split 34m interval', () => {
+    expect(splitStringInterval('1d')).toMatchInlineSnapshot(`
+      Object {
+        "unit": "d",
+        "value": 1,
+      }
+    `);
+  });
+
+  test('should return null if cannot parse interval', () => {
+    expect(splitStringInterval('wrong_value_1')).toMatchInlineSnapshot(`null`);
+  });
+});
 
 describe('parseInterval', () => {
+  const validateDuration = (duration: Duration | null, unit: unitOfTime.Base, value: number) => {
+    expect(duration).toBeDefined();
+
+    if (duration) {
+      expect(duration.as(unit)).toBe(value);
+    }
+  };
+
   describe('integer', () => {
     test('should correctly parse 1d interval', () => {
       validateDuration(parseInterval('1d'), 'd', 1);

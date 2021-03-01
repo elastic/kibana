@@ -11,14 +11,11 @@ import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
   describe('GET /api/app_search/engines', () => {
-    const AUTH_HEADER = 'Basic 123';
     const mockRequest = {
-      headers: {
-        authorization: AUTH_HEADER,
-      },
       query: {
         type: 'indexed',
-        pageIndex: 1,
+        'page[current]': 1,
+        'page[size]': 10,
       },
     };
 
@@ -42,17 +39,6 @@ describe('engine routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/collection',
-        params: { type: 'indexed', 'page[current]': 1, 'page[size]': 10 },
-        hasValidData: expect.any(Function),
-      });
-    });
-
-    it('passes custom parameters to enterpriseSearchRequestHandler', () => {
-      mockRouter.callRoute({ query: { type: 'meta', pageIndex: 99 } });
-
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/collection',
-        params: { type: 'meta', 'page[current]': 99, 'page[size]': 10 },
         hasValidData: expect.any(Function),
       });
     });
@@ -84,27 +70,29 @@ describe('engine routes', () => {
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = { query: { type: 'meta', pageIndex: 5 } };
+        const request = {
+          query: {
+            type: 'meta',
+            'page[current]': 5,
+            'page[size]': 10,
+          },
+        };
         mockRouter.shouldValidate(request);
       });
 
-      it('wrong pageIndex type', () => {
-        const request = { query: { type: 'indexed', pageIndex: 'indexed' } };
-        mockRouter.shouldThrow(request);
-      });
-
       it('wrong type string', () => {
-        const request = { query: { type: 'invalid', pageIndex: 1 } };
+        const request = {
+          query: {
+            type: 'invalid',
+            'page[current]': 5,
+            'page[size]': 10,
+          },
+        };
         mockRouter.shouldThrow(request);
       });
 
-      it('missing pageIndex', () => {
-        const request = { query: { type: 'indexed' } };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('missing type', () => {
-        const request = { query: { pageIndex: 1 } };
+      it('missing query params', () => {
+        const request = { query: {} };
         mockRouter.shouldThrow(request);
       });
     });
