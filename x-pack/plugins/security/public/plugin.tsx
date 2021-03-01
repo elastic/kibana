@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { FeaturesPluginStart } from '../../features/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
@@ -48,6 +49,7 @@ export interface PluginStartDependencies {
   features: FeaturesPluginStart;
   securityOss: SecurityOssPluginStart;
   management?: ManagementStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class SecurityPlugin
