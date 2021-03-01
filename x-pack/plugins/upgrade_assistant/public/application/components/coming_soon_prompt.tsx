@@ -23,7 +23,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.upgradeAssistant.emptyPromptTitle"
+              id="xpack.upgradeAssistant.emptyPrompt.title"
               defaultMessage="Coming soon: {uaVersion} Upgrade Assistant"
               values={{ uaVersion: `${nextMajor}.0` }}
             />
@@ -33,7 +33,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
           <>
             <p>
               <FormattedMessage
-                id="xpack.upgradeAssistant.emptyPromptDescription"
+                id="xpack.upgradeAssistant.emptyPrompt.upgradeAssistantDescription"
                 defaultMessage="The Upgrade Assistant helps prepare for your upgrade to the next major Elasticsearch version.
                 It identifies deprecated settings in your cluster and guides you through the process of resolving issues, such as reindexing.
                 Check back here when Elasticsearch {nextMajorVersion} is released."
@@ -43,7 +43,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
             {currentMajor === 7 && (
               <p>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.emptyPromptDescription"
+                  id="xpack.upgradeAssistant.emptyPrompt.learnMoreDescription"
                   defaultMessage="To learn more about the upcoming changes, see {learnMoreLink}."
                   values={{
                     learnMoreLink: (
