@@ -19,6 +19,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
     <EuiPageContent>
       <EuiEmptyPrompt
         iconType="wrench"
+        data-test-subj="comingSoonPrompt"
         title={
           <h2>
             <FormattedMessage
