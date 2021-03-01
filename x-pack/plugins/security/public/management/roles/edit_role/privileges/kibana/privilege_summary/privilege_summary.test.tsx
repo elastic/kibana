@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
@@ -65,7 +66,7 @@ describe('PrivilegeSummary', () => {
     expect(wrapper.find(PrivilegeSummaryTable)).toHaveLength(0);
   });
 
-  it('clicking the button renders the privilege summary table', () => {
+  it('clicking the button renders the privilege summary table', async () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
     const role = createRole([
@@ -86,7 +87,10 @@ describe('PrivilegeSummary', () => {
       />
     );
 
-    findTestSubject(wrapper, 'viewPrivilegeSummaryButton').simulate('click');
+    await act(async () => {
+      findTestSubject(wrapper, 'viewPrivilegeSummaryButton').simulate('click');
+    });
+    wrapper.update();
     expect(wrapper.find(PrivilegeSummaryTable)).toHaveLength(1);
   });
 });
