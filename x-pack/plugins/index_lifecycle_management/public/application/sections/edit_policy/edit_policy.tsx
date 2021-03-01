@@ -43,6 +43,7 @@ import {
   ColdPhase,
   DeletePhase,
   HotPhase,
+  FrozenPhase,
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
@@ -243,13 +244,15 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               <HotPhase />
 
               <EuiSpacer />
-
               <WarmPhase />
 
               <EuiSpacer />
-
               <ColdPhase />
 
+              <EuiSpacer />
+              <FrozenPhase />
+
+              <EuiSpacer />
               <DeletePhase />
             </div>
 
