@@ -182,6 +182,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const showDataAllocationOptions = (phase: Phases) => () => {
+    act(() => {
+      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
+    });
+    component.update();
+  };
+
   const setSelectedNodeAttribute = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
@@ -254,6 +261,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       warm: {
         enable: enable('warm'),
+        showDataAllocationOptions: showDataAllocationOptions('warm'),
         warmPhaseOnRollover,
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
@@ -268,6 +276,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       cold: {
         enable: enable('cold'),
+        showDataAllocationOptions: showDataAllocationOptions('warm'),
         setMinAgeValue: setMinAgeValue('cold'),
         setMinAgeUnits: setMinAgeUnits('cold'),
         setDataAllocation: setDataAllocation('cold'),
