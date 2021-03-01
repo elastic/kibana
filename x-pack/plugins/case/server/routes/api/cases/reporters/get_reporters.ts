@@ -10,7 +10,7 @@ import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 
-export function initGetReportersApi({ caseService, router }: RouteDeps) {
+export function initGetReportersApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_REPORTERS_URL,
@@ -24,6 +24,7 @@ export function initGetReportersApi({ caseService, router }: RouteDeps) {
         });
         return response.ok({ body: UsersRt.encode(reporters) });
       } catch (error) {
+        logger.error(`Failed to get reporters in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

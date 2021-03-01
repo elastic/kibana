@@ -14,7 +14,12 @@ import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
-export function initDeleteCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteCommentApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -25,7 +30,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
       },
@@ -46,8 +51,8 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const type = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-        const id = request.query?.subCaseID ?? request.params.case_id;
+        const type = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const id = request.query?.subCaseId ?? request.params.case_id;
 
         const caseRef = myComment.references.find((c) => c.type === type);
         if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
@@ -69,7 +74,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              subCaseId: request.query?.subCaseID,
+              subCaseId: request.query?.subCaseId,
               commentId: request.params.comment_id,
               fields: ['comment'],
             }),
@@ -78,6 +83,9 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }
