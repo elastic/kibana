@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ConfirmModal } from '../../../components/confirm_modal';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 export interface ConfirmDeleteUsersProps {
   usernames: string[];

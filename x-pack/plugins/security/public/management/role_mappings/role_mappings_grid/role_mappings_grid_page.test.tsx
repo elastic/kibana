@@ -8,7 +8,7 @@
 import React from 'react';
 import { CoreStart, ScopedHistory } from 'src/core/public';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { RoleMappingsGridPage } from '.';
+import { RoleMappingsGridPage } from './role_mappings_grid_page';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
 import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from '@kbn/test/jest';

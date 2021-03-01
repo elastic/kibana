@@ -15,7 +15,7 @@ import { findTestSubject } from '@kbn/test/jest';
 // warnings in the console which adds unnecessary noise to the test output.
 import '@kbn/test/target/jest/utils/stub_web_worker';
 
-import { EditRoleMappingPage } from '.';
+import { EditRoleMappingPage } from './edit_role_mapping_page';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';

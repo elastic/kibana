@@ -11,10 +11,10 @@ import { Actions } from '../../../../server/authorization';
 import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { KibanaFeature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
-import { SecurityLicenseFeatures } from '../../..';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { featuresPluginMock } from '../../../../../features/server/mocks';
+import { SecurityLicenseFeatures } from '../../../../common/licensing';
 
 export const createRawKibanaPrivileges = (
   features: KibanaFeature[],

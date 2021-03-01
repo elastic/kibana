@@ -21,7 +21,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import React, { ChangeEvent, Component } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { User } from '../../../../../common/model';
-import { UserAPIClient } from '../..';
+import { UserAPIClient } from '../../user_api_client';
 
 interface Props {
   user: User;

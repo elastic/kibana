@@ -36,7 +36,7 @@ import { ChangePasswordFlyout } from './change_password_flyout';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 export interface EditUserPageProps {
   username: string;

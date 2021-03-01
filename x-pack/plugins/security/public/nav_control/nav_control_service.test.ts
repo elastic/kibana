@@ -8,7 +8,7 @@
 import { coreMock } from 'src/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
-import { SecurityNavControlService } from '.';
+import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
 import { nextTick } from '@kbn/test/jest';
 import { securityMock } from '../mocks';

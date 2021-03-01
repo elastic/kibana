@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
-import { RuleEditorPanel } from '.';
+import { RuleEditorPanel } from './rule_editor_panel';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { JSONRuleEditor } from './json_rule_editor';
 

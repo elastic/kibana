@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Actions } from '.';
+import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
-import { AuthenticatedUser } from '..';
+import { AuthenticatedUser } from '../../common/model';
 import { CheckPrivilegesResponse } from './types';
 
 type MockAuthzOptions =

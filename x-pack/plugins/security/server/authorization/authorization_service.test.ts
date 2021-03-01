@@ -21,7 +21,7 @@ import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
-import { AuthorizationService } from '.';
+import { AuthorizationService } from './authorization_service';
 
 import { nextTick } from '@kbn/test/jest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';

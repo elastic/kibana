@@ -12,7 +12,7 @@ import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { PrivilegeSummary } from '.';
+import { PrivilegeSummary } from './privilege_summary';
 import { findTestSubject } from '@kbn/test/jest';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 import { coreMock } from 'src/core/public/mocks';

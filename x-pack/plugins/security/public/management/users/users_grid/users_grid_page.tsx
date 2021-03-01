@@ -33,7 +33,7 @@ import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;

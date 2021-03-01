@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defineViewRoutes } from '.';
+import { defineViewRoutes } from './';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 

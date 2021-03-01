@@ -16,8 +16,8 @@ import {
 } from '../../../features/server';
 
 import { CheckPrivilegesResponse } from './types';
-import { AuthorizationServiceSetup } from '.';
-import { AuthenticatedUser } from '..';
+import { AuthorizationServiceSetup } from './authorization_service';
+import { AuthenticatedUser } from '../../common/model';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,

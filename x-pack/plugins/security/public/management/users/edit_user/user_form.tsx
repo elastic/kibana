@@ -30,7 +30,7 @@ import { useForm, ValidationErrors } from '../../../components/use_form';
 import { DocLink } from '../../../components/doc_link';
 import { RolesAPIClient } from '../../roles';
 import { RoleComboBox } from '../../role_combo_box';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 export const THROTTLE_USERS_WAIT = 10000;
 

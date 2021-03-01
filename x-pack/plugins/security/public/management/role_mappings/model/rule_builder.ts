@@ -13,7 +13,7 @@ import { AnyRule } from './any_rule';
 import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
-import { RuleBuilderError } from '.';
+import { RuleBuilderError } from './rule_builder_error';
 
 interface RuleBuilderResult {
   /** The maximum rule depth within the parsed rule set. */

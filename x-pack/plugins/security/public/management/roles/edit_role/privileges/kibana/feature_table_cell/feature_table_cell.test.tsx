@@ -8,7 +8,7 @@
 import React from 'react';
 import { createFeature } from '../../../../__fixtures__/kibana_features';
 import { mountWithIntl } from '@kbn/test/jest';
-import { FeatureTableCell } from '.';
+import { FeatureTableCell } from './feature_table_cell';
 import { SecuredFeature } from '../../../../model';
 import { EuiIconTip } from '@elastic/eui';
 

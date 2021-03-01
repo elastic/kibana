@@ -24,7 +24,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { useForm, ValidationErrors } from '../../../components/use_form';
 import { useCurrentUser } from '../../../components/use_current_user';
 import { FormFlyout } from '../../../components/form_flyout';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 export interface ChangePasswordFormValues {
   current_password?: string;

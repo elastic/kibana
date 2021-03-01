@@ -17,7 +17,7 @@ import {
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { AuthorizationServiceSetup } from '../authorization';
 import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
-import { SecurityPluginSetup } from '..';
+import { SecurityPluginSetup } from '../plugin';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,

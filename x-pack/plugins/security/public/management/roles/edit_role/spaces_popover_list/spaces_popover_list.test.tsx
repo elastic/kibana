@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { SpacesPopoverList } from '.';
+import { SpacesPopoverList } from './spaces_popover_list';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,

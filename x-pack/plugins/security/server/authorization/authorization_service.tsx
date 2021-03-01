@@ -53,7 +53,7 @@ import { CheckPrivilegesWithRequest } from './types';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { canRedirectRequest } from '../authentication';
 import { ResetSessionPage } from './reset_session_page';
-import { AuthenticatedUser } from '..';
+import { AuthenticatedUser } from '../../common/model';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';

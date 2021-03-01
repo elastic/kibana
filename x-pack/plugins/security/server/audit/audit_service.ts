@@ -18,7 +18,7 @@ import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing
 import { ConfigType } from '../config';
 import { SpacesPluginSetup } from '../../../spaces/server';
 import { AuditEvent, httpRequestEvent } from './audit_events';
-import { SecurityPluginSetup } from '..';
+import { SecurityPluginSetup } from '../plugin';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour

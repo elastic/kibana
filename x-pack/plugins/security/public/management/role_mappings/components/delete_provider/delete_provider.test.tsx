@@ -11,7 +11,7 @@ import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { findTestSubject } from '@kbn/test/jest';
 import { RoleMapping } from '../../../../../common/model';
-import { DeleteProvider } from '.';
+import { DeleteProvider } from './delete_provider';
 
 import { roleMappingsAPIClientMock } from '../../index.mock';
 import { coreMock } from 'src/core/public/mocks';

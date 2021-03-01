@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { RoleComboBox } from '.';
+import { RoleComboBox } from './role_combo_box';
 
 describe('RoleComboBox', () => {
   it('renders roles grouped by custom, user, admin, system and deprecated roles with correct color', () => {

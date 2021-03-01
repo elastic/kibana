@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defineAuthenticationRoutes } from '.';
+import { defineAuthenticationRoutes } from './';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 
