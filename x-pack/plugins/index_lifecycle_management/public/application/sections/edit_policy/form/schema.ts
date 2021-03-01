@@ -110,6 +110,30 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
     },
+    frozen: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
+          { defaultMessage: 'Activate frozen phase' }
+        ),
+      },
+      freezeEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
+          defaultMessage: 'Freeze index',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
+      },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
     delete: {
       enabled: {
         defaultValue: false,

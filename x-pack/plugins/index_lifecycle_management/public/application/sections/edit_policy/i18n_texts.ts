@@ -188,6 +188,9 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
+      frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle', {
+        defaultMessage: 'Frozen phase',
+      }),
       delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
         defaultMessage: 'Delete phase',
       }),
@@ -205,6 +208,12 @@ export const i18nTexts = {
         defaultMessage:
           'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.',
       }),
+      frozen: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
+        {
+          defaultMessage: 'Here will come the copy description of the frozen phase',
+        }
+      ),
       delete: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
         {

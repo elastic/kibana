@@ -38,7 +38,7 @@ import './_searchable_snapshot_field.scss';
 const { emptyField } = fieldValidators;
 
 export interface Props {
-  phase: 'hot' | 'cold';
+  phase: 'hot' | 'cold' | 'frozen';
 }
 
 /**
@@ -60,6 +60,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const isColdPhase = phase === 'cold';
+  const isFrozenPhase = phase === 'frozen';
+  const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
   const isDisabledInColdDueToHotPhase = isColdPhase && isUsingSearchableSnapshotInHotPhase;
 
@@ -68,7 +70,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
     Boolean(
       // New policy on cloud should have searchable snapshot on in cold phase
-      (isColdPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+      (isColdOrFrozenPhase && isNewPolicy && cloud?.isCloudEnabled) ||
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
