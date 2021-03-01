@@ -22,8 +22,8 @@ import {
   isOrdinalChartData,
   ChartData,
   ChartDataItem,
-  OrdinalDataItem,
   NumericDataItem,
+  OrdinalDataItem,
 } from '../../../../common/types/field_histograms';
 
 import { NON_AGGREGATABLE } from './common';
