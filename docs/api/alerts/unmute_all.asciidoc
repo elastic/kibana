@@ -20,7 +20,7 @@ Unmute all alert instances.
   (Required, string) The ID of the alert whose instances you want to unmute.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[alerts-api-unmute-all-response-codes]]
 ==== Response code

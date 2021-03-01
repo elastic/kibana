@@ -20,7 +20,7 @@ Retrieves an action by ID.
   (Required, string) The ID of the action.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-api-get-codes]]
 ==== Response code

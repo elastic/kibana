@@ -22,7 +22,7 @@ WARNING: Once you delete an alert, you cannot recover it.
   (Required, string) The ID of the alert that you want to remove.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[alerts-api-delete-response-codes]]
 ==== Response code
