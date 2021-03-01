@@ -8,7 +8,7 @@ To view the surrounding documents, your index pattern must contain time-based ev
 
 . In the document table, click the expand icon (>).
 . Click *View surrounding documents.*
-
++
 This opens the Context view of *Discover*.
 The documents are sorted by the time field specified in the index pattern 
 and displayed using the same set of columns as the *Discover* view from which 
