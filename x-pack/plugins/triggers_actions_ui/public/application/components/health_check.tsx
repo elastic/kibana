@@ -94,7 +94,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
 };
 
 interface PromptErrorProps {
-  docLinks: Pick<DocLinksStart, 'links'>;
+  docLinks: DocLinksStart;
   className?: string;
 }
 
