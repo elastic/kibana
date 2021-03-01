@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -24,7 +25,6 @@ import {
   postCase,
   postComment,
   pushCase,
-  pushToService,
 } from './api';
 
 import {
@@ -33,26 +33,20 @@ import {
   basicCase,
   allCasesSnake,
   basicCaseSnake,
-  actionTypeExecutorResult,
   pushedCaseSnake,
   casesStatus,
   casesSnake,
   cases,
   caseUserActions,
   pushedCase,
-  pushSnake,
   reporters,
   respReporters,
-  serviceConnector,
-  casePushParams,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import * as i18n from './translations';
-import { getCaseConfigurePushUrl } from '../../../../case/common/api/helpers';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -83,11 +77,13 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual('');
     });
   });
+
   describe('getActionLicense', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(actionLicenses);
     });
+
     test('check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/actions/list_action_types`, {
@@ -101,6 +97,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(actionLicenses);
     });
   });
+
   describe('getCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -122,6 +119,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('getCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -144,6 +142,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
     });
+
     test('correctly applies filters', async () => {
       await getCases({
         filterOptions: {
@@ -168,6 +167,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
     });
+
     test('tags with weird chars get handled gracefully', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
@@ -204,6 +204,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...allCases });
     });
   });
+
   describe('getCasesStatus', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -222,6 +223,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(casesStatus);
     });
   });
+
   describe('getCaseUserActions', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -241,6 +243,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(caseUserActions);
     });
   });
+
   describe('getReporters', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -260,6 +263,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(respReporters);
     });
   });
+
   describe('getTags', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -279,6 +283,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(tags);
     });
   });
+
   describe('patchCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -306,6 +311,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...[basicCase] });
     });
   });
+
   describe('patchCasesStatus', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -333,6 +339,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...cases });
     });
   });
+
   describe('patchComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -370,6 +377,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('postCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -404,6 +412,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('postComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -428,88 +437,30 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('pushCase', () => {
+    const connectorId = 'connectorId';
+
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(pushedCaseSnake);
     });
 
     test('check url, method, signal', async () => {
-      await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/_push`, {
-        method: 'POST',
-        body: JSON.stringify(pushSnake),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
-      expect(resp).toEqual(pushedCase);
-    });
-  });
-  describe('pushToService', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(actionTypeExecutorResult);
-    });
-    const connectorId = 'connectorId';
-    test('check url, method, signal', async () => {
-      await pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${getCaseConfigurePushUrl(connectorId)}`, {
-        method: 'POST',
-        body: JSON.stringify({
-          connector_type: ConnectorTypes.jira,
-          params: casePushParams,
-        }),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await pushToService(
-        connectorId,
-        ConnectorTypes.jira,
-        casePushParams,
-        abortCtrl.signal
+      await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+          signal: abortCtrl.signal,
+        }
       );
-      expect(resp).toEqual(serviceConnector);
     });
 
-    test('unhappy path - serviceMessage', async () => {
-      const theError = 'the error';
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-        serviceMessage: theError,
-        message: 'not it',
-      });
-      await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
-    });
-
-    test('unhappy path - message', async () => {
-      const theError = 'the error';
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-        message: theError,
-      });
-      await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
-    });
-
-    test('unhappy path - no message', async () => {
-      const theError = i18n.ERROR_PUSH_TO_SERVICE;
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-      });
-      await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
+    test('happy path', async () => {
+      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      expect(resp).toEqual(pushedCase);
     });
   });
 });

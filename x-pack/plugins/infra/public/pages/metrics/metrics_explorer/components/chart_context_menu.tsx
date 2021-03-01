@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,6 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -23,7 +26,6 @@ import {
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
-import { SourceConfiguration } from '../../../../utils/source_configuration';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 
@@ -31,14 +33,14 @@ export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source?: SourceConfiguration;
+  source?: InfraSourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
 const fieldToNodeType = (
-  source: SourceConfiguration,
+  source: InfraSourceConfiguration,
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];

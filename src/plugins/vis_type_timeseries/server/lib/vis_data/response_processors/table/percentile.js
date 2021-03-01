@@ -1,29 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { last } from 'lodash';
 import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function percentile(bucket, panel, series) {
-  return (next) => (results) => {
+export function percentile(bucket, panel, series, meta, extractFields) {
+  return (next) => async (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE) {
@@ -34,7 +24,7 @@ export function percentile(bucket, panel, series) {
       aggregations: bucket,
     };
 
-    getSplits(fakeResp, panel, series).forEach((split) => {
+    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
       // table allows only one percentile in a series (the last one will be chosen in case of several)
       const percentile = last(metric.percentiles);
       const percentileKey = toPercentileNumber(percentile.value);
@@ -45,6 +35,7 @@ export function percentile(bucket, panel, series) {
 
       results.push({
         id: split.id,
+        label: `${split.label} (${percentile.value ?? 0})`,
         data,
       });
     });

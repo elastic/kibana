@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionFactoryRegistry } from '../types';
@@ -14,7 +15,6 @@ import {
 } from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
-import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
@@ -46,24 +46,19 @@ export class UiActionsServiceEnhancements
    */
   public readonly registerActionFactory = <
     Config extends BaseActionConfig = BaseActionConfig,
-    SupportedTriggers extends TriggerId = TriggerId,
-    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-      triggers: SupportedTriggers[];
-    },
-    ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+    ExecutionContext extends object = object,
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
   >(
-    definition: ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ActionContext>
+    definition: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>
   ) => {
     if (this.actionFactories.has(definition.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
     }
 
-    const actionFactory = new ActionFactory<
-      Config,
-      SupportedTriggers,
-      FactoryContext,
-      ActionContext
-    >(definition, this.deps);
+    const actionFactory = new ActionFactory<Config, ExecutionContext, FactoryContext>(
+      definition,
+      this.deps
+    );
 
     this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
     this.registerFeatureUsage(definition);
@@ -95,11 +90,8 @@ export class UiActionsServiceEnhancements
    */
   public readonly registerDrilldown = <
     Config extends BaseActionConfig = BaseActionConfig,
-    SupportedTriggers extends TriggerId = TriggerId,
-    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-      triggers: SupportedTriggers[];
-    },
-    ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+    ExecutionContext extends object = object,
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
   >({
     id: factoryId,
     isBeta,
@@ -118,13 +110,8 @@ export class UiActionsServiceEnhancements
     telemetry,
     extract,
     inject,
-  }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
-    const actionFactory: ActionFactoryDefinition<
-      Config,
-      SupportedTriggers,
-      FactoryContext,
-      ExecutionContext
-    > = {
+  }: DrilldownDefinition<Config, ExecutionContext, FactoryContext>): void => {
+    const actionFactory: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext> = {
       id: factoryId,
       isBeta,
       minimalLicense,
@@ -151,7 +138,7 @@ export class UiActionsServiceEnhancements
           ? async (context) => isCompatible(serializedAction.config, context)
           : undefined,
       }),
-    } as ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>;
+    } as ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>;
 
     this.registerActionFactory(actionFactory);
   };

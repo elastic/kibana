@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -18,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
@@ -160,24 +160,19 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={close} style={{ width: '800px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
+  <EuiModal onClose={close} style={{ width: '800px' }}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
 
-      <EuiModalBody>{children}</EuiModalBody>
+    <EuiModalBody>{children}</EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage
-            id="xpack.ml.validateJob.modal.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
+    <EuiModalFooter>
+      <EuiButton onClick={close} size="s" fill>
+        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 );
 Modal.propType = {
   close: PropTypes.func.isRequired,
@@ -309,8 +304,7 @@ export class ValidateJobUI extends Component {
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
-    const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
+    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

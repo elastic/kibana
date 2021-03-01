@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
@@ -120,9 +122,9 @@ export const fetchRules = async ({
     ...showElasticRuleFilter,
   ].join(' AND ');
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
+  const tags = filterOptions.tags
+    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
+    .join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''
@@ -205,7 +207,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 

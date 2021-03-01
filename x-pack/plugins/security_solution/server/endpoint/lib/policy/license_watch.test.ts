@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subject } from 'rxjs';
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from 'src/core/server/mocks';
 import { LicenseService } from '../../../../common/license/license';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
 import { PolicyWatcher } from './license_watch';
@@ -14,7 +19,7 @@ import { licenseMock } from '../../../../../licensing/common/licensing.mock';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
 import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
-import { factory } from '../../../../common/endpoint/models/policy_config';
+import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import { PolicyConfig } from '../../../../common/endpoint/types';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
@@ -23,7 +28,7 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
     // eslint-disable-next-line no-param-reassign
     cb = (p) => p;
   }
-  const policyConfig = cb(factory());
+  const policyConfig = cb(policyFactory());
   packagePolicy.inputs[0].config = { policy: { value: policyConfig } };
   return packagePolicy;
 };
@@ -31,6 +36,7 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
 describe('Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const soStartMock = savedObjectsServiceMock.createStartContract();
+  const esStartMock = elasticsearchServiceMock.createStart();
   let packagePolicySvcMock: jest.Mocked<PackagePolicyServiceInterface>;
 
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -45,7 +51,7 @@ describe('Policy-Changing license watcher', () => {
     // mock a license-changing service to test reactivity
     const licenseEmitter: Subject<ILicense> = new Subject();
     const licenseService = new LicenseService();
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, logger);
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
 
     // swap out watch function, just to ensure it gets called when a license change happens
     const mockWatch = jest.fn();
@@ -90,7 +96,7 @@ describe('Policy-Changing license watcher', () => {
         perPage: 100,
       });
 
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, logger);
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
     await pw.watch(Gold); // just manually trigger with a given license
 
     expect(packagePolicySvcMock.list.mock.calls.length).toBe(3); // should have asked for 3 pages of resuts
@@ -119,14 +125,14 @@ describe('Policy-Changing license watcher', () => {
       perPage: 100,
     });
 
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, logger);
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
 
     // emulate a license change below paid tier
     await pw.watch(Basic);
 
     expect(packagePolicySvcMock.update).toHaveBeenCalled();
     expect(
-      packagePolicySvcMock.update.mock.calls[0][2].inputs[0].config!.policy.value.windows.popup
+      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config!.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
   });

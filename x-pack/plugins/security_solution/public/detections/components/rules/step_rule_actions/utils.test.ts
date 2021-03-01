@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
@@ -51,15 +52,12 @@ describe('stepRuleActions utils', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeAll(() => {
-      const actionMock = {
+      const actionMock = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'id',
         iconClass: 'iconClass',
         validateParams: validateParamsMock,
         selectMessage: 'message',
-        validateConnector: jest.fn(),
-        actionConnectorFields: null,
-        actionParamsFields: null,
-      };
+      });
       actionTypeRegistry.get.mockReturnValue(actionMock);
     });
 

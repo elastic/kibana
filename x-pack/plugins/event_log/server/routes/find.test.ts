@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findRoute } from './find';
@@ -34,7 +35,7 @@ describe('find', () => {
       total: events.length,
       data: events,
     };
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(result);
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(result);
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
@@ -46,11 +47,11 @@ describe('find', () => {
 
     await handler(context, req, res);
 
-    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, id] = eventLogClient.findEventsBySavedObject.mock.calls[0];
+    const [type, ids] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(id).toEqual(`1`);
+    expect(ids).toEqual(['1']);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,
@@ -63,7 +64,7 @@ describe('find', () => {
     findRoute(router, systemLogger);
 
     const [, handler] = router.get.mock.calls[0];
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce({
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce({
       page: 0,
       per_page: 10,
       total: 0,
@@ -81,11 +82,11 @@ describe('find', () => {
 
     await handler(context, req, res);
 
-    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, id, options] = eventLogClient.findEventsBySavedObject.mock.calls[0];
+    const [type, ids, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(id).toEqual(`1`);
+    expect(ids).toEqual(['1']);
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
@@ -104,7 +105,7 @@ describe('find', () => {
     findRoute(router, systemLogger);
 
     const [, handler] = router.get.mock.calls[0];
-    eventLogClient.findEventsBySavedObject.mockRejectedValueOnce(new Error('oof!'));
+    eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('oof!'));
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
@@ -119,7 +120,7 @@ describe('find', () => {
 
     expect(systemLogger.debug).toHaveBeenCalledTimes(1);
     expect(systemLogger.debug).toHaveBeenCalledWith(
-      'error calling eventLog findEventsBySavedObject(action, 1, {"page":3,"per_page":10}): oof!'
+      'error calling eventLog findEventsBySavedObjectIds(action, [1], {"page":3,"per_page":10}): oof!'
     );
   });
 });

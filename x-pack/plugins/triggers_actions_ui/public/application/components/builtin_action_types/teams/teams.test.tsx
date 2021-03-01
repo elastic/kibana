@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -39,8 +41,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: [],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: [],
+        },
       },
     });
   });
@@ -55,8 +62,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is required.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is required.'],
+        },
       },
     });
   });
@@ -73,8 +85,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is invalid.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is invalid.'],
+        },
       },
     });
   });
@@ -91,8 +108,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL must start with https://.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL must start with https://.'],
+        },
       },
     });
   });

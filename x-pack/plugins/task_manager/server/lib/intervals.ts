@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isString, memoize } from 'lodash';
@@ -12,6 +13,19 @@ export enum IntervalCadence {
   Hour = 'h',
   Day = 'd',
 }
+
+// Once Babel is updated ot support Typescript 4.x templated types, we can use
+// this more accurate and safer compile-time valdiation
+// export type Interval = `${number}${IntervalCadence}`;
+export type Interval = string;
+
+export function isInterval(interval: Interval | string): interval is Interval {
+  const numericAsStr: string = interval.slice(0, -1);
+  const numeric: number = parseInt(numericAsStr, 10);
+  const cadence: IntervalCadence | string = interval.slice(-1);
+  return !(!isCadence(cadence) || isNaN(numeric) || numeric <= 0 || !isNumeric(numericAsStr));
+}
+
 const VALID_CADENCE = new Set(Object.values(IntervalCadence));
 const CADENCE_IN_MS: Record<IntervalCadence, number> = {
   [IntervalCadence.Second]: 1000,
@@ -24,7 +38,7 @@ function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadenc
   return VALID_CADENCE.has(cadence as IntervalCadence);
 }
 
-export function asInterval(ms: number): string {
+export function asInterval(ms: number): Interval {
   const secondsRemainder = ms % 1000;
   const minutesRemainder = ms % 60000;
   return secondsRemainder ? `${ms}ms` : minutesRemainder ? `${ms / 1000}s` : `${ms / 60000}m`;
@@ -34,9 +48,9 @@ export function asInterval(ms: number): string {
  * Returns a date that is the specified interval from now. Currently,
  * only minute-intervals and second-intervals are supported.
  *
- * @param {string} interval - An interval of the form `Nm` such as `5m`
+ * @param {Interval} interval - An interval of the form `Nm` such as `5m`
  */
-export function intervalFromNow(interval?: string): Date | undefined {
+export function intervalFromNow(interval?: Interval): Date | undefined {
   if (interval === undefined) {
     return;
   }
@@ -48,9 +62,9 @@ export function intervalFromNow(interval?: string): Date | undefined {
  * only minute-intervals and second-intervals are supported.
  *
  * @param {Date} date - The date to add interval to
- * @param {string} interval - An interval of the form `Nm` such as `5m`
+ * @param {Interval} interval - An interval of the form `Nm` such as `5m`
  */
-export function intervalFromDate(date: Date, interval?: string): Date | undefined {
+export function intervalFromDate(date: Date, interval?: Interval): Date | undefined {
   if (interval === undefined) {
     return;
   }
@@ -59,9 +73,11 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
 
 export function maxIntervalFromDate(
   date: Date,
-  ...intervals: Array<string | undefined>
+  ...intervals: Array<Interval | undefined>
 ): Date | undefined {
-  const maxSeconds = Math.max(...intervals.filter(isString).map(parseIntervalAsSecond));
+  const maxSeconds = Math.max(
+    ...intervals.filter(isString).map((interval) => parseIntervalAsSecond(interval as Interval))
+  );
   if (!isNaN(maxSeconds)) {
     return secondsFromDate(date, maxSeconds);
   }
@@ -91,14 +107,14 @@ export function secondsFromDate(date: Date, secs: number): Date {
 /**
  * Verifies that the specified interval matches our expected format.
  *
- * @param {string} interval - An interval such as `5m` or `10s`
+ * @param {Interval} interval - An interval such as `5m` or `10s`
  * @returns {number} The interval as seconds
  */
-export const parseIntervalAsSecond = memoize((interval: string): number => {
+export const parseIntervalAsSecond = memoize((interval: Interval): number => {
   return Math.round(parseIntervalAsMillisecond(interval) / 1000);
 });
 
-export const parseIntervalAsMillisecond = memoize((interval: string): number => {
+export const parseIntervalAsMillisecond = memoize((interval: Interval): number => {
   const numericAsStr: string = interval.slice(0, -1);
   const numeric: number = parseInt(numericAsStr, 10);
   const cadence: IntervalCadence | string = interval.slice(-1);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getIndexTemplate, getIlmPolicy } from './documents';
@@ -18,7 +19,8 @@ describe('getIlmPolicy()', () => {
 });
 
 describe('getIndexTemplate()', () => {
-  const esNames = getEsNames('XYZ');
+  const kibanaVersion = '1.2.3';
+  const esNames = getEsNames('XYZ', kibanaVersion);
 
   test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames);

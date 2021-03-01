@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,6 +25,8 @@ import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
+import { useSyncSelectedNode } from './use_sync_selected_node';
+import { ResolverNoProcessEvents } from './resolver_no_process_events';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -55,6 +58,11 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
     });
+
+    /**
+     * This will keep the selectedNode in the view in sync with the nodeID specified in the url
+     */
+    useSyncSelectedNode();
 
     const { timestamp } = useContext(SideEffectContext);
 
@@ -89,6 +97,10 @@ export const ResolverWithoutProviders = React.memo(
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const colorMap = useColors();
 
+    const noProcessEventsFound = useMemo(() => processNodePositions.size < 1, [
+      processNodePositions,
+    ]);
+
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
         {isLoading ? (
@@ -105,6 +117,8 @@ export const ResolverWithoutProviders = React.memo(
               />
             </div>
           </div>
+        ) : noProcessEventsFound ? (
+          <ResolverNoProcessEvents />
         ) : (
           <>
             <GraphContainer

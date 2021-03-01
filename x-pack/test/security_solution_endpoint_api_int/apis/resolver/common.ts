@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { firstNonNullValue } from '../../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
 import { NodeID } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
 import {
-  SafeResolverChildNode,
-  SafeResolverLifecycleNode,
   SafeResolverEvent,
-  ResolverNodeStats,
   ResolverNode,
   ResolverSchema,
 } from '../../../../plugins/security_solution/common/endpoint/types';
@@ -29,6 +28,32 @@ import {
   RelatedEventInfo,
   categoryMapping,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
+
+/**
+ * Schema used for the /tree api post requests that uses the ancestry
+ */
+export const schemaWithAncestry: ResolverSchema = {
+  ancestry: 'process.Ext.ancestry',
+  id: 'process.entity_id',
+  parent: 'process.parent.entity_id',
+};
+
+/**
+ * Schema used for the /tree api post requests that does not use the ancestry
+ */
+export const schemaWithoutAncestry: ResolverSchema = {
+  id: 'process.entity_id',
+  parent: 'process.parent.entity_id',
+};
+
+/**
+ * Schema used for the /tree api post requests that uses the name field
+ */
+export const schemaWithName: ResolverSchema = {
+  id: 'process.entity_id',
+  parent: 'process.parent.entity_id',
+  name: 'process.name',
+};
 
 const createLevels = ({
   descendantsByParent,
@@ -389,138 +414,6 @@ export const createAncestryArray = (events: Event[]) => {
 };
 
 /**
- * Check that the given lifecycle is in the resolver tree's corresponding map
- *
- * @deprecated use verifyTree
- * @param node a lifecycle node containing the start and end events for a node
- * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
- */
-const expectLifecycleNodeInMap = (
-  node: SafeResolverLifecycleNode,
-  nodeMap: Map<string, TreeNode>
-) => {
-  const genNode = nodeMap.get(node.entityID);
-  expect(genNode).to.be.ok();
-  compareArrays(genNode!.lifecycle, node.lifecycle, true);
-};
-
-/**
- * Verify that all the ancestor nodes are valid and optionally have parents.
- *
- * @deprecated use verifyTree
- * @param ancestors an array of ancestors
- * @param tree the generated resolver tree as the source of truth
- * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
- *  does not contain all the ancestors, the last one will not have the parent
- */
-export const checkAncestryFromEntityTreeAPI = (
-  ancestors: SafeResolverLifecycleNode[],
-  tree: Tree,
-  verifyLastParent: boolean
-) => {
-  // group the ancestors by their entity_id mapped to a lifecycle node
-  const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
-  // group by parent entity_id
-  const groupedAncestorsParent = _.groupBy(ancestors, (ancestor) =>
-    parentEntityIDSafeVersion(ancestor.lifecycle[0])
-  );
-  // make sure there aren't any nodes with the same entity_id
-  expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
-  // make sure there aren't any nodes with the same parent entity_id
-  expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
-
-  // make sure each of the ancestors' lifecycle events are in the generated tree
-  for (const node of ancestors) {
-    expectLifecycleNodeInMap(node, tree.ancestry);
-  }
-
-  // start at the origin which is always the first element of the array and make sure we have a connection
-  // using parent id between each of the nodes
-  let foundParents = 0;
-  let node = ancestors[0];
-  for (let i = 0; i < ancestors.length; i++) {
-    const parentID = parentEntityIDSafeVersion(node.lifecycle[0]);
-    if (parentID !== undefined) {
-      const nextNode = groupedAncestors[parentID];
-      if (!nextNode) {
-        break;
-      }
-      // the grouped nodes should only have a single entry since each entity is unique
-      node = nextNode[0];
-    }
-    foundParents++;
-  }
-
-  if (verifyLastParent) {
-    expect(foundParents).to.eql(ancestors.length);
-  } else {
-    // if we only retrieved a portion of all the ancestors then the most distant grandparent's parent will not necessarily
-    // be in the results
-    expect(foundParents).to.eql(ancestors.length - 1);
-  }
-};
-
-/**
- * Retrieves the most distant ancestor in the given array.
- *
- * @deprecated use verifyTree
- * @param ancestors an array of ancestor nodes
- */
-export const retrieveDistantAncestor = (ancestors: SafeResolverLifecycleNode[]) => {
-  // group the ancestors by their entity_id mapped to a lifecycle node
-  const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
-  let node = ancestors[0];
-  for (let i = 0; i < ancestors.length; i++) {
-    const parentID = parentEntityIDSafeVersion(node.lifecycle[0]);
-    if (parentID !== undefined) {
-      const nextNode = groupedAncestors[parentID];
-      if (nextNode) {
-        node = nextNode[0];
-      } else {
-        return node;
-      }
-    }
-  }
-  return node;
-};
-
-/**
- * Verify that the children nodes are correct
- *
- * @deprecated use verifyTree
- * @param children the children nodes
- * @param tree the generated resolver tree as the source of truth
- * @param numberOfParents an optional number to compare that are a certain number of parents in the children array
- * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
- */
-export const verifyChildrenFromEntityTreeAPI = (
-  children: SafeResolverChildNode[],
-  tree: Tree,
-  numberOfParents?: number,
-  childrenPerParent?: number
-) => {
-  // group the children by their entity_id mapped to a child node
-  const groupedChildren = _.groupBy(children, (child) => child.entityID);
-  // make sure each child is unique
-  expect(Object.keys(groupedChildren).length).to.eql(children.length);
-  if (numberOfParents !== undefined) {
-    const groupParent = _.groupBy(children, (child) =>
-      parentEntityIDSafeVersion(child.lifecycle[0])
-    );
-    expect(Object.keys(groupParent).length).to.eql(numberOfParents);
-    if (childrenPerParent !== undefined) {
-      Object.values(groupParent).forEach((childNodes) =>
-        expect(childNodes.length).to.be(childrenPerParent)
-      );
-    }
-  }
-
-  children.forEach((child) => {
-    expectLifecycleNodeInMap(child, tree.children);
-  });
-};
-
-/**
  * Compare an array of events returned from an API with an array of events generated
  *
  * @param expected an array to use as the source of truth
@@ -546,52 +439,4 @@ export const compareArrays = (
       })
     ).to.be.ok();
   });
-};
-
-/**
- * Verifies that the stats received from ES for a node reflect the categories of events that the generator created.
- *
- * @deprecated use verifyTree
- * @param relatedEvents the related events received for a particular node
- * @param categories the related event info used when generating the resolver tree
- */
-export const verifyEntityTreeStats = (
-  stats: ResolverNodeStats | undefined,
-  categories: RelatedEventInfo[],
-  relatedAlerts: number
-) => {
-  expect(stats).to.not.be(undefined);
-  let totalExpEvents = 0;
-  for (const cat of categories) {
-    const ecsCategories = categoryMapping[cat.category];
-    if (Array.isArray(ecsCategories)) {
-      // if there are multiple ecs categories used to define a related event, the count for all of them should be the same
-      // and they should equal what is defined in the categories used to generate the related events
-      for (const ecsCat of ecsCategories) {
-        expect(stats?.events.byCategory[ecsCat]).to.be(cat.count);
-      }
-    } else {
-      expect(stats?.events.byCategory[ecsCategories]).to.be(cat.count);
-    }
-
-    totalExpEvents += cat.count;
-  }
-  expect(stats?.events.total).to.be(totalExpEvents);
-};
-
-/**
- * A helper function for verifying the stats information an array of nodes.
- *
- * @deprecated use verifyTree
- * @param nodes an array of lifecycle nodes that should have a stats field defined
- * @param categories the related event info used when generating the resolver tree
- */
-export const verifyLifecycleStats = (
-  nodes: SafeResolverLifecycleNode[],
-  categories: RelatedEventInfo[],
-  relatedAlerts: number
-) => {
-  for (const node of nodes) {
-    verifyEntityTreeStats(node.stats, categories, relatedAlerts);
-  }
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState, Dispatch } from 'react';
@@ -11,6 +12,7 @@ import { CreateRulesSchema } from '../../../../../common/detection_engine/schema
 
 import { createRule } from './api';
 import * as i18n from './translations';
+import { transformOutput } from './transforms';
 
 interface CreateRuleReturn {
   isLoading: boolean;
@@ -29,11 +31,11 @@ export const useCreateRule = (): ReturnCreateRule => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     setIsSaved(false);
-    async function saveRule() {
+    const saveRule = async () => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await createRule({ rule, signal: abortCtrl.signal });
+          await createRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
           if (isSubscribed) {
             setIsSaved(true);
           }
@@ -46,15 +48,14 @@ export const useCreateRule = (): ReturnCreateRule => {
           setIsLoading(false);
         }
       }
-    }
+    };
 
     saveRule();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+  }, [rule, dispatchToaster]);
 
   return [{ isLoading, isSaved }, setRule];
 };

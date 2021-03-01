@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { waitFor } from '@testing-library/react';
 
 import { AllRulesUtilityBar } from './utility_bar';
 
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
+const mockTheme = { eui: { euiBreakpoints: { l: '1200px' }, paddingSizes: { m: '10px' } } };
 
 describe('AllRules', () => {
   it('renders AllRulesUtilityBar total rules and selected rules', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
@@ -39,7 +39,7 @@ describe('AllRules', () => {
 
   it('does not render total selected and bulk actions when "showBulkActions" is false', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
@@ -62,7 +62,7 @@ describe('AllRules', () => {
 
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
@@ -81,7 +81,7 @@ describe('AllRules', () => {
 
   it('renders no utility actions if user has no permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions
           onRefresh={jest.fn()}
@@ -101,7 +101,7 @@ describe('AllRules', () => {
   it('invokes refresh on refresh action click', () => {
     const mockRefresh = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={mockRefresh}
@@ -123,7 +123,7 @@ describe('AllRules', () => {
   it('invokes onRefreshSwitch when auto refresh switch is clicked', async () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}

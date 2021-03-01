@@ -7,16 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function createAction<T extends ActionType>(action: ActionDefinitionByType<T>): ActionByType<T>;
+export declare function createAction<Context extends object = object>(action: ActionDefinition<Context>): Action<Context>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  action | <code>ActionDefinitionByType&lt;T&gt;</code> |  |
+|  action | <code>ActionDefinition&lt;Context&gt;</code> |  |
 
 <b>Returns:</b>
 
-`ActionByType<T>`
+`Action<Context>`
 

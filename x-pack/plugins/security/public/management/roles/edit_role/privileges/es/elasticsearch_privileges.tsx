@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -19,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import React, { Component, Fragment } from 'react';
+import type { DocLinksStart } from 'src/core/public';
 import { Role, BuiltinESPrivileges } from '../../../../../../common/model';
 import { SecurityLicense } from '../../../../../../common/licensing';
 import { IndicesAPIClient } from '../../../indices_api_client';
@@ -26,13 +28,12 @@ import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
-import { DocumentationLinksService } from '../../../documentation_links';
 
 interface Props {
   role: Role;
   editable: boolean;
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   license: SecurityLicense;
   onChange: (role: Role) => void;
   runAsUsers: string[];
@@ -90,7 +91,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                 id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
                 defaultMessage="Manage the actions this role can perform against your cluster. "
               />
-              {this.learnMore(docLinks.getESClusterPrivilegesDocUrl())}
+              {this.learnMore(docLinks.links.security.clusterPrivileges)}
             </p>
           }
         >
@@ -120,7 +121,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                 id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
                 defaultMessage="Allow requests to be submitted on the behalf of other users. "
               />
-              {this.learnMore(docLinks.getESRunAsPrivilegesDocUrl())}
+              {this.learnMore(docLinks.links.security.runAsPrivilege)}
             </p>
           }
         >
@@ -164,7 +165,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
               defaultMessage="Control access to the data in your cluster. "
             />
-            {this.learnMore(docLinks.getESIndicesPrivilegesDocUrl())}
+            {this.learnMore(docLinks.links.security.indicesPrivileges)}
           </p>
         </EuiText>
 

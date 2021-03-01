@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('uptime alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/88177
+  describe.skip('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -88,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // the previous line resolves, the API may not be done creating the alert yet, so we
         // put the fetch code in a retry block with a timeout.
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -196,14 +197,17 @@ export class HeadlessChromiumDriver {
   }
 
   public async setViewport(
-    { width, height, zoom }: ViewZoomWidthHeight,
+    { width: _width, height: _height, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
-    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+    const width = Math.floor(_width);
+    const height = Math.floor(_height);
+
+    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 
     await this.page.setViewport({
-      width: Math.floor(width / zoom),
-      height: Math.floor(height / zoom),
+      width,
+      height,
       deviceScaleFactor: zoom,
       isMobile: false,
     });
@@ -243,7 +247,7 @@ export class HeadlessChromiumDriver {
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
-        logger.debug(`Using custom headers for ${interceptedUrl}`);
+        logger.trace(`Using custom headers for ${interceptedUrl}`);
         const headers = map(
           {
             ...interceptedRequest.request.headers,
@@ -270,7 +274,7 @@ export class HeadlessChromiumDriver {
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
-        logger.debug(`No custom headers for ${loggedUrl}`);
+        logger.trace(`No custom headers for ${loggedUrl}`);
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {

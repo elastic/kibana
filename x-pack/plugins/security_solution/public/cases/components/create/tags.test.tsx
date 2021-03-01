@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,9 +10,10 @@ import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook, FIELD_TYPES } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../../shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
+import { schema, FormProps } from './schema';
 
 jest.mock('../../containers/use_get_tags');
 const useGetTagsMock = useGetTags as jest.Mock;
@@ -20,10 +22,10 @@ describe('Tags', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ tags: string[] }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {
-        tags: { type: FIELD_TYPES.COMBO_BOX },
+        tags: schema.tags,
       },
     });
 

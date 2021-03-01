@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -12,6 +13,7 @@ import {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
+import { TimelineEqlResponse } from '../common/search_strategy/timeline';
 import { SecurityPageName } from './app/types';
 import { InspectResponse } from './types';
 
@@ -106,7 +108,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 };
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T>,
+  response: StrategyResponseType<T> | TimelineEqlResponse,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],

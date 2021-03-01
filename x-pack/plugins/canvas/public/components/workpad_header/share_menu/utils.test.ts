@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../../../../common/lib/fetch');
 
 import { getPdfUrl, createPdf, LayoutType } from './utils';
-import { workpads } from '../../../../__tests__/fixtures/workpads';
+import { workpads } from '../../../../__fixtures__/workpads';
 import { fetch } from '../../../../common/lib/fetch';
 import { IBasePath } from 'kibana/public';
 

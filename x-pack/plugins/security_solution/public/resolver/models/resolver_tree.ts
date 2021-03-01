@@ -1,14 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  ResolverTree,
-  ResolverNodeStats,
-  ResolverLifecycleNode,
-  SafeResolverEvent,
   NewResolverTree,
   ResolverNode,
   EventStats,
@@ -82,51 +79,6 @@ export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventS
     }
   }
   return stats;
-}
-
-/**
- * ResolverTree is a type returned by the server.
- */
-
-/**
- * This returns the 'LifecycleNodes' of the tree. These nodes have
- * the entityID and stats for a process. Used by `relatedEventsStats`.
- *
- * @deprecated use indexed_process_tree instead
- */
-function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
-  return [tree, ...tree.children.childNodes, ...tree.ancestry.ancestors];
-}
-
-/**
- * All the process events
- *
- * @deprecated use nodeData instead
- */
-export function lifecycleEvents(tree: ResolverTree) {
-  const events: SafeResolverEvent[] = [...tree.lifecycle];
-  for (const { lifecycle } of tree.children.childNodes) {
-    events.push(...lifecycle);
-  }
-  for (const { lifecycle } of tree.ancestry.ancestors) {
-    events.push(...lifecycle);
-  }
-  return events;
-}
-
-/**
- * This returns a map of entity_ids to stats for the related events and alerts.
- *
- * @deprecated use indexed_process_tree instead
- */
-export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
-  const nodeRelatedEventStats: Map<string, ResolverNodeStats> = new Map();
-  for (const node of lifecycleNodes(tree)) {
-    if (node.stats) {
-      nodeRelatedEventStats.set(node.entityID, node.stats);
-    }
-  }
-  return nodeRelatedEventStats;
 }
 
 /**

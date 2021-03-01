@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../spaces/public';
 import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
@@ -25,6 +27,7 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   validator: RoleValidator;
+  spacesApiUi?: SpacesApiUi;
 }
 
 export class KibanaPrivilegesRegion extends Component<Props, {}> {
@@ -47,6 +50,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       onChange,
       editable,
       validator,
+      spacesApiUi,
     } = this.props;
 
     if (role._transform_error && role._transform_error.includes('kibana')) {
@@ -64,6 +68,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           editable={editable}
           canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
           validator={validator}
+          spacesApiUi={spacesApiUi!}
         />
       );
     } else {

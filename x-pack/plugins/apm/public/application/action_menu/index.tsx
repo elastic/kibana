@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
@@ -28,6 +29,7 @@ export function ActionMenu() {
     canSaveAlerts,
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, capabilities);
+  const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -52,7 +54,7 @@ export function ActionMenu() {
         <AlertingPopoverAndFlyout
           basePath={basePath}
           canReadAlerts={canReadAlerts}
-          canSaveAlerts={canSaveAlerts}
+          canSaveAlerts={canSaveApmAlerts}
           canReadAnomalies={canReadAnomalies}
           includeTransactionDuration={serviceName !== undefined}
         />

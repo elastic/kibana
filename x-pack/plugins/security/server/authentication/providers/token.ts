@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import { AuthenticationInfo } from '../../elasticsearch';
+import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -65,9 +68,13 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         access_token: accessToken,
         refresh_token: refreshToken,
         authentication: authenticationInfo,
-      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'password', username, password },
-      });
+      } = (
+        await this.options.client.asInternalUser.security.getToken<{
+          access_token: string;
+          refresh_token: string;
+          authentication: AuthenticationInfo;
+        }>({ body: { grant_type: 'password', username, password } })
+      ).body;
 
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
@@ -80,7 +87,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         }
       );
     } catch (err) {
-      this.logger.debug(`Failed to perform a login: ${err.message}`);
+      this.logger.debug(`Failed to perform a login: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
   }

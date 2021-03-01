@@ -9,5 +9,5 @@ ID of the factory for this action. Used to construct dynamic actions.
 <b>Signature:</b>
 
 ```typescript
-readonly type?: ActionType;
+readonly type?: string;
 ```

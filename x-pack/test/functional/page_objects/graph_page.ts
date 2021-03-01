@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
@@ -196,7 +197,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('confirmSaveSavedObjectButton');
 
       // Confirm that the Graph has been saved.
-      return await testSubjects.exists('saveGraphSuccess');
+      return await testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
     }
 
     async getSearchFilter() {

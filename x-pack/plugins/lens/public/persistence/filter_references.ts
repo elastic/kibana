@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Filter } from 'src/plugins/data/public';
@@ -22,14 +23,18 @@ export function extractFilterReferences(
       type: 'index-pattern',
       id: filterRow.meta.index,
     });
-    return {
+    const newFilter = {
       ...filterRow,
       meta: {
         ...filterRow.meta,
         indexRefName: refName,
-        index: undefined,
       },
     };
+    // remove index because it's specified by indexRefName
+    delete newFilter.meta.index;
+    // remove value because it can't be persisted
+    delete newFilter.meta.value;
+    return newFilter;
   });
 
   return { persistableFilters, references };

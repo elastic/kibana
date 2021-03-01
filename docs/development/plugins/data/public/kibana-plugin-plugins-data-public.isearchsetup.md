@@ -18,6 +18,6 @@ export interface ISearchSetup
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-public.isearchsetup.aggs.md) | <code>AggsSetup</code> |  |
 |  [session](./kibana-plugin-plugins-data-public.isearchsetup.session.md) | <code>ISessionService</code> | Current session management [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |
-|  [sessionsClient](./kibana-plugin-plugins-data-public.isearchsetup.sessionsclient.md) | <code>ISessionsClient</code> | Background search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |
+|  [sessionsClient](./kibana-plugin-plugins-data-public.isearchsetup.sessionsclient.md) | <code>ISessionsClient</code> | Search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |
 |  [usageCollector](./kibana-plugin-plugins-data-public.isearchsetup.usagecollector.md) | <code>SearchUsageCollector</code> |  |
 

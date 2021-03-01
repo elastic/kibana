@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies files written or modified in the startup folder by unsigned processes. Adversaries may abuse this technique to maintain persistence in an environment.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*"
   ],
@@ -30,13 +31,20 @@
       },
       "technique": [
         {
-          "id": "T1060",
-          "name": "Registry Run Keys / Startup Folder",
-          "reference": "https://attack.mitre.org/techniques/T1060/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

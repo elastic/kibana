@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -14,7 +15,7 @@ import {
   QuerySignalsSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 
-export const querySignalsRoute = (router: IRouter) => {
+export const querySignalsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_QUERY_SIGNALS_URL,

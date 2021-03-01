@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -47,6 +36,8 @@ export interface BundleSpec {
   readonly banner?: string;
   /** Absolute path to a kibana.json manifest file, if omitted we assume there are not dependenices */
   readonly manifestPath?: string;
+  /** Maximum allowed page load asset size for the bundles page load asset */
+  readonly pageLoadAssetSizeLimit?: number;
 }
 
 export class Bundle {
@@ -74,6 +65,8 @@ export class Bundle {
    * Every bundle mentioned in the `requiredBundles` must be built together.
    */
   public readonly manifestPath: BundleSpec['manifestPath'];
+  /** Maximum allowed page load asset size for the bundles page load asset */
+  public readonly pageLoadAssetSizeLimit: BundleSpec['pageLoadAssetSizeLimit'];
 
   public readonly cache: BundleCache;
 
@@ -86,8 +79,9 @@ export class Bundle {
     this.outputDir = spec.outputDir;
     this.manifestPath = spec.manifestPath;
     this.banner = spec.banner;
+    this.pageLoadAssetSizeLimit = spec.pageLoadAssetSizeLimit;
 
-    this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
+    this.cache = new BundleCache(this.outputDir);
   }
 
   /**
@@ -118,6 +112,7 @@ export class Bundle {
       outputDir: this.outputDir,
       manifestPath: this.manifestPath,
       banner: this.banner,
+      pageLoadAssetSizeLimit: this.pageLoadAssetSizeLimit,
     };
   }
 
@@ -233,6 +228,13 @@ export function parseBundles(json: string) {
           }
         }
 
+        const { pageLoadAssetSizeLimit } = spec;
+        if (pageLoadAssetSizeLimit !== undefined) {
+          if (!(typeof pageLoadAssetSizeLimit === 'number')) {
+            throw new Error('`bundles[]` must have a numeric `pageLoadAssetSizeLimit` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
@@ -242,6 +244,7 @@ export function parseBundles(json: string) {
           outputDir,
           banner,
           manifestPath,
+          pageLoadAssetSizeLimit,
         });
       }
     );

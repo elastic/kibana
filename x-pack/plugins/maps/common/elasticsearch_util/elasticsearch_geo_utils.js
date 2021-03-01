@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -172,8 +173,15 @@ export function convertESShapeToGeojsonGeometry(value) {
       geoJson.type = GEO_JSON_TYPE.MULTI_POLYGON;
       break;
     case 'geometrycollection':
-      geoJson.type = GEO_JSON_TYPE.GEOMETRY_COLLECTION;
-      break;
+    case GEO_JSON_TYPE.GEOMETRY_COLLECTION:
+      // PEBKAC - geometry-collections need to be unrolled to their individual geometries first.
+      const invalidGeometrycollectionError = i18n.translate(
+        'xpack.maps.es_geo_utils.convert.invalidGeometryCollectionErrorMessage',
+        {
+          defaultMessage: `Should not pass GeometryCollection to convertESShapeToGeojsonGeometry`,
+        }
+      );
+      throw new Error(invalidGeometrycollectionError);
     case 'envelope':
       // format defined here https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#_envelope
       const polygon = formatEnvelopeAsPolygon({
@@ -227,14 +235,21 @@ export function geoShapeToGeometry(value, accumulator) {
     return;
   }
 
-  let geoJson;
   if (typeof value === 'string') {
-    geoJson = convertWKTStringToGeojson(value);
+    const geoJson = convertWKTStringToGeojson(value);
+    accumulator.push(geoJson);
+  } else if (
+    // Needs to deal with possible inconsistencies in capitalization
+    value.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION ||
+    value.type === 'geometrycollection'
+  ) {
+    for (let i = 0; i < value.geometries.length; i++) {
+      geoShapeToGeometry(value.geometries[i], accumulator);
+    }
   } else {
-    geoJson = convertESShapeToGeojsonGeometry(value);
+    const geoJson = convertESShapeToGeojsonGeometry(value);
+    accumulator.push(geoJson);
   }
-
-  accumulator.push(geoJson);
 }
 
 export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {

@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "server/**/*",
+    "scripts/**/*",
+    "generated/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "generated/*.json",
+    "common/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" }
+  ]
+}

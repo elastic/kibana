@@ -1,0 +1,211 @@
+---
+id: presentationUtilPlugin
+slug: /kibana-dev-docs/presentationPlugin
+title: Presentation Utility Plugin
+summary: Introduction to the Presentation Utility Plugin.
+date: 2020-01-12
+tags: ['kibana', 'presentation', 'services']
+related: []
+---
+
+## Introduction
+
+The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
+
+## Plugin Services Toolkit
+
+While Kibana provides a `useKibana` hook for use in a plugin, the number of services it provides is very large.  This presents a set of difficulties:
+
+- a direct dependency upon the Kibana environment;
+- a requirement to mock the full Kibana environment when testing or using Storybook;
+- a lack of knowledge as to what services are being consumed at any given time.
+
+To mitigate these difficulties, the Presentation Team creates services within the plugin that then consume Kibana-provided (or other) services.  This is a toolkit for creating simple services within a plugin.
+
+### Overview
+
+- A `PluginServiceFactory` is a function that will return a set of functions-- which comprise a `Service`-- given a set of parameters.
+- A `PluginServiceProvider` is an object that use a factory to start, stop or provide a `Service`.
+- A `PluginServiceRegistry` is a collection of providers for a given environment, (e.g. Kibana, Jest, Storybook, stub, etc).
+- A `PluginServices` object uses a registry to provide services throughout the plugin.
+
+### Defining Services
+
+To start, a plugin should define a set of services it wants to provide to itself or other plugins.
+
+<DocAccordion buttonContent="Service Definition Example" initialIsOpen>
+```ts
+export interface PresentationDashboardsService {
+  findDashboards: (
+    query: string,
+    fields: string[]
+  ) => Promise<Array<SimpleSavedObject<DashboardSavedObject>>>;
+  findDashboardsByTitle: (title: string) => Promise<Array<SimpleSavedObject<DashboardSavedObject>>>;
+}
+
+export interface PresentationFooService {
+  getFoo: () => string;
+  setFoo: (bar: string) => void;
+}
+
+export interface PresentationUtilServices {
+  dashboards: PresentationDashboardsService;
+  foo: PresentationFooService;
+}
+```
+</DocAccordion>
+
+This definition will be used in the toolkit to ensure services are complete and as expected.
+
+### Plugin Services
+
+The `PluginServices` class hosts a registry of service providers from which a plugin can access its services.  It uses the service definition as a generic.
+
+```ts
+export const pluginServices = new PluginServices<PresentationUtilServices>();
+```
+
+This can be placed in the `index.ts` file of a `services` directory within your plugin.
+
+Once created, it simply requires a `PluginServiceRegistry` to be started and set.
+
+### Service Provider Registry
+
+Each environment in which components are used requires a `PluginServiceRegistry` to specify how the providers are started.  For example, simple stubs of services require no parameters to start, (so the `StartParameters` generic remains unspecified)
+
+<DocAccordion buttonContent="Stubbed Service Registry Example" initialIsOpen>
+```ts
+export const providers: PluginServiceProviders<PresentationUtilServices> = {
+  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  foo: new PluginServiceProvider(fooServiceFactory),
+};
+
+export const serviceRegistry = new PluginServiceRegistry<PresentationUtilServices>(providers);
+```
+</DocAccordion>
+
+By contrast, a registry that uses Kibana can provide `KibanaPluginServiceParams` to determine how to start its providers, so the `StartParameters` generic is given:
+
+<DocAccordion buttonContent="Kibana Service Registry Example" initialIsOpen>
+```ts
+export const providers: PluginServiceProviders<
+  PresentationUtilServices,
+  KibanaPluginServiceParams<PresentationUtilPluginStart>
+> = {
+  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  foo: new PluginServiceProvider(fooServiceFactory),
+};
+
+export const serviceRegistry = new PluginServiceRegistry<
+  PresentationUtilServices,
+  KibanaPluginServiceParams<PresentationUtilPluginStart>
+>(providers);
+```
+</DocAccordion>
+
+### Service Provider
+
+A `PluginServiceProvider` is a container for a Service Factory that is responsible for starting, stopping and providing a service implementation.  A Service Provider doesn't change, rather the factory and the relevant `StartParameters` change.
+
+### Service Factories
+
+A Service Factory is nothing more than a function that uses `StartParameters` to return a set of functions that conforms to a portion of the `Services` specification.  For each service, a factory is provided for each environment.
+
+Given a service definition:
+
+```ts
+export interface PresentationFooService {
+  getFoo: () => string;
+  setFoo: (bar: string) => void;
+}
+```
+
+a factory for a stubbed version might look like this:
+
+```ts
+type FooServiceFactory = PluginServiceFactory<PresentationFooService>;
+
+export const fooServiceFactory: FooServiceFactory = () => ({
+  getFoo: () => 'bar',
+  setFoo: (bar) => { console.log(`${bar} set!`)},
+});
+```
+
+and a factory for a Kibana version might look like this:
+
+```ts
+export type FooServiceFactory = KibanaPluginServiceFactory<
+  PresentationFooService,
+  PresentationUtilPluginStart
+>;
+
+export const fooServiceFactory: FooServiceFactory = ({
+  coreStart,
+  startPlugins,
+}) => {
+  // ...do something with Kibana services...
+
+  return {
+    getFoo: //...
+    setFoo: //...
+  }
+}
+```
+
+### Using Services
+
+Once your services and providers are defined, and you have at least one set of factories, you can use `PluginServices` to provide the services to your React components:
+
+<DocAccordion buttonContent="Services starting in a plugin" initialIsOpen>
+```ts
+// plugin.ts
+import { pluginServices } from './services';
+import { registry } from './services/kibana';
+
+  public async start(
+    coreStart: CoreStart,
+    startPlugins: StartDeps
+  ): Promise<PresentationUtilPluginStart> {
+    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+    return {};
+  }
+```
+</DocAccordion>
+
+and wrap your root React component with the `PluginServices` context:
+
+<DocAccordion buttonContent="Providing services in a React context" initialIsOpen>
+```ts
+import { pluginServices } from './services';
+
+const ContextProvider = pluginServices.getContextProvider(),
+
+return(
+  <I18nContext>
+    <WhateverElse>
+      <ContextProvider>{application}</ContextProvider>
+    </WhateverElse>
+  </I18nContext>
+)
+```
+</DocAccordion>
+
+and then, consume your services using provided hooks in a component:
+
+<DocAccordion buttonContent="Consuming services in a component" initialIsOpen>
+```ts
+// component.ts
+
+import { pluginServices } from '../services';
+
+export function MyComponent() {
+  // Retrieve all context hooks from `PluginServices`, destructuring for the one we're using
+  const { foo } = pluginServices.getHooks();
+
+  // Use the `useContext` hook to access the API.
+  const { getFoo } = foo.useService();
+
+  // ...
+}
+```
+</DocAccordion>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, of, Subject } from 'rxjs';
@@ -113,7 +114,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(0);
 
@@ -213,7 +214,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(2000);
 
@@ -281,7 +282,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
@@ -356,12 +357,16 @@ function mockHealthStats(overrides = {}) {
           timestamp: new Date().toISOString(),
           value: {
             drift: [1000, 60000],
+            load: [0, 100, 75],
             execution: {
               duration: [],
               result_frequency_percent_as_number: [],
             },
             polling: {
               last_successful_poll: new Date().toISOString(),
+              duration: [500, 400, 3000],
+              claim_conflicts: [0, 100, 75],
+              claim_mismatches: [0, 100, 75],
               result_frequency_percent_as_number: [
                 'NoTasksClaimed',
                 'NoTasksClaimed',

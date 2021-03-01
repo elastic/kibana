@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect } from 'react';
@@ -10,9 +11,20 @@ import { esQuery, esKuery } from '../../../../../../../../../../src/plugins/data
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
 
+// `undefined` is used for a non-initialized state
+// `null` is set if no saved search is used
+export type SavedSearchQuery = Record<string, any> | null | undefined;
+export type SavedSearchQueryStr =
+  | string
+  | {
+      [key: string]: any;
+    }
+  | null
+  | undefined;
+
 export function useSavedSearch() {
-  const [savedSearchQuery, setSavedSearchQuery] = useState<any>(undefined);
-  const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<any>(undefined);
+  const [savedSearchQuery, setSavedSearchQuery] = useState<SavedSearchQuery>(undefined);
+  const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
   const mlContext = useMlContext();
   const { currentSavedSearch, currentIndexPattern, kibanaConfig } = mlContext;
@@ -36,6 +48,9 @@ export function useSavedSearch() {
 
       setSavedSearchQuery(qry);
       setSavedSearchQueryStr(qryString);
+    } else {
+      setSavedSearchQuery(null);
+      setSavedSearchQueryStr(null);
     }
   };
 

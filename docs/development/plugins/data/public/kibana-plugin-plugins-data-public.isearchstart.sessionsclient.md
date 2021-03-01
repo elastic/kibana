@@ -4,7 +4,7 @@
 
 ## ISearchStart.sessionsClient property
 
-Background search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md)
+Search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md)
 
 <b>Signature:</b>
 

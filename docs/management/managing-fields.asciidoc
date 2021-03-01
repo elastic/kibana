@@ -18,6 +18,7 @@ To format a field:
 . Open the main menu, and click *Stack Management > Index Patterns*.
 . Click the index pattern that contains the field you want to format.
 . Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
+. Enter a custom label for the field, if needed.
 . Select a format and fill in the details.
 +
 [role="screenshot"]

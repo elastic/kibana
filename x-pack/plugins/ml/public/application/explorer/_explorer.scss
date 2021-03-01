@@ -11,7 +11,7 @@ $borderRadius: $euiBorderRadius / 2;
   }
 
   .results-container {
-    padding: 0px 0px $euiSize 0px;
+    padding: 0 0 $euiSize 0;
 
     // SASSTODO: Overwrite of bootstrap
     .col-xs-12 {

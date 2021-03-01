@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect } from 'react';
@@ -9,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSpacer,
   EuiModal,
-  EuiOverlayMask,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
@@ -76,74 +76,72 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
 
   if (canDelete) {
     return (
-      <EuiOverlayMask>
-        <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
-                defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-                values={{
-                  jobsCount: jobIds.length,
-                  jobId: jobIds[0],
-                }}
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <p>
-              {deleting === true ? (
-                <div>
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.deleteJobModal.deletingJobsStatusLabel"
-                    defaultMessage="Deleting jobs"
-                  />
-                  <EuiSpacer />
-                  <div style={{ textAlign: 'center' }}>
-                    <EuiLoadingSpinner size="l" />
-                  </div>
+      <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
+              defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+              values={{
+                jobsCount: jobIds.length,
+                jobId: jobIds[0],
+              }}
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <p>
+            {deleting === true ? (
+              <div>
+                <FormattedMessage
+                  id="xpack.ml.jobsList.deleteJobModal.deletingJobsStatusLabel"
+                  defaultMessage="Deleting jobs"
+                />
+                <EuiSpacer />
+                <div style={{ textAlign: 'center' }}>
+                  <EuiLoadingSpinner size="l" />
                 </div>
-              ) : (
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
+              </div>
+            ) : (
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
+                  defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
                 {jobsCount, plural, one {It} other {They}} will be deleted in the background
                 and may not disappear from the jobs list instantly."
-                    values={{
-                      jobsCount: jobIds.length,
-                    }}
-                  />
-                </EuiText>
-              )}
-            </p>
-          </EuiModalBody>
-          <>
-            <EuiSpacer />
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={closeModal} disabled={deleting}>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.deleteJobModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
+                  values={{
+                    jobsCount: jobIds.length,
+                  }}
                 />
-              </EuiButtonEmpty>
+              </EuiText>
+            )}
+          </p>
+        </EuiModalBody>
+        <>
+          <EuiSpacer />
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={closeModal} disabled={deleting}>
+              <FormattedMessage
+                id="xpack.ml.jobsList.deleteJobModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
 
-              <EuiButton
-                onClick={deleteJob}
-                fill
-                disabled={deleting}
-                color="danger"
-                data-test-subj="mlDeleteJobConfirmModalButton"
-              >
-                <FormattedMessage
-                  id="xpack.ml.jobsList.deleteJobModal.deleteButtonLabel"
-                  defaultMessage="Delete"
-                />
-              </EuiButton>
-            </EuiModalFooter>
-          </>
-        </EuiModal>
-      </EuiOverlayMask>
+            <EuiButton
+              onClick={deleteJob}
+              fill
+              disabled={deleting}
+              color="danger"
+              data-test-subj="mlDeleteJobConfirmModalButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.deleteJobModal.deleteButtonLabel"
+                defaultMessage="Delete"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </>
+      </EuiModal>
     );
   } else {
     return (

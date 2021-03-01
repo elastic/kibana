@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,9 +16,12 @@ import { DEFAULT_POLICY_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
-
-  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
+  const {
+    createIndex,
+    createComposableIndexTemplate,
+    createDataStream,
+    cleanUp: cleanUpEsResources,
+  } = initElasticsearchHelpers(getService);
 
   const {
     loadPolicies,
@@ -73,6 +77,34 @@ export default function ({ getService }) {
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
         expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
+      });
+
+      it('should add hidden indices linked to policies', async () => {
+        // Create a policy
+        const policy = getPolicyPayload('hidden-index-link-test-policy');
+        const { name: policyName } = policy;
+        await createPolicy(policy);
+
+        // Create hidden data stream
+        await createComposableIndexTemplate('my_template', {
+          template: {},
+          index_patterns: ['hidden*'],
+          data_stream: {
+            hidden: true,
+          },
+        });
+
+        const indexName = 'hidden_index';
+        await createDataStream(indexName, {
+          '@timestamp': '2020-01-27',
+        });
+
+        await addPolicyToIndex(policyName, indexName);
+
+        const { body } = await loadPolicies(true);
+        const fetchedPolicy = body.find((p) => p.name === policyName);
+        // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
+        expect(fetchedPolicy.linkedIndices[0]).to.contain(indexName);
       });
     });
 

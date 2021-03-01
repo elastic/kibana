@@ -1,0 +1,3 @@
+x-pack/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss
+build
+target

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -23,7 +24,7 @@ export const mockParsedObjects = [
     title: 'My duplicate timeline',
     dateRange: { start: '2020-03-18T09:31:47.294Z', end: '2020-03-19T09:31:47.294Z' },
     savedQueryId: null,
-    sort: { columnId: '@timestamp', sortDirection: 'desc' },
+    sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
     created: 1584828930463,
     createdBy: 'angela',
     updated: 1584868346013,
@@ -698,6 +699,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
       },
       created: 1588162404153,
@@ -870,6 +872,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
       },
       timelineType: 'template',
@@ -1052,6 +1055,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
       },
       timelineType: 'template',
@@ -1172,6 +1176,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
       },
       timelineType: 'template',

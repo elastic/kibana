@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { isAgentsSetup, unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
@@ -27,6 +28,7 @@ const fakeRequest = ({
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   action: string,
   agentPolicyId: string
 ) {
@@ -40,7 +42,7 @@ export async function agentPolicyUpdateEventHandler(
   const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
-    await generateEnrollmentAPIKey(soClient, {
+    await generateEnrollmentAPIKey(soClient, esClient, {
       agentPolicyId,
     });
     await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
@@ -51,7 +53,7 @@ export async function agentPolicyUpdateEventHandler(
   }
 
   if (action === 'deleted') {
-    await unenrollForAgentPolicyId(soClient, agentPolicyId);
+    await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
     await deleteEnrollmentApiKeyForAgentPolicyId(soClient, agentPolicyId);
   }
 }

@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { SavedObjectAttributes } from '../../../../core/public';
+import { extractSearchSourceReferences } from '../../../data/public';
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
@@ -85,12 +76,12 @@ export class VisualizeEmbeddableFactory
     type: 'visualization',
     getIconForSavedObject: (savedObject) => {
       return (
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.icon || 'visualizeApp'
       );
     },
     getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.title
       })`;
     },
     showSavedObject: (savedObject) => {
@@ -197,6 +188,7 @@ export class VisualizeEmbeddableFactory
       const saveOptions = {
         confirmOverwrite: false,
         returnToOrigin: true,
+        isTitleDuplicateConfirmed: true,
       };
       savedVis.title = title;
       savedVis.copyOnSave = false;
@@ -245,5 +237,43 @@ export class VisualizeEmbeddableFactory
         overlays,
       }
     );
+  }
+
+  public extract(_state: EmbeddableStateWithType) {
+    const state = (_state as unknown) as VisualizeInput;
+    const references = [];
+
+    if (state.savedVis?.data.searchSource) {
+      const [, searchSourceReferences] = extractSearchSourceReferences(
+        state.savedVis.data.searchSource
+      );
+
+      references.push(...searchSourceReferences);
+    }
+
+    if (state.savedVis?.data.savedSearchId) {
+      references.push({
+        name: 'search_0',
+        type: 'search',
+        id: String(state.savedVis.data.savedSearchId),
+      });
+    }
+
+    if (state.savedVis?.params.controls) {
+      const controls = state.savedVis.params.controls;
+      controls.forEach((control: Record<string, string>, i: number) => {
+        if (!control.indexPattern) {
+          return;
+        }
+        control.indexPatternRefName = `control_${i}_index_pattern`;
+        references.push({
+          name: control.indexPatternRefName,
+          type: 'index-pattern',
+          id: control.indexPattern,
+        });
+      });
+    }
+
+    return { state: _state, references };
   }
 }

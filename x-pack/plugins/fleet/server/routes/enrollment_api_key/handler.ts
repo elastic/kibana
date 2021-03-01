@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandler } from 'src/core/server';
@@ -26,12 +27,18 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(soClient, {
-      page: request.query.page,
-      perPage: request.query.perPage,
-      kuery: request.query.kuery,
-    });
+    const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(
+      soClient,
+      esClient,
+      {
+        page: request.query.page,
+        perPage: request.query.perPage,
+        kuery: request.query.kuery,
+      }
+    );
     const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
 
     return response.ok({ body });
@@ -45,8 +52,9 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, {
+    const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
       name: request.body.name,
       expiration: request.body.expiration,
       agentPolicyId: request.body.policy_id,
@@ -64,8 +72,9 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    await APIKeyService.deleteEnrollmentApiKey(soClient, request.params.keyId);
+    await APIKeyService.deleteEnrollmentApiKey(soClient, esClient, request.params.keyId);
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
@@ -84,8 +93,13 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const apiKey = await APIKeyService.getEnrollmentAPIKey(soClient, request.params.keyId);
+    const apiKey = await APIKeyService.getEnrollmentAPIKey(
+      soClient,
+      esClient,
+      request.params.keyId
+    );
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
 
     return response.ok({ body });

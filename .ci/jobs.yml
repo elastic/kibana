@@ -2,7 +2,6 @@
 
 JOB:
   - kibana-intake
-  - x-pack-intake
   - kibana-firefoxSmoke
   - kibana-ciGroup1
   - kibana-ciGroup2
@@ -32,6 +31,8 @@ JOB:
   - x-pack-ciGroup9
   - x-pack-ciGroup10
   - x-pack-ciGroup11
+  - x-pack-ciGroup12
+  - x-pack-ciGroup13
   - x-pack-accessibility
   - x-pack-visualRegression
 

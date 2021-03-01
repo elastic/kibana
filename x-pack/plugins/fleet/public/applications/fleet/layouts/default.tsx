@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
@@ -108,7 +110,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiFlexItem>
                     <EuiButtonEmpty
                       iconType="popout"
-                      href="https://ela.st/ingest-manager-feedback"
+                      href="https://ela.st/fleet-feedback"
                       target="_blank"
                     >
                       <FormattedMessage

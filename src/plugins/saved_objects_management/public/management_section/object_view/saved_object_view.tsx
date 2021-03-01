@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -25,16 +14,18 @@ import {
   SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
-  SimpleSavedObject,
   ScopedHistory,
+  HttpSetup,
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp } from '../../lib';
+import { canViewInApp, findObject } from '../../lib';
 import { SubmittedFormData } from '../types';
+import { SavedObjectWithMetadata } from '../../types';
 
 interface SavedObjectEditionProps {
   id: string;
+  http: HttpSetup;
   serviceName: string;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   capabilities: Capabilities;
@@ -47,7 +38,7 @@ interface SavedObjectEditionProps {
 
 interface SavedObjectEditionState {
   type: string;
-  object?: SimpleSavedObject<any>;
+  object?: SavedObjectWithMetadata<any>;
 }
 
 export class SavedObjectEdition extends Component<
@@ -67,9 +58,9 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { id, savedObjectsClient } = this.props;
+    const { http, id } = this.props;
     const { type } = this.state;
-    savedObjectsClient.get(type, id).then((object) => {
+    findObject(http, type, id).then((object) => {
       this.setState({
         object,
       });
@@ -81,7 +72,7 @@ export class SavedObjectEdition extends Component<
       capabilities,
       notFoundType,
       serviceRegistry,
-      id,
+      http,
       serviceName,
       savedObjectsClient,
     } = this.props;
@@ -91,7 +82,7 @@ export class SavedObjectEdition extends Component<
       string,
       boolean
     >;
-    const canView = canViewInApp(capabilities, type);
+    const canView = canViewInApp(capabilities, type) && Boolean(object?.meta.inAppUrl?.path);
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
@@ -102,7 +93,7 @@ export class SavedObjectEdition extends Component<
           canViewInApp={canView}
           type={type}
           onDeleteClick={() => this.delete()}
-          viewUrl={service.urlFor(id)}
+          viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
         />
         {notFoundType && (
           <>

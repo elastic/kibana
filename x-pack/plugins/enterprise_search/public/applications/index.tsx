@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { Store } from 'redux';
+import { Router } from 'react-router-dom';
+
 import { getContext, resetContext } from 'kea';
+import { Store } from 'redux';
+
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { AppMountParameters, CoreStart } from 'src/core/public';
-import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { InitialAppData } from '../../common/types';
+import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
+import { externalUrl } from './shared/enterprise_search_url';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
+import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
-import { mountHttpLogic } from './shared/http';
-import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { externalUrl } from './shared/enterprise_search_url';
 
 /**
  * This file serves as a reusable wrapper to share Kibana-level context and other helpers
@@ -41,6 +44,7 @@ export const renderApp = (
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
+    charts: plugins.charts,
     cloud: plugins.cloud || {},
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -94,6 +95,14 @@ export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
       'Map Security Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
 };
+
+export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingDescErr', {
+    values: { thirdPartyName },
+    defaultMessage:
+      'Field mappings require an established connection to { thirdPartyName }. Please check your connection credentials.',
+  });
+};
 export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
   return i18n.translate('xpack.securitySolution.case.configureCases.editFieldMappingTitle', {
     values: { thirdPartyName },
@@ -154,7 +163,7 @@ export const SAVE = i18n.translate('xpack.securitySolution.case.configureCases.s
 export const SAVE_CLOSE = i18n.translate(
   'xpack.securitySolution.case.configureCases.saveAndCloseButton',
   {
-    defaultMessage: 'Save & Close',
+    defaultMessage: 'Save & close',
   }
 );
 

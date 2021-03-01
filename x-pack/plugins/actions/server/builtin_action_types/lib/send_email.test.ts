@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('nodemailer', () => ({
@@ -13,6 +14,7 @@ import { sendEmail } from './send_email';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -136,7 +138,7 @@ describe('send_email module', () => {
           "port": 1025,
           "secure": false,
           "tls": Object {
-            "rejectUnauthorized": undefined,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -223,6 +225,10 @@ function getSendEmailOptions(
   { content = {}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings
 ) {
+  const configurationUtilities = actionsConfigMock.create();
+  if (proxySettings) {
+    configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
   return {
     content: {
       ...content,
@@ -242,8 +248,8 @@ function getSendEmailOptions(
       user: 'elastic',
       password: 'changeme',
     },
-    proxySettings,
     hasAuth: true,
+    configurationUtilities,
   };
 }
 
@@ -251,6 +257,10 @@ function getSendEmailOptionsNoAuth(
   { content = {}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings
 ) {
+  const configurationUtilities = actionsConfigMock.create();
+  if (proxySettings) {
+    configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
   return {
     content: {
       ...content,
@@ -267,7 +277,7 @@ function getSendEmailOptionsNoAuth(
     transport: {
       ...transport,
     },
-    proxySettings,
     hasAuth: false,
+    configurationUtilities,
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
@@ -9,8 +10,8 @@ import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
+import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementAppMountParams,
@@ -24,14 +25,17 @@ import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
-import { AlertAddProps } from './application/sections/alert_form/alert_add';
-import { AlertEditProps } from './application/sections/alert_form/alert_edit';
+
+import type { ActionTypeModel, AlertTypeModel } from './types';
+import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
+import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { AlertAddProps } from './application/sections/alert_form/alert_add';
+import type { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -122,7 +126,17 @@ export class Plugin
         ];
 
         const { renderApp } = await import('./application/app');
-        const kibanaFeatures = await pluginsStart.features.getFeatures();
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,

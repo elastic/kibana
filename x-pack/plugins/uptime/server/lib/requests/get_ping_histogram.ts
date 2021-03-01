@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getFilterClause } from '../helper';
@@ -21,12 +22,14 @@ export interface GetPingHistogramParams {
   monitorId?: string;
 
   bucketSize?: string;
+
+  query?: string;
 }
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ uptimeEsClient, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ uptimeEsClient, from, to, filters, monitorId, bucketSize, query }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -43,6 +46,20 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     query: {
       bool: {
         filter,
+        ...(query
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(query),
+                    type: 'phrase_prefix',
+                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+                  },
+                },
+              ],
+            }
+          : {}),
       },
     },
     size: 0,

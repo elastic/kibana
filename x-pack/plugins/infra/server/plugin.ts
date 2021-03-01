@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
 import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
@@ -28,7 +28,7 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
-import { InfraRequestHandlerContext } from './types';
+import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 
 export const config = {
@@ -78,22 +78,15 @@ export interface InfraPluginSetup {
   ) => void;
 }
 
-export class InfraServerPlugin {
-  private config$: Observable<InfraConfig>;
-  public config = {} as InfraConfig;
+export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
+  public config: InfraConfig;
   public libs: InfraBackendLibs | undefined;
 
   constructor(context: PluginInitializerContext) {
-    this.config$ = context.config.create<InfraConfig>();
+    this.config = context.config.get<InfraConfig>();
   }
 
-  async setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
-    await new Promise<void>((resolve) => {
-      this.config$.subscribe((configValue) => {
-        this.config = configValue;
-        resolve();
-      });
-    });
+  setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
@@ -144,11 +137,11 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerts, this.libs);
+    registerAlertTypes(plugins.alerts, this.libs, plugins.ml);
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
-      (context, request): InfraRequestHandlerContext => {
+      (context, request) => {
         const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
           request,

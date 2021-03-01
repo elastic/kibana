@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   xAxisConfig,
   yAxisConfig,
   hideAxis,
-} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
+} from '../../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 
 describe('getFlotAxisConfig', () => {

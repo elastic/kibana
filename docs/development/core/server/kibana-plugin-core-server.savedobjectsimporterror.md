@@ -2,24 +2,29 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md)
 
-## SavedObjectsImportError interface
+## SavedObjectsImportError class
 
-Represents a failure to import.
 
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsImportError 
+export declare class SavedObjectsImportError extends Error 
 ```
 
 ## Properties
 
-|  Property | Type | Description |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [attributes](./kibana-plugin-core-server.savedobjectsimporterror.attributes.md) |  | <code>Record&lt;string, any&gt; &#124; undefined</code> |  |
+|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) |  | <code>string</code> |  |
+
+## Methods
+
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-server.savedobjectsimporterror.error.md) | <code>SavedObjectsImportConflictError &#124; SavedObjectsImportAmbiguousConflictError &#124; SavedObjectsImportUnsupportedTypeError &#124; SavedObjectsImportMissingReferencesError &#124; SavedObjectsImportUnknownError</code> |  |
-|  [id](./kibana-plugin-core-server.savedobjectsimporterror.id.md) | <code>string</code> |  |
-|  [meta](./kibana-plugin-core-server.savedobjectsimporterror.meta.md) | <code>{</code><br/><code>        title?: string;</code><br/><code>        icon?: string;</code><br/><code>    }</code> |  |
-|  [overwrite](./kibana-plugin-core-server.savedobjectsimporterror.overwrite.md) | <code>boolean</code> | If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
-|  [title](./kibana-plugin-core-server.savedobjectsimporterror.title.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) | <code>string</code> |  |
+|  [importSizeExceeded(limit)](./kibana-plugin-core-server.savedobjectsimporterror.importsizeexceeded.md) | <code>static</code> |  |
+|  [nonUniqueImportObjects(nonUniqueEntries)](./kibana-plugin-core-server.savedobjectsimporterror.nonuniqueimportobjects.md) | <code>static</code> |  |
+|  [nonUniqueRetryDestinations(nonUniqueRetryDestinations)](./kibana-plugin-core-server.savedobjectsimporterror.nonuniqueretrydestinations.md) | <code>static</code> |  |
+|  [nonUniqueRetryObjects(nonUniqueRetryObjects)](./kibana-plugin-core-server.savedobjectsimporterror.nonuniqueretryobjects.md) | <code>static</code> |  |
+|  [referencesFetchError(objects)](./kibana-plugin-core-server.savedobjectsimporterror.referencesfetcherror.md) | <code>static</code> |  |
 

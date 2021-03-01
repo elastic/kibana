@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import {
   createSampleTrustedApp,
@@ -18,6 +19,12 @@ import {
   createUserChangedUrlAction,
   createGlobalNoMiddlewareStore,
 } from '../../../test_utils';
+
+const mockTheme = {
+  eui: {
+    euiColorLightestShade: '#ece',
+  },
+};
 
 import { TrustedAppsList } from '.';
 
@@ -30,9 +37,7 @@ const now = 111111;
 const renderList = (store: ReturnType<typeof createGlobalNoMiddlewareStore>) => {
   const Wrapper: React.FC = ({ children }) => (
     <Provider store={store}>
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
     </Provider>
   );
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -377,7 +378,7 @@ describe('Detections Rules API', () => {
       await deleteRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'] });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_delete', {
         body: '[{"id":"mySuperRuleId"},{"id":"mySuperRuleId_II"}]',
-        method: 'DELETE',
+        method: 'POST',
       });
     });
 

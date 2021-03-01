@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
@@ -10,7 +11,6 @@ import {
   timestampSafeVersion,
 } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
-import { ChildrenPaginationCursor } from './children_pagination';
 
 type SearchAfterFields = [number, string];
 
@@ -54,7 +54,7 @@ export interface PaginationFields {
  *
  * @param data Transforms a pagination cursor into a base64 encoded string
  */
-export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
+export function urlEncodeCursor(data: PaginationCursor): string {
   const value = JSON.stringify(data);
   return Buffer.from(value, 'utf8')
     .toString('base64')

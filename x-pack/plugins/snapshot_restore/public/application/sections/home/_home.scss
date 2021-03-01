@@ -36,11 +36,11 @@
 .snapshotRestorePolicyTableSnapshotFailureContainer {
   max-width: 200px;
   > .euiFlexItem:last-child {
-      min-width: 0;
-      .euiText {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+    min-width: 0;
+    .euiText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }

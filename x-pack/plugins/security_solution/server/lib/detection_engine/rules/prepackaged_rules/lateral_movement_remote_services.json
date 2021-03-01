@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -33,13 +34,13 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

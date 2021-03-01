@@ -12,7 +12,7 @@
 }
 
 // Targeting img as this won't target normal EuiIcon's only the custom svgs's
-img.lnsChartSwitch__chartIcon { // sass-lint:disable-line no-qualifying-elements
+img.lnsChartSwitch__chartIcon { // stylelint-disable-line selector-no-qualifying-type
   // The large icons aren't square so max out the width to fill the height
   width: 100%;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,8 +11,8 @@ import uuid from 'uuid/v4';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const security = getService('security');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
@@ -36,7 +37,15 @@ export default function ({ getService, getPageObjects }) {
 
   describe('On GeoJSON index name & pattern operation complete', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'global_index_pattern_management_all'],
+        false
+      );
       await PageObjects.maps.openNewMap();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     beforeEach(async () => {
@@ -87,20 +96,6 @@ export default function ({ getService, getPageObjects }) {
 
       const newIndexedLayerExists = await PageObjects.maps.doesLayerExist(indexName);
       expect(newIndexedLayerExists).to.be(false);
-    });
-
-    it('should create a link to new index in management', async () => {
-      const indexName = await indexPoint();
-
-      const layerAddReady = await PageObjects.maps.importLayerReadyForAdd();
-      expect(layerAddReady).to.be(true);
-
-      const newIndexLinkExists = await testSubjects.exists('indexManagementNewIndexLink');
-      expect(newIndexLinkExists).to.be(true);
-
-      const indexLink = await testSubjects.getAttribute('indexManagementNewIndexLink', 'href');
-      const linkDirectsToNewIndex = indexLink.endsWith(indexName);
-      expect(linkDirectsToNewIndex).to.be(true);
     });
 
     const GEO_POINT = 'geo_point';

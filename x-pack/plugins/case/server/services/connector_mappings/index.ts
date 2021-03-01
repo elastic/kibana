@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -40,7 +41,7 @@ export class ConnectorMappingsService {
         this.log.debug(`Attempting to find all connector mappings`);
         return await client.find({ ...options, type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT });
       } catch (error) {
-        this.log.debug(`Attempting to find all connector mappings`);
+        this.log.error(`Attempting to find all connector mappings: ${error}`);
         throw error;
       }
     },
@@ -51,7 +52,7 @@ export class ConnectorMappingsService {
           references,
         });
       } catch (error) {
-        this.log.debug(`Error on POST a new connector mappings: ${error}`);
+        this.log.error(`Error on POST a new connector mappings: ${error}`);
         throw error;
       }
     },

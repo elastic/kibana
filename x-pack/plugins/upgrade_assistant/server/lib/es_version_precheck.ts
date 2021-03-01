@@ -1,28 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { CURRENT_VERSION } from '../../common/version';
+import { versionService } from './version';
+
+interface Nodes {
+  nodes: {
+    [nodeId: string]: { version: string };
+  };
+}
 
 /**
  * Returns an array of all the unique Elasticsearch Node Versions in the Elasticsearch cluster.
  */
-export const getAllNodeVersions = async (adminClient: ILegacyScopedClusterClient) => {
+export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
   // Get the version information for all nodes in the cluster.
-  const { nodes } = (await adminClient.callAsInternalUser('nodes.info', {
-    filterPath: 'nodes.*.version',
-  })) as { nodes: { [nodeId: string]: { version: string } } };
+  const response = await adminClient.asInternalUser.nodes.info<Nodes>({
+    filter_path: 'nodes.*.version',
+  });
+
+  const nodes = response.body.nodes;
 
   const versionStrings = Object.values(nodes).map(({ version }) => version);
 
@@ -31,14 +40,14 @@ export const getAllNodeVersions = async (adminClient: ILegacyScopedClusterClient
     .map((version) => new SemVer(version));
 };
 
-export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[]) => {
+export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[], majorVersion: number) => {
   // Determine if all nodes in the cluster are running the same major version as Kibana.
   const numDifferentVersion = allNodeVersions.filter(
-    (esNodeVersion) => esNodeVersion.major !== CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major !== majorVersion
   ).length;
 
   const numSameVersion = allNodeVersions.filter(
-    (esNodeVersion) => esNodeVersion.major === CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major === majorVersion
   ).length;
 
   if (numDifferentVersion) {
@@ -62,20 +71,22 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const { client } = ctx.core.elasticsearch.legacy;
+  const { client } = ctx.core.elasticsearch;
   let allNodeVersions: SemVer[];
 
   try {
     allNodeVersions = await getAllNodeVersions(client);
   } catch (e) {
-    if (e.status === 403) {
+    if (e.statusCode === 403) {
       return response.forbidden({ body: e.message });
     }
 
     throw e;
   }
 
-  const result = verifyAllMatchKibanaVersion(allNodeVersions);
+  const majorVersion = versionService.getMajorVersion();
+
+  const result = verifyAllMatchKibanaVersion(allNodeVersions, majorVersion);
   if (!result.allNodesMatch) {
     return response.customError({
       // 426 means "Upgrade Required" and is used when semver compatibility is not met.

@@ -4,8 +4,7 @@
 
 Elastic is developing a Case Management Workflow. Follow our progress:
 
-- [Case API Documentation](https://documenter.getpostman.com/view/172706/SW7c2SuF?version=latest)
-- [Github Meta](https://github.com/elastic/kibana/issues/50103)
+- [Case API Documentation](https://www.elastic.co/guide/en/security/master/cases-overview.html)
 
 
 # Action types
@@ -42,27 +41,28 @@ This action type has no `secrets` properties.
 | description | The case’s description.                                               | string                  |
 | tags        | String array containing words and phrases that help categorize cases. | string[]                |
 | connector   | Object containing the connector’s configuration.                      | [connector](#connector) |
+| settings    | Object containing the case’s settings.                                | [settings](#settings)   |
 
 #### `subActionParams (update)`
 
-| Property    | Description                                                | Type                    |
-| ----------- | ---------------------------------------------------------- | ----------------------- |
-| id          | The ID of the case being updated.                          | string                  |
-| tile        | The updated case title.                                    | string                  |
-| description | The updated case description.                              | string                  |
-| tags        | The updated case tags.                                     | string                  |
-| connector   | Object containing the connector’s configuration.           | [connector](#connector) |
-| status      | The updated case status, which can be: `open` or `closed`. | string                  |
-| version     | The current case version.                                  | string                  |
+| Property    | Description                                                               | Type                    |
+| ----------- | ------------------------------------------------------------------------- | ----------------------- |
+| id          | The ID of the case being updated.                                         | string                  |
+| tile        | The updated case title.                                                   | string                  |
+| description | The updated case description.                                             | string                  |
+| tags        | The updated case tags.                                                    | string                  |
+| connector   | Object containing the connector’s configuration.                          | [connector](#connector) |
+| status      | The updated case status, which can be: `open`, `in-progress` or `closed`. | string                  |
+| settings    | Object containing the case’s settings.                                    | [settings](#settings)   |
+| version     | The current case version.                                                 | string                  |
 
 #### `subActionParams (addComment)`
 
-| Property | Description                                                             | Type              |
-| -------- | ----------------------------------------------------------------------- | ----------------- |
-| type     | The type of the comment                                                 | `user` \| `alert` |
-| comment  | The comment. Valid only when type is `user`.                            | string            |
-| alertId  | The alert ID. Valid only when the type is `alert`                       | string            |
-| index    | The index where the alert is saved. Valid only when the type is `alert` | string            |
+| Property | Description              | Type   |
+| -------- | ------------------------ | ------ |
+| type     | The type of the comment. | `user` |
+| comment  | The comment.             | string |
+
 #### `connector`
 
 | Property | Description                                                                                       | Type              |
@@ -96,3 +96,9 @@ For IBM Resilient connectors:
 | ------------ | ------------------------------- | -------- |
 | issueTypes   | The issue types of the issue.   | string[] |
 | severityCode | The severity code of the issue. | string   |
+
+#### `settings`
+
+| Property   | Description                    | Type    |
+| ---------- | ------------------------------ | ------- |
+| syncAlerts | Turn on or off alert synching. | boolean |

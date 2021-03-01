@@ -16,6 +16,8 @@ export interface SavedObjectsServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [createExporter](./kibana-plugin-core-server.savedobjectsservicestart.createexporter.md) | <code>(client: SavedObjectsClientContract) =&gt; ISavedObjectsExporter</code> | Creates an [exporter](./kibana-plugin-core-server.isavedobjectsexporter.md) bound to given client. |
+|  [createImporter](./kibana-plugin-core-server.savedobjectsservicestart.createimporter.md) | <code>(client: SavedObjectsClientContract) =&gt; ISavedObjectsImporter</code> | Creates an [importer](./kibana-plugin-core-server.isavedobjectsimporter.md) bound to given client. |
 |  [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md) | <code>(includedHiddenTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
 |  [createScopedRepository](./kibana-plugin-core-server.savedobjectsservicestart.createscopedrepository.md) | <code>(req: KibanaRequest, includedHiddenTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
 |  [createSerializer](./kibana-plugin-core-server.savedobjectsservicestart.createserializer.md) | <code>() =&gt; SavedObjectsSerializer</code> | Creates a [serializer](./kibana-plugin-core-server.savedobjectsserializer.md) that is aware of all registered types. |

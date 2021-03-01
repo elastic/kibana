@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
@@ -31,6 +32,7 @@ import {
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { RuntimeMappings } from '../step_define/common/types';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
   DEFAULT_BODY = 'mgtPage__body',
@@ -88,8 +90,12 @@ interface WizardProps {
   searchItems: SearchItems;
 }
 
-export const CreateTransformWizardContext = createContext<{ indexPattern: IndexPattern | null }>({
+export const CreateTransformWizardContext = createContext<{
+  indexPattern: IndexPattern | null;
+  runtimeMappings: RuntimeMappings | undefined;
+}>({
   indexPattern: null,
+  runtimeMappings: undefined,
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
@@ -238,7 +244,9 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   return (
-    <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+    <CreateTransformWizardContext.Provider
+      value={{ indexPattern, runtimeMappings: stepDefineState.runtimeMappings }}
+    >
       <EuiSteps className="transform__steps" steps={stepsConfig} />
     </CreateTransformWizardContext.Provider>
   );

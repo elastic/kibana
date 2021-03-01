@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaFeature } from '../../../../plugins/features/server';
-import { Space } from '../../common/model/space';
-import { setupCapabilitiesSwitcher } from './capabilities_switcher';
-import { Capabilities, CoreSetup } from 'src/core/server';
+import type { Capabilities, CoreSetup } from 'src/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { KibanaFeature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
+import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { PluginsStart } from '../plugin';
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
 const features = ([
   {
@@ -152,7 +154,7 @@ describe('capabilitiesSwitcher', () => {
 
     const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     expect(result).toEqual(buildCapabilities());
   });
@@ -166,12 +168,31 @@ describe('capabilitiesSwitcher', () => {
 
     const capabilities = buildCapabilities();
 
-    const { switcher } = setup(space);
+    const { switcher, spacesService } = setup(space);
     const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
 
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     expect(result).toEqual(buildCapabilities());
+    expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
+  });
+
+  it('does not toggle capabilities when the default capabilities are requested', async () => {
+    const space: Space = {
+      id: 'space',
+      name: '',
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+    };
+
+    const capabilities = buildCapabilities();
+
+    const { switcher, spacesService } = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+
+    const result = await switcher(request, capabilities, true);
+
+    expect(result).toEqual(buildCapabilities());
+    expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 
   it('logs a debug message, and does not toggle capabilities if an error is encountered', async () => {
@@ -188,7 +209,7 @@ describe('capabilitiesSwitcher', () => {
 
     spacesService.getActiveSpace.mockRejectedValue(new Error('Something terrible happened'));
 
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     expect(result).toEqual(buildCapabilities());
     expect(logger.debug).toHaveBeenCalledWith(
@@ -207,7 +228,7 @@ describe('capabilitiesSwitcher', () => {
 
     const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     expect(result).toEqual(buildCapabilities());
   });
@@ -223,7 +244,7 @@ describe('capabilitiesSwitcher', () => {
 
     const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     const expectedCapabilities = buildCapabilities();
 
@@ -247,7 +268,7 @@ describe('capabilitiesSwitcher', () => {
 
     const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     const expectedCapabilities = buildCapabilities();
 
@@ -274,7 +295,7 @@ describe('capabilitiesSwitcher', () => {
 
     const { switcher } = setup(space);
     const request = httpServerMock.createKibanaRequest();
-    const result = await switcher(request, capabilities);
+    const result = await switcher(request, capabilities, false);
 
     const expectedCapabilities = buildCapabilities();
 

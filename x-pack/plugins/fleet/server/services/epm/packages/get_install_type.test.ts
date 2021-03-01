@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObject } from 'src/core/server';
 import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
 import { getInstallType } from './install';
@@ -15,6 +17,7 @@ const mockInstallation: SavedObject<Installation> = {
     id: 'test-pkg',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
+    package_assets: [],
     es_index_patterns: { pattern: 'pattern-name' },
     name: 'test packagek',
     version: '1.0.0',
@@ -32,6 +35,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
     id: 'test-pkg',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
+    package_assets: [],
     es_index_patterns: { pattern: 'pattern-name' },
     name: 'test packagek',
     version: '1.0.0',

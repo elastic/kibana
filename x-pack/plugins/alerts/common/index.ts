@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertsHealth } from './alert';
@@ -15,6 +16,7 @@ export * from './alert_instance_summary';
 export * from './builtin_action_groups';
 export * from './disabled_action_groups';
 export * from './alert_notify_when_type';
+export * from './parse_duration';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;

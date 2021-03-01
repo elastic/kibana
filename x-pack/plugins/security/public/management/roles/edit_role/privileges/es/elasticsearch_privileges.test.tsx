@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { DocumentationLinksService } from '../../../documentation_links';
 import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
@@ -45,7 +45,7 @@ function getProps() {
       index: ['all', 'read', 'write', 'index'],
     },
     indicesAPIClient: indicesAPIClientMock.create(),
-    docLinks: new DocumentationLinksService(docLinks),
+    docLinks,
     license,
   };
 }

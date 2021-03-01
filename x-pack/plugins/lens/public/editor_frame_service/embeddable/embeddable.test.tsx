@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Subject } from 'rxjs';
 import {
   Embeddable,
   LensByValueInput,
@@ -13,13 +13,7 @@ import {
   LensEmbeddableInput,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import {
-  Query,
-  TimeRange,
-  Filter,
-  TimefilterContract,
-  IndexPatternsContract,
-} from 'src/plugins/data/public';
+import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
@@ -110,7 +104,7 @@ describe('embeddable', () => {
     mountpoint.remove();
   });
 
-  it('should render expression with expression renderer', async () => {
+  it('should render expression once with expression renderer', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -122,11 +116,53 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
+| expression`);
+  });
+
+  it('should not render the visualization if any error arises', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: [{ shortMessage: '', longMessage: 'my validation error' }],
           }),
       },
       {} as LensEmbeddableInput
@@ -134,9 +170,7 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({} as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
-| expression`);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
   });
 
   it('should initialize output with deduped list of index patterns', async () => {
@@ -161,11 +195,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       {} as LensEmbeddableInput
@@ -193,11 +230,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -213,8 +253,6 @@ describe('embeddable', () => {
       filters,
       searchSessionId: 'searchSessionId',
     });
-
-    expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -233,11 +271,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -266,11 +307,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -313,11 +357,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       input
@@ -360,11 +407,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       input
@@ -406,11 +456,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       input
@@ -441,11 +494,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -476,11 +532,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -511,11 +570,14 @@ describe('embeddable', () => {
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
           }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
@@ -537,50 +599,5 @@ describe('embeddable', () => {
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-  });
-
-  it('should re-render on auto refresh fetch observable', async () => {
-    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
-
-    const autoRefreshFetchSubject = new Subject();
-    const timefilter = ({
-      getAutoRefreshFetch$: () => autoRefreshFetchSubject.asObservable(),
-    } as unknown) as TimefilterContract;
-
-    const embeddable = new Embeddable(
-      {
-        timefilter,
-        attributeService,
-        expressionRenderer,
-        basePath,
-        indexPatternService: {} as IndexPatternsContract,
-        editable: true,
-        getTrigger,
-        documentToExpression: () =>
-          Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
-          }),
-      },
-      { id: '123', timeRange, query, filters } as LensEmbeddableInput
-    );
-    await embeddable.initializeSavedVis({
-      id: '123',
-      timeRange,
-      query,
-      filters,
-    } as LensEmbeddableInput);
-    embeddable.render(mountpoint);
-
-    act(() => {
-      autoRefreshFetchSubject.next();
-    });
-
-    expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Stream from 'stream';
@@ -23,15 +12,14 @@ import _ from 'lodash';
 import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
-// @ts-expect-error missing type def
-import stringify from 'json-stringify-safe';
 import { inspect } from 'util';
 
-import { applyFiltersToKeys } from './utils';
+import { applyFiltersToKeys, getResponsePayloadBytes } from './utils';
 import { getLogEventData } from './metadata';
 import { LegacyLoggingConfig } from './schema';
 import {
   AnyEvent,
+  ResponseEvent,
   isResponseEvent,
   isOpsEvent,
   isErrorEvent,
@@ -81,6 +69,23 @@ export abstract class BaseLogFormat extends Stream.Transform {
     next();
   }
 
+  getContentLength({ responsePayload, responseHeaders }: ResponseEvent): number | undefined {
+    try {
+      return getResponsePayloadBytes(responsePayload, responseHeaders);
+    } catch (e) {
+      // We intentionally swallow any errors as this information is
+      // only a nicety for logging purposes, and should not cause the
+      // server to crash if it cannot be determined.
+      this.push(
+        this.format({
+          type: 'log',
+          tags: ['warning', 'logging'],
+          message: `Failed to calculate response payload bytes. [${e}]`,
+        }) + '\n'
+      );
+    }
+  }
+
   extractAndFormatTimestamp(data: Record<string, any>, format?: string) {
     const { timezone } = this.config;
     const date = moment(data['@timestamp']);
@@ -111,15 +116,10 @@ export abstract class BaseLogFormat extends Stream.Transform {
         referer: source.referer,
       };
 
-      const contentLength =
-        event.responsePayload === 'object'
-          ? stringify(event.responsePayload).length
-          : String(event.responsePayload).length;
-
       data.res = {
         statusCode: event.statusCode,
         responseTime: event.responseTime,
-        contentLength,
+        contentLength: this.getContentLength(event),
       };
 
       const query = queryString.stringify(event.query, { sort: false });
@@ -133,7 +133,9 @@ export abstract class BaseLogFormat extends Stream.Transform {
       data.message += levelColor(data.res.statusCode);
       data.message += ' ';
       data.message += chalk.gray(data.res.responseTime + 'ms');
-      data.message += chalk.gray(' - ' + numeral(contentLength).format('0.0b'));
+      if (data.res.contentLength) {
+        data.message += chalk.gray(' - ' + numeral(data.res.contentLength).format('0.0b'));
+      }
     } else if (isOpsEvent(event)) {
       _.defaults(data, _.pick(event, ['pid', 'os', 'proc', 'load']));
       data.message = chalk.gray('memory: ');

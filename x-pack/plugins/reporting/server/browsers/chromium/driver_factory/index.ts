@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -65,6 +66,7 @@ export class HeadlessChromiumDriverFactory {
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs(viewport);
+      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;

@@ -23,6 +23,11 @@ parameters:
 put:
   summary: PackagePolicies - Update
   operationId: put-packagePolicies-packagePolicyId
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/update_package_policy.yaml
   responses:
     '200':
       description: OK

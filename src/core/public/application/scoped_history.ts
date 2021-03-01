@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -62,6 +51,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * The key of the current position of the window in the history stack.
    */
   private currentLocationKeyIndex: number = 0;
+  /**
+   * Array of the current {@link block} unregister callbacks
+   */
+  private blockUnregisterCallbacks: Set<UnregisterCallback> = new Set();
 
   constructor(private readonly parentHistory: History, private readonly basePath: string) {
     const parentPath = this.parentHistory.location.pathname;
@@ -187,18 +180,20 @@ export class ScopedHistory<HistoryLocationState = unknown>
   };
 
   /**
-   * Not supported. Use {@link AppMountParameters.onAppLeave}.
-   *
-   * @remarks
-   * We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers
-   * a modal when possible, falling back to a confirm dialog box in the beforeunload case.
+   * Add a block prompt requesting user confirmation when navigating away from the current page.
    */
   public block = (
     prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>
   ): UnregisterCallback => {
-    throw new Error(
-      `history.block is not supported. Please use the AppMountParameters.onAppLeave API.`
-    );
+    this.verifyActive();
+
+    const unregisterCallback = this.parentHistory.block(prompt);
+    this.blockUnregisterCallbacks.add(unregisterCallback);
+
+    return () => {
+      this.blockUnregisterCallbacks.delete(unregisterCallback);
+      unregisterCallback();
+    };
   };
 
   /**
@@ -301,6 +296,12 @@ export class ScopedHistory<HistoryLocationState = unknown>
       if (!location.pathname.startsWith(this.basePath)) {
         unlisten();
         this.isActive = false;
+
+        for (const unregisterBlock of this.blockUnregisterCallbacks) {
+          unregisterBlock();
+        }
+        this.blockUnregisterCallbacks.clear();
+
         return;
       }
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,9 +27,7 @@ import { EuiSelectableOption } from '@elastic/eui';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
-import { documentationLinksService } from '../../../../services/documentation';
-
-import { useServices } from '../../../../app_context';
+import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
@@ -45,6 +45,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   errors,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const {
     indices: unfilteredSnapshotIndices,
     dataStreams: snapshotDataStreams = [],
@@ -164,7 +165,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRestoreDocUrl()}
+            href={docLinks.links.snapshotRestore.restoreSnapshot}
             target="_blank"
             iconType="help"
           >

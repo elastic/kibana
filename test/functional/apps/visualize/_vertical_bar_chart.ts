@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -452,7 +441,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = ['200', '404', '503'];
+        const expectedEntries = await PageObjects.visChart.getExpectedValue(
+          ['200', '404', '503'],
+          ['503', '404', '200'] // sorting aligned with rendered geometries
+        );
         const legendEntries = await PageObjects.visChart.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -462,7 +454,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectCustomSortMetric(3, 'Min', 'bytes');
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = ['404', '200', '503'];
+        const expectedEntries = await PageObjects.visChart.getExpectedValue(
+          ['404', '200', '503'],
+          ['503', '200', '404'] // sorting aligned with rendered geometries
+        );
         const legendEntries = await PageObjects.visChart.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -495,23 +490,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = [
-          '200 - win 8',
-          '200 - win xp',
-          '200 - ios',
-          '200 - osx',
-          '200 - win 7',
-          '404 - ios',
-          '503 - ios',
-          '503 - osx',
-          '503 - win 7',
-          '503 - win 8',
-          '503 - win xp',
-          '404 - osx',
-          '404 - win 7',
-          '404 - win 8',
-          '404 - win xp',
-        ];
+        const expectedEntries = await PageObjects.visChart.getExpectedValue(
+          [
+            '200 - win 8',
+            '200 - win xp',
+            '200 - ios',
+            '200 - osx',
+            '200 - win 7',
+            '404 - ios',
+            '503 - ios',
+            '503 - osx',
+            '503 - win 7',
+            '503 - win 8',
+            '503 - win xp',
+            '404 - osx',
+            '404 - win 7',
+            '404 - win 8',
+            '404 - win xp',
+          ],
+          [
+            '404 - win xp',
+            '404 - win 8',
+            '404 - win 7',
+            '404 - osx',
+            '503 - win xp',
+            '503 - win 8',
+            '503 - win 7',
+            '503 - osx',
+            '503 - ios',
+            '404 - ios',
+            '200 - win 7',
+            '200 - osx',
+            '200 - ios',
+            '200 - win xp',
+            '200 - win 8',
+          ]
+        );
         const legendEntries = await PageObjects.visChart.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -522,7 +536,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleDisabledAgg(3);
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
+        const expectedEntries = await PageObjects.visChart.getExpectedValue(
+          ['win 8', 'win xp', 'ios', 'osx', 'win 7'],
+          ['win 7', 'osx', 'ios', 'win xp', 'win 8']
+        );
         const legendEntries = await PageObjects.visChart.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });

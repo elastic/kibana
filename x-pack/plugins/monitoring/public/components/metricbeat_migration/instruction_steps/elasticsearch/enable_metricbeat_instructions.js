@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
@@ -16,10 +18,10 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
   _meta,
   { esMonitoringUrl }
 ) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
-  const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
-  );
+  const elasticsearchUrl = Legacy.shims.docLinks.links.monitoring.monitorElasticsearch;
+  const metricbeatInstallUrl = Legacy.shims.docLinks.links.metricbeat.install;
+  const metricbeatStartUrl = Legacy.shims.docLinks.links.metricbeat.start;
+  const securitySetup = getSecurityStep(elasticsearchUrl);
 
   const installMetricbeatStep = {
     title: i18n.translate(
@@ -31,10 +33,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatInstallUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
               defaultMessage="Follow these instructions."
@@ -131,10 +130,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
     children: (
       <EuiText>
         <p>
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
-            target="_blank"
-          >
+          <EuiLink href={metricbeatStartUrl} target="_blank">
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
               defaultMessage="Follow these instructions."

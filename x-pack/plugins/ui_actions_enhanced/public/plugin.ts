@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -13,27 +14,15 @@ import {
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
-import {
-  TriggerId,
-  UiActionsSetup,
-  UiActionsStart,
-} from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import {
-  CustomTimeRangeAction,
-  CUSTOM_TIME_RANGE,
-  TimeRangeActionContext,
-} from './custom_time_range_action';
-import {
-  CustomTimeRangeBadge,
-  CUSTOM_TIME_RANGE_BADGE,
-  TimeBadgeActionContext,
-} from './custom_time_range_badge';
+import { CustomTimeRangeAction } from './custom_time_range_action';
+import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
@@ -69,13 +58,6 @@ export interface StartContract
       | 'inject'
     > {
   FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
-}
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [CUSTOM_TIME_RANGE]: TimeRangeActionContext;
-    [CUSTOM_TIME_RANGE_BADGE]: TimeBadgeActionContext;
-  }
 }
 
 export class AdvancedUiActionsPublicPlugin
@@ -138,7 +120,7 @@ export class AdvancedUiActionsPublicPlugin
       ...this.enhancements!,
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
         actionFactories: this.enhancements!.getActionFactories(),
-        getTrigger: (triggerId: TriggerId) => uiActions.getTrigger(triggerId),
+        getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,

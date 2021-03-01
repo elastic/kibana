@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IconType } from '@elastic/eui';
 import { AssetType, ElasticsearchAssetType, KibanaAssetType, ServiceName } from '../../types';
 
@@ -28,10 +30,12 @@ export const AssetTitleMap: Record<AssetType, string> = {
   input: 'Agent input',
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
+  lens: 'Lens',
 };
 
-export const ServiceTitleMap: Record<Extract<ServiceName, 'kibana'>, string> = {
+export const ServiceTitleMap: Record<ServiceName, string> = {
   kibana: 'Kibana',
+  elasticsearch: 'Elasticsearch',
 };
 
 export const AssetIcons: Record<KibanaAssetType, IconType> = {
@@ -39,7 +43,8 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   index_pattern: 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
-  map: 'mapApp',
+  map: 'emsApp',
+  lens: 'lensApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

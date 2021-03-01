@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -51,14 +52,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user userEAST ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'userEast',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'dls EAST',
+        confirm_password: 'changeme',
+        full_name: 'dls EAST',
         email: 'dlstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'myroleEast'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -77,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'name:ABC Company region:EAST _id:doc1 _type: - _index:dlstest _score:0'
+        '_id:doc1 _type: - _index:dlstest _score:0 region.keyword:EAST name:ABC Company name.keyword:ABC Company region:EAST'
       );
     });
     after('logout', async () => {

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import crypto from 'crypto';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
 
-export type ConfigType = ReturnType<typeof createConfig>;
+export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object(
   {
@@ -32,23 +31,3 @@ export const ConfigSchema = schema.object(
     },
   }
 );
-
-export function createConfig(config: TypeOf<typeof ConfigSchema>, logger: Logger) {
-  let encryptionKey = config.encryptionKey;
-  const usingEphemeralEncryptionKey = encryptionKey === undefined;
-  if (encryptionKey === undefined) {
-    logger.warn(
-      'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
-        'To decrypt encrypted saved objects attributes after restart, ' +
-        'please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-    );
-
-    encryptionKey = crypto.randomBytes(16).toString('hex');
-  }
-
-  return {
-    ...config,
-    encryptionKey,
-    usingEphemeralEncryptionKey,
-  };
-}

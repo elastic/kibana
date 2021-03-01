@@ -26,28 +26,49 @@ NOTE: You do not need to enable the {es} {security-features} for this type of en
 When you obtain a server certificate, you must set its subject alternative name (SAN) correctly to ensure that modern web browsers with
 hostname verification will trust it. You can set one or more SANs to the {kib} server's fully-qualified domain name (FQDN), hostname, or IP
 address. When choosing the SAN, you should pick whichever attribute you will be using to connect to {kib} in your browser, which is likely
-the FQDN.
+the FQDN in a production environment.
 
-
-You may choose to generate a certificate signing request (CSR) and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool.
+You may choose to generate a signed certificate and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool.
 For example:
 
 [source,sh]
 --------------------------------------------------------------------------------
-bin/elasticsearch-certutil csr -name kibana-server -dns some-website.com,www.some-website.com
+bin/elasticsearch-certutil cert -name kibana-server -dns localhost,127.0.0.1
 --------------------------------------------------------------------------------
 
-This will produce a ZIP archive named `kibana-server.zip`. Extract that archive to obtain the PEM-formatted CSR (`kibana-server.csr`) and
-unencrypted private key (`kibana-server.key`). In this example, the CSR has a common name (CN) of `kibana-server`, a SAN of
-`some-website.com`, and another SAN of `www.some-website.com`.
+This will produce a PKCS#12 file named `kibana-server.p12`, which contains the server certificate and private key.
 
-NOTE: You will need to use a certificate authority (CA) to sign your CSR to obtain your server certificate. This certificate's signature
-will be verified by web browsers that are configured to trust the CA.
+NOTE: In this example, the server certificate is signed by a locally-generated certificate authority (CA). This is not suitable for a
+production environment, and it will result in warnings in your web browser until you configure your browser to trust the certificate. Steps
+to configure certificate trust vary depending upon your browser and operating system. If you want to obtain a server certificate for a
+production environment, you can instead generate a certificate signing request (CSR) with `elasticsearch-certutil` using
+{ref}/certutil.html#certutil-csr[CSR mode].
 --
 
 . Configure {kib} to access the server certificate and private key.
 
-.. If your server certificate and private key are in PEM format:
+.. If your server certificate and private key are contained in a PKCS#12 file:
++
+--
+Specify your PKCS#12 file in `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.keystore.path: "/path/to/kibana-server.p12"
+--------------------------------------------------------------------------------
+
+If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+bin/kibana-keystore add server.ssl.keystore.password
+--------------------------------------------------------------------------------
+
+NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
+need to set `server.ssl.keystore.password` to an empty string.
+--
+
+.. Otherwise, if your server certificate and private key are in PEM format:
 +
 --
 Specify your server certificate and private key in `kibana.yml`:
@@ -66,27 +87,6 @@ bin/kibana-keystore add server.ssl.keyPassphrase
 --------------------------------------------------------------------------------
 --
 
-.. Otherwise, if your server certificate and private key are contained in a PKCS#12 file:
-+
---
-Specify your PKCS#12 file in `kibana.yml`:
-
-[source,yaml]
---------------------------------------------------------------------------------
-server.ssl.keystore.path: "/path/to/kibana-server.p12"
---------------------------------------------------------------------------------
-
-If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
-
-[source,yaml]
---------------------------------------------------------------------------------
-bin/kibana-keystore add server.ssl.keystore.password
---------------------------------------------------------------------------------
-
-TIP: If your PKCS#12 file isn't protected with a password, depending on how it was generated, you may need to set
-`server.ssl.keystore.password` to an empty string.
---
-
 +
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
 
@@ -103,7 +103,7 @@ server.ssl.enabled: true
 
 . Restart {kib}.
 
-After making these changes, you must always access {kib} via HTTPS. For example, https://<your_kibana_host>.com.
+After making these changes, you must always access {kib} via HTTPS. For example, `https://localhost:5601`.
 
 [[configuring-tls-kib-es]]
 ==== Encrypt traffic between {kib} and {es}
@@ -166,8 +166,8 @@ If your PKCS#12 file is encrypted, add the decryption password to your <<secure-
 bin/kibana-keystore add elasticsearch.ssl.truststore.password
 --------------------------------------------------------------------------------
 
-TIP: If your PKCS#12 file isn't protected with a password, depending on how it was generated, you may need to set
-`elasticsearch.ssl.truststore.password` to an empty string.
+NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
+need to set `server.ssl.truststore.password` to an empty string.
 --
 
 +

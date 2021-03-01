@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
+  ElasticsearchClient,
   KibanaRequest,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
@@ -22,14 +24,11 @@ import {
   AgentSOAttributes,
   AgentActionSOAttributes,
 } from '../../types';
-import {
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_ACTION_SAVED_OBJECT_TYPE,
-} from '../../constants';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
 import { ackAgentUpgraded } from './upgrade';
+import { updateAgent } from './crud';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -40,6 +39,7 @@ const actionCache = new LRU<string, AgentAction>({
 
 export async function acknowledgeAgentActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
@@ -79,31 +79,28 @@ export async function acknowledgeAgentActions(
 
   const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
   if (isAgentUnenrolled) {
-    await forceUnenrollAgent(soClient, agent.id);
+    await forceUnenrollAgent(soClient, esClient, agent.id);
   }
 
   const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
   if (upgradeAction) {
-    await ackAgentUpgraded(soClient, upgradeAction);
+    await ackAgentUpgraded(soClient, esClient, upgradeAction);
   }
 
   const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
-  await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(configChangeAction
-      ? [
-          {
-            type: AGENT_SAVED_OBJECT_TYPE,
-            id: agent.id,
-            attributes: {
-              policy_revision: configChangeAction.policy_revision,
-              packages: configChangeAction?.ack_data?.packages,
-            },
-          },
-        ]
-      : []),
-    ...buildUpdateAgentActionSentAt(agentActionsIds),
-  ]);
+  if (configChangeAction) {
+    await updateAgent(soClient, esClient, agent.id, {
+      policy_revision: configChangeAction.policy_revision,
+      packages: configChangeAction?.ack_data?.packages,
+    });
+  }
+
+  if (agentActionsIds.length > 0) {
+    await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
+      ...buildUpdateAgentActionSentAt(agentActionsIds),
+    ]);
+  }
 
   return actions;
 }
@@ -196,16 +193,20 @@ export async function saveAgentEvents(
 export interface AcksService {
   acknowledgeAgentActions: (
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agent: Agent,
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
 
   authenticateAgentWithAccessToken: (
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     request: KibanaRequest
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
+
+  getElasticsearchClientContract: () => ElasticsearchClient;
 
   saveAgentEvents: (
     soClient: SavedObjectsClientContract,

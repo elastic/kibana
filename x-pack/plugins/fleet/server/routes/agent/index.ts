@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IRouter, RouteValidationResultFactory } from 'src/core/server';
@@ -294,6 +290,9 @@ export const registerElasticAgentRoutes = (router: IRouter, config: FleetConfigT
       getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
         appContextService
       ),
+      getElasticsearchClientContract: appContextService.getInternalUserESClient.bind(
+        appContextService
+      ),
       saveAgentEvents: AgentService.saveAgentEvents,
     })
   );
@@ -311,6 +310,9 @@ export const registerElasticAgentRoutes = (router: IRouter, config: FleetConfigT
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
       authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
       getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
+      getElasticsearchClientContract: appContextService.getInternalUserESClient.bind(
         appContextService
       ),
       saveAgentEvents: AgentService.saveAgentEvents,

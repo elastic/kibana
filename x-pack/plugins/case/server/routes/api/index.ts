@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
@@ -9,11 +10,14 @@ import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
 import { initPatchCasesApi } from './cases/patch_cases';
 import { initPostCaseApi } from './cases/post_case';
-import { initPushCaseUserActionApi } from './cases/push_case';
+import { initPushCaseApi } from './cases/push_case';
 import { initGetReportersApi } from './cases/reporters/get_reporters';
 import { initGetCasesStatusApi } from './cases/status/get_status';
 import { initGetTagsApi } from './cases/tags/get_tags';
-import { initGetAllUserActionsApi } from './cases/user_actions/get_all_user_actions';
+import {
+  initGetAllCaseUserActionsApi,
+  initGetAllSubCaseUserActionsApi,
+} from './cases/user_actions/get_all_user_actions';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
 import { initDeleteAllCommentsApi } from './cases/comments/delete_all_comments';
@@ -27,9 +31,21 @@ import { initCaseConfigureGetActionConnector } from './cases/configure/get_conne
 import { initGetCaseConfigure } from './cases/configure/get_configure';
 import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
-import { initPostPushToService } from './cases/configure/post_push_to_service';
 
 import { RouteDeps } from './types';
+import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
+import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
+import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
+import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
+
+/**
+ * Default page number when interacting with the saved objects API.
+ */
+export const defaultPage = 1;
+/**
+ * Default number of results when interacting with the saved objects API.
+ */
+export const defaultPerPage = 20;
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -38,8 +54,14 @@ export function initCaseApi(deps: RouteDeps) {
   initGetCaseApi(deps);
   initPatchCasesApi(deps);
   initPostCaseApi(deps);
-  initPushCaseUserActionApi(deps);
-  initGetAllUserActionsApi(deps);
+  initPushCaseApi(deps);
+  initGetAllCaseUserActionsApi(deps);
+  initGetAllSubCaseUserActionsApi(deps);
+  // Sub cases
+  initGetSubCaseApi(deps);
+  initPatchSubCasesApi(deps);
+  initFindSubCasesApi(deps);
+  initDeleteSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);
@@ -53,7 +75,6 @@ export function initCaseApi(deps: RouteDeps) {
   initGetCaseConfigure(deps);
   initPatchCaseConfigure(deps);
   initPostCaseConfigure(deps);
-  initPostPushToService(deps);
   // Reporters
   initGetReportersApi(deps);
   // Status

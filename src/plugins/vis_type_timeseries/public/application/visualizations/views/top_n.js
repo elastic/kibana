@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
+import { emptyLabel } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
 
 const RENDER_MODES = {
@@ -114,6 +104,7 @@ export class TopN extends Component {
       // if both are 0, the division returns NaN causing unexpected behavior.
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
+      const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
 
       const styles = reactcss(
         {
@@ -139,7 +130,7 @@ export class TopN extends Component {
       return (
         <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
           <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
-            {item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label}
+            {label || emptyLabel}
           </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div className="tvbVisTopN__innerBar" style={styles.innerBar}>

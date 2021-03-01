@@ -9,9 +9,9 @@ List of triggers that this embeddable will execute.
 <b>Signature:</b>
 
 ```typescript
-supportedTriggers(): Array<keyof TriggerContextMapping>;
+supportedTriggers(): string[];
 ```
 <b>Returns:</b>
 
-`Array<keyof TriggerContextMapping>`
+`string[]`
 

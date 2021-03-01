@@ -1,43 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Readable } from 'stream';
-import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
-import {
-  exportSavedObjectsToStream,
-  resolveSavedObjectsImportErrors,
-} from '../../../../../../src/core/server';
+import type { Readable } from 'stream';
+
+import type {
+  CoreStart,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsImportRetry,
+} from 'src/core/server';
+
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
-import { getIneligibleTypes } from './lib/get_ineligible_types';
+import type { CopyOptions, CopyResponse, ResolveConflictsOptions } from './types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjects: CoreStart['savedObjects'],
-  getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
-  const { getTypeRegistry, getScopedClient } = savedObjects;
+  const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
+  const savedObjectsExporter = createExporter(savedObjectsClient);
+  const savedObjectsImporter = createImporter(savedObjectsClient);
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
-    const objectStream = await exportSavedObjectsToStream({
+    const objectStream = await savedObjectsExporter.exportByObjects({
+      request,
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
       objects: options.objects,
-      savedObjectsClient,
-      exportSizeLimit: getImportExportObjectLimit(),
     });
     return readStreamToCompletion<SavedObject>(objectStream);
   };
@@ -49,11 +53,8 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     createNewCopies: boolean
   ) => {
     try {
-      const importResponse = await resolveSavedObjectsImportErrors({
+      const importResponse = await savedObjectsImporter.resolveImportErrors({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: getImportExportObjectLimit(),
-        savedObjectsClient,
-        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
         createNewCopies,

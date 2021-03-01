@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -13,6 +14,7 @@ import {
   CasesConfigureRequestRt,
   CaseConfigureResponseRt,
   throwErrors,
+  ConnectorMappingsAttributes,
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
@@ -22,7 +24,12 @@ import {
   transformESConnectorToCaseConnector,
 } from '../helpers';
 
-export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPostCaseConfigure({
+  caseConfigureService,
+  caseService,
+  router,
+  logger,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_URL,
@@ -32,13 +39,14 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
     },
     async (context, request, response) => {
       try {
+        let error = null;
         if (!context.case) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
         const caseClient = context.case.getCaseClient();
-        const actionsClient = await context.actions?.getActionsClient();
+        const actionsClient = context.actions?.getActionsClient();
         if (actionsClient == null) {
-          throw Boom.notFound('Action client have not been found');
+          throw Boom.notFound('Action client not found');
         }
         const client = context.core.savedObjects.client;
         const query = pipe(
@@ -55,15 +63,21 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           );
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { email, full_name, username } = await caseService.getUser({ request, response });
+        const { email, full_name, username } = await caseService.getUser({ request });
 
         const creationDate = new Date().toISOString();
-        const mappings = await caseClient.getMappings({
-          actionsClient,
-          caseClient,
-          connectorId: query.connector.id,
-          connectorType: query.connector.type,
-        });
+        let mappings: ConnectorMappingsAttributes[] = [];
+        try {
+          mappings = await caseClient.getMappings({
+            actionsClient,
+            connectorId: query.connector.id,
+            connectorType: query.connector.type,
+          });
+        } catch (e) {
+          error = e.isBoom
+            ? e.output.payload.message
+            : `Error connecting to ${query.connector.name} instance`;
+        }
         const post = await caseConfigureService.post({
           client,
           attributes: {
@@ -83,9 +97,11 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             connector: transformESConnectorToCaseConnector(post.attributes.connector),
             mappings,
             version: post.version ?? '',
+            error,
           }),
         });
       } catch (error) {
+        logger.error(`Failed to post case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

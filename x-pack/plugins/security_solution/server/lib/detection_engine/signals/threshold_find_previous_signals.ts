@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { singleSearchAfter } from './single_search_after';
 
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -16,10 +21,10 @@ interface FindPreviousThresholdSignalsParams {
   from: string;
   to: string;
   indexPattern: string[];
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
-  bucketByField: string;
+  bucketByFields: string[];
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -31,7 +36,7 @@ export const findPreviousThresholdSignals = async ({
   services,
   logger,
   ruleId,
-  bucketByField,
+  bucketByFields,
   timestampOverride,
   buildRuleMessage,
 }: FindPreviousThresholdSignalsParams): Promise<{
@@ -39,21 +44,6 @@ export const findPreviousThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  const aggregations = {
-    threshold: {
-      terms: {
-        field: 'signal.threshold_result.value',
-      },
-      aggs: {
-        lastSignalTimestamp: {
-          max: {
-            field: 'signal.original_time', // timestamp of last event captured by bucket
-          },
-        },
-      },
-    },
-  };
-
   const filter = {
     bool: {
       must: [
@@ -62,17 +52,18 @@ export const findPreviousThresholdSignals = async ({
             'signal.rule.rule_id': ruleId,
           },
         },
-        {
-          term: {
-            'signal.rule.threshold.field': bucketByField,
-          },
-        },
+        ...bucketByFields.map((field) => {
+          return {
+            term: {
+              'signal.rule.threshold.field': field,
+            },
+          };
+        }),
       ],
     },
   };
 
   return singleSearchAfter({
-    aggregations,
     searchAfterSortId: undefined,
     timestampOverride,
     index: indexPattern,
@@ -81,7 +72,7 @@ export const findPreviousThresholdSignals = async ({
     services,
     logger,
     filter,
-    pageSize: 0,
+    pageSize: 10000, // TODO: multiple pages?
     buildRuleMessage,
     excludeDocsWithTimestampOverride: false,
   });

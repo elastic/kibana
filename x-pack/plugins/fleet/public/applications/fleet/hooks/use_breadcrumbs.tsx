@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
 import { BASE_PATH, Page, DynamicPagePathValues, pagePathGetters } from '../constants';
@@ -16,7 +18,7 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
 };
 
 const breadcrumbGetters: {
-  [key in Page]: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
+  [key in Page]?: (values: DynamicPagePathValues) => ChromeBreadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
   overview: () => [
@@ -63,7 +65,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  integration_details: ({ pkgTitle }) => [
+  integration_details_overview: ({ pkgTitle }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.integrations(),
@@ -82,7 +84,7 @@ const breadcrumbGetters: {
       }),
     },
     {
-      href: pagePathGetters.integration_details({ pkgkey, panel: 'policies' }),
+      href: pagePathGetters.integration_details_policies({ pkgkey }),
       text: pkgTitle,
     },
     { text: policyName },
@@ -140,7 +142,7 @@ const breadcrumbGetters: {
       }),
     },
     {
-      href: pagePathGetters.integration_details({ pkgkey }),
+      href: pagePathGetters.integration_details_overview({ pkgkey }),
       text: pkgTitle,
     },
     {
@@ -219,10 +221,11 @@ const breadcrumbGetters: {
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
   const { chrome, http } = useStartServices();
-  const breadcrumbs: ChromeBreadcrumb[] = breadcrumbGetters[page](values).map((breadcrumb) => ({
-    ...breadcrumb,
-    href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,
-  }));
+  const breadcrumbs: ChromeBreadcrumb[] =
+    breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
+      ...breadcrumb,
+      href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,
+    })) || [];
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -56,7 +45,7 @@ export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
+export const contextMenuTrigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
     defaultMessage: 'Context menu',
@@ -67,7 +56,7 @@ export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
 };
 
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
+export const panelBadgeTrigger: Trigger = {
   id: PANEL_BADGE_TRIGGER,
   title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
     defaultMessage: 'Panel badges',
@@ -78,7 +67,7 @@ export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
 };
 
 export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+export const panelNotificationTrigger: Trigger = {
   id: PANEL_NOTIFICATION_TRIGGER,
   title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
     defaultMessage: 'Panel notifications',
@@ -89,7 +78,7 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
 };
 
 export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+export const selectRangeTrigger: Trigger = {
   id: SELECT_RANGE_TRIGGER,
   title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
     defaultMessage: 'Range selection',
@@ -100,7 +89,7 @@ export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
 };
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+export const valueClickTrigger: Trigger = {
   id: VALUE_CLICK_TRIGGER,
   title: i18n.translate('embeddableApi.valueClickTrigger.title', {
     defaultMessage: 'Single click',

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly detachAction: (triggerId: TriggerId, actionId: string) => void;
+readonly detachAction: (triggerId: string, actionId: string) => void;
 ```

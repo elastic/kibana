@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { applicationServiceMock } from './application/application_service.mock';
@@ -29,7 +18,6 @@ import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
 
@@ -113,12 +101,6 @@ export const MockRenderingService = renderingServiceMock.create();
 export const RenderingServiceConstructor = jest.fn().mockImplementation(() => MockRenderingService);
 jest.doMock('./rendering', () => ({
   RenderingService: RenderingServiceConstructor,
-}));
-
-export const MockContextService = contextServiceMock.create();
-export const ContextServiceConstructor = jest.fn().mockImplementation(() => MockContextService);
-jest.doMock('./context', () => ({
-  ContextService: ContextServiceConstructor,
 }));
 
 export const MockIntegrationsService = integrationsServiceMock.create();

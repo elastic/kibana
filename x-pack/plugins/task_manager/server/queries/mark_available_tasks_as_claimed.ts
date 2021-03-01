@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SortClause,
   ScriptClause,
@@ -12,6 +14,8 @@ import {
   mustBeAllOf,
   MustCondition,
   BoolClauseWithAnyCondition,
+  ShouldCondition,
+  FilterCondition,
 } from './query_clauses';
 
 export const TaskWithSchedule: ExistsFilter = {
@@ -37,14 +41,26 @@ export function taskWithLessThanMaxAttempts(
   };
 }
 
-export function tasksClaimedByOwner(taskManagerId: string) {
+export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
+  return {
+    bool: {
+      should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
+    },
+  };
+}
+
+export function tasksClaimedByOwner(
+  taskManagerId: string,
+  ...taskFilters: Array<FilterCondition<TermFilter> | ShouldCondition<TermFilter>>
+) {
   return mustBeAllOf(
     {
       term: {
         'task.ownerId': taskManagerId,
       },
     },
-    { term: { 'task.status': 'claiming' } }
+    { term: { 'task.status': 'claiming' } },
+    ...taskFilters
   );
 }
 
@@ -105,27 +121,35 @@ export const updateFieldsAndMarkAsFailed = (
     [field: string]: string | number | Date;
   },
   claimTasksById: string[],
-  registeredTaskTypes: string[],
+  claimableTaskTypes: string[],
+  skippedTaskTypes: string[],
   taskMaxAttempts: { [field: string]: number }
-): ScriptClause => ({
-  source: `
-  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
-    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
+): ScriptClause => {
+  const markAsClaimingScript = `ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+    .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+    .join(' ')}`;
+  return {
+    source: `
+    if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
+      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+        ${markAsClaimingScript}
+      } else {
+        ctx._source.task.status = "failed";
+      }
+    } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
+      ${markAsClaimingScript}
+    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+      ctx._source.task.status = "unrecognized";
     } else {
-      ctx._source.task.status = "failed";
-    }
-  } else {
-    ctx._source.task.status = "unrecognized";
-  }
-  `,
-  lang: 'painless',
-  params: {
-    fieldUpdates,
-    claimTasksById,
-    registeredTaskTypes,
-    taskMaxAttempts,
-  },
-});
+      ctx.op = "noop";
+    }`,
+    lang: 'painless',
+    params: {
+      fieldUpdates,
+      claimTasksById,
+      claimableTaskTypes,
+      skippedTaskTypes,
+      taskMaxAttempts,
+    },
+  };
+};

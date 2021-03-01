@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import {
   GetStepsData,
@@ -82,6 +84,8 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+          cardinality_field: ['process.name'],
+          cardinality_value: '2',
         },
         threatIndex: [],
         threatMapping: [],
@@ -211,6 +215,8 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+          cardinality_field: [],
+          cardinality_value: '0',
         },
         threatIndex: [],
         threatMapping: [],
@@ -253,6 +259,8 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+          cardinality_field: [],
+          cardinality_value: '0',
         },
         threatIndex: [],
         threatMapping: [],

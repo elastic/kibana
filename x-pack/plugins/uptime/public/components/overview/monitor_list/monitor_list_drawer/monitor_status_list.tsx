@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -40,12 +41,16 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
   return (
     <>
       <EuiFlexGroup style={{ maxWidth: 1000 }}>
-        <EuiFlexItem>
-          <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
-        </EuiFlexItem>
+        {downChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
+          </EuiFlexItem>
+        )}
+        {absUpChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>

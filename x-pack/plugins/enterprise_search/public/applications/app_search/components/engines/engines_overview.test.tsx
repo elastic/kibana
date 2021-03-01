@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../../../__mocks__/kea.mock';
-import '../../../__mocks__/react_router_history.mock';
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { shallow, ReactWrapper } from 'enzyme';
 
-import { mountAsync, mockHttpValues, setMockValues } from '../../../__mocks__';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { LoadingState, EmptyState } from './components';
 import { EnginesTable } from './engines_table';
@@ -19,109 +18,148 @@ import { EnginesTable } from './engines_table';
 import { EnginesOverview } from './';
 
 describe('EnginesOverview', () => {
+  const values = {
+    hasPlatinumLicense: false,
+    dataLoading: false,
+    engines: [],
+    enginesMeta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_results: 0,
+      },
+    },
+    enginesLoading: false,
+    metaEngines: [],
+    metaEnginesMeta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_results: 0,
+      },
+    },
+    metaEnginesLoading: false,
+  };
+  const actions = {
+    loadEngines: jest.fn(),
+    loadMetaEngines: jest.fn(),
+    onEnginesPagination: jest.fn(),
+    onMetaEnginesPagination: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(values);
+    setMockActions(actions);
+  });
+
   describe('non-happy-path states', () => {
     it('isLoading', () => {
+      setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(LoadingState)).toHaveLength(1);
     });
 
-    it('isEmpty', async () => {
-      setMockValues({
-        http: {
-          ...mockHttpValues.http,
-          get: () => ({
-            results: [],
-            meta: { page: { total_results: 0 } },
-          }),
-        },
-      });
-      const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
+    it('isEmpty', () => {
+      setMockValues({ ...values, engines: [] });
+      const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EmptyState)).toHaveLength(1);
     });
   });
 
   describe('happy-path states', () => {
-    const mockedApiResponse = {
-      results: [
-        {
-          name: 'hello-world',
-          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-          document_count: 50,
-          field_count: 10,
-        },
-      ],
-      meta: {
+    const valuesWithEngines = {
+      ...values,
+      dataLoading: false,
+      engines: ['dummy-engine'],
+      enginesMeta: {
         page: {
           current: 1,
-          total_pages: 10,
-          total_results: 100,
           size: 10,
+          total_results: 100,
         },
       },
     };
-    const mockApi = jest.fn(() => mockedApiResponse);
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      setMockValues({ http: { ...mockHttpValues.http, get: mockApi } });
+      setMockValues(valuesWithEngines);
     });
 
     it('renders and calls the engines API', async () => {
-      const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
+      const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
-      expect(mockApi).toHaveBeenNthCalledWith(1, '/api/app_search/engines', {
-        query: {
-          type: 'indexed',
-          pageIndex: 1,
-        },
-      });
+      expect(actions.loadEngines).toHaveBeenCalled();
+    });
+
+    it('renders a create engine button which takes users to the create engine page', () => {
+      const wrapper = shallow(<EnginesOverview />);
+
+      expect(
+        wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').prop('to')
+      ).toEqual('/engine_creation');
     });
 
     describe('when on a platinum license', () => {
       it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
         setMockValues({
+          ...valuesWithEngines,
           hasPlatinumLicense: true,
-          http: { ...mockHttpValues.http, get: mockApi },
+          metaEngines: ['dummy-meta-engine'],
         });
-        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
+        const wrapper = shallow(<EnginesOverview />);
 
         expect(wrapper.find(EnginesTable)).toHaveLength(2);
-        expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
-          query: {
-            type: 'meta',
-            pageIndex: 1,
-          },
-        });
+        expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
     });
 
     describe('pagination', () => {
-      const getTablePagination = (wrapper: ReactWrapper) =>
+      const getTablePagination = (wrapper: ShallowWrapper) =>
         wrapper.find(EnginesTable).prop('pagination');
 
       it('passes down page data from the API', async () => {
-        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
+        const wrapper = shallow(<EnginesOverview />);
         const pagination = getTablePagination(wrapper);
 
-        expect(pagination.totalEngines).toEqual(100);
+        expect(pagination.totalItemCount).toEqual(100);
         expect(pagination.pageIndex).toEqual(0);
       });
 
       it('re-polls the API on page change', async () => {
-        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
-        await act(async () => getTablePagination(wrapper).onPaginate(5));
-        wrapper.update();
+        const wrapper = shallow(<EnginesOverview />);
 
-        expect(mockApi).toHaveBeenLastCalledWith('/api/app_search/engines', {
-          query: {
-            type: 'indexed',
-            pageIndex: 5,
+        setMockValues({
+          ...valuesWithEngines,
+          enginesMeta: {
+            page: {
+              ...valuesWithEngines.enginesMeta.page,
+              current: 51,
+            },
           },
         });
-        expect(getTablePagination(wrapper).pageIndex).toEqual(4);
+        rerender(wrapper);
+
+        expect(actions.loadEngines).toHaveBeenCalledTimes(2);
+        expect(getTablePagination(wrapper).pageIndex).toEqual(50);
+      });
+
+      it('calls onPagination handlers', async () => {
+        setMockValues({
+          ...valuesWithEngines,
+          hasPlatinumLicense: true,
+          metaEngines: ['dummy-meta-engine'],
+        });
+        const wrapper = shallow(<EnginesOverview />);
+        const pageEvent = { page: { index: 0 } };
+
+        wrapper.find(EnginesTable).first().simulate('change', pageEvent);
+        expect(actions.onEnginesPagination).toHaveBeenCalledWith(1);
+
+        wrapper.find(EnginesTable).last().simulate('change', pageEvent);
+        expect(actions.onMetaEnginesPagination).toHaveBeenCalledWith(1);
       });
     });
   });

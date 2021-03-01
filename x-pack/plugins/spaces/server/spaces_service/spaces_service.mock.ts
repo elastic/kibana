@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 
 const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
   const setupContract: jest.Mocked<SpacesServiceSetup> = {

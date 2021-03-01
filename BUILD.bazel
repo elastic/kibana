@@ -1,0 +1,7 @@
+exports_files(
+  [
+    "tsconfig.json",
+    "package.json"
+  ],
+  visibility = ["//visibility:public"]
+)

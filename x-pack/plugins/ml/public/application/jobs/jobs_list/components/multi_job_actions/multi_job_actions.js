@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -53,6 +54,7 @@ export class MultiJobActions extends Component {
               showStartDatafeedModal={this.props.showStartDatafeedModal}
               showDeleteJobModal={this.props.showDeleteJobModal}
               refreshJobs={this.props.refreshJobs}
+              showCreateAlertFlyout={this.props.showCreateAlertFlyout}
             />
           </Fragment>
         )}
@@ -66,4 +68,5 @@ MultiJobActions.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  showCreateAlertFlyout: PropTypes.func.isRequired,
 };

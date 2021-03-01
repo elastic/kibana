@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -15,8 +16,8 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createUptimeESClient, UptimeESClient } from '../lib';
 import { UptimeAlertTypeFactory, UptimeAlertTypeParam, UptimeAlertTypeState } from './types';
 
-export interface UptimeAlertType
-  extends Omit<ReturnType<UptimeAlertTypeFactory>, 'executor' | 'producer'> {
+export interface UptimeAlertType<ActionGroupIds extends string>
+  extends Omit<ReturnType<UptimeAlertTypeFactory<ActionGroupIds>>, 'executor' | 'producer'> {
   executor: ({
     options,
     uptimeEsClient,
@@ -26,7 +27,8 @@ export interface UptimeAlertType
       UptimeAlertTypeParam,
       UptimeAlertTypeState,
       AlertInstanceState,
-      AlertInstanceContext
+      AlertInstanceContext,
+      ActionGroupIds
     >;
     uptimeEsClient: UptimeESClient;
     dynamicSettings: DynamicSettings;
@@ -34,7 +36,9 @@ export interface UptimeAlertType
   }) => Promise<UptimeAlertTypeState | void>;
 }
 
-export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
+export const uptimeAlertWrapper = <ActionGroupIds extends string>(
+  uptimeAlert: UptimeAlertType<ActionGroupIds>
+) => ({
   ...uptimeAlert,
   producer: 'uptime',
   executor: async (
@@ -42,7 +46,8 @@ export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
       UptimeAlertTypeParam,
       UptimeAlertTypeState,
       AlertInstanceState,
-      AlertInstanceContext
+      AlertInstanceContext,
+      ActionGroupIds
     >
   ) => {
     const {

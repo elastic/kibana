@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { MouseEvent } from 'react';
@@ -11,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { goToSpecifiedPath } from '../../render_app';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getToasts,
@@ -47,7 +48,7 @@ const tableColumns: Array<EuiBasicTableColumn<any>> = [
       <EuiLink
         onClick={(e: MouseEvent) => {
           e.preventDefault();
-          goToSpecifiedPath(`/${MAP_PATH}/${record.id}`);
+          goToSpecifiedPath(getEditPath(record.id));
         }}
         data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
       >

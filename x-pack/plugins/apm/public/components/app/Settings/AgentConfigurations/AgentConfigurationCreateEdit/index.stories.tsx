@@ -1,18 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { HttpSetup } from 'kibana/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
@@ -21,7 +17,6 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../../../context/apm_plugin/apm_plugin_context';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',

@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { ExceptionListClient } from '../../../lists/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
@@ -90,6 +93,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
+  exceptionListsClient: ExceptionListClient | undefined;
 };
 
 /**
@@ -121,7 +125,9 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts
+          dependencies.alerts,
+          dependencies.licenseService,
+          dependencies.exceptionListsClient
         )
       );
 

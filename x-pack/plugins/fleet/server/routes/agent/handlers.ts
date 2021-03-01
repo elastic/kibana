@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandler } from 'src/core/server';
@@ -39,8 +40,10 @@ export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    const agent = await AgentService.getAgent(soClient, request.params.agentId);
+    const agent = await AgentService.getAgent(soClient, esClient, request.params.agentId);
 
     const body: GetOneAgentResponse = {
       item: {
@@ -98,8 +101,10 @@ export const deleteAgentHandler: RequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    await AgentService.deleteAgent(soClient, request.params.agentId);
+    await AgentService.deleteAgent(soClient, esClient, request.params.agentId);
 
     const body = {
       action: 'deleted',
@@ -124,11 +129,13 @@ export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    await AgentService.updateAgent(soClient, request.params.agentId, {
-      userProvidedMetatada: request.body.user_provided_metadata,
+    await AgentService.updateAgent(soClient, esClient, request.params.agentId, {
+      user_provided_metadata: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgent(soClient, request.params.agentId);
+    const agent = await AgentService.getAgent(soClient, esClient, request.params.agentId);
 
     const body = {
       item: {
@@ -156,14 +163,17 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
-    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
+    const esClient = appContextService.getInternalUserESClient();
+    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, esClient, request);
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => {
       abortController.abort();
     });
     const signal = abortController.signal;
+
     const { actions } = await AgentService.agentCheckin(
       soClient,
+      esClient,
       agent,
       {
         events: request.body.events || [],
@@ -196,8 +206,13 @@ export const postAgentEnrollHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
+    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(
+      soClient,
+      esClient,
+      apiKeyId
+    );
 
     if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
       return response.unauthorized({
@@ -212,8 +227,7 @@ export const postAgentEnrollHandler: RequestHandler<
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
-      },
-      request.body.shared_id
+      }
     );
     const body: PostAgentEnrollResponse = {
       action: 'created',
@@ -234,8 +248,10 @@ export const getAgentsHandler: RequestHandler<
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, {
+    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -243,7 +259,7 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
     });
     const totalInactive = request.query.showInactive
-      ? await AgentService.countInactiveAgents(soClient, {
+      ? await AgentService.countInactiveAgents(soClient, esClient, {
           kuery: request.query.kuery,
         })
       : 0;
@@ -270,8 +286,14 @@ export const putAgentsReassignHandler: RequestHandler<
   TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
+    await AgentService.reassignAgent(
+      soClient,
+      esClient,
+      request.params.agentId,
+      request.body.policy_id
+    );
 
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
@@ -293,20 +315,18 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   }
 
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    // Reassign by array of IDs
-    const result = Array.isArray(request.body.agents)
-      ? await AgentService.reassignAgents(
-          soClient,
-          { agentIds: request.body.agents },
-          request.body.policy_id
-        )
-      : await AgentService.reassignAgents(
-          soClient,
-          { kuery: request.body.agents },
-          request.body.policy_id
-        );
-    const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
+    const results = await AgentService.reassignAgents(
+      soClient,
+      esClient,
+      Array.isArray(request.body.agents)
+        ? { agentIds: request.body.agents }
+        : { kuery: request.body.agents },
+      request.body.policy_id
+    );
+
+    const body: PostBulkAgentReassignResponse = results.items.reduce((acc, so) => {
       return {
         ...acc,
         [so.id]: {
@@ -326,10 +346,13 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
       soClient,
+      esClient,
       request.query.policyId,
       request.query.kuery
     );

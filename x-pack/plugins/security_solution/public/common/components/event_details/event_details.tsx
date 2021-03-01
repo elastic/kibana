@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
@@ -46,6 +47,11 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     flex-direction: column;
     overflow: hidden;
   }
+`;
+
+const TabContentWrapper = styled.div`
+  height: 100%;
+  position: relative;
 `;
 
 const EventDetailsComponent: React.FC<Props> = ({
@@ -105,7 +111,9 @@ const EventDetailsComponent: React.FC<Props> = ({
         content: (
           <>
             <EuiSpacer size="m" />
-            <JsonView data={data} />
+            <TabContentWrapper>
+              <JsonView data={data} />
+            </TabContentWrapper>
           </>
         ),
       },

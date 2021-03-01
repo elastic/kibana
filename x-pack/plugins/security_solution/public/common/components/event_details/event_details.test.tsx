@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { waitFor } from '@testing-library/dom';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -53,12 +54,6 @@ describe('EventDetails', () => {
       </TestProviders>
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
-  });
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
   });
 
   describe('tabs', () => {

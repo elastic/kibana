@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -41,12 +42,11 @@ interface Props {
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  expanded: boolean;
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   notesCount: number;
-  onEventToggled: () => void;
+  onEventDetailsPanelOpened: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -73,12 +73,11 @@ export const EventColumnView = React.memo<Props>(
     data,
     ecsData,
     eventIdToNoteIds,
-    expanded,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
     notesCount,
-    onEventToggled,
+    onEventDetailsPanelOpened,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
@@ -219,14 +218,12 @@ export const EventColumnView = React.memo<Props>(
           checked={Object.keys(selectedEventIds).includes(id)}
           columnValues={columnValues}
           onRowSelected={onRowSelected}
-          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
           loadingEventIds={loadingEventIds}
-          onEventToggled={onEventToggled}
+          onEventDetailsPanelOpened={onEventDetailsPanelOpened}
           showCheckboxes={showCheckboxes}
         />
-
         <DataDrivenColumns
           _id={id}
           ariaRowindex={ariaRowindex}

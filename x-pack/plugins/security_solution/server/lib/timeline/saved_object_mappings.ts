@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from '../../../../../../src/core/server';
@@ -131,6 +132,25 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     description: {
       type: 'text',
+    },
+    eqlOptions: {
+      properties: {
+        eventCategoryField: {
+          type: 'text',
+        },
+        tiebreakerField: {
+          type: 'text',
+        },
+        timestampField: {
+          type: 'text',
+        },
+        query: {
+          type: 'text',
+        },
+        size: {
+          type: 'text',
+        },
+      },
     },
     eventType: {
       type: 'keyword',
@@ -266,8 +286,12 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     sort: {
+      dynamic: false,
       properties: {
         columnId: {
+          type: 'keyword',
+        },
+        columnType: {
           type: 'keyword',
         },
         sortDirection: {

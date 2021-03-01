@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useCallback } from 'react';
 import {
   useWaffleOptionsContext,
@@ -76,7 +78,9 @@ export const useWaffleViewState = () => {
         region: newState.region,
         legend: newState.legend,
       });
-      if (newState.time) {
+      // if this is the "Default View" view, don't update the time range to the view's time range,
+      // this way it will use the global Kibana time or the default time already set
+      if (newState.time && newState.id !== '0') {
         setWaffleTimeState({
           currentTime: newState.time,
           isAutoReloading: newState.autoReload,
@@ -98,4 +102,5 @@ export type WaffleViewState = WaffleOptionsState & {
   time: number;
   autoReload: boolean;
   filterQuery: WaffleFiltersState;
+  id?: string;
 };

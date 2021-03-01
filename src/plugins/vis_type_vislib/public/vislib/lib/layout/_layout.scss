@@ -25,123 +25,6 @@
 // Numbers in here are brittle
 //
 
-.visWrapper {
-  display: flex;
-  flex: 1 1 100%;
-  flex-direction: row;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-  padding: $euiSizeS 0;
-}
-
-.visWrapper__column {
-  display: flex;
-  flex: 1 0 0;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-}
-
-.visWrapper__splitCharts--column {
-  display: flex;
-  flex: 1 0 20px;
-  flex-direction: row;
-  min-height: 0;
-  min-width: 0;
-
-  .visWrapper__chart {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-}
-
-.visWrapper__splitCharts--row {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 100%;
-  min-height: 0;
-  min-width: 0;
-
-  .visWrapper__chart {
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
-
-.visWrapper__chart {
-  display: flex;
-  flex: 1 0 0;
-  overflow: visible;
-  margin: 5px;
-  min-height: 0;
-  min-width: 0;
-}
-
-.visWrapper__alerts {
-  position: relative;
-}
-
-// General Axes
-
-.visAxis__column--top .axis-div svg {
-  margin-bottom: -5px;
-}
-
-// Y Axes
-
-.visAxis--x,
-.visAxis--y {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-}
-
-.visAxis--x {
-  overflow: visible;
-}
-
-.visAxis__spacer--y {
-  min-height: 0;
-}
-
-.visAxis__column--y {
-  display: flex;
-  flex-direction: row;
-  flex: 1 0 ($euiSizeXL + $euiSizeXS);
-  min-height: 0;
-  min-width: 0;
-}
-
-.visAxis__splitTitles--y {
-  display: flex;
-  flex-direction: column;
-  min-height: $euiSizeM;
-  min-width: 0;
-}
-
-.visAxis__splitTitles--x {
-  display: flex;
-  flex-direction: row;
-  min-height: 1px;
-  max-height: $euiSize;
-  min-width: $euiSize;
-}
-
-.visAxis__splitAxes--x,
-.visAxis__splitAxes--y {
-  display: flex;
-  flex-direction: column;
-  min-height: ($euiSize + $euiSizeXS);
-  min-width: 0;
-}
-
-.visAxis__splitAxes--x {
-  flex-direction: row;
-  min-height: 0;
-}
-
 //
 // STYLE
 //
@@ -155,6 +38,14 @@
 // sass-lint:disable-block no-mergeable-selectors
 // Keep SVG and non-renamable selectors separately
 .visWrapper {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: $euiSizeS 0;
+
   svg {
     overflow: visible;
   }
@@ -339,4 +230,111 @@
     pointer-events: none;
     fill: $visHoverBackgroundColor;
   }
+}
+
+.visWrapper__column {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visWrapper__splitCharts--column {
+  display: flex;
+  flex: 1 0 20px;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+
+  .visWrapper__chart {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+.visWrapper__splitCharts--row {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  min-height: 0;
+  min-width: 0;
+
+  .visWrapper__chart {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.visWrapper__chart {
+  display: flex;
+  flex: 1 0 0;
+  overflow: visible;
+  margin: 5px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visWrapper__alerts {
+  position: relative;
+}
+
+// General Axes
+
+.visAxis__column--top .axis-div svg {
+  margin-bottom: -5px;
+}
+
+// Y Axes
+
+.visAxis--x,
+.visAxis--y {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visAxis--x {
+  overflow: visible;
+}
+
+.visAxis__spacer--y {
+  min-height: 0;
+}
+
+.visAxis__column--y {
+  display: flex;
+  flex-direction: row;
+  flex: 1 0 ($euiSizeXL + $euiSizeXS);
+  min-height: 0;
+  min-width: 0;
+}
+
+.visAxis__splitTitles--y {
+  display: flex;
+  flex-direction: column;
+  min-height: $euiSizeM;
+  min-width: 0;
+}
+
+.visAxis__splitTitles--x {
+  display: flex;
+  flex-direction: row;
+  min-height: 1px;
+  max-height: $euiSize;
+  min-width: $euiSize;
+}
+
+.visAxis__splitAxes--x,
+.visAxis__splitAxes--y {
+  display: flex;
+  flex-direction: column;
+  min-height: ($euiSize + $euiSizeXS);
+  min-width: 0;
+}
+
+.visAxis__splitAxes--x {
+  flex-direction: row;
+  min-height: 0;
 }

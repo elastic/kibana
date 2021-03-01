@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FrontendLibs } from './lib/types';
@@ -14,11 +15,18 @@ import { CoreSetup } from '../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { BeatsManagementConfigType } from '../common';
+import { MANAGEMENT_SECTION } from '../common/constants';
 
 async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
-  await libs.framework.waitUntilFrameworkReady();
+  const [startServices] = await Promise.all([
+    core.getStartServices(),
+    libs.framework.waitUntilFrameworkReady(),
+  ]);
 
-  if (libs.framework.licenseIsAtLeast('standard')) {
+  const capabilities = startServices[0].application.capabilities;
+  const hasBeatsCapability = capabilities.management.ingest?.[MANAGEMENT_SECTION] ?? false;
+
+  if (libs.framework.licenseIsAtLeast('standard') && hasBeatsCapability) {
     const mount = async (params: any) => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       setServices(coreStart, pluginsStart, params);

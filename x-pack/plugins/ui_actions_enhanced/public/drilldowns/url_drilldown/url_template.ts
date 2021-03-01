@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { create as createHandlebars, HelperDelegate, HelperOptions } from 'handlebars';
@@ -9,6 +10,7 @@ import { encode, RisonValue } from 'rison-node';
 import dateMath from '@elastic/datemath';
 import moment, { Moment } from 'moment';
 import numeral from '@elastic/numeral';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 const handlebars = createHandlebars();
 
@@ -116,7 +118,22 @@ handlebars.registerHelper('replace', (...args) => {
   return String(str).split(searchString).join(valueString);
 });
 
-export function compile(url: string, context: object): string {
-  const template = handlebars.compile(url, { strict: true, noEscape: true });
-  return encodeURI(template(context));
+handlebars.registerHelper('encodeURIComponent', (component: unknown) => {
+  const str = String(component);
+  return encodeURIComponent(str);
+});
+handlebars.registerHelper('encodeURIQuery', (component: unknown) => {
+  const str = String(component);
+  return url.encodeUriQuery(str);
+});
+
+export function compile(urlTemplate: string, context: object, doEncode: boolean = true): string {
+  const handlebarsTemplate = handlebars.compile(urlTemplate, { strict: true, noEscape: true });
+  let processedUrl: string = handlebarsTemplate(context);
+
+  if (doEncode) {
+    processedUrl = encodeURI(processedUrl);
+  }
+
+  return processedUrl;
 }

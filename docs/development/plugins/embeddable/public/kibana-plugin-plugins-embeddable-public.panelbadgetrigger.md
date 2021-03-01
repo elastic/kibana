@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'>
+panelBadgeTrigger: Trigger
 ```

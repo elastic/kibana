@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -44,11 +46,17 @@ describe('resilient connector validation', () => {
     } as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        apiKeyId: [],
-        apiKeySecret: [],
-        orgId: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          orgId: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: [],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -65,11 +73,17 @@ describe('resilient connector validation', () => {
     } as unknown) as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        apiKeyId: [],
-        apiKeySecret: ['Secret is required'],
-        orgId: ['Organization ID is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          orgId: ['Organization ID is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: ['Secret is required'],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -82,7 +96,7 @@ describe('resilient action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { name: [] },
+      errors: { 'subActionParams.incident.name': [] },
     });
   });
 
@@ -93,7 +107,7 @@ describe('resilient action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        name: ['Name is required.'],
+        'subActionParams.incident.name': ['Name is required.'],
       },
     });
   });

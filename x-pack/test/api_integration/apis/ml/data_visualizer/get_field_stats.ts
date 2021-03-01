@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -174,16 +176,6 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  function compareByFieldName(a: { fieldName: string }, b: { fieldName: string }) {
-    if (a.fieldName < b.fieldName) {
-      return -1;
-    }
-    if (a.fieldName > b.fieldName) {
-      return 1;
-    }
-    return 0;
-  }
-
   describe('get_field_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -221,11 +213,8 @@ export default ({ getService }: FtrProviderContext) => {
         nonMetricFieldsTestData.expected.responseCode
       );
 
-      // Sort the fields in the response before validating.
-      const expectedRspFields = nonMetricFieldsTestData.expected.responseBody.sort(
-        compareByFieldName
-      );
-      const actualRspFields = body.sort(compareByFieldName);
+      const expectedRspFields = sortBy(nonMetricFieldsTestData.expected.responseBody, 'fieldName');
+      const actualRspFields = sortBy(body, 'fieldName');
       expect(actualRspFields).to.eql(expectedRspFields);
     });
 

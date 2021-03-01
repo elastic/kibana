@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -47,13 +48,20 @@
       },
       "technique": [
         {
-          "id": "T1086",
-          "name": "PowerShell",
-          "reference": "https://attack.mitre.org/techniques/T1086/"
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

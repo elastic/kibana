@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
@@ -22,16 +11,21 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
+import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
 import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
-import { addHelpMenuToAppChrome } from './lib';
+import { addHelpMenuToAppChrome, DashboardPanelStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
-import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
+import {
+  DashboardFeatureFlagConfig,
+  DashboardSetupDependencies,
+  DashboardStart,
+  DashboardStartDependencies,
+} from '../plugin';
 
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { KibanaContextProvider } from '../services/kibana_react';
@@ -41,6 +35,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '../services/core';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -77,6 +72,7 @@ export async function mountApp({
   const {
     navigation,
     savedObjects,
+    urlForwarding,
     data: dataStart,
     share: shareStart,
     embeddable: embeddableStart,
@@ -88,6 +84,7 @@ export async function mountApp({
     navigation,
     onAppLeave,
     savedObjects,
+    urlForwarding,
     usageCollection,
     core: coreStart,
     data: dataStart,
@@ -102,8 +99,11 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
+    dashboardPanelStorage: new DashboardPanelStorage(core.notifications.toasts),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
+      .allowByValueEmbeddables,
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),
@@ -112,6 +112,7 @@ export async function mountApp({
       mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
       createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
+      storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
   };
 
@@ -129,7 +130,7 @@ export async function mountApp({
     let destination;
     if (redirectTo.destination === 'dashboard') {
       destination = redirectTo.id
-        ? createDashboardEditUrl(redirectTo.id)
+        ? createDashboardEditUrl(redirectTo.id, redirectTo.editMode)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     } else {
       destination = createDashboardListingFilterUrl(redirectTo.filter);
@@ -180,6 +181,10 @@ export async function mountApp({
     );
   };
 
+  const renderNoMatch = (routeProps: RouteComponentProps) => {
+    return <DashboardNoMatch history={routeProps.history} />;
+  };
+
   // make sure the index pattern list is up to date
   await dataStart.indexPatterns.clearCache();
 
@@ -202,6 +207,10 @@ export async function mountApp({
               render={renderDashboard}
             />
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route exact path="/">
+              <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+            </Route>
+            <Route render={renderNoMatch} />
           </Switch>
         </HashRouter>
       </KibanaContextProvider>

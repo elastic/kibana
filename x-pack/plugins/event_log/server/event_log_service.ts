@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
 import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 type SystemLogger = Plugin['systemLogger'];

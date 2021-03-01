@@ -1,0 +1,34 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    // add all the folders contains files to be compiled
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    // add references to other TypeScript projects the plugin depends on
+
+    // requiredPlugins from ./kibana.json
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
+    { "path": "../data_enhanced/tsconfig.json" },
+    { "path": "../fleet/tsconfig.json" },
+
+    // optionalPlugins from ./kibana.json
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+
+    // requiredBundles from ./kibana.json
+    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+  ]
+}

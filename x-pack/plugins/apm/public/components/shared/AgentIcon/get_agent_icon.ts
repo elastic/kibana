@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,9 +12,11 @@ import {
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import defaultIcon from '../span_icon/icons/default.svg';
 import dotNetIcon from './icons/dot-net.svg';
+import erlangIcon from './icons/erlang.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
+import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
@@ -22,9 +25,11 @@ import rumJsIcon from './icons/rumjs.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
+  erlang: erlangIcon,
   go: goIcon,
   java: javaIcon,
   nodejs: nodeJsIcon,
+  ocaml: ocamlIcon,
   opentelemetry: openTelemetryIcon,
   php: phpIcon,
   python: pythonIcon,

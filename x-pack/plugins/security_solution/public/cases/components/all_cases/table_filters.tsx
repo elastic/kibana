@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -24,6 +25,7 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
+  disabledStatuses?: CaseStatuses[];
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -49,6 +51,7 @@ const CasesTableFiltersComponent = ({
   onFilterChanged,
   initial = defaultInitial,
   setFilterRefetch,
+  disabledStatuses,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
@@ -157,6 +160,7 @@ const CasesTableFiltersComponent = ({
               selectedStatus={initial.status}
               onStatusChanged={onStatusChanged}
               stats={stats}
+              disabledStatuses={disabledStatuses}
             />
           </StatusFilterWrapper>
         </EuiFlexGroup>

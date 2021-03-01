@@ -6,14 +6,22 @@
     "embeddable",
     "inspector",
     "kibanaLegacy",
-    "urlForwarding",
     "navigation",
-    "uiActions",
     "savedObjects",
-    "share"
+    "share",
+    "uiActions",
+    "urlForwarding",
+    "presentationUtil"
   ],
-  "optionalPlugins": ["home", "usageCollection", "savedObjectsTaggingOss"],
+  "optionalPlugins": [
+    "home",
+    "savedObjectsTaggingOss",
+    "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

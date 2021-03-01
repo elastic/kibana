@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -228,6 +217,83 @@ describe('context app', function () {
         expect(
           mockSearchSource.setField.calledWith('sort', [{ '@timestamp': 'desc' }, { _doc: 'desc' }])
         ).toBe(true);
+      });
+    });
+  });
+
+  describe('function fetchSuccessors with useNewFieldsApi set', function () {
+    let fetchSuccessors;
+    let mockSearchSource;
+
+    beforeEach(() => {
+      mockSearchSource = createContextSearchSourceStub([], '@timestamp');
+
+      setServices({
+        data: {
+          search: {
+            searchSource: {
+              create: jest.fn().mockImplementation(() => mockSearchSource),
+            },
+          },
+        },
+      });
+
+      fetchSuccessors = (
+        indexPatternId,
+        timeField,
+        sortDir,
+        timeValIso,
+        timeValNr,
+        tieBreakerField,
+        tieBreakerValue,
+        size
+      ) => {
+        const anchor = {
+          _source: {
+            [timeField]: timeValIso,
+          },
+          sort: [timeValNr, tieBreakerValue],
+        };
+
+        return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
+          'successors',
+          indexPatternId,
+          anchor,
+          timeField,
+          tieBreakerField,
+          sortDir,
+          size,
+          []
+        );
+      };
+    });
+
+    it('should perform exactly one query when enough hits are returned', function () {
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 5000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 4000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 - 1),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 - 2),
+      ];
+
+      return fetchSuccessors(
+        'INDEX_PATTERN_ID',
+        '@timestamp',
+        'desc',
+        ANCHOR_TIMESTAMP_3000,
+        MS_PER_DAY * 3000,
+        '_doc',
+        0,
+        3,
+        []
+      ).then((hits) => {
+        expect(mockSearchSource.fetch.calledOnce).toBe(true);
+        expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+        const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
+        const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
+        expect(removeFieldsSpy.calledOnce).toBe(true);
+        expect(setFieldsSpy.calledOnce).toBe(true);
       });
     });
   });

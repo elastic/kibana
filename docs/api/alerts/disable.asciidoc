@@ -1,0 +1,34 @@
+[[alerts-api-disable]]
+=== Disable alert API
+++++
+<titleabbrev>Disable alert</titleabbrev>
+++++
+
+Disable an alert.
+
+[[alerts-api-disable-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerts/alert/<id>/_disable`
+
+[[alerts-api-disable-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the alert that you want to disable.
+
+[[alerts-api-disable-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Disable an alert with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerts/alert/41893910-6bca-11eb-9e0d-85d233e3ee35/_disable
+--------------------------------------------------
+// KIBANA

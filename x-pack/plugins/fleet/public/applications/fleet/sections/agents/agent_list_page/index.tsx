@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
@@ -47,7 +49,7 @@ import { AgentTableHeader } from './components/table_header';
 import { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 
-const REFRESH_INTERVAL_MS = 10000;
+const REFRESH_INTERVAL_MS = 30000;
 
 const RowActions = React.memo<{
   agent: Agent;
@@ -282,7 +284,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           healthy: agentsStatusRequest.data.results.online,
           unhealthy: agentsStatusRequest.data.results.error,
           offline: agentsStatusRequest.data.results.offline,
-          updating: agentsStatusRequest.data.results.other,
+          updating: agentsStatusRequest.data.results.updating,
           inactive: agentsRequest.data.totalInactive,
         });
 

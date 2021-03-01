@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -17,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../../spaces/public';
 import { Role, isRoleReserved } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../validate_role';
@@ -35,6 +38,7 @@ interface Props {
   canCustomizeSubFeaturePrivileges: boolean;
   validator: RoleValidator;
   uiCapabilities: Capabilities;
+  spacesApiUi: SpacesApiUi;
 }
 
 interface State {
@@ -213,6 +217,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         spaces={this.getDisplaySpaces()}
         kibanaPrivileges={this.props.kibanaPrivileges}
         canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
+        spacesApiUi={this.props.spacesApiUi}
       />
     );
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
@@ -110,7 +112,7 @@ describe('delete()', () => {
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
       'api_key_pending_invalidation'
     );
@@ -135,7 +137,7 @@ describe('delete()', () => {
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
@@ -153,7 +155,7 @@ describe('delete()', () => {
     });
 
     await alertsClient.delete({ id: '1' });
-    expect(taskManager.remove).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
   });
 
   test(`doesn't invalidate API key when apiKey is null`, async () => {
@@ -217,8 +219,8 @@ describe('delete()', () => {
     );
   });
 
-  test('throws error when taskManager.remove throws an error', async () => {
-    taskManager.remove.mockRejectedValue(new Error('TM Fail'));
+  test('throws error when taskManager.removeIfExists throws an error', async () => {
+    taskManager.removeIfExists.mockRejectedValue(new Error('TM Fail'));
 
     await expect(alertsClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TM Fail"`

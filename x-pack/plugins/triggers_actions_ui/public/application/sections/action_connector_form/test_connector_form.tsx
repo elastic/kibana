@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, Suspense } from 'react';
 import {
   EuiFlexGroup,
@@ -20,7 +22,7 @@ import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, ActionTypeRegistryContract } from '../../../types';
+import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
 
 export interface ConnectorAddFlyoutProps {
@@ -47,8 +49,8 @@ export const TestConnectorForm = ({
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
-  const actionErrors = actionTypeModel?.validateParams(actionParams);
-  const hasErrors = !!Object.values(actionErrors.errors).find((errors) => errors.length > 0);
+  const actionErrors = actionTypeModel?.validateParams(actionParams).errors as IErrorObject;
+  const hasErrors = !!Object.values(actionErrors).find((errors) => errors.length > 0);
 
   const steps = [
     {
@@ -67,7 +69,7 @@ export const TestConnectorForm = ({
             <ParamsFieldsComponent
               actionParams={actionParams}
               index={0}
-              errors={actionErrors.errors}
+              errors={actionErrors}
               editAction={(field, value) =>
                 setActionParams({
                   ...actionParams,

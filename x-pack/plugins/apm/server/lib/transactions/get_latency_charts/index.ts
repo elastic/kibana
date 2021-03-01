@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
@@ -11,7 +13,11 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -19,6 +25,7 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -27,7 +34,9 @@ export type LatencyChartsSearchResponse = PromiseReturnType<
   typeof searchLatency
 >;
 
-async function searchLatency({
+function searchLatency({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -35,6 +44,8 @@ async function searchLatency({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -47,11 +58,12 @@ async function searchLatency({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {
@@ -98,7 +110,9 @@ async function searchLatency({
   return apmEventClient.search(params);
 }
 
-export async function getLatencyTimeseries({
+export function getLatencyTimeseries({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -106,6 +120,8 @@ export async function getLatencyTimeseries({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -113,32 +129,36 @@ export async function getLatencyTimeseries({
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const response = await searchLatency({
-    serviceName,
-    transactionType,
-    transactionName,
-    setup,
-    searchAggregatedTransactions,
-    latencyAggregationType,
+  return withApmSpan('get_latency_charts', async () => {
+    const response = await searchLatency({
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+      latencyAggregationType,
+    });
+
+    if (!response.aggregations) {
+      return { latencyTimeseries: [], overallAvgDuration: null };
+    }
+
+    return {
+      overallAvgDuration:
+        response.aggregations.overall_avg_duration.value || null,
+      latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
+        (bucket) => {
+          return {
+            x: bucket.key,
+            y: getLatencyValue({
+              latencyAggregationType,
+              aggregation: bucket.latency,
+            }),
+          };
+        }
+      ),
+    };
   });
-
-  if (!response.aggregations) {
-    return { latencyTimeseries: [], overallAvgDuration: null };
-  }
-
-  return {
-    overallAvgDuration:
-      response.aggregations.overall_avg_duration.value || null,
-    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
-      (bucket) => {
-        return {
-          x: bucket.key,
-          y: getLatencyValue({
-            latencyAggregationType,
-            aggregation: bucket.latency,
-          }),
-        };
-      }
-    ),
-  };
 }

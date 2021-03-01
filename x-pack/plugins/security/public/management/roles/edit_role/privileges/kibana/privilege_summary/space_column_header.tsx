@@ -1,24 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment } from 'react';
+
+import React, { Fragment, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Space, SpaceAvatar } from '../../../../../../../../spaces/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 
-interface Props {
+export interface SpaceColumnHeaderProps {
   spaces: Space[];
   entry: RoleKibanaPrivilege;
+  spacesApiUi: SpacesApiUi;
 }
 
 const SPACES_DISPLAY_COUNT = 4;
 
-export const SpaceColumnHeader = (props: Props) => {
+export const SpaceColumnHeader = (props: SpaceColumnHeaderProps) => {
+  const { spacesApiUi } = props;
   const isGlobal = isGlobalPrivilegeDefinition(props.entry);
   const entrySpaces = props.entry.spaces.map((spaceId) => {
     return (
@@ -29,12 +34,14 @@ export const SpaceColumnHeader = (props: Props) => {
       }
     );
   });
+  const LazySpaceAvatar = useMemo(() => spacesApiUi.components.getSpaceAvatar, [spacesApiUi]);
+
   return (
     <div>
       {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map((space) => {
         return (
           <span key={space.id}>
-            <SpaceAvatar size="s" space={space} />{' '}
+            <LazySpaceAvatar size="s" space={space} />{' '}
             {isGlobal && (
               <span>
                 <FormattedMessage
@@ -60,6 +67,7 @@ export const SpaceColumnHeader = (props: Props) => {
                 },
               }
             )}
+            spacesApiUi={spacesApiUi}
           />
         </Fragment>
       )}

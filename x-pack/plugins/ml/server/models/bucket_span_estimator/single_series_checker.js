@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -17,7 +18,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
   const REF_DATA_INTERVAL = { name: '1h', ms: 3600000 };
 
   class SingleSeriesChecker {
-    constructor(index, timeField, aggType, field, duration, query, thresholds) {
+    constructor(index, timeField, aggType, field, duration, query, thresholds, runtimeMappings) {
       this.index = index;
       this.timeField = timeField;
       this.aggType = aggType;
@@ -30,7 +31,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
         varDiff: 0,
         created: false,
       };
-
+      this.runtimeMappings = runtimeMappings;
       this.interval = null;
     }
 
@@ -170,6 +171,7 @@ export function singleSeriesCheckerFactory({ asCurrentUser }) {
             },
           },
         },
+        ...this.runtimeMappings,
       };
 
       if (this.field !== null) {

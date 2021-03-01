@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Unit } from '@elastic/datemath';
 import { EuiSelectOption } from '@elastic/eui';
 
@@ -65,6 +67,7 @@ export type Action =
       type: 'setToFrom';
     };
 
+/* eslint-disable-next-line complexity */
 export const queryPreviewReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
     case 'setQueryInfo': {
@@ -129,7 +132,9 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
       const thresholdField =
         action.threshold != null &&
         action.threshold.field != null &&
-        action.threshold.field.trim() !== '';
+        ((typeof action.threshold.field === 'string' && action.threshold.field.trim() !== '') ||
+          (Array.isArray(action.threshold.field) &&
+            action.threshold.field.every((field) => field.trim() !== '')));
       const showNonEqlHist =
         action.ruleType === 'query' ||
         action.ruleType === 'saved_query' ||

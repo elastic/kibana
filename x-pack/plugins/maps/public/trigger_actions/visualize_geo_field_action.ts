@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid/v4';
@@ -21,7 +22,8 @@ import {
 import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
 
-export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_FIELD>({
+export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
+  id: ACTION_VISUALIZE_GEO_FIELD,
   type: ACTION_VISUALIZE_GEO_FIELD,
   getDisplayName: () =>
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {

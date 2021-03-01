@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -215,7 +217,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     return from === 'policy'
       ? getHref('policy_details', { policyId: agentPolicyId || policyId })
-      : getHref('integration_details', { pkgkey });
+      : getHref('integration_details_overview', { pkgkey });
   }, [agentPolicyId, policyId, from, getHref, pkgkey, routeState]);
 
   const cancelClickHandler: ReactEventHandler = useCallback(

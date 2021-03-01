@@ -142,6 +142,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -206,6 +207,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -547,6 +549,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
+                    size="s"
                   />
                 </span>
               </div>
@@ -611,6 +614,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
+                    size="s"
                   />
                 </span>
               </div>
@@ -962,6 +966,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -1026,6 +1031,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>

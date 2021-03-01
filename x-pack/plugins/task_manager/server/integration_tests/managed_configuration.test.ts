@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -29,6 +30,7 @@ describe('managed configuration', () => {
       index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
+      version_conflict_threshold: 80,
       max_poll_inactivity_cycles: 10,
       monitored_aggregated_stats_refresh_rate: 60000,
       monitored_stats_required_freshness: 4000,

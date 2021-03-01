@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -10,11 +11,12 @@ import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 import {
+  MB,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
-} from '../../../../../../common/constants/file_datavisualizer';
+} from '../../../../../../../file_upload/public';
 import { getUiSettings } from '../../../../util/dependency_cache';
 import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
 
@@ -48,7 +50,7 @@ export function readFile(file: File) {
           if (data === null || typeof data === 'string') {
             return reject();
           }
-          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const size = UPLOAD_SIZE_MB * MB;
           const fileContents = decoder.decode(data.slice(0, size));
 
           if (fileContents === '') {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Logger } from '../../../../../src/core/server';
@@ -117,7 +118,7 @@ describe('validateActionTypeSecrets()', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureHostnameAllowed: () => {
+        ensureUriAllowed: () => {
           throw new Error(`target hostname is not added to allowedHosts`);
         },
       },
@@ -165,10 +166,6 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -194,9 +191,14 @@ describe('execute()', () => {
   });
 
   test('calls the mock executor with success proxy', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+    });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
+      configurationUtilities,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -204,10 +206,6 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'

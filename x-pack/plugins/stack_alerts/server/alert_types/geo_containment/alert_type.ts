@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,7 @@ import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';
+export const RecoveryActionGroupId = 'notGeoContained';
 
 const actionVariableContextEntityIdLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
@@ -97,7 +99,6 @@ export const ParamsSchema = schema.object({
   boundaryIndexId: schema.string({ minLength: 1 }),
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
   indexQuery: schema.maybe(schema.any({})),
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
@@ -113,7 +114,6 @@ export interface GeoContainmentParams extends AlertTypeParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }
@@ -141,7 +141,9 @@ export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
   GeoContainmentState,
   GeoContainmentInstanceState,
-  GeoContainmentInstanceContext
+  GeoContainmentInstanceContext,
+  typeof ActionGroupId,
+  typeof RecoveryActionGroupId
 >;
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {
@@ -160,6 +162,12 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     id: GEO_CONTAINMENT_ID,
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
+    recoveryActionGroup: {
+      id: RecoveryActionGroupId,
+      name: i18n.translate('xpack.stackAlerts.geoContainment.notGeoContained', {
+        defaultMessage: 'No longer contained',
+      }),
+    },
     defaultActionGroupId: ActionGroupId,
     executor: getGeoContainmentExecutor(logger),
     producer: STACK_ALERTS_FEATURE_ID,

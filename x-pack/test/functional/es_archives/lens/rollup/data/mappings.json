@@ -1,6 +1,29 @@
 {
   "type": "index",
   "value": {
+    "index": "lens_regular_data",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+            "type": "date"
+        },
+        "bytes": {
+          "type": "float"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
     "index": "lens_rolled_up_data",
     "mappings": {
       "_meta": {

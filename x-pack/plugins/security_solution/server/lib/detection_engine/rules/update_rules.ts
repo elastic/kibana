@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
@@ -37,7 +38,7 @@ export const updateRules = async ({
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
-    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, false),
+    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
     params: {
       author: ruleUpdate.author ?? [],
       buildingBlockType: ruleUpdate.building_block_type,

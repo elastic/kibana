@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
+import { HITS_TOTAL_RELATION } from '../../../common/types/es_client';
 import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  search: () => Promise.resolve({ body: { hits: { total: { value: 1, relation: 'eq' } } } }),
+  search: () =>
+    Promise.resolve({ body: { hits: { total: { value: 1, relation: HITS_TOTAL_RELATION.EQ } } } }),
 };
 
 const mlClusterClient = ({

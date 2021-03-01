@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 
 import {
@@ -31,12 +33,12 @@ const ServiceNowConnectorFields: React.FC<
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
+  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { username, password } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
+  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
+  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),

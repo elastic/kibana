@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { initParams } from './agg_params';
@@ -44,6 +33,7 @@ export interface AggTypeConfig<
   ordered?: any;
   hasNoDsl?: boolean;
   params?: Array<Partial<TParam>>;
+  valueType?: DatatableColumnType;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
@@ -102,6 +92,11 @@ export class AggType<
    * @type {string}
    */
   title: string;
+  /**
+   * The type the values produced by this agg will have in the final data table.
+   * If not specified, the type of the field is used.
+   */
+  valueType?: DatatableColumnType;
   /**
    * a function that will be called when this aggType is assigned to
    * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
@@ -233,6 +228,7 @@ export class AggType<
     this.dslName = config.dslName || config.name;
     this.expressionName = config.expressionName;
     this.title = config.title;
+    this.valueType = config.valueType;
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;

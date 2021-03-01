@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticUser } from '../types';
 import {
   ActionConnector,
+  ActionTypeConnector,
   ActionType,
   CaseConnector,
   CaseField,
@@ -15,7 +17,15 @@ import {
   ThirdPartyField,
 } from '../../../../../case/common/api';
 
-export { ActionConnector, ActionType, CaseConnector, CaseField, ClosureType, ThirdPartyField };
+export {
+  ActionConnector,
+  ActionTypeConnector,
+  ActionType,
+  CaseConnector,
+  CaseField,
+  ClosureType,
+  ThirdPartyField,
+};
 
 export interface CaseConnectorMapping {
   actionType: ActionType;
@@ -28,6 +38,7 @@ export interface CaseConfigure {
   connector: CasesConfigure['connector'];
   createdAt: string;
   createdBy: ElasticUser;
+  error: string | null;
   mappings: CaseConnectorMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;

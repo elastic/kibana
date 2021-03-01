@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
@@ -74,21 +76,27 @@ export const createPackagePolicyHandler: RequestHandler<
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  let newData = { ...request.body };
   try {
-    newData = await packagePolicyService.runExternalCallbacks(
+    const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newData,
+      { ...request.body },
       context,
       request
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {
-      user,
-    });
+    const packagePolicy = await packagePolicyService.create(
+      soClient,
+      esClient,
+      callCluster,
+      newData,
+      {
+        user,
+      }
+    );
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
       body,
@@ -110,6 +118,7 @@ export const updatePackagePolicyHandler: RequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
@@ -131,6 +140,7 @@ export const updatePackagePolicyHandler: RequestHandler<
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
+      esClient,
       request.params.packagePolicyId,
       { ...newData, package: pkg, inputs },
       { user }
@@ -149,10 +159,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
+      esClient,
       request.body.packagePolicyIds,
       { user }
     );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -78,7 +79,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -96,7 +97,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           return getRowItemData(row, $);
         });
     },
@@ -105,7 +106,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,
@@ -155,6 +156,35 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
       );
       await createBtn.click();
+    },
+    async setAlertName(value: string) {
+      await testSubjects.setValue('alertNameInput', value);
+      await this.assertAlertName(value);
+    },
+    async assertAlertName(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('alertNameInput', 'value');
+      expect(actualValue).to.eql(expectedValue);
+    },
+    async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
+      await testSubjects.setValue('intervalInput', value.toString());
+      if (unit) {
+        await testSubjects.selectValue('intervalInputUnit', unit);
+      }
+      await this.assertAlertInterval(value, unit);
+    },
+    async assertAlertInterval(expectedValue: number, expectedUnit?: 's' | 'm' | 'h' | 'd') {
+      const actualValue = await testSubjects.getAttribute('intervalInput', 'value');
+      expect(actualValue).to.eql(expectedValue);
+      if (expectedUnit) {
+        const actualUnitValue = await testSubjects.getAttribute('intervalInputUnit', 'value');
+        expect(actualUnitValue).to.eql(expectedUnit);
+      }
+    },
+    async saveAlert() {
+      await testSubjects.click('saveAlertButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
+      expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
+      await testSubjects.click('confirmModalConfirmButton');
     },
   };
 }

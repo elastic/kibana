@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import httpProxy from 'http-proxy';
@@ -371,6 +372,34 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+              });
+            });
+        });
+
+        it('should handle failing with a simulated success when labels containing a space', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    issueType: '10006',
+                    labels: ['label with spaces'],
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.labels]: types that failed validation:\n - [subActionParams.incident.labels.0.0]: The label label with spaces cannot contain spaces\n - [subActionParams.incident.labels.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
               });
             });
         });

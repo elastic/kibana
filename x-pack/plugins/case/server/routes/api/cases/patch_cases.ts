@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { escapeHatch, wrapError } from '../utils';
@@ -9,7 +10,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { CasesPatchRequest } from '../../../../common/api';
 
-export function initPatchCasesApi({ router }: RouteDeps) {
+export function initPatchCasesApi({ router, logger }: RouteDeps) {
   router.patch(
     {
       path: CASES_URL,
@@ -18,18 +19,19 @@ export function initPatchCasesApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const caseClient = context.case.getCaseClient();
-      const cases = request.body as CasesPatchRequest;
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const cases = request.body as CasesPatchRequest;
+
         return response.ok({
-          body: await caseClient.update({ caseClient, cases }),
+          body: await caseClient.update(cases),
         });
       } catch (error) {
+        logger.error(`Failed to patch cases in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

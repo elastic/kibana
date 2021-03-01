@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Request } from '@hapi/hapi';
@@ -64,7 +65,7 @@ export async function authenticate(callCluster: CallESAsCurrentUser) {
   }
 }
 
-export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id: string) {
+export async function invalidateAPIKeys(soClient: SavedObjectsClientContract, ids: string[]) {
   const adminUser = await outputService.getAdminUser(soClient);
   if (!adminUser) {
     throw new Error('No admin user configured');
@@ -88,7 +89,7 @@ export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id:
 
   try {
     const res = await security.authc.apiKeys.invalidate(request, {
-      id,
+      ids,
     });
 
     return res;

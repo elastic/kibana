@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Windows contains accessibility features that may be launched with a key combination before a user has logged in. An adversary can modify the way these programs are launched to get a command prompt or backdoor without logging in to the system.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -34,9 +36,16 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     },
@@ -49,13 +58,21 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }

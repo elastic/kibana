@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { InfraSource } from '../../sources';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import {
@@ -29,7 +30,7 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 const COMPOSITE_GROUP_SIZE = 40;
 
 export async function getChartPreviewData(
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSource,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
@@ -114,7 +115,7 @@ const addHistogramAggregationToQuery = (
 
 const getUngroupedResults = async (
   query: object,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   callWithRequest: KibanaFramework['callWithRequest']
 ) => {
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(
@@ -124,7 +125,7 @@ const getUngroupedResults = async (
 
 const getGroupedResults = async (
   query: object,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   callWithRequest: KibanaFramework['callWithRequest']
 ) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];

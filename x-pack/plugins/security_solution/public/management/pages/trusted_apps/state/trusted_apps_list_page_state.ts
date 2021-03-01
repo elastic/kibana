@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
@@ -32,6 +33,10 @@ export interface TrustedAppsListPageLocation {
 }
 
 export interface TrustedAppsListPageState {
+  /** Represents if trusted apps entries exist, regardless of whether the list is showing results
+   * or not (which could use filtering in the future)
+   */
+  entriesExist: AsyncResourceState<boolean>;
   listView: {
     listResourceState: AsyncResourceState<TrustedAppsListData>;
     freshDataTimestamp: number;

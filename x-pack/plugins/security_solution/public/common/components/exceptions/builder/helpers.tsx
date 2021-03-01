@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import uuid from 'uuid';
+
+import { addIdToItem } from '../../../../../common/add_remove_id_to_item';
 import { IIndexPattern, IFieldType } from '../../../../../../../../src/plugins/data/common';
 import {
   Entry,
   OperatorTypeEnum,
   EntryNested,
   ExceptionListType,
-  EntryMatch,
-  EntryMatchAny,
-  EntryExists,
   entriesList,
   ListSchema,
   OperatorEnum,
@@ -159,6 +160,7 @@ export const getFormattedBuilderEntry = (
           ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
           : foundField,
       correspondingKeywordField,
+      id: item.id ?? `${itemIndex}`,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -168,6 +170,7 @@ export const getFormattedBuilderEntry = (
   } else {
     return {
       field: foundField,
+      id: item.id ?? `${itemIndex}`,
       correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
@@ -214,6 +217,7 @@ export const getFormattedBuilderEntries = (
     } else {
       const parentEntry: FormattedBuilderEntry = {
         operator: isOperator,
+        id: item.id ?? `${index}`,
         nested: 'parent',
         field: isNewNestedEntry
           ? undefined
@@ -264,7 +268,7 @@ export const getUpdatedEntriesOnDelete = (
   const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
 
   if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
-    const updatedEntryEntries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists> = [
+    const updatedEntryEntries = [
       ...itemOfInterest.entries.slice(0, entryIndex),
       ...itemOfInterest.entries.slice(entryIndex + 1),
     ];
@@ -281,6 +285,7 @@ export const getUpdatedEntriesOnDelete = (
       const { field } = itemOfInterest;
       const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
         field,
+        id: itemOfInterest.id ?? `${entryIndex}`,
         type: OperatorTypeEnum.NESTED,
         entries: updatedEntryEntries,
       };
@@ -316,12 +321,13 @@ export const getUpdatedEntriesOnDelete = (
 export const getEntryFromOperator = (
   selectedOperator: OperatorOption,
   currentEntry: FormattedBuilderEntry
-): Entry => {
+): Entry & { id?: string } => {
   const isSameOperatorType = currentEntry.operator.type === selectedOperator.type;
   const fieldValue = currentEntry.field != null ? currentEntry.field.name : '';
   switch (selectedOperator.type) {
     case 'match':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.MATCH,
         operator: selectedOperator.operator,
@@ -330,6 +336,7 @@ export const getEntryFromOperator = (
       };
     case 'match_any':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.MATCH_ANY,
         operator: selectedOperator.operator,
@@ -337,6 +344,7 @@ export const getEntryFromOperator = (
       };
     case 'list':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.LIST,
         operator: selectedOperator.operator,
@@ -344,6 +352,7 @@ export const getEntryFromOperator = (
       };
     default:
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.EXISTS,
         operator: selectedOperator.operator,
@@ -396,7 +405,7 @@ export const getEntryOnFieldChange = (
 
   if (nested === 'parent') {
     // For nested entries, when user first selects to add a nested
-    // entry, they first see a row similiar to what is shown for when
+    // entry, they first see a row similar to what is shown for when
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
@@ -407,15 +416,16 @@ export const getEntryOnFieldChange = (
 
     return {
       updatedEntry: {
+        id: item.id,
         field: newParentFieldValue,
         type: OperatorTypeEnum.NESTED,
         entries: [
-          {
+          addIdToItem({
             field: newChildFieldValue ?? '',
             type: OperatorTypeEnum.MATCH,
             operator: isOperator.operator,
             value: '',
-          },
+          }),
         ],
       },
       index: entryIndex,
@@ -427,6 +437,7 @@ export const getEntryOnFieldChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: newChildFieldValue ?? '',
             type: OperatorTypeEnum.MATCH,
             operator: isOperator.operator,
@@ -440,6 +451,7 @@ export const getEntryOnFieldChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: newField != null ? newField.name : '',
         type: OperatorTypeEnum.MATCH,
         operator: isOperator.operator,
@@ -507,6 +519,7 @@ export const getEntryOnMatchChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: fieldName,
             type: OperatorTypeEnum.MATCH,
             operator: operator.operator,
@@ -520,6 +533,7 @@ export const getEntryOnMatchChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: field != null ? field.name : '',
         type: OperatorTypeEnum.MATCH,
         operator: operator.operator,
@@ -553,6 +567,7 @@ export const getEntryOnMatchAnyChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: fieldName,
             type: OperatorTypeEnum.MATCH_ANY,
             operator: operator.operator,
@@ -566,6 +581,7 @@ export const getEntryOnMatchAnyChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: field != null ? field.name : '',
         type: OperatorTypeEnum.MATCH_ANY,
         operator: operator.operator,
@@ -593,6 +609,7 @@ export const getEntryOnListChange = (
 
   return {
     updatedEntry: {
+      id: item.id,
       field: field != null ? field.name : '',
       type: OperatorTypeEnum.LIST,
       operator: operator.operator,
@@ -603,6 +620,7 @@ export const getEntryOnListChange = (
 };
 
 export const getDefaultEmptyEntry = (): EmptyEntry => ({
+  id: uuid.v4(),
   field: '',
   type: OperatorTypeEnum.MATCH,
   operator: OperatorEnum.INCLUDED,
@@ -610,6 +628,7 @@ export const getDefaultEmptyEntry = (): EmptyEntry => ({
 });
 
 export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
+  id: uuid.v4(),
   field: '',
   type: OperatorTypeEnum.NESTED,
   entries: [],

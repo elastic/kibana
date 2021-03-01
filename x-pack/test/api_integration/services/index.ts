@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
@@ -15,10 +16,6 @@ import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
-import {
-  InfraOpsGraphQLClientProvider,
-  InfraOpsGraphQLClientFactoryProvider,
-} from './infraops_graphql_client';
 import {
   SecuritySolutionGraphQLClientProvider,
   SecuritySolutionGraphQLClientFactoryProvider,
@@ -37,8 +34,6 @@ export const services = {
 
   legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-  infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
-  infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
   infraLogSourceConfiguration: InfraLogSourceConfigurationProvider,
   securitySolutionGraphQLClient: SecuritySolutionGraphQLClientProvider,

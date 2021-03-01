@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
@@ -9,7 +10,6 @@ import { Type } from '@kbn/config-schema';
 import {
   HttpResources,
   HttpResourcesRequestHandler,
-  IRouter,
   RequestHandler,
   kibanaResponseFactory,
   RouteConfig,
@@ -18,6 +18,7 @@ import { SecurityLicense } from '../../../common/licensing';
 import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
+import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import {
   coreMock,
@@ -28,7 +29,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let license: jest.Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {
@@ -145,7 +146,7 @@ describe('Login view routes', () => {
       return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
     }
 
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [loginStateRouteConfig, loginStateRouteHandler] = router.get.mock.calls.find(

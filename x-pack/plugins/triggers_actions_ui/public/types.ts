@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionGroup, AlertActionParam, AlertTypeParams } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
+  ActionGroup,
+  AlertActionParam,
   SanitizedAlert,
   AlertAction,
   AlertAggregations,
@@ -22,6 +25,7 @@ import {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 } from '../../alerts/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -38,23 +42,30 @@ export {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 };
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;
-export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
-  TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
->;
+export type ActionTypeRegistryContract<
+  ActionConnector = unknown,
+  ActionParams = unknown
+> = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
-  editActionConfig: (property: string, value: any) => void;
-  editActionSecrets: (property: string, value: any) => void;
+  editActionConfig: (property: string, value: unknown) => void;
+  editActionSecrets: (property: string, value: unknown) => void;
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+}
+
+export enum AlertFlyoutCloseReason {
+  SAVED,
+  CANCELED,
 }
 
 export interface ActionParamsProps<TParams> {
@@ -79,20 +90,29 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ValidationResult;
-  validateParams: (actionParams: any) => ValidationResult;
+  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  validateParams: (
+    actionParams: ActionParams
+  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
     >
   > | null;
-  actionParamsFields: React.LazyExoticComponent<
-    ComponentType<ActionParamsProps<ActionParams>>
-  > | null;
+  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+}
+
+export interface GenericValidationResult<T> {
+  errors: Record<Extract<keyof T, string>, string[] | unknown>;
 }
 
 export interface ValidationResult {
   errors: Record<string, any>;
+}
+
+export interface ConnectorValidationResult<Config, Secrets> {
+  config?: GenericValidationResult<Config>;
+  secrets?: GenericValidationResult<Secrets>;
 }
 
 interface ActionConnectorProps<Config, Secrets> {
@@ -119,13 +139,13 @@ export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProp
   isPreconfigured: false;
 };
 
-export type ActionConnector<Config = Record<string, any>, Secrets = Record<string, any>> =
+export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
   | PreConfiguredActionConnector
   | UserConfiguredActionConnector<Config, Secrets>;
 
 export type ActionConnectorWithoutId<
-  Config = Record<string, any>,
-  Secrets = Record<string, any>
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -146,9 +166,11 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType
-  extends Pick<
-    CommonAlertType,
+export interface AlertType<
+  ActionGroupIds extends string = string,
+  RecoveryActionGroupId extends string = string
+> extends Pick<
+    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
@@ -175,11 +197,13 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   Params extends AlertTypeParams = AlertTypeParams,
-  MetaData = Record<string, any>
+  MetaData = Record<string, unknown>,
+  ActionGroupIds extends string = string
 > {
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,
@@ -187,7 +211,7 @@ export interface AlertTypeParamsExpressionProps<
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
-  actionGroups: ActionGroup[];
+  actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;

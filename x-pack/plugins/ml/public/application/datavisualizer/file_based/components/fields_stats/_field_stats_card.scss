@@ -1,7 +1,7 @@
 .card-container {
   display: inline-grid;
   display: -ms-inline-grid;
-  padding: 0px 10px 10px 0px;
+  padding: 0 10px 10px 0;
 }
 
 .ml-field-data-card {
@@ -70,7 +70,7 @@
   }
 
   .stat.heading {
-    padding-bottom: 0px;
+    padding-bottom: 0;
   }
 
   .stat.min,
@@ -92,7 +92,7 @@
   }
 
   .not-exist-message {
-    padding: 50px 30px 0px 30px;
+    padding: 50px 30px 0 30px;
     text-align: center;
   }
 

@@ -19,7 +19,6 @@
     "triggersActionsUi",
     "alerts",
     "actions",
-    "encryptedSavedObjects",
     "encryptedSavedObjects"
   ],
   "server": true,

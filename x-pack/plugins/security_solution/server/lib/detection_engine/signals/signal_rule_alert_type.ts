@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-import { partition } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
+
+import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
   SIGNALS_ID,
@@ -19,6 +24,7 @@ import {
   isThresholdRule,
   isEqlRule,
   isThreatMatchRule,
+  hasLargeValueItem,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
@@ -32,17 +38,17 @@ import {
   WrappedSignalHit,
 } from './types';
 import {
-  getGapBetweenRuns,
   getListsClient,
   getExceptions,
-  getGapMaxCatchupRatio,
-  MAX_RULE_GAP_RATIO,
   wrapSignal,
   createErrorsFromShard,
   createSearchAfterReturnType,
   mergeReturns,
   createSearchAfterReturnTypeFromResponse,
   checkPrivileges,
+  hasTimestampFields,
+  hasReadIndexPrivileges,
+  getRuleRangeTuples,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -130,6 +136,7 @@ export const signalRulesAlertType = ({
         threatFilters,
         threatQuery,
         threatIndex,
+        threatIndicatorPath,
         threatMapping,
         threatLanguage,
         timestampOverride,
@@ -173,70 +180,73 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-      let wroteStatus = false;
+      let wroteWarningStatus = false;
       await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        const inputIndex = await getInputIndex(services, version, index);
-        const privileges = await checkPrivileges(services, inputIndex);
+        if (!isEmpty(index)) {
+          const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
+          const inputIndices = await getInputIndex(services, version, index);
+          const [privileges, timestampFieldCaps] = await Promise.all([
+            checkPrivileges(services, inputIndices),
+            services.scopedClusterClient.fieldCaps({
+              index,
+              fields: hasTimestampOverride
+                ? ['@timestamp', timestampOverride as string]
+                : ['@timestamp'],
+              include_unmapped: true,
+            }),
+          ]);
 
-        const indexNames = Object.keys(privileges.index);
-        const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
-          indexNames,
-          (indexName) => privileges.index[indexName].read
-        );
-
-        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
-          // some indices have read privileges others do not.
-          // set a partial failure status
-          const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
-            indexesWithNoReadPrivileges
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        } else if (
-          indexesWithReadPrivileges.length === 0 &&
-          indexesWithNoReadPrivileges.length === indexNames.length
-        ) {
-          // none of the indices had read privileges so set the status to failed
-          // since we can't search on any indices we do not have read privileges on
-          const errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
-            indexesWithNoReadPrivileges
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.error(errorString);
-          wroteStatus = true;
+          wroteWarningStatus = await flow(
+            () =>
+              tryCatch(
+                () =>
+                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                toError
+              ),
+            chain((wroteStatus) =>
+              tryCatch(
+                () =>
+                  hasTimestampFields(
+                    wroteStatus,
+                    hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    timestampFieldCaps,
+                    inputIndices,
+                    ruleStatusService,
+                    logger,
+                    buildRuleMessage
+                  ),
+                toError
+              )
+            ),
+            toPromise
+          )();
         }
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
-
-      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-      if (gap != null && gap.asMilliseconds() > 0) {
-        const fromUnit = from[from.length - 1];
-        const { ratio } = getGapMaxCatchupRatio({
-          logger,
-          buildRuleMessage,
-          previousStartedAt,
-          ruleParamsFrom: from,
-          interval,
-          unit: fromUnit,
-        });
-        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
-          const gapString = gap.humanize();
-          const gapMessage = buildRuleMessage(
-            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-            'Consider increasing your look behind time or adding more Kibana instances.'
-          );
-          logger.warn(gapMessage);
-
-          hasError = true;
-          await ruleStatusService.error(gapMessage, { gap: gapString });
-        }
+      const { tuples, remainingGap } = getRuleRangeTuples({
+        logger,
+        previousStartedAt,
+        from,
+        to,
+        interval,
+        maxSignals,
+        buildRuleMessage,
+      });
+      if (remainingGap.asMilliseconds() > 0) {
+        const gapString = remainingGap.humanize();
+        const gapMessage = buildRuleMessage(
+          `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
+          'Consider increasing your look behind time or adding more Kibana instances.'
+        );
+        logger.warn(gapMessage);
+        hasError = true;
+        await ruleStatusService.error(gapMessage, { gap: gapString });
       }
       try {
         const { listClient, exceptionsClient } = getListsClient({
@@ -356,7 +366,17 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
+            );
+            wroteWarningStatus = true;
+          }
           const inputIndex = await getInputIndex(services, version, index);
+
+          const thresholdFields = Array.isArray(threshold.field)
+            ? threshold.field
+            : [threshold.field];
 
           const {
             filters: bucketFilters,
@@ -368,7 +388,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByField: threshold.field,
+            bucketByFields: thresholdFields,
             timestampOverride,
             buildRuleMessage,
           });
@@ -459,6 +479,7 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
           result = await createThreatSignals({
+            tuples,
             threatMapping,
             query,
             inputIndex,
@@ -469,8 +490,6 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             exceptionItems: exceptionItems ?? [],
-            gap,
-            previousStartedAt,
             listClient,
             logger,
             eventsTelemetry,
@@ -493,6 +512,7 @@ export const signalRulesAlertType = ({
             threatLanguage,
             buildRuleMessage,
             threatIndex,
+            threatIndicatorPath,
             concurrentSearches: concurrentSearches ?? 1,
             itemsPerSearch: itemsPerSearch ?? 9000,
           });
@@ -510,8 +530,7 @@ export const signalRulesAlertType = ({
           });
 
           result = await searchAfterAndBulkCreate({
-            gap,
-            previousStartedAt,
+            tuples,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
@@ -539,6 +558,12 @@ export const signalRulesAlertType = ({
         } else if (isEqlRule(type)) {
           if (query === undefined) {
             throw new Error('EQL query rule must have a query defined');
+          }
+          if (hasLargeValueItem(exceptionItems ?? [])) {
+            await ruleStatusService.warning(
+              'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
+            );
+            wroteWarningStatus = true;
           }
           try {
             const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
@@ -642,13 +667,28 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteStatus) {
+          if (!hasError && !wroteWarningStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
               lastLookBackDate: result.lastLookBackDate?.toISOString(),
             });
           }
+
+          // adding this log line so we can get some information from cloud
+          logger.info(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount}  ${
+                !isEmpty(result.totalToFromTuples)
+                  ? `signals searched between date ranges ${JSON.stringify(
+                      result.totalToFromTuples,
+                      null,
+                      2
+                    )}`
+                  : ''
+              }`
+            )
+          );
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',

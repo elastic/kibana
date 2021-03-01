@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Detects changes to registry persistence keys that are uncommonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -32,6 +34,15 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
+      "technique": []
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
       "technique": [
         {
           "id": "T1112",
@@ -41,6 +52,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

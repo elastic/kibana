@@ -26,7 +26,7 @@
 
 .globalFilterItem-isDisabled {
   color: $euiColorDarkShade;
-  background-color: transparentize($euiColorLightShade, 0.5);
+  background-color: transparentize($euiColorLightShade, .5);
   text-decoration: line-through;
   font-weight: $euiFontWeightRegular;
   font-style: italic;

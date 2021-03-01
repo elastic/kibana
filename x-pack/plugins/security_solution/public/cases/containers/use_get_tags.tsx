@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect, useReducer } from 'react';
-
+import { useEffect, useReducer, useRef, useCallback } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getTags } from './api';
 import * as i18n from './translations';
@@ -58,37 +58,42 @@ export const useGetTags = (): UseGetTags => {
     tags: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
-  const callFetch = () => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-
-    const fetchData = async () => {
+  const callFetch = useCallback(async () => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
-      try {
-        const response = await getTags(abortCtrl.signal);
-        if (!didCancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response });
-        }
-      } catch (error) {
-        if (!didCancel) {
+
+      const response = await getTags(abortCtrlRef.current.signal);
+
+      if (!isCancelledRef.current) {
+        dispatch({ type: 'FETCH_SUCCESS', payload: response });
+      }
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    };
-    fetchData();
-    return () => {
-      abortCtrl.abort();
-      didCancel = true;
-    };
-  };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     callFetch();
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...state, fetchTags: callFetch };

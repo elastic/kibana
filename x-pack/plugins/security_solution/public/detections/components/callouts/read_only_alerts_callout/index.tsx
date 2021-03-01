@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo } from 'react';
@@ -14,16 +15,16 @@ const readOnlyAccessToAlertsMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-alerts',
   title: i18n.READ_ONLY_ALERTS_CALLOUT_TITLE,
-  description: <p>{i18n.READ_ONLY_ALERTS_CALLOUT_MSG}</p>,
+  description: i18n.readOnlyAlertsCallOutBody(),
 };
 
 const ReadOnlyAlertsCallOutComponent = () => {
-  const [{ hasIndexWrite }] = useUserData();
+  const [{ hasIndexUpdateDelete }] = useUserData();
 
   return (
     <CallOutSwitcher
       namespace="detections"
-      condition={hasIndexWrite != null && !hasIndexWrite}
+      condition={hasIndexUpdateDelete != null && !hasIndexUpdateDelete}
       message={readOnlyAccessToAlertsMessage}
     />
   );

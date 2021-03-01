@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { stringify } from 'query-string';
@@ -18,6 +19,11 @@ const {
 
 export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
   if (ignoreEmpty) {
+    // We don't want to encode this values because they are often set to Date.now(), the relative
+    // values in dateRangeStart are better for a URL.
+    delete params.absoluteDateRangeStart;
+    delete params.absoluteDateRangeEnd;
+
     Object.keys(params).forEach((key: string) => {
       // @ts-ignore
       const val = params[key];

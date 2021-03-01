@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Identifies execution of suspicious persistent programs (scripts, rundll32, etc.) by looking at process lineage and command line usage.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -31,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1060",
-          "name": "Registry Run Keys / Startup Folder",
-          "reference": "https://attack.mitre.org/techniques/T1060/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

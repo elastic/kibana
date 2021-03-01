@@ -19,8 +19,9 @@ You’ll learn how to:
 [[index-patterns-read-only-access]]
 === Before you begin
 
-* To access *Index Patterns*, you must have the {kib} privilege
-`Index Pattern Management`.  To add the privilege, open the main menu, then click *Stack Management > Roles*.
+* To access the *Index Patterns* view, you must have the {kib} privilege
+`Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
+`view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
 to create or save index patterns. The buttons to create new index patterns or
@@ -138,6 +139,10 @@ which indicates the type of data the field contains in {es},
 such as strings or boolean values. The field mapping also determines
 how you can use the field, such as whether it can be searched or aggregated.
 
+When a new field is added to the index, the index pattern field list is updated
+the next time the index pattern is loaded, for example, when you load the page or
+move between {kib} apps.
+
 [role="screenshot"]
 image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
 
@@ -157,21 +162,17 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 <<field-formatters-geopoint, geopoints>>,
 and <<field-formatters-numeric, numbers>>.
 
+To customize the displayed field name provided by {es}, you can
+use *Custom Label* .
+
 A popularity counter keeps track of the fields you use most often.
 The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
-To edit the field format and popularity counter, click the edit icon
+To edit the field display, click the edit icon
 (image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
 
 [role="screenshot"]
 image:management/index-patterns/images/edit-field-format.png["Edit field format"]
-
-[float]
-==== Refresh the data fields
-
-To pick up newly-added fields,
-refresh (image:management/index-patterns/images/refresh-icon.png[Refresh icon]) the index fields list.
-This action also resets the {kib} popularity counters for the fields.
 
 [float]
 [[default-index-pattern]]

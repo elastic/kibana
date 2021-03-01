@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rt from 'io-ts';
-import { EuiTheme } from '../../../../../observability/public';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { InventoryFormatterTypeRT } from '../../../../common/inventory_models/types';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';

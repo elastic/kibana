@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -17,7 +19,7 @@ import { px } from '../../../../style/variables';
 interface IconPopoverProps {
   title: string;
   children: React.ReactChild;
-  onOpen: () => void;
+  onClick: () => void;
   onClose: () => void;
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
@@ -27,7 +29,7 @@ export function IconPopover({
   icon,
   title,
   children,
-  onOpen,
+  onClick,
   onClose,
   detailsFetchStatus,
   isOpen,
@@ -35,16 +37,13 @@ export function IconPopover({
   if (!icon) {
     return null;
   }
-  const isLoading =
-    detailsFetchStatus === FETCH_STATUS.LOADING ||
-    detailsFetchStatus === FETCH_STATUS.PENDING;
-
+  const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
   return (
     <EuiPopover
       anchorPosition="downCenter"
       ownFocus={false}
       button={
-        <EuiButtonEmpty onClick={onOpen} data-test-subj={`popover_${title}`}>
+        <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
           <EuiIcon type={icon} size="l" color="black" />
         </EuiButtonEmpty>
       }

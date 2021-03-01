@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   getMutualAuthenticationResponseToken,
@@ -54,7 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('does not prevent basic login', async () => {
-      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -62,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username, password },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
 
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', cookie.cookieString())
         .expect(200);
 
-      expect(user.username).to.eql(username);
+      expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.eql('realm');
       // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud

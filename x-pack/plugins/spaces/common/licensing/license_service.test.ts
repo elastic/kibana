@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of } from 'rxjs';
+
 import { licenseMock } from '../../../licensing/common/licensing.mock';
+import type { LicenseType } from '../../../licensing/common/types';
+import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { SpacesLicenseService } from './license_service';
-import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
 
 describe('license#isEnabled', function () {
   it('should indicate that Spaces is disabled when there is no license information', () => {

@@ -9,7 +9,7 @@ An object that handles registration of context providers and configuring handler
 <b>Signature:</b>
 
 ```typescript
-export interface IContextContainer<THandler extends HandlerFunction<any>> 
+export interface IContextContainer<THandler extends RequestHandler> 
 ```
 
 ## Remarks

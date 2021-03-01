@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -9,16 +10,16 @@ import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import { SUPPORTED_CONNECTORS } from '../../../../../case/common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { useActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { ActionType } from '../../../../../triggers_actions_ui/public';
 
 import { ClosureType } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
-import { connectorsConfiguration } from '../connectors';
 
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -49,8 +50,6 @@ const FormWrapper = styled.div`
   `}
 `;
 
-const actionTypes: ActionType[] = Object.values(connectorsConfiguration);
-
 interface ConfigureCasesComponentProps {
   userCanCrud: boolean;
 }
@@ -72,17 +71,26 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     mappings,
     persistLoading,
     persistCaseConfigure,
+    refetchCaseConfigure,
     setConnector,
     setClosureType,
   } = useCaseConfigure();
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
+  const { loading: isLoadingActionTypes, actionTypes, refetchActionTypes } = useActionTypes();
+  const supportedActionTypes = useMemo(
+    () => actionTypes.filter((actionType) => SUPPORTED_CONNECTORS.includes(actionType.id)),
+    [actionTypes]
+  );
 
-  // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
-  // TODO: Fix it if reloadConnectors type change.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
-  const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
+  const onConnectorUpdate = useCallback(async () => {
+    refetchConnectors();
+    refetchActionTypes();
+    refetchCaseConfigure();
+  }, [refetchActionTypes, refetchCaseConfigure, refetchConnectors]);
+
+  const isLoadingAny =
+    isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
@@ -92,9 +100,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setAddFlyoutVisibility,
   ]);
 
-  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
-    setEditFlyoutVisibility,
-  ]);
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -155,11 +161,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       triggersActionsUi.getAddConnectorFlyout({
         consumer: 'case',
         onClose: onCloseAddFlyout,
-        actionTypes,
-        reloadConnectors,
+        actionTypes: supportedActionTypes,
+        reloadConnectors: onConnectorUpdate,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [supportedActionTypes]
   );
 
   const ConnectorEditFlyout = useMemo(
@@ -169,7 +175,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
             initialConnector: editedConnectorItem,
             consumer: 'case',
             onClose: onCloseEditFlyout,
-            reloadConnectors,
+            reloadConnectors: onConnectorUpdate,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps

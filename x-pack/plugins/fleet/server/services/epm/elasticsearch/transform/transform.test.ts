@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -16,6 +17,7 @@ jest.mock('./common', () => {
   };
 });
 
+import { errors as LegacyESErrors } from 'elasticsearch';
 import { installTransform } from './install';
 import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
@@ -216,6 +218,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
       [
@@ -223,6 +226,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
     ]);
@@ -344,6 +348,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
     ]);
@@ -487,6 +492,108 @@ describe('test transform install', () => {
         'endpoint',
         {
           installed_es: [],
+        },
+      ],
+    ]);
+  });
+
+  test('ignore already exists error if saved object and ES transforms are out of sync', async () => {
+    const previousInstallation: Installation = ({
+      installed_es: [],
+    } as unknown) as Installation;
+
+    const currentInstallation: Installation = ({
+      installed_es: [
+        {
+          id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown) as Installation;
+    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
+      Buffer.from('{"content": "data"}', 'utf8')
+    );
+    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+      .mockReturnValueOnce(Promise.resolve(previousInstallation))
+      .mockReturnValueOnce(Promise.resolve(currentInstallation));
+
+    (getInstallationObject as jest.MockedFunction<
+      typeof getInstallationObject
+    >).mockReturnValueOnce(
+      Promise.resolve(({
+        attributes: { installed_es: [] },
+      } as unknown) as SavedObject<Installation>)
+    );
+    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
+
+    legacyScopedClusterClient.callAsCurrentUser.mockImplementation(
+      async (endpoint, clientParams, options) => {
+        if (
+          endpoint === 'transport.request' &&
+          clientParams?.method === 'PUT' &&
+          clientParams?.path === '/_transform/endpoint.metadata_current-default-0.16.0-dev.0'
+        ) {
+          const err: LegacyESErrors._Abstract & { body?: any } = new LegacyESErrors.BadRequest();
+          err.body = {
+            error: { type: 'resource_already_exists_exception' },
+          };
+          throw err;
+        }
+      }
+    );
+    await installTransform(
+      ({
+        name: 'endpoint',
+        version: '0.16.0-dev.0',
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'endpoint.metadata_current',
+            title: 'Endpoint Metadata',
+            release: 'experimental',
+            package: 'endpoint',
+            ingest_pipeline: 'default',
+            elasticsearch: {
+              'index_template.mappings': {
+                dynamic: false,
+              },
+            },
+            path: 'metadata_current',
+          },
+        ],
+      } as unknown) as RegistryPackage,
+      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+      legacyScopedClusterClient.callAsCurrentUser,
+      savedObjectsClient
+    );
+
+    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+      [
+        'transport.request',
+        {
+          method: 'PUT',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
+          query: 'defer_validation=true',
+          body: '{"content": "data"}',
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'POST',
+          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
+        },
+      ],
+    ]);
+    expect(savedObjectsClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
+          ],
         },
       ],
     ]);

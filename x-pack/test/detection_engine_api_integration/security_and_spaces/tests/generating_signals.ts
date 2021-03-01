@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -67,6 +68,19 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should abide by max_signals > 100', async () => {
+        const maxSignals = 500;
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          max_signals: maxSignals,
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, maxSignals, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id], maxSignals);
+        expect(signalsOpen.hits.hits.length).equal(maxSignals);
       });
 
       it('should have recorded the rule_id within the signal', async () => {
@@ -201,8 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // ES PROMOTION FAILURE: http://github.com/elastic/kibana/issues/86709
-      describe.skip('EQL Rules', () => {
+      describe('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
@@ -226,28 +239,26 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
             ],
             original_event: {
-              action: 'boot',
-              dataset: 'login',
-              kind: 'event',
-              module: 'system',
-              origin: '/var/log/wtmp',
+              action: 'error',
+              category: 'user-login',
+              module: 'auditd',
             },
             parent: {
               depth: 0,
-              id: 'UBXOBmkBR346wHgnLP8T',
+              id: 'gCF0B2kBR346wHgnb7m0',
               index: 'auditbeat-8.0.0-2019.02.19-000001',
               type: 'event',
             },
             parents: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -268,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForSignalsToBePresent(supertest, 10, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
@@ -284,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -297,7 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 depth: 0,
-                id: 'URXOBmkBR346wHgnLP8T',
+                id: 'CCF0B2kBR346wHgngLtX',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },

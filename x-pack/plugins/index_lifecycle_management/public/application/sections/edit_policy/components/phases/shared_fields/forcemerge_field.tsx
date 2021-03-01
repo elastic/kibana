@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
+import uuid from 'uuid';
+import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+
+import { UseField } from '../../../form';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
 
@@ -38,50 +42,56 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         </h3>
       }
       description={
-        <EuiTextColor color="subdued">
+        <>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
-            defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+            defaultMessage="Reduce the number of segments in each index shard and clean up deleted documents."
           />{' '}
-          <LearnMoreLink docPath="indices-forcemerge.html" />
-        </EuiTextColor>
+          <LearnMoreLink docPath="ilm-forcemerge.html" />
+        </>
       }
       titleSize="xs"
       fullWidth
       switchProps={{
-        'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
-        'data-test-subj': `${phase}-forceMergeSwitch`,
-        'aria-controls': 'forcemergeContent',
         label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
+        'data-test-subj': `${phase}-forceMergeSwitch`,
         initialValue: initialToggleValue,
       }}
     >
+      <UseField
+        path={`phases.${phase}.actions.forcemerge.max_num_segments`}
+        component={NumericField}
+        componentProps={{
+          fullWidth: false,
+          euiFieldProps: {
+            'data-test-subj': `${phase}-selectedForceMergeSegments`,
+            min: 1,
+          },
+        }}
+      />
       <EuiSpacer />
-      <div id="forcemergeContent" aria-live="polite" role="region">
-        <UseField
-          key={`phases.${phase}.actions.forcemerge.max_num_segments`}
-          path={`phases.${phase}.actions.forcemerge.max_num_segments`}
-          component={NumericField}
-          componentProps={{
-            fullWidth: false,
-            euiFieldProps: {
-              'data-test-subj': `${phase}-selectedForceMergeSegments`,
-              min: 1,
-            },
-          }}
-        />
-        <UseField
-          key={`_meta.${phase}.bestCompression`}
-          path={`_meta.${phase}.bestCompression`}
-          component={ToggleField}
-          componentProps={{
-            hasEmptyLabelSpace: true,
-            euiFieldProps: {
-              'data-test-subj': `${phase}-bestCompression`,
-            },
-          }}
-        />
-      </div>
+      <UseField path={`_meta.${phase}.bestCompression`}>
+        {(field) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                label={field.label}
+                checked={field.value as boolean}
+                onChange={field.onChange}
+                data-test-subj={`${phase}-bestCompression`}
+                id={uuid()}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18nTexts.editPolicy.bestCompressionFieldHelpText}
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </UseField>
     </DescribedFormRow>
   );
 };

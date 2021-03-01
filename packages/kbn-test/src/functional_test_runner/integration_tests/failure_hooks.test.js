@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { spawnSync } from 'child_process';
@@ -30,9 +19,11 @@ describe('failure hooks', function () {
   it('runs and prints expected output', () => {
     const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG]);
     const lines = stripAnsi(proc.stdout.toString('utf8')).split(/\r?\n/);
+    const linesCopy = [...lines];
+
     const tests = [
       {
-        flag: '$FAILING_BEFORE_HOOK$',
+        flag: '"before all" hook: $FAILING_BEFORE_HOOK$',
         assert(lines) {
           expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
           expect(lines.shift()).toMatch(
@@ -41,7 +32,7 @@ describe('failure hooks', function () {
         },
       },
       {
-        flag: '$FAILING_TEST$',
+        flag: '└-> $FAILING_TEST$',
         assert(lines) {
           expect(lines.shift()).toMatch(/global before each/);
           expect(lines.shift()).toMatch(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
@@ -49,7 +40,7 @@ describe('failure hooks', function () {
         },
       },
       {
-        flag: '$FAILING_AFTER_HOOK$',
+        flag: '"after all" hook: $FAILING_AFTER_HOOK$',
         assert(lines) {
           expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
           expect(lines.shift()).toMatch(
@@ -59,14 +50,19 @@ describe('failure hooks', function () {
       },
     ];
 
-    while (lines.length && tests.length) {
-      const line = lines.shift();
-      if (line.includes(tests[0].flag)) {
-        const test = tests.shift();
-        test.assert(lines);
+    try {
+      while (lines.length && tests.length) {
+        const line = lines.shift();
+        if (line.includes(tests[0].flag)) {
+          const test = tests.shift();
+          test.assert(lines);
+        }
       }
-    }
 
-    expect(tests).toHaveLength(0);
+      expect(tests).toHaveLength(0);
+    } catch (error) {
+      console.error('full log output', linesCopy.join('\n'));
+      throw error;
+    }
   });
 });

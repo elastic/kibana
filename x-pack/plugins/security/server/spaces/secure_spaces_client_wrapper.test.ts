@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock } from '../../../../../src/core/server/mocks';
@@ -14,7 +15,7 @@ import { deepFreeze } from '@kbn/std';
 import { Space } from '../../../spaces/server';
 import { authorizationMock } from '../authorization/index.mock';
 import { AuthorizationServiceSetup } from '../authorization';
-import { GetAllSpacesPurpose } from '../../../spaces/common/model/types';
+import { GetAllSpacesPurpose } from '../../../spaces/server';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SavedObjectsErrorHelpers } from 'src/core/server';

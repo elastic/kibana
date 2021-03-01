@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle, EuiProgress, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { basePath } from '../kibana_services';
+import { getHttp } from '../kibana_services';
 
 export class JsonImportProgress extends Component {
   state = {
@@ -117,9 +118,7 @@ export class JsonImportProgress extends Component {
                 <a
                   data-test-subj="indexManagementNewIndexLink"
                   target="_blank"
-                  href={`${basePath}/app/kibana#/
-                      management/elasticsearch/index_management/indices/
-                      filter/${indexName}`.replace(/\s/g, '')}
+                  href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
                 >
                   {i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink', {
                     defaultMessage: 'Index Management',

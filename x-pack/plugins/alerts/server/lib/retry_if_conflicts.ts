@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // This module provides a helper to perform retries on a function if the
@@ -15,9 +16,7 @@ import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server
 type RetryableForConflicts<T> = () => Promise<T>;
 
 // number of times to retry when conflicts occur
-// note: it seems unlikely that we'd need more than one retry, but leaving
-// this statically configurable in case we DO need > 1
-export const RetryForConflictsAttempts = 1;
+export const RetryForConflictsAttempts = 2;
 
 // milliseconds to wait before retrying when conflicts occur
 // note: we considered making this random, to help avoid a stampede, but

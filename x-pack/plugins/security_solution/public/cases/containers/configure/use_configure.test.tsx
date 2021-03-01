@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -16,7 +17,14 @@ import * as api from './api';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('./api');
-
+const mockErrorToToaster = jest.fn();
+jest.mock('../../../common/components/toasters', () => {
+  const original = jest.requireActual('../../../common/components/toasters');
+  return {
+    ...original,
+    errorToToaster: () => mockErrorToToaster(),
+  };
+});
 const configuration: ConnectorConfiguration = {
   connector: {
     id: '456',
@@ -156,12 +164,67 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
 
       expect(result.current.connector.id).toEqual('123');
       await waitForNextUpdate();
       expect(result.current.connector.id).toEqual('456');
+    });
+  });
+
+  test('Displays error when present - getCaseConfigure', async () => {
+    const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
+    spyOnGetCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        error: 'uh oh homeboy',
+        version: '',
+      })
+    );
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).toHaveBeenCalled();
+    });
+  });
+
+  test('Displays error when present - postCaseConfigure', async () => {
+    // When there is no version, a configuration is created. Otherwise is updated.
+    const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
+    spyOnGetCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        version: '',
+      })
+    );
+
+    const spyOnPostCaseConfigure = jest.spyOn(api, 'postCaseConfigure');
+    spyOnPostCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        ...configuration,
+        error: 'uh oh homeboy',
+      })
+    );
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
+
+      result.current.persistCaseConfigure(configuration);
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).toHaveBeenCalled();
     });
   });
 

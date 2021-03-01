@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { HttpSetup } from 'src/core/public';
 
 import { LoadingState } from '../../types';
 
-interface DeprecationLoggingTabProps extends ReactIntl.InjectedIntlProps {
+interface DeprecationLoggingTabProps {
   http: HttpSetup;
 }
 
@@ -22,7 +23,7 @@ interface DeprecationLoggingTabState {
   loggingEnabled?: boolean;
 }
 
-export class DeprecationLoggingToggleUI extends React.Component<
+export class DeprecationLoggingToggle extends React.Component<
   DeprecationLoggingTabProps,
   DeprecationLoggingTabState
 > {
@@ -59,27 +60,29 @@ export class DeprecationLoggingToggleUI extends React.Component<
   }
 
   private renderLoggingState() {
-    const { intl } = this.props;
     const { loggingEnabled, loadingState } = this.state;
 
     if (loadingState === LoadingState.Error) {
-      return intl.formatMessage({
-        id:
-          'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
-        defaultMessage: 'Could not load logging state',
-      });
+      return i18n.translate(
+        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
+        {
+          defaultMessage: 'Could not load logging state',
+        }
+      );
     } else if (loggingEnabled) {
-      return intl.formatMessage({
-        id:
-          'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
-        defaultMessage: 'On',
-      });
+      return i18n.translate(
+        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
+        {
+          defaultMessage: 'On',
+        }
+      );
     } else {
-      return intl.formatMessage({
-        id:
-          'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledLabel',
-        defaultMessage: 'Off',
-      });
+      return i18n.translate(
+        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledLabel',
+        {
+          defaultMessage: 'Off',
+        }
+      );
     }
   }
 
@@ -117,5 +120,3 @@ export class DeprecationLoggingToggleUI extends React.Component<
     }
   };
 }
-
-export const DeprecationLoggingToggle = injectI18n(DeprecationLoggingToggleUI);

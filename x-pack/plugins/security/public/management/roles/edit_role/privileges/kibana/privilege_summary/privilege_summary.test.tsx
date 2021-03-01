@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
+import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { PrivilegeSummary } from '.';
 import { findTestSubject } from '@kbn/test/jest';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
+import { coreMock } from 'src/core/public/mocks';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',
@@ -30,6 +34,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 describe('PrivilegeSummary', () => {
   it('initially renders a button', () => {
@@ -49,6 +56,7 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 
@@ -73,6 +81,7 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 

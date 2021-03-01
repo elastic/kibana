@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { SearchTypes } from '../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
-import { Signal, Ancestor, BaseSignalHit } from './types';
+import { Signal, Ancestor, BaseSignalHit, ThresholdResult } from './types';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -94,16 +96,24 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
   };
 };
 
+const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
+  return typeof thresholdResult === 'object';
+};
+
 /**
  * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalSignalFields = (doc: BaseSignalHit) => {
+  const thresholdResult = doc._source.threshold_result;
+  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
+    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
+  }
   return {
     parent: buildParent(removeClashes(doc)),
     original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
     original_event: doc._source.event ?? undefined,
-    threshold_result: doc._source.threshold_result,
+    threshold_result: thresholdResult,
     original_signal:
       doc._source.signal != null && !isEventTypeSignal(doc) ? doc._source.signal : undefined,
   };

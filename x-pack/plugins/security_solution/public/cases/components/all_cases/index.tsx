@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBasicTable,
+  EuiBasicTable as _EuiBasicTable,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -17,11 +19,12 @@ import {
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import * as i18n from './translations';
+import classnames from 'classnames';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import * as i18n from './translations';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
-import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
+import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -51,10 +54,12 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { Stats } from '../status';
+import { getExpandedRowMap } from './expanded_row';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
+
 const FlexItemDivider = styled(EuiFlexItem)`
   ${({ theme }) => css`
     .euiFlexGroup--gutterMedium > &.euiFlexItem {
@@ -72,6 +77,7 @@ const ProgressLoader = styled(EuiProgress)`
     z-index: ${theme.eui.euiZHeader};
   `}
 `;
+
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
@@ -81,13 +87,41 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable = styled(EuiBasicTable)`
+  ${({ theme }) => `
+    .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
+      padding: 8px 0 8px 32px;
+    }
+
+    &.isModal .euiTableRow.isDisabled {
+      cursor: not-allowed;
+      background-color: ${theme.eui.euiTableHoverClickableColor};
+    }
+
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow:hover {
+      background-color: transparent;
+    }
+
+    &.isModal .euiTableRow.euiTableRow-isExpandedRow {
+      .subCase:hover {
+        background-color: ${theme.eui.euiTableHoverClickableColor};
+      }
+    }
+  `}
+`;
+BasicTable.displayName = 'BasicTable';
+
 interface AllCasesProps {
-  onRowClick?: (theCase?: Case) => void;
+  onRowClick?: (theCase?: Case | SubCase) => void;
   isModal?: boolean;
   userCanCrud: boolean;
+  disabledStatuses?: CaseStatuses[];
+  disabledCases?: CaseType[];
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ onRowClick, isModal = false, userCanCrud }) => {
+  ({ onRowClick, isModal = false, userCanCrud, disabledStatuses, disabledCases = [] }) => {
     const { navigateToApp } = useKibana().services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
@@ -128,7 +162,7 @@ export const AllCases = React.memo<AllCasesProps>(
       isUpdated,
       updateBulkStatus,
     } = useUpdateCases();
-    const [deleteThisCase, setDeleteThisCase] = useState({
+    const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
     });
@@ -188,7 +222,7 @@ export const AllCases = React.memo<AllCasesProps>(
     const toggleDeleteModal = useCallback(
       (deleteCase: Case) => {
         handleToggleModal();
-        setDeleteThisCase(deleteCase);
+        setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
       },
       [handleToggleModal]
     );
@@ -199,7 +233,11 @@ export const AllCases = React.memo<AllCasesProps>(
         if (caseIds.length === 1) {
           const singleCase = selectedCases.find((theCase) => theCase.id === caseIds[0]);
           if (singleCase) {
-            return setDeleteThisCase({ id: singleCase.id, title: singleCase.title });
+            return setDeleteThisCase({
+              id: singleCase.id,
+              title: singleCase.title,
+              type: singleCase.type,
+            });
           }
         }
         const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
@@ -313,6 +351,18 @@ export const AllCases = React.memo<AllCasesProps>(
       () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status, isModal),
       [actions, filterOptions.status, userCanCrud, isModal]
     );
+
+    const itemIdToExpandedRowMap = useMemo(
+      () =>
+        getExpandedRowMap({
+          columns: memoizedGetCasesColumns,
+          data: data.cases,
+          isModal,
+          onSubCaseClick: onRowClick,
+        }),
+      [data.cases, isModal, memoizedGetCasesColumns, onRowClick]
+    );
+
     const memoizedPagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
@@ -328,7 +378,11 @@ export const AllCases = React.memo<AllCasesProps>(
     };
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-      () => ({ onSelectionChange: setSelectedCases }),
+      () => ({
+        selectable: (theCase) => isEmpty(theCase.subCases),
+        onSelectionChange: setSelectedCases,
+        selectableMessage: (selectable) => (!selectable ? i18n.SELECTABLE_MESSAGE_COLLECTIONS : ''),
+      }),
       [setSelectedCases]
     );
     const isCasesLoading = useMemo(
@@ -349,7 +403,8 @@ export const AllCases = React.memo<AllCasesProps>(
 
         return {
           'data-test-subj': `cases-table-row-${theCase.id}`,
-          ...(isModal ? { onClick: onTableRowClick } : {}),
+          className: classnames({ isDisabled: theCase.type === CaseType.collection }),
+          ...(isModal && theCase.type !== CaseType.collection ? { onClick: onTableRowClick } : {}),
         };
       },
       [isModal, onRowClick]
@@ -434,6 +489,7 @@ export const AllCases = React.memo<AllCasesProps>(
               status: filterOptions.status,
             }}
             setFilterRefetch={setFilterRefetch}
+            disabledStatuses={disabledStatuses}
           />
           {isCasesLoading && isDataEmpty ? (
             <Div>
@@ -470,12 +526,13 @@ export const AllCases = React.memo<AllCasesProps>(
                   )}
                 </UtilityBarSection>
               </UtilityBar>
-              <EuiBasicTable
+              <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
                 isSelectable={userCanCrud && !isModal}
                 itemId="id"
                 items={data.cases}
+                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                 noItemsMessage={
                   <EuiEmptyPrompt
                     title={<h3>{i18n.NO_CASES}</h3>}
@@ -501,6 +558,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 rowProps={tableRowProps}
                 selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
+                className={classnames({ isModal })}
               />
             </Div>
           )}

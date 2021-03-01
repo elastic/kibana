@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-expect-error Untyped Elastic library
-import { evaluate } from 'tinymath';
+import { evaluate } from '@kbn/tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -19,7 +19,6 @@ import {
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
-// @ts-expect-error untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 
@@ -131,16 +130,17 @@ export function pointseries(): ExpressionFunctionDefinition<
         [PRIMARY_KEY]: i,
       }));
 
-      function normalizeValue(expression: string, value: string) {
+      function normalizeValue(expression: string, value: number | number[], index: number) {
+        const numberValue = Array.isArray(value) ? value[index] : value;
         switch (getExpressionType(input.columns, expression)) {
           case 'string':
-            return String(value);
+            return String(numberValue);
           case 'number':
-            return Number(value);
+            return Number(numberValue);
           case 'date':
-            return moment(value).valueOf();
+            return moment(numberValue).valueOf();
           default:
-            return value;
+            return numberValue;
         }
       }
 
@@ -152,7 +152,7 @@ export function pointseries(): ExpressionFunctionDefinition<
           (acc: Record<string, string | number>, { name, value }) => {
             try {
               acc[name] = args[name]
-                ? normalizeValue(value, evaluate(value, mathScope)[i])
+                ? normalizeValue(value, evaluate(value, mathScope), i)
                 : '_all';
             } catch (e) {
               // TODO: handle invalid column names...

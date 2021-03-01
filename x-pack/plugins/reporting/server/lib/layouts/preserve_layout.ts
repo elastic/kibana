@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -9,7 +10,8 @@ import { CustomPageSize } from 'pdfmake/interfaces';
 import { getDefaultLayoutSelectors } from '../../../common';
 import { LAYOUT_TYPES } from '../../../common/constants';
 import { LayoutSelectorDictionary, PageSizeParams, Size } from '../../../common/types';
-import { Layout, LayoutInstance } from './';
+import type { LayoutInstance } from './';
+import { Layout } from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
@@ -51,8 +53,8 @@ export class PreserveLayout extends Layout implements LayoutInstance {
 
   public getViewport() {
     return {
-      height: this.scaledHeight,
-      width: this.scaledWidth,
+      height: this.height,
+      width: this.width,
       zoom: ZOOM,
     };
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment } from 'react';
@@ -21,7 +22,7 @@ import { GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface GroupByExpressionProps {
+export interface GroupByExpressionProps {
   groupBy: string;
   errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
@@ -95,6 +96,7 @@ export const GroupByExpression = ({
                   }
                 )
           }`}
+          data-test-subj="groupByExpression"
           value={`${groupByTypes[groupBy].text} ${
             groupByTypes[groupBy].sizeRequired
               ? `${termSize} ${termField ? `'${termField}'` : ''}`
@@ -115,6 +117,7 @@ export const GroupByExpression = ({
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>
@@ -205,3 +208,6 @@ export const GroupByExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { GroupByExpression as default };

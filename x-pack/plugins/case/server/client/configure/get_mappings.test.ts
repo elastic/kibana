@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConnectorTypes } from '../../../common/api';
@@ -27,10 +28,9 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
-        caseClient: caseClient.client,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
       });
@@ -41,10 +41,9 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: [],
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
-        caseClient: caseClient.client,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
       });

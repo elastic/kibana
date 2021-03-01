@@ -89,6 +89,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esTransportPort = "61${parallelId}3"
   def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
+  def corsTestServerPort = "61${parallelId}6"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
@@ -100,6 +101,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+    "TEST_CORS_SERVER_PORT=${corsTestServerPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
@@ -126,8 +128,12 @@ def functionalTestProcess(String name, String script) {
   }
 }
 
-def ossCiGroupProcess(ciGroup) {
+def ossCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("ciGroup" + ciGroup) {
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
+
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -139,8 +145,11 @@ def ossCiGroupProcess(ciGroup) {
   }
 }
 
-def xpackCiGroupProcess(ciGroup) {
+def xpackCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -177,20 +186,21 @@ def uploadCoverageArtifacts(prefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
-    'target/kibana-*',
-    'target/test-metrics/*',
-    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
+    'target/kibana-*',
+    'target/kibana-coverage/jest/**/*',
+    'target/kibana-security-solution/**/*.png',
+    'target/test-metrics/*',
     'target/test-suites-ci-plan.json',
-    'test/**/screenshots/session/*.png',
-    'test/**/screenshots/failure/*.png',
     'test/**/screenshots/diff/*.png',
+    'test/**/screenshots/failure/*.png',
+    'test/**/screenshots/session/*.png',
     'test/functional/failure_debug/html/*.html',
-    'x-pack/test/**/screenshots/session/*.png',
-    'x-pack/test/**/screenshots/failure/*.png',
     'x-pack/test/**/screenshots/diff/*.png',
-    'x-pack/test/functional/failure_debug/html/*.html',
+    'x-pack/test/**/screenshots/failure/*.png',
+    'x-pack/test/**/screenshots/session/*.png',
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
+    'x-pack/test/functional/failure_debug/html/*.html',
   ]
 
   withEnv([
@@ -415,12 +425,13 @@ def buildXpackPlugins() {
   runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
 }
 
-def withTasks(Map params = [worker: [:]], Closure closure) {
+def withTasks(Map params = [:], Closure closure) {
   catchErrors {
-    def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
+    def config = [setupWork: {}, worker: [:], parallel: 24] + params
+    def workerConfig = [name: 'ci-worker', size: 'xxl', ramDisk: true] + config.worker
 
-    workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
+    workers.ci(workerConfig) {
+      withCiTaskQueue([parallel: config.parallel]) {
         parallel([
           docker: {
             retry(2) {
@@ -433,6 +444,8 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
           xpackPlugins: { buildXpackPlugins() },
         ])
 
+        config.setupWork()
+
         catchErrors {
           closure()
         }
@@ -442,16 +455,27 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 }
 
 def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
+  parallel([
+    general: {
+      withTasks {
+        tasks.check()
+        tasks.lint()
+        tasks.test()
+        tasks.functionalOss()
+        tasks.functionalXpack()
+        tasks.storybooksCi()
+      }
+    },
+    jest: {
+      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
+        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+      }
+    },
+  ])
 }
 
 def pipelineLibraryTests() {
+  return
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {

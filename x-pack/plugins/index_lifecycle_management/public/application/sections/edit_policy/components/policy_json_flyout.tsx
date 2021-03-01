@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -32,6 +33,19 @@ interface Props {
   policyName: string;
 }
 
+/**
+ * Ensure that the JSON we get from the from has phases in the correct order.
+ */
+const prettifyFormJson = (policy: SerializedPolicy): SerializedPolicy => ({
+  ...policy,
+  phases: {
+    hot: policy.phases.hot,
+    warm: policy.phases.warm,
+    cold: policy.phases.cold,
+    delete: policy.phases.delete,
+  },
+});
+
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
@@ -46,7 +60,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
   const updatePolicy = useCallback(async () => {
     setPolicy(undefined);
     if (await validateForm()) {
-      setPolicy(getFormData() as SerializedPolicy);
+      setPolicy(prettifyFormJson(getFormData()));
     } else {
       setPolicy(null);
     }

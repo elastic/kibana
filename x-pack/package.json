@@ -12,8 +12,7 @@
     "build": "../node_modules/.bin/gulp build",
     "testonly": "echo 'Deprecated, use `yarn test`'",
     "test": "../node_modules/.bin/gulp test",
-    "test:jest": "node ../scripts/jest",
-    "test:mocha": "node scripts/mocha"
+    "test:jest": "node ../scripts/jest"
   },
   "kibana": {
     "build": {

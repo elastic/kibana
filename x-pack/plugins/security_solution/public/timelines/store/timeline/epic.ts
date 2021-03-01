@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -55,12 +56,12 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEqlOptions,
   updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateKqlMode,
   updateProviders,
   updateRange,
@@ -68,7 +69,7 @@ import {
   upsertColumn,
   updateIndexNames,
   updateTimeline,
-  updateTitle,
+  updateTitleAndDescription,
   updateAutoSaveMsg,
   setExcludedRowRendererIds,
   setFilters,
@@ -105,13 +106,13 @@ const timelineActionsType = [
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDataProviderType.type,
-  updateDescription.type,
+  updateEqlOptions.type,
   updateEventType.type,
   updateKqlMode.type,
   updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
-  updateTitle.type,
+  updateTitleAndDescription.type,
   updateRange.type,
   upsertColumn.type,
 ];
@@ -181,8 +182,7 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId) &&
-          !get('payload.disableAutoSave', action)
+          isItAtimelineAction(timelineId)
         ) {
           return true;
         }
@@ -339,6 +339,7 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eqlOptions: null,
   eventType: null,
   excludedRowRendererIds: null,
   filters: null,

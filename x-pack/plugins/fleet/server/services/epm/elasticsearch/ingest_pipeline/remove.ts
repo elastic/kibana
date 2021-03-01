@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { appContextService } from '../../../';
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
 import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
 
@@ -60,7 +62,11 @@ export async function deletePipeline(callCluster: CallESAsCurrentUser, id: strin
     try {
       await callCluster('ingest.deletePipeline', { id });
     } catch (err) {
-      throw new Error(`error deleting pipeline ${id}`);
+      // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
+      // duplicate references to them, see https://github.com/elastic/kibana/issues/91192
+      if (err.statusCode !== 404) {
+        throw new IngestManagerError(`error deleting pipeline ${id}: ${err}`);
+      }
     }
   }
 }

@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,17 +19,18 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../../app_logic';
-import { TruncatedContent } from '../../../../shared/truncate';
-import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { Loading } from '../../../../shared/loading';
+import { TruncatedContent } from '../../../../shared/truncate';
+import { AppLogic } from '../../../app_logic';
+import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { CANCEL_BUTTON } from '../../../constants';
+import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupUsersTable } from './group_users_table';
-
-import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 export const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptySourcesDescription',
@@ -97,12 +96,6 @@ const REMOVE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.removeButtonText',
   {
     defaultMessage: 'Remove group',
-  }
-);
-const CANCEL_REMOVE_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.cancelRemoveButtonText',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 const CONFIRM_TITLE_TEXT = i18n.translate(
@@ -232,18 +225,16 @@ export const GroupOverview: React.FC = () => {
       <EuiSpacer size="xxl" />
       <ContentSection title={REMOVE_SECTION_TITLE} description={REMOVE_SECTION_DESCRIPTION}>
         {confirmDeleteModalVisible && (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              onCancel={hideConfirmDeleteModal}
-              onConfirm={deleteGroup}
-              confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
-              title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_REMOVE_BUTTON_TEXT}
-              defaultFocusedButton="confirm"
-            >
-              {CONFIRM_REMOVE_DESCRIPTION}
-            </EuiConfirmModal>
-          </EuiOverlayMask>
+          <EuiConfirmModal
+            onCancel={hideConfirmDeleteModal}
+            onConfirm={deleteGroup}
+            confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
+            title={CONFIRM_TITLE_TEXT}
+            cancelButtonText={CANCEL_BUTTON}
+            defaultFocusedButton="confirm"
+          >
+            {CONFIRM_REMOVE_DESCRIPTION}
+          </EuiConfirmModal>
         )}
         <EuiButton
           color="danger"

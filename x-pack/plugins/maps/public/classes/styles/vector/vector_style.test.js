@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { VectorStyle } from './vector_style';
@@ -12,7 +13,7 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { MockField } from './properties/__tests__/test_util';
+import { MockField } from './properties/test_helpers/test_util';
 
 jest.mock('../../../kibana_services');
 
@@ -220,6 +221,14 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
                 type: 'MultiLineString',
               },
               properties: {},
+            },
+            {
+              geometry: {
+                type: 'Point',
+              },
+              properties: {
+                __kbn_is_centroid_feature__: true,
+              },
             },
           ],
         },
