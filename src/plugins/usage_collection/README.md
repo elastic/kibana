@@ -204,11 +204,6 @@ schema: {
     _meta: {
       description: 'The greeting keyword',
     }
-  },
-  some_obj: {
-    total: {
-      type: 'long',
-    },
   }
 }
 ```
