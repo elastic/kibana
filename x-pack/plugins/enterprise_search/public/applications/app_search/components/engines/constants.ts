@@ -27,7 +27,7 @@ export const DELETE_ENGINE_MESSAGE = (engineName: string) =>
   i18n.translate(
     'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.successMessage',
     {
-      defaultMessage: 'Successfully deleted engine "{engineName}"',
+      defaultMessage: 'Successfully deleted "{engineName}"',
       values: {
         engineName,
       },
