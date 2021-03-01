@@ -56,4 +56,4 @@ export const getIndexArgs = (expression: string) => {
   );
 
   return indexArgs;
-}
+};
