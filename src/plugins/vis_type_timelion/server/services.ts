@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsServiceStart } from '../../../../src/plugins/data/server/index_patterns';
+import type { PluginStart } from '../../data/server';
 
-let indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'];
+let indexPatternsServiceFactory: PluginStart['indexPatterns']['indexPatternsServiceFactory'];
 
-export const setIndexPatternsService = async (
-  indexPatterns: IndexPatternsServiceStart,
-) => {
+export const setIndexPatternsService = async (indexPatterns: PluginStart['indexPatterns']) => {
   indexPatternsServiceFactory = indexPatterns.indexPatternsServiceFactory;
 };
 

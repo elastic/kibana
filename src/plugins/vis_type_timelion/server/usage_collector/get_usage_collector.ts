@@ -11,7 +11,7 @@ import { ElasticsearchClient } from 'src/core/server';
 import { getIndexArgs } from '../../common/parser';
 import { getIndexPatternsService } from '../services';
 
-type ESResponse = SearchResponse<{ visualization: { visState: string }, updated_at: string }>;
+type ESResponse = SearchResponse<{ visualization: { visState: string }; updated_at: string }>;
 
 export interface TimelionUsage {
   timelion_use_scripted_fields_total: number;
@@ -27,13 +27,10 @@ const getPastDays = (dateString: string): number => {
 export const getStats = async (
   esClient: ElasticsearchClient,
   soClient: any,
-  index: string,
+  index: string
 ): Promise<TimelionUsage | undefined> => {
   const indexPatternsServiceFactory = getIndexPatternsService();
-  const indexPatternsService = await indexPatternsServiceFactory(
-    soClient,
-    esClient
-  );
+  const indexPatternsService = await indexPatternsServiceFactory(soClient, esClient);
 
   const timelionUsage = {
     timelion_use_scripted_fields_total: 0,
@@ -46,7 +43,7 @@ export const getStats = async (
     filterPath: [
       'hits.hits._id',
       'hits.hits._source.visualization',
-      'hits.hits._source.updated_at'
+      'hits.hits._source.updated_at',
     ],
     body: {
       query: {
@@ -72,25 +69,29 @@ export const getStats = async (
     if (visState.type === 'timelion' && getPastDays(lastUpdated) <= 90) {
       const indexArgs = getIndexArgs(visState.params.expression);
 
-      for (const index in indexArgs) {
-        const indexPatternId = indexArgs[index]?.value.text;
+      for (const arrayIndex in indexArgs) {
+        if (indexArgs.hasOwnProperty(arrayIndex)) {
+          const indexPatternId = indexArgs[arrayIndex]?.value.text;
 
-        if (indexPatternId) {
-          const indexPatternSpec = (await indexPatternsService.find(indexPatternId)).find(
-            (index) => index.title === indexPatternId
-          );
-        
-          const scriptedFields = indexPatternSpec?.getScriptedFields() ?? [];
-          const isScriptedFieldinExpession = scriptedFields.some((field) => visState.params.expression.includes(field.name));
+          if (indexPatternId) {
+            const indexPatternSpec = (await indexPatternsService.find(indexPatternId)).find(
+              (indexPattern) => indexPattern.title === indexPatternId
+            );
 
-          if (isScriptedFieldinExpession) {
-            timelionUsage.timelion_use_scripted_fields_total++;
-            break;
+            const scriptedFields = indexPatternSpec?.getScriptedFields() ?? [];
+            const isScriptedFieldinExpession = scriptedFields.some((field) =>
+              visState.params.expression.includes(field.name)
+            );
+
+            if (isScriptedFieldinExpession) {
+              timelionUsage.timelion_use_scripted_fields_total++;
+              break;
+            }
           }
         }
       }
     }
   }
 
-  return timelionUsage.timelion_use_scripted_fields_total ? timelionUsage: undefined;
+  return timelionUsage.timelion_use_scripted_fields_total ? timelionUsage : undefined;
 };

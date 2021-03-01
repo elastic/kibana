@@ -13,7 +13,7 @@ import { ConfigObservable } from '../types';
 
 export function registerTimelionUsageCollector(
   collectorSet: UsageCollectionSetup,
-  config: ConfigObservable,
+  config: ConfigObservable
 ) {
   const collector = collectorSet.makeUsageCollector<TimelionUsage | undefined>({
     type: 'vis_type_timelion',

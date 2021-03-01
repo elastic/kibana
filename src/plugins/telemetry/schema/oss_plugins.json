@@ -5319,6 +5319,13 @@
         }
       }
     },
+    "vis_type_timelion": {
+      "properties": {
+        "timelion_use_scripted_fields_total": {
+          "type": "long"
+        }
+      }
+    },
     "vis_type_vega": {
       "properties": {
         "vega_lib_specs_total": {

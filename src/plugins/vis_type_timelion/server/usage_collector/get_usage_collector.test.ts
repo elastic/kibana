@@ -71,23 +71,33 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
 
 describe('Timelion visualization usage collector', () => {
   const mockIndex = 'mock_index';
-  const indexPatternServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'] = (() => {
+  const indexPatternServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'] = ((() => {
     return {
-      find: () => [{ title: 'my-test', getScriptedFields: () => [{ name: 'scripted-test-field' }] }]
+      find: () => [
+        { title: 'my-test', getScriptedFields: () => [{ name: 'scripted-test-field' }] },
+      ],
     };
-  }) as unknown as IndexPatternsServiceStart['indexPatternsServiceFactory'];
+  }) as unknown) as IndexPatternsServiceStart['indexPatternsServiceFactory'];
   setIndexPatternsService({
-    indexPatternsServiceFactory: indexPatternServiceFactory
+    indexPatternsServiceFactory: indexPatternServiceFactory,
   });
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockCollectorFetchContext().esClient, getMockCollectorFetchContext().soClient, mockIndex);
+    const result = await getStats(
+      getMockCollectorFetchContext().esClient,
+      getMockCollectorFetchContext().soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(getMockCollectorFetchContext([]).esClient, getMockCollectorFetchContext().soClient, mockIndex);
+    const result = await getStats(
+      getMockCollectorFetchContext([]).esClient,
+      getMockCollectorFetchContext().soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
@@ -102,7 +112,11 @@ describe('Timelion visualization usage collector', () => {
         },
       },
     ]);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
@@ -126,14 +140,22 @@ describe('Timelion visualization usage collector', () => {
       },
     ]);
 
-    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockCollectorFetchContext.soClient, mockIndex);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toMatchObject({
       timelion_use_scripted_fields_total: 1,
