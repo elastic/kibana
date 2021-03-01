@@ -70,7 +70,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       }),
       render: (name: string) => (
         <EuiLinkTo
-          data-test-subj="engineNameLink"
+          data-test-subj="EngineNameLink"
           to={generteEncodedEnginePath(name)}
           onClick={sendEngineTableLinkClickTelemetry}
         >
