@@ -96,8 +96,7 @@ describe('getSearchDsl', () => {
         mappings,
         opts.type,
         opts.sortField,
-        opts.sortOrder,
-        opts.pit
+        opts.sortOrder
       );
     });
 
