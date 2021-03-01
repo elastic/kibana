@@ -10,11 +10,9 @@ import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 import { LegacyModePopover } from './legacy_mode_popover';
 import { SwitchModePopover } from './switch_mode_popover';
+import { convertIndexPatternObjectToStringRepresentation } from '../../../../../common/index_patterns_utils';
 
 import type { SelectIndexComponentProps } from './types';
-import type { IndexPatternObject } from '../../../../common/types';
-
-const toTextValue = (v: IndexPatternObject) => (typeof v === 'string' ? v : v?.title ?? '');
 
 export const FieldTextSelect = ({
   onIndexChange,
@@ -24,7 +22,7 @@ export const FieldTextSelect = ({
   onModeChange,
   allowSwitchUseKibanaIndexesMode,
 }: SelectIndexComponentProps) => {
-  const textualValue = toTextValue(value);
+  const textualValue = convertIndexPatternObjectToStringRepresentation(value);
   const append = [<LegacyModePopover index={textualValue} />];
 
   const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback(

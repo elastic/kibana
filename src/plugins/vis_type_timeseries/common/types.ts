@@ -7,7 +7,14 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems, visPayloadSchema, fieldObject, indexPattern } from './vis_schema';
+import {
+  metricsItems,
+  panel,
+  seriesItems,
+  visPayloadSchema,
+  fieldObject,
+  indexPattern,
+} from './vis_schema';
 import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 

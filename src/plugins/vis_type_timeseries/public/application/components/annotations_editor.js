@@ -34,6 +34,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 
 function newAnnotation() {
   return {
@@ -125,11 +126,11 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'index_pattern')}
+                  <IndexPatternSelect
                     value={model.index_pattern}
-                    placeholder={defaultIndexPattern}
-                    fullWidth
+                    indexPatternName={'index_pattern'}
+                    onChange={handleChange}
+                    defaultIndexPattern={model.default_index_pattern}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { extractIndexPatterns } from './extract_index_patterns';
+import { extractIndexPatterns } from './index_patterns_utils';
 import { PanelSchema } from './types';
 
 describe('extractIndexPatterns(vis)', () => {

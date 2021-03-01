@@ -10,7 +10,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { EuiTextColor, EuiButtonIcon, EuiPopover, EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getCoreStart, getDataStart } from '../../../services';
+import { getCoreStart, getDataStart } from '../../../../services';
 
 interface LegacyModePopoverProps {
   index: string;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+import { extractIndexPatterns } from '../../../common/index_patterns_utils';
 import { PanelSchema } from '../../../common/types';
 import { AbstractSearchStrategy, ReqFacade } from './strategies';
 

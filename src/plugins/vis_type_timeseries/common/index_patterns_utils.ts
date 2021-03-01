@@ -41,3 +41,11 @@ export function extractIndexPatterns(
 
   return uniq<IndexPatternObject>(patterns).sort();
 }
+
+export const convertIndexPatternObjectToStringRepresentation = (
+  indexPatternObject: IndexPatternObject
+) =>
+  typeof indexPatternObject === 'string' ? indexPatternObject : indexPatternObject?.title ?? '';
+
+export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
+  typeof indexPatternObject === 'string' ? indexPatternObject : indexPatternObject?.id ?? '';

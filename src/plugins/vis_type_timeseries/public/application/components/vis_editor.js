@@ -15,7 +15,7 @@ import { VisEditorVisualization } from './vis_editor_visualization';
 import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+import { extractIndexPatterns } from '../../../common/index_patterns_utils';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';

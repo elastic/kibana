@@ -36,6 +36,7 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/metric_types';
+import { getIndexPatternObjectKey } from '../../../../common/index_patterns_utils';
 export class TablePanelConfig extends Component {
   static contextType = VisDataContext;
   constructor(props) {
@@ -59,7 +60,9 @@ export class TablePanelConfig extends Component {
   handlePivotChange = (selectedOption) => {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[model.index_pattern].find((field) => field.name === pivotId);
+    const field = fields[getIndexPatternObjectKey(model.index_pattern)].find(
+      (field) => field.name === pivotId
+    );
     const pivotType = get(field, 'type', model.pivot_type);
 
     this.props.onChange({

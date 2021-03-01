@@ -10,8 +10,8 @@ import React, { useState, useContext, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
-import { PanelModelContext } from '../../contexts/panel_model_context';
-import type { IndexPatternObject } from '../../../../common/types';
+import { PanelModelContext } from '../../../contexts/panel_model_context';
+import type { IndexPatternObject } from '../../../../../common/types';
 
 const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
 

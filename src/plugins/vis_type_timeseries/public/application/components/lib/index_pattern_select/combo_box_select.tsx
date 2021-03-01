@@ -9,11 +9,11 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { getDataStart } from '../../../services';
+import { getDataStart } from '../../../../services';
 
 import type { SelectIndexComponentProps } from './types';
-import type { IndexPatternObject } from '../../../../common/types';
-import type { IndexPatternsService } from '../../../../../data/public';
+import type { IndexPatternObject } from '../../../../../common/types';
+import type { IndexPatternsService } from '../../../../../../data/public';
 import { SwitchModePopover } from './switch_mode_popover';
 
 /** @internal **/

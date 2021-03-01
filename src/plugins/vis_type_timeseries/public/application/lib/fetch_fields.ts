@@ -9,10 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { SanitizedFieldType } from '../../../common/types';
+import { SanitizedFieldType, IndexPatternObject } from '../../../common/types';
+import { getIndexPatternObjectKey } from '../../../common/index_patterns_utils';
 
 export async function fetchFields(
-  indexes: string[] = [],
+  indexes: IndexPatternObject[] = [],
   signal?: AbortSignal
 ): Promise<Record<string, SanitizedFieldType[]>> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
@@ -23,19 +24,23 @@ export async function fetchFields(
     const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        return coreStart.http.get(ROUTES.FIELDS, {
-          query: {
-            index: pattern,
-          },
-          signal,
-        });
+        if (typeof pattern !== 'string' && pattern?.id) {
+          return (await dataStart.indexPatterns.get(pattern.id)).getNonScriptedFields();
+        } else {
+          return coreStart.http.get(ROUTES.FIELDS, {
+            query: {
+              index: `${pattern ?? ''}`,
+            },
+            signal,
+          });
+        }
       })
     );
 
     const fields: Record<string, SanitizedFieldType[]> = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
-        [currentPattern]: indexFields[index],
+        [getIndexPatternObjectKey(currentPattern)]: indexFields[index],
       }),
       {}
     );
