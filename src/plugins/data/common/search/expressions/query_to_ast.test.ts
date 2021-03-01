@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './kibana';
-export * from './kibana_context';
-export * from './kql';
-export * from './lucene';
-export * from './query_to_ast';
-export * from './timerange_to_ast';
-export * from './kibana_context_type';
-export * from './esaggs';
-export * from './utils';
-export * from './timerange';
+import { queryToAst } from './query_to_ast';
+
+describe('queryToAst', () => {
+  it('returns an object with the correct structure', () => {
+    const actual = queryToAst({ language: 'lucene', query: 'country: US' });
+    expect(actual).toMatchSnapshot();
+  });
+});

@@ -22,6 +22,8 @@ export type ExpressionValueSearchContext = ExpressionValueBoxed<
   ExecutionContextSearch
 >;
 
+export type KibanaQueryOutput = ExpressionValueBoxed<'kibana_query', Query>;
+
 // TODO: These two are exported for legacy reasons - remove them eventually.
 export type KIBANA_CONTEXT_NAME = 'kibana_context';
 export type KibanaContext = ExpressionValueSearchContext;

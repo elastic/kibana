@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './kibana';
-export * from './kibana_context';
-export * from './kql';
-export * from './lucene';
-export * from './query_to_ast';
-export * from './timerange_to_ast';
-export * from './kibana_context_type';
-export * from './esaggs';
-export * from './utils';
-export * from './timerange';
+import { timerangeToAst } from './timerange_to_ast';
+
+describe('timerangeToAst', () => {
+  it('returns an object with the correct structure', () => {
+    const actual = timerangeToAst({ from: 'now', to: 'now-7d', mode: 'absolute' });
+    expect(actual).toMatchSnapshot();
+  });
+});
