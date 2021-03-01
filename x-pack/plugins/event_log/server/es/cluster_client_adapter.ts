@@ -138,6 +138,7 @@ export class ClusterClientAdapter {
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
+      // @ts-expect-error
       return (await esClient.indices.existsTemplate({ name })).body.exists;
     } catch (err) {
       throw new Error(`error checking existance of index template: ${err.message}`);
@@ -163,16 +164,14 @@ export class ClusterClientAdapter {
   public async doesAliasExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
+      // @ts-expect-error
       return (await esClient.indices.existsAlias({ name })).body.exists;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
     }
   }
 
-  public async createIndex(
-    name: string,
-    body: string | Record<string, unknown> = {}
-  ): Promise<void> {
+  public async createIndex(name: string, body: Record<string, unknown> = {}): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.create({
