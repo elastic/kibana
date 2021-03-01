@@ -6,11 +6,13 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Case } from '../../containers/types';
+import { CaseStatuses } from '../../../../../case/common/api';
+import { Case, SubCase } from '../../containers/types';
 import { AllCasesModal } from './all_cases_modal';
 
 export interface UseAllCasesModalProps {
-  onRowClick: (theCase?: Case) => void;
+  onRowClick: (theCase?: Case | SubCase) => void;
+  disabledStatuses?: CaseStatuses[];
 }
 
 export interface UseAllCasesModalReturnedValues {
@@ -22,12 +24,13 @@ export interface UseAllCasesModalReturnedValues {
 
 export const useAllCasesModal = ({
   onRowClick,
+  disabledStatuses,
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onClick = useCallback(
-    (theCase?: Case) => {
+    (theCase?: Case | SubCase) => {
       closeModal();
       onRowClick(theCase);
     },
@@ -41,6 +44,7 @@ export const useAllCasesModal = ({
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onRowClick={onClick}
+          disabledStatuses={disabledStatuses}
         />
       ),
       isModalOpen,
@@ -48,7 +52,7 @@ export const useAllCasesModal = ({
       openModal,
       onRowClick,
     }),
-    [isModalOpen, closeModal, onClick, openModal, onRowClick]
+    [isModalOpen, closeModal, onClick, disabledStatuses, openModal, onRowClick]
   );
 
   return state;
