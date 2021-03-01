@@ -153,6 +153,11 @@ it('indexes documents using the bulk client helper', async () => {
             "onDrop": [Function],
             "retries": 5,
           },
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+            },
+          },
         ],
         Array [
           Object {
@@ -170,6 +175,11 @@ it('indexes documents using the bulk client helper', async () => {
             "onDocument": [Function],
             "onDrop": [Function],
             "retries": 5,
+          },
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+            },
           },
         ],
       ],

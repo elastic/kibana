@@ -108,6 +108,11 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
             "scroll": "1m",
             "size": 1000,
           },
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+            },
+          },
         ],
         Array [
           Object {
@@ -119,6 +124,11 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
             "rest_total_hits_as_int": true,
             "scroll": "1m",
             "size": 1000,
+          },
+          Object {
+            "headers": Object {
+              "x-elastic-product-origin": "kibana",
+            },
           },
         ],
       ],

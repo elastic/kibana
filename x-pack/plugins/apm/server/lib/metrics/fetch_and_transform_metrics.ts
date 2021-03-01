@@ -49,6 +49,7 @@ interface Filter {
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
@@ -57,6 +58,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   additionalFilters = [],
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -68,6 +70,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
 
   const projection = getMetricsProjection({
     environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,

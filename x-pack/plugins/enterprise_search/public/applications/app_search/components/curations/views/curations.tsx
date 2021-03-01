@@ -24,12 +24,16 @@ import { FlashMessages } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
+
 import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes';
+import { FormattedDateTime } from '../../../utils/formatted_date_time';
 import { generateEnginePath } from '../../engine';
 
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
+import { convertToDate } from '../utils';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -101,6 +105,7 @@ export const CurationsTable: React.FC = () => {
       ),
       width: '30%',
       dataType: 'string',
+      render: (dateString: string) => <FormattedDateTime date={convertToDate(dateString)} />,
     },
     {
       width: '120px',
@@ -164,15 +169,10 @@ export const CurationsTable: React.FC = () => {
         />
       }
       pagination={{
-        pageIndex: meta.page.current - 1,
-        pageSize: meta.page.size,
-        totalItemCount: meta.page.total_results,
+        ...convertMetaToPagination(meta),
         hidePerPageOptions: true,
       }}
-      onChange={({ page }: { page: { index: number } }) => {
-        const { index } = page;
-        onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
-      }}
+      onChange={handlePageChange(onPaginate)}
     />
   );
 };
