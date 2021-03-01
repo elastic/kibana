@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
   describe('discover data grid context tests', () => {
     before(async () => {
@@ -100,12 +101,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await docTable.clickRowToggle({ rowIndex: 0 });
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/doc');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const contextFields = await docTable.getFields();
-      expect(contextFields.length).to.be.greaterThan(0);
+      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
     });
   });
 }

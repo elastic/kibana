@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
   ]);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
   describe('context link in discover', () => {
     before(async () => {
@@ -119,9 +120,12 @@ export default function ({ getService, getPageObjects }) {
       await docTable.clickRowToggle({ rowIndex: 0 });
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const contextFields = await docTable.getFields();
-      expect(contextFields.length).to.be.greaterThan(0);
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
     });
   });
 }
