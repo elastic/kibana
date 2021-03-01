@@ -15,6 +15,8 @@ pipeline {
     E2E_DIR = 'x-pack/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
     KBN_OPTIMIZER_THEMES = 'v7light'
+    GITHUB_CHECK_APM_UI = 'end2end-for-apm-ui'
+    GITHUB_CHECK_UPTIME_UI = 'end2end-for-uptime-ui'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -59,14 +61,14 @@ pipeline {
                 JENKINS_NODE_COOKIE = 'dontKillMe'
               }
               steps {
-                notifyStatus('Preparing kibana', 'PENDING')
+                notifyStatus(env.GITHUB_CHECK_APM_UI, 'Preparing kibana', 'PENDING')
                 dir("${BASE_DIR}"){
                   sh "${E2E_DIR}/ci/prepare-kibana.sh"
                 }
               }
               post {
                 unsuccessful {
-                  notifyStatus('Kibana warm up failed', 'FAILURE')
+                  notifyStatus(env.GITHUB_CHECK_APM_UI, 'Kibana warm up failed', 'FAILURE')
                 }
               }
             }
@@ -93,10 +95,10 @@ pipeline {
                   }
                 }
                 unsuccessful {
-                  notifyTestStatus('Test failures', 'FAILURE')
+                  notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Test failures', 'FAILURE')
                 }
                 success {
-                  notifyTestStatus('Tests passed', 'SUCCESS')
+                  notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Tests passed', 'SUCCESS')
                 }
               }
             }
@@ -114,6 +116,7 @@ pipeline {
           options { skipDefaultCheckout() }
           when { expression { return env.RUN_UPTIME_E2E != "false" } }
           steps {
+            notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Preparing kibana', 'PENDING')
             echo 'TBC'
           }
         }
@@ -127,12 +130,12 @@ pipeline {
   }
 }
 
-def notifyStatus(String description, String status) {
-  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+def notifyStatus(String check, String description, String status) {
+  withGithubStatus.notify(check, description, status, getBlueoceanTabURL('pipeline'))
 }
 
-def notifyTestStatus(String description, String status) {
-  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
+def notifyTestStatus(String check, String description, String status) {
+  withGithubStatus.notify(check, description, status, getBlueoceanTabURL('tests'))
 }
 
 def analyseBuildReasonForApmUI() {
