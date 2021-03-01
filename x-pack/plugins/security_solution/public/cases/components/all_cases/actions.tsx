@@ -28,7 +28,7 @@ export const getActions = ({
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open,
-    enabled: (item: Case | SubCase) => isIndividual(item),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.open,
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -45,7 +45,8 @@ export const getActions = ({
 
   const makeInProgressAction = {
     available: (item: Case) => caseStatus !== CaseStatuses['in-progress'],
-    enabled: (item: Case | SubCase) => isIndividual(item),
+    enabled: (item: Case | SubCase) =>
+      isIndividual(item) && item.status !== CaseStatuses['in-progress'],
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -62,7 +63,7 @@ export const getActions = ({
 
   const closeCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.closed,
-    enabled: (item: Case | SubCase) => isIndividual(item),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.closed,
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,
