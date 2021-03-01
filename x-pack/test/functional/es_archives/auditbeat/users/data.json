@@ -51,7 +51,8 @@
         "pid": "13647"
       },
       "source": {
-        "ip": "51.38.82.60"
+        "ip": "51.38.82.60",
+        "port": "22"
       },
       "network": {
         "direction": "incoming"
