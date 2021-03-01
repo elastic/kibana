@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { ConnectorTypes } from '../../../../../case/common/api';
 import { UseField, useFormData, FieldHook, useFormContext } from '../../../shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
@@ -25,13 +26,25 @@ interface ConnectorsFieldProps {
   connectors: ActionConnector[];
   field: FieldHook<FormProps['fields']>;
   isEdit: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
-const ConnectorFields = ({ connectors, isEdit, field }: ConnectorsFieldProps) => {
+const ConnectorFields = ({
+  connectors,
+  isEdit,
+  field,
+  hideConnectorServiceNowSir = false,
+}: ConnectorsFieldProps) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
-  const connector = getConnectorById(connectorId, connectors) ?? null;
-
+  let connector = getConnectorById(connectorId, connectors) ?? null;
+  if (
+    connector &&
+    hideConnectorServiceNowSir &&
+    connector.actionTypeId === ConnectorTypes.serviceNowSIR
+  ) {
+    connector = null;
+  }
   return (
     <ConnectorFieldsForm
       connector={connector}
@@ -76,6 +89,7 @@ const ConnectorComponent: React.FC<Props> = ({ hideConnectorServiceNowSir = fals
           component={ConnectorFields}
           componentProps={{
             connectors,
+            hideConnectorServiceNowSir,
             isEdit: true,
           }}
         />

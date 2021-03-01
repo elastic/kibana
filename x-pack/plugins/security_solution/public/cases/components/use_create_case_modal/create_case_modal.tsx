@@ -44,7 +44,11 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FormContext caseType={caseType} onSuccess={onSuccess}>
+        <FormContext
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          caseType={caseType}
+          onSuccess={onSuccess}
+        >
           <CreateCaseForm
             withSteps={false}
             hideConnectorServiceNowSir={hideConnectorServiceNowSir}

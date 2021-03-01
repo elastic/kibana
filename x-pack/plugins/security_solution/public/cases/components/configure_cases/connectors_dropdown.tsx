@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { ConnectorTypes } from '../../../../../case/common/api';
 import { ActionConnector } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
@@ -67,7 +68,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
-        if (hideConnectorServiceNowSir && connector.actionTypeId === '.servicenow-sir') {
+        if (hideConnectorServiceNowSir && connector.actionTypeId === ConnectorTypes.serviceNowSIR) {
           return acc;
         }
 
