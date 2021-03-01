@@ -9,6 +9,8 @@
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
 import type { IEsSearchResponse } from '../../../common';
+import { isCompleteResponse } from '../../../common';
+import { CollectedUsage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 
@@ -23,34 +25,50 @@ export function usageProvider(core: CoreSetup): SearchUsage {
     return coreStart.savedObjects.createInternalRepository();
   });
 
+  const collectedUsage: CollectedUsage = {
+    successCount: 0,
+    errorCount: 0,
+    totalDuration: 0,
+  };
+
   // Instead of updating the search count every time a search completes, we update some in-memory
   // counts and only update the saved object every ~5 seconds
-  let successCount = 0;
-  let errorCount = 0;
-  let totalDuration = 0;
-
   const updateSearchUsage = debounce(
     async () => {
       const repository = await getRepository();
-      await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, [
-        { fieldName: 'successCount', incrementBy: successCount },
-        { fieldName: 'errorCount', incrementBy: errorCount },
-        { fieldName: 'totalDuration', incrementBy: totalDuration },
-      ]);
-      successCount = errorCount = totalDuration = 0;
+      const counterFields = Object.entries(collectedUsage)
+        .map(([fieldName, incrementBy]) => ({ fieldName, incrementBy }))
+        // Filter out any zero values because `incrementCounter` will still increment them
+        .filter(({ incrementBy }) => incrementBy > 0);
+
+      try {
+        const { attributes } = await repository.incrementCounter<CollectedUsage>(
+          SAVED_OBJECT_ID,
+          SAVED_OBJECT_ID,
+          counterFields
+        );
+
+        // Since search requests may have completed while the saved object was being updated, we minus
+        // what was just updated in the saved object rather than resetting the values to 0
+        collectedUsage.successCount -= attributes.successCount ?? 0;
+        collectedUsage.errorCount -= attributes.errorCount ?? 0;
+        collectedUsage.totalDuration -= attributes.totalDuration ?? 0;
+      } catch (e) {
+        // We didn't reset the counters so we'll retry when the next search request completes
+      }
     },
     5000,
     { maxWait: 5000 }
   );
 
   const trackSuccess = (duration: number) => {
-    successCount++;
-    totalDuration += duration;
+    collectedUsage.successCount++;
+    collectedUsage.totalDuration += duration;
     return updateSearchUsage();
   };
 
-  const trackError = async () => {
-    errorCount++;
+  const trackError = () => {
+    collectedUsage.errorCount++;
     return updateSearchUsage();
   };
 
@@ -63,6 +81,7 @@ export function usageProvider(core: CoreSetup): SearchUsage {
 export function searchUsageObserver(logger: Logger, usage?: SearchUsage) {
   return {
     next(response: IEsSearchResponse) {
+      if (!isCompleteResponse(response)) return;
       logger.debug(`trackSearchStatus:next  ${response.rawResponse.took}`);
       usage?.trackSuccess(response.rawResponse.took);
     },
