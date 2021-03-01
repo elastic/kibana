@@ -34,14 +34,20 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue({
     // @ts-expect-error we only care about the response body
+  esClient.nodes.usage.mockResolvedValue({
     body: {
       cluster_name: 'testCluster',
+      _nodes: {
+        failed: 0,
+        failures: [],
+        successful: 123,
+        total: 123,
+      },
       nodes: {
         some_node_id: {
-          timestamp: 1588617023177,
-          since: 1588616945163,
+          timestamp: '1588617023177',
+          since: '1588616945163',
           rest_actions: {
             nodes_usage_action: 1,
             create_index_action: 1,
