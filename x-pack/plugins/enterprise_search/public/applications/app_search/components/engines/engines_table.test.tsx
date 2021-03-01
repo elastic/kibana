@@ -201,7 +201,7 @@ describe('EnginesTable', () => {
             canManageEngines: true,
           },
         });
-        wrapper = shallow(<EnginesTable {...props} />);
+        wrapper = mountWithIntl(<EnginesTable {...props} />);
         tableRow = wrapper.find(EuiTableRow).first();
         actions = tableRow.find(EuiIcon);
         EnginesLogic.mount();
