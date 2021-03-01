@@ -9,7 +9,13 @@ Create {kib} alerts.
 [[alerts-api-create-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/alerts/alert`
+`POST <kibana host>:<port>/api/alerts/alert/<id>`
+
+[[alerts-api-create-path-params]]
+==== Path parameters
+
+`<id>`::
+  (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
 
 [[alerts-api-create-request-body]]
 ==== Request body

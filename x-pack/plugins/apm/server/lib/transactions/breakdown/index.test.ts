@@ -38,7 +38,6 @@ function getMockSetup(esResponse: any) {
       }
     ) as APMConfig,
     uiFilters: {},
-    esFilter: [],
     indices: mockIndices,
     dynamicIndexPattern: null as any,
   };

@@ -57,11 +57,12 @@ type ServiceNodeMetricsProps = RouteComponentProps<{
 }>;
 
 export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { kuery, start, end },
+  } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useApmServiceContext();
   const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
-  const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
@@ -72,15 +73,15 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           params: {
             path: { serviceName, serviceNodeName },
             query: {
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, serviceNodeName, start, end, uiFilters]
+    [kuery, serviceName, serviceNodeName, start, end]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

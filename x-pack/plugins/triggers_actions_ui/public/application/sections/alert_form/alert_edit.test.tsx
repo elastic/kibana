@@ -167,7 +167,7 @@ describe('alert_edit', () => {
       <AlertEdit
         onClose={() => {}}
         initialAlert={alert}
-        reloadAlerts={() => {
+        onSave={() => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}

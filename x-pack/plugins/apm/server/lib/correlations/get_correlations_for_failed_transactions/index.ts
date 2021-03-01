@@ -13,7 +13,11 @@ import {
 } from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -32,6 +36,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForFailedTransactions({
   environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -39,6 +44,7 @@ export async function getCorrelationsForFailedTransactions({
   setup,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -46,13 +52,13 @@ export async function getCorrelationsForFailedTransactions({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_correlations_for_failed_transactions', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
       { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...esFilter,
+      ...kqlQuery(kuery),
     ];
 
     if (serviceName) {

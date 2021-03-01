@@ -43,8 +43,7 @@ const INITIAL_STATE = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { environment, start, end },
-    uiFilters,
+    urlParams: { environment, kuery, start, end },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -72,9 +71,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           path: { serviceName },
           query: {
             environment,
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
             transactionType,
           },
         },
@@ -85,7 +84,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         };
       });
     },
-    [environment, start, end, serviceName, uiFilters, transactionType]
+    [environment, kuery, start, end, serviceName, transactionType]
   );
 
   const { requestId, items } = data;
@@ -116,9 +115,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               numBuckets: 20,
               transactionType,
               groupIds,

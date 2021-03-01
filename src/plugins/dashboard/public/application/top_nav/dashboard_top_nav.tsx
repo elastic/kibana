@@ -19,7 +19,12 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../services/embeddable';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
+import {
+  getSavedObjectFinder,
+  SavedObjectSaveOpts,
+  SaveResult,
+  showSaveModal,
+} from '../../services/saved_objects';
 
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
@@ -43,7 +48,6 @@ import { OverlayRef } from '../../../../../core/public';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
-import { SavedDashboardSaveOpts } from '../lib/save_dashboard';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -176,7 +180,7 @@ export function DashboardTopNav({
       }
 
       function discardChanges() {
-        dashboardStateManager.resetState(true);
+        dashboardStateManager.resetState();
         dashboardStateManager.clearUnsavedPanels();
 
         // We need to do a hard reset of the timepicker. appState will not reload like
@@ -221,7 +225,8 @@ export function DashboardTopNav({
    * @resolved {String} - The id of the doc
    */
   const save = useCallback(
-    async (saveOptions: SavedDashboardSaveOpts) => {
+    async (saveOptions: SavedObjectSaveOpts) => {
+      setIsSaveInProgress(true);
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function (id) {
           if (id) {
@@ -235,8 +240,15 @@ export function DashboardTopNav({
 
             dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
-              redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
+              redirectTo({
+                id,
+                // editMode: true,
+                destination: 'dashboard',
+                useReplace: true,
+              });
             } else {
+              setIsSaveInProgress(false);
+              dashboardStateManager.resetState();
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
             }
           }
@@ -354,7 +366,7 @@ export function DashboardTopNav({
     }
 
     setIsSaveInProgress(true);
-    save({ stayInEditMode: true }).then((response: SaveResult) => {
+    save({}).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
         dashboardStateManager.setTitle(currentTitle);
