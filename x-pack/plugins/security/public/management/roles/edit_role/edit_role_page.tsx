@@ -40,6 +40,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import type { DocLinksStart, ScopedHistory } from 'kibana/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
 import { KibanaFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -84,6 +85,7 @@ interface Props {
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
+  spacesApiUi?: SpacesApiUi;
 }
 
 function useRunAsUsers(
@@ -289,6 +291,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   uiCapabilities,
   notifications,
   history,
+  spacesApiUi,
 }) => {
   const backToRoleList = useCallback(() => history.push('/'), [history]);
 
@@ -447,6 +450,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           role={role}
           onChange={onRoleChange}
           validator={validator}
+          spacesApiUi={spacesApiUi}
         />
       </div>
     );
