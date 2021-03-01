@@ -6,16 +6,17 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Persistence via Microsoft Office AddIns",
-  "query": "file where event.type != \"deletion\" and\n wildcard(file.extension,\"wll\",\"xll\",\"ppa\",\"ppam\",\"xla\",\"xlam\") and\n wildcard(file.path, \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Word\\\\Startup\\\\*\",\n                     \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\AddIns\\\\*\",\n                     \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Excel\\\\XLSTART\\\\*\")\n",
+  "query": "file where event.type != \"deletion\" and\n file.extension : (\"wll\",\"xll\",\"ppa\",\"ppam\",\"xla\",\"xlam\") and\n file.path :\n    (\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Word\\\\Startup\\\\*\",\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\AddIns\\\\*\",\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Excel\\\\XLSTART\\\\*\"\n    )\n",
   "references": [
     "https://labs.mwrinfosecurity.com/blog/add-in-opportunities-for-office-persistence/"
   ],
-  "risk_score": 71,
+  "risk_score": 73,
   "rule_id": "f44fa4b6-524c-4e87-8d9e-a32599e4fb7c",
   "severity": "high",
   "tags": [
@@ -44,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

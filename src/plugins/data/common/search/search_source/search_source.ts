@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual, uniqWith } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
@@ -114,8 +114,13 @@ export class SearchSource {
   private readonly dependencies: SearchSourceDependencies;
 
   constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
-    this.fields = fields;
+    const { parent, ...currentFields } = fields;
+    this.fields = currentFields;
     this.dependencies = dependencies;
+
+    if (parent) {
+      this.setParent(new SearchSource(parent, dependencies));
+    }
   }
 
   /** ***
@@ -173,49 +178,7 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields(recurse = false): SearchSourceFields {
-    let thisFilter = this.fields.filter; // type is single value, array, or function
-    if (thisFilter) {
-      if (typeof thisFilter === 'function') {
-        thisFilter = thisFilter() || []; // type is single value or array
-      }
-
-      if (Array.isArray(thisFilter)) {
-        thisFilter = [...thisFilter];
-      } else {
-        thisFilter = [thisFilter];
-      }
-    } else {
-      thisFilter = [];
-    }
-
-    if (recurse) {
-      const parent = this.getParent();
-      if (parent) {
-        const parentFields = parent.getFields(recurse);
-
-        let parentFilter = parentFields.filter; // type is single value, array, or function
-        if (parentFilter) {
-          if (typeof parentFilter === 'function') {
-            parentFilter = parentFilter() || []; // type is single value or array
-          }
-
-          if (Array.isArray(parentFilter)) {
-            thisFilter.push(...parentFilter);
-          } else {
-            thisFilter.push(parentFilter);
-          }
-        }
-
-        // add combined filters to the fields
-        const thisFields = {
-          ...this.fields,
-          filter: thisFilter,
-        };
-
-        return { ...parentFields, ...thisFields };
-      }
-    }
+  getFields(): SearchSourceFields {
     return { ...this.fields };
   }
 
@@ -466,6 +429,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':
@@ -540,12 +505,7 @@ export class SearchSource {
     // we need to get the list of fields from an index pattern
     return fields
       .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({
-        field: fld.name,
-        ...((wildcardField as Record<string, string>)?.include_unmapped && {
-          include_unmapped: (wildcardField as Record<string, string>).include_unmapped,
-        }),
-      }));
+      .map((fld: IndexPatternField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
@@ -727,9 +687,7 @@ export class SearchSource {
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
   public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
-      'size',
-    ]);
+    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
@@ -740,6 +698,9 @@ export class SearchSource {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (recurse && this.getParent()) {
+      serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);
     }
     return serializedSearchSourceFields;
   }

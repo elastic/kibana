@@ -11,11 +11,12 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Attempt to Remove File Quarantine Attribute",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name == \"xattr\" and process.args == \"com.apple.quarantine\" and process.args == \"-d\"\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.args : \"xattr\" and\n  (\n    (process.args : \"com.apple.quarantine\" and process.args : (\"-d\", \"-w\")) or\n    (process.args : \"-c\" and process.command_line :\n      (\n        \"/bin/bash -c xattr -c *\",\n        \"/bin/zsh -c xattr -c *\",\n        \"/bin/sh -c xattr -c *\"\n      )\n    )\n  )\n",
   "references": [
-    "https://www.trendmicro.com/en_us/research/20/k/new-macos-backdoor-connected-to-oceanlotus-surfaces.html"
+    "https://www.trendmicro.com/en_us/research/20/k/new-macos-backdoor-connected-to-oceanlotus-surfaces.html",
+    "https://ss64.com/osx/xattr.html"
   ],
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "f0b48bbc-549e-4bcf-8ee0-a7a72586c6a7",
   "severity": "medium",
   "tags": [
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

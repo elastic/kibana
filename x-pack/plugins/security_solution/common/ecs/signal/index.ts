@@ -14,4 +14,5 @@ export interface SignalEcs {
   group?: {
     id?: string[];
   };
+  threshold_result?: unknown;
 }

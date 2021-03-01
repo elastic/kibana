@@ -346,6 +346,10 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       },
       pushed_at: null,
       pushed_by: null,
+      rule: {
+        id: 'rule-id-1',
+        name: 'rule-name-1',
+      },
       updated_at: '2019-11-25T22:32:30.608Z',
       updated_by: {
         full_name: 'elastic',
@@ -379,6 +383,10 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       },
       pushed_at: null,
       pushed_by: null,
+      rule: {
+        id: 'rule-id-2',
+        name: 'rule-name-2',
+      },
       updated_at: '2019-11-25T22:32:30.608Z',
       updated_by: {
         full_name: 'elastic',

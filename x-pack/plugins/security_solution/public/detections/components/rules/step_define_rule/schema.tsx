@@ -197,13 +197,13 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
         {
-          defaultMessage: 'Field',
+          defaultMessage: 'Group by',
         }
       ),
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
         {
-          defaultMessage: 'Select a field to group results by',
+          defaultMessage: "Select fields to group by. Fields are joined together with 'AND'",
         }
       ),
     },
@@ -213,6 +213,53 @@ export const schema: FormSchema<DefineStepRule> = {
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
         {
           defaultMessage: 'Threshold',
+        }
+      ),
+      validations: [
+        {
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            return fieldValidators.numberGreaterThanField({
+              than: 1,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                {
+                  defaultMessage: 'Value must be greater than or equal to one.',
+                }
+              ),
+              allowEquality: true,
+            })(...args);
+          },
+        },
+      ],
+    },
+    cardinality_field: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityFieldLabel',
+        {
+          defaultMessage: 'Count',
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldCardinalityFieldHelpText',
+        {
+          defaultMessage: 'Select a field to check cardinality',
+        }
+      ),
+    },
+    cardinality_value: {
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityValueFieldLabel',
+        {
+          defaultMessage: 'Unique values',
         }
       ),
       validations: [

@@ -69,6 +69,10 @@ describe('PATCH comment', () => {
         type: CommentType.alert,
         alertId: 'new-id',
         index: 'test-index',
+        rule: {
+          id: 'rule-id',
+          name: 'rule',
+        },
         id: commentID,
         version: 'WzYsMV0=',
       },
@@ -218,6 +222,10 @@ describe('PATCH comment', () => {
         type: CommentType.alert,
         alertId: 'test-id',
         index: 'test-index',
+        rule: {
+          id: 'rule-id',
+          name: 'rule',
+        },
         id: 'mock-comment-1',
         version: 'WzEsMV0=',
       },

@@ -36,8 +36,23 @@ export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
+export const THREAT_MAPPING_COMBO_BOX_INPUT =
+  '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
+
+export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
+
+export const THREAT_MATCH_INDICATOR_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="queryInput"]';
+
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
+
+export const THREAT_MATCH_INDICATOR_INDEX =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
+  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
 

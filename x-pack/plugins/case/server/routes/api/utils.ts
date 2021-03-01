@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { badRequest, boomify, isBoom } from '@hapi/boom';
+import { isEmpty } from 'lodash';
+import { badRequest, Boom, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -44,6 +45,7 @@ import {
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';
+import { isCaseError } from '../../common/error';
 
 export const transformNewSubCase = ({
   createdAt,
@@ -120,7 +122,8 @@ export interface AlertInfo {
 const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
   if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     acc.ids.push(...getAlertIds(comment));
-    acc.indices.add(comment.index);
+    const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
+    indices.forEach((index) => acc.indices.add(index));
   }
   return acc;
 };
@@ -180,9 +183,19 @@ export const transformNewComment = ({
   };
 };
 
+/**
+ * Transforms an error into the correct format for a kibana response.
+ */
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const options = { statusCode: error.statusCode ?? 500 };
-  const boom = isBoom(error) ? error : boomify(error, options);
+  let boom: Boom;
+
+  if (isCaseError(error)) {
+    boom = error.boomify();
+  } else {
+    const options = { statusCode: error.statusCode ?? 500 };
+    boom = isBoom(error) ? error : boomify(error, options);
+  }
+
   return {
     body: boom,
     headers: boom.output.headers as { [key: string]: string },
@@ -249,12 +262,14 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
   subCases,
+  subCaseIds,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
   subCases?: SubCaseResponse[];
+  subCaseIds?: string[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
@@ -264,6 +279,7 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
+  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
 
 export const flattenSubCaseSavedObject = ({

@@ -60,11 +60,7 @@ describe('Info session routes', () => {
           request,
           kibanaResponseFactory
         )
-      ).resolves.toEqual({
-        status: 500,
-        options: {},
-        payload: 'Internal Error',
-      });
+      ).rejects.toThrowError(unhandledException);
 
       expect(session.get).toHaveBeenCalledWith(request);
     });

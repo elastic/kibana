@@ -210,9 +210,12 @@ describe('AllCases', () => {
             id: null,
             createdAt: null,
             createdBy: null,
+            status: null,
+            subCases: null,
             tags: null,
             title: null,
             totalComment: null,
+            totalAlerts: null,
           },
         ],
       },
@@ -278,6 +281,7 @@ describe('AllCases', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
@@ -302,12 +306,33 @@ describe('AllCases', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
         caseId: firstCase.id,
         updateKey: 'status',
         updateValue: CaseStatuses.open,
+        refetchCasesStatus: fetchCasesStatus,
+        version: firstCase.version,
+      });
+    });
+  });
+
+  it('put case in progress when row action icon clicked', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="action-in-progress"]').first().simulate('click');
+      const firstCase = useGetCasesMockState.data.cases[0];
+      expect(dispatchUpdateCaseProperty).toBeCalledWith({
+        caseId: firstCase.id,
+        updateKey: 'status',
+        updateValue: CaseStatuses['in-progress'],
         refetchCasesStatus: fetchCasesStatus,
         version: firstCase.version,
       });
@@ -389,6 +414,27 @@ describe('AllCases', () => {
       wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       wrapper.find('[data-test-subj="cases-bulk-open-button"]').first().simulate('click');
       expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, CaseStatuses.open);
+    });
+  });
+
+  it('Bulk in-progress status update', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: useGetCasesMockState.data.cases,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
+      wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().simulate('click');
+      expect(updateBulkStatus).toBeCalledWith(
+        useGetCasesMockState.data.cases,
+        CaseStatuses['in-progress']
+      );
     });
   });
 
@@ -542,6 +588,7 @@ describe('AllCases', () => {
         },
         id: '1',
         status: 'open',
+        subCaseIds: [],
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
         totalAlerts: 0,

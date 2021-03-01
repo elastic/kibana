@@ -82,6 +82,8 @@ const stepDefineDefaultValue: DefineStepRule = {
   threshold: {
     field: [],
     value: '200',
+    cardinality_field: [],
+    cardinality_value: '2',
   },
   timeline: {
     id: null,
@@ -150,17 +152,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ruleType: formRuleType,
       queryBar: formQuery,
       threatIndex: formThreatIndex,
-      'threshold.value': formThresholdValue,
       'threshold.field': formThresholdField,
+      'threshold.value': formThresholdValue,
+      'threshold.cardinality_field': formThresholdCardinalityField,
+      'threshold.cardinality_value': formThresholdCardinalityValue,
     },
   ] = useFormData<
     DefineStepRule & {
-      'threshold.value': number | undefined;
       'threshold.field': string[] | undefined;
+      'threshold.value': number | undefined;
+      'threshold.cardinality_field': string[] | undefined;
+      'threshold.cardinality_value': number | undefined;
     }
   >({
     form,
-    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+    watch: [
+      'index',
+      'ruleType',
+      'queryBar',
+      'threshold.field',
+      'threshold.value',
+      'threshold.cardinality_field',
+      'threshold.cardinality_value',
+      'threatIndex',
+    ],
   });
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
@@ -274,17 +289,32 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   const thresholdFormValue = useMemo((): Threshold | undefined => {
-    return formThresholdValue != null && formThresholdField != null
-      ? { value: formThresholdValue, field: formThresholdField[0] }
+    return formThresholdValue != null &&
+      formThresholdField != null &&
+      formThresholdCardinalityField != null &&
+      formThresholdCardinalityValue != null
+      ? {
+          field: formThresholdField[0],
+          value: formThresholdValue,
+          cardinality_field: formThresholdCardinalityField[0],
+          cardinality_value: formThresholdCardinalityValue,
+        }
       : undefined;
-  }, [formThresholdField, formThresholdValue]);
+  }, [
+    formThresholdField,
+    formThresholdValue,
+    formThresholdCardinalityField,
+    formThresholdCardinalityValue,
+  ]);
 
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue }) => (
+    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
         browserFields={aggregatableFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
+        thresholdCardinalityField={thresholdCardinalityField}
+        thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
     [aggregatableFields]
@@ -428,6 +458,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                   thresholdValue: {
                     path: 'threshold.value',
+                  },
+                  thresholdCardinalityField: {
+                    path: 'threshold.cardinality_field',
+                  },
+                  thresholdCardinalityValue: {
+                    path: 'threshold.cardinality_value',
                   },
                 }}
               >

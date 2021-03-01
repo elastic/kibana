@@ -150,6 +150,7 @@ export class WorkpadTemplates extends React.PureComponent<
           sorting={sorting}
           onChange={this.onTableChange}
           className="canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
+          data-test-subj="canvasTemplatesTable"
         />
         <EuiSpacer />
         {rows.length > 0 && (

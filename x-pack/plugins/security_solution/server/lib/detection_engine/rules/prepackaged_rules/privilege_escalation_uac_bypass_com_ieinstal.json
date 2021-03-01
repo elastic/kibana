@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "UAC Bypass Attempt via Elevated COM Internet Explorer Add-On Installer",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n wildcard(process.executable, \"C:\\\\*\\\\AppData\\\\*\\\\Temp\\\\IDC*.tmp\\\\*.exe\") and\n process.parent.name == \"ieinstal.exe\" and process.parent.args == \"-Embedding\"\n\n /* uncomment once in winlogbeat */\n /* and not (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true) */\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.executable : \"C:\\\\*\\\\AppData\\\\*\\\\Temp\\\\IDC*.tmp\\\\*.exe\" and\n process.parent.name : \"ieinstal.exe\" and process.parent.args : \"-Embedding\"\n\n /* uncomment once in winlogbeat */\n /* and not (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true) */\n",
   "references": [
     "https://swapcontext.blogspot.com/2020/11/uac-bypasses-from-comautoapprovallist.html"
   ],
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

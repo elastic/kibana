@@ -103,3 +103,7 @@ export const SERVICENOW_LINK_ARIA = i18n.translate(
     defaultMessage: 'click to view the incident on servicenow',
   }
 );
+
+export const STATUS = i18n.translate('xpack.securitySolution.case.caseTable.status', {
+  defaultMessage: 'Status',
+});

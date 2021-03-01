@@ -27,9 +27,7 @@ const Container = styled.div`
 
 const defaultAlertComment = {
   type: CommentType.generatedAlert,
-  alerts: '{{context.alerts}}',
-  index: '{{context.rule.output_index}}',
-  ruleId: '{{context.rule.id}}',
+  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{rule.id}}", "ruleName": "{{rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
 };
 
 const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionParams>> = ({
@@ -49,7 +47,9 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       const newProps = { ...actionParams.subActionParams, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    // edit action causes re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [actionParams.subActionParams, index]
   );
 
   const onCaseChanged = useCallback(

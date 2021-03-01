@@ -457,7 +457,7 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-Enables legacy charts library for area, line and bar charts in visualize.
+Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
@@ -465,24 +465,25 @@ Maps values to specific colors in *Visualize* charts and *TSVB*. This setting do
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element
-of the chart. The lower this number, the more the highlighted element stands out.
-This must be a number between 0 and 1.
+of the chart. Use numbers between 0 and 1. The lower the number, the more the highlighted element stands out.
+
+[[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
+The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 [[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
 Shows a warning in a region map when terms cannot be joined to a shape.
 
 [[visualization-tilemap-wmsdefaults]]`visualization:tileMap:WMSdefaults`::
-The default properties for the WMS map server support in the coordinate map.
+The default properties for the WMS map server supported in the coordinate map.
 
 [[visualization-tilemap-maxprecision]]`visualization:tileMap:maxPrecision`::
-The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
-and 12 is the maximum. See this
-{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[explanation of cell dimensions].
+The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high,
+and 12 is the maximum. For more information, refer to
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
-Enables users to create, view, and edit experimental visualizations. If disabled,
-only visualizations that are considered production-ready are available to the
-user.
+Enables users to create, view, and edit experimental visualizations. When disabled,
+only production-ready visualizations are available to users.
 
 
 [float]

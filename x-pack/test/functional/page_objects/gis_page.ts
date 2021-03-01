@@ -335,6 +335,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
     }
 
+    async getNumberOfLayers() {
+      const tocEntries = await find.allByCssSelector('.mapTocEntry');
+      return tocEntries.length;
+    }
+
     async doesLayerExist(layerName: string) {
       return await testSubjects.exists(
         `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`

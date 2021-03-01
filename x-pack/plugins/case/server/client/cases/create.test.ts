@@ -6,6 +6,7 @@
  */
 
 import { ConnectorTypes, CaseStatuses, CaseType, CaseClientPostRequest } from '../../../common/api';
+import { isCaseError } from '../../common/error';
 
 import {
   createMockSavedObjectsRepository,
@@ -76,6 +77,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -174,6 +176,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -239,6 +242,7 @@ describe('create', () => {
             "syncAlerts": true,
           },
           "status": "open",
+          "subCaseIds": undefined,
           "subCases": undefined,
           "tags": Array [
             "defacement",
@@ -273,14 +277,16 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .create({ theCase: postCase })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .create({ theCase: postCase })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when missing description', async () => {
@@ -300,14 +306,16 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .create({ theCase: postCase })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .create({ theCase: postCase })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when missing tags', async () => {
@@ -327,14 +335,16 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .create({ theCase: postCase })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .create({ theCase: postCase })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when missing connector ', async () => {
@@ -349,14 +359,16 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .create({ theCase: postCase })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .create({ theCase: postCase })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws when connector missing the right fields', async () => {
@@ -377,14 +389,16 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
-        // @ts-expect-error
-        .create({ theCase: postCase })
-        .catch((e) => {
-          expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
-        });
+      return (
+        caseClient.client
+          // @ts-expect-error
+          .create({ theCase: postCase })
+          .catch((e) => {
+            expect(e).not.toBeNull();
+            expect(e.isBoom).toBe(true);
+            expect(e.output.statusCode).toBe(400);
+          })
+      );
     });
 
     test('it throws if you passing status for a new case', async () => {
@@ -410,7 +424,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.create(postCase).catch((e) => {
+      return caseClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);
@@ -438,10 +452,12 @@ describe('create', () => {
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      caseClient.client.create(postCase).catch((e) => {
+      return caseClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
-        expect(e.isBoom).toBe(true);
-        expect(e.output.statusCode).toBe(400);
+        expect(isCaseError(e)).toBeTruthy();
+        const boomErr = e.boomify();
+        expect(boomErr.isBoom).toBe(true);
+        expect(boomErr.output.statusCode).toBe(400);
       });
     });
   });

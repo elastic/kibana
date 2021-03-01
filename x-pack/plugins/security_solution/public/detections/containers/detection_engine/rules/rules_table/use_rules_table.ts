@@ -38,6 +38,7 @@ const initialStateDefaults: RulesTableState = {
   exportRuleIds: [],
   lastUpdated: 0,
   isRefreshOn: true,
+  isRefreshing: false,
   showIdleModal: false,
 };
 

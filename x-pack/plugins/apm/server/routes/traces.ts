@@ -10,25 +10,25 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 
 export const tracesRoute = createRoute({
   endpoint: 'GET /api/apm/traces',
   params: t.type({
-    query: t.intersection([environmentRt, rangeRt, uiFiltersRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { environment } = context.params.query;
+    const { environment, kuery } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     return getTransactionGroupList(
-      { environment, type: 'top_traces', searchAggregatedTransactions },
+      { environment, kuery, type: 'top_traces', searchAggregatedTransactions },
       setup
     );
   },

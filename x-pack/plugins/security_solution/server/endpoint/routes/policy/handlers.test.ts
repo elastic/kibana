@@ -49,11 +49,7 @@ describe('test policy response handler', () => {
 
     it('should return the latest policy response for a host', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -72,11 +68,7 @@ describe('test policy response handler', () => {
     });
 
     it('should return not found when there is no response policy for host', async () => {
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
         Promise.resolve(createSearchResponse())

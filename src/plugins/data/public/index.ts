@@ -308,6 +308,7 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -417,6 +418,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

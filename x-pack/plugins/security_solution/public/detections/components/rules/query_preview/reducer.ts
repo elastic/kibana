@@ -67,6 +67,7 @@ export type Action =
       type: 'setToFrom';
     };
 
+/* eslint-disable-next-line complexity */
 export const queryPreviewReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
     case 'setQueryInfo': {
@@ -131,7 +132,9 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
       const thresholdField =
         action.threshold != null &&
         action.threshold.field != null &&
-        action.threshold.field.trim() !== '';
+        ((typeof action.threshold.field === 'string' && action.threshold.field.trim() !== '') ||
+          (Array.isArray(action.threshold.field) &&
+            action.threshold.field.every((field) => field.trim() !== '')));
       const showNonEqlHist =
         action.ruleType === 'query' ||
         action.ruleType === 'saved_query' ||

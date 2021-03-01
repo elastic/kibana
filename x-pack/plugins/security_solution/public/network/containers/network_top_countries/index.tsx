@@ -8,6 +8,7 @@
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
@@ -25,7 +26,6 @@ import {
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -71,6 +71,7 @@ export const useNetworkTopCountries = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
 
@@ -122,12 +123,11 @@ export const useNetworkTopCountries = ({
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkTopCountriesRequestOptions, NetworkTopCountriesStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -135,44 +135,37 @@ export const useNetworkTopCountries = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setNetworkTopCountriesResponse((prevResponse) => ({
-                    ...prevResponse,
-                    networkTopCountries: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setNetworkTopCountriesResponse((prevResponse) => ({
+                  ...prevResponse,
+                  networkTopCountries: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+                setLoading(false);
                 // TODO: Make response error status clearer
                 notifications.toasts.addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
-                searchSubscription$.unsubscribe();
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_TOP_COUNTRIES,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_NETWORK_TOP_COUNTRIES,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -203,6 +196,10 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [networkTopCountriesRequest, networkTopCountriesSearch]);
 
   return [loading, networkTopCountriesResponse];

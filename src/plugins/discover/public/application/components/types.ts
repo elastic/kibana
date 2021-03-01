@@ -159,23 +159,12 @@ export interface DiscoverProps {
    */
   timeRange?: { from: string; to: string };
   /**
-   * An object containing properties for proper handling of unmapped fields in the UI
+   * An object containing properties for unmapped fields behavior
    */
   unmappedFieldsConfig?: {
     /**
      * determines whether to display unmapped fields
-     * configurable through the switch in the UI
      */
     showUnmappedFields: boolean;
-    /**
-     * determines if we should display an option to toggle showUnmappedFields value in the first place
-     * this value is not configurable through the UI
-     */
-    showUnmappedFieldsDefaultValue: boolean;
-    /**
-     * callback function to change the value of `showUnmappedFields` flag
-     * @param value new value to set
-     */
-    onChangeUnmappedFields: (value: boolean) => void;
   };
 }

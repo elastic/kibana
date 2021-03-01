@@ -154,7 +154,7 @@ describe('context app', function () {
         const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
         expect(setFieldsSpy.calledOnce).toBe(true);
         expect(removeFieldsSpy.calledOnce).toBe(true);
-        expect(setFieldsSpy.firstCall.args[1]).toEqual(['*']);
+        expect(setFieldsSpy.firstCall.args[1]).toEqual([{ field: '*', include_unmapped: 'true' }]);
       });
     });
   });

@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import { CommentType } from '../../../common/api';
+import { isCaseError } from '../../common/error';
 import {
   createMockSavedObjectsRepository,
   mockCaseComments,
@@ -75,6 +76,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -94,6 +99,10 @@ describe('addComment', () => {
           "index": "test-index",
           "pushed_at": null,
           "pushed_by": null,
+          "rule": Object {
+            "id": "test-rule1",
+            "name": "test-rule",
+          },
           "type": "alert",
           "updated_at": null,
           "updated_by": null,
@@ -231,6 +240,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -265,6 +278,10 @@ describe('addComment', () => {
           type: CommentType.alert,
           alertId: 'test-alert',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
@@ -281,7 +298,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
+      return caseClient.client
         .addComment({
           caseId: 'mock-id-1',
           // @ts-expect-error
@@ -310,7 +327,7 @@ describe('addComment', () => {
 
       ['comment'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -337,7 +354,7 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['alertId', 'index'].forEach((attribute) => {
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             comment: {
@@ -371,7 +388,7 @@ describe('addComment', () => {
 
       ['alertId', 'index'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -398,7 +415,7 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['comment'].forEach((attribute) => {
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             comment: {
@@ -406,6 +423,10 @@ describe('addComment', () => {
               type: CommentType.alert,
               index: 'test-index',
               alertId: 'test-id',
+              rule: {
+                id: 'test-rule1',
+                name: 'test-rule',
+              },
             },
           })
           .catch((e) => {
@@ -417,14 +438,14 @@ describe('addComment', () => {
     });
 
     test('it throws when the case does not exists', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
+      return caseClient.client
         .addComment({
           caseId: 'not-exists',
           comment: {
@@ -434,20 +455,22 @@ describe('addComment', () => {
         })
         .catch((e) => {
           expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(404);
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(404);
         });
     });
 
     test('it throws when postNewCase throws', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
+      return caseClient.client
         .addComment({
           caseId: 'mock-id-1',
           comment: {
@@ -457,13 +480,15 @@ describe('addComment', () => {
         })
         .catch((e) => {
           expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(400);
         });
     });
 
     test('it throws when the case is closed and the comment is of type alert', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
@@ -471,19 +496,25 @@ describe('addComment', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client
+      return caseClient.client
         .addComment({
           caseId: 'mock-id-4',
           comment: {
             type: CommentType.alert,
             alertId: 'test-alert',
             index: 'test-index',
+            rule: {
+              id: 'test-rule1',
+              name: 'test-rule',
+            },
           },
         })
         .catch((e) => {
           expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(400);
         });
     });
   });
