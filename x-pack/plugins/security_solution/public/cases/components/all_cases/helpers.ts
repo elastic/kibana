@@ -18,6 +18,12 @@ export const isSubCase = (theCase: Case | SubCase): theCase is SubCase =>
   (theCase as SubCase).caseParentId !== undefined &&
   (theCase as SubCase).associationType === AssociationType.subCase;
 
+export const isCollection = (theCase: Case | SubCase | null | undefined) =>
+  theCase != null && (theCase as Case).type === CaseType.collection;
+
+export const isIndividual = (theCase: Case | SubCase | null | undefined) =>
+  theCase != null && (theCase as Case).type === CaseType.individual;
+
 export const getSubCasesStatusCountsBadges = (
   subCases: SubCase[]
 ): Array<{ name: CaseStatuses; color: string; count: number }> => {

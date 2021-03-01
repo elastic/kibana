@@ -8,20 +8,18 @@
 import { Dispatch } from 'react';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { statuses } from '../status';
 import * as i18n from './translations';
+import { isIndividual } from './helpers';
 
 interface GetActions {
   caseStatus: string;
   dispatchUpdate: Dispatch<Omit<UpdateCase, 'refetchCasesStatus'>>;
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
-
-const isCollection = (theCase: Case | SubCase | null | undefined) =>
-  theCase != null && (theCase as Case).type === CaseType.collection;
 
 export const getActions = ({
   caseStatus,
@@ -30,7 +28,7 @@ export const getActions = ({
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open,
-    enabled: (item: Case | SubCase) => !isCollection(item),
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -47,7 +45,7 @@ export const getActions = ({
 
   const makeInProgressAction = {
     available: (item: Case) => caseStatus !== CaseStatuses['in-progress'],
-    enabled: (item: Case | SubCase) => !isCollection(item),
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -64,7 +62,7 @@ export const getActions = ({
 
   const closeCaseAction = {
     available: (item: Case | SubCase) => caseStatus !== CaseStatuses.closed,
-    enabled: (item: Case | SubCase) => !isCollection(item),
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,
