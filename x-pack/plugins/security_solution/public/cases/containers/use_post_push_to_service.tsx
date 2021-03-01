@@ -67,17 +67,17 @@ export const usePostPushToService = (): UsePostPushToService => {
   });
   const [, dispatchToaster] = useStateToaster();
   const cancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const abortCtrlRef = useRef(new AbortController());
 
   const pushCaseToExternalService = useCallback(
     async ({ caseId, connector }: PushToServiceRequest) => {
       try {
-        dispatch({ type: 'FETCH_INIT' });
-        abortCtrl.current.abort();
+        abortCtrlRef.current.abort();
         cancel.current = false;
-        abortCtrl.current = new AbortController();
+        abortCtrlRef.current = new AbortController();
+        dispatch({ type: 'FETCH_INIT' });
 
-        const response = await pushCase(caseId, connector.id, abortCtrl.current.signal);
+        const response = await pushCase(caseId, connector.id, abortCtrlRef.current.signal);
 
         if (!cancel.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
@@ -90,11 +90,13 @@ export const usePostPushToService = (): UsePostPushToService => {
         return response;
       } catch (error) {
         if (!cancel.current) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }
@@ -105,7 +107,7 @@ export const usePostPushToService = (): UsePostPushToService => {
 
   useEffect(() => {
     return () => {
-      abortCtrl.current.abort();
+      abortCtrlRef.current.abort();
       cancel.current = true;
     };
   }, []);
