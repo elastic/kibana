@@ -32,10 +32,11 @@ type SpacesApiUiComponentMock = jest.Mocked<SpacesApiUiComponent>;
 
 const createApiUiComponentsMock = () => {
   const mock: SpacesApiUiComponentMock = {
-    SpacesContext: jest.fn(),
-    ShareToSpaceFlyout: jest.fn(),
-    SpaceList: jest.fn(),
-    LegacyUrlConflict: jest.fn(),
+    getSpacesContextProvider: jest.fn(),
+    getShareToSpaceFlyout: jest.fn(),
+    getSpaceList: jest.fn(),
+    getLegacyUrlConflict: jest.fn(),
+    getSpaceAvatar: jest.fn(),
   };
 
   return mock;
