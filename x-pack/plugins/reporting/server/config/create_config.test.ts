@@ -109,7 +109,7 @@ describe('Reporting server createConfig$', () => {
   });
 
   it('show warning when kibanaServer.hostName === "0"', async () => {
-    mockInitContext = makeMockInitContext({
+    mockInitContext = coreMock.createPluginInitializerContext({
       encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
       kibanaServer: { hostname: '0' },
     });
