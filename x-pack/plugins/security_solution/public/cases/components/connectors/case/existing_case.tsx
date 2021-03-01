@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
+import { CaseType } from '../../../../../../case/common/api';
 import {
   useGetCases,
   DEFAULT_QUERY_PARAMS,
@@ -25,10 +26,17 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
     onlyCollectionType: true,
   });
 
-  const onCaseCreated = useCallback(() => refetchCases(), [refetchCases]);
+  const onCaseCreated = useCallback(
+    (newCase) => {
+      refetchCases();
+      onCaseChanged(newCase.id);
+    },
+    [onCaseChanged, refetchCases]
+  );
 
   const { modal, openModal } = useCreateCaseModal({
     onCaseCreated,
+    caseType: CaseType.collection,
     // FUTURE DEVELOPER
     // We are making the assumption that this component is only used in rules creation
     // that's why we want to hide ServiceNow SIR
