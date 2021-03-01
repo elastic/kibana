@@ -9,6 +9,7 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { ApiScope, TextWithLinks } from '../types';
+import { getRelativePath } from './utils';
 
 /**
  *
@@ -54,6 +55,9 @@ export function extractImportReferences(
         const str = textSegment.substr(index + length - name.length, name.length);
         if (str && str !== '') {
           texts.push(str);
+        } else {
+          // If there is no ".Name" then use the full path. You can see things like "typeof import("file")"
+          texts.push(getRelativePath(path));
         }
       } else {
         const section = getApiSectionId({
@@ -69,10 +73,12 @@ export function extractImportReferences(
             apiPath: path,
             directory: plugin.directory,
           }),
-          section,
-          text: name,
+          section: name && name !== '' ? section : undefined,
+          text: name && name !== '' ? name : getRelativePath(path),
         });
       }
+
+      // Prep textSegment to skip past the `import`, then check for more.
       textSegment = textSegment.substr(index + length);
     } else {
       if (textSegment && textSegment !== '') {
@@ -87,10 +93,10 @@ export function extractImportReferences(
 function extractImportRef(
   str: string
 ): { path: string; name: string; index: number; length: number } | undefined {
-  const groups = str.match(/import\("(.*?)"\)\.(\w*)/);
+  const groups = str.match(/import\("(.*?)"\)\.?(\w*)/);
   if (groups) {
     const path = groups[1];
-    const name = groups[2];
+    const name = groups.length > 2 ? groups[2] : '';
     const index = groups.index!;
     const length = groups[0].length;
     return { path, name, index, length };
