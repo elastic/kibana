@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '../tooling_log';
+import { inspect } from 'util';
+
+import * as Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
+import { lastValueFrom } from '@kbn/std';
+import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -49,6 +54,38 @@ interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
 interface MigrateResponse {
   success: boolean;
   result: Array<{ status: string }>;
+}
+
+interface FindApiResponse {
+  saved_objects: Array<{
+    type: string;
+    id: string;
+    [key: string]: unknown;
+  }>;
+  total: number;
+  per_page: number;
+  page: number;
+}
+
+interface CleanOptions {
+  space?: string;
+  types: string[];
+}
+
+interface DeleteObjectsOptions {
+  space?: string;
+  objects: Array<{
+    type: string;
+    id: string;
+  }>;
+}
+
+async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
+  if (arr.length) {
+    await lastValueFrom(
+      Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
+    );
+  }
 }
 
 export class KbnClientSavedObjects {
@@ -142,5 +179,68 @@ export class KbnClientSavedObjects {
     });
 
     return data;
+  }
+
+  public async clean(options: CleanOptions) {
+    this.log.debug('Cleaning all saved objects', { space: options.space });
+
+    let deleted = 0;
+
+    while (true) {
+      const resp = await this.requester.request<FindApiResponse>({
+        method: 'GET',
+        path: options.space
+          ? uriencode`/s/${options.space}/api/saved_objects/_find`
+          : '/api/saved_objects/_find',
+        query: {
+          per_page: 1000,
+          type: options.types,
+          fields: 'none',
+        },
+      });
+
+      this.log.info('deleting batch of', resp.data.saved_objects.length, 'objects');
+      const deletion = await this.bulkDelete({
+        space: options.space,
+        objects: resp.data.saved_objects,
+      });
+      deleted += deletion.deleted;
+
+      if (resp.data.total <= resp.data.per_page) {
+        break;
+      }
+    }
+
+    this.log.success('deleted', deleted, 'objects');
+  }
+
+  public async bulkDelete(options: DeleteObjectsOptions) {
+    let deleted = 0;
+    let missing = 0;
+
+    await concurrently(20, options.objects, async (obj) => {
+      try {
+        await this.requester.request({
+          method: 'DELETE',
+          path: options.space
+            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}`
+            : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
+        });
+        deleted++;
+      } catch (error) {
+        if (isAxiosResponseError(error)) {
+          if (error.response.status === 404) {
+            missing++;
+            return;
+          }
+
+          throw createFailError(`${error.response.status} resp: ${inspect(error.response.data)}`);
+        }
+
+        throw error;
+      }
+    });
+
+    return { deleted, missing };
   }
 }
