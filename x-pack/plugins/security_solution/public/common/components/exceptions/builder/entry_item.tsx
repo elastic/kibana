@@ -138,7 +138,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           </EuiFormRow>
         );
       } else {
-        return comboBox;
+        return (
+          <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+            {comboBox}
+          </EuiFormRow>
+        );
       }
     },
     [handleFieldChange, indexPattern, entry, listType]
@@ -176,7 +180,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   };
 
