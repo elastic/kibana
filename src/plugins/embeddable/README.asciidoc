@@ -26,7 +26,7 @@ link:https://github.com/elastic/kibana/blob/master/src/plugins/embeddable/docs/R
 
 === API docs
 
-===== Browser API
+==== Browser API
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablesetup.md[Browser Setup contract]
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablestart.md[Browser Start contract]
 
