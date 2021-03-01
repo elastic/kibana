@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { CaseStatuses } from '../../../../../case/common/api';
 import { Case } from '../../containers/types';
 import { statuses } from '../status';
@@ -22,5 +21,4 @@ export const getStatusDate = (theCase: Case): string | null => {
   return null;
 };
 
-export const getStatusTitle = (status: CaseStatuses): string =>
-  get(statuses, `${status}.actionBar.title`);
+export const getStatusTitle = (status: CaseStatuses) => statuses[status].actionBar.title;
