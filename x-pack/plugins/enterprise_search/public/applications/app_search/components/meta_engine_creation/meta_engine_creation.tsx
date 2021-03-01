@@ -91,82 +91,80 @@ export const MetaEngineCreation: React.FC = () => {
       <EuiPageBody>
         <FlashMessages />
         <EuiPanel>
-          <EuiForm>
-            <form
-              data-test-subj="MetaEngineCreationForm"
-              onSubmit={(e) => {
-                e.preventDefault();
-                submitEngine();
-              }}
-            >
-              <EuiTitle>
-                <EuiText>{META_ENGINE_CREATION_FORM_TITLE}</EuiText>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    data-test-subj="MetaEngineCreationNameFormRow"
-                    label={META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
-                    helpText={
-                      name.length > 0 && rawName !== name ? (
-                        <>
-                          {SANITIZED_NAME_NOTE} <strong>{name}</strong>
-                        </>
-                      ) : (
-                        ALLOWED_CHARS_NOTE
-                      )
-                    }
+          <EuiForm
+            component="form"
+            data-test-subj="MetaEngineCreationForm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitEngine();
+            }}
+          >
+            <EuiTitle>
+              <EuiText>{META_ENGINE_CREATION_FORM_TITLE}</EuiText>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  data-test-subj="MetaEngineCreationNameFormRow"
+                  label={META_ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
+                  helpText={
+                    name.length > 0 && rawName !== name ? (
+                      <>
+                        {SANITIZED_NAME_NOTE} <strong>{name}</strong>
+                      </>
+                    ) : (
+                      ALLOWED_CHARS_NOTE
+                    )
+                  }
+                  fullWidth
+                >
+                  <EuiFieldText
+                    name="engine-name"
+                    value={rawName}
+                    onChange={(event) => setRawName(event.currentTarget.value)}
                     fullWidth
-                  >
-                    <EuiFieldText
-                      name="engine-name"
-                      value={rawName}
-                      onChange={(event) => setRawName(event.currentTarget.value)}
-                      autoComplete="off"
-                      fullWidth
-                      data-test-subj="MetaEngineCreationNameInput"
-                      placeholder={META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
-                      autoFocus
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <EuiFormRow label={META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL} fullWidth>
-                <EuiComboBox
-                  data-test-subj="MetaEngineCreationSourceEnginesInput"
-                  options={indexedEngineNames.map(engineNameToComboBoxOption)}
-                  selectedOptions={selectedIndexedEngineNames.map(engineNameToComboBoxOption)}
-                  onChange={(options) => {
-                    setSelectedIndexedEngineNames(options.map(comboBoxOptionToEngineName));
-                  }}
-                />
-              </EuiFormRow>
-              <EuiSpacer />
-              {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
-                <EuiCallOut
-                  color="warning"
-                  title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE(
-                    maxEnginesPerMetaEngine
-                  )}
-                />
-              )}
-              <EuiSpacer />
-              <EuiButton
-                disabled={
-                  name.length === 0 ||
-                  selectedIndexedEngineNames.length === 0 ||
-                  selectedIndexedEngineNames.length > maxEnginesPerMetaEngine
-                }
-                type="submit"
-                data-test-subj="NewMetaEngineSubmitButton"
-                fill
-                color="secondary"
-              >
-                {META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
-              </EuiButton>
-            </form>
+                    data-test-subj="MetaEngineCreationNameInput"
+                    placeholder={META_ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
+                    autoFocus
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFormRow label={META_ENGINE_CREATION_FORM_ENGINE_SOURCE_ENGINES_LABEL} fullWidth>
+              <EuiComboBox
+                data-test-subj="MetaEngineCreationSourceEnginesInput"
+                options={indexedEngineNames.map(engineNameToComboBoxOption)}
+                selectedOptions={selectedIndexedEngineNames.map(engineNameToComboBoxOption)}
+                onChange={(options) => {
+                  setSelectedIndexedEngineNames(options.map(comboBoxOptionToEngineName));
+                }}
+              />
+            </EuiFormRow>
+            <EuiSpacer />
+            {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
+              <EuiCallOut
+                color="warning"
+                title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE(
+                  maxEnginesPerMetaEngine
+                )}
+              />
+            )}
+            <EuiSpacer />
+            <EuiButton
+              disabled={
+                name.length === 0 ||
+                selectedIndexedEngineNames.length === 0 ||
+                selectedIndexedEngineNames.length > maxEnginesPerMetaEngine
+              }
+              type="submit"
+              data-test-subj="NewMetaEngineSubmitButton"
+              fill
+              color="secondary"
+            >
+              {META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
+            </EuiButton>
           </EuiForm>
         </EuiPanel>
       </EuiPageBody>
