@@ -251,8 +251,8 @@ The [ServiceNow user documentation `params`](https://www.elastic.co/guide/en/kib
 
 | Property        | Description                                                                                        | Type   |
 | --------------- | -------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices` | string |
-| subActionParams | The parameters of the sub action                                                                   | object |
+| subAction       | The subaction to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                                                   | object |
 
 #### `subActionParams (pushToService)`
 
@@ -267,22 +267,22 @@ The following table describes the properties of the `incident` object.
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | short_description | The title of the incident.                                                                                                | string              |
 | description       | The description of the incident.                                                                                          | string _(optional)_ |
-| externalId        | The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_ |
-| severity          | The name of the severity in ServiceNow.                                                                                   | string _(optional)_ |
-| urgency           | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_ |
-| impact            | The name of the impact in ServiceNow.                                                                                     | string _(optional)_ |
-| category          | The name of the category in ServiceNow.                                                                                   | string _(optional)_ |
-| subcategory       | The name of the subcategory in ServiceNow.                                                                                | string _(optional)_ |
+| externalId        | The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_ |
+| severity          | The severity in ServiceNow.                                                                                   | string _(optional)_ |
+| urgency           | The urgency in ServiceNow.                                                                                    | string _(optional)_ |
+| impact            | The impact in ServiceNow.                                                                                     | string _(optional)_ |
+| category          | The category in ServiceNow.                                                                                   | string _(optional)_ |
+| subcategory       | The subcategory in ServiceNow.                                                                                | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 
-No parameters for `getFields` sub-action. Provide an empty object `{}`.
+No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (getIncident)`
 
 | Property   | Description                           | Type   |
 | ---------- | ------------------------------------- | ------ |
-| externalId | The id of the incident in ServiceNow. | string |
+| externalId | The ID of the incident in ServiceNow. | string |
 
 
 #### `subActionParams (getChoices)`
@@ -300,8 +300,8 @@ The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/ma
 
 | Property        | Description                                                                                                                                | Type   |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, and `getFields` | string |
-| subActionParams | The parameters of the sub action                                                                                                           | object |
+| subAction       | The subaction to perform. It can be `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, and `getFields`. | string |
+| subActionParams | The parameters of the subaction.                                                                                                           | object |
 
 #### `subActionParams (pushToService)`
 
@@ -314,45 +314,45 @@ The following table describes the properties of the `incident` object.
 
 | Property    | Description                                                                                                      | Type                  |
 | ----------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
-| summary     | The title of the issue                                                                                           | string                |
-| description | The description of the issue                                                                                     | string _(optional)_   |
-| externalId  | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
-| issueType   | The id of the issue type in Jira.                                                                                | string _(optional)_   |
+| summary     | The title of the issue.                                                                                          | string                |
+| description | The description of the issue.                                                                                   | string _(optional)_   |
+| externalId  | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_   |
+| issueType   | The ID of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority    | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
 | labels      | An array of labels. Labels cannot contain spaces.                                                                | string[] _(optional)_ |
-| parent      | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
+| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 
 #### `subActionParams (getIncident)`
 
 | Property   | Description                 | Type   |
 | ---------- | --------------------------- | ------ |
-| externalId | The id of the issue in Jira | string |
+| externalId | The ID of the issue in Jira. | string |
 
 #### `subActionParams (issueTypes)`
 
-No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
+No parameters for the `issueTypes` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (fieldsByIssueType)`
 
 | Property | Description                      | Type   |
 | -------- | -------------------------------- | ------ |
-| id       | The id of the issue type in Jira | string |
+| id       | The ID of the issue type in Jira. | string |
 
 #### `subActionParams (issues)`
 
 | Property | Description             | Type   |
 | -------- | ----------------------- | ------ |
-| title    | The title to search for | string |
+| title    | The title to search for. | string |
 
 #### `subActionParams (issue)`
 
 | Property | Description                 | Type   |
 | -------- | --------------------------- | ------ |
-| id       | The id of the issue in Jira | string |
+| id       | The ID of the issue in Jira. | string |
 
 #### `subActionParams (getFields)`
 
-No parameters for `getFields` sub-action. Provide an empty object `{}`.
+No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ---
 ## IBM Resilient
@@ -363,8 +363,8 @@ The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/
 
 | Property        | Description                                                                                        | Type   |
 | --------------- | -------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `getFields`, `incidentTypes`, and `severity` | string |
-| subActionParams | The parameters of the sub action                                                                   | object |
+| subAction       | The subaction to perform. It can be `pushToService`, `getFields`, `incidentTypes`, and `severity. | string |
+| subActionParams | The parameters of the subaction.                                                                   | object |
 
 #### `subActionParams (pushToService)`
 
@@ -377,23 +377,23 @@ The following table describes the properties of the `incident` object.
 
 | Property      | Description                                                                                                                  | Type                  |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| name          | The title of the incident                                                                                                    | string _(optional)_   |
-| description   | The description of the incident                                                                                              | string _(optional)_   |
-| externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
-| incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
-| severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+| name          | The title of the incident.                                                                                                 | string _(optional)_   |
+| description   | The description of the incident.                                                                                             | string _(optional)_   |
+| externalId    | The ID of the incident in IBM Resilient. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_   |
+| incidentTypes | An array with the IDs of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
+| severityCode  | IBM Resilient ID of the severity code.                                                                                       | number _(optional)_   |
 
 #### `subActionParams (getFields)`
 
-No parameters for `getFields` sub-action. Provide an empty object `{}`.
+No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (incidentTypes)`
 
-No parameters for `incidentTypes` sub-action. Provide an empty object `{}`.
+No parameters for the `incidentTypes` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (severity)`
 
-No parameters for `severity` sub-action. Provide an empty object `{}`.
+No parameters for the `severity` subaction. Provide an empty object `{}`.
 
 ---
 # Command Line Utility
