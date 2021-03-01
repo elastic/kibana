@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const flyout = getService('flyout');
 
-  describe('Accessibility Search Profiler Editor', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/91939
+  describe.skip('Accessibility Search Profiler Editor', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchProfiler');
       await a11y.testAppSnapshot();
