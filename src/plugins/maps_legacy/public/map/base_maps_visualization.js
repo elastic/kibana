@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
 import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
-import { getServiceSettings } from '../get_service_settings';
+import { getServiceSettings } from '../../../maps_ems/public';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS

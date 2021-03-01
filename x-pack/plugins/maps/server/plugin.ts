@@ -13,7 +13,7 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from 'src/core/server';
+} from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';

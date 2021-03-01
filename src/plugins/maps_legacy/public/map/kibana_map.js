@@ -12,7 +12,7 @@ import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
-import { ORIGIN } from '../common/constants/origin';
+import { ORIGIN } from '../../../maps_ems/common';
 import { getToasts } from '../kibana_services';
 import { L } from '../leaflet';
 

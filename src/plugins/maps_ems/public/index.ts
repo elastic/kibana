@@ -16,9 +16,8 @@ export {
   FileLayer,
   TmsLayer,
   IServiceSettings,
+  getServiceSettings,
 } from './service_settings';
-
-import './map/index.scss';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
