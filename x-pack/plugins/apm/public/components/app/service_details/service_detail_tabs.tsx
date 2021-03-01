@@ -37,6 +37,7 @@ interface Tab {
   key: string;
   href: string;
   text: ReactNode;
+  hidden?: boolean;
   render: () => ReactNode;
 }
 
@@ -126,6 +127,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const profilingTab = {
     key: 'profiling',
     href: useServiceProfilingHref({ serviceName }),
+    hidden: !config.profilingEnabled,
     text: (
       <EuiFlexGroup direction="row" gutterSize="s">
         <EuiFlexItem>
@@ -167,22 +169,20 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
     tabs.push(metricsTab);
   }
 
-  tabs.push(serviceMapTab);
-
-  if (config.profilingEnabled) {
-    tabs.push(profilingTab);
-  }
+  tabs.push(serviceMapTab, profilingTab);
 
   const selectedTab = tabs.find((serviceTab) => serviceTab.key === tab);
 
   return (
     <>
       <MainTabs>
-        {tabs.map(({ href, key, text }) => (
-          <EuiTab href={href} isSelected={key === tab} key={key}>
-            {text}
-          </EuiTab>
-        ))}
+        {tabs
+          .filter((t) => !t.hidden)
+          .map(({ href, key, text }) => (
+            <EuiTab href={href} isSelected={key === tab} key={key}>
+              {text}
+            </EuiTab>
+          ))}
         <div style={{ marginLeft: 'auto' }}>
           <Correlations />
         </div>
