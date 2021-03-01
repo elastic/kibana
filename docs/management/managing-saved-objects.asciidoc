@@ -42,7 +42,7 @@ of objects to update and want to batch the process.
 [float]
 ==== Compatibility across versions and downgrades
 
-We do not guarantee compatibility of a Saved Object exported from newer Kibana version and imported to older Kibana version:
+We do not guarantee compatibility of a Saved Object exported from newer Kibana version and imported to older Kibana version (including patch versions):
 
 * New functionalities (e.g. a new Visualization type or new options in existing visualizations) cannot be reproduced in previous versions
 * The exported format of Saved Objects can change without notice and it is guaranteed to work only when reimported on the same (or more recent) Kibana version
