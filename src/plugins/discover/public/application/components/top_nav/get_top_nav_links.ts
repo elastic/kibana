@@ -11,7 +11,6 @@ import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
 import { unhashUrl } from '../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../build_services';
-import { Adapters } from '../../../../../inspector/common/adapters';
 import { SavedSearch } from '../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';
@@ -23,7 +22,6 @@ import { IndexPattern, ISearchSource } from '../../../kibana_services';
 export const getTopNavLinks = ({
   getFieldCounts,
   indexPattern,
-  inspectorAdapters,
   navigateTo,
   savedSearch,
   services,
@@ -33,7 +31,6 @@ export const getTopNavLinks = ({
 }: {
   getFieldCounts: () => Promise<Record<string, number>>;
   indexPattern: IndexPattern;
-  inspectorAdapters: Adapters;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -128,9 +125,6 @@ export const getTopNavLinks = ({
     testId: 'openInspectorButton',
     run: () => {
       onOpenInspector();
-      services.inspector.open(inspectorAdapters, {
-        title: savedSearch.title,
-      });
     },
   };
 
