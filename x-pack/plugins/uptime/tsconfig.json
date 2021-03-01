@@ -9,7 +9,7 @@
   },
   "include": [
     "common/**/*",
-    "e2e/**/*",
+    "scripts/**/*",
     "public/**/*",
     "public/components/monitor/status_details/location_map/embeddables/low_poly_layer.json",
     "server/**/*",
