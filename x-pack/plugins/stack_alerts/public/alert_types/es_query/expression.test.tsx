@@ -116,6 +116,7 @@ describe('EsQueryAlertTypeExpression', () => {
         docLinks: {
           ELASTIC_WEBSITE_URL: '',
           DOC_LINK_VERSION: '',
+          links: {},
         },
       },
     });

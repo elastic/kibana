@@ -55,10 +55,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )}
             helpText={
-              <EuiLink
-                href={`${docLinks.links.alerting.emailAction}#configuring-email`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.emailActionConfig} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
                   defaultMessage="Configure email accounts"
