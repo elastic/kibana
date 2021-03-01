@@ -86,7 +86,7 @@ export interface ActionWizardProps<
   triggerPickerDocsLink?: string;
 }
 
-export const ActionWizard: React.FC<ActionWizardProps> = ({
+const ActionWizard: React.FC<ActionWizardProps> = ({
   currentActionFactory,
   actionFactories,
   onActionFactoryChange,
@@ -384,3 +384,6 @@ function getTriggersForActionFactory(
 ): string[] {
   return actionFactory.supportedTriggers().filter((trigger) => allTriggers.includes(trigger));
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ActionWizard;

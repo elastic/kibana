@@ -18,8 +18,8 @@ export {
   StartContract as AdvancedUiActionsStart,
 } from './plugin';
 
-export { ActionWizard } from './components';
-export {
+export { ActionWizard } from './components/index';
+export type {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,
   SerializedAction as UiActionsEnhancedSerializedAction,
@@ -35,5 +35,5 @@ export {
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
-export * from './drilldowns/url_drilldown';
+export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns/drilldown_definition';
+// export * from './drilldowns/url_drilldown';

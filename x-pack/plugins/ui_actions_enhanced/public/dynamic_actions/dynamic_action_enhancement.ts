@@ -9,7 +9,7 @@ import { EnhancementRegistryDefinition } from '../../../../../src/plugins/embedd
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 import { DynamicActionsState } from '../../../ui_actions_enhanced/public';
-import { UiActionsServiceEnhancements } from '../services';
+import type { UiActionsServiceEnhancements } from '../services';
 
 export const dynamicActionEnhancement = (
   uiActionsEnhanced: UiActionsServiceEnhancements

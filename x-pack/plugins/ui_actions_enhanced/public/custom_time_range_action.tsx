@@ -10,8 +10,8 @@ import React from 'react';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
-import { CustomizeTimeRangeModal } from './customize_time_range_modal';
-import { OpenModal, CommonlyUsedRange } from './types';
+import { CustomizeTimeRangeModal } from './customiza_time_range_modal_lazy';
+import type { OpenModal, CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
 const SEARCH_EMBEDDABLE_TYPE = 'search';

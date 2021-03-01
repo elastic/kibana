@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseActionFactoryContext } from '../../dynamic_actions';
+import type { BaseActionFactoryContext } from '../../dynamic_actions';
 
 /**
  * Interface used as piece of ActionFactoryContext that is passed in from drilldown wizard component to action factories

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { UrlDrilldownConfig, UrlDrilldownScope } from './types';
-import { compile } from './url_template';
+import { urlDrilldownCompileUrl } from './url_template_lazy';
 
 const generalFormatError = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
@@ -50,10 +50,10 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
   }
 }
 
-export function validateUrlTemplate(
+export async function validateUrlTemplate(
   urlTemplate: UrlDrilldownConfig['url'],
   scope: UrlDrilldownScope
-): { isValid: boolean; error?: string } {
+): Promise<{ isValid: boolean; error?: string }> {
   if (!urlTemplate.template)
     return {
       isValid: false,
@@ -61,7 +61,7 @@ export function validateUrlTemplate(
     };
 
   try {
-    const compiledUrl = compile(urlTemplate.template, scope);
+    const compiledUrl = await urlDrilldownCompileUrl(urlTemplate.template, scope);
     return validateUrl(compiledUrl);
   } catch (e) {
     return {

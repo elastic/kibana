@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export * from './types';
-export * from './action_factory';
-export * from './action_factory_definition';
-export * from './dynamic_action_storage';
-export * from './dynamic_action_manager_state';
-export * from './dynamic_action_manager';
+export async function urlDrilldownCompileUrl(
+  urlTemplate: string,
+  context: object,
+  doEncode: boolean = true
+) {
+  const { compile } = await import('./url_template');
+  return compile(urlTemplate, context, doEncode);
+}

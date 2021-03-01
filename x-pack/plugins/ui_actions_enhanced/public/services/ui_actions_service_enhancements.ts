@@ -6,20 +6,20 @@
  */
 
 import { ActionFactoryRegistry } from '../types';
-import {
-  ActionFactory,
-  ActionFactoryDefinition,
+import type {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedEvent,
-} from '../dynamic_actions';
-import { DrilldownDefinition } from '../drilldowns';
+} from '../dynamic_actions/types';
+import { ActionFactory } from '../dynamic_actions/action_factory';
 import { ILicense } from '../../../licensing/common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 import { DynamicActionsState } from '../../common/types';
+import { ActionFactoryDefinition } from '../dynamic_actions/action_factory_definition';
+import { DrilldownDefinition } from '../drilldowns/drilldown_definition';
 
 export { DynamicActionsState };
 

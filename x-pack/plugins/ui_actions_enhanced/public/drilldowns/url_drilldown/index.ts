@@ -11,5 +11,5 @@ export {
   validateUrlTemplate as urlDrilldownValidateUrlTemplate,
   validateUrl as urlDrilldownValidateUrl,
 } from './url_validation';
-export { compile as urlDrilldownCompileUrl } from './url_template';
+export { urlDrilldownCompileUrl } from './url_template_lazy';
 export { globalScopeProvider as urlDrilldownGlobalScopeProvider } from './url_drilldown_global_scope';

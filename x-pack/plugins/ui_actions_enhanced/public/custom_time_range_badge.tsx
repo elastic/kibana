@@ -10,7 +10,7 @@ import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
-import { CustomizeTimeRangeModal } from './customize_time_range_modal';
+import { CustomizeTimeRangeModal } from './customiza_time_range_modal_lazy';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 

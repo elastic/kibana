@@ -140,7 +140,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       return false;
     }
 
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       return false;
@@ -149,9 +149,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return true;
   };
 
-  private buildUrl(config: Config, context: ActionContext): string {
+  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
     const doEncode = config.encodeUrl ?? true;
-    const url = urlDrilldownCompileUrl(
+    const url = await urlDrilldownCompileUrl(
       config.url.template,
       this.getRuntimeVariables(context),
       doEncode

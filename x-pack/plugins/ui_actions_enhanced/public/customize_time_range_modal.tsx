@@ -26,7 +26,7 @@ import { TimeRangeInput } from './custom_time_range_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { CommonlyUsedRange } from './types';
 
-interface CustomizeTimeRangeProps {
+export interface CustomizeTimeRangeProps {
   embeddable: Embeddable<TimeRangeInput>;
   onClose: () => void;
   dateFormat?: string;
@@ -38,7 +38,8 @@ interface State {
   inheritTimeRange: boolean;
 }
 
-export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, State> {
+// eslint-disable-next-line import/no-default-export
+export default class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, State> {
   constructor(props: CustomizeTimeRangeProps) {
     super(props);
     this.state = {

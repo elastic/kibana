@@ -26,7 +26,7 @@ import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { createFlyoutManageDrilldowns } from './drilldowns';
+import { createFlyoutManageDrilldowns } from './drilldowns/components/connected_flyout_manage_drilldowns';
 import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
@@ -57,7 +57,7 @@ export interface StartContract
       | 'extract'
       | 'inject'
     > {
-  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+  FlyoutManageDrilldowns: ReturnType<any>;
 }
 
 export class AdvancedUiActionsPublicPlugin
@@ -93,7 +93,7 @@ export class AdvancedUiActionsPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
+  public start(core: CoreStart, { uiActions, licensing }: StartDependencies): any {
     this.subs.push(licensing.license$.subscribe(this.licenseInfo));
 
     const dateFormat = core.uiSettings.get('dateFormat') as string;
