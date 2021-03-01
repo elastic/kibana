@@ -188,7 +188,7 @@ In this phase, we set out to provide the necessary infrastructure outlined previ
 
 A `BUILD.bazel` file will be added to the root of each package defining a `build` target. This filegroup target will be what we call during the bootstrap phase to build all packages migrated to Bazel. This target is temporary to maintain similar functionality during our transition. In the future, these procedural build steps will be removed in favor of dependency, tree-driven actions where work will only be done if it’s necessary for the given task like running the Kibana server or executing a unit test.
 
-The `@kbn/pm` package will be updated to allow for the existing legacy builds to run in parallel with the new packages build target, invoked by calling `bazel build //packages:build`.
+The `@kbn/pm` package was updated in https://github.com/elastic/kibana/pull/89961 to run the new packages build target, invoked by calling `bazel build //packages:build`, before executing the existing legacy package builds.
 
 The build targets will no longer reside within the package themselves and instead will be within the `bazel/bin` directory. To account for this, any defined dependency will need to be updated to reference the new directory (example: `link:bazel/bin/packages/elastic-datemath`). While also in this transition period, the build will need to copy over the packages from `bazel/bin` into the `node_modules` of the build target.
 
