@@ -90,9 +90,10 @@ export class FunctionalTestRunner {
         let transaction: ApmTransaction | null = null;
 
         if (apm.isStarted()) {
-          transaction = apm.startTransaction(printTitle(runnable), runnable.type);
+          transaction = apm.startTransaction(printTitle(runnable), 'runnable');
           transaction?.setLabel('file', runnable.file ?? 'unknown');
           transaction?.setLabel('ownTitle', runnable.title);
+          transaction?.setLabel('runnableType', runnable.type);
         }
 
         transactions.set(runnable, transaction);
