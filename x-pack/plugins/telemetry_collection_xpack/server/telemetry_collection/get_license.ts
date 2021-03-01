@@ -62,7 +62,6 @@ export async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient)
   });
 
   if (license) {
-    // @ts-expect-error
     cachedLicense = license;
   }
   return license;
