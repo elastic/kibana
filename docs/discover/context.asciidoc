@@ -13,7 +13,6 @@ This opens the Context view of *Discover*.
 The documents are sorted by the time field specified in the index pattern 
 and displayed using the same set of columns as the *Discover* view from which 
 the context was opened. The anchor document is highlighted in blue.
-
 +
 [role="screenshot"]
 image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
