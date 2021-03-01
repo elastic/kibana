@@ -58,7 +58,7 @@ function getDescription(state?: State) {
     return {
       icon: LensIconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-        defaultMessage: 'Mixed Bar horizontal',
+        defaultMessage: 'Mixed bar horizontal',
       }),
     };
   }
