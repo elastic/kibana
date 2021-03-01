@@ -280,7 +280,7 @@ In this phase, we will be replacing our current build tooling located at `src/de
 
 There are a few rules already available provided by Bazel that should be used. In some cases, like tar, they have been re-implemented to ensure the output is hermetic. `rules_pgk` has `pkg_tar`, `pkg_deb`, `pkg_rpm`, and `pkg_zip` to assist with this. `rules_docker` provides the ability to build containers without depending on Docker to be installed and providing the ability to build for other platforms.
 
-While this phase can being with phase 1, it can not be completed until all packages and plugins have been migrated.
+While this phase can begin with phase 1, it can not be completed until all packages and plugins have been migrated.
 
 # Drawbacks
 
