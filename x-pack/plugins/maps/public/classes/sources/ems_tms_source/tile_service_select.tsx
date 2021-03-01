@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import React, { ChangeEvent, Component } from 'react';
+import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { getEmsTmsServices } from '../../../meta';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
-import { i18n } from '@kbn/i18n';
 
 export const AUTO_SELECT = 'auto_select';
 
-export class TileServiceSelect extends React.Component {
-  state = {
+export interface EmsTmsSourceConfig {
+  id: string | null;
+  isAutoSelect: boolean;
+}
+
+interface Props {
+  config?: EmsTmsSourceConfig;
+  onTileSelect: (sourceConfig: EmsTmsSourceConfig) => void;
+}
+
+interface State {
+  emsTmsOptions: EuiSelectOption[];
+  hasLoaded: boolean;
+}
+
+export class TileServiceSelect extends Component<Props, State> {
+  private _isMounted = false;
+
+  state: State = {
     emsTmsOptions: [],
     hasLoaded: false,
   };
@@ -51,7 +68,7 @@ export class TileServiceSelect extends React.Component {
     this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
-  _onChange = (e) => {
+  _onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({
@@ -63,9 +80,9 @@ export class TileServiceSelect extends React.Component {
   render() {
     const helpText = this.state.emsTmsOptions.length === 0 ? getEmsUnavailableMessage() : null;
 
-    let selectedId;
+    let selectedId: string | undefined;
     if (this.props.config) {
-      selectedId = this.props.config.isAutoSelect ? AUTO_SELECT : this.props.config.id;
+      selectedId = this.props.config.isAutoSelect ? AUTO_SELECT : this.props.config.id!;
     }
 
     return (
