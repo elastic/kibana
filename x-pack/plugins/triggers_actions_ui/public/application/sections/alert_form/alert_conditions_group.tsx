@@ -60,3 +60,6 @@ export const AlertConditionsGroup = <ConditionProps extends unknown>({
     </EuiFormRow>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertConditionsGroup as default };

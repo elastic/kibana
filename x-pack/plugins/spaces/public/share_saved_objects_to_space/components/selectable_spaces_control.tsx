@@ -6,7 +6,8 @@
  */
 
 import './selectable_spaces_control.scss';
-import React from 'react';
+
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -14,20 +15,28 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NoSpacesAvailable } from './no_spaces_available';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
-import { SpaceAvatar } from '../../space_avatar';
-import { ShareToSpaceTarget } from '../../types';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
-import { ShareOptions } from '../types';
+import type { ShareToSpaceTarget } from '../../types';
+import type { ShareOptions } from '../types';
+import { NoSpacesAvailable } from './no_spaces_available';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spaces: ShareToSpaceTarget[];
@@ -100,7 +109,7 @@ export const SelectableSpacesControl = (props: Props) => {
       const additionalProps = getAdditionalProps(space, activeSpaceId, checked);
       return {
         label: space.name,
-        prepend: <SpaceAvatar space={space} size={'s'} />,
+        prepend: <LazySpaceAvatar space={space} size={'s'} />, // wrapped in a Suspense below
         checked: checked ? 'on' : undefined,
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
@@ -192,27 +201,29 @@ export const SelectableSpacesControl = (props: Props) => {
       fullWidth
     >
       <>
-        <EuiSelectable
-          options={options}
-          onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
-          listProps={{
-            bordered: true,
-            rowHeight: ROW_HEIGHT,
-            className: 'spcShareToSpace__spacesList',
-            'data-test-subj': 'sts-form-space-selector',
-          }}
-          height={ROW_HEIGHT * 3.5}
-          searchable={options.length > 6}
-        >
-          {(list, search) => {
-            return (
-              <>
-                {search}
-                {list}
-              </>
-            );
-          }}
-        </EuiSelectable>
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <EuiSelectable
+            options={options}
+            onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
+            listProps={{
+              bordered: true,
+              rowHeight: ROW_HEIGHT,
+              className: 'spcShareToSpace__spacesList',
+              'data-test-subj': 'sts-form-space-selector',
+            }}
+            height={ROW_HEIGHT * 3.5}
+            searchable={options.length > 6}
+          >
+            {(list, search) => {
+              return (
+                <>
+                  {search}
+                  {list}
+                </>
+              );
+            }}
+          </EuiSelectable>
+        </Suspense>
         {getUnknownSpacesLabel()}
         {getNoSpacesAvailable()}
       </>
