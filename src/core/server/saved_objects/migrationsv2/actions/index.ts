@@ -642,7 +642,6 @@ export const createIndex = (
           // started
           timeout: DEFAULT_TIMEOUT,
           body: {
-            // @ts-expect-error
             mappings,
             aliases: aliasesObject,
             settings: {
@@ -736,7 +735,6 @@ export const updateAndPickupMappings = (
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        // @ts-expect-error
         body: mappings,
       })
       .then((res) => {

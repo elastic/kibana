@@ -13,7 +13,7 @@ import { encodeBase64 } from './base64';
  * that can be used in the saved object API in place of numeric
  * version numbers
  */
-export function encodeVersion(seqNo: number, primaryTerm: number) {
+export function encodeVersion(seqNo?: number, primaryTerm?: number) {
   if (!Number.isInteger(primaryTerm)) {
     throw new TypeError('_primary_term from elasticsearch must be an integer');
   }

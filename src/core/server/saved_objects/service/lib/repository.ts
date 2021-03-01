@@ -379,7 +379,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
-              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -406,6 +405,7 @@ export class SavedObjectsRepository {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult?.found === true;
+        // @ts-expect-error _source is optional in search response
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
           return {
@@ -685,7 +685,6 @@ export class SavedObjectsRepository {
             lang: 'painless',
             params: { namespace },
           },
-          // @ts-expect-error UpdateByQueryRequest does not allow conflicts property on body
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -999,7 +998,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update(
+    const aliasResponse = await this.client.update<{ 'legacy-url-alias': LegacyUrlAlias }>(
       {
         id: rawAliasId,
         index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
@@ -1032,15 +1031,13 @@ export class SavedObjectsRepository {
 
     if (
       aliasResponse.statusCode === 404 ||
-      // @ts-expect-error UpdateResponse<T>.get should be required
       aliasResponse.body.get.found === false ||
-      // @ts-expect-error UpdateResponse<T>.get should be required
       aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
     ) {
       // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
       return this.resolveExactMatch(type, id, options);
     }
-    // @ts-expect-error UpdateResponse<T>.get should be required
+
     const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE];
     const objectIndex = this.getIndexForType(type);
     const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
@@ -1420,7 +1417,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
-              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -1595,7 +1591,6 @@ export class SavedObjectsRepository {
             },
             lang: 'painless',
           },
-          // @ts-expect-error
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -1917,7 +1912,7 @@ export class SavedObjectsRepository {
   private getSavedObjectFromSource<T>(
     type: string,
     id: string,
-    doc: { _seq_no: number; _primary_term: number; _source: SavedObjectsRawDocSource }
+    doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
   ): SavedObject<T> {
     const { originId, updated_at: updatedAt } = doc._source;
 
