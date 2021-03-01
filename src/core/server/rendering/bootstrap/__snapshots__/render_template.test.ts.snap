@@ -108,11 +108,6 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         '/js-2',
     ], function () {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-
-      load([
-          '/style-1',
-          '/style-2',
-      ]);
     });
   }
 }

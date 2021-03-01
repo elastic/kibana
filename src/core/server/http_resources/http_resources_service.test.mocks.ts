@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { uiRenderMixin } from './ui_render';
+export const getApmConfigMock = jest.fn();
 
-export async function uiMixin(kbnServer) {
-  await kbnServer.mixin(uiRenderMixin);
-}
+jest.doMock('./get_apm_config', () => ({
+  getApmConfig: getApmConfigMock,
+}));
