@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { rangeQuery } from '../../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { withApmSpan } from '../../../utils/with_apm_span';

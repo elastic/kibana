@@ -28,6 +28,7 @@ export interface RulesTableState {
   exportRuleIds: string[];
   lastUpdated: number;
   isRefreshOn: boolean;
+  isRefreshing: boolean;
   showIdleModal: boolean;
 }
 
@@ -44,6 +45,7 @@ export type RulesTableAction =
   | { type: 'exportRuleIds'; ids: string[] }
   | { type: 'setLastRefreshDate' }
   | { type: 'setAutoRefreshOn'; on: boolean }
+  | { type: 'setIsRefreshing'; isRefreshing: boolean }
   | { type: 'setShowIdleModal'; show: boolean }
   | { type: 'failure' };
 
@@ -53,11 +55,7 @@ export const createRulesTableReducer = (
   const rulesTableReducer = (state: RulesTableState, action: RulesTableAction): RulesTableState => {
     switch (action.type) {
       case 'setRules': {
-        if (
-          tableRef != null &&
-          tableRef.current != null &&
-          tableRef.current.changeSelection != null
-        ) {
+        if (tableRef?.current?.changeSelection != null) {
           // for future devs: eui basic table is not giving us a prop to set the value, so
           // we are using the ref in setTimeout to reset on the next loop so that we
           // do not get a warning telling us we are trying to update during a render
@@ -140,6 +138,12 @@ export const createRulesTableReducer = (
         return {
           ...state,
           isRefreshOn: action.on,
+        };
+      }
+      case 'setIsRefreshing': {
+        return {
+          ...state,
+          isRefreshing: action.isRefreshing,
         };
       }
       case 'setShowIdleModal': {

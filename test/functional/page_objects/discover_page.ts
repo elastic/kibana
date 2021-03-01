@@ -194,11 +194,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+    public async getDocTableField(index: number, cellIndex = 0) {
+      const fields = await find.allByCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
       );
-      return await field.getVisibleText();
+      return await fields[cellIndex].getVisibleText();
     }
 
     public async skipToEndOfDocTable() {
