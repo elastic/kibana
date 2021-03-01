@@ -2,12 +2,10 @@
   "cluster.put_component_template": {
     "url_params": {
       "create": "__flag__",
-      "timeout": "",
       "master_timeout": ""
     },
     "methods": [
-      "PUT",
-      "POST"
+      "PUT"
     ],
     "patterns": [
       "_component_template/{name}"

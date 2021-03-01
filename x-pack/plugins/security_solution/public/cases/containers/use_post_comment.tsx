@@ -48,7 +48,7 @@ interface PostComment {
   subCaseId?: string;
 }
 export interface UsePostComment extends NewCommentState {
-  postComment: (args: PostComment) => void;
+  postComment: (args: PostComment) => Promise<void>;
 }
 
 export const usePostComment = (): UsePostComment => {
