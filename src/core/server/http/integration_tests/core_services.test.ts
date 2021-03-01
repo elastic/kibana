@@ -65,7 +65,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
 
-        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
 
         const router = createRouter('');
         router.get({ path: '/is-auth', validate: false }, (context, req, res) =>
@@ -136,6 +136,37 @@ describe('http service', () => {
         await root.start();
         await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
+
+      it('returns true if authenticated on a route with "try" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+      });
+
+      it('returns false if not authenticated on a route with "try" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+      });
     });
     describe('#get()', () => {
       it('returns authenticated status and allow associate auth state with request', async () => {
@@ -179,7 +210,7 @@ describe('http service', () => {
 
         const { http } = await root.setup();
         const { createRouter, registerAuth, auth } = http;
-        await registerAuth(authenticate);
+        registerAuth(authenticate);
         const router = createRouter('');
         router.get(
           { path: '/get-auth', validate: false, options: { authRequired: false } },
@@ -193,6 +224,24 @@ describe('http service', () => {
           .expect(200, { status: 'unauthenticated' });
 
         expect(authenticate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('#isEnabled()', () => {
+      it('returns true if auth has been registered', async () => {
+        const { http } = await root.setup();
+        const { registerAuth, auth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+
+        expect(auth.isEnabled()).toBe(true);
+      });
+
+      it('returns false if auth has not been registered', async () => {
+        const { http } = await root.setup();
+        const { auth } = http;
+
+        expect(auth.isEnabled()).toBe(false);
       });
     });
   });
