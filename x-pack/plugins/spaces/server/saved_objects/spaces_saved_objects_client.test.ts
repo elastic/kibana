@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectTypeRegistry } from 'src/core/server';
-import { SpacesClient } from '../spaces_client';
-import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import Boom from '@hapi/boom';
+
+import { SavedObjectTypeRegistry } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+
+import { DEFAULT_SPACE_ID } from '../../common/constants';
+import type { SpacesClient } from '../spaces_client';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
