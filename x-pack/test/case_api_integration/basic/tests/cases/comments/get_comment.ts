@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should get a sub case comment', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
       const { body: comment }: { body: CommentResponse } = await supertest
-        .get(`${CASES_URL}/${caseInfo.id}/comments/${caseInfo.subCase!.comments![0].id}`)
+        .get(`${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}`)
         .expect(200);
       expect(comment.type).to.be(CommentType.generatedAlert);
     });
