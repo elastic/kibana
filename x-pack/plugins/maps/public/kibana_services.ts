@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { CoreStart } from 'kibana/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
+import { MapsEmsConfig } from '../../../../src/plugins/maps_ems/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';
@@ -62,9 +62,9 @@ export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsLegacyConfig;
-export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
+// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
+let kibanaCommonConfig: MapsEmsConfig;
+export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
 let emsSettings: EMSSettings;

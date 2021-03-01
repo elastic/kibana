@@ -8,22 +8,21 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
-import {
+
+/** @public */
+export {
   VectorLayer,
   FileLayerField,
   FileLayer,
   TmsLayer,
   IServiceSettings,
-} from './service_settings/service_settings_types';
+} from './service_settings';
 
 import './map/index.scss';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
-
-/** @public */
-export { IServiceSettings, VectorLayer, FileLayerField, FileLayer, TmsLayer };
 
 export * from '../common';
 

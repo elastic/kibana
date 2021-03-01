@@ -51,7 +51,7 @@ import { MapsStartApi } from './api';
 import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
+import { MapsEmsConfig } from '../../../../src/plugins/maps_ems/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { FileUploadPluginStart } from '../../file_upload/public';
@@ -71,7 +71,7 @@ export interface MapsPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: { config: MapsLegacyConfig };
+  mapsEms: { config: MapsEmsConfig };
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
 }
@@ -120,11 +120,11 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setKibanaCommonConfig(plugins.mapsLegacy.config);
+    setKibanaCommonConfig(plugins.mapsEms.config);
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    const emsSettings = new EMSSettings(plugins.mapsLegacy.config, getIsEnterprisePlus);
+    const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
     setEMSSettings(emsSettings);
 
     // register url generators

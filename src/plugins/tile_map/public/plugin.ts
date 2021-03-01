@@ -15,7 +15,9 @@ import {
 } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsEmsPluginSetup } from '../../maps_ems/public';
+import { IServiceSettings } from '../../maps_ems/public';
 import { DataPublicPluginStart } from '../../data/public';
 import {
   setCoreService,
@@ -49,6 +51,7 @@ export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -74,15 +77,15 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, mapsEms }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision, getServiceSettings } = mapsLegacy;
+    const { getZoomPrecision, getPrecision } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
       uiSettings: core.uiSettings,
-      getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
     };
 
     expressions.registerFunction(createTileMapFn);

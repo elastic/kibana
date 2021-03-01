@@ -34,7 +34,7 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
@@ -43,7 +43,7 @@ interface SetupDeps {
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 export interface StartDeps {
@@ -145,8 +145,8 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
-    const mapsLegacyConfig = mapsLegacy.config;
+    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
     const currentConfig = this._initializerContext.config.get();
 
@@ -160,7 +160,7 @@ export class MapsPlugin implements Plugin {
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;
-    const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
+    const emsSettings = new EMSSettings(mapsEmsConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';

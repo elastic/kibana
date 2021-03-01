@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
+import { mapTooltipProvider, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
+import { ORIGIN } from '../../maps_ems/public';
 
 export function createRegionMapVisualization({
   regionmapsConfig,

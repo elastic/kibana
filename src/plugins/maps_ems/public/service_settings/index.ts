@@ -7,3 +7,5 @@
  */
 
 export { getServiceSettings } from './get_service_settings';
+
+export * from './service_settings_types';

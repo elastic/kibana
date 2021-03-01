@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { truncatedColorSchemas } from '../../../charts/public';
-import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
+import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_ems/public';
 import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
 import { WmsOptions } from '../../../maps_legacy/public';
 import { RegionMapVisParams } from '../region_map_types';
