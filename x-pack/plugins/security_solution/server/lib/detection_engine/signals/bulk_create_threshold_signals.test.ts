@@ -93,6 +93,78 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
     });
   });
 
+  it('should return transformed threshold results for pre-7.12 rules without threshold field', () => {
+    const threshold: Threshold = {
+      field: '',
+      value: 1,
+    };
+    const startedAt = new Date('2020-12-17T16:27:00Z');
+    const transformedResults = transformThresholdResultsToEcs(
+      {
+        ...sampleDocSearchResultsNoSortId('abcd'),
+        aggregations: {
+          threshold_0: {
+            buckets: [
+              {
+                key: '',
+                doc_count: 15,
+                top_threshold_hits: {
+                  hits: {
+                    hits: [sampleDocNoSortId('abcd')],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      'test',
+      startedAt,
+      undefined,
+      loggingSystemMock.createLogger(),
+      {
+        ...threshold,
+        field: normalizeThresholdField(threshold.field),
+      },
+      '1234',
+      undefined
+    );
+    const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
+    expect(transformedResults).toEqual({
+      took: 10,
+      timed_out: false,
+      _shards: {
+        total: 10,
+        successful: 10,
+        failed: 0,
+        skipped: 0,
+      },
+      results: {
+        hits: {
+          total: 1,
+        },
+      },
+      hits: {
+        total: 100,
+        max_score: 100,
+        hits: [
+          {
+            _id,
+            _index: 'test',
+            _source: {
+              '@timestamp': '2020-04-20T21:27:45+0000',
+              threshold_result: {
+                terms: [],
+                cardinality: undefined,
+                count: 15,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('should return transformed threshold results', () => {
     const threshold: ThresholdNormalized = {
       field: ['source.ip', 'host.name'],
@@ -190,6 +262,89 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                   },
                 ],
                 count: 12,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return transformed threshold results without threshold fields', () => {
+    const threshold: ThresholdNormalized = {
+      field: [],
+      value: 1,
+      cardinality: [
+        {
+          field: 'destination.ip',
+          value: 5,
+        },
+      ],
+    };
+    const startedAt = new Date('2020-12-17T16:27:00Z');
+    const transformedResults = transformThresholdResultsToEcs(
+      {
+        ...sampleDocSearchResultsNoSortId('abcd'),
+        aggregations: {
+          threshold_0: {
+            buckets: [
+              {
+                key: '',
+                doc_count: 15,
+                top_threshold_hits: {
+                  hits: {
+                    hits: [sampleDocNoSortId('abcd')],
+                  },
+                },
+                cardinality_count: {
+                  value: 7,
+                },
+              },
+            ],
+          },
+        },
+      },
+      'test',
+      startedAt,
+      undefined,
+      loggingSystemMock.createLogger(),
+      threshold,
+      '1234',
+      undefined
+    );
+    const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
+    expect(transformedResults).toEqual({
+      took: 10,
+      timed_out: false,
+      _shards: {
+        total: 10,
+        successful: 10,
+        failed: 0,
+        skipped: 0,
+      },
+      results: {
+        hits: {
+          total: 1,
+        },
+      },
+      hits: {
+        total: 100,
+        max_score: 100,
+        hits: [
+          {
+            _id,
+            _index: 'test',
+            _source: {
+              '@timestamp': '2020-04-20T21:27:45+0000',
+              threshold_result: {
+                terms: [],
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
+                count: 15,
               },
             },
           },

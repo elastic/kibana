@@ -62,50 +62,14 @@ const getTransformedHits = (
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
 ) => {
-  if (threshold.field.length === 0) {
-    const totalResults =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+  const aggParts = threshold.field.length
+    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    : {
+        field: null,
+        index: 0,
+        name: 'threshold_0',
+      };
 
-    if (totalResults < threshold.value) {
-      return [];
-    }
-
-    const hit = results.hits.hits[0];
-    if (hit == null) {
-      logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
-      return [];
-    }
-    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-    if (timestampArray == null) {
-      return [];
-    }
-    const timestamp = timestampArray[0];
-    if (typeof timestamp !== 'string') {
-      return [];
-    }
-
-    const source = {
-      '@timestamp': timestamp,
-      threshold_result: {
-        terms: [
-          {
-            value: ruleId,
-          },
-        ],
-        count: totalResults,
-      },
-    };
-
-    return [
-      {
-        _index: inputIndex,
-        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
-        _source: source,
-      },
-    ];
-  }
-
-  const aggParts = results.aggregations && getThresholdAggregationParts(results.aggregations);
   if (!aggParts) {
     return [];
   }
@@ -129,7 +93,7 @@ const getTransformedHits = (
                 value: bucket.key,
               },
               ...val.terms,
-            ],
+            ].filter((term) => term.field != null),
             cardinality: val.cardinality,
             topThresholdHits: val.topThresholdHits,
             docCount: val.docCount,
@@ -143,7 +107,7 @@ const getTransformedHits = (
               field,
               value: bucket.key,
             },
-          ],
+          ].filter((term) => term.field != null),
           cardinality: threshold.cardinality?.length
             ? [
                 {
