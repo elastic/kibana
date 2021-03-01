@@ -8,7 +8,8 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useMemo } from 'react';
-import { AnomalyResultType, ANOMALY_RESULT_TYPE } from '@kbn/ml-utils';
+import { ANOMALY_RESULT_TYPE } from '@kbn/ml-utils/src/constants/anomalies';
+import { AnomalyResultType } from '@kbn/ml-utils/src/types/anomalies';
 
 export interface ResultTypeSelectorProps {
   value: AnomalyResultType | undefined;
