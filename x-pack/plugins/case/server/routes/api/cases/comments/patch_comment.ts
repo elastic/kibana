@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
@@ -26,10 +26,17 @@ interface CombinedCaseParams {
   service: CaseServiceSetup;
   client: SavedObjectsClientContract;
   caseID: string;
+  logger: Logger;
   subCaseId?: string;
 }
 
-async function getCommentableCase({ service, client, caseID, subCaseId }: CombinedCaseParams) {
+async function getCommentableCase({
+  service,
+  client,
+  caseID,
+  subCaseId,
+  logger,
+}: CombinedCaseParams) {
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       service.getCase({
@@ -41,22 +48,23 @@ async function getCommentableCase({ service, client, caseID, subCaseId }: Combin
         id: subCaseId,
       }),
     ]);
-    return new CommentableCase({ collection: caseInfo, service, subCase, soClient: client });
+    return new CommentableCase({
+      collection: caseInfo,
+      service,
+      subCase,
+      soClient: client,
+      logger,
+    });
   } else {
     const caseInfo = await service.getCase({
       client,
       id: caseID,
     });
-    return new CommentableCase({ collection: caseInfo, service, soClient: client });
+    return new CommentableCase({ collection: caseInfo, service, soClient: client, logger });
   }
 }
 
-export function initPatchCommentApi({
-  caseConfigureService,
-  caseService,
-  router,
-  userActionService,
-}: RouteDeps) {
+export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -88,6 +96,7 @@ export function initPatchCommentApi({
           client,
           caseID: request.params.case_id,
           subCaseId: request.query?.subCaseId,
+          logger,
         });
 
         const myComment = await caseService.getComment({
@@ -161,6 +170,9 @@ export function initPatchCommentApi({
           body: await updatedCase.encode(),
         });
       } catch (error) {
+        logger.error(
+          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }
