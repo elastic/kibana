@@ -9476,7 +9476,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage": "另存为新策略",
     "xpack.indexLifecycleMgmt.editPolicy.saveButton": "保存策略",
     "xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage": "保存生命周期策略 {lifecycleName} 时出错",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody": "在热阶段启用可搜索快照时，不允许强制合并、缩小、冻结可搜索快照以及将其置入冷阶段。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription": "在所选存储库中拍取受管索引的快照，并将其安装为可搜索快照。{learnMoreLink}。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel": "可搜索快照存储库",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle": "可搜索快照",
