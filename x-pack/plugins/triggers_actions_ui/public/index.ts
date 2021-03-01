@@ -14,8 +14,8 @@ export {
   AlertConditionsGroup,
   ActionGroupWithCondition,
 } from './application/sections';
-export { ActionForm } from './application/sections/action_connector_form';
-export {
+
+export type {
   AlertAction,
   Alert,
   AlertTypeModel,
@@ -29,11 +29,15 @@ export {
   ActionConnector,
   IErrorObject,
   AlertFlyoutCloseReason,
+  AlertTypeParams,
 } from './types';
+
 export {
+  ActionForm,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
+
 export { loadActionTypes } from './application/lib/action_connector_api';
 export * from './common';
 
@@ -46,7 +50,4 @@ export * from './plugin';
 
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export { ForLastExpression } from './common/expression_items/for_the_last';
-export { TriggersAndActionsUiServices } from '../public/application/app';
-
-export { createTriggerActionUIMock } from './mock';
+export type { TriggersAndActionsUiServices } from '../public/application/app';

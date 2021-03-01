@@ -11,15 +11,23 @@ export enum BoostType {
   Proximity = 'proximity',
 }
 
-export enum BoostFunction {
+export enum FunctionalBoostFunction {
+  Logarithmic = 'logarithmic',
+  Exponential = 'exponential',
+  Linear = 'linear',
+}
+
+export enum ProximityBoostFunction {
   Gaussian = 'gaussian',
   Exponential = 'exponential',
   Linear = 'linear',
 }
 
+export type BoostFunction = FunctionalBoostFunction | ProximityBoostFunction;
+
 export enum BoostOperation {
   Add = 'add',
-  Multiple = 'multiply',
+  Multiply = 'multiply',
 }
 
 export interface BaseBoost {

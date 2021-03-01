@@ -20,14 +20,16 @@ jest.mock('../create/form_context', () => {
       onSuccess,
     }: {
       children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => void;
+      onSuccess: ({ id }: { id: string }) => Promise<void>;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() => onSuccess({ id: 'case-id' })}
+            onClick={async () => {
+              await onSuccess({ id: 'case-id' });
+            }}
           >
             {'submit'}
           </button>
@@ -55,10 +57,10 @@ jest.mock('../create/submit_button', () => {
 });
 
 const onCloseFlyout = jest.fn();
-const onCaseCreated = jest.fn();
+const onSuccess = jest.fn();
 const defaultProps = {
   onCloseFlyout,
-  onCaseCreated,
+  onSuccess,
 };
 
 describe('CreateCaseFlyout', () => {
@@ -97,7 +99,7 @@ describe('CreateCaseFlyout', () => {
     const props = wrapper.find('FormContext').props();
     expect(props).toEqual(
       expect.objectContaining({
-        onSuccess: onCaseCreated,
+        onSuccess,
       })
     );
   });
@@ -110,6 +112,6 @@ describe('CreateCaseFlyout', () => {
     );
 
     wrapper.find(`[data-test-subj='form-context-on-success']`).first().simulate('click');
-    expect(onCaseCreated).toHaveBeenCalledWith({ id: 'case-id' });
+    expect(onSuccess).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

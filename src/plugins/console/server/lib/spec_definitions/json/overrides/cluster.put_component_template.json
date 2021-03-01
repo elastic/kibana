@@ -1,0 +1,13 @@
+{
+  "indices.put_template": {
+    "data_autocomplete_rules": {
+      "template": {},
+      "aliases": {},
+      "settings": {},
+      "mappings": {},
+      "version": 0,
+      "_meta": {},
+      "allow_auto_create": false
+    }
+  }
+}

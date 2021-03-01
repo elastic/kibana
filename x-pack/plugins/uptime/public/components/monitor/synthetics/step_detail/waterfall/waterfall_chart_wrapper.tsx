@@ -16,7 +16,11 @@ import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
-  return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
+  return (
+    <EuiHealth color={item.colour} className="eui-textNoWrap">
+      {item.name}
+    </EuiHealth>
+  );
 };
 
 interface Props {
