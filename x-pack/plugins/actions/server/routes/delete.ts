@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IRouter, RequestHandler } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
@@ -27,18 +27,13 @@ export const deleteActionRoute = (
         params: paramSchema,
       },
     },
-    router.handleLegacyErrors(verifyAccessAndContext(licenseState, deleteAction))
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const actionsClient = context.actions.getActionsClient();
+        const { id } = req.params;
+        await actionsClient.delete({ id });
+        return res.noContent();
+      })
+    )
   );
-};
-
-export const deleteAction: RequestHandler<
-  TypeOf<typeof paramSchema>,
-  unknown,
-  unknown,
-  ActionsRequestHandlerContext
-> = async function (context, req, res) {
-  const actionsClient = context.actions.getActionsClient();
-  const { id } = req.params;
-  await actionsClient.delete({ id });
-  return res.noContent();
 };

@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
+import { ILicenseState } from '../lib';
+
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
+import { BASE_ACTION_API_PATH } from '../../common';
+import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
+import { verifyAccessAndContext } from './verify_access_and_context';
+import { AsApiContract, RewriteResponseCase } from './rewrite_request_case';
+
+const paramSchema = schema.object({
+  id: schema.string(),
+});
+
+const bodySchema = schema.object({
+  params: schema.recordOf(schema.string(), schema.any()),
+});
+
+const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = ({
+  actionId,
+  serviceMessage,
+  ...res
+}) => ({
+  ...res,
+  action_id: actionId,
+  service_message: serviceMessage,
+});
+
+export const executeActionRoute = (
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState
+) => {
+  router.post(
+    {
+      path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
+      validate: {
+        body: bodySchema,
+        params: paramSchema,
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const actionsClient = context.actions.getActionsClient();
+        const { params } = req.body;
+        const { id } = req.params;
+        const body: AsApiContract<ActionTypeExecutorResult<unknown>> = rewriteBodyRes(
+          await actionsClient.execute({
+            params,
+            actionId: id,
+            source: asHttpRequestExecutionSource(req),
+          })
+        );
+        return body
+          ? res.ok({
+              body,
+            })
+          : res.noContent();
+      })
+    )
+  );
+};

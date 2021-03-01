@@ -10,6 +10,8 @@ import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
+import { executeActionRoute } from './execute';
+import { getAllActionRoute } from './get_all';
 import * as legacy from './legacy';
 
 export function defineRoutes(
@@ -23,8 +25,13 @@ export function defineRoutes(
   deleteActionRoute(router, licenseState);
 
   legacy.getActionRoute(router, licenseState);
+
+  getAllActionRoute(router, licenseState);
   legacy.getAllActionRoute(router, licenseState);
+
   legacy.updateActionRoute(router, licenseState);
   legacy.listActionTypesRoute(router, licenseState);
+
   legacy.executeActionRoute(router, licenseState);
+  executeActionRoute(router, licenseState);
 }
