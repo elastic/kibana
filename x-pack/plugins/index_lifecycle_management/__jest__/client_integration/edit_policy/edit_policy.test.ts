@@ -128,7 +128,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
         await actions.hot.setShrink('2');
-        await actions.hot.setReadonly(true);
+        await actions.hot.toggleReadonly(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -275,7 +275,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
-        await actions.warm.setReadonly(true);
+        await actions.warm.toggleReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];

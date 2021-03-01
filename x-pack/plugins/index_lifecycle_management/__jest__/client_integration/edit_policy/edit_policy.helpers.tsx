@@ -200,8 +200,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
 
-  const setReadonly = (phase: Phases) => async (value: boolean) => {
-    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  const createReadonlyActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-readonlySwitch`;
+    return {
+      readonlyExists: () => exists(toggleSelector),
+      toggleReadonly: createFormToggleAction(toggleSelector),
+    };
   };
 
   const createSearchableSnapshotActions = (phase: Phases) => {
@@ -245,7 +249,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setIndexPriority: setIndexPriority('hot'),
         setShrink: setShrink('hot'),
         shrinkExists: shrinkExists('hot'),
-        setReadonly: setReadonly('hot'),
+        ...createReadonlyActions('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
@@ -259,7 +263,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setShrink: setShrink('warm'),
         shrinkExists: shrinkExists('warm'),
         ...createForceMergeActions('warm'),
-        setReadonly: setReadonly('warm'),
+        ...createReadonlyActions('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
