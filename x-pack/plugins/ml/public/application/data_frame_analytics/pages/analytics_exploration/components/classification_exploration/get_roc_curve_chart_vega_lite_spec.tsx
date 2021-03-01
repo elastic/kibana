@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
 
 import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
 
@@ -52,7 +50,7 @@ export const getRocCurveChartVegaLiteSpec = (
   const colorRangeNominal = getColorRangeNominal(classificationClasses);
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     // Left padding of 45px to align the left axis of the chart with the confusion matrix above.
     padding: { left: 45, top: 0, right: 0, bottom: 0 },
     config: {

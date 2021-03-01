@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -108,7 +106,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
   );
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     background: 'transparent',
     // There seems to be a bug in Vega which doesn't propagate these settings
     // for repeated charts, it seems to be fixed for facets but not repeat.
