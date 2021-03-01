@@ -1,6 +1,6 @@
 # Telemetry Schemas
 
-This list of `.json` files describes the format of the payloads sent to the Remote Telemetry Service. All the files should follow the schema convention as defined in the `usage_collection` plugin and `@kbn/telemetry-tools`.
+This list of `.json` files describes the format of the payloads sent to the Remote Telemetry Service. All the files should follow the schema convention as defined in the `usage_collection` plugin and `@kbn/telemetry-tools`, with the addition of the type `pass_through`. This additional `type` indicates Kibana sends the payload as-is from the output of an external ES query.
 
 There are currently 2 files:
 
