@@ -17,12 +17,8 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { apmReindexScript, isLegacyApmIndex } from '../apm';
-import apmMappings from '../apm/mapping.json';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
-
-import { versionService } from '../version';
 
 import {
   generateNewIndexName,
@@ -136,8 +132,7 @@ export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
-  licensing: LicensingPluginSetup,
-  apmIndexPatterns: string[] = []
+  licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
 
@@ -318,13 +313,12 @@ export const reindexServiceFactory = (
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
 
     const { body: createIndex } = await esClient.indices.create({
       index: newIndexName,
       body: {
         settings,
-        mappings: legacyApmIndex ? apmMappings : mappings,
+        mappings,
       },
     });
 
@@ -353,28 +347,18 @@ export const reindexServiceFactory = (
       await esClient.indices.open({ index: indexName });
     }
 
-    const reindexBody = {
-      source: { index: indexName },
-      dest: { index: reindexOp.attributes.newIndexName },
-    } as any;
-
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
-    if (legacyApmIndex) {
-      reindexBody.script = {
-        lang: 'painless',
-        source: apmReindexScript,
-      };
-    }
-
     const { body: startReindexResponse } = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
-      body: reindexBody,
+      body: {
+        source: { index: indexName },
+        dest: { index: reindexOp.attributes.newIndexName },
+      },
     });
 
     return actions.updateReindexOp(reindexOp, {
@@ -437,7 +421,6 @@ export const reindexServiceFactory = (
     // Delete the task from ES .tasks index
     const { body: deleteTaskResp } = await esClient.delete({
       index: '.tasks',
-      type: 'task',
       id: taskId,
     });
 
@@ -565,11 +548,11 @@ export const reindexServiceFactory = (
     },
 
     async detectReindexWarnings(indexName: string) {
-      const flatSettings = await actions.getFlatSettingsWithTypeName(indexName);
+      const flatSettings = await actions.getFlatSettings(indexName, true);
       if (!flatSettings) {
         return null;
       } else {
-        return getReindexWarnings(flatSettings, apmIndexPatterns);
+        return getReindexWarnings(flatSettings);
       }
     },
 
@@ -582,12 +565,6 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
-      if (isSystemIndex(indexName)) {
-        throw error.reindexSystemIndex(
-          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${versionService.getMajorVersion()}.x minor version.`
-        );
-      }
-
       const { body: indexExists } = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -785,8 +762,6 @@ export const reindexServiceFactory = (
     },
   };
 };
-
-export const isSystemIndex = (indexName: string) => indexName.startsWith('.');
 
 export const isMlIndex = (indexName: string) => {
   const sourceName = sourceNameForIndex(indexName);

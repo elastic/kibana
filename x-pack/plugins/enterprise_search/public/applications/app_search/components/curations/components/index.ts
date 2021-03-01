@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const mockAddDefaultField = jest.fn();
-
-jest.mock('../lib/query_default_field', () => ({
-  addDefaultField: mockAddDefaultField,
-}));
+export { CurationQueries } from './curation_queries';

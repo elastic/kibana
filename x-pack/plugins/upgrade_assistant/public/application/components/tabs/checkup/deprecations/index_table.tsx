@@ -10,7 +10,6 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
@@ -145,11 +144,11 @@ export class IndexDeprecationTable extends React.Component<
 
   private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
-    // should show the reindex button. This should work for known usecases.
+    // should show the reindex button. This should work for known use cases.
     const { indices } = this.props;
-    const showReindexButton = indices.find((i) => i.reindex === true);
-    const showNeedsDefaultFieldsButton = indices.find((i) => i.needsDefaultFields === true);
-    if (!showReindexButton && !showNeedsDefaultFieldsButton) {
+    const hasActionsColumn = Boolean(indices.find((i) => i.reindex === true));
+
+    if (hasActionsColumn === false) {
       return null;
     }
 
@@ -157,28 +156,20 @@ export class IndexDeprecationTable extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
-            if (showReindexButton) {
-              return (
-                <AppContext.Consumer>
-                  {({ http, docLinks }) => {
-                    return (
-                      <ReindexButton
-                        docLinks={docLinks}
-                        reindexBlocker={indexDep.blockerForReindexing}
-                        indexName={indexDep.index!}
-                        http={http}
-                      />
-                    );
-                  }}
-                </AppContext.Consumer>
-              );
-            } else {
-              return (
-                <AppContext.Consumer>
-                  {({ http }) => <FixDefaultFieldsButton indexName={indexDep.index!} http={http} />}
-                </AppContext.Consumer>
-              );
-            }
+            return (
+              <AppContext.Consumer>
+                {({ http, docLinks }) => {
+                  return (
+                    <ReindexButton
+                      docLinks={docLinks}
+                      reindexBlocker={indexDep.blockerForReindexing}
+                      indexName={indexDep.index!}
+                      http={http}
+                    />
+                  );
+                }}
+              </AppContext.Consumer>
+            );
           },
         },
       ],

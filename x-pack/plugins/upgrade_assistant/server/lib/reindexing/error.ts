@@ -13,7 +13,6 @@ import {
   ReindexTaskFailed,
   ReindexAlreadyInProgress,
   MultipleReindexJobsFound,
-  CannotReindexSystemIndexInCurrent,
   ReindexCannotBeCancelled,
   ReindexIsNotInQueue,
 } from './error_symbols';
@@ -35,7 +34,6 @@ export const error = {
   reindexTaskFailed: createErrorFactory(ReindexTaskFailed),
   reindexTaskCannotBeDeleted: createErrorFactory(ReindexTaskCannotBeDeleted),
   reindexAlreadyInProgress: createErrorFactory(ReindexAlreadyInProgress),
-  reindexSystemIndex: createErrorFactory(CannotReindexSystemIndexInCurrent),
   reindexIsNotInQueue: createErrorFactory(ReindexIsNotInQueue),
   multipleReindexJobsFound: createErrorFactory(MultipleReindexJobsFound),
   reindexCannotBeCancelled: createErrorFactory(ReindexCannotBeCancelled),

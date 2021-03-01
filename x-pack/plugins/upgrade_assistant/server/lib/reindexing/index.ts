@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { reindexServiceFactory, isSystemIndex } from './reindex_service';
+export { reindexServiceFactory } from './reindex_service';
 export { ReindexWorker } from './worker';

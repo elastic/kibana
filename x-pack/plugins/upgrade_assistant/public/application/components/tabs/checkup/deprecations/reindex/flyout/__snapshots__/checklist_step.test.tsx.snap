@@ -57,30 +57,6 @@ exports[`ChecklistFlyout renders 1`] = `
         }
       }
     />
-    <EuiSpacer />
-    <EuiCallOut
-      color="warning"
-      iconType="alert"
-      title={
-        <FormattedMessage
-          defaultMessage="After reindexing APM indices, return to the {apmSetupLink} to reload Kibana objects. You only need to do this once."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.calloutTitle"
-          values={
-            Object {
-              "apmSetupLink": <EuiLink
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="APM Setup Instructions"
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.apmIndexPatternCallout.apmSetupLinkLabel"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      }
-    />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
