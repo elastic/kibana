@@ -1,1 +1,83 @@
-{"id":"searchprofiler","client":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]},"server":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]},"common":{"classes":[],"functions":[],"interfaces":[{"id":"def-common.LicenseStatus","type":"Interface","label":"LicenseStatus","description":[],"children":[{"id":"def-common.LicenseStatus.valid","type":"boolean","label":"valid","description":[],"source":{"path":"x-pack/plugins/searchprofiler/common/types.ts","lineNumber":10,"link":"https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L10"}},{"id":"def-common.LicenseStatus.message","type":"string","label":"message","description":[],"source":{"path":"x-pack/plugins/searchprofiler/common/types.ts","lineNumber":11,"link":"https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L11"},"signature":["string | undefined"]}],"source":{"path":"x-pack/plugins/searchprofiler/common/types.ts","lineNumber":9,"link":"https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L9"},"initialIsOpen":false}],"enums":[],"misc":[],"objects":[{"id":"def-common.PLUGIN","type":"Object","label":"PLUGIN","description":[],"source":{"path":"x-pack/plugins/searchprofiler/common/constants.ts","lineNumber":13,"link":"https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/constants.ts#L13"},"signature":["Readonly<{ id: string; minimumLicenseType: \"basic\"; }>"],"initialIsOpen":false}]}}
+{
+  "id": "searchprofiler",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-common.LicenseStatus",
+        "type": "Interface",
+        "label": "LicenseStatus",
+        "description": [],
+        "children": [
+          {
+            "id": "def-common.LicenseStatus.valid",
+            "type": "boolean",
+            "label": "valid",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/searchprofiler/common/types.ts",
+              "lineNumber": 10,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L10"
+            }
+          },
+          {
+            "id": "def-common.LicenseStatus.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/searchprofiler/common/types.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L11"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/searchprofiler/common/types.ts",
+          "lineNumber": 9,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/types.ts#L9"
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "id": "def-common.PLUGIN",
+        "type": "Object",
+        "label": "PLUGIN",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/searchprofiler/common/constants.ts",
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/searchprofiler/common/constants.ts#L13"
+        },
+        "signature": [
+          "Readonly<{ id: string; minimumLicenseType: \"basic\"; }>"
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

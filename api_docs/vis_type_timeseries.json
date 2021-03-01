@@ -1,1 +1,88 @@
-{"id":"visTypeTimeseries","client":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]},"server":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[],"setup":{"id":"def-server.VisTypeTimeseriesSetup","type":"Interface","label":"VisTypeTimeseriesSetup","description":[],"children":[{"id":"def-server.VisTypeTimeseriesSetup.getVisData","type":"Function","label":"getVisData","description":[],"source":{"path":"src/plugins/vis_type_timeseries/server/plugin.ts","lineNumber":48,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L48"},"signature":["(requestContext: ",{"pluginId":"data","scope":"server","docId":"kibDataSearchPluginApi","section":"def-server.DataRequestHandlerContext","text":"DataRequestHandlerContext"},", fakeRequest: ",{"pluginId":"core","scope":"server","docId":"kibCorePluginApi","section":"def-server.FakeRequest","text":"FakeRequest"},", options: ",{"pluginId":"visTypeTimeseries","scope":"server","docId":"kibVisTypeTimeseriesPluginApi","section":"def-server.GetVisDataOptions","text":"GetVisDataOptions"},") => Promise<",{"pluginId":"visTypeTimeseries","scope":"common","docId":"kibVisTypeTimeseriesPluginApi","section":"def-common.TimeseriesVisData","text":"TimeseriesVisData"},">"]}],"source":{"path":"src/plugins/vis_type_timeseries/server/plugin.ts","lineNumber":47,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L47"},"lifecycle":"setup","initialIsOpen":true}},"common":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]}}
+{
+  "id": "visTypeTimeseries",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-server.VisTypeTimeseriesSetup",
+      "type": "Interface",
+      "label": "VisTypeTimeseriesSetup",
+      "description": [],
+      "children": [
+        {
+          "id": "def-server.VisTypeTimeseriesSetup.getVisData",
+          "type": "Function",
+          "label": "getVisData",
+          "description": [],
+          "source": {
+            "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+            "lineNumber": 48,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L48"
+          },
+          "signature": [
+            "(requestContext: ",
+            {
+              "pluginId": "data",
+              "scope": "server",
+              "docId": "kibDataSearchPluginApi",
+              "section": "def-server.DataRequestHandlerContext",
+              "text": "DataRequestHandlerContext"
+            },
+            ", fakeRequest: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCorePluginApi",
+              "section": "def-server.FakeRequest",
+              "text": "FakeRequest"
+            },
+            ", options: ",
+            {
+              "pluginId": "visTypeTimeseries",
+              "scope": "server",
+              "docId": "kibVisTypeTimeseriesPluginApi",
+              "section": "def-server.GetVisDataOptions",
+              "text": "GetVisDataOptions"
+            },
+            ") => Promise<",
+            {
+              "pluginId": "visTypeTimeseries",
+              "scope": "common",
+              "docId": "kibVisTypeTimeseriesPluginApi",
+              "section": "def-common.TimeseriesVisData",
+              "text": "TimeseriesVisData"
+            },
+            ">"
+          ]
+        }
+      ],
+      "source": {
+        "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+        "lineNumber": 47,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L47"
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

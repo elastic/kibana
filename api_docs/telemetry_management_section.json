@@ -1,1 +1,226 @@
-{"id":"telemetryManagementSection","client":{"classes":[{"id":"def-public.OptInExampleFlyout","type":"Class","label":"OptInExampleFlyout","description":["\nReact component for displaying the example data associated with the Telemetry opt-in banner."],"signature":["OptInExampleFlyout"," extends React.PureComponent<Props, State, any>"],"children":[{"id":"def-public.OptInExampleFlyout._isMounted","type":"boolean","label":"_isMounted","description":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":41,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L41"}},{"id":"def-public.OptInExampleFlyout.state","type":"Object","children":[{"id":"def-public.OptInExampleFlyout.state.data","type":"Uncategorized","label":"data","description":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":44,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L44"},"signature":["null"]},{"id":"def-public.OptInExampleFlyout.state.isLoading","type":"boolean","label":"isLoading","description":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":45,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L45"},"signature":["true"]},{"id":"def-public.OptInExampleFlyout.state.hasPrivilegeToRead","type":"boolean","label":"hasPrivilegeToRead","description":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":46,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L46"},"signature":["false"]}],"description":[],"label":"state","source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":43,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L43"}},{"id":"def-public.OptInExampleFlyout.componentDidMount","type":"Function","label":"componentDidMount","signature":["() => Promise<void>"],"description":[],"children":[],"tags":[],"returnComment":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":49,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L49"}},{"id":"def-public.OptInExampleFlyout.componentWillUnmount","type":"Function","label":"componentWillUnmount","signature":["() => void"],"description":[],"children":[],"tags":[],"returnComment":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":70,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L70"}},{"id":"def-public.OptInExampleFlyout.renderBody","type":"Function","label":"renderBody","signature":["({ data, isLoading, hasPrivilegeToRead }: State) => JSX.Element"],"description":[],"children":[{"type":"Object","label":"{ data, isLoading, hasPrivilegeToRead }","isRequired":true,"signature":["State"],"description":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":74,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"}}],"tags":[],"returnComment":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":74,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"}},{"id":"def-public.OptInExampleFlyout.render","type":"Function","label":"render","signature":["() => JSX.Element"],"description":[],"children":[],"tags":[],"returnComment":[],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":124,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L124"}}],"source":{"path":"src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx","lineNumber":40,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L40"},"initialIsOpen":false}],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[],"setup":{"id":"def-public.TelemetryManagementSectionPluginSetup","type":"Interface","label":"TelemetryManagementSectionPluginSetup","description":[],"children":[{"id":"def-public.TelemetryManagementSectionPluginSetup.toggleSecuritySolutionExample","type":"Function","label":"toggleSecuritySolutionExample","description":[],"source":{"path":"src/plugins/telemetry_management_section/public/plugin.tsx","lineNumber":35,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L35"},"signature":["(enabled: boolean) => void"]}],"source":{"path":"src/plugins/telemetry_management_section/public/plugin.tsx","lineNumber":34,"link":"https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L34"},"lifecycle":"setup","initialIsOpen":true}},"server":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]},"common":{"classes":[],"functions":[],"interfaces":[],"enums":[],"misc":[],"objects":[]}}
+{
+  "id": "telemetryManagementSection",
+  "client": {
+    "classes": [
+      {
+        "id": "def-public.OptInExampleFlyout",
+        "type": "Class",
+        "label": "OptInExampleFlyout",
+        "description": [
+          "\nReact component for displaying the example data associated with the Telemetry opt-in banner."
+        ],
+        "signature": [
+          "OptInExampleFlyout",
+          " extends React.PureComponent<Props, State, any>"
+        ],
+        "children": [
+          {
+            "id": "def-public.OptInExampleFlyout._isMounted",
+            "type": "boolean",
+            "label": "_isMounted",
+            "description": [],
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L41"
+            }
+          },
+          {
+            "id": "def-public.OptInExampleFlyout.state",
+            "type": "Object",
+            "children": [
+              {
+                "id": "def-public.OptInExampleFlyout.state.data",
+                "type": "Uncategorized",
+                "label": "data",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+                  "lineNumber": 44,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L44"
+                },
+                "signature": [
+                  "null"
+                ]
+              },
+              {
+                "id": "def-public.OptInExampleFlyout.state.isLoading",
+                "type": "boolean",
+                "label": "isLoading",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+                  "lineNumber": 45,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L45"
+                },
+                "signature": [
+                  "true"
+                ]
+              },
+              {
+                "id": "def-public.OptInExampleFlyout.state.hasPrivilegeToRead",
+                "type": "boolean",
+                "label": "hasPrivilegeToRead",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+                  "lineNumber": 46,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L46"
+                },
+                "signature": [
+                  "false"
+                ]
+              }
+            ],
+            "description": [],
+            "label": "state",
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L43"
+            }
+          },
+          {
+            "id": "def-public.OptInExampleFlyout.componentDidMount",
+            "type": "Function",
+            "label": "componentDidMount",
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L49"
+            }
+          },
+          {
+            "id": "def-public.OptInExampleFlyout.componentWillUnmount",
+            "type": "Function",
+            "label": "componentWillUnmount",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 70,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L70"
+            }
+          },
+          {
+            "id": "def-public.OptInExampleFlyout.renderBody",
+            "type": "Function",
+            "label": "renderBody",
+            "signature": [
+              "({ data, isLoading, hasPrivilegeToRead }: State) => JSX.Element"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "{ data, isLoading, hasPrivilegeToRead }",
+                "isRequired": true,
+                "signature": [
+                  "State"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+                  "lineNumber": 74,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 74,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
+            }
+          },
+          {
+            "id": "def-public.OptInExampleFlyout.render",
+            "type": "Function",
+            "label": "render",
+            "signature": [
+              "() => JSX.Element"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+              "lineNumber": 124,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L124"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L40"
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-public.TelemetryManagementSectionPluginSetup",
+      "type": "Interface",
+      "label": "TelemetryManagementSectionPluginSetup",
+      "description": [],
+      "children": [
+        {
+          "id": "def-public.TelemetryManagementSectionPluginSetup.toggleSecuritySolutionExample",
+          "type": "Function",
+          "label": "toggleSecuritySolutionExample",
+          "description": [],
+          "source": {
+            "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
+            "lineNumber": 35,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L35"
+          },
+          "signature": [
+            "(enabled: boolean) => void"
+          ]
+        }
+      ],
+      "source": {
+        "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
+        "lineNumber": 34,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L34"
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
