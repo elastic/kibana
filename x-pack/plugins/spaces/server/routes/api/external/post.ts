@@ -6,11 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, log, getSpacesService } = deps;

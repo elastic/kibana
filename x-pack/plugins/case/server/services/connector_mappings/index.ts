@@ -41,7 +41,7 @@ export class ConnectorMappingsService {
         this.log.debug(`Attempting to find all connector mappings`);
         return await client.find({ ...options, type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT });
       } catch (error) {
-        this.log.debug(`Attempting to find all connector mappings`);
+        this.log.error(`Attempting to find all connector mappings: ${error}`);
         throw error;
       }
     },
@@ -52,7 +52,7 @@ export class ConnectorMappingsService {
           references,
         });
       } catch (error) {
-        this.log.debug(`Error on POST a new connector mappings: ${error}`);
+        this.log.error(`Error on POST a new connector mappings: ${error}`);
         throw error;
       }
     },
