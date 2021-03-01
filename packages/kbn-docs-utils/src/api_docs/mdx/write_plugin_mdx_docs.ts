@@ -84,7 +84,7 @@ import ${json} from './${fileName}.json';
     common: groupPluginApi(doc.common),
     server: groupPluginApi(doc.server),
   };
-  fs.writeFileSync(Path.resolve(folder, fileName + '.json'), JSON.stringify(scopedDoc));
+  fs.writeFileSync(Path.resolve(folder, fileName + '.json'), JSON.stringify(scopedDoc, null, 2));
 
   mdx += scopApiToMdx(scopedDoc.client, 'Client', json, 'client');
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
