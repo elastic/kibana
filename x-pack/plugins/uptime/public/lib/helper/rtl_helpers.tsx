@@ -24,7 +24,7 @@ import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
-import { createTriggerActionUIMock } from '../../../../triggers_actions_ui/public';
+import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -89,7 +89,7 @@ const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
-    triggersActionsUi: createTriggerActionUIMock(),
+    triggersActionsUi: triggersActionsUiMock.createStart(),
   };
 
   return core;

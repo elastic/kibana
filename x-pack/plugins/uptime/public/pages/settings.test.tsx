@@ -36,7 +36,7 @@ describe('settings', () => {
         target: { value: 'heartbeat-8*, synthetics-8*' },
       });
 
-      expect(getByText('Index names must not contain space'));
+      await waitFor(() => expect(getByText('Index names must not contain space')));
     });
 
     it('it show select a connector flyout', async () => {
@@ -47,7 +47,6 @@ describe('settings', () => {
       act(() => {
         fireEvent.click(getByTestId('createConnectorButton'));
       });
-
       await waitFor(() => expect(getByText('Select a connector')));
     });
   });
