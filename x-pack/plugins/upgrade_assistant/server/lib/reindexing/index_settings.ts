@@ -8,8 +8,7 @@
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
 import { versionService } from '../version';
-import { FlatSettings } from './types';
-
+import { FlatSettings, FlatSettingsWithTypeName } from './types';
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;
@@ -69,10 +68,23 @@ export const generateNewIndexName = (indexName: string): string => {
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
+export const getReindexWarnings = (
+  flatSettings: FlatSettingsWithTypeName | FlatSettings
+): ReindexWarning[] => {
   const warnings = [
     // No warnings yet for 8.0 -> 9.0
   ] as Array<[ReindexWarning, boolean]>;
+
+  if (versionService.getMajorVersion() === 7) {
+    const DEFAULT_TYPE_NAME = '_doc';
+    // In 7+ it's not possible to have more than one type anyways, so always grab the first
+    // (and only) key.
+    const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
+
+    const typeNameWarning = Boolean(typeName && typeName !== DEFAULT_TYPE_NAME);
+
+    warnings.push([ReindexWarning.customTypeName, typeNameWarning]);
+  }
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
+import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
 import React from 'react';
 import type {
@@ -35,15 +35,12 @@ export interface UsageCollectionSetup {
   components: {
     ApplicationUsageTrackingProvider: React.FC;
   };
-  allowTrackUserAgent: (allow: boolean) => void;
   applicationUsageTracker: IApplicationUsageTracker;
   reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
 }
 
 export interface UsageCollectionStart {
   reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
   applicationUsageTracker: Pick<
     ApplicationUsageTracker,
     'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
@@ -57,7 +54,6 @@ export function isUnauthenticated(http: HttpSetup) {
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private applicationUsageTracker?: ApplicationUsageTracker;
-  private trackUserAgent: boolean = true;
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
@@ -88,11 +84,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
         ),
       },
       applicationUsageTracker,
-      allowTrackUserAgent: (allow: boolean) => {
-        this.trackUserAgent = allow;
-      },
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
     };
   }
 
@@ -110,14 +102,11 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       );
     }
 
-    if (this.trackUserAgent) {
-      this.reporter.reportUserAgent('kibana');
-    }
+    this.reporter.reportUserAgent('kibana');
 
     return {
       applicationUsageTracker: this.getPublicApplicationUsageTracker(),
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
     };
   }
 

@@ -379,6 +379,7 @@ xpack.security.authc.providers:
 --------------------------------------------------------------------------------
 
 [float]
+[[anonymous-access-and-embedding]]
 ===== Anonymous access and embedding
 
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
