@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setup } from './helpers/overview.helpers';
+import { OverviewTestBed, setup } from './helpers';
 
 describe('<PageContent />', () => {
   let testBed: OverviewTestBed;

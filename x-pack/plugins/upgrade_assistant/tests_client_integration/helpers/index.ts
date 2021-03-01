@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { setupEnvironment } from './setup_environment';
+export { setup, OverviewTestBed } from './overview.helpers';
