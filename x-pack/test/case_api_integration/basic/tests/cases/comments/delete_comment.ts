@@ -101,15 +101,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         await supertest
           .delete(
-            `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.subCase!.comments![0].id}?subCaseID=${
-              caseInfo.subCase!.id
+            `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}?subCaseId=${
+              caseInfo.subCases![0].id
             }`
           )
           .set('kbn-xsrf', 'true')
           .send()
           .expect(204);
         const { body } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`
+          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
         );
         expect(body.length).to.eql(0);
       });
@@ -117,24 +117,24 @@ export default ({ getService }: FtrProviderContext): void => {
       it('deletes all comments from a sub case', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
         await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send(postCommentUserReq)
           .expect(200);
 
         let { body: allComments } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`
+          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
         );
         expect(allComments.length).to.eql(2);
 
         await supertest
-          .delete(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .delete(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(204);
 
         ({ body: allComments } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`
+          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
         ));
 
         // no comments for the sub case

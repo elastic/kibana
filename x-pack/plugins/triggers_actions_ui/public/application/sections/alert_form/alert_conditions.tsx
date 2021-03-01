@@ -124,3 +124,6 @@ export const AlertConditions = <ConditionProps extends any, ActionGroupIds exten
     </EuiFlexGroup>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertConditions as default };
