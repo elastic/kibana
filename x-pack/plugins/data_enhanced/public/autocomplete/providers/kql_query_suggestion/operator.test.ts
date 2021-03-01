@@ -83,7 +83,7 @@ describe('Kuery operator suggestions', () => {
   test('should return range operators for date range fields', async () => {
     const suggestions = await getSuggestions(
       querySuggestionsArgs,
-      mockKueryNode({ fieldName: 'date_range' })
+      mockKueryNode({ fieldName: 'time_range' })
     );
 
     expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();

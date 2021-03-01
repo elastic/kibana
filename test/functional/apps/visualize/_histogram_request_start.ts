@@ -76,20 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
         log.debug('Field = machine.ram_range');
         await PageObjects.visEditor.selectField('machine.ram_range');
-
-        // const providedInterval = '100';
-        // log.debug(`Interval = ${providedInterval}`);
-        // await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
-        await PageObjects.visEditor.clickGo();
         await PageObjects.common.sleep(1000); // fix this
-        await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisContent();
-          expect(data.length).to.eql(0);
-          // const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
-          // const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
-          // const actualInterval = bucketEnd - bucketStart;
-          // expect(actualInterval).to.eql(1200000000);
-        });
+        expect(await PageObjects.visEditor.getNumericInterval()).to.eql(100);
       });
     });
   });
