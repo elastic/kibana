@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
@@ -149,6 +149,11 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
     },
   ];
 
+  const onCloseFlyout = useCallback(() => {
+    setIsFlyoutOpen(false);
+    dispatch(getAnomalyAlertAction.get({ monitorId }));
+  }, [dispatch, monitorId]);
+
   return (
     <>
       <EuiPopover
@@ -177,10 +182,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       <UptimeEditAlertFlyoutComponent
         initialAlert={anomalyAlert!}
         alertFlyoutVisible={isFlyoutOpen}
-        setAlertFlyoutVisibility={() => {
-          setIsFlyoutOpen(false);
-          dispatch(getAnomalyAlertAction.get({ monitorId }));
-        }}
+        setAlertFlyoutVisibility={onCloseFlyout}
       />
     </>
   );
