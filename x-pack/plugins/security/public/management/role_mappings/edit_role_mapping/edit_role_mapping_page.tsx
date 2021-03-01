@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart, ScopedHistory, DocLinksStart } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { NotificationsStart, ScopedHistory, DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../common/model';
 import { RuleEditorPanel } from './rule_editor_panel';
 import {

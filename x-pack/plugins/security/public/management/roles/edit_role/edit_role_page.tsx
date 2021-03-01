@@ -31,7 +31,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Capabilities,
   FatalErrorsSetup,
@@ -39,7 +39,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
-import type { DocLinksStart, ScopedHistory } from 'src/core/public';
+import { DocLinksStart, ScopedHistory } from 'src/core/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { FeaturesPluginStart } from '../../../../../features/public';

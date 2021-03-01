@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { JSONRuleEditor } from './json_rule_editor';

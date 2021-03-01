@@ -9,7 +9,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { shallowWithIntl, nextTick, mountWithIntl } from '@kbn/test/jest';
 import { SecurityNavControl } from './nav_control_component';
-import type { AuthenticatedUser } from '../../common/model';
+import { AuthenticatedUser } from '../../common/model';
 import { EuiPopover, EuiHeaderSectionItemButton } from '@elastic/eui';
 import { findTestSubject } from '@kbn/test/jest';
 

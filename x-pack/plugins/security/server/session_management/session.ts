@@ -8,12 +8,12 @@
 import { promisify } from 'util';
 import { randomBytes, createHash } from 'crypto';
 import nodeCrypto, { Crypto } from '@elastic/node-crypto';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from 'src/core/server';
-import type { AuthenticationProvider } from '../../common/model';
-import type { ConfigType } from '../config';
-import type { SessionIndex, SessionIndexValue } from './session_index';
-import type { SessionCookie } from './session_cookie';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { KibanaRequest, Logger } from 'src/core/server';
+import { AuthenticationProvider } from '../../common/model';
+import { ConfigType } from '../config';
+import { SessionIndex, SessionIndexValue } from './session_index';
+import { SessionCookie } from './session_cookie';
 
 /**
  * The shape of the value that represents user's session information.

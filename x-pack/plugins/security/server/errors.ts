@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import type { CustomHttpResponseOptions, ResponseError } from 'src/core/server';
+import { CustomHttpResponseOptions, ResponseError } from 'src/core/server';
 
 export function wrapError(error: any) {
   return Boom.boomify(error, { statusCode: getErrorStatusCode(error) });

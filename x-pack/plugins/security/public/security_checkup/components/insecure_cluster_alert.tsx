@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { DocLinksStart, MountPoint } from 'src/core/public';
+import { DocLinksStart, MountPoint } from 'src/core/public';
 import {
   EuiCheckbox,
   EuiText,

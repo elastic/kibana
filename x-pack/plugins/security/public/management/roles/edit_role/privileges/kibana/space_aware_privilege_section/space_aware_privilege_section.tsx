@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../../spaces/public';
 import { Role, isRoleReserved } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../validate_role';

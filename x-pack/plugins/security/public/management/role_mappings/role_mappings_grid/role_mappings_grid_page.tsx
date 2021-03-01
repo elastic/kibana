@@ -25,8 +25,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
+import { PublicMethodsOf } from '@kbn/utility-types';
+import {
   NotificationsStart,
   ApplicationStart,
   DocLinksStart,

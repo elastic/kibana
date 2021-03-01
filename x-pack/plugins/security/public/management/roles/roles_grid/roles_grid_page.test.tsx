@@ -6,7 +6,7 @@
  */
 
 import { EuiIcon, EuiBasicTable } from '@elastic/eui';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';

@@ -8,7 +8,7 @@
 jest.mock('./authenticator');
 
 import Boom from '@hapi/boom';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   loggingSystemMock,
@@ -23,7 +23,7 @@ import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { sessionMock } from '../session_management/session.mock';
 
-import type {
+import {
   AuthenticationHandler,
   AuthToolkit,
   KibanaRequest,
@@ -32,11 +32,11 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
 } from 'src/core/server';
-import type { AuthenticatedUser } from '../../common/model';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session } from '../session_management';
+import { AuthenticatedUser } from '../../common/model';
+import { SecurityLicense } from '../../common/licensing';
+import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { Session } from '../session_management';
 import { ConfigSchema, ConfigType, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';

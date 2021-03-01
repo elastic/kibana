@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import React, { Component, Fragment } from 'react';
-import type { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from 'src/core/public';
 import { Role, BuiltinESPrivileges } from '../../../../../../common/model';
 import { SecurityLicense } from '../../../../../../common/licensing';
 import { IndicesAPIClient } from '../../../indices_api_client';

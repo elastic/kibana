@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
 import { licenseMock } from '../common/licensing/index.mock';

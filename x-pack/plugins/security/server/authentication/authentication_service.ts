@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
+import { PublicMethodsOf } from '@kbn/utility-types';
+import {
   LoggerFactory,
   KibanaRequest,
   Logger,
@@ -14,14 +14,14 @@ import type {
   IClusterClient,
   HttpServiceStart,
 } from 'src/core/server';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import type { ConfigType } from '../config';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session } from '../session_management';
-import type { DeauthenticationResult } from './deauthentication_result';
-import type { AuthenticationResult } from './authentication_result';
+import { SecurityLicense } from '../../common/licensing';
+import { AuthenticatedUser } from '../../common/model';
+import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { ConfigType } from '../config';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { Session } from '../session_management';
+import { DeauthenticationResult } from './deauthentication_result';
+import { AuthenticationResult } from './authentication_result';
 import { getErrorStatusCode } from '../errors';
 import { APIKeys } from './api_keys';
 import { Authenticator, ProviderLoginAttempt } from './authenticator';

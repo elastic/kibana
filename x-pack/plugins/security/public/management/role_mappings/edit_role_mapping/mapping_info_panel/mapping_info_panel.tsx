@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
-import type { SecurityLicense } from '../../../common/licensing';
+import { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+import { SecurityLicense } from '../../../common/licensing';
 import {
   HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,

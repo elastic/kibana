@@ -18,7 +18,7 @@ import { SecurityLicense } from '../../../common/licensing';
 import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
-import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
+import { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import { coreMock, httpServerMock, httpResourcesMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';

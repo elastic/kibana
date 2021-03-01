@@ -16,7 +16,7 @@ import {
   EuiFieldSearch,
   EuiPopover,
 } from '@elastic/eui';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import { Space } from 'src/plugins/spaces_oss/common';
 import { spacesManagerMock } from '../../../../../../spaces/public/spaces_manager/mocks';
 import { getUiApi } from '../../../../../../spaces/public/ui_api';
 import { SpaceAvatarInternal } from '../../../../../../spaces/public/space_avatar/space_avatar_internal';

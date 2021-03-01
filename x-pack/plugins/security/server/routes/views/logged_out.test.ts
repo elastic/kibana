@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
 import { Session } from '../../session_management';
 import { defineLoggedOutRoutes } from './logged_out';

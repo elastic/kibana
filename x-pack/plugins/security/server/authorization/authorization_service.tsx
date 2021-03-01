@@ -12,7 +12,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Subscription, Observable } from 'rxjs';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import type { Capabilities as UICapabilities } from 'src/core/types';
+import { Capabilities as UICapabilities } from 'src/core/types';
 
 import {
   LoggerFactory,

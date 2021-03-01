@@ -30,7 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
-import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
+import { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
 interface Props {

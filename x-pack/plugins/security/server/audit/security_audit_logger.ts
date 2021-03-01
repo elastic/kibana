@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticationProvider } from '../../common/model';
+import { AuthenticationProvider } from '../../common/model';
 import { LegacyAuditLogger } from './audit_service';
 
 /**

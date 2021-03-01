@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConfigDeprecationProvider } from 'src/core/server';
+import { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename,

@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import type { KibanaRequest } from 'src/core/server';
-import type { AuthenticationInfo } from '../../elasticsearch';
+import { KibanaRequest } from 'src/core/server';
+import { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';

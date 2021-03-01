@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
 import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import { SpaceAvatarInternal } from '../../../../../../../../spaces/public/space_avatar/space_avatar_internal';
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { SpaceColumnHeader } from './space_column_header';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { coreMock } from 'src/core/public/mocks';

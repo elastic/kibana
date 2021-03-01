@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Role,
   RoleIndexPrivilege,

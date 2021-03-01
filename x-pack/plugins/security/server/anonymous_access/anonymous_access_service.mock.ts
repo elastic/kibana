@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnonymousAccessServiceStart } from './anonymous_access_service';
+import { AnonymousAccessServiceStart } from './anonymous_access_service';
 
 import { capabilitiesServiceMock } from 'src/core/server/mocks';
 

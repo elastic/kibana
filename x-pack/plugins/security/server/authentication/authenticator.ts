@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { LoggerFactory, IBasePath, IClusterClient } from 'src/core/server';
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
@@ -14,14 +14,14 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
+import { SecurityLicense } from '../../common/licensing';
+import { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
-import type { ConfigType } from '../config';
+import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { SessionValue, Session } from '../session_management';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { SessionValue, Session } from '../session_management';
 
 import {
   AnonymousAuthenticationProvider,

@@ -9,7 +9,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { NotEnabled } from './not_enabled';

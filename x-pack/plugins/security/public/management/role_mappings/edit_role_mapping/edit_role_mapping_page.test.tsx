@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { findTestSubject } from '@kbn/test/jest';
 

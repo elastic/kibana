@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@kbn/test/jest';
 import { Role, RoleMapping } from '../../../../../common/model';

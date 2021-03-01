@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { AuthenticationServiceStart } from './authentication_service';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { AuthenticationServiceStart } from './authentication_service';
 
 import { apiKeysMock } from './api_keys/api_keys.mock';
 

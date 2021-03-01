@@ -11,7 +11,7 @@ import { defineCaptureURLRoutes } from './capture_url';
 
 import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
-import type { SecurityRequestHandlerContext } from '../../types';
+import { SecurityRequestHandlerContext } from '../../types';
 
 describe('Capture URL view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

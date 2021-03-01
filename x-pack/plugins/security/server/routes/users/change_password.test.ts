@@ -7,9 +7,9 @@
 
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { Headers, kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/server';
 import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
 import { Session } from '../../session_management';

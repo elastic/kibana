@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import moment from 'moment-timezone';
-import type { NotificationsStart } from 'src/core/public';
+import { NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';

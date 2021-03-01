@@ -19,7 +19,7 @@ import {
   EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../../spaces/public';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';

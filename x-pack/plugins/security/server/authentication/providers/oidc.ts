@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type from 'type-detect';
 import { KibanaRequest } from 'src/core/server';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import type { AuthenticationInfo } from '../../elasticsearch';
+import { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';

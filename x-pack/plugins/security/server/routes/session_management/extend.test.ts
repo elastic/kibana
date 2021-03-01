@@ -9,7 +9,7 @@ import { kibanaResponseFactory, RequestHandler, RouteConfig } from 'src/core/ser
 import { defineSessionExtendRoutes } from './extend';
 
 import { httpServerMock } from 'src/core/server/mocks';
-import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Extend session routes', () => {

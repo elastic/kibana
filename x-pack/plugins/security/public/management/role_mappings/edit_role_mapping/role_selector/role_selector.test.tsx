@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiComboBox } from '@elastic/eui';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { RoleSelector } from './role_selector';
 import { Role, RoleMapping } from '../../../../../common/model';
 import { RoleTemplateEditor } from './role_template_editor';

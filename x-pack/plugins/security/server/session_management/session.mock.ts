@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { Session, SessionValue } from './session';
 import { sessionIndexMock } from './session_index.mock';

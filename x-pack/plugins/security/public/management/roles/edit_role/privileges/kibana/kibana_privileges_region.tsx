@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import { Space } from '../../../../../../../spaces/public';
 import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';

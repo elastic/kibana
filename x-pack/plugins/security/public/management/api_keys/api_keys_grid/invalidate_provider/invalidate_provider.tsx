@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'src/core/public';
 import { ApiKeyToInvalidate } from '../../../../../common/model';

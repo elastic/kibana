@@ -11,7 +11,7 @@ jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
 import Boom from '@hapi/boom';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   loggingSystemMock,
   httpServiceMock,

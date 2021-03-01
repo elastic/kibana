@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityLicense } from '../../../common/licensing';
+import { SecurityLicense } from '../../../common/licensing';
 import { APIKeys } from './api_keys';
 
 import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
-import type { AuthenticationInfo } from '../elasticsearch';
+import { ElasticsearchClient, Logger } from 'src/core/server';
+import { AuthenticationInfo } from '../elasticsearch';
 import { getErrorStatusCode } from '../errors';
 
 /**

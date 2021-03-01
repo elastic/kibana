@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
-import type { AuthenticationProvider } from '../../common/model';
-import type { ConfigType } from '../config';
+import { ElasticsearchClient, Logger } from 'src/core/server';
+import { AuthenticationProvider } from '../../common/model';
+import { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;

@@ -6,16 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { httpServerMock } from 'src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationServiceStart } from '../../authentication';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
-import type { SecurityRequestHandlerContext } from '../../types';
+import { SecurityRequestHandlerContext } from '../../types';
 
 describe('API keys enabled', () => {
   function getMockContext(
