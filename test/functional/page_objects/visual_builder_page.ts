@@ -432,9 +432,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async setIndexPatternValue(value: string) {
-      const el = await testSubjects.find('metricsIndexPatternInput');
-      await el.clearValue();
-      await el.type(value, { charByChar: true });
+      await comboBox.clearInputField('metricsIndexPatternInput');
+      await comboBox.setCustom('metricsIndexPatternInput', value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

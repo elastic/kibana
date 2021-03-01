@@ -21,6 +21,7 @@ export const FieldTextSelect = ({
   placeholder,
   onModeChange,
   allowSwitchUseKibanaIndexesMode,
+  'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const textualValue = convertIndexPatternObjectToStringRepresentation(value);
   const append = [<LegacyModePopover index={textualValue} />];
@@ -43,6 +44,7 @@ export const FieldTextSelect = ({
       value={textualValue}
       placeholder={placeholder}
       append={append}
+      data-test-subj={dataTestSubj}
     />
   );
 };

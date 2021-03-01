@@ -46,6 +46,7 @@ export const ComboBoxSelect = ({
   value,
   placeholder,
   allowSwitchUseKibanaIndexesMode,
+  'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
 
@@ -72,6 +73,7 @@ export const ComboBoxSelect = ({
       selectedOptions={toSelectedOptions(value)}
       isDisabled={disabled}
       placeholder={placeholder}
+      data-test-subj={dataTestSubj}
       {...(allowSwitchUseKibanaIndexesMode && {
         append: <SwitchModePopover isKibanaIndicesModeOn={true} onModeChange={onModeChange} />,
       })}
