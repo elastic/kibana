@@ -12,14 +12,16 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiCallOut } from '@elastic/eui';
+
 import { MetaEngineCreation } from './';
 
 const DEFAULT_VALUES = {
   // MetaEngineLogic
-  name: '',
-  rawName: '',
+  name: 'test-meta-engine',
+  rawName: 'test-meta-engine',
   indexedEngineNames: [],
-  selectedIndexedEngineNames: [],
+  selectedIndexedEngineNames: ['one'],
   // AppLogic
   configuredLimits: { engine: { maxEnginesPerMetaEngine: 10 } },
 };
@@ -46,11 +48,6 @@ describe('MetaEngineCreation', () => {
 
   describe('MetaEngineCreationNameInput', () => {
     it('uses rawName as its value', () => {
-      setMockValues({
-        ...DEFAULT_VALUES,
-        rawName: 'Name__With#$&*%Special--Characters',
-      });
-
       const wrapper = shallow(<MetaEngineCreation />);
       expect(
         wrapper
@@ -58,7 +55,7 @@ describe('MetaEngineCreation', () => {
           .render()
           .find('input') // as far as I can tell I can't include this input in the .find() two lines above
           .attr('value')
-      ).toEqual('Name__With#$&*%Special--Characters');
+      ).toEqual('test-meta-engine');
     });
 
     it('EngineCreationForm calls submitEngine on form submit', () => {
@@ -123,5 +120,68 @@ describe('MetaEngineCreation', () => {
       .simulate('change', [{ label: 'foo', value: 'foo' }]);
 
     expect(MOCK_ACTIONS.setSelectedIndexedEngineNames).toHaveBeenCalledWith(['foo']);
+  });
+
+  it('renders a warning callout when user has selected too many engines', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      ...{
+        selectedIndexedEngineNames: ['one', 'two', 'three'],
+        configuredLimits: { engine: { maxEnginesPerMetaEngine: 2 } },
+      },
+    });
+    const wrapper = shallow(<MetaEngineCreation />);
+
+    expect(wrapper.find(EuiCallOut).prop('title')).toContain('Meta engines have a limit of');
+  });
+
+  describe('NewMetaEngineSubmitButton', () => {
+    it('is enabled for a valid submission', () => {
+      const wrapper = shallow(<MetaEngineCreation />);
+      const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
+
+      expect(submitButton.prop('disabled')).toEqual(false);
+    });
+
+    it('is disabled when name is empty', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        ...{
+          name: '',
+          rawName: '',
+        },
+      });
+      const wrapper = shallow(<MetaEngineCreation />);
+      const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
+
+      expect(submitButton.prop('disabled')).toEqual(true);
+    });
+
+    it('is disabled when user has selected no engines', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        ...{
+          selectedIndexedEngineNames: [],
+        },
+      });
+      const wrapper = shallow(<MetaEngineCreation />);
+      const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
+
+      expect(submitButton.prop('disabled')).toEqual(true);
+    });
+
+    it('is disabled when user has selected too many engines', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        ...{
+          selectedIndexedEngineNames: ['one', 'two', 'three'],
+          configuredLimits: { engine: { maxEnginesPerMetaEngine: 2 } },
+        },
+      });
+      const wrapper = shallow(<MetaEngineCreation />);
+      const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
+
+      expect(submitButton.prop('disabled')).toEqual(true);
+    });
   });
 });
