@@ -298,7 +298,7 @@ which will load the visualization's editor.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
-|The Kibana alerting plugin provides a common place to set up alerting.
+|The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
@@ -518,7 +518,7 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
+the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
