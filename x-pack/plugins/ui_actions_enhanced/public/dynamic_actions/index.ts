@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './drilldown_definition';
-export * from './components';
+export * from './types';
+export * from './action_factory';
+export * from './action_factory_definition';
+export * from './dynamic_action_storage';
+export * from './dynamic_action_manager_state';
+export * from './dynamic_action_manager';

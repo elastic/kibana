@@ -19,7 +19,7 @@ export {
 } from './plugin';
 
 export { ActionWizard } from './components/index';
-export type {
+export {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,
   SerializedAction as UiActionsEnhancedSerializedAction,
@@ -36,4 +36,4 @@ export type {
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
 export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns/drilldown_definition';
-// export * from './drilldowns/url_drilldown';
+export * from './drilldowns/url_drilldown';

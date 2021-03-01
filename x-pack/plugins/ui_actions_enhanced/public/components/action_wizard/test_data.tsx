@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { ActionWizard } from './action_wizard';
+import ActionWizard from './action_wizard';
 import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
