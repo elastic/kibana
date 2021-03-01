@@ -32,6 +32,23 @@ If data is available and all clauses have been defined, a preview chart will ren
 image::user/alerting/images/alert-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
+==== Action variables
+
+When the index threshold alert condition is met, the following variables are available to use inside each action:
+
+`context.title`:: A preconstructed title for the alert. Example: `alert kibana sites - high egress met threshold`.
+`context.message`:: A preconstructed message for the alert. Example: +
+`alert 'kibana sites - high egress' is active for group 'threshold met':` +
+`- Value: 42` +
+`- Conditions Met: count greater than 4 over 5m` +
+`- Timestamp: 2020-01-01T00:00:00.000Z`
+
+`context.group`:: The name of the action group associated with the threshold condition. Example: `threshold met`.
+`context.date`:: The date, in ISO format, that the alert met the threshold condition. Example: `2020-01-01T00:00:00.000Z`.
+`context.value`:: The value for the alert that met the threshold condition.
+`context.conditions`:: A description of the threshold condition. Example: `count greater than 4`
+
+[float]
 ==== Example
 
 In this section, you will use the {kib} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.

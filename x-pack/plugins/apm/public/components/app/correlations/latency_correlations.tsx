@@ -110,7 +110,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.latency.description', {
                 defaultMessage:
@@ -250,6 +250,7 @@ function LatencyDistributionChart({
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
           yAccessors={['y']}
+          color={theme.eui.euiColorVis1}
           data={data?.overall?.distribution || []}
           minBarHeight={5}
           tickFormat={(d) => `${roundFloat(d)}%`}
@@ -271,7 +272,7 @@ function LatencyDistributionChart({
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color={theme.eui.euiColorAccent}
+            color={theme.eui.euiColorVis2}
             data={getSelectedDistribution(data, selectedSignificantTerm)}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
