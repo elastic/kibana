@@ -14,12 +14,16 @@ import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
 export async function runElasticsearch({ config, options }) {
   const { log, esFrom } = options;
+
   const ssl = config.get('esTestCluster.ssl');
   const license = config.get('esTestCluster.license');
   const esArgs = config.get('esTestCluster.serverArgs');
   const esEnvVars = config.get('esTestCluster.serverEnvVars');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
+  if (config.get('esTestCluster.skipEsCluster')) {
+    return;
+  }
   const cluster = createLegacyEsTestCluster({
     port: config.get('servers.elasticsearch.port'),
     password: isSecurityEnabled

@@ -175,6 +175,7 @@ export const schema = Joi.object()
         serverEnvVars: Joi.object(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        skipEsCluster: Joi.boolean(),
       })
       .default(),
 

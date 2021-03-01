@@ -353,6 +353,7 @@
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.0.0",
     "@elastic/maki": "6.3.0",
+    "@elastic/synthetics": "0.0.1-alpha.9",
     "@elastic/ui-ace": "0.2.3",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/reporters": "^26.5.2",
