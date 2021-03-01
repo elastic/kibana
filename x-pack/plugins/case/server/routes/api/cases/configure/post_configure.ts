@@ -24,7 +24,12 @@ import {
   transformESConnectorToCaseConnector,
 } from '../helpers';
 
-export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPostCaseConfigure({
+  caseConfigureService,
+  caseService,
+  router,
+  logger,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_URL,
@@ -96,6 +101,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           }),
         });
       } catch (error) {
+        logger.error(`Failed to post case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
