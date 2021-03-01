@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "ui": true,
   "server": true,
+  "requiredPlugins": ["mapsEms"],
   "requiredBundles": ["kibanaReact", "visDefaultEditor", "mapsEms"]
 }
