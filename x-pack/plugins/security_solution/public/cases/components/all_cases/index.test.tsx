@@ -310,11 +310,12 @@ describe('AllCases', () => {
         )
         .last()
         .simulate('click');
+      expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toEqual(true);
       expect(
         wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
-      ).toEqual(false);
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toEqual(
-        false
+        true
       );
       expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
         false
@@ -379,6 +380,15 @@ describe('AllCases', () => {
   it('opens case when row action icon clicked', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [
+          {
+            ...defaultGetCases.data.cases[0],
+            status: CaseStatuses.closed,
+          },
+        ],
+      },
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
