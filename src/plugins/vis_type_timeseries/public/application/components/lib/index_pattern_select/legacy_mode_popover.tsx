@@ -92,9 +92,9 @@ export const LegacyModePopover = ({ index }: LegacyModePopoverProps) => {
   const navigateToCreateIndexPatterns = useCallback(() => {
     const core = getCoreStart();
     core.application.navigateToApp('management', {
-      path: `/kibana/indexPatterns/create`,
+      path: `/kibana/indexPatterns/create?name=${index}`,
     });
-  }, []);
+  }, [index]);
 
   useEffect(() => {
     async function retrieveIndex() {
