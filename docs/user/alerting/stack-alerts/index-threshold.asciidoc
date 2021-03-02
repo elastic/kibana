@@ -2,20 +2,17 @@
 [[alert-type-index-threshold]]
 === Index threshold
 
-The index threshold alert type is designed to run an {es} query over indices, aggregating field values from documents, comparing them to threshold values, and scheduling actions to run when the thresholds are met.
+The index threshold alert type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 
 [float]
 ==== Create the alert
 
 Fill in the <<defining-alerts-general-details, alert details>>, then select *Index Threshold*.
 
-[role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-select.png[Choose an index threshold alert type]
-
 [float]
-==== Conditions
+==== Define the conditions
 
-The index threshold has 5 clauses that define the condition to detect.
+Define the following properties to detect the condition.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-conditions.png[Five clauses define the condition to detect]
@@ -32,9 +29,9 @@ If data is available and all clauses have been defined, a preview chart will ren
 image::user/alerting/images/alert-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
-==== Action variables
+==== Add action variables
 
-When the index threshold alert condition is met, the following variables are available to each action, in addition to the <<defining-alerts-actions-variables, variables common to all alerts>>:
+<<defining-alerts-actions-details, Add an action>> to run when the alert condition is met. The following variables are specific to the index threshold alert. You can also specify <<defining-alerts-actions-variables, variables common to all alerts>>.
 
 `context.title`:: A preconstructed title for the alert. Example: `alert kibana sites - high egress met threshold`.
 `context.message`:: A preconstructed message for the alert. Example: +
@@ -48,46 +45,46 @@ When the index threshold alert condition is met, the following variables are ava
 `context.value`:: The value for the alert that met the threshold condition.
 `context.conditions`:: A description of the threshold condition. Example: `count greater than 4`
 
-<<defining-alerts-actions-details, Add an action>> to the alert to use these variables.
-
 [float]
 ==== Example
 
-In this section, you will use the {kib} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.
+In this example, you will use the {kib} <<add-sample-data, sample weblog dataset>> to set up and tune the conditions on an index threshold alert. For this example, you want to detect when any of the top four sites serve more than 420,000 bytes over a 24 hour period.
 
-. From the <<alert-management, Alerts and Actions>>, create a new alert and fill in the <<defining-alerts-general-details, general alert details>>. This alert will be checked every 4 hours, and will only execute actions when the alert status changes. Choose the index threshold alert type. 
+.  Open the main menu, then click **Stack Management > Alerts and Actions**.
+
+.  Create a new alert that is checked every four hours and executes actions when the alert status changes.
+
+.  Select the **Index threshold** alert type.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-select.png[Choosing an index threshold alert type]
 
-. Click on each clause to open a control that helps you set the value:
-+
-Index clause:: The index clause control will list and allow you to search for available indices. Choose *kibana_sample_data_logs*
+. Click *Index*, and set *Indices to query* to *kibana_sample_data_logs*.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-index.png[Choosing an index]
-+
-Once an index is selected, the list of time fields for that index will be available to select. Choose *@timestamp*.
+
+. Set the *Time field* to *@timestamp*.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-timefield.png[Choosing a time field]
-+
-When clause:: We want to detect the number of bytes served during the time window, so we select `sum` as the aggregation, and `bytes` as the field to aggregate. 
+
+. To detect the number of bytes served during the time window, click *When* and select `sum` as the aggregation, and bytes as the field to aggregate.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-aggregation.png[Choosing the aggregation]
-+
-Over/Grouped over clause:: We want to alert on the three sites that have the most traffic, so we'll group the sum of bytes by the `host.keyword` field and take the top 3 values. 
+
+. To detect the four sites that have the most traffic, click *Over* and select `top`, enter `4`, and select `host.keyword` as the field.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-grouping.png[Choosing the groups]
-+
-Threshold clause:: We want to alert when any site exceeds 420,000 bytes over a 24 hour period, so we'll set the threshold to 420,000 and use the `is above` comparison. 
+
+. To alert when any of the top four sites exceeds 420,000 bytes over a 24 hour period, select `is above` and enter `420000`.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-threshold.png[Setting the threshold]
-+
-Time window clause:: Finally, set the time window to 24 hours to complete the alert configuration.
+
+. Finally, click *For the last*, enter `24` and select `hours` to complete the alert configuration.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-window.png[Setting the time window]

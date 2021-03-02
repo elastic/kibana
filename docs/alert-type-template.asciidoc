@@ -8,16 +8,10 @@ Include a short description of the alert type.
 
 Fill in the <<defining-alerts-general-details, alert details>>, then select *<ALERT TYPE>*.
 
-////
-Optional, include a screenshot
-[role="screenshot"]
-image::user/alerting/images/alert-types-<ALERT TYPE>-select.png[Choose an <ALERT TYPE> alert type]
-////
-
 [float]
-==== Conditions
+==== Define the conditions
 
-Include all of the conditions for this alert type and a short description of each.
+Define the following properties to detect the condition.
 
 ////
 Optional, include a screenshot
@@ -29,14 +23,12 @@ Condition1:: This is a condition the user must define.
 Condition2:: This is another condition the user must define.
 
 [float]
-==== Action variables
+==== Add action variables
 
-When the <ALERT TYPE> alert condition is met, the following variables are available to each action, in addition to the <<defining-alerts-actions-variables, variables common to all alerts>>:
+<<defining-alerts-actions-details, Add an action>> to run when the alert condition is met. The following variables are specific to the <ALERT TYPE> alert. You can also specify <<defining-alerts-actions-variables, variables common to all alerts>>.
 
 `context.variableA`:: A short description of the context variable defined by the alert type.
 `context.variableB`:: A short description of the context variable defined by the alert type with an example. Example: `this is what variableB outputs`.
-
-<<defining-alerts-actions-details, Add an action>> to the alert to use these variables.
 
 ////
 Optional, include a step-by-step example for creating this alert 
