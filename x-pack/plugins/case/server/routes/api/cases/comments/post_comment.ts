@@ -11,7 +11,7 @@ import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { CommentRequest } from '../../../../../common/api';
 
-export function initPostCommentApi({ router }: RouteDeps) {
+export function initPostCommentApi({ router, logger }: RouteDeps) {
   router.post(
     {
       path: CASE_COMMENTS_URL,
@@ -21,7 +21,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
         }),
         query: schema.maybe(
           schema.object({
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
         body: escapeHatch,
@@ -33,7 +33,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
       }
 
       const caseClient = context.case.getCaseClient();
-      const caseId = request.query?.subCaseID ?? request.params.case_id;
+      const caseId = request.query?.subCaseId ?? request.params.case_id;
       const comment = request.body as CommentRequest;
 
       try {
@@ -41,6 +41,9 @@ export function initPostCommentApi({ router }: RouteDeps) {
           body: await caseClient.addComment({ caseId, comment }),
         });
       } catch (error) {
+        logger.error(
+          `Failed to post comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

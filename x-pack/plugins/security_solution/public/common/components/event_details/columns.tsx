@@ -85,24 +85,28 @@ export const getColumns = ({
     sortable: false,
     truncateText: false,
     width: '30px',
-    render: (field: string) => (
-      <EuiToolTip content={i18n.VIEW_COLUMN(field)}>
-        <EuiCheckbox
-          aria-label={i18n.VIEW_COLUMN(field)}
-          checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
-          data-test-subj={`toggle-field-${field}`}
-          data-colindex={1}
-          id={field}
-          onChange={() =>
-            toggleColumn({
-              columnHeaderType: defaultColumnHeaderType,
-              id: field,
-              width: DEFAULT_COLUMN_MIN_WIDTH,
-            })
-          }
-        />
-      </EuiToolTip>
-    ),
+    render: (field: string, data: EventFieldsData) => {
+      const label = data.isObjectArray ? i18n.NESTED_COLUMN(field) : i18n.VIEW_COLUMN(field);
+      return (
+        <EuiToolTip content={label}>
+          <EuiCheckbox
+            aria-label={label}
+            checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
+            data-test-subj={`toggle-field-${field}`}
+            data-colindex={1}
+            id={field}
+            onChange={() =>
+              toggleColumn({
+                columnHeaderType: defaultColumnHeaderType,
+                id: field,
+                width: DEFAULT_COLUMN_MIN_WIDTH,
+              })
+            }
+            disabled={data.isObjectArray && data.type !== 'geo_point'}
+          />
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'field',
@@ -118,38 +122,42 @@ export const getColumns = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DroppableWrapper
-            droppableId={getDroppableId(
-              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-            )}
-            key={getDroppableId(
-              `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
-            )}
-            isDropDisabled={true}
-            type={DRAG_TYPE_FIELD}
-            renderClone={(provided) => (
-              <div
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                ref={provided.innerRef}
-                tabIndex={-1}
-              >
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={field} />
-                </DragEffects>
-              </div>
-            )}
-          >
-            <DraggableFieldsBrowserField
-              browserFields={browserFields}
-              categoryId={data.category}
-              fieldName={field}
-              fieldCategory={data.category}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
-          </DroppableWrapper>
+          {data.isObjectArray && data.type !== 'geo_point' ? (
+            <>{field}</>
+          ) : (
+            <DroppableWrapper
+              droppableId={getDroppableId(
+                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+              )}
+              key={getDroppableId(
+                `event-details-field-droppable-wrapper-${contextId}-${eventId}-${data.category}-${field}`
+              )}
+              isDropDisabled={true}
+              type={DRAG_TYPE_FIELD}
+              renderClone={(provided) => (
+                <div
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  tabIndex={-1}
+                >
+                  <DragEffects>
+                    <DraggableFieldBadge fieldId={field} />
+                  </DragEffects>
+                </div>
+              )}
+            >
+              <DraggableFieldsBrowserField
+                browserFields={browserFields}
+                categoryId={data.category}
+                fieldName={field}
+                fieldCategory={data.category}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+              />
+            </DroppableWrapper>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
@@ -191,6 +199,7 @@ export const getColumns = ({
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={getLinkValue(data.field)}
                   />

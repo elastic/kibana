@@ -7,10 +7,9 @@
 
 import React, { FC } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
-import type { FieldDataRowProps } from '../../types/field_data_row';
+import { ChartData, OrdinalDataItem } from '../../../../../../common/types/field_histograms';
 import { ColumnChart } from '../../../../components/data_grid/column_chart';
-import { ChartData } from '../../../../components/data_grid';
-import { OrdinalDataItem } from '../../../../components/data_grid/use_column_chart';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 
 export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
