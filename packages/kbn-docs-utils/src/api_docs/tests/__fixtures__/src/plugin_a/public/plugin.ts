@@ -66,6 +66,11 @@ export interface Start {
    * @returns The currently selected {@link SearchLanguage}
    */
   getSearchLanguage: () => SearchLanguage;
+
+  /**
+   * @internal
+   */
+  anInternalStartFn: () => string;
 }
 
 /**
