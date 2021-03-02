@@ -9,10 +9,12 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFocusTrap,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiOutsideClickDetector,
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
@@ -48,46 +50,51 @@ export const confirmDiscardOrKeepUnsavedChanges = (
   return new Promise((resolve) => {
     const session = overlays.openModal(
       toMountPoint(
-        <>
-          <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
-            <EuiModalHeaderTitle>
-              {leaveEditModeConfirmStrings.getLeaveEditModeTitle()}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+        <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.discardConfirmKeepButton'}>
+          <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
+            <div role="dialog">
+              <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
+                <EuiModalHeaderTitle>
+                  {leaveEditModeConfirmStrings.getLeaveEditModeTitle()}
+                </EuiModalHeaderTitle>
+              </EuiModalHeader>
 
-          <EuiModalBody>
-            <EuiText>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
-          </EuiModalBody>
+              <EuiModalBody>
+                <EuiText>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
+              </EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              data-test-subj="dashboardDiscardConfirmCancel"
-              onClick={() => session.close()}
-            >
-              {leaveEditModeConfirmStrings.getLeaveEditModeCancelButtonText()}
-            </EuiButtonEmpty>
-            <EuiButtonEmpty
-              color="danger"
-              data-test-subj="dashboardDiscardConfirmDiscard"
-              onClick={() => {
-                session.close();
-                resolve('discard');
-              }}
-            >
-              {leaveEditModeConfirmStrings.getLeaveEditModeDiscardButtonText()}
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
-              data-test-subj="dashboardDiscardConfirmKeep"
-              onClick={() => {
-                session.close();
-                resolve('keep');
-              }}
-            >
-              {leaveEditModeConfirmStrings.getLeaveEditModeKeepChangesText()}
-            </EuiButton>
-          </EuiModalFooter>
-        </>
+              <EuiModalFooter>
+                <EuiButtonEmpty
+                  data-test-subj="dashboardDiscardConfirmCancel"
+                  onClick={() => session.close()}
+                >
+                  {leaveEditModeConfirmStrings.getLeaveEditModeCancelButtonText()}
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  color="danger"
+                  data-test-subj="dashboardDiscardConfirmDiscard"
+                  onClick={() => {
+                    session.close();
+                    resolve('discard');
+                  }}
+                >
+                  {leaveEditModeConfirmStrings.getLeaveEditModeDiscardButtonText()}
+                </EuiButtonEmpty>
+                <EuiButton
+                  fill
+                  data-test-subj="dashboardDiscardConfirmKeep"
+                  className="discardConfirmKeepButton"
+                  onClick={() => {
+                    session.close();
+                    resolve('keep');
+                  }}
+                >
+                  {leaveEditModeConfirmStrings.getLeaveEditModeKeepChangesText()}
+                </EuiButton>
+              </EuiModalFooter>
+            </div>
+          </EuiOutsideClickDetector>
+        </EuiFocusTrap>
       ),
       {
         'data-test-subj': 'dashboardDiscardConfirmModal',
@@ -104,44 +111,52 @@ export const confirmCreateWithUnsaved = (
 ) => {
   const session = overlays.openModal(
     toMountPoint(
-      <>
-        <EuiModalHeader data-test-subj="dashboardCreateConfirm">
-          <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
-        </EuiModalHeader>
+      <EuiFocusTrap
+        clickOutsideDisables={true}
+        initialFocus={'.dashboardCreateConfirmContinueButton'}
+      >
+        <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
+          <div role="dialog">
+            <EuiModalHeader data-test-subj="dashboardCreateConfirm">
+              <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
+            </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiText>{createConfirmStrings.getCreateSubtitle()}</EuiText>
-        </EuiModalBody>
+            <EuiModalBody>
+              <EuiText>{createConfirmStrings.getCreateSubtitle()}</EuiText>
+            </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty
-            data-test-subj="dashboardCreateConfirmCancel"
-            onClick={() => session.close()}
-          >
-            {createConfirmStrings.getCancelButtonText()}
-          </EuiButtonEmpty>
-          <EuiButtonEmpty
-            color="danger"
-            data-test-subj="dashboardCreateConfirmStartOver"
-            onClick={() => {
-              startBlankCallback();
-              session.close();
-            }}
-          >
-            {createConfirmStrings.getStartOverButtonText()}
-          </EuiButtonEmpty>
-          <EuiButton
-            fill
-            data-test-subj="dashboardCreateConfirmContinue"
-            onClick={() => {
-              contineCallback();
-              session.close();
-            }}
-          >
-            {createConfirmStrings.getContinueButtonText()}
-          </EuiButton>
-        </EuiModalFooter>
-      </>
+            <EuiModalFooter>
+              <EuiButtonEmpty
+                data-test-subj="dashboardCreateConfirmCancel"
+                onClick={() => session.close()}
+              >
+                {createConfirmStrings.getCancelButtonText()}
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                color="danger"
+                data-test-subj="dashboardCreateConfirmStartOver"
+                onClick={() => {
+                  startBlankCallback();
+                  session.close();
+                }}
+              >
+                {createConfirmStrings.getStartOverButtonText()}
+              </EuiButtonEmpty>
+              <EuiButton
+                fill
+                data-test-subj="dashboardCreateConfirmContinue"
+                className="dashboardCreateConfirmContinueButton"
+                onClick={() => {
+                  contineCallback();
+                  session.close();
+                }}
+              >
+                {createConfirmStrings.getContinueButtonText()}
+              </EuiButton>
+            </EuiModalFooter>
+          </div>
+        </EuiOutsideClickDetector>
+      </EuiFocusTrap>
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',
