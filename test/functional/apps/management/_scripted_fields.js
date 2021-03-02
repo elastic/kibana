@@ -27,6 +27,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const deployment = getService('deployment');
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -47,6 +48,9 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
+      // delete .kibana index and then wait for Kibana to re-create it
+      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
     });
 
     after(async function afterAll() {

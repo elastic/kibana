@@ -90,7 +90,7 @@
   "type": "doc",
   "value": {
     "id": "config:8.0.0",
-    "index": ".kibana",
+    "index": ".kibana_1",
     "source": {
       "config": {
         "accessibility:disableAnimations": true,
