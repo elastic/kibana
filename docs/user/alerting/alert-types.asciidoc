@@ -10,7 +10,7 @@ Kibana provides two types of alerts:
 [float]
 ==== Standard stack alerts
 
-Users require the `all` privilege to access to the *Stack Alerts* feature and create and edit alerts. .
+Users require the `all` privilege to access to the *Stack Alerts* feature and create and edit alerts.
 See <<kibana-feature-privileges, feature privileges>> for more information. 
 
 {kib} provides two stack alerts: 
