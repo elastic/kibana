@@ -12,6 +12,7 @@ import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service';
 import { getDeleteProvider } from './components/delete_field_provider';
+import { getFieldDeleteModalOpener } from './open_delete_modal';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -39,6 +40,11 @@ export class IndexPatternFieldEditorPlugin
         fieldFormats: data.fieldFormats,
         fieldFormatEditors,
         search: data.search,
+        usageCollection,
+      }),
+      openDeleteModal: getFieldDeleteModalOpener({
+        core,
+        indexPatternService: data.indexPatterns,
         usageCollection,
       }),
       userPermissions: {
