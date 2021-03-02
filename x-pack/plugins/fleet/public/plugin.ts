@@ -25,8 +25,10 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './applications/fleet/constants';
+
 import type { FleetConfigType } from '../common/types';
+
+import { BASE_PATH } from './applications/fleet/constants';
 import { licenseService } from './applications/fleet/hooks/use_license';
 import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
 import {

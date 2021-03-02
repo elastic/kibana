@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+
 import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,

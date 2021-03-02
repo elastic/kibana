@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'kibana/server';
+
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';

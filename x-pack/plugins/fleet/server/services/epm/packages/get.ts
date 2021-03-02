@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+
 import {
   isPackageLimited,
   installationStatuses,

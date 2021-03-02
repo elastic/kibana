@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type { Installation } from '../../../types';
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 jest.mock('./install');
 jest.mock('./bulk_install_packages');
@@ -17,6 +18,7 @@ const { ensureInstalledDefaultPackages } = jest.requireActual('./install');
 const { isBulkInstallError: actualIsBulkInstallError } = jest.requireActual(
   './bulk_install_packages'
 );
+// eslint-disable-next-line import/order
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { appContextService } from '../../app_context';

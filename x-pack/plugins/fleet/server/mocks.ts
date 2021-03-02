@@ -13,9 +13,11 @@ import {
 
 import { coreMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../../plugins/licensing/server/mocks';
-import type { FleetAppContext } from './plugin';
+
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
+
+import type { FleetAppContext } from './plugin';
 import type { PackagePolicyServiceInterface } from './services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from './services';
 

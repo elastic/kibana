@@ -7,10 +7,12 @@
 
 import { URL } from 'url';
 
+import { URL } from 'url';
+
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
-import { URL } from 'url';
+
 import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
 import type {
   Agent,
   AgentAction,

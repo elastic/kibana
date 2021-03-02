@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import type { CallESAsCurrentUser } from '../../../types';
 import * as Registry from '../registry';
 

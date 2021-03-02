@@ -7,14 +7,13 @@
 
 import { coreMock, httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 
-import { FleetConfigType } from '../index';
+import type { FleetConfigType } from '../index';
 
 import {
   createLimitedPreAuthHandler,
   isLimitedRoute,
   registerLimitedConcurrencyRoutes,
 } from './limited_concurrency';
-import type { FleetConfigType } from '../index';
 
 describe('registerLimitedConcurrencyRoutes', () => {
   test(`doesn't call registerOnPreAuth if maxConcurrentConnections is 0`, async () => {

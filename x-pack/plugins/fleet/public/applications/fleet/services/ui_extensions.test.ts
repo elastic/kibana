@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+
 import type {
   PackagePolicyEditExtensionComponent,
   UIExtensionRegistrationCallback,

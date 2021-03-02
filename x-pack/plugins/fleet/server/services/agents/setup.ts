@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
   EsAssetReference,

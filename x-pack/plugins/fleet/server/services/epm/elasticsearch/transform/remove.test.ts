@@ -6,9 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from 'kibana/server';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-import { deleteTransformRefs } from './remove';
+
 import type { EsAssetReference } from '../../../../../common/types/models';
 
 import { deleteTransformRefs } from './remove';

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import type { EnrollmentAPIKey } from '../../types';
 import { appContextService } from '../app_context';
 

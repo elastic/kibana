@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import type { Agent } from '../../../types';
 import { appContextService } from '../../app_context';
 import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../constants';

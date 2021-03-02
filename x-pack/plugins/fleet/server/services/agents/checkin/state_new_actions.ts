@@ -23,6 +23,7 @@ import {
 } from 'rxjs/operators';
 import { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import type {
   Agent,
   AgentAction,

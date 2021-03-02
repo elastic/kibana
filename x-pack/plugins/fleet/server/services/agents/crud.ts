@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 

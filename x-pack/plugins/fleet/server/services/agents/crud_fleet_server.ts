@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { SearchResponse } from 'elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
+
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import type { FleetServerAgent } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';

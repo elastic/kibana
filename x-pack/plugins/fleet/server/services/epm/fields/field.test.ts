@@ -10,7 +10,7 @@ import path from 'path';
 
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
-import path from 'path';
+
 import { getField, processFields } from './field';
 import type { Field, Fields } from './field';
 

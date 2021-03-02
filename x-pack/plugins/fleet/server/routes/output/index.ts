@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
 import {
   GetOneOutputRequestSchema,

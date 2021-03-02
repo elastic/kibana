@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsBulkResponse } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
 import type {
   Agent,
   AgentActionSOAttributes,

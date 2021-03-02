@@ -8,7 +8,7 @@
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'kibana/server';
 import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
-import { registerRoutes } from './index';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';

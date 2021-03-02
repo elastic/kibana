@@ -54,7 +54,6 @@ import {
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import type { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({

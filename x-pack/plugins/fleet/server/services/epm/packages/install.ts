@@ -10,16 +10,16 @@ import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import {
-  isRequiredPackage,
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
+
 import { defaultPackages } from '../../../../common';
 import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
+import {
+  IngestManagerError,
+  PackageOperationNotSupportedError,
+  PackageOutdatedError,
+} from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -30,13 +30,21 @@ import type {
   EsAssetReference,
   InstallType,
 } from '../../../types';
+import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
+
+import {
+  isRequiredPackage,
+  getInstallation,
+  getInstallationObject,
+  bulkInstallPackages,
+  isBulkInstallError,
+} from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
-import { isRequiredPackage } from './index';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {

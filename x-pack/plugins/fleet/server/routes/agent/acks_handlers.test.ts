@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,

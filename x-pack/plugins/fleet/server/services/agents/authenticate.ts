@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import type { Agent } from '../../types';
 import * as APIKeyService from '../api_keys';
 

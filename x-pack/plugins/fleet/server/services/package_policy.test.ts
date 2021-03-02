@@ -10,13 +10,14 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-import { createPackagePolicyMock } from '../../common/mocks';
-import { packagePolicyService } from './package_policy';
-import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+
 import type { SavedObjectsUpdateResponse } from 'src/core/server';
 import { KibanaRequest } from 'kibana/server';
+
+import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+import { createPackagePolicyMock } from '../../common/mocks';
 import type { ExternalCallback } from '..';
-import { appContextService } from './app_context';
+
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { packagePolicyService } from './package_policy';

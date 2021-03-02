@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';

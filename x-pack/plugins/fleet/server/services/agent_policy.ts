@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,

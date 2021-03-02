@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
 } from 'src/core/server';
+
 import type {
   Agent,
   NewAgentEvent,

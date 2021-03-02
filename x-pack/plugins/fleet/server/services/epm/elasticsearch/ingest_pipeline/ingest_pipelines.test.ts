@@ -7,7 +7,7 @@
 
 import { readFileSync } from 'fs';
 import path from 'path';
-import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
+
 import type { RegistryDataStream } from '../../../../types';
 
 import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
