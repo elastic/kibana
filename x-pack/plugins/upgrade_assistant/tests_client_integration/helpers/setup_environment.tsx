@@ -7,7 +7,6 @@
 
 import React from 'react';
 import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { docLinksServiceMock } from '../../../../../src/core/public/mocks';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -15,7 +14,7 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { mockKibanaSemverVersion, UA_READONLY_MODE } from '../../common/constants';
 import { AppContextProvider } from '../../public/application/app_context';
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+const mockHttpClient = axios.create();
 
 const contextValue = {
   http: (mockHttpClient as unknown) as HttpSetup,
