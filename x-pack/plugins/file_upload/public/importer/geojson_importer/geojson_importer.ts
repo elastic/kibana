@@ -27,6 +27,13 @@ import { ImportFailure, ImportResponse, MB } from '../../../common';
 const IMPORT_CHUNK_SIZE_MB = 10 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
+export interface GeoJsonPreview {
+  features: Feature[];
+  hasPoints: boolean;
+  hasShapes: boolean;
+  previewCoverage: number;
+}
+
 export class GeoJsonImporter extends Importer {
   private _file: File;
   private _isActive = true;
@@ -52,20 +59,19 @@ export class GeoJsonImporter extends Importer {
     this._isActive = false;
   }
 
-  public async previewFile(
-    rowLimit?: number,
-    sizeLimit?: number
-  ): Promise<{ features: Feature[]; geoFieldTypes: string[]; previewCoverage: number }> {
+  public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoJsonPreview> {
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
       previewCoverage: this._hasNext
         ? Math.round((this._unimportedBytesProcessed / this._file.size) * 100)
         : 100,
-      geoFieldTypes:
-        this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint')
-          ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
-          : [ES_FIELD_TYPES.GEO_SHAPE],
+      hasPoints: this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint'),
+      hasShapes:
+        this._geometryTypesMap.has('LineString') ||
+        this._geometryTypesMap.has('MultiLineString') ||
+        this._geometryTypesMap.has('Polygon') ||
+        this._geometryTypesMap.has('MultiPolygon'),
     };
   }
 

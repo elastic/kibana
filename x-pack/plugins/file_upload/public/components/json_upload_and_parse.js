@@ -13,6 +13,7 @@ import { IndexSettings } from './index_settings';
 import { getIndexPatternService } from '../kibana_services';
 import { GeoJsonFilePicker } from './geojson_file_picker';
 import { ImportCompleteView } from './import_complete_view';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 
 const PHASE = {
   CONFIGURE: 'CONFIGURE',
@@ -201,16 +202,21 @@ export class JsonUploadAndParse extends Component {
     });
   };
 
-  _onFileSelect = ({ features, geoFieldTypes, importer, indexName, previewCoverage }) => {
+  _onFileSelect = ({ features, hasPoints, hasShapes, importer, indexName, previewCoverage }) => {
     this._geojsonImporter = importer;
+
+    const geoFieldTypes = hasPoints
+      ? [ES_FIELD_TYPES.GEO_POINT, ES_FIELD_TYPES.GEO_SHAPE]
+      : [ES_FIELD_TYPES.GEO_SHAPE];
 
     const newState = {
       indexTypes: geoFieldTypes,
       indexName,
     };
-    if (!this.state.selectedIndexType && geoFieldTypes.length) {
+    if (!this.state.selectedIndexType) {
       // auto select index type
-      newState.selectedIndexType = geoFieldTypes[0];
+      newState.selectedIndexType =
+        hasPoints && !hasShapes ? ES_FIELD_TYPES.GEO_POINT : ES_FIELD_TYPES.GEO_SHAPE;
     } else if (
       this.state.selectedIndexType &&
       !geoFieldTypes.includes(this.state.selectedIndexType)
@@ -274,6 +280,7 @@ export class JsonUploadAndParse extends Component {
           indexName={this.state.indexName}
           setIndexName={(indexName) => this.setState({ indexName })}
           indexTypes={this.state.indexTypes}
+          selectedIndexType={this.state.selectedIndexType}
           setSelectedIndexType={(selectedIndexType) => this.setState({ selectedIndexType })}
           setHasIndexErrors={(hasIndexErrors) => this.setState({ hasIndexErrors })}
         />

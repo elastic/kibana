@@ -44,7 +44,8 @@ describe('previewFile', () => {
     expect(results).toEqual({
       features: [],
       previewCoverage: 0,
-      geoFieldTypes: ['geo_shape'],
+      hasPoints: false,
+      hasShapes: false,
     });
   });
 
@@ -53,7 +54,8 @@ describe('previewFile', () => {
     const results = await importer.previewFile();
     expect(results).toEqual({
       previewCoverage: 100,
-      geoFieldTypes: ['geo_point', 'geo_shape'],
+      hasPoints: true,
+      hasShapes: false,
       features: FEATURE_COLLECTION.features,
     });
   });
@@ -88,7 +90,8 @@ describe('previewFile', () => {
 
     expect(results).toEqual({
       previewCoverage: 100,
-      geoFieldTypes: ['geo_point', 'geo_shape'],
+      hasPoints: true,
+      hasShapes: false,
       features: FEATURE_COLLECTION.features,
     });
   });
@@ -116,7 +119,8 @@ describe('previewFile', () => {
 
     expect(results).toEqual({
       previewCoverage: 100,
-      geoFieldTypes: ['geo_point', 'geo_shape'],
+      hasPoints: true,
+      hasShapes: false,
       features: FEATURE_COLLECTION.features,
     });
   });
@@ -138,7 +142,8 @@ describe('previewFile', () => {
 
     expect(results).toEqual({
       previewCoverage: 100,
-      geoFieldTypes: ['geo_shape'],
+      hasPoints: false,
+      hasShapes: false,
       features: [],
     });
   });
@@ -165,7 +170,8 @@ describe('previewFile', () => {
 
     expect(results).toEqual({
       previewCoverage: 100,
-      geoFieldTypes: ['geo_shape'],
+      hasPoints: false,
+      hasShapes: false,
       features: [],
     });
   });

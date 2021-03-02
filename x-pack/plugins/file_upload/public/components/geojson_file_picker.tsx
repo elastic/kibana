@@ -6,27 +6,24 @@
  */
 
 import React, { Component } from 'react';
-import { Feature } from 'geojson';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../common';
 import { getMaxBytesFormatted } from '../get_max_bytes';
 import { validateFile } from '../importer';
-import { GeoJsonImporter, GEOJSON_FILE_TYPES } from '../importer/geojson_importer';
+import { GeoJsonImporter, GeoJsonPreview, GEOJSON_FILE_TYPES } from '../importer/geojson_importer';
 
 interface Props {
   onSelect: ({
     features,
-    geoFieldTypes,
+    hasPoints,
+    hasShapes,
     importer,
     indexName,
     previewCoverage,
-  }: {
-    features: Feature[];
+  }: GeoJsonPreview & {
     indexName: string;
     importer: GeoJsonImporter;
-    geoFieldTypes: string[];
-    previewCoverage: number;
   }) => void;
   onClear: () => void;
 }
@@ -73,11 +70,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
 
     let importer: GeoJsonImporter | null = null;
     let previewError: string | null = null;
-    let preview: {
-      features: Feature[];
-      geoFieldTypes: string[];
-      previewCoverage: number;
-    } | null = null;
+    let preview: GeoJsonPreview | null = null;
     try {
       validateFile(file, GEOJSON_FILE_TYPES);
       importer = new GeoJsonImporter(file);
