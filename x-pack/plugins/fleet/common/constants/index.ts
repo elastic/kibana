@@ -24,10 +24,12 @@ export const SO_SEARCH_LIMIT = 10000;
 
 export const FLEET_SERVER_INDICES_VERSION = 1;
 
+export const FLEET_SERVER_ARTIFACTS_INDEX = '.fleet-artifacts';
+
 export const FLEET_SERVER_INDICES = [
   '.fleet-actions',
   '.fleet-agents',
-  '.fleet-artifacts',
+  FLEET_SERVER_ARTIFACTS_INDEX,
   '.fleet-enrollment-api-keys',
   '.fleet-policies',
   '.fleet-policies-leader',

@@ -39,6 +39,9 @@
       "type": {
         "type": "keyword"
       },
+      "relative_url": {
+        "type": "keyword"
+      },
       "body": {
         "type": "binary"
       }
