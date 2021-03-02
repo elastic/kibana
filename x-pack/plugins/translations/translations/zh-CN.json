@@ -17251,7 +17251,6 @@
     "xpack.securitySolution.case.common.noConnector": "未选择任何连接器",
     "xpack.securitySolution.case.components.connectors.case.actionTypeTitle": "案例",
     "xpack.securitySolution.case.components.connectors.case.addNewCaseOption": "添加新案例",
-    "xpack.securitySolution.case.components.connectors.case.callOutInfo": "规则创建后的所有告警将追加到选定案例。",
     "xpack.securitySolution.case.components.connectors.case.caseRequired": "必须选择策略。",
     "xpack.securitySolution.case.components.connectors.case.casesDropdownPlaceholder": "选择案例",
     "xpack.securitySolution.case.components.connectors.case.casesDropdownRowLabel": "案例",
