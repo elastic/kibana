@@ -15,7 +15,6 @@ import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constant
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const log = getService('log');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
 
@@ -30,7 +29,6 @@ export default ({ getService }: FtrProviderContext) => {
     action: string,
     expectedStatusCode: number
   ) {
-    log.debug(`Running ${action} request for ${jobId} in ${space}...`);
     const resp = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/${action}`)
       .auth(
@@ -39,9 +37,6 @@ export default ({ getService }: FtrProviderContext) => {
       )
       .set(COMMON_REQUEST_HEADERS);
     const { body, status } = resp;
-
-    log.debug(`Response status is ${status} for ${action} request for ${jobId} in ${space}...`);
-    log.debug(`${JSON.stringify(body, null, 2)}`);
 
     expect(status).to.be(expectedStatusCode);
     return body;
