@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { CallESAsCurrentUser } from '../../../types';
+import type { SavedObjectsClientContract } from 'src/core/server';
+import type { CallESAsCurrentUser } from '../../../types';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
-import { BulkInstallResponse, IBulkInstallPackageError, upgradePackage } from './install';
+import { upgradePackage } from './install';
+import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
