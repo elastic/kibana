@@ -39,32 +39,19 @@ export async function createAnomalyDetectionJobs(
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  // skip creation of duplicate ML jobs
-  const jobs = await getAnomalyDetectionJobs(setup, logger);
-  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
-  const requestedExistingMlJobEnvs = environments.filter((env) =>
-    existingMlJobEnvs.includes(env)
-  );
-  const newMlJobEnvs = environments.filter(
-    (env) => !existingMlJobEnvs.includes(env)
-  );
-  if (requestedExistingMlJobEnvs.length) {
-    logger.warn(
-      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`
-    );
-  }
-  if (newMlJobEnvs.length === 0) {
+  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(setup, environments, logger);
+  if (uniqueMlJobEnvs.length === 0) {
     return [];
   }
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
     logger.info(
-      `Creating ML anomaly detection jobs for environments: [${newMlJobEnvs}].`
+      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
     const indexPatternName = indices['apm_oss.transactionIndices'];
     const responses = await Promise.all(
-      newMlJobEnvs.map((environment) =>
+      uniqueMlJobEnvs.map((environment) =>
         createAnomalyDetectionJob({ ml, environment, indexPatternName })
       )
     );
@@ -123,4 +110,25 @@ async function createAnomalyDetectionJob({
       ],
     });
   });
+}
+
+async function getUniqueMlJobEnvs(
+  setup: Setup,
+  environments: string[],
+  logger: Logger
+) {
+  // skip creation of duplicate ML jobs
+  const jobs = await getAnomalyDetectionJobs(setup, logger);
+  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const requestedExistingMlJobEnvs = environments.filter((env) =>
+    existingMlJobEnvs.includes(env)
+  );
+
+  if (requestedExistingMlJobEnvs.length) {
+    logger.warn(
+      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`
+    );
+  }
+
+  return environments.filter((env) => !existingMlJobEnvs.includes(env));
 }
