@@ -116,9 +116,19 @@ export const reloadDeletedRules = () => {
   cy.get(RELOAD_PREBUILT_RULES_BTN).click({ force: true });
 };
 
+/**
+ * Selects the number of rules. Since there can be missing click handlers
+ * when the page loads at first, we use a pipe and a trigger of click
+ * on it and then check to ensure that it is checked before continuing
+ * with the tests.
+ * @param numberOfRules The number of rules to click/check
+ */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).click({ force: true });
+    cy.get(RULE_CHECKBOX)
+      .eq(i)
+      .pipe(($el) => $el.trigger('click'))
+      .should('be.checked');
   }
 };
 

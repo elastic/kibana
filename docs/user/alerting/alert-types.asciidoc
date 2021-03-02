@@ -28,7 +28,15 @@ For domain-specific alerts, refer to the documentation for that app.
 * {observability-guide}/create-alerts.html[Observability alerts]
 * {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
-* <<xpack-ml, ML alerts>>
+* {ml-docs}/ml-configuring-alerts.html[{ml-cap} alerts]
+
+[NOTE]
+==============================================
+Some alert types are subscription features, while others are free features.
+For a comparison of the Elastic subscription levels,
+see {subscriptions}[the subscription page].
+==============================================
+
 
 include::stack-alerts/index-threshold.asciidoc[]
 include::stack-alerts/es-query.asciidoc[]
