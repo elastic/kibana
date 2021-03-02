@@ -30,7 +30,7 @@ describe('updateActionRoute', () => {
 
     const [config, handler] = router.put.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
     const updateResult = {
       id: '1',
@@ -58,7 +58,15 @@ describe('updateActionRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: updateResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        id: '1',
+        connector_type_id: 'my-action-type-id',
+        name: 'My name',
+        config: { foo: true },
+        is_preconfigured: false,
+      },
+    });
 
     expect(actionsClient.update).toHaveBeenCalledTimes(1);
     expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`

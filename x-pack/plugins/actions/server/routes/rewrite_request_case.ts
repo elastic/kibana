@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-type RenameActionToConnector<K extends string> = K extends `actionTypeId` ? `connectorTypeId` : K;
+type RenameActionToConnector<K extends string> = K extends `actionTypeId`
+  ? `connectorTypeId`
+  : K extends `actionId`
+  ? `connectorId`
+  : K;
+
 export type AsApiContract<T> = {
   [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K];
 };

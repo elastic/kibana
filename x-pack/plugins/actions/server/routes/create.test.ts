@@ -43,7 +43,7 @@ describe('createActionRoute', () => {
 
     const createApiResult = {
       ...omit(createResult, ['actionTypeId', 'isPreconfigured']),
-      action_type_id: createResult.actionTypeId,
+      connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
     };
 
@@ -55,7 +55,7 @@ describe('createActionRoute', () => {
       {
         body: {
           name: 'My name',
-          action_type_id: 'abc',
+          connector_type_id: 'abc',
           config: { foo: true },
           secrets: {},
         },
@@ -108,7 +108,7 @@ describe('createActionRoute', () => {
       {
         body: {
           name: 'My name',
-          action_type_id: 'abc',
+          connector_type_id: 'abc',
           config: { foo: true },
           secrets: {},
         },
@@ -146,7 +146,7 @@ describe('createActionRoute', () => {
       {
         body: {
           name: 'My name',
-          action_type_id: 'abc',
+          connector_type_id: 'abc',
           config: { foo: true },
           secrets: {},
         },

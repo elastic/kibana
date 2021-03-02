@@ -29,7 +29,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = (
   ...res
 }) => ({
   ...res,
-  action_id: actionId,
+  connector_id: actionId,
   ...(serviceMessage ? { service_message: serviceMessage } : {}),
 });
 

@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        action_id: createdAction.id,
+        connector_id: createdAction.id,
         status: 'error',
         message: 'an error occurred while running the action executor',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,

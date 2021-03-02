@@ -14,10 +14,10 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function listActionTypesTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('list_action_types', () => {
+  describe('connector_types', () => {
     it('should return 200 with list of connector types containing defaults', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/actions/list_connector_types`
+        `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector_types`
       );
 
       function createActionTypeMatcher(id: string, name: string) {

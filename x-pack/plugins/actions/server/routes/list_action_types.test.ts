@@ -31,7 +31,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
 
     const listTypes = [
       {
@@ -64,7 +64,16 @@ describe('listActionTypesRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: listTypes,
+      body: [
+        {
+          id: '1',
+          name: 'name',
+          enabled: true,
+          enabled_in_config: true,
+          enabled_in_license: true,
+          minimum_license_required: 'gold',
+        },
+      ],
     });
   });
 
@@ -76,7 +85,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
 
     const listTypes = [
       {
@@ -117,7 +126,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
 
     const listTypes = [
       {

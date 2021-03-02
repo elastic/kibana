@@ -47,7 +47,7 @@ describe('executeActionRoute', () => {
     );
 
     const executeResult = {
-      action_id: '1',
+      connector_id: '1',
       status: 'ok',
     };
 

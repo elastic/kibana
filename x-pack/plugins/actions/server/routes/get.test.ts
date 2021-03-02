@@ -54,8 +54,8 @@ describe('getActionRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "action_type_id": "2",
           "config": Object {},
+          "connector_type_id": "2",
           "id": "1",
           "is_preconfigured": false,
           "name": "action name",
@@ -69,7 +69,7 @@ describe('getActionRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: {
         id: '1',
-        action_type_id: '2',
+        connector_type_id: '2',
         name: 'action name',
         config: {},
         is_preconfigured: false,

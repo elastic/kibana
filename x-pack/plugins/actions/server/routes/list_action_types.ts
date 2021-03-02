@@ -27,7 +27,7 @@ export const listActionTypesRoute = (
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/list_connector_types`,
+      path: `${BASE_ACTION_API_PATH}/connector_types`,
       validate: {},
     },
     router.handleLegacyErrors(
