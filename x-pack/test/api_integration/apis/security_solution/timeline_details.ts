@@ -665,34 +665,6 @@ const EXPECTED_DATA = [
     ],
     isObjectArray: false,
   },
-  {
-    category: '_index',
-    field: '_index',
-    values: ['filebeat-7.0.0-iot-2019.06'],
-    originalValue: ['filebeat-7.0.0-iot-2019.06'],
-    isObjectArray: false,
-  },
-  {
-    category: '_type',
-    field: '_type',
-    values: ['_doc'],
-    originalValue: ['_doc'],
-    isObjectArray: false,
-  },
-  {
-    category: '_id',
-    field: '_id',
-    values: ['QRhG1WgBqd-n62SwZYDT'],
-    originalValue: ['QRhG1WgBqd-n62SwZYDT'],
-    isObjectArray: false,
-  },
-  {
-    category: '_score',
-    field: '_score',
-    values: ['1'],
-    originalValue: ['1'],
-    isObjectArray: false,
-  },
 ];
 const EXPECTED_KPI_COUNTS = {
   destinationIpCount: 154,
