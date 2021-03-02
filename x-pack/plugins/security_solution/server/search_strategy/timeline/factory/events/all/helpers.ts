@@ -14,7 +14,6 @@ import {
 import { toStringArray } from '../../../../helpers/to_array';
 import { getDataSafety, getDataFromFieldsHits } from '../details/helpers';
 
-
 export const formatTimelineData = async (
   dataFields: readonly string[],
   ecsFields: readonly string[],
