@@ -12,15 +12,9 @@ import { appContextService } from '../../../app_context';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
-    await esClient.transport.request(
-      {
-        method: 'POST',
-        path: `/_transform/${transformId}/_stop`,
-        querystring: 'force=true',
-      },
-      {
-        ignore: [404],
-      }
+    await esClient.transform.stopTransform(
+      { transform_id: transformId, force: true },
+      { ignore: [404] }
     );
   }
 };
@@ -32,37 +26,25 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      // get the index the transform
-      const { body } = await esClient.transport.request(
-        {
-          method: 'GET',
-          path: `/_transform/${transformId}`,
-        },
-        {
-          ignore: [404],
-        }
-      );
-
-      // `transport.request` doesn't accept generics, so we cast the type here.
-      const transformResponse = body as {
+      interface TransformResponse {
         count: number;
         transforms?: Array<{
           dest: {
             index: string;
           };
         }>;
-      };
+      }
+
+      // get the index the transform
+      const { body: transformResponse } = await esClient.transform.getTransform<TransformResponse>(
+        { transform_id: transformId },
+        { ignore: [404] }
+      );
 
       await stopTransforms([transformId], esClient);
-      await esClient.transport.request(
-        {
-          method: 'DELETE',
-          querystring: 'force=true',
-          path: `/_transform/${transformId}`,
-        },
-        {
-          ignore: [404],
-        }
+      await esClient.transform.deleteTransform(
+        { force: true, transform_id: transformId },
+        { ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
       if (transformResponse?.transforms) {

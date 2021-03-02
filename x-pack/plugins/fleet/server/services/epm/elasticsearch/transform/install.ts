@@ -122,10 +122,9 @@ async function handleTransformInstall({
 }): Promise<EsAssetReference> {
   try {
     // defer validation on put if the source index is not available
-    await esClient.transport.request({
-      method: 'PUT',
-      path: `/_transform/${transform.installationName}`,
-      querystring: 'defer_validation=true',
+    await esClient.transform.putTransform({
+      transform_id: transform.installationName,
+      defer_validation: true,
       body: transform.content,
     });
   } catch (err) {
@@ -137,15 +136,9 @@ async function handleTransformInstall({
       throw err;
     }
   }
-  await esClient.transport.request(
-    {
-      method: 'POST',
-      path: `/_transform/${transform.installationName}/_start`,
-      // Ignore error if the transform is already started
-    },
-    {
-      ignore: [409],
-    }
+  await esClient.transform.startTransform(
+    { transform_id: transform.installationName },
+    { ignore: [409] }
   );
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
