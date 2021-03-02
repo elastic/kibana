@@ -38,8 +38,8 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
-const DEFAULT_FIELD_TYPES = ['keyword', 'text'];
-const DEFAULT_FIELD_LIMIT = 1024;
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -346,15 +346,15 @@ function getBaseTemplate(
   // Find all field names to set `index.query.default_field` to, which will be
   // the first 1024 keyword or text fields
   const defaultFields = flattenFieldsToNameAndType(fields).filter(
-    (field) => field.type && DEFAULT_FIELD_TYPES.includes(field.type)
+    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
   );
-  if (defaultFields.length > DEFAULT_FIELD_LIMIT) {
+  if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
     logger.warn(
-      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${DEFAULT_FIELD_LIMIT} fields`
+      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
     );
   }
-  const defaultFieldNames = (defaultFields.length > DEFAULT_FIELD_LIMIT
-    ? defaultFields.slice(0, DEFAULT_FIELD_LIMIT)
+  const defaultFieldNames = (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
+    ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
     : defaultFields
   ).map((field) => field.name);
 
