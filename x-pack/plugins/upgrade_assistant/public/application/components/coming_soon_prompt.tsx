@@ -15,8 +15,6 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;
 
-  console.log(nextMajor);
-
   return (
     <EuiPageContent>
       <EuiEmptyPrompt
