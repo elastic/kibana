@@ -61,3 +61,5 @@ export interface EsRuntimeField {
     source: string;
   };
 }
+
+export type CloseEditor = () => void;

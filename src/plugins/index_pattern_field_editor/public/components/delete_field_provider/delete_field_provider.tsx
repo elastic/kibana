@@ -7,8 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { DeleteFieldModal } from '../delete_field_modal/delete_field_modal';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 
@@ -22,58 +21,10 @@ interface State {
   fieldsToDelete: string[];
 }
 
-const geti18nTexts = (fieldsToDelete?: string[]) => {
-  let modalTitle = '';
-  if (fieldsToDelete) {
-    const isSingle = fieldsToDelete.length === 1;
-
-    modalTitle = isSingle
-      ? i18n.translate(
-          'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteSingleTitle',
-          {
-            defaultMessage: `Remove field '{name}'?`,
-            values: { name: fieldsToDelete[0] },
-          }
-        )
-      : i18n.translate(
-          'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteMultipleTitle',
-          {
-            defaultMessage: `Remove {count} fields?`,
-            values: { count: fieldsToDelete.length },
-          }
-        );
-  }
-
-  return {
-    modalTitle,
-    confirmButtonText: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeButtonLabel',
-      {
-        defaultMessage: 'Remove',
-      }
-    ),
-    cancelButtonText: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.cancelButtonLabel',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-    warningMultipleFields: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.multipleDeletionDescription',
-      {
-        defaultMessage: 'You are about to remove these runtime fields:',
-      }
-    ),
-  };
-};
-
 export const DeleteRuntimeFieldProvider = ({ children, onConfirmDelete }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false, fieldsToDelete: [] });
 
   const { isModalOpen, fieldsToDelete } = state;
-  const i18nTexts = geti18nTexts(fieldsToDelete);
-  const { modalTitle, confirmButtonText, cancelButtonText, warningMultipleFields } = i18nTexts;
-  const isMultiple = Boolean(fieldsToDelete.length > 1);
 
   const deleteField: DeleteFieldFunc = useCallback((fieldNames) => {
     setState({
@@ -101,28 +52,11 @@ export const DeleteRuntimeFieldProvider = ({ children, onConfirmDelete }: Props)
       {children(deleteField)}
 
       {isModalOpen && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={modalTitle}
-            data-test-subj="runtimeFieldDeleteConfirmModal"
-            onCancel={closeModal}
-            onConfirm={confirmDelete}
-            cancelButtonText={cancelButtonText}
-            buttonColor="danger"
-            confirmButtonText={confirmButtonText}
-          >
-            {isMultiple && (
-              <>
-                <p>{warningMultipleFields}</p>
-                <ul>
-                  {fieldsToDelete.map((fieldName) => (
-                    <li key={fieldName}>{fieldName}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <DeleteFieldModal
+          fieldsToDelete={fieldsToDelete}
+          confirmDelete={confirmDelete}
+          closeModal={closeModal}
+        />
       )}
     </>
   );
