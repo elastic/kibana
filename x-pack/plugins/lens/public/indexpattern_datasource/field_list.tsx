@@ -68,8 +68,8 @@ export const FieldList = React.memo(function FieldList({
   existFieldsInIndex: boolean;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
-  editField: (name: string) => void;
-  deleteField: (name: string) => void;
+  editField?: (name: string) => void;
+  deleteField?: (name: string) => void;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);

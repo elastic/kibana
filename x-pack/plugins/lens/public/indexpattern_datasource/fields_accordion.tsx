@@ -54,8 +54,8 @@ export interface FieldsAccordionProps {
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
-  editField: (name: string) => void;
-  deleteField: (name: string) => void;
+  editField?: (name: string) => void;
+  deleteField?: (name: string) => void;
 }
 
 export const FieldsAccordion = memo(function InnerFieldsAccordion({

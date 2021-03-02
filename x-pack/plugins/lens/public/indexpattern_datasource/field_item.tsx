@@ -73,8 +73,8 @@ export interface FieldItemProps {
   itemIndex: number;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
-  editField: (name: string) => void;
-  deleteField: (name: string) => void;
+  editField?: (name: string) => void;
+  deleteField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
@@ -114,19 +114,25 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const [infoIsOpen, setOpen] = useState(false);
 
-  const closeAndEdit = useCallback(
-    (name: string) => {
-      editField(name);
-      setOpen(false);
-    },
+  const closeAndEdit = useMemo(
+    () =>
+      editField
+        ? (name: string) => {
+            editField(name);
+            setOpen(false);
+          }
+        : undefined,
     [editField, setOpen]
   );
 
-  const closeAndDelete = useCallback(
-    (name: string) => {
-      deleteField(name);
-      setOpen(false);
-    },
+  const closeAndDelete = useMemo(
+    () =>
+      deleteField
+        ? (name: string) => {
+            deleteField(name);
+            setOpen(false);
+          }
+        : undefined,
     [deleteField, setOpen]
   );
 
@@ -352,10 +358,14 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   const runtimeFieldControls = (
     <>
-      <EuiButtonEmpty onClick={() => editField(field.name)}>
-        {i18n.translate('xpack.lens.indexPattern.editFieldLabel', { defaultMessage: 'Edit field' })}
-      </EuiButtonEmpty>
-      {field.runtime && (
+      {editField && (
+        <EuiButtonEmpty onClick={() => editField(field.name)}>
+          {i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+            defaultMessage: 'Edit field',
+          })}
+        </EuiButtonEmpty>
+      )}
+      {deleteField && field.runtime && (
         <EuiButtonEmpty onClick={() => deleteField(field.name)} color="danger">
           {i18n.translate('xpack.lens.indexPattern.deleteFieldLabel', {
             defaultMessage: 'Delete field',

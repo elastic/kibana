@@ -310,6 +310,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
+  const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
+
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern.getFieldByName(field.name);
@@ -497,34 +499,43 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
   }, [currentIndexPattern.id, data.indexPatterns, onUpdateIndexPattern]);
 
-  const editField = useCallback(
-    async (fieldName?: string) => {
-      const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
-      closeFieldEditor.current = indexPatternFieldEditor.openEditor({
-        ctx: {
-          indexPattern: indexPatternInstance,
-        },
-        fieldName,
-        onSave: reloadIndexPattern,
-      });
-    },
-    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern]
+  const editField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName?: string) => {
+            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+              ctx: {
+                indexPattern: indexPatternInstance,
+              },
+              fieldName,
+              onSave: reloadIndexPattern,
+            });
+          }
+        : undefined,
+    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern, editPermission]
   );
 
-  const deleteField = useCallback(
-    async (fieldName: string) => {
-      const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
-      closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
-        ctx: {
-          indexPattern: indexPatternInstance,
-        },
-        fieldNames: [fieldName],
-        onDelete: reloadIndexPattern,
-      });
-    },
-    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern]
+  const deleteField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName: string) => {
+            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+              ctx: {
+                indexPattern: indexPatternInstance,
+              },
+              fieldNames: [fieldName],
+              onDelete: reloadIndexPattern,
+            });
+          }
+        : undefined,
+    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern, editPermission]
   );
-  const addField = useCallback(() => editField(), [editField]);
+  const addField = useMemo(() => (editPermission && editField ? () => editField() : undefined), [
+    editField,
+    editPermission,
+  ]);
 
   const fieldProps = useMemo(
     () => ({
@@ -700,13 +711,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             deleteField={deleteField}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={addField}>
-            {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {addField && (
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={addField}>
+              {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
+                defaultMessage: 'Add field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </ChildDragDropProvider>
   );
