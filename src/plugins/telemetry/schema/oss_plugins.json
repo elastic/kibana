@@ -7487,7 +7487,7 @@
         "visualization:heatmap:maxBuckets": {
           "type": "long",
           "_meta": {
-            "description": "Non-default value of visualivisualization:heatmapng"
+            "description": "Non-default value of visualization:heatmap:maxBuckets"
           }
         },
         "visualization:colorMapping": {
@@ -7511,7 +7511,7 @@
         "visualization:tileMap:maxPrecision": {
           "type": "long",
           "_meta": {
-            "description": "Non-default value of visualization:tileMap"
+            "description": "Non-default value of visualization:tileMap:maxPrecision"
           }
         },
         "csv:separator": {
