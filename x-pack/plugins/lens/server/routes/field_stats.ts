@@ -86,6 +86,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             body: {
               query,
               aggs,
+              // @ts-expect-error SearchRequest doesn't know the property
               runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
@@ -175,7 +176,10 @@ export async function getNumberHistogram(
   const terms =
     'top_values' in minMaxResult.aggregations!.sample
       ? minMaxResult.aggregations!.sample.top_values
-      : { buckets: [] };
+      : {
+          buckets: [] as Array<{ doc_count: number; key: string | number }>,
+        };
+
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,

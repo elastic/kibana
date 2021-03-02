@@ -192,6 +192,7 @@ async function fetchIndexPatternStats({
       sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       fields: ['*'],
       _source: false,
+      // @ts-expect-error SearchRequest doesn't know the property
       runtime_mappings: runtimeFields.reduce((acc, field) => {
         if (!field.runtimeField) return acc;
         acc[field.name] = field.runtimeField;
