@@ -138,7 +138,7 @@ export class EnterpriseSearchRequestHandler {
         return response.custom({
           statusCode: status,
           headers: this.headers,
-          body: responseJson,
+          body: _sessionData ? responseJson : json,
         });
       } catch (e) {
         // Catch connection/auth errors
