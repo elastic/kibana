@@ -114,7 +114,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
       this.props.onSelect({
         ...preview,
         importer,
-        indexName: file.name.split('.')[0],
+        indexName: file.name.split('.')[0].toLowerCase(),
       });
     }
   }
