@@ -33,8 +33,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
   if (dimensions.x) {
-    getTimefilter().disableTimeRangeSelector();
-
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
