@@ -215,6 +215,7 @@ export const signalRulesAlertType = ({
                   hasTimestampFields(
                     wroteStatus,
                     hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    name,
                     timestampFieldCaps,
                     inputIndices,
                     ruleStatusService,

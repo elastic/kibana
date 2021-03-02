@@ -16,6 +16,7 @@ import {
   EuiPageContentBody,
   EuiTitle,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -25,10 +26,17 @@ import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
-import { ENGINE_CREATION_PATH } from '../../routes';
+import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
-import { CREATE_AN_ENGINE_BUTTON_LABEL, ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
+import {
+  CREATE_AN_ENGINE_BUTTON_LABEL,
+  CREATE_A_META_ENGINE_BUTTON_LABEL,
+  ENGINES_TITLE,
+  META_ENGINE_EMPTY_PROMPT_DESCRIPTION,
+  META_ENGINE_EMPTY_PROMPT_TITLE,
+  META_ENGINES_TITLE,
+} from './constants';
 import { EnginesLogic } from './engines_logic';
 import { EnginesTable } from './engines_table';
 
@@ -36,6 +44,7 @@ import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+
   const {
     dataLoading,
     engines,
@@ -45,6 +54,7 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesMeta,
     metaEnginesLoading,
   } = useValues(EnginesLogic);
+
   const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
     EnginesLogic
   );
@@ -99,15 +109,27 @@ export const EnginesOverview: React.FC = () => {
           />
         </EuiPageContentBody>
 
-        {metaEngines.length > 0 && (
+        {hasPlatinumLicense && (
           <>
             <EuiSpacer size="xl" />
             <EuiPageContentHeader>
-              <EuiTitle size="s">
-                <h2>
-                  <MetaEngineIcon /> {META_ENGINES_TITLE}
-                </h2>
-              </EuiTitle>
+              <EuiPageContentHeaderSection>
+                <EuiTitle size="s">
+                  <h2>
+                    <MetaEngineIcon /> {META_ENGINES_TITLE}
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+              <EuiPageContentHeaderSection>
+                <EuiButtonTo
+                  color="primary"
+                  fill
+                  data-test-subj="appSearchEnginesMetaEngineCreationButton"
+                  to={META_ENGINE_CREATION_PATH}
+                >
+                  {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                </EuiButtonTo>
+              </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
               <EnginesTable
@@ -117,6 +139,21 @@ export const EnginesOverview: React.FC = () => {
                   ...convertMetaToPagination(metaEnginesMeta),
                   hidePerPageOptions: true,
                 }}
+                noItemsMessage={
+                  <EuiEmptyPrompt
+                    title={<h2>{META_ENGINE_EMPTY_PROMPT_TITLE}</h2>}
+                    body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
+                    actions={
+                      <EuiButtonTo
+                        data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
+                        fill
+                        to={META_ENGINE_CREATION_PATH}
+                      >
+                        {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                      </EuiButtonTo>
+                    }
+                  />
+                }
                 onChange={handlePageChange(onMetaEnginesPagination)}
               />
             </EuiPageContentBody>
