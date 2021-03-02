@@ -8,7 +8,6 @@
 import { assign, omit } from 'lodash';
 
 import {
-  StatusAll,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
@@ -45,6 +44,7 @@ import {
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
+import { StatusAll } from '../components/status';
 
 import {
   ActionLicense,

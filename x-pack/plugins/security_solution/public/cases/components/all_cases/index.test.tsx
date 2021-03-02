@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { casesStatus, useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { StatusAll, CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -24,6 +24,7 @@ import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCasesColumns } from './columns';
 import { AllCases } from '.';
+import { StatusAll } from '../status';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
