@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClient } from 'kibana/server';
+import { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
 import { isFleetServerSetup } from '../services/fleet_server';
 
@@ -17,11 +18,13 @@ export interface AgentUsage {
 }
 
 export const getAgentUsage = async (
+  config: FleetConfigType,
   soClient?: SavedObjectsClient,
   esClient?: ElasticsearchClient
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
-  if (!soClient || !esClient || !(await isFleetServerSetup())) {
+  const fleetServerMissing = config.agents.fleetServerEnabled && !(await isFleetServerSetup());
+  if (!soClient || !esClient || fleetServerMissing) {
     return {
       total: 0,
       online: 0,
