@@ -47,6 +47,7 @@ export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testi
       language: 'kuery',
       enabled: true,
       tags: ['rule1'],
+      max_signals: 500,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
