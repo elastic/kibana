@@ -42,7 +42,7 @@ export const rolesManagementApp = Object.freeze({
         const [
           [
             { application, docLinks, http, i18n: i18nStart, notifications, chrome },
-            { data, features },
+            { data, features, spaces },
           ],
           { RolesGridPage },
           { EditRolePage },
@@ -92,6 +92,8 @@ export const rolesManagementApp = Object.freeze({
                 },
           ]);
 
+          const spacesApiUi = spaces?.ui;
+
           return (
             <EditRolePage
               action={action}
@@ -109,6 +111,7 @@ export const rolesManagementApp = Object.freeze({
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
               history={history}
+              spacesApiUi={spacesApiUi}
             />
           );
         };

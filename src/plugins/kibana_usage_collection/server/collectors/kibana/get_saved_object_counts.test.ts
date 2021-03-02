@@ -12,7 +12,7 @@ import { getSavedObjectsCounts } from './get_saved_object_counts';
 export function mockGetSavedObjectsCounts(params: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   esClient.search.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: { ...params },
     }
