@@ -10,7 +10,6 @@ import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
-import { ApplicationUsageTracker } from '@kbn/analytics';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
@@ -35,6 +34,7 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
@@ -59,7 +59,6 @@ import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { Moment } from 'moment';
 import moment from 'moment';
 import { NameList } from 'elasticsearch';
@@ -1531,6 +1530,7 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
+    maxIndexPatterns?: number;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1998,13 +1998,19 @@ export interface QueryStringInputProps {
     // (undocumented)
     disableLanguageSwitcher?: boolean;
     // (undocumented)
-    iconType?: string;
+    iconType?: EuiIconProps['type'];
     // (undocumented)
     indexPatterns: Array<IIndexPattern | string>;
+    // (undocumented)
+    isClearable?: boolean;
     // (undocumented)
     isInvalid?: boolean;
     // (undocumented)
     languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+    // (undocumented)
+    nonKqlMode?: 'lucene' | 'text';
+    // (undocumented)
+    nonKqlModeHelpText?: string;
     // (undocumented)
     onBlur?: () => void;
     // (undocumented)
@@ -2254,8 +2260,8 @@ export const SEARCH_SESSIONS_MANAGEMENT_ID = "search_sessions";
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
-    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "indexPatterns" | "filters" | "dataTestSubj" | "intl" | "refreshInterval" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
+export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "placeholder" | "isLoading" | "iconType" | "indexPatterns" | "filters" | "dataTestSubj" | "isClearable" | "intl" | "refreshInterval" | "nonKqlMode" | "nonKqlModeHelpText" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, "query" | "placeholder" | "isLoading" | "iconType" | "indexPatterns" | "filters" | "dataTestSubj" | "isClearable" | "refreshInterval" | "nonKqlMode" | "nonKqlModeHelpText" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated">, any> & {
+    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "placeholder" | "isLoading" | "iconType" | "indexPatterns" | "filters" | "dataTestSubj" | "isClearable" | "intl" | "refreshInterval" | "nonKqlMode" | "nonKqlModeHelpText" | "screenTitle" | "onRefresh" | "onRefreshChange" | "showQueryInput" | "showDatePicker" | "showAutoRefreshOnly" | "dateRangeFrom" | "dateRangeTo" | "isRefreshPaused" | "customSubmitButton" | "timeHistory" | "indicateNoData" | "onFiltersUpdated" | "savedQuery" | "showSaveQuery" | "onClearSavedQuery" | "showQueryBar" | "showFilterBar" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated"> & ReactIntl.InjectedIntlProps>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "SearchBarOwnProps" needs to be exported by the entry point index.d.ts

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__';
+import {
+  mountWithIntl,
+  mockKibanaValues,
+  setMockActions,
+  setMockValues,
+} from '../../../../__mocks__';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, mount, ReactWrapper } from 'enzyme';
+import { shallow, ReactWrapper } from 'enzyme';
 
 import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -46,7 +51,7 @@ describe('Curations', () => {
 
   const actions = {
     loadCurations: jest.fn(),
-    deleteCurationSet: jest.fn(),
+    deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
   };
 
@@ -71,7 +76,7 @@ describe('Curations', () => {
   });
 
   it('calls loadCurations on page load', () => {
-    mount(<Curations />);
+    mountWithIntl(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
   });
@@ -95,7 +100,7 @@ describe('Curations', () => {
       let wrapper: ReactWrapper;
 
       beforeAll(() => {
-        wrapper = mount(<CurationsTable />);
+        wrapper = mountWithIntl(<CurationsTable />);
       });
 
       it('renders queries and last updated columns', () => {
@@ -106,8 +111,8 @@ describe('Curations', () => {
         expect(tableContent).toContain('mountains, valleys');
 
         expect(tableContent).toContain('Last updated');
-        expect(tableContent).toContain('January 1, 1970 at 12:00PM');
-        expect(tableContent).toContain('January 2, 1970 at 12:00PM');
+        expect(tableContent).toContain('Jan 1, 1970 12:00 PM');
+        expect(tableContent).toContain('Jan 2, 1970 12:00 PM');
       });
 
       it('renders queries with curation links', () => {
@@ -129,12 +134,12 @@ describe('Curations', () => {
           expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-id-2');
         });
 
-        it('delete action calls deleteCurationSet', () => {
+        it('delete action calls deleteCuration', () => {
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').first().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-1');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-1');
 
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').last().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-2');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-2');
         });
       });
     });
