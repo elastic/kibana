@@ -151,7 +151,11 @@ pipeline {
               }
               post {
                 always {
-                  echo "TBD"
+                  dir("${UPTIME_E2E_DIR}"){
+                    sh 'docker-compose logs > uptime-e2e-docker.log || true'
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: 'uptime-e2e-docker.log')
+                  }
+                  echo 'TBD: archive test output when the smoke tests generate junit output'
                 }
                 unsuccessful {
                   notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Test failures', 'FAILURE')
