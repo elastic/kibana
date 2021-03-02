@@ -157,7 +157,7 @@ export class ServiceSettings implements IServiceSettings {
    *
    * @param additionalQueryParams
    */
-  setQueryParams(additionalQueryParams: { [p: string]: string }) {
+  setQueryParams(additionalQueryParams: { [p: string]: string | undefined }) {
     // Functions more as a "set" than an "add" in ems-client
     this._emsClient.addQueryParams(additionalQueryParams);
   }
