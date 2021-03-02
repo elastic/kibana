@@ -32,7 +32,7 @@ import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
 const StyledEuiModal = styled(EuiModal)`
-${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
   max-width: 95vw;
   min-height: 90vh;
 
@@ -63,7 +63,6 @@ const StyledEuiModalBody = styled(EuiModalBody)`
     }
   }
 `;
-
 
 interface StatefulRowRenderersBrowserProps {
   timelineId: string;
@@ -116,52 +115,47 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-          <StyledEuiModal onClose={hideFieldBrowser}>
-            <EuiModalHeader>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                direction="row"
-                gutterSize="none"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
-                  <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="s"
-                        data-test-subj="disable-all"
-                        onClick={handleDisableAll}
-                      >
-                        {i18n.DISABLE_ALL}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
+        <StyledEuiModal onClose={hideFieldBrowser}>
+          <EuiModalHeader>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              direction="row"
+              gutterSize="none"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
+                <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      data-test-subj="disable-all"
+                      onClick={handleDisableAll}
+                    >
+                      {i18n.DISABLE_ALL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
 
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        size="s"
-                        data-test-subj="enable-all"
-                        onClick={handleEnableAll}
-                      >
-                        {i18n.ENABLE_ALL}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiModalHeader>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill size="s" data-test-subj="enable-all" onClick={handleEnableAll}>
+                      {i18n.ENABLE_ALL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalHeader>
 
-            <StyledEuiModalBody>
-              <RowRenderersBrowser
-                excludedRowRendererIds={excludedRowRendererIds}
-                setExcludedRowRendererIds={setExcludedRowRendererIds}
-              />
-            </StyledEuiModalBody>
-          </StyledEuiModal>
+          <StyledEuiModalBody>
+            <RowRenderersBrowser
+              excludedRowRendererIds={excludedRowRendererIds}
+              setExcludedRowRendererIds={setExcludedRowRendererIds}
+            />
+          </StyledEuiModalBody>
+        </StyledEuiModal>
       )}
     </>
   );
