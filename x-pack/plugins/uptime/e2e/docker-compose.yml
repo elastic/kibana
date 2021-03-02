@@ -36,6 +36,7 @@ services:
   heartbeat:
     image: docker.elastic.co/beats/heartbeat:${STACK_VERSION}
     container_name: uptime-e2e-heartbeat
+    command: -e --strict.perms=false
     depends_on:
       - elasticsearch
     volumes:
