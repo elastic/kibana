@@ -447,6 +447,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}

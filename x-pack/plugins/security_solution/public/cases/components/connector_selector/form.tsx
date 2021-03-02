@@ -22,6 +22,7 @@ interface ConnectorSelectorProps {
   isEdit: boolean;
   isLoading: boolean;
   handleChange?: (newValue: string) => void;
+  hideConnectorServiceNowSir?: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
@@ -32,6 +33,7 @@ export const ConnectorSelector = ({
   isEdit = true,
   isLoading = false,
   handleChange,
+  hideConnectorServiceNowSir = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const onChange = useCallback(
@@ -58,6 +60,7 @@ export const ConnectorSelector = ({
       <ConnectorsDropdown
         connectors={connectors}
         disabled={disabled}
+        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
         isLoading={isLoading}
         onChange={onChange}
         selectedConnector={isEmpty(field.value) ? 'none' : field.value}
