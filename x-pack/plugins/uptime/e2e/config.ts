@@ -41,6 +41,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--uiSettings.overrides.theme:darkMode=true`,
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
+        '--migrations.enableV2=false',
       ],
     },
   };
