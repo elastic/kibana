@@ -7479,7 +7479,10 @@
           }
         },
         "xPack:defaultAdminEmail": {
-          "type": "keyword"
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
         },
         "visualize:enableLabs": {
           "type": "boolean",
