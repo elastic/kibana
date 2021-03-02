@@ -21,19 +21,19 @@ export const InlineTagsList: React.FC<Props> = ({ displayCountOnly, tags }) => {
 
   const displayedTags = tags.slice(0, 2);
   const tooltipTags = tags.slice(displayCountOnly ? 0 : 2);
-  const tagsText = tags.length === 1 ? 'tag' : 'tags';
   const moreTagsMessage = displayCountOnly
-    ? `${tooltipTags.length} ${tagsText}`
-    : `and ${tooltipTags.length} more`;
+    ? i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.tagsCountBadge', {
+        defaultMessage: '{tagsCount, plural, one {# tag} other {# tags}}',
+        values: { tagsCount: tags.length },
+      })
+    : i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.moreTagsBadge', {
+        defaultMessage: 'and {moreTagsCount} more',
+        values: { moreTagsCount: tooltipTags.length },
+      });
 
   const TagToolTip = () => (
     <EuiToolTip position="bottom" content={tooltipTags.join(', ')}>
-      <EuiBadge color={displayCountOnly ? 'hollow' : 'default'}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.moreTagsBadge', {
-          defaultMessage: moreTagsMessage,
-          values: { moreTagsCount: tooltipTags.length },
-        })}
-      </EuiBadge>
+      <EuiBadge color={displayCountOnly ? 'hollow' : 'default'}>{moreTagsMessage}</EuiBadge>
     </EuiToolTip>
   );
 
