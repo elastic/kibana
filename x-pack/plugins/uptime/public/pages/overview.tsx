@@ -47,20 +47,17 @@ export const OverviewPageComponent = () => {
   useBreadcrumbs([]); // No extra breadcrumbs on overview
 
   return (
-    <>
-      <EmptyState>
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          <QueryBar />
-          <EuiFlexItemStyled grow={true}>
-            <FilterGroup />
-          </EuiFlexItemStyled>
-          {/*{error && !loading && <ParsingErrorCallout error={error} />}*/}
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <StatusPanel />
-        <EuiSpacer size="s" />
-        <MonitorList />
-      </EmptyState>
-    </>
+    <EmptyState>
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        <QueryBar />
+        <EuiFlexItemStyled grow={true}>
+          <FilterGroup />
+        </EuiFlexItemStyled>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <StatusPanel />
+      <EuiSpacer size="s" />
+      <MonitorList />
+    </EmptyState>
   );
 };

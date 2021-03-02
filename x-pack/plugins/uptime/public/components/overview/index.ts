@@ -10,5 +10,3 @@ export * from './empty_state';
 export * from './filter_group';
 export * from './alerts';
 export * from './snapshot';
-
-export { ParsingErrorCallout } from './parsing_error_callout';
