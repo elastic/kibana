@@ -120,7 +120,7 @@ export async function rebuildAllAction({
                 name: convertLegacyTypeToMetricsetName(legacyDoc.type),
               },
             };
-            const debug = legacyDoc.type === 'indices_stats';
+            // const debug = legacyDoc.type === 'indices_stats';
             for (const alias of aliases) {
               let value = _.get(legacyDoc, alias.key, null);
               if (value === null && alias.key.includes('.shards.')) {
