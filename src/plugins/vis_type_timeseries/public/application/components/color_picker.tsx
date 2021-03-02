@@ -74,10 +74,13 @@ export function ColorPicker({
       part[name] = hex ? `rgba(${rgba.join(',')})` : '';
       onChange(part);
       setColor(text);
-
-      clearOverwriteColor();
+      if (!isOnLegend) {
+        clearOverwriteColor();
+      } else {
+        setOverwrittenColor(text);
+      }
     },
-    [name, onChange, clearOverwriteColor]
+    [name, onChange, clearOverwriteColor, isOnLegend]
   );
 
   useEffect(() => {
