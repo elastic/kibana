@@ -64,6 +64,7 @@ export interface QueryBarTopRowProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   autoSubmit?: boolean;
+  storageKey?: string;
 }
 
 // Needed for React.lazy
@@ -198,6 +199,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
           nonKqlModeHelpText={props.nonKqlModeHelpText}
+          storageKey={props.storageKey}
         />
       </EuiFlexItem>
     );

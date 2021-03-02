@@ -73,10 +73,6 @@ export const useQueryBar = () => {
     [query]
   );
 
-  useEffect(() => {
-    storage.set(SYNTAX_STORAGE, query.language);
-  }, [query.language, storage]);
-
   useDebounce(
     () => {
       if (query.language === SyntaxType.kuery && !error && esFilters) {

@@ -17,6 +17,8 @@ import { useIndexPattern } from './use_index_pattern';
 import { useQueryBar } from './use_query_bar';
 import { UptimeStartupPluginsContext } from '../../../contexts';
 
+const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
+
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
     .globalQueryBar {
@@ -49,13 +51,13 @@ export const QueryBar = () => {
         iconType="search"
         isLoading={loading}
         isClearable={true}
-        onQueryChange={(queryN) => {
-          if (queryN.query?.language === 'text') {
-            setQuery(queryN.query);
+        onQueryChange={({ query: queryN }) => {
+          if (queryN?.language === 'text') {
+            setQuery({ query: queryN.query as string, language: queryN.language });
           }
         }}
-        onQuerySubmit={(queryN) => {
-          if (queryN.query) setQuery(queryN.query);
+        onQuerySubmit={({ query: queryN }) => {
+          if (queryN) setQuery({ query: queryN.query as string, language: queryN.language });
         }}
         query={query}
         aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
@@ -64,6 +66,7 @@ export const QueryBar = () => {
         data-test-subj="xpack.uptime.filterBar"
         useDefaultBehaviors={false}
         autoSubmit={true}
+        storageKey={SYNTAX_STORAGE}
       />
     </EuiFlexItemStyled>
   );

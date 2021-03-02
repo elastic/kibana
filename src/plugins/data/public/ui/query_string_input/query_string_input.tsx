@@ -67,6 +67,7 @@ export interface QueryStringInputProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   autoSubmit?: boolean;
+  storageKey?: string;
 }
 
 interface Props extends QueryStringInputProps {
@@ -486,12 +487,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('kibana.userQueryLanguage', language);
+    const storageKey = this.props.storageKey || 'kibana.userQueryLanguage';
+
+    this.services.storage.set(storageKey, language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
     this.onSubmit(newQuery);
-    this.reportUiCounter?.(METRIC_TYPE.LOADED, `query_string:language:${language}`);
+    this.reportUiCounter?.(
+      METRIC_TYPE.LOADED,
+      storageKey ? `${storageKey}:language:${language}` : `query_string:language:${language}`
+    );
   };
 
   private onOutsideClick = () => {

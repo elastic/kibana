@@ -76,6 +76,7 @@ export interface SearchBarOwnProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   autoSubmit?: boolean;
+  storageKey?: string;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -413,6 +414,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           autoSubmit={this.props.autoSubmit}
+          storageKey={this.props.storageKey}
         />
       );
     }
