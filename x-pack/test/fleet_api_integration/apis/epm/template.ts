@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { createAppContextStartContractMock } from '../../../../plugins/fleet/server/mocks';
+import { appContextService } from '../../../../plugins/fleet/server/services';
 import { getTemplate } from '../../../../plugins/fleet/server/services/epm/elasticsearch/template/template';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,6 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('EPM - template', async () => {
+    beforeEach(async () => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+
     it('can be loaded', async () => {
       const template = getTemplate({
         type: 'logs',
