@@ -19,11 +19,13 @@ const createTestCases = (spaceId: string) => {
   const exportableObjects = [
     cases.singleNamespaceObject,
     cases.multiNamespaceObject,
+    cases.multiNamespaceIsolatedObject,
     cases.namespaceAgnosticObject,
   ];
   const exportableTypes = [
     cases.singleNamespaceType,
     cases.multiNamespaceType,
+    cases.multiNamespaceIsolatedType,
     cases.namespaceAgnosticType,
   ];
   const nonExportableObjectsAndTypes = [cases.hiddenObject, cases.hiddenType];

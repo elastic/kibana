@@ -250,7 +250,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return es.send('GET', settingKeyToPathMap[settingsKey], null);
+    return es.send('GET', settingKeyToPathMap[settingsKey], null, true);
   } else {
     const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {

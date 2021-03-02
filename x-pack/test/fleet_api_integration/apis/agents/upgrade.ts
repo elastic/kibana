@@ -427,5 +427,84 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(400);
     });
+
+    describe('fleet upgrade agent(s) in a managed policy', function () {
+      it('should respond 400 to bulk upgrade and not update the agent SOs', async () => {
+        // update enrolled policy to managed
+        await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+        const kibanaVersion = await kibanaServer.version.get();
+        await kibanaServer.savedObjects.update({
+          id: 'agent1',
+          type: AGENT_SAVED_OBJECT_TYPE,
+          attributes: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
+        });
+        await kibanaServer.savedObjects.update({
+          id: 'agent2',
+          type: AGENT_SAVED_OBJECT_TYPE,
+          attributes: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+              },
+            },
+          },
+        });
+
+        // attempt to upgrade agent in managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            agents: ['agent1', 'agent2'],
+          })
+          .expect(400);
+        expect(body.message).to.contain('Cannot upgrade agent in managed policy policy1');
+
+        const [agent1data, agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent1`),
+          supertest.get(`/api/fleet/agents/agent2`),
+        ]);
+
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+        expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should respond 400 to upgrade and not update the agent SOs', async () => {
+        // update enrolled policy to managed
+        await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+        const kibanaVersion = await kibanaServer.version.get();
+        await kibanaServer.savedObjects.update({
+          id: 'agent1',
+          type: AGENT_SAVED_OBJECT_TYPE,
+          attributes: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
+        });
+
+        // attempt to upgrade agent in managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ version: kibanaVersion })
+          .expect(400);
+        expect(body.message).to.contain('Cannot upgrade agent agent1 in managed policy policy1');
+
+        const agent1data = await supertest.get(`/api/fleet/agents/agent1`);
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+      });
+    });
   });
 }

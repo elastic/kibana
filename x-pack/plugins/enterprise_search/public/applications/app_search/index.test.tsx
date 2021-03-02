@@ -10,6 +10,7 @@ import '../__mocks__/enterprise_search_url.mock';
 import { setMockValues, setMockActions } from '../__mocks__';
 
 import React from 'react';
+
 import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
@@ -17,6 +18,7 @@ import { shallow } from 'enzyme';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
 import { EngineRouter } from './components/engine';
+import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { SetupGuide } from './components/setup_guide';
@@ -100,8 +102,21 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('ability checks', () => {
-    // TODO: Use this section for routes wrapped in canViewX conditionals
-    // e.g., it('renders settings if a user can view settings')
+    describe('canManageEngines', () => {
+      it('renders EngineCreation when user canManageEngines is true', () => {
+        setMockValues({ myRole: { canManageEngines: true } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(EngineCreation)).toHaveLength(1);
+      });
+
+      it('does not render EngineCreation when user canManageEngines is false', () => {
+        setMockValues({ myRole: { canManageEngines: false } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(EngineCreation)).toHaveLength(0);
+      });
+    });
   });
 });
 

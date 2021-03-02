@@ -4,71 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState, useMemo, useCallback, ReactEventHandler } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import React, { ReactEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { Redirect, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
-  EuiSpacer,
   EuiBetaBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
+import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
 import {
   CreatePackagePolicyRouteState,
   DetailViewPanelName,
-  entries,
   InstallStatus,
   PackageInfo,
 } from '../../../../types';
-import { Loading, Error } from '../../../../components';
-import {
-  useGetPackageInfoByKey,
-  useBreadcrumbs,
-  useLink,
-  useCapabilities,
-} from '../../../../hooks';
+import { Error, Loading } from '../../../../components';
+import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
+import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 import { useSetPackageInstallStatus } from '../../hooks';
-import { IconPanel, LoadingIconPanel } from '../../components/icon_panel';
-import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components/release_badge';
-import { UpdateIcon } from '../../components/icons';
-import { Content } from './content';
+import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { OverviewPage } from './overview';
+import { PackagePoliciesPage } from './policies';
+import { SettingsPage } from './settings';
+import { CustomViewPage } from './custom';
 import './index.scss';
-import { useUIExtension } from '../../../../hooks/use_ui_extension';
-import { PLUGIN_ID } from '../../../../../../../common/constants';
-import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
-import { IntegrationAgentPolicyCount } from './integration_agent_policy_count';
-
-export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
 export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
-
-const PanelDisplayNames: Record<DetailViewPanelName, string> = {
-  overview: i18n.translate('xpack.fleet.epm.packageDetailsNav.overviewLinkText', {
-    defaultMessage: 'Overview',
-  }),
-  policies: i18n.translate('xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText', {
-    defaultMessage: 'Policies',
-  }),
-  settings: i18n.translate('xpack.fleet.epm.packageDetailsNav.settingsLinkText', {
-    defaultMessage: 'Settings',
-  }),
-  custom: i18n.translate('xpack.fleet.epm.packageDetailsNav.packageCustomLinkText', {
-    defaultMessage: 'Advanced',
-  }),
-};
 
 const Divider = styled.div`
   width: 0;
@@ -82,12 +60,12 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
 `;
 
 function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
-  useBreadcrumbs('integration_details', { pkgTitle: packageTitle });
+  useBreadcrumbs('integration_details_overview', { pkgTitle: packageTitle });
   return null;
 }
 
 export function Detail() {
-  const { pkgkey, panel = DEFAULT_PANEL } = useParams<DetailParams>();
+  const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const history = useHistory();
@@ -247,7 +225,7 @@ export function Detail() {
                     { isDivider: true },
                     {
                       label: i18n.translate('xpack.fleet.epm.usedByLabel', {
-                        defaultMessage: 'Agent Policies',
+                        defaultMessage: 'Agent policies',
                       }),
                       'data-test-subj': 'agentPolicyCount',
                       content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
@@ -306,37 +284,79 @@ export function Detail() {
     ]
   );
 
-  const tabs = useMemo<WithHeaderLayoutProps['tabs']>(() => {
+  const headerTabs = useMemo<WithHeaderLayoutProps['tabs']>(() => {
     if (!packageInfo) {
       return [];
     }
+    const packageInfoKey = pkgKeyFromPackageInfo(packageInfo);
 
-    return (entries(PanelDisplayNames)
-      .filter(([panelId]) => {
-        // Don't show `Policies` tab if package is not installed
-        if (panelId === 'policies' && packageInstallStatus !== InstallStatus.installed) {
-          return false;
-        }
+    const tabs: WithHeaderLayoutProps['tabs'] = [
+      {
+        id: 'overview',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.overviewLinkText"
+            defaultMessage="Overview"
+          />
+        ),
+        isSelected: panel === 'overview',
+        'data-test-subj': `tab-overview`,
+        href: getHref('integration_details_overview', {
+          pkgkey: packageInfoKey,
+        }),
+      },
+    ];
 
-        // Don't show `custom` tab if a custom component is not registered
-        if (panelId === 'custom' && !showCustomTab) {
-          return false;
-        }
+    if (packageInstallStatus === InstallStatus.installed) {
+      tabs.push({
+        id: 'policies',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
+            defaultMessage="Policies"
+          />
+        ),
+        isSelected: panel === 'policies',
+        'data-test-subj': `tab-policies`,
+        href: getHref('integration_details_policies', {
+          pkgkey: packageInfoKey,
+        }),
+      });
+    }
 
-        return true;
-      })
-      .map(([panelId, display]) => {
-        return {
-          id: panelId,
-          name: display,
-          isSelected: panelId === panel,
-          'data-test-subj': `tab-${panelId}`,
-          href: getHref('integration_details', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo || {}),
-            panel: panelId,
-          }),
-        };
-      }) as unknown) as WithHeaderLayoutProps['tabs'];
+    tabs.push({
+      id: 'settings',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetailsNav.settingsLinkText"
+          defaultMessage="Settings"
+        />
+      ),
+      isSelected: panel === 'settings',
+      'data-test-subj': `tab-settings`,
+      href: getHref('integration_details_settings', {
+        pkgkey: packageInfoKey,
+      }),
+    });
+
+    if (showCustomTab) {
+      tabs.push({
+        id: 'custom',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageCustomLinkText"
+            defaultMessage="Advanced"
+          />
+        ),
+        isSelected: panel === 'custom',
+        'data-test-subj': `tab-custom`,
+        href: getHref('integration_details_custom', {
+          pkgkey: packageInfoKey,
+        }),
+      });
+    }
+
+    return tabs;
   }, [getHref, packageInfo, panel, showCustomTab, packageInstallStatus]);
 
   return (
@@ -344,7 +364,7 @@ export function Detail() {
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
-      tabs={tabs}
+      tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
       {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
@@ -361,7 +381,21 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Content {...packageInfo} panel={panel} />
+        <Switch>
+          <Route path={PAGE_ROUTING_PATHS.integration_details_overview}>
+            <OverviewPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={PAGE_ROUTING_PATHS.integration_details_settings}>
+            <SettingsPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={PAGE_ROUTING_PATHS.integration_details_policies}>
+            <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+          </Route>
+          <Route path={PAGE_ROUTING_PATHS.integration_details_custom}>
+            <CustomViewPage packageInfo={packageInfo} />
+          </Route>
+          <Redirect to={PAGE_ROUTING_PATHS.integration_details_overview} />
+        </Switch>
       )}
     </WithHeaderLayout>
   );

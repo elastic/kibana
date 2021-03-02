@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
-import { CreateJobLinkCard } from '../create_job_link_card';
+import { LinkCard } from '../link_card';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
@@ -34,7 +34,7 @@ export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
 
   return (
     <EuiFlexItem>
-      <CreateJobLinkCard
+      <LinkCard
         data-test-subj={`mlRecognizerCard ${config.id}`}
         href={href}
         title={config.title}

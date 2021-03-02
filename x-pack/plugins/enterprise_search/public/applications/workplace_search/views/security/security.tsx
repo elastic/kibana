@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiConfirmModal,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -169,18 +168,16 @@ export const Security: React.FC = () => {
   );
 
   const confirmModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={CONFIRM_CHANGES_TEXT}
-        onConfirm={savePrivateSources}
-        onCancel={hideConfirmModal}
-        buttonColor="primary"
-        cancelButtonText={KEEP_EDITING_BUTTON}
-        confirmButtonText={SAVE_CHANGES_BUTTON}
-      >
-        {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={CONFIRM_CHANGES_TEXT}
+      onConfirm={savePrivateSources}
+      onCancel={hideConfirmModal}
+      buttonColor="primary"
+      cancelButtonText={KEEP_EDITING_BUTTON}
+      confirmButtonText={SAVE_CHANGES_BUTTON}
+    >
+      {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
+    </EuiConfirmModal>
   );
 
   return (

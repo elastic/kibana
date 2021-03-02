@@ -9,7 +9,7 @@ Clears the [editor state](./kibana-plugin-plugins-embeddable-public.embeddableed
 <b>Signature:</b>
 
 ```typescript
-clearEditorState(appId: string): void;
+clearEditorState(appId?: string): void;
 ```
 
 ## Parameters

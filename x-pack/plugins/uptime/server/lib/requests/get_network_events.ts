@@ -50,6 +50,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
         event._source.synthetics.payload.response.timing
           ? secondsToMillis(event._source.synthetics.payload.response.timing.request_time)
           : undefined;
+      const securityDetails = event._source.synthetics.payload.response?.security_details;
 
       return {
         timestamp: event._source['@timestamp'],
@@ -61,6 +62,22 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
         requestStartTime,
         loadEndTime,
         timings: event._source.synthetics.payload.timings,
+        bytesDownloadedCompressed: event._source.synthetics.payload.response?.encoded_data_length,
+        certificates: securityDetails
+          ? {
+              issuer: securityDetails.issuer,
+              subjectName: securityDetails.subject_name,
+              validFrom: securityDetails.valid_from
+                ? secondsToMillis(securityDetails.valid_from)
+                : undefined,
+              validTo: securityDetails.valid_to
+                ? secondsToMillis(securityDetails.valid_to)
+                : undefined,
+            }
+          : undefined,
+        requestHeaders: event._source.synthetics.payload.request?.headers,
+        responseHeaders: event._source.synthetics.payload.response?.headers,
+        ip: event._source.synthetics.payload.response?.remote_i_p_address,
       };
     }),
   };

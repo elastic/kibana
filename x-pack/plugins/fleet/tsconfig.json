@@ -1,18 +1,21 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
   },
   "include": [
     // add all the folders containg files to be compiled
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "scripts/**/*"
+    "server/**/*.json",
+    "scripts/**/*",
+    "package.json",
+    "../../typings/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

@@ -537,6 +537,7 @@ describe('Task Run Statistics', () => {
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
       );
       events$.next(asTaskManagerStatEvent('pollingDelay', asOk(0)));
+      events$.next(asTaskManagerStatEvent('claimDuration', asOk(10)));
       events$.next(
         asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
       );

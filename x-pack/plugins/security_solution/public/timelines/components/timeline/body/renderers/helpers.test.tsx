@@ -193,7 +193,19 @@ describe('helpers', () => {
     });
 
     describe('valid values', () => {
-      const validValues = ['file_create_event', 'created', 'file_delete_event', 'deleted'];
+      const validValues = [
+        'created',
+        'creation',
+        'deleted',
+        'deletion',
+        'file_create_event',
+        'file_delete_event',
+        'files-encrypted',
+        'load',
+        'modification',
+        'overwrite',
+        'rename',
+      ];
 
       validValues.forEach((eventAction) => {
         test(`${eventAction} returns true`, () => {

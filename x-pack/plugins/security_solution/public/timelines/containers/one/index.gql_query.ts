@@ -58,6 +58,13 @@ export const oneTimelineQuery = gql`
         end
       }
       description
+      eqlOptions {
+        eventCategoryField
+        tiebreakerField
+        timestampField
+        query
+        size
+      }
       eventType
       eventIdToNoteIds {
         eventId

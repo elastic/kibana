@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectTypeRegistry } from 'src/core/server';
-import { SpacesClient } from '../spaces_client';
-import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import Boom from '@hapi/boom';
+
+import { SavedObjectTypeRegistry } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+
+import { DEFAULT_SPACE_ID } from '../../common/constants';
+import type { SpacesClient } from '../spaces_client';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
@@ -584,6 +586,58 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.removeReferencesTo).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#openPointInTimeForType', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.openPointInTimeForType('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.openPointInTimeForType('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith('foo', {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#closePointInTime', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.closePointInTime('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { succeeded: true, num_freed: 1 };
+        baseClient.closePointInTime.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.closePointInTime('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.closePointInTime).toHaveBeenCalledWith('foo', {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });

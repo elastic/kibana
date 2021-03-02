@@ -8,13 +8,18 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
-export function initDeleteCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteCommentApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -23,13 +28,18 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           case_id: schema.string(),
           comment_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         const myComment = await caseService.getComment({
@@ -41,10 +51,13 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
-        if (caseRef == null || (caseRef != null && caseRef.id !== request.params.case_id)) {
+        const type = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const id = request.query?.subCaseId ?? request.params.case_id;
+
+        const caseRef = myComment.references.find((c) => c.type === type);
+        if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
           throw Boom.notFound(
-            `This comment ${request.params.comment_id} does not exist in ${request.params.case_id}).`
+            `This comment ${request.params.comment_id} does not exist in ${id}).`
           );
         }
 
@@ -60,7 +73,8 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
               action: 'delete',
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
+              caseId: id,
+              subCaseId: request.query?.subCaseId,
               commentId: request.params.comment_id,
               fields: ['comment'],
             }),
@@ -69,6 +83,9 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

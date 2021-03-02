@@ -6,12 +6,16 @@
  */
 
 import { curry } from 'lodash';
-
-import { KibanaRequest, kibanaResponseFactory } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, CasePostRequest } from '../../../common/api';
-import { createCaseClient } from '../../client';
-import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
+import {
+  CasePatchRequest,
+  CasePostRequest,
+  CommentRequest,
+  CommentType,
+} from '../../../common/api';
+import { createExternalCaseClient } from '../../client';
+import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
   ExecutorSubActionAddCommentParams,
@@ -19,9 +23,10 @@ import {
   CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
-import type { CasesRequestHandlerContext } from '../../types';
 
-import { GetActionTypeParams } from '..';
+import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
+import { nullUser } from '../../common';
+import { createCaseError } from '../../common/error';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -69,18 +74,18 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient } = services;
-  const caseClient = createCaseClient({
+  const { savedObjectsClient, scopedClusterClient } = services;
+  const caseClient = createExternalCaseClient({
     savedObjectsClient,
-    request: {} as KibanaRequest,
-    response: kibanaResponseFactory,
+    scopedClusterClient,
+    // we might want the user information to be passed as part of the action request
+    user: nullUser,
     caseService,
     caseConfigureService,
     connectorMappingsService,
     userActionService,
     alertsService,
-    // TODO: When case connector is enabled we should figure out how to pass the context.
-    context: {} as CasesRequestHandlerContext,
+    logger,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -90,7 +95,17 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({ theCase: subActionParams as CasePostRequest });
+    try {
+      data = await caseClient.create({
+        ...(subActionParams as CasePostRequest),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create a case using connector: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'update') {
@@ -102,16 +117,96 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({
-      caseClient,
-      cases: { cases: [updateParamsWithoutNullValues] },
-    });
+    try {
+      data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseClient, caseId, comment });
+    try {
+      const formattedComment = transformConnectorComment(comment, logger);
+      data = await caseClient.addComment({ caseId, comment: formattedComment });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
 }
+
+/**
+ * This converts a connector style generated alert ({_id: string} | {_id: string}[]) to the expected format of addComment.
+ */
+interface AttachmentAlerts {
+  ids: string[];
+  indices: string[];
+  rule: { id: string | null; name: string | null };
+}
+
+/**
+ * Convert a connector style comment passed through the action plugin to the expected format for the add comment functionality.
+ *
+ * @param comment an object defining the comment to be attached to a case/sub case
+ * @param logger an optional logger to handle logging an error if parsing failed
+ *
+ * Note: This is exported so that the integration tests can use it.
+ */
+export const transformConnectorComment = (
+  comment: CommentSchemaType,
+  logger?: Logger
+): CommentRequest => {
+  if (isCommentGeneratedAlert(comment)) {
+    try {
+      const genAlerts: Array<{
+        _id: string;
+        _index: string;
+        ruleId: string | undefined;
+        ruleName: string | undefined;
+      }> = JSON.parse(
+        `${comment.alerts.substring(0, comment.alerts.lastIndexOf(separator))}]`.replace(
+          new RegExp(separator, 'g'),
+          ','
+        )
+      );
+
+      const { ids, indices, rule } = genAlerts.reduce<AttachmentAlerts>(
+        (acc, { _id, _index, ruleId, ruleName }) => {
+          // Mutation is faster than destructing.
+          // Mutation usually leads to side effects but for this scenario it's ok to do it.
+          acc.ids.push(_id);
+          acc.indices.push(_index);
+          // We assume one rule per batch of alerts, this will use the rule information from the last entry in the array
+          acc.rule = { id: ruleId ?? null, name: ruleName ?? null };
+          return acc;
+        },
+        { ids: [], indices: [], rule: { id: null, name: null } }
+      );
+
+      return {
+        type: CommentType.generatedAlert,
+        alertId: ids,
+        index: indices,
+        rule,
+      };
+    } catch (e) {
+      throw createCaseError({
+        message: `Error parsing generated alert in case connector -> ${e}`,
+        error: e,
+        logger,
+      });
+    }
+  } else {
+    return comment;
+  }
+};

@@ -30,8 +30,10 @@ export interface SearchSessionIndicatorProps {
   onContinueInBackground?: () => void;
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
+  onViewSearchSessions?: () => void;
   onSaveResults?: () => void;
-
+  managementDisabled?: boolean;
+  managementDisabledReasonText?: string;
   saveDisabled?: boolean;
   saveDisabledReasonText?: string;
 
@@ -77,18 +79,26 @@ const ContinueInBackgroundButton = ({
 
 const ViewAllSearchSessionsButton = ({
   viewSearchSessionsLink = 'management/kibana/search_sessions',
+  onViewSearchSessions = () => {},
   buttonProps = {},
+  managementDisabled,
+  managementDisabledReasonText,
 }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    href={viewSearchSessionsLink}
-    data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
-      defaultMessage="Manage sessions"
-    />
-  </EuiButtonEmpty>
+  <EuiToolTip content={managementDisabledReasonText}>
+    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+    <EuiButtonEmpty
+      href={viewSearchSessionsLink}
+      onClick={onViewSearchSessions}
+      data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
+      isDisabled={managementDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
+        defaultMessage="Manage sessions"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
 const SaveButton = ({
@@ -153,7 +163,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Completed]: {
     button: {
       color: 'subdued',
-      iconType: 'clock',
+      iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',
       }),

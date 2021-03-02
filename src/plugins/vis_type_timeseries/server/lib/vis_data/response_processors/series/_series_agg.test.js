@@ -67,6 +67,44 @@ describe('seriesAgg', () => {
         ],
       ]);
     });
+
+    test('returns the count of series', () => {
+      expect(seriesAgg.count(series)).toEqual([
+        [
+          [0, 3],
+          [1, 3],
+          [2, 3],
+        ],
+      ]);
+    });
+
+    test('returns the count of missing series', () => {
+      expect(
+        seriesAgg.count([
+          [
+            [0, null],
+            [1, null],
+            [2, 0],
+          ],
+          [
+            [0, 0],
+            [1, null],
+            [2, 3],
+          ],
+          [
+            [0, 2],
+            [1, null],
+            [2, 3],
+          ],
+        ])
+      ).toEqual([
+        [
+          [0, 2],
+          [1, 0],
+          [2, 3],
+        ],
+      ]);
+    });
   });
 
   describe('overall', () => {

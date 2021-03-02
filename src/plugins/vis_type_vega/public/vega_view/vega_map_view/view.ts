@@ -68,11 +68,18 @@ export class VegaMapView extends VegaBaseView {
 
   private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapboxOptions> {
     const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
-    const zoomSettings = validateZoomSettings(this._parser.mapConfig, defaults, this.onWarn);
+    const { zoom, maxZoom, minZoom } = validateZoomSettings(
+      this._parser.mapConfig,
+      defaults,
+      this.onWarn
+    );
+    const { signals } = this._vegaStateRestorer.restore() || {};
 
     return {
-      ...zoomSettings,
-      center: [longitude, latitude],
+      maxZoom,
+      minZoom,
+      zoom: signals?.zoom ?? zoom,
+      center: [signals?.longitude ?? longitude, signals?.latitude ?? latitude],
       scrollZoom: scrollWheelZoom,
     };
   }
@@ -137,6 +144,12 @@ export class VegaMapView extends VegaBaseView {
     if (this.shouldShowZoomControl) {
       mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     }
+
+    // disable map rotation using right click + drag
+    mapBoxInstance.dragRotate.disable();
+
+    // disable map rotation using touch rotation gesture
+    mapBoxInstance.touchZoomRotate.disableRotation();
   }
 
   private initLayers(mapBoxInstance: Map, vegaView: View) {

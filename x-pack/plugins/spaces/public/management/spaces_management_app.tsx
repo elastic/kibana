@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, useParams } from 'react-router-dom';
+import { Route, Router, Switch, useParams } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
-import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
-import { SpacesGridPage } from './spaces_grid';
-import { ManageSpacePage } from './edit_space';
-import { Space } from '..';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
@@ -26,26 +26,34 @@ interface CreateParams {
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
   create({ getStartServices, spacesManager }: CreateParams) {
+    const title = i18n.translate('xpack.spaces.displayName', {
+      defaultMessage: 'Spaces',
+    });
+
     return {
       id: this.id,
       order: 2,
-      title: i18n.translate('xpack.spaces.displayName', {
-        defaultMessage: 'Spaces',
-      }),
+      title,
 
       async mount({ element, setBreadcrumbs, history }) {
+        const [startServices, { SpacesGridPage }, { ManageSpacePage }] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./edit_space'),
+        ]);
+
         const [
-          { notifications, i18n: i18nStart, application },
+          { notifications, i18n: i18nStart, application, chrome },
           { features },
-        ] = await getStartServices();
+        ] = startServices;
         const spacesBreadcrumbs = [
           {
-            text: i18n.translate('xpack.spaces.management.breadcrumb', {
-              defaultMessage: 'Spaces',
-            }),
+            text: title,
             href: `/`,
           },
         ];
+
+        chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(spacesBreadcrumbs);
@@ -132,6 +140,7 @@ export const spacesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

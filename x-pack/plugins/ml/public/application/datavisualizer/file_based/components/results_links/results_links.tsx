@@ -20,10 +20,12 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../../src/plugins/discover/public';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 const RECHECK_DELAY_MS = 3000;
 
 interface Props {
+  fieldStats: FindFileStructureResponse['field_stats'];
   index: string;
   indexPatternId: string;
   timeFieldName?: string;
@@ -32,6 +34,7 @@ interface Props {
 }
 
 export const ResultsLinks: FC<Props> = ({
+  fieldStats,
   index,
   indexPatternId,
   timeFieldName,
@@ -55,7 +58,7 @@ export const ResultsLinks: FC<Props> = ({
 
   const {
     services: {
-      application: { getUrlForApp },
+      application: { getUrlForApp, capabilities },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -66,6 +69,11 @@ export const ResultsLinks: FC<Props> = ({
     let unmounted = false;
 
     const getDiscoverUrl = async (): Promise<void> => {
+      const isDiscoverAvailable = capabilities.discover?.show ?? false;
+      if (!isDiscoverAvailable) {
+        return;
+      }
+
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
@@ -133,7 +141,7 @@ export const ResultsLinks: FC<Props> = ({
     return () => {
       unmounted = true;
     };
-  }, [indexPatternId, getUrlGenerator]);
+  }, [indexPatternId, getUrlGenerator, JSON.stringify(globalState)]);
 
   useEffect(() => {
     setShowCreateJobLink(checkPermission('canCreateJob') && mlNodesAvailable());
@@ -149,6 +157,22 @@ export const ResultsLinks: FC<Props> = ({
     };
     setGlobalState(_globalState);
   }, [duration]);
+
+  useEffect(() => {
+    // Update the global time range from known timeFieldName if stats is available
+    if (
+      fieldStats &&
+      typeof fieldStats === 'object' &&
+      timeFieldName !== undefined &&
+      fieldStats.hasOwnProperty(timeFieldName) &&
+      fieldStats[timeFieldName].earliest !== undefined &&
+      fieldStats[timeFieldName].latest !== undefined
+    ) {
+      setGlobalState({
+        time: { from: fieldStats[timeFieldName].earliest!, to: fieldStats[timeFieldName].latest! },
+      });
+    }
+  }, [timeFieldName, fieldStats]);
 
   async function updateTimeValues(recheck = true) {
     if (timeFieldName !== undefined) {

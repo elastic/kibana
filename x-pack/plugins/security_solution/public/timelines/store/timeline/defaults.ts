@@ -15,17 +15,25 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
-export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
+export const timelineDefaults: SubsetTimelineModel &
+  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
   activeTab: TimelineTabs.query,
   columns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: 'event.sequence',
+    timestampField: '@timestamp',
+    query: '',
+    size: 100,
+  },
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],

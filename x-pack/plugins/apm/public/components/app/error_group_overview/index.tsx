@@ -27,8 +27,9 @@ interface ErrorGroupOverviewProps {
 }
 
 export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, sortField, sortDirection } = urlParams;
+  const {
+    urlParams: { environment, kuery, start, end, sortField, sortDirection },
+  } = useUrlParams();
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -46,17 +47,18 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
               serviceName,
             },
             query: {
+              environment,
+              kuery,
               start,
               end,
               sortField,
               sortDirection: normalizedSortDirection,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
+    [environment, kuery, serviceName, start, end, sortField, sortDirection]
   );
 
   useTrackPageview({

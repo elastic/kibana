@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { OperatorFunction, Subject } from 'rxjs';
+import { OperatorFunction, ReplaySubject } from 'rxjs';
 import { share, tap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
@@ -47,7 +47,7 @@ export const useDataSearch = <
 }) => {
   const { services } = useKibanaContextForPlugin();
   const requests$ = useObservable(
-    () => new Subject<ParsedDataSearchRequestDescriptor<Request, Response>>(),
+    () => new ReplaySubject<ParsedDataSearchRequestDescriptor<Request, Response>>(1),
     []
   );
 

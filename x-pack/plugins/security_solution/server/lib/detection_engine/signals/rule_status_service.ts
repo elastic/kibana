@@ -24,7 +24,7 @@ interface Attributes {
 export interface RuleStatusService {
   goingToRun: () => Promise<void>;
   success: (message: string, attributes?: Attributes) => Promise<void>;
-  partialFailure: (message: string, attributes?: Attributes) => Promise<void>;
+  warning: (message: string, attributes?: Attributes) => Promise<void>;
   error: (message: string, attributes?: Attributes) => Promise<void>;
 }
 
@@ -48,7 +48,7 @@ export const buildRuleStatusAttributes: (
         lastSuccessMessage: message,
       };
     }
-    case 'partial failure': {
+    case 'warning': {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
@@ -102,7 +102,7 @@ export const ruleStatusServiceFactory = async ({
       });
     },
 
-    partialFailure: async (message, attributes) => {
+    warning: async (message, attributes) => {
       const [currentStatus] = await getOrCreateRuleStatuses({
         alertId,
         ruleStatusClient,
@@ -110,7 +110,7 @@ export const ruleStatusServiceFactory = async ({
 
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('partial failure', message, attributes),
+        ...buildRuleStatusAttributes('warning', message, attributes),
       });
     },
 

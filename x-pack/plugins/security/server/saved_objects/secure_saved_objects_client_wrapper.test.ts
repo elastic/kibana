@@ -905,6 +905,17 @@ describe('#find', () => {
     );
   });
 
+  test(`throws BadRequestError when searching across namespaces when pit is provided`, async () => {
+    const options = {
+      type: [type1, type2],
+      pit: { id: 'abc123' },
+      namespaces: ['some-ns', 'another-ns'],
+    };
+    await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"_find across namespaces is not permitted when using the \`pit\` option."`
+    );
+  });
+
   test(`checks privileges for user, actions, and namespaces`, async () => {
     const options = { type: [type1, type2], namespaces };
     await expectPrivilegeCheck(client.find, { options }, namespaces);
@@ -984,6 +995,64 @@ describe('#get', () => {
     await expect(() => client.get(type, id, { namespace })).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_get', EventOutcome.FAILURE, { type, id });
+  });
+});
+
+describe('#openPointInTimeForType', () => {
+  const type = 'foo';
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.openPointInTimeForType, { type });
+  });
+
+  test(`returns result of baseClient.openPointInTimeForType when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    const result = await expectSuccess(client.openPointInTimeForType, { type, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
+    const options = { namespace };
+    await expectSuccess(client.openPointInTimeForType, { type, options });
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.UNKNOWN);
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.openPointInTimeForType(type, { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.FAILURE);
+  });
+});
+
+describe('#closePointInTime', () => {
+  const id = 'abc123';
+  const namespace = 'some-ns';
+
+  test(`returns result of baseClient.closePointInTime`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.closePointInTime.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    const result = await client.closePointInTime(id, options);
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`adds audit event`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.closePointInTime.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    await client.closePointInTime(id, options);
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_close_point_in_time', EventOutcome.UNKNOWN);
   });
 });
 

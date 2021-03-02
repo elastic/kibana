@@ -28,7 +28,7 @@ import { act, cleanup } from '@testing-library/react';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
-  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
+  const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
@@ -100,7 +100,7 @@ describe('when on integration detail', () => {
     it('should redirect if custom url is accessed', () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
@@ -148,7 +148,7 @@ describe('when on integration detail', () => {
     it('should display custom content when tab is clicked', async () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       await lazyComponentWasRendered;
@@ -173,14 +173,14 @@ describe('when on integration detail', () => {
         onCancelNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
-        onCancelUrl: '#/integrations/detail/nginx-0.3.7',
+        onCancelUrl: '#/integrations/detail/nginx-0.3.7/overview',
         onSaveNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
       });
@@ -188,7 +188,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and on the Policies Tab', () => {
-    const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
+    const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey });
     beforeEach(() => {
       testRenderer.history.push(policiesTabURLPath);
       render();

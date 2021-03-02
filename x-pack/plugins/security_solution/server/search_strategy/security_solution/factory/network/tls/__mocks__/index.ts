@@ -69,6 +69,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggs: {
               count: { cardinality: { field: 'tls.server.hash.sha1' } },
@@ -99,7 +100,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -123,6 +123,7 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignoreUnavailable: true,
+  track_total_hits: false,
   body: {
     aggs: {
       count: { cardinality: { field: 'tls.server.hash.sha1' } },
@@ -153,6 +154,5 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
 };

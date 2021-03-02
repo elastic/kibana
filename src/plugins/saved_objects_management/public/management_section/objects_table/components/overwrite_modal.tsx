@@ -7,13 +7,7 @@
  */
 
 import React, { useState, Fragment, ReactNode } from 'react';
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EUI_MODAL_CONFIRM_BUTTON,
-  EuiText,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FailedImportConflict } from '../../../lib/resolve_import_errors';
@@ -98,29 +92,27 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
           }
         );
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
-          defaultMessage: 'Overwrite {type}?',
-          values: { type },
-        })}
-        cancelButtonText={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.cancelButtonText',
-          { defaultMessage: 'Skip' }
-        )}
-        confirmButtonText={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.overwriteButtonText',
-          { defaultMessage: 'Overwrite' }
-        )}
-        buttonColor="danger"
-        onCancel={() => onFinish(false)}
-        onConfirm={() => onFinish(true, destinationId)}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        maxWidth="500px"
-      >
-        <p>{bodyText}</p>
-        {selectControl}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
+        defaultMessage: 'Overwrite {type}?',
+        values: { type },
+      })}
+      cancelButtonText={i18n.translate(
+        'savedObjectsManagement.objectsTable.overwriteModal.cancelButtonText',
+        { defaultMessage: 'Skip' }
+      )}
+      confirmButtonText={i18n.translate(
+        'savedObjectsManagement.objectsTable.overwriteModal.overwriteButtonText',
+        { defaultMessage: 'Overwrite' }
+      )}
+      buttonColor="danger"
+      onCancel={() => onFinish(false)}
+      onConfirm={() => onFinish(true, destinationId)}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      maxWidth="500px"
+    >
+      <p>{bodyText}</p>
+      {selectControl}
+    </EuiConfirmModal>
   );
 };

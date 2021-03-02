@@ -17,22 +17,39 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
-import { Options, Choice } from './types';
+import { Fields, Choice } from './types';
+import { choicesToEuiOptions } from './helpers';
 
-const useGetChoicesFields = ['urgency', 'severity', 'impact'];
-const defaultOptions: Options = {
+const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
+const defaultFields: Fields = {
   urgency: [],
   severity: [],
   impact: [],
+  category: [],
+  subcategory: [],
 };
 
 const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowITSMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const init = useRef(true);
-  const { severity = null, urgency = null, impact = null } = fields ?? {};
+  const { severity = null, urgency = null, impact = null, category = null, subcategory = null } =
+    fields ?? {};
   const { http, notifications } = useKibana().services;
-  const [options, setOptions] = useState<Options>(defaultOptions);
+  const [choices, setChoices] = useState<Fields>(defaultFields);
+
+  const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
+  const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
+  const severityOptions = useMemo(() => choicesToEuiOptions(choices.severity), [choices.severity]);
+  const impactOptions = useMemo(() => choicesToEuiOptions(choices.impact), [choices.impact]);
+
+  const subcategoryOptions = useMemo(
+    () =>
+      choicesToEuiOptions(
+        choices.subcategory.filter((choice) => choice.dependent_value === category)
+      ),
+    [choices.subcategory, category]
+  );
 
   const listItems = useMemo(
     () => [
@@ -40,7 +57,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.URGENCY,
-              description: options.urgency.find((option) => `${option.value}` === urgency)?.text,
+              description: urgencyOptions.find((option) => `${option.value}` === urgency)?.text,
             },
           ]
         : []),
@@ -48,7 +65,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.SEVERITY,
-              description: options.severity.find((option) => `${option.value}` === severity)?.text,
+              description: severityOptions.find((option) => `${option.value}` === severity)?.text,
             },
           ]
         : []),
@@ -56,27 +73,53 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.IMPACT,
-              description: options.impact.find((option) => `${option.value}` === impact)?.text,
+              description: impactOptions.find((option) => `${option.value}` === impact)?.text,
+            },
+          ]
+        : []),
+      ...(category != null && category.length > 0
+        ? [
+            {
+              title: i18n.CATEGORY,
+              description: categoryOptions.find((option) => `${option.value}` === category)?.text,
+            },
+          ]
+        : []),
+      ...(subcategory != null && subcategory.length > 0
+        ? [
+            {
+              title: i18n.SUBCATEGORY,
+              description: subcategoryOptions.find((option) => `${option.value}` === subcategory)
+                ?.text,
             },
           ]
         : []),
     ],
-    [urgency, options.urgency, options.severity, options.impact, severity, impact]
+    [
+      category,
+      categoryOptions,
+      impact,
+      impactOptions,
+      severity,
+      severityOptions,
+      subcategory,
+      subcategoryOptions,
+      urgency,
+      urgencyOptions,
+    ]
   );
 
-  const onChoicesSuccess = (choices: Choice[]) =>
-    setOptions(
-      choices.reduce(
-        (acc, choice) => ({
+  const onChoicesSuccess = (values: Choice[]) => {
+    setChoices(
+      values.reduce(
+        (acc, value) => ({
           ...acc,
-          [choice.element]: [
-            ...(acc[choice.element] != null ? acc[choice.element] : []),
-            { value: choice.value, text: choice.label },
-          ],
+          [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
         }),
-        defaultOptions
+        defaultFields
       )
     );
+  };
 
   const { isLoading: isLoadingChoices } = useGetChoices({
     http,
@@ -100,17 +143,17 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   useEffect(() => {
     if (init.current) {
       init.current = false;
-      onChange({ urgency, severity, impact });
+      onChange({ urgency, severity, impact, category, subcategory });
     }
-  }, [impact, onChange, severity, urgency]);
+  }, [category, impact, onChange, severity, subcategory, urgency]);
 
   return isEdit ? (
-    <div data-test-subj={'connector-fields-sn'}>
+    <div data-test-subj={'connector-fields-sn-itsm'}>
       <EuiFormRow fullWidth label={i18n.URGENCY}>
         <EuiSelect
           fullWidth
           data-test-subj="urgencySelect"
-          options={options.urgency}
+          options={urgencyOptions}
           value={urgency ?? undefined}
           isLoading={isLoadingChoices}
           disabled={isLoadingChoices}
@@ -125,7 +168,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
             <EuiSelect
               fullWidth
               data-test-subj="severitySelect"
-              options={options.severity}
+              options={severityOptions}
               value={severity ?? undefined}
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
@@ -139,12 +182,43 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
             <EuiSelect
               fullWidth
               data-test-subj="impactSelect"
-              options={options.impact}
+              options={impactOptions}
               value={impact ?? undefined}
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
               hasNoInitialSelection
               onChange={(e) => onChangeCb('impact', e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.CATEGORY}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="categorySelect"
+              options={categoryOptions}
+              value={category ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              hasNoInitialSelection
+              onChange={(e) => onChange({ ...fields, category: e.target.value, subcategory: null })}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="subcategorySelect"
+              options={subcategoryOptions}
+              // Needs an empty string instead of undefined to select the blank option when changing categories
+              value={subcategory ?? ''}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              hasNoInitialSelection
+              onChange={(e) => onChangeCb('subcategory', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -87,6 +87,7 @@ export const buildUniquePrivateIpsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         ...getAggs('source'),
@@ -98,7 +99,6 @@ export const buildUniquePrivateIpsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

@@ -493,6 +493,15 @@ describe('helpers', () => {
       expect(result.exceptions_list).toEqual([getListMock()]);
     });
 
+    test('returns a threat indicator path', () => {
+      mockData = {
+        ...mockData,
+        threatIndicatorPath: 'my_custom.path',
+      };
+      const result = formatAboutStepData(mockData);
+      expect(result.threat_indicator_path).toEqual('my_custom.path');
+    });
+
     test('returns formatted object with both exceptions_lists', () => {
       const result = formatAboutStepData(
         {

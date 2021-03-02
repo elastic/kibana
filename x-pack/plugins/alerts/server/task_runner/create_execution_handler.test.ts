@@ -72,6 +72,7 @@ const createExecutionHandlerParams: jest.Mocked<
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
+  kibanaBaseUrl: 'http://localhost:5601',
   alertType,
   logger: loggingSystemMock.create().get(),
   eventLogger: mockEventLogger,

@@ -39,13 +39,13 @@ export const buildHostOverviewQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: false,
     },
   };
 

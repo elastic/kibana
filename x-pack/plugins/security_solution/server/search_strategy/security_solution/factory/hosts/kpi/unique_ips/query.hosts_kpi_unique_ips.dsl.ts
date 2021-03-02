@@ -30,6 +30,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         unique_source_ips: {
@@ -75,7 +76,6 @@ export const buildHostsKpiUniqueIpsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiOverlayMask, EuiButton } from '@elastic/eui';
+import { EuiConfirmModal, EuiButton } from '@elastic/eui';
 import React, { PureComponent, Fragment } from 'react';
 import { Job, Props as ListingProps } from '../report_listing';
 
@@ -62,19 +62,17 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
     });
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={() => this.hideConfirm()}
-          onConfirm={() => this.props.performDelete()}
-          confirmButtonText={confirmButtonText}
-          cancelButtonText={cancelButtonText}
-          defaultFocusedButton="confirm"
-          buttonColor="danger"
-        >
-          {message}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={() => this.hideConfirm()}
+        onConfirm={() => this.props.performDelete()}
+        confirmButtonText={confirmButtonText}
+        cancelButtonText={cancelButtonText}
+        defaultFocusedButton="confirm"
+        buttonColor="danger"
+      >
+        {message}
+      </EuiConfirmModal>
     );
   }
 

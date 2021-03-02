@@ -100,7 +100,6 @@ interface RoleInterface {
       siem: string[];
       actions: string[];
       builtInAlerts: string[];
-      savedObjectsManagement: string[];
     };
     spaces: string[];
   }>;

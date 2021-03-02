@@ -18,6 +18,7 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
+  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
@@ -51,6 +52,12 @@ export const addsException = (exception: Exception) => {
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const openExceptionModalFromRuleSettings = () => {
+  cy.get(ADD_EXCEPTIONS_BTN).click();
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
@@ -89,4 +96,8 @@ export const waitForTheRuleToBeExecuted = async () => {
     cy.get(REFRESH_BUTTON).click({ force: true });
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
   }
+};
+
+export const goBackToAllRulesTable = () => {
+  cy.get(BACK_TO_RULES).click();
 };

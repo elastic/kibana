@@ -16,7 +16,7 @@ import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 
-export function initPushCaseApi({ router }: RouteDeps) {
+export function initPushCaseApi({ router, logger }: RouteDeps) {
   router.post(
     {
       path: CASE_PUSH_URL,
@@ -26,18 +26,18 @@ export function initPushCaseApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
-      const caseClient = context.case.getCaseClient();
-      const actionsClient = context.actions?.getActionsClient();
-
-      if (actionsClient == null) {
-        return response.badRequest({ body: 'Action client not found' });
-      }
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const actionsClient = context.actions?.getActionsClient();
+
+        if (actionsClient == null) {
+          return response.badRequest({ body: 'Action client not found' });
+        }
+
         const params = pipe(
           CasePushRequestParamsRt.decode(request.params),
           fold(throwErrors(Boom.badRequest), identity)
@@ -45,13 +45,13 @@ export function initPushCaseApi({ router }: RouteDeps) {
 
         return response.ok({
           body: await caseClient.push({
-            caseClient,
             actionsClient,
             caseId: params.case_id,
             connectorId: params.connector_id,
           }),
         });
       } catch (error) {
+        logger.error(`Failed to push case in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

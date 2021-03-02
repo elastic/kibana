@@ -131,7 +131,10 @@ describe('Push case', () => {
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(caseClient.getAlerts).toHaveBeenCalledWith({ ids: ['test-id'] });
+    expect(caseClient.getAlerts).toHaveBeenCalledWith({
+      ids: ['test-id'],
+      indices: new Set<string>(['test-index']),
+    });
   });
 
   it(`Calls execute with correct arguments`, async () => {
@@ -167,7 +170,7 @@ describe('Push case', () => {
             parent: null,
             priority: 'High',
             labels: ['LOLBins'],
-            summary: 'Another bad one (created at 2019-11-25T22:32:17.947Z by elastic)',
+            summary: 'Another bad one',
             description:
               'Oh no, a bad meanie going LOLBins all over the place! (created at 2019-11-25T22:32:17.947Z by elastic)',
             externalId: null,

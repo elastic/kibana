@@ -31,5 +31,7 @@
     { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
+    { "path": "../alerts/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

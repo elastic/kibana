@@ -62,6 +62,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
   async init() {
@@ -103,6 +104,10 @@ export class VegaBaseView {
           this._$messages = null;
         }
         if (this._view) {
+          const state = this._view.getState();
+          if (state) {
+            this._vegaStateRestorer.save(state);
+          }
           this._view.finalize();
         }
         this._view = null;
@@ -167,7 +172,7 @@ export class VegaBaseView {
     // Override URL sanitizer to prevent external data loading (if disabled)
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
-    vegaLoader.sanitize = (uri, options) => {
+    vegaLoader.sanitize = async (uri, options) => {
       if (uri.bypassToken === bypassToken) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
@@ -184,7 +189,11 @@ export class VegaBaseView {
           })
         );
       }
-      return originalSanitize(uri, options);
+      const result = await originalSanitize(uri, options);
+      // This will allow Vega users to load images from any domain.
+      result.crossOrigin = null;
+
+      return result;
     };
     config.loader = vegaLoader;
 
@@ -262,7 +271,13 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
-      return view.runAsync(); // Allows callers to await rendering
+      const state = this._vegaStateRestorer.restore();
+
+      if (state) {
+        return view.setState(state);
+      } else {
+        return view.runAsync();
+      }
     }
   }
 

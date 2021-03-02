@@ -40,7 +40,21 @@ export const signalSchema = schema.object({
   severityMapping: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threshold: schema.maybe(
-    schema.object({ field: schema.nullable(schema.string()), value: schema.number() })
+    schema.object({
+      // Can be an empty string or empty array
+      field: schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      // Always required
+      value: schema.number(),
+      cardinality: schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            field: schema.string(),
+            value: schema.number(),
+          }),
+          { maxSize: 1 }
+        )
+      ),
+    })
   ),
   timestampOverride: schema.nullable(schema.string()),
   to: schema.string(),
@@ -52,6 +66,7 @@ export const signalSchema = schema.object({
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatFilters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatIndex: schema.maybe(schema.arrayOf(schema.string())),
+  threatIndicatorPath: schema.maybe(schema.string()),
   threatQuery: schema.maybe(schema.string()),
   threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatLanguage: schema.maybe(schema.string()),

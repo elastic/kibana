@@ -56,7 +56,7 @@ const { dragging } = useContext(DragContext);
 return (
   <DragDrop
     className="axis"
-    dropType={getDropTypes(dragging)}
+    dropType={getDropProps(dragging)}
     onDrop={(item) => onChange([...items, item])}
   >
     {items.map((x) => (

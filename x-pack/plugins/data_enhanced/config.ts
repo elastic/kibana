@@ -13,7 +13,7 @@ export const configSchema = schema.object({
       /**
        * Turns the feature on \ off (incl. removing indicator and management screens)
        */
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
       /**
        * pageSize controls how many search session objects we load at once while monitoring
        * session completion

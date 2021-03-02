@@ -22,5 +22,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./sessions_management'));
+    loadTestFile(require.resolve('./sessions_management_permissions'));
   });
 }

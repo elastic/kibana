@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EuiSelectOption } from '@elastic/eui';
-
 export interface Choice {
   value: string;
   label: string;
@@ -15,4 +13,3 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
-export type Options = Record<string, EuiSelectOption[]>;

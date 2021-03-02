@@ -24,6 +24,7 @@ const createTestCases = (crossSpaceSearch?: string[]) => {
   const normalTypes = [
     cases.singleNamespaceType,
     cases.multiNamespaceType,
+    cases.multiNamespaceIsolatedType,
     cases.namespaceAgnosticType,
     cases.eachType,
     cases.pageBeyondTotal,

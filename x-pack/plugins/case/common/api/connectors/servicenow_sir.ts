@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 
+// New fields should also be added at: x-pack/plugins/case/server/connectors/case/schema.ts
 export const ServiceNowSIRFieldsRT = rt.type({
   category: rt.union([rt.string, rt.null]),
   destIp: rt.union([rt.boolean, rt.null]),

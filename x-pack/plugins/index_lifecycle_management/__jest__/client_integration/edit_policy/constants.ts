@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+
 import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
@@ -234,3 +236,32 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
   },
   name: POLICY_NAME,
 } as any) as PolicyFromES;
+
+export const getGeneratedPolicies = (): PolicyFromES[] => {
+  const policy = {
+    phases: {
+      hot: {
+        min_age: '0s',
+        actions: {
+          rollover: {
+            max_size: '1gb',
+          },
+        },
+      },
+    },
+  };
+  const policies: PolicyFromES[] = [];
+  for (let i = 0; i < 105; i++) {
+    policies.push({
+      version: i,
+      modified_date: moment().subtract(i, 'days').toISOString(),
+      linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+      name: `testy${i}`,
+      policy: {
+        ...policy,
+        name: `testy${i}`,
+      },
+    });
+  }
+  return policies;
+};

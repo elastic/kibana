@@ -393,6 +393,7 @@ export const getResult = (): RuleAlertType => ({
     threatMapping: undefined,
     threatLanguage: undefined,
     threatIndex: undefined,
+    threatIndicatorPath: undefined,
     threatQuery: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
@@ -435,6 +436,35 @@ export const getMlResult = (): RuleAlertType => {
       type: 'machine_learning',
       anomalyThreshold: 44,
       machineLearningJobId: 'some_job_id',
+    },
+  };
+};
+
+export const getThresholdResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'threshold',
+      threshold: {
+        field: 'host.ip',
+        value: 5,
+      },
+    },
+  };
+};
+
+export const getEqlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'eql',
+      query: 'process where true',
     },
   };
 };

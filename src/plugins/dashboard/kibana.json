@@ -10,7 +10,8 @@
     "savedObjects",
     "share",
     "uiActions",
-    "urlForwarding"
+    "urlForwarding",
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "home",

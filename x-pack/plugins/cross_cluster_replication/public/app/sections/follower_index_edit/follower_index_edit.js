@@ -15,7 +15,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOverlayMask,
   EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
@@ -182,47 +181,45 @@ export class FollowerIndexEdit extends PureComponent {
     );
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={this.closeConfirmModal}
-          onConfirm={this.confirmSaveFollowerIhdex}
-          cancelButtonText={i18n.translate(
-            'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={
-            isPaused ? (
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmAndResumeButtonText"
-                defaultMessage="Update and resume"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText"
-                defaultMessage="Update"
-              />
-            )
+      <EuiConfirmModal
+        title={title}
+        onCancel={this.closeConfirmModal}
+        onConfirm={this.confirmSaveFollowerIhdex}
+        cancelButtonText={i18n.translate(
+          'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
           }
-        >
-          <p>
-            {isPaused ? (
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.resumeDescription"
-                defaultMessage="Updating a follower index resumes replication of its leader index."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
-                defaultMessage="The follower index is paused, then resumed. If the update fails,
+        )}
+        confirmButtonText={
+          isPaused ? (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmAndResumeButtonText"
+              defaultMessage="Update and resume"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText"
+              defaultMessage="Update"
+            />
+          )
+        }
+      >
+        <p>
+          {isPaused ? (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.resumeDescription"
+              defaultMessage="Updating a follower index resumes replication of its leader index."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
+              defaultMessage="The follower index is paused, then resumed. If the update fails,
                   try manually resuming replication."
-              />
-            )}
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            />
+          )}
+        </p>
+      </EuiConfirmModal>
     );
   };
 

@@ -16,17 +16,22 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Options } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
+import { choicesToEuiOptions } from './helpers';
+
 import * as i18n from './translations';
 
-const useGetChoicesFields = ['urgency', 'severity', 'impact'];
-const defaultOptions: Options = {
+const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
+const defaultFields: Fields = {
+  category: [],
+  subcategory: [],
   urgency: [],
   severity: [],
   impact: [],
+  priority: [],
 };
 
 const ServiceNowParamsFields: React.FunctionComponent<
@@ -48,7 +53,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const [options, setOptions] = useState<Options>(defaultOptions);
+  const [choices, setChoices] = useState<Fields>(defaultFields);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -73,19 +78,32 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  const onChoicesSuccess = (choices: Choice[]) =>
-    setOptions(
-      choices.reduce(
-        (acc, choice) => ({
+  const onChoicesSuccess = useCallback((values: Choice[]) => {
+    setChoices(
+      values.reduce(
+        (acc, value) => ({
           ...acc,
-          [choice.element]: [
-            ...(acc[choice.element] != null ? acc[choice.element] : []),
-            { value: choice.value, text: choice.label },
-          ],
+          [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
         }),
-        defaultOptions
+        defaultFields
       )
     );
+  }, []);
+
+  const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
+  const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
+  const severityOptions = useMemo(() => choicesToEuiOptions(choices.severity), [choices.severity]);
+  const impactOptions = useMemo(() => choicesToEuiOptions(choices.impact), [choices.impact]);
+
+  const subcategoryOptions = useMemo(
+    () =>
+      choicesToEuiOptions(
+        choices.subcategory.filter(
+          (subcategory) => subcategory.dependent_value === incident.category
+        )
+      ),
+    [choices.subcategory, incident.category]
+  );
 
   const { isLoading: isLoadingChoices } = useGetChoices({
     http,
@@ -140,7 +158,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           hasNoInitialSelection
           isLoading={isLoadingChoices}
           disabled={isLoadingChoices}
-          options={options.urgency}
+          options={urgencyOptions}
           value={incident.urgency ?? ''}
           onChange={(e) => editSubActionProperty('urgency', e.target.value)}
         />
@@ -155,7 +173,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
               hasNoInitialSelection
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
-              options={options.severity}
+              options={severityOptions}
               value={incident.severity ?? ''}
               onChange={(e) => editSubActionProperty('severity', e.target.value)}
             />
@@ -169,9 +187,50 @@ const ServiceNowParamsFields: React.FunctionComponent<
               hasNoInitialSelection
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
-              options={options.impact}
+              options={impactOptions}
               value={incident.impact ?? ''}
               onChange={(e) => editSubActionProperty('impact', e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="categorySelect"
+              hasNoInitialSelection
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={categoryOptions}
+              value={incident.category ?? undefined}
+              onChange={(e) => {
+                editAction(
+                  'subActionParams',
+                  {
+                    incident: { ...incident, category: e.target.value, subcategory: null },
+                    comments,
+                  },
+                  index
+                );
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="subcategorySelect"
+              hasNoInitialSelection
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={subcategoryOptions}
+              // Needs an empty string instead of undefined to select the blank option when changing categories
+              value={incident.subcategory ?? ''}
+              onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>

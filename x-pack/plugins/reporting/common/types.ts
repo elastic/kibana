@@ -76,7 +76,6 @@ export interface ReportSource {
   started_at?: string;
   completed_at?: string;
   created_at: string;
-  priority?: number;
   process_expiration?: string;
 }
 
@@ -113,7 +112,6 @@ export interface ReportApiJSON {
   kibana_id: string;
   browser_type: string | undefined;
   created_at: string;
-  priority?: number;
   jobtype: string;
   created_by: string | false;
   timeout?: number;

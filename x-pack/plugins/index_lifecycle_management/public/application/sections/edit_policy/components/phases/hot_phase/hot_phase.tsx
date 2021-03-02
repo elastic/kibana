@@ -16,7 +16,6 @@ import {
   EuiCallOut,
   EuiTextColor,
   EuiSwitch,
-  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -121,25 +120,12 @@ export const HotPhase: FunctionComponent = () => {
           <div aria-live="polite" role="region">
             <UseField<boolean> path="_meta.hot.customRollover.enabled">
               {(field) => (
-                <>
-                  <EuiSwitch
-                    label={field.label}
-                    checked={field.value}
-                    onChange={(e) => field.setValue(e.target.checked)}
-                    data-test-subj="rolloverSwitch"
-                  />
-                  &nbsp;
-                  <EuiIconTip
-                    type="questionInCircle"
-                    content={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="Roll over to a new index when the
-    current index meets one of the defined conditions."
-                      />
-                    }
-                  />
-                </>
+                <EuiSwitch
+                  label={field.label}
+                  checked={field.value}
+                  onChange={(e) => field.setValue(e.target.checked)}
+                  data-test-subj="rolloverSwitch"
+                />
               )}
             </UseField>
             {isUsingRollover && (

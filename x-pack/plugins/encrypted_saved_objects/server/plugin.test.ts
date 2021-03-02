@@ -19,12 +19,28 @@ describe('EncryptedSavedObjects Plugin', () => {
       );
       expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .toMatchInlineSnapshot(`
-              Object {
-                "createMigration": [Function],
-                "registerType": [Function],
-                "usingEphemeralEncryptionKey": true,
-              }
-            `);
+        Object {
+          "canEncrypt": false,
+          "createMigration": [Function],
+          "registerType": [Function],
+        }
+      `);
+    });
+
+    it('exposes proper contract when encryption key is set', () => {
+      const plugin = new EncryptedSavedObjectsPlugin(
+        coreMock.createPluginInitializerContext(
+          ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
+        )
+      );
+      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "canEncrypt": true,
+          "createMigration": [Function],
+          "registerType": [Function],
+        }
+      `);
     });
   });
 

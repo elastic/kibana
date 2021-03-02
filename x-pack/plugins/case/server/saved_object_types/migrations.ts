@@ -8,7 +8,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
-import { ConnectorTypes, CommentType } from '../../common/api';
+import {
+  ConnectorTypes,
+  CommentType,
+  CaseType,
+  AssociationType,
+  ESConnectorFields,
+} from '../../common/api';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -24,7 +30,7 @@ interface SanitizedCaseConnector {
     id: string;
     name: string | null;
     type: string | null;
-    fields: null;
+    fields: null | ESConnectorFields;
   };
 }
 
@@ -47,6 +53,10 @@ interface SanitizedCaseSettings {
   settings: {
     syncAlerts: boolean;
   };
+}
+
+interface SanitizedCaseType {
+  type: string;
 }
 
 export const caseMigrations = {
@@ -78,6 +88,26 @@ export const caseMigrations = {
         ...doc.attributes,
         settings: {
           syncAlerts: true,
+        },
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<SanitizedCaseConnector>
+  ): SavedObjectSanitizedDoc<SanitizedCaseType & SanitizedCaseConnector> => {
+    const { fields, type } = doc.attributes.connector;
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        type: CaseType.individual,
+        connector: {
+          ...doc.attributes.connector,
+          fields:
+            Array.isArray(fields) && fields.length > 0 && type === ConnectorTypes.serviceNowITSM
+              ? [...fields, { key: 'category', value: null }, { key: 'subcategory', value: null }]
+              : fields,
         },
       },
       references: doc.references || [],
@@ -150,11 +180,17 @@ export const userActionsMigrations = {
 
 interface UnsanitizedComment {
   comment: string;
+  type?: CommentType;
 }
 
 interface SanitizedComment {
   comment: string;
   type: CommentType;
+}
+
+interface SanitizedCommentForSubCases {
+  associationType: AssociationType;
+  rule?: { id: string | null; name: string | null };
 }
 
 export const commentsMigrations = {
@@ -167,6 +203,26 @@ export const commentsMigrations = {
         ...doc.attributes,
         type: CommentType.user,
       },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+  ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
+    let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+      ...doc.attributes,
+      associationType: AssociationType.case,
+    };
+
+    // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+    // introduced in 7.12.
+    if (doc.attributes.type === CommentType.alert) {
+      attributes = { ...attributes, rule: { id: null, name: null } };
+    }
+
+    return {
+      ...doc,
+      attributes,
       references: doc.references || [],
     };
   },

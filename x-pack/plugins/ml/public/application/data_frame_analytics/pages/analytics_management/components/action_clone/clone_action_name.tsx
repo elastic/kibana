@@ -121,6 +121,30 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               ignore: true,
             },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
+            },
           },
         }
       : {}),
@@ -214,6 +238,30 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             early_stopping_enabled: {
               optional: true,
               ignore: true,
+            },
+            alpha: {
+              optional: true,
+              formKey: 'alpha',
+            },
+            downsample_factor: {
+              optional: true,
+              formKey: 'downsampleFactor',
+            },
+            eta_growth_rate_per_tree: {
+              optional: true,
+              formKey: 'etaGrowthRatePerTree',
+            },
+            max_optimization_rounds_per_hyperparameter: {
+              optional: true,
+              formKey: 'maxOptimizationRoundsPerHyperparameter',
+            },
+            soft_tree_depth_limit: {
+              optional: true,
+              formKey: 'softTreeDepthLimit',
+            },
+            soft_tree_depth_tolerance: {
+              optional: true,
+              formKey: 'softTreeDepthTolerance',
             },
           },
         }

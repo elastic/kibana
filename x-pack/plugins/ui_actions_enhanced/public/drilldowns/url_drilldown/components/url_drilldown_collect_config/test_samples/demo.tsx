@@ -20,7 +20,14 @@ export const Demo = () => {
       <UrlDrilldownCollectConfig
         config={config}
         onConfig={onConfig}
-        variables={['event.key', 'event.value']}
+        variables={[
+          {
+            label: 'event.key',
+          },
+          {
+            label: 'event.value',
+          },
+        ]}
       />
       {JSON.stringify(config)}
     </>

@@ -21,6 +21,7 @@ import { NotFound } from '../shared/not_found';
 import { AppLogic } from './app_logic';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 import { EngineNav, EngineRouter } from './components/engine';
+import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
@@ -28,6 +29,7 @@ import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
+  ENGINE_CREATION_PATH,
   ROOT_PATH,
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
@@ -56,7 +58,10 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
-  const { hasInitialized } = useValues(AppLogic);
+  const {
+    hasInitialized,
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -96,6 +101,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
               <Route exact path={CREDENTIALS_PATH}>
                 <Credentials />
               </Route>
+              {canManageEngines && (
+                <Route exact path={ENGINE_CREATION_PATH}>
+                  <EngineCreation />
+                </Route>
+              )}
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>

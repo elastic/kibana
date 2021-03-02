@@ -40,6 +40,7 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   alertTypeRegistry: AlertTypeRegistry;
+  kibanaBaseUrl: string | undefined;
 }
 
 export class TaskRunnerFactory {

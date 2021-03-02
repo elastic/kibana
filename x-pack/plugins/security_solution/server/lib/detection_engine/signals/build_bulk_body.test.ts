@@ -36,7 +36,13 @@ describe('buildBulkBody', () => {
     delete doc._source.source;
     const fakeSignalSourceHit = buildBulkBody({
       doc,
-      ruleParams: sampleParams,
+      ruleParams: {
+        ...sampleParams,
+        threshold: {
+          field: ['host.name'],
+          value: 100,
+        },
+      },
       id: sampleRuleGuid,
       name: 'rule-name',
       actions: [],
@@ -110,6 +116,10 @@ describe('buildBulkBody', () => {
           severity_mapping: [],
           tags: ['some fake tag 1', 'some fake tag 2'],
           threat: [],
+          threshold: {
+            field: ['host.name'],
+            value: 100,
+          },
           throttle: 'no_actions',
           type: 'query',
           to: 'now',
@@ -136,15 +146,25 @@ describe('buildBulkBody', () => {
       _source: {
         ...baseDoc._source,
         threshold_result: {
+          terms: [
+            {
+              value: 'abcd',
+            },
+          ],
           count: 5,
-          value: 'abcd',
         },
       },
     };
     delete doc._source.source;
     const fakeSignalSourceHit = buildBulkBody({
       doc,
-      ruleParams: sampleParams,
+      ruleParams: {
+        ...sampleParams,
+        threshold: {
+          field: [],
+          value: 4,
+        },
+      },
       id: sampleRuleGuid,
       name: 'rule-name',
       actions: [],
@@ -218,6 +238,10 @@ describe('buildBulkBody', () => {
           severity_mapping: [],
           tags: ['some fake tag 1', 'some fake tag 2'],
           threat: [],
+          threshold: {
+            field: [],
+            value: 4,
+          },
           throttle: 'no_actions',
           type: 'query',
           to: 'now',
@@ -231,8 +255,12 @@ describe('buildBulkBody', () => {
           exceptions_list: getListArrayMock(),
         },
         threshold_result: {
+          terms: [
+            {
+              value: 'abcd',
+            },
+          ],
           count: 5,
-          value: 'abcd',
         },
         depth: 1,
       },

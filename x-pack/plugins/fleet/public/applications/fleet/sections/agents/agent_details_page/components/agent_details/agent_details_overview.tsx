@@ -174,7 +174,9 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription className="eui-textTruncate">
+                  {description}
+                </EuiDescriptionListDescription>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );

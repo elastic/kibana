@@ -89,6 +89,17 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
+    name: 'alertActionSubgroup',
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertActionSubgroupLabel',
+      {
+        defaultMessage:
+          'The alert action subgroup that was used to scheduled actions for the alert.',
+      }
+    ),
+  });
+
+  result.push({
     name: 'alertActionGroupName',
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.alertActionGroupNameLabel',
@@ -97,6 +108,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
           'The human readable name of the alert action group that was used to scheduled actions for the alert.',
       }
     ),
+  });
+
+  result.push({
+    name: 'kibanaBaseUrl',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.kibanaBaseUrlLabel', {
+      defaultMessage:
+        'The configured server.publicBaseUrl value or empty string if not configured.',
+    }),
   });
 
   return result;

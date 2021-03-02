@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 export class RemoveClusterButtonProvider extends Component {
   static propTypes = {
@@ -84,7 +84,7 @@ export class RemoveClusterButtonProvider extends Component {
       );
 
       modal = (
-        <EuiOverlayMask>
+        <>
           {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
           <EuiConfirmModal
             data-test-subj="remoteClustersDeleteConfirmModal"
@@ -108,7 +108,7 @@ export class RemoveClusterButtonProvider extends Component {
           >
             {!isSingleCluster && content}
           </EuiConfirmModal>
-        </EuiOverlayMask>
+        </>
       );
     }
 

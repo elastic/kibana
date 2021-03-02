@@ -10,7 +10,6 @@ import { PropTypes } from 'prop-types';
 
 import {
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -111,37 +110,35 @@ export class CalendarsListUI extends Component {
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            data-test-subj={'mlCalendarDeleteConfirmation'}
-            title={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
-                defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
-                values={{
-                  calendarsCount: selectedForDeletion.length,
-                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-                }}
-              />
-            }
-            onCancel={this.closeDestroyModal}
-            onConfirm={this.deleteCalendars}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            }
-            buttonColor="danger"
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          data-test-subj={'mlCalendarDeleteConfirmation'}
+          title={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
+              defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
+              values={{
+                calendarsCount: selectedForDeletion.length,
+                calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
+              }}
+            />
+          }
+          onCancel={this.closeDestroyModal}
+          onConfirm={this.deleteCalendars}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
       );
     }
 

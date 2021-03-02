@@ -36,7 +36,7 @@ import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
-import { SavedView } from '../../containers/saved_view/saved_view';
+import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
@@ -195,7 +195,7 @@ const PageContent = (props: {
   const { options } = useContext(MetricsExplorerOptionsContainer.Context);
 
   return (
-    <SavedView.Provider
+    <SavedViewProvider
       shouldLoadDefault={options.source === 'default'}
       viewType={'metrics-explorer-view'}
       defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
@@ -205,6 +205,6 @@ const PageContent = (props: {
         source={configuration}
         {...props}
       />
-    </SavedView.Provider>
+    </SavedViewProvider>
   );
 };

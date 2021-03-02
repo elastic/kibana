@@ -224,16 +224,16 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
     appenders: {
       auditTrailAppender: config.appender ?? {
-        kind: 'console',
+        type: 'console',
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           highlight: true,
         },
       },
     },
     loggers: [
       {
-        context: 'audit.ecs',
+        name: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

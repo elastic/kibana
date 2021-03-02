@@ -42,7 +42,7 @@ describe('TimeIntervalTriggeringPolicy', () => {
     interval: string = '15m',
     modulate: boolean = false
   ): TimeIntervalTriggeringPolicyConfig => ({
-    kind: 'time-interval',
+    type: 'time-interval',
     interval: schema.duration().validate(interval),
     modulate,
   });

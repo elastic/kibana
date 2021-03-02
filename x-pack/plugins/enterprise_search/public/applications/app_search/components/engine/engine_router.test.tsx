@@ -17,6 +17,7 @@ import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
+import { CurationsRouter } from '../curations';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 
@@ -97,7 +98,14 @@ describe('EngineRouter', () => {
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
   });
 
-  it('renders an relevance tuning view', () => {
+  it('renders a curations view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineCurations: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(CurationsRouter)).toHaveLength(1);
+  });
+
+  it('renders a relevance tuning view', () => {
     setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
     const wrapper = shallow(<EngineRouter />);
 

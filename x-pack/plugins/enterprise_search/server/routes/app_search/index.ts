@@ -9,6 +9,7 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerAnalyticsRoutes } from './analytics';
 import { registerCredentialsRoutes } from './credentials';
+import { registerCurationsRoutes } from './curations';
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
 import { registerEnginesRoutes } from './engines';
 import { registerSearchSettingsRoutes } from './search_settings';
@@ -21,5 +22,6 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerAnalyticsRoutes(dependencies);
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerCurationsRoutes(dependencies);
   registerSearchSettingsRoutes(dependencies);
 };

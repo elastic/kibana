@@ -8,7 +8,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -18,10 +18,12 @@ import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessage } from '../error_helper';
+import { ErrorMessage } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
+  errors: ErrorMessage[] | undefined;
   variables?: Record<string, unknown>;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
@@ -37,6 +39,46 @@ export interface ExpressionWrapperProps {
   className?: string;
 }
 
+interface VisualizationErrorProps {
+  errors: ExpressionWrapperProps['errors'];
+}
+
+export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
+  return (
+    <div className="lnsEmbeddedError">
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        data-test-subj="embeddable-lens-failure"
+        body={
+          <>
+            {errors ? (
+              <>
+                <p>{errors[0].longMessage}</p>
+                {errors.length > 1 ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.embeddable.failure"
+                  defaultMessage="Visualization couldn't be displayed"
+                />
+              </p>
+            )}
+          </>
+        }
+      />
+    </div>
+  );
+}
+
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
@@ -50,23 +92,12 @@ export function ExpressionWrapper({
   hasCompatibleActions,
   style,
   className,
+  errors,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
-      {expression === null || expression === '' ? (
-        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-          <EuiFlexItem>
-            <EuiIcon type="alert" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.lens.embeddable.failure"
-                defaultMessage="Visualization couldn't be displayed"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      {errors || expression === null || expression === '' ? (
+        <VisualizationErrorPanel errors={errors} />
       ) : (
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent

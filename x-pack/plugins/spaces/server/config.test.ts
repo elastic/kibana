@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { deepFreeze } from '@kbn/std';
+
 import { spacesConfigDeprecationProvider } from './config';
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {

@@ -16,6 +16,7 @@ import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  Flattened,
 } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
@@ -31,6 +32,7 @@ import {
   comment,
   entry,
   entriesNested,
+  nestedEntryItem,
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
@@ -42,6 +44,7 @@ import { validate } from '../../../../common/validate';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { addIdToItem, removeIdFromItem } from '../../../../common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -148,12 +151,12 @@ export const getNewExceptionItem = ({
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
-      {
+      addIdToItem({
         field: '',
         operator: 'included',
         type: 'match',
         value: '',
-      },
+      }),
     ],
     item_id: undefined,
     list_id: listId,
@@ -172,16 +175,37 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => {
-        const [validatedEntry] = validate(t, entry);
-        const [validatedNestedEntry] = validate(t, entriesNested);
+      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
 
-        if (validatedEntry != null || validatedNestedEntry != null) {
-          return true;
+        if (entriesNested.is(strippedSingleEntry)) {
+          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+            return validatedNestedEntry != null;
+          });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
+
+          const [validatedNestedEntry] = validate(
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
+            entriesNested
+          );
+
+          if (validatedNestedEntry != null) {
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
+          }
+          return nestedAcc;
+        } else {
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
+
+          if (validatedEntry != null) {
+            return [...nestedAcc, singleEntry];
+          }
+          return nestedAcc;
         }
-
-        return false;
-      });
+      }, []);
 
       const item = { ...exception, entries };
 
@@ -263,6 +287,16 @@ export const enrichNewExceptionItemsWithComments = (
     };
   });
 };
+
+export const buildGetAlertByIdQuery = (id: string | undefined) => ({
+  query: {
+    match: {
+      _id: {
+        query: id || '',
+      },
+    },
+  },
+});
 
 /**
  * Adds new and existing comments to exceptionItem
@@ -358,31 +392,50 @@ export const entryHasListType = (
  * Returns the value for `file.Ext.code_signature` which
  * can be an object or array of objects
  */
-export const getCodeSignatureValue = (
-  alertData: Ecs
+export const getFileCodeSignature = (
+  alertData: Flattened<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
-  // Pre 7.10 file.Ext.code_signature was mistakenly populated as
-  // a single object with subject_name and trusted.
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Returns the value for `process.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getProcessCodeSignature = (
+  alertData: Flattened<Ecs>
+): Array<{ subjectName: string; trusted: string }> => {
+  const { process } = alertData;
+  const codeSignature = process && process.Ext && process.Ext.code_signature;
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Pre 7.10 `Ext.code_signature` fields were mistakenly populated as
+ * a single object with subject_name and trusted.
+ */
+export const getCodeSignatureValue = (
+  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined
+): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    return codeSignature.map((signature) => ({
-      subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
-      trusted: (signature.trusted && signature.trusted[0]) ?? '',
-    }));
+    return codeSignature.map((signature) => {
+      return {
+        subjectName: signature.subject_name ?? '',
+        trusted: signature.trusted.toString() ?? '',
+      };
+    });
   } else {
-    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+    const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-    const subjectName: string | undefined =
-      signature && signature.subject_name && signature.subject_name[0];
-    const trusted: string | undefined = signature && signature.trusted && signature.trusted[0];
 
     return [
       {
-        subjectName: subjectName ?? '',
-        trusted: trusted ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted ?? '',
       },
     ];
   }
@@ -391,23 +444,24 @@ export const getCodeSignatureValue = (
 /**
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
-export const getPrepopulatedItem = ({
+export const getPrepopulatedEndpointException = ({
   listId,
   ruleName,
   codeSignature,
-  filePath,
-  sha256Hash,
   eventCode,
   listNamespace = 'agnostic',
+  alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
-  filePath: string;
-  sha256Hash: string;
   eventCode: string;
+  alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
+  const { file } = alertEcsData;
+  const filePath = file?.path ?? '';
+  const sha256Hash = file?.hash?.sha256 ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: [
@@ -440,6 +494,77 @@ export const getPrepopulatedItem = ({
         operator: 'included',
         type: 'match',
         value: sha256Hash ?? '',
+      },
+      {
+        field: 'event.code',
+        operator: 'included',
+        type: 'match',
+        value: eventCode ?? '',
+      },
+    ],
+  };
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedRansomwareException = ({
+  listId,
+  ruleName,
+  codeSignature,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string };
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process, Ransomware } = alertEcsData;
+  const sha256Hash = process?.hash?.sha256 ?? '';
+  const executable = process?.executable ?? '';
+  const ransomwareFeature = Ransomware?.feature ?? '';
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: [
+      {
+        field: 'process.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.trusted : '',
+          },
+        ],
+      },
+      {
+        field: 'process.executable',
+        operator: 'included',
+        type: 'match',
+        value: executable ?? '',
+      },
+      {
+        field: 'process.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: sha256Hash ?? '',
+      },
+      {
+        field: 'Ransomware.feature',
+        operator: 'included',
+        type: 'match',
+        value: ransomwareFeature ?? '',
       },
       {
         field: 'event.code',
@@ -487,18 +612,31 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: Ecs
+  alertEcsData: Flattened<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
-  const { file, event: alertEvent } = alertEcsData;
+  const { event: alertEvent } = alertEcsData;
+  const eventCode = alertEvent?.code ?? '';
 
-  return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
-    getPrepopulatedItem({
+  if (eventCode === 'ransomware') {
+    return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
+      getPrepopulatedRansomwareException({
+        listId,
+        ruleName,
+        eventCode,
+        codeSignature,
+        alertEcsData,
+      })
+    );
+  }
+
+  // By default return the standard prepopulated Endpoint Exception fields
+  return getFileCodeSignature(alertEcsData).map((codeSignature) =>
+    getPrepopulatedEndpointException({
       listId,
       ruleName,
-      filePath: file && file.path ? file.path[0] : '',
-      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
-      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
+      eventCode,
       codeSignature,
+      alertEcsData,
     })
   );
 };

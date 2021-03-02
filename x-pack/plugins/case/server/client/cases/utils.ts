@@ -38,6 +38,16 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
+import { getAlertIds } from '../../routes/api/utils';
+
+interface CreateIncidentArgs {
+  actionsClient: ActionsClient;
+  theCase: CaseResponse;
+  userActions: CaseUserActionsResponse;
+  connector: ActionConnector;
+  mappings: ConnectorMappingsAttributes[];
+  alerts: CaseClientGetAlertsResponse;
+}
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -66,21 +76,21 @@ const isConnectorSupported = (connectorId: string): connectorId is FormatterConn
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert) {
-    return `Alert with id ${comment.alertId} added to case`;
+  } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+    const ids = getAlertIds(comment);
+    return `Alert with ids ${ids.join(', ')} added to case`;
   }
 
   return '';
 };
 
-interface CreateIncidentArgs {
-  actionsClient: ActionsClient;
-  theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
-  connector: ActionConnector;
-  mappings: ConnectorMappingsAttributes[];
-  alerts: CaseClientGetAlertsResponse;
-}
+const countAlerts = (comments: CaseResponse['comments']): number =>
+  comments?.reduce<number>((total, comment) => {
+    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
+    }
+    return total;
+  }, 0) ?? 0;
 
 export const createIncident = async ({
   actionsClient,
@@ -150,22 +160,35 @@ export const createIncident = async ({
     userActions
       .slice(latestPushInfo?.index ?? 0)
       .filter(
-        (action, index) =>
-          Array.isArray(action.action_field) && action.action_field[0] === 'comment'
+        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
       )
       .map((action) => action.comment_id)
   );
-  const commentsToBeUpdated = caseComments?.filter((comment) =>
-    commentsIdsToBeUpdated.has(comment.id)
+
+  const commentsToBeUpdated = caseComments?.filter(
+    (comment) =>
+      // We push only user's comments
+      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
+  const totalAlerts = countAlerts(caseComments);
+
   let comments: ExternalServiceComment[] = [];
+
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
       comments = transformComments(commentsToBeUpdated, ['informationAdded']);
     }
   }
+
+  if (totalAlerts > 0) {
+    comments.push({
+      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${theCase.id}-total-alerts`,
+    });
+  }
+
   return { incident, comments };
 };
 
@@ -245,7 +268,13 @@ export const prepareFieldsForTransformation = ({
               key: mapping.target,
               value: params[mapping.source] ?? '',
               actionType: mapping.action_type,
-              pipes: mapping.action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+              pipes:
+                // Do not transform titles
+                mapping.source !== 'title'
+                  ? mapping.action_type === 'append'
+                    ? [...defaultPipes, 'append']
+                    : defaultPipes
+                  : [],
             },
           ]
         : acc,
@@ -306,11 +335,13 @@ export const getCommentContextFromAttributes = (
         type: CommentType.user,
         comment: attributes.comment,
       };
+    case CommentType.generatedAlert:
     case CommentType.alert:
       return {
-        type: CommentType.alert,
+        type: attributes.type,
         alertId: attributes.alertId,
         index: attributes.index,
+        rule: attributes.rule,
       };
     default:
       return {

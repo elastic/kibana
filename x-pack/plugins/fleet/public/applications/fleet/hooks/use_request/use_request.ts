@@ -19,7 +19,10 @@ let httpClient: HttpSetup;
 
 export type UseRequestConfig = _UseRequestConfig;
 
-interface RequestError extends Error {
+/**
+ * @internal
+ */
+export interface RequestError extends Error {
   statusCode?: number;
 }
 

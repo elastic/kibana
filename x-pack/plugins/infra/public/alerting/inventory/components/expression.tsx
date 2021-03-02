@@ -38,8 +38,10 @@ import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import {
+  IErrorObject,
+  AlertTypeParamsExpressionProps,
+} from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -78,22 +80,21 @@ export interface AlertContextMeta {
   customMetrics?: SnapshotCustomMetricInput[];
 }
 
-interface Props {
-  errors: IErrorObject[];
-  alertParams: {
-    criteria: InventoryMetricConditions[];
-    nodeType: InventoryItemType;
-    filterQuery?: string;
-    filterQueryText?: string;
-    sourceId: string;
-    alertOnNoData?: boolean;
-  };
-  alertInterval: string;
-  alertThrottle: string;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  metadata: AlertContextMeta;
-}
+type Criteria = InventoryMetricConditions[];
+type Props = Omit<
+  AlertTypeParamsExpressionProps<
+    {
+      criteria: Criteria;
+      nodeType: InventoryItemType;
+      filterQuery?: string;
+      filterQueryText?: string;
+      sourceId: string;
+      alertOnNoData?: boolean;
+    },
+    AlertContextMeta
+  >,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+>;
 
 export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
@@ -111,7 +112,15 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertInterval,
+    alertThrottle,
+    metadata,
+    alertNotifyWhen,
+  } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -186,7 +195,7 @@ export const Expressions: React.FC<Props> = (props) => {
         timeSize: ts,
       }));
       setTimeSize(ts || undefined);
-      setAlertParams('criteria', criteria);
+      setAlertParams('criteria', criteria as Criteria);
     },
     [alertParams.criteria, setAlertParams]
   );
@@ -198,7 +207,7 @@ export const Expressions: React.FC<Props> = (props) => {
         timeUnit: tu,
       }));
       setTimeUnit(tu as Unit);
-      setAlertParams('criteria', criteria);
+      setAlertParams('criteria', criteria as Criteria);
     },
     [alertParams.criteria, setAlertParams]
   );
@@ -301,7 +310,7 @@ export const Expressions: React.FC<Props> = (props) => {
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
               setAlertParams={updateParams}
-              errors={errors[idx] || emptyError}
+              errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
               fields={derivedIndexPattern.fields}
             />
@@ -385,6 +394,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertThrottle={alertThrottle}
+        alertNotifyWhen={alertNotifyWhen}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
@@ -406,7 +416,7 @@ interface ExpressionRowProps {
   expression: Omit<InventoryMetricConditions, 'metric'> & {
     metric?: SnapshotMetricType;
   };
-  errors: IErrorObject;
+  errors: AlertTypeParamsExpressionProps['errors'];
   canDelete: boolean;
   addExpression(): void;
   remove(id: number): void;

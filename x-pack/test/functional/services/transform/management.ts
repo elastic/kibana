@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type TransformManagement = ProvidedType<typeof TransformManagementProvider>;
 
 export function TransformManagementProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
