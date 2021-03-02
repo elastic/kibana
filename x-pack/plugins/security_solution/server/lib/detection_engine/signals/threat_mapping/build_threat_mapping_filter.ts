@@ -84,6 +84,7 @@ export const createInnerAndClauses = ({
                   query: value[0],
                   _name: encodeThreatMatchNamedQuery({
                     id: threatListItem._id,
+                    index: threatListItem._index,
                     field: threatMappingEntry.field,
                     value: threatMappingEntry.value,
                   }),

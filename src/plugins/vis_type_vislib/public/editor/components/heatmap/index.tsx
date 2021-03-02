@@ -23,6 +23,7 @@ import {
   SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   NumberInputOption,
+  PercentageModeOption,
 } from '../../../../../vis_default_editor/public';
 
 import { HeatmapVisParams } from '../../../heatmap';
@@ -125,13 +126,10 @@ function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
           setValue={setValueAxisScale}
         />
 
-        <SwitchOption
-          disabled={stateParams.setColorRange}
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.percentageModeLabel', {
-            defaultMessage: 'Percentage mode',
-          })}
-          paramName="percentageMode"
-          value={stateParams.setColorRange ? false : stateParams.percentageMode}
+        <PercentageModeOption
+          data-test-subj="metricPercentageMode"
+          percentageMode={stateParams.setColorRange ? false : stateParams.percentageMode}
+          formatPattern={stateParams.percentageFormatPattern}
           setValue={setValue}
         />
         <EuiSpacer size="s" />
