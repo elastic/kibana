@@ -1350,8 +1350,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L22"
+              "lineNumber": 23,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L23"
             }
           }
         ],
@@ -1370,8 +1370,8 @@
         "label": "handleEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L22"
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L23"
         },
         "returnComment": [],
         "initialIsOpen": false

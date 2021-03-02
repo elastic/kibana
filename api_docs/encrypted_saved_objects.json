@@ -149,8 +149,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L32"
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L34"
             }
           },
           {
@@ -160,8 +160,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L33"
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L35"
             },
             "signature": [
               "ReadonlySet<string | ",
@@ -182,8 +182,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L34"
+              "lineNumber": 36,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L36"
             },
             "signature": [
               "ReadonlySet<string> | undefined"
@@ -192,8 +192,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L31"
+          "lineNumber": 33,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L33"
         },
         "initialIsOpen": false
       },
@@ -210,8 +210,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L40"
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L41"
             },
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
@@ -236,8 +236,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-          "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L39"
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L40"
         },
         "initialIsOpen": false
       }
@@ -260,8 +260,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L31"
+            "lineNumber": 35,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L35"
           }
         },
         {
@@ -271,8 +271,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L32"
+            "lineNumber": 36,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L36"
           },
           "signature": [
             "(typeRegistration: ",
@@ -293,8 +293,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L33"
+            "lineNumber": 37,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L37"
           },
           "signature": [
             {
@@ -309,8 +309,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-        "lineNumber": 27,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L27"
+        "lineNumber": 31,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L31"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -328,8 +328,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 37,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L37"
+            "lineNumber": 41,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L41"
           },
           "signature": [
             "(error: Error) => boolean"
@@ -342,8 +342,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 38,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L38"
+            "lineNumber": 42,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L42"
           },
           "signature": [
             {
@@ -358,8 +358,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-        "lineNumber": 36,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L36"
+        "lineNumber": 40,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/encrypted_saved_objects/server/plugin.ts#L40"
       },
       "lifecycle": "start",
       "initialIsOpen": true

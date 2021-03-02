@@ -26,8 +26,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L24"
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L25"
             },
             "signature": [
               {
@@ -48,8 +48,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L29"
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L30"
             },
             "signature": [
               {
@@ -70,8 +70,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L34"
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L35"
             },
             "signature": [
               {
@@ -92,15 +92,15 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L41"
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L42"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L20"
+          "lineNumber": 21,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L21"
         },
         "initialIsOpen": false
       },
@@ -123,8 +123,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L14"
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L15"
             }
           },
           {
@@ -140,8 +140,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L15"
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L16"
             }
           },
           {
@@ -157,8 +157,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L16"
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L17"
             }
           },
           {
@@ -181,8 +181,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L17"
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L18"
             }
           },
           {
@@ -192,8 +192,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L18"
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L19"
             },
             "signature": [
               "Observable",
@@ -211,8 +211,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/common/licensing/license_service.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L13"
+          "lineNumber": 14,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/licensing/license_service.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -404,8 +404,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L28"
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L29"
             }
           },
           {
@@ -415,8 +415,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L29"
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L30"
             },
             "signature": [
               "IconType"
@@ -429,8 +429,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L30"
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L31"
             }
           },
           {
@@ -440,8 +440,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L31"
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L32"
             },
             "signature": [
               "number | undefined"
@@ -450,8 +450,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L27"
+          "lineNumber": 28,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/nav_control/nav_control_component.tsx#L28"
         },
         "initialIsOpen": false
       }
@@ -466,8 +466,8 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 170,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/plugin.tsx#L170"
+        "lineNumber": 168,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/plugin.tsx#L168"
       },
       "signature": [
         "{ authc: AuthenticationServiceSetup; sessionTimeout: ISessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
@@ -488,8 +488,8 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 171,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/plugin.tsx#L171"
+        "lineNumber": 169,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/public/plugin.tsx#L169"
       },
       "signature": [
         "{ navControlService: ",
@@ -521,8 +521,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L59"
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L60"
             }
           },
           {
@@ -534,8 +534,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L63"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L64"
             }
           },
           {
@@ -547,8 +547,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L67"
+              "lineNumber": 68,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L68"
             },
             "signature": [
               "number | undefined"
@@ -563,15 +563,15 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L71"
+              "lineNumber": 72,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L72"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L55"
+          "lineNumber": 56,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L56"
         },
         "initialIsOpen": false
       },
@@ -590,8 +590,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L46"
+              "lineNumber": 47,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L47"
             },
             "signature": [
               "string[]"
@@ -600,8 +600,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L45"
+          "lineNumber": 46,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L46"
         },
         "initialIsOpen": false
       },
@@ -622,8 +622,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L96"
+              "lineNumber": 97,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L97"
             },
             "signature": [
               "string[]"
@@ -638,8 +638,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L100"
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L101"
             },
             "signature": [
               "string[]"
@@ -654,8 +654,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L104"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L105"
             }
           },
           {
@@ -667,8 +667,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L108"
+              "lineNumber": 109,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L109"
             },
             "signature": [
               "{ type: string; reason: string; caused_by: { type: string; reason: string; }; }[] | undefined"
@@ -677,8 +677,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 92,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L92"
+          "lineNumber": 93,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L93"
         },
         "initialIsOpen": false
       },
@@ -697,8 +697,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L78"
+              "lineNumber": 79,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L79"
             }
           },
           {
@@ -710,8 +710,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L82"
+              "lineNumber": 83,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L83"
             }
           },
           {
@@ -723,15 +723,15 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L86"
+              "lineNumber": 87,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L87"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L74"
+          "lineNumber": 75,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L75"
         },
         "initialIsOpen": false
       },
@@ -748,8 +748,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L30"
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L33"
             },
             "signature": [
               "(eventType: string, message: string, data?: Record<string, any> | undefined) => void"
@@ -758,8 +758,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L29"
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L32"
         },
         "initialIsOpen": false
       },
@@ -776,8 +776,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L34"
+              "lineNumber": 37,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L37"
             },
             "signature": [
               "(event: ",
@@ -794,8 +794,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L33"
+          "lineNumber": 36,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_service.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -816,8 +816,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L26"
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L27"
             }
           },
           {
@@ -827,8 +827,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L27"
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L28"
             },
             "signature": [
               "{ action: string; category?: ",
@@ -865,8 +865,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L33"
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L34"
             },
             "signature": [
               "{ name: string; roles?: readonly string[] | undefined; } | undefined"
@@ -879,8 +879,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L37"
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L38"
             },
             "signature": [
               "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
@@ -893,8 +893,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L79"
+              "lineNumber": 80,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L80"
             },
             "signature": [
               "{ code?: string | undefined; message?: string | undefined; } | undefined"
@@ -907,8 +907,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L83"
+              "lineNumber": 84,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L84"
             },
             "signature": [
               "{ request?: { method?: string | undefined; } | undefined; } | undefined"
@@ -921,8 +921,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L88"
+              "lineNumber": 89,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L89"
             },
             "signature": [
               "{ domain?: string | undefined; path?: string | undefined; port?: number | undefined; query?: string | undefined; scheme?: string | undefined; } | undefined"
@@ -931,8 +931,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L19"
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L20"
         },
         "initialIsOpen": false
       },
@@ -951,8 +951,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L64"
+              "lineNumber": 73,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L73"
             },
             "signature": [
               "{ getCurrentUser: (request: ",
@@ -981,8 +981,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L68"
+              "lineNumber": 77,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L77"
             },
             "signature": [
               "Pick<",
@@ -1003,8 +1003,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L72"
+              "lineNumber": 81,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L81"
             },
             "signature": [
               {
@@ -1023,8 +1023,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L73"
+              "lineNumber": 82,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L82"
             },
             "signature": [
               {
@@ -1039,8 +1039,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "lineNumber": 60,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L60"
+          "lineNumber": 69,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L69"
         },
         "initialIsOpen": false
       },
@@ -1059,8 +1059,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L80"
+              "lineNumber": 89,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L89"
             },
             "signature": [
               "Pick<",
@@ -1081,8 +1081,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/plugin.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L81"
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L90"
             },
             "signature": [
               "Pick<",
@@ -1099,8 +1099,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security/server/plugin.ts",
-          "lineNumber": 79,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L79"
+          "lineNumber": 88,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/plugin.ts#L88"
         },
         "initialIsOpen": false
       },
@@ -1126,8 +1126,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L24"
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L25"
             },
             "signature": [
               {
@@ -1148,8 +1148,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L29"
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L30"
             },
             "signature": [
               {
@@ -1170,8 +1170,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L34"
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L35"
             },
             "signature": [
               {
@@ -1192,15 +1192,15 @@
             ],
             "source": {
               "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L41"
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L42"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L20"
+          "lineNumber": 21,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/common/model/authenticated_user.ts#L21"
         },
         "initialIsOpen": false
       }
@@ -1213,8 +1213,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 97,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L97"
+          "lineNumber": 98,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L98"
         },
         "initialIsOpen": false
       },
@@ -1225,8 +1225,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 103,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L103"
+          "lineNumber": 104,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L104"
         },
         "initialIsOpen": false
       },
@@ -1237,8 +1237,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 110,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L110"
+          "lineNumber": 111,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security/server/audit/audit_events.ts#L111"
         },
         "initialIsOpen": false
       }

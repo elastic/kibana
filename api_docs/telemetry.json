@@ -146,8 +146,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/telemetry/server/fetcher.ts",
-                  "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L59"
+                  "lineNumber": 58,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L58"
                 }
               }
             ],
@@ -155,8 +155,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/telemetry/server/fetcher.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L59"
+              "lineNumber": 58,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L58"
             }
           },
           {
@@ -200,8 +200,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/telemetry/server/fetcher.ts",
-                  "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L66"
+                  "lineNumber": 65,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L65"
                 }
               },
               {
@@ -220,8 +220,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/telemetry/server/fetcher.ts",
-                  "lineNumber": 67,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L67"
+                  "lineNumber": 66,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L66"
                 }
               }
             ],
@@ -229,8 +229,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/telemetry/server/fetcher.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L65"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L64"
             }
           },
           {
@@ -246,15 +246,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/telemetry/server/fetcher.ts",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L78"
+              "lineNumber": 77,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L77"
             }
           }
         ],
         "source": {
           "path": "src/plugins/telemetry/server/fetcher.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L46"
+          "lineNumber": 45,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/fetcher.ts#L45"
         },
         "initialIsOpen": false
       }

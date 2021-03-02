@@ -1631,8 +1631,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/fleet/public/plugin.ts",
-        "lineNumber": 44,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L44"
+        "lineNumber": 47,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L47"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1652,8 +1652,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/public/plugin.ts",
-            "lineNumber": 50,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L50"
+            "lineNumber": 53,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L53"
           },
           "signature": [
             {
@@ -1672,8 +1672,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/public/plugin.ts",
-            "lineNumber": 51,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L51"
+            "lineNumber": 54,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L54"
           },
           "signature": [
             "() => Promise<true>"
@@ -1682,8 +1682,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/fleet/public/plugin.ts",
-        "lineNumber": 49,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L49"
+        "lineNumber": 52,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/public/plugin.ts#L52"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1728,8 +1728,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L46"
+              "lineNumber": 47,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L47"
             },
             "signature": [
               "typeof ",
@@ -1803,8 +1803,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 51,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L51"
+                  "lineNumber": 52,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L52"
                 }
               },
               {
@@ -1823,8 +1823,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 52,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L52"
+                  "lineNumber": 53,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L53"
                 }
               },
               {
@@ -1844,8 +1844,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L53"
+                  "lineNumber": 54,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L54"
                 }
               }
             ],
@@ -1853,8 +1853,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L50"
+              "lineNumber": 51,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L51"
             }
           },
           {
@@ -1910,8 +1910,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L59"
+                  "lineNumber": 60,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L60"
                 }
               },
               {
@@ -1930,8 +1930,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 60,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L60"
+                  "lineNumber": 61,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L61"
                 }
               },
               {
@@ -1944,8 +1944,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L61"
+                  "lineNumber": 62,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L62"
                 }
               }
             ],
@@ -1953,8 +1953,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L58"
+              "lineNumber": 59,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L59"
             }
           },
           {
@@ -1966,8 +1966,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L66"
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L67"
             },
             "signature": [
               "typeof ",
@@ -1983,8 +1983,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/index.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L42"
+          "lineNumber": 43,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L43"
         },
         "initialIsOpen": false
       },
@@ -2031,8 +2031,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L22"
+                  "lineNumber": 23,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L23"
                 }
               },
               {
@@ -2045,8 +2045,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 23,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L23"
+                  "lineNumber": 24,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L24"
                 }
               },
               {
@@ -2059,8 +2059,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 24,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L24"
+                  "lineNumber": 25,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L25"
                 }
               }
             ],
@@ -2068,15 +2068,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L21"
+              "lineNumber": 22,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L22"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/index.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L20"
+          "lineNumber": 21,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L21"
         },
         "initialIsOpen": false
       },
@@ -2131,8 +2131,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L34"
+                  "lineNumber": 35,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L35"
                 }
               },
               {
@@ -2145,8 +2145,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L35"
+                  "lineNumber": 36,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L36"
                 }
               }
             ],
@@ -2154,15 +2154,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L33"
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L34"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/index.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L32"
+          "lineNumber": 33,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L33"
         },
         "initialIsOpen": false
       },
@@ -2179,8 +2179,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L70"
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L71"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2209,8 +2209,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L71"
+              "lineNumber": 72,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L72"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2239,8 +2239,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L72"
+              "lineNumber": 73,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L73"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2261,8 +2261,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L73"
+              "lineNumber": 74,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L74"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2287,8 +2287,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/index.ts",
-          "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L69"
+          "lineNumber": 70,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L70"
         },
         "initialIsOpen": false
       },
@@ -2497,8 +2497,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/index.ts",
-          "lineNumber": 72,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/index.ts#L72"
+          "lineNumber": 73,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/index.ts#L73"
         },
         "signature": [
           "any"
@@ -2512,8 +2512,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-          "lineNumber": 591,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L591"
+          "lineNumber": 592,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L592"
         },
         "signature": [
           "PackagePolicyService"
@@ -12388,8 +12388,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L10"
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L11"
         },
         "signature": [
           "\"ingest-agent-policies\""
@@ -12403,8 +12403,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L11"
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L12"
         },
         "signature": [
           "\".fleet-policies\""
@@ -12418,8 +12418,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L46"
+          "lineNumber": 47,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L47"
         },
         "signature": [
           "\"system\"[]"
@@ -14523,8 +14523,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L12"
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L13"
         },
         "signature": [
           "{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }"
@@ -14542,8 +14542,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L21"
+              "lineNumber": 22,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L22"
             }
           },
           {
@@ -14553,8 +14553,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L22"
+              "lineNumber": 23,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L23"
             }
           },
           {
@@ -14564,8 +14564,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L23"
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L24"
             }
           },
           {
@@ -14575,8 +14575,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L24"
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L25"
             },
             "signature": [
               "\"active\""
@@ -14589,8 +14589,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L25"
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L26"
             },
             "signature": [
               "never[]"
@@ -14603,8 +14603,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L26"
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L27"
             },
             "signature": [
               "true"
@@ -14617,8 +14617,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L27"
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L28"
             },
             "signature": [
               "false"
@@ -14631,8 +14631,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L28"
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L29"
             },
             "signature": [
               "(\"metrics\" | \"logs\")[]"
@@ -14643,8 +14643,8 @@
         "label": "DEFAULT_AGENT_POLICY",
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L17"
+          "lineNumber": 18,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L18"
         },
         "initialIsOpen": false
       },
@@ -14659,8 +14659,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L35"
+              "lineNumber": 36,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L36"
             }
           },
           {
@@ -14670,8 +14670,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L36"
+              "lineNumber": 37,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L37"
             }
           },
           {
@@ -14681,8 +14681,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L37"
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L38"
             }
           },
           {
@@ -14692,8 +14692,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L38"
+              "lineNumber": 39,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L39"
             },
             "signature": [
               "\"active\""
@@ -14706,8 +14706,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L39"
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L40"
             },
             "signature": [
               "never[]"
@@ -14720,8 +14720,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L40"
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L41"
             },
             "signature": [
               "false"
@@ -14734,8 +14734,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L41"
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L42"
             },
             "signature": [
               "true"
@@ -14748,8 +14748,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L42"
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L43"
             },
             "signature": [
               "false"
@@ -14762,8 +14762,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L43"
+              "lineNumber": 44,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L44"
             },
             "signature": [
               "(\"metrics\" | \"logs\")[]"
@@ -14774,8 +14774,8 @@
         "label": "DEFAULT_FLEET_SERVER_AGENT_POLICY",
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L31"
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/constants/agent_policy.ts#L32"
         },
         "initialIsOpen": false
       },

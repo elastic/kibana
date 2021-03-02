@@ -257,7 +257,7 @@
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/maps_legacy/common/ems_defaults.ts#L12"
         },
         "signature": [
-          "\"https://maps.elastic.co/v7.11\""
+          "\"https://maps.elastic.co/v7.12\""
         ],
         "initialIsOpen": false
       },

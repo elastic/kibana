@@ -1574,8 +1574,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L239"
+              "lineNumber": 241,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L241"
             }
           },
           {
@@ -1588,8 +1588,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 240,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L240"
+              "lineNumber": 242,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L242"
             }
           },
           {
@@ -1602,8 +1602,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 241,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L241"
+              "lineNumber": 243,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L243"
             }
           },
           {
@@ -1623,8 +1623,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 242,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L242"
+              "lineNumber": 244,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L244"
             }
           },
           {
@@ -1637,8 +1637,30 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 243,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L243"
+              "lineNumber": 245,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L245"
+            }
+          },
+          {
+            "type": "Object",
+            "label": "runtimeMappings",
+            "isRequired": false,
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "ml",
+                "scope": "common",
+                "docId": "kibMlPluginApi",
+                "section": "def-common.RuntimeField",
+                "text": "RuntimeField"
+              },
+              "> | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 246,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L246"
             }
           }
         ],
@@ -1653,14 +1675,16 @@
           },
           ", indexPatternTitle: string, query: any, fields: ",
           "HistogramField",
-          "[], samplerShardSize: number) => Promise<ChartData[]>"
+          "[], samplerShardSize: number, runtimeMappings?: Record<string, ",
+          "RuntimeField",
+          "> | undefined) => Promise<ChartData[]>"
         ],
         "description": [],
         "label": "getHistogramsForFields",
         "source": {
           "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-          "lineNumber": 238,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L238"
+          "lineNumber": 240,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L240"
         },
         "returnComment": [],
         "initialIsOpen": false
@@ -5789,6 +5813,25 @@
         },
         "signature": [
           "\"gte\" | \"eq\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ChartData",
+        "type": "Type",
+        "label": "ChartData",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
+          "lineNumber": 68,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/common/types/field_histograms.ts#L68"
+        },
+        "signature": [
+          "NumericChartData",
+          " | ",
+          "OrdinalChartData",
+          " | ",
+          "UnsupportedChartData"
         ],
         "initialIsOpen": false
       }
