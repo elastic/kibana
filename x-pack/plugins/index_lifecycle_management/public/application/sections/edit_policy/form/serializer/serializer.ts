@@ -242,6 +242,56 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     }
 
     /**
+     * FROZEN PHASE SERIALIZATION
+     */
+    if (_meta.frozen.enabled) {
+      draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
+      const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE MIN AGE
+       */
+      if (updatedPolicy.phases.frozen?.min_age) {
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+      }
+
+      /**
+       * FROZEN PHASE DATA ALLOCATION
+       */
+      frozenPhase.actions = serializeMigrateAndAllocateActions(
+        _meta.frozen,
+        frozenPhase.actions,
+        originalPolicy?.phases.frozen?.actions,
+        updatedPolicy.phases.frozen?.actions?.allocate?.number_of_replicas
+      );
+
+      /**
+       * FROZEN PHASE FREEZE
+       */
+      if (_meta.frozen.freezeEnabled) {
+        frozenPhase.actions.freeze = frozenPhase.actions.freeze ?? {};
+      } else {
+        delete frozenPhase.actions.freeze;
+      }
+
+      /**
+       * FROZEN PHASE SET PRIORITY
+       */
+      if (!updatedPolicy.phases.frozen?.actions?.set_priority) {
+        delete frozenPhase.actions.set_priority;
+      }
+
+      /**
+       * FROZEN PHASE SEARCHABLE SNAPSHOT
+       */
+      if (!updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+        delete frozenPhase.actions.searchable_snapshot;
+      }
+    } else {
+      delete draft.phases.frozen;
+    }
+
+    /**
      * DELETE PHASE SERIALIZATION
      */
     if (_meta.delete.enabled) {
