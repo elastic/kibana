@@ -7,7 +7,8 @@
  */
 
 import { of } from 'rxjs';
-import { SpacesApi, SpacesApiUi, SpacesApiUiComponent } from './api';
+
+import type { SpacesApi, SpacesApiUi, SpacesApiUiComponent } from './api';
 
 const createApiMock = (): jest.Mocked<SpacesApi> => ({
   activeSpace$: of(),

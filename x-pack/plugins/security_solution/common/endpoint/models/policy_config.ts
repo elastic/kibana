@@ -54,15 +54,8 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
-      ransomware: {
-        mode: ProtectionModes.prevent,
-      },
       popup: {
         malware: {
-          message: '',
-          enabled: true,
-        },
-        ransomware: {
           message: '',
           enabled: true,
         },
@@ -111,18 +104,11 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     mac: {
       ...policy.mac,
-      ransomware: {
-        mode: ProtectionModes.off,
-      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
-        },
-        ransomware: {
-          message: '',
-          enabled: false,
         },
       },
     },
