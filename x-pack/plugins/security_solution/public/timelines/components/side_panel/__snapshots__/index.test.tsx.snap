@@ -24,9 +24,9 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
 
 exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Details Panel when the panelView is set and the associated params are set 1`] = `
 .c0 {
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 
 <DetailsPanel
@@ -237,9 +237,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set 1`] = `
 Array [
   .c1 {
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 
 .c2 .euiFlyoutBody__overflow {
@@ -268,13 +268,13 @@ Array [
 <Styled(EuiFlyout)
     data-test-subj="timeline:details-panel:flyout"
     onClose={[Function]}
-    size="s"
+    size="m"
   >
     <EuiFlyout
       className="c0"
       data-test-subj="timeline:details-panel:flyout"
       onClose={[Function]}
-      size="s"
+      size="m"
     >
       <EuiWindowEvent
         event="keydown"
@@ -287,7 +287,7 @@ Array [
           data-eui="EuiFocusTrap"
         >
           <div
-            className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
+            className="euiFlyout euiFlyout--medium euiFlyout--paddingLarge c0"
             data-test-subj="timeline:details-panel:flyout"
             role="dialog"
             tabIndex={0}
@@ -509,9 +509,9 @@ Array [
     </EuiFlyout>
   </Styled(EuiFlyout)>,
   .c1 {
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 
 .c2 .euiFlyoutBody__overflow {
@@ -541,7 +541,7 @@ Array [
     className="c0"
     data-test-subj="timeline:details-panel:flyout"
     onClose={[Function]}
-    size="s"
+    size="m"
   >
     <EuiWindowEvent
       event="keydown"
@@ -554,7 +554,7 @@ Array [
         data-eui="EuiFocusTrap"
       >
         <div
-          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
+          className="euiFlyout euiFlyout--medium euiFlyout--paddingLarge c0"
           data-test-subj="timeline:details-panel:flyout"
           role="dialog"
           tabIndex={0}
@@ -775,9 +775,9 @@ Array [
     </EuiFocusTrap>
   </EuiFlyout>,
   .c1 {
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 
 .c2 .euiFlyoutBody__overflow {
@@ -804,7 +804,7 @@ Array [
 }
 
 <div
-    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
+    className="euiFlyout euiFlyout--medium euiFlyout--paddingLarge c0"
     data-test-subj="timeline:details-panel:flyout"
     role="dialog"
     tabIndex={0}
