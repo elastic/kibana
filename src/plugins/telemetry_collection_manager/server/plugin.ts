@@ -30,6 +30,7 @@ import {
 } from './types';
 import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -120,9 +121,10 @@ export class TelemetryCollectionManagerPlugin
       ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
       : this.elasticsearchClient?.asInternalUser;
     // Scope the saved objects client appropriately and pass to the stats collection config
-    const soClient = config.unencrypted
-      ? this.savedObjectsService?.getScopedClient(config.request)
+    const soRepository = config.unencrypted
+      ? this.savedObjectsService?.createScopedRepository(config.request)
       : this.savedObjectsService?.createInternalRepository();
+    const soClient = soRepository && new TelemetrySavedObjectsClient(soRepository);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
