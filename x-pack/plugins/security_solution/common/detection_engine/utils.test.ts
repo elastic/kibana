@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { hasEqlSequenceQuery, hasLargeValueList, hasNestedEntry, isThreatMatchRule } from './utils';
+import {
+  hasEqlSequenceQuery,
+  hasLargeValueList,
+  hasNestedEntry,
+  isThreatMatchRule,
+  normalizeThresholdField,
+} from './utils';
 import { EntriesArray } from '../shared_imports';
 
 describe('#hasLargeValueList', () => {
@@ -149,5 +155,23 @@ describe('#hasEqlSequenceQuery', () => {
     it('should return false', () => {
       expect(hasEqlSequenceQuery(query)).toEqual(false);
     });
+  });
+});
+
+describe('normalizeThresholdField', () => {
+  it('converts a string to a string array', () => {
+    expect(normalizeThresholdField('host.name')).toEqual(['host.name']);
+  });
+  it('returns a string array when a string array is passed in', () => {
+    expect(normalizeThresholdField(['host.name'])).toEqual(['host.name']);
+  });
+  it('converts undefined to an empty array', () => {
+    expect(normalizeThresholdField(undefined)).toEqual([]);
+  });
+  it('converts null to an empty array', () => {
+    expect(normalizeThresholdField(null)).toEqual([]);
+  });
+  it('converts an empty string to an empty array', () => {
+    expect(normalizeThresholdField('')).toEqual([]);
   });
 });

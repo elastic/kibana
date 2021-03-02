@@ -70,7 +70,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.addValueButtonLabel',
           {
-            defaultMessage: 'Add Value',
+            defaultMessage: 'Add value',
           }
         )}
       </EuiButton>
