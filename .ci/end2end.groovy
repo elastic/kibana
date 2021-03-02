@@ -76,7 +76,7 @@ pipeline {
               options { skipDefaultCheckout() }
               when { expression { return env.RUN_APM_E2E != "false" } }
               steps{
-                notifyTestStatus('Running smoke tests', 'PENDING')
+                notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Running smoke tests', 'PENDING')
                 dir("${BASE_DIR}"){
                   sh "${E2E_DIR}/ci/run-e2e.sh"
                 }
