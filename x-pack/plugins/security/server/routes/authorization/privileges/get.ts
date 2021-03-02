@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '../..';
+
+import type { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
 export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionParams) {

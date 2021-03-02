@@ -11,7 +11,7 @@ import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initGetCaseApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_DETAILS_URL,
@@ -26,10 +26,10 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
       },
     },
     async (context, request, response) => {
-      const caseClient = context.case.getCaseClient();
-      const id = request.params.case_id;
-
       try {
+        const caseClient = context.case.getCaseClient();
+        const id = request.params.case_id;
+
         return response.ok({
           body: await caseClient.get({
             id,
@@ -38,6 +38,9 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           }),
         });
       } catch (error) {
+        logger.error(
+          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments} \ninclude sub comments: ${request.query.includeSubCaseComments}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

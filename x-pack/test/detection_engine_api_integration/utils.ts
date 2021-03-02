@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
