@@ -281,11 +281,6 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
 }
 
 export function createExtentFilter(mapExtent, geoFieldName) {
-  // Extent filters are used to dynamically filter data for the current map view port.
-  // Continue to use geo_bounding_box queries for extent filters
-  // 1) geo_bounding_box queries are faster than polygon queries
-  // 2) geo_shape benefits of pre-indexed shapes and
-  // compatibility across multi-indices with geo_point and geo_shape do not apply to this use case.
   const boundingBox = makeESBbox(mapExtent);
   return {
     geo_bounding_box: {
