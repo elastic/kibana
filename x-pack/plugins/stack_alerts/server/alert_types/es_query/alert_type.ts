@@ -256,7 +256,7 @@ export function getAlertType(
         );
         const lastTimestamp = firstHitWithSort?.sort;
         if (lastTimestamp != null && lastTimestamp.length > 0) {
-          timestamp = lastTimestamp[0];
+          timestamp = String(lastTimestamp[0]);
         }
       }
     }
