@@ -84,9 +84,9 @@ export const MigrationCallout = ({ value, switchMode, matchedIndex }: LegacyMode
 
   return (
     <>
+      <EuiSpacer />
       {matchedIndex && getReadyToMigrateCallOut(value, switchMode)}
       {!matchedIndex && getNoMatchedIndicesCallOut(value, navigateToCreateIndexPatterns)}
-      <EuiSpacer />
     </>
   );
 };

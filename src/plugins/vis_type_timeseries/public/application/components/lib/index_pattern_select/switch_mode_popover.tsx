@@ -97,9 +97,6 @@ export const SwitchModePopover = ({
           />
         </EuiText>
         <EuiSpacer />
-        {value && isStringTypeIndexPattern(value) && (
-          <MigrationCallout value={value} switchMode={switchMode} matchedIndex={matchedIndex} />
-        )}
         <EuiSwitch
           name="switch"
           checked={useKibanaIndices}
@@ -111,6 +108,9 @@ export const SwitchModePopover = ({
           )}
           onChange={switchMode}
         />
+        {value && isStringTypeIndexPattern(value) && (
+          <MigrationCallout value={value} switchMode={switchMode} matchedIndex={matchedIndex} />
+        )}
       </div>
     </EuiPopover>
   );
