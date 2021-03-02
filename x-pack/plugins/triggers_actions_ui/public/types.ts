@@ -63,6 +63,11 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   consumer?: string;
 }
 
+export enum AlertFlyoutCloseReason {
+  SAVED,
+  CANCELED,
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;

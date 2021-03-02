@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RoleMapping } from '../shared/types';
+
 export * from '../../../common/types/workplace_search';
 
 export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
@@ -202,4 +204,14 @@ export interface SearchResultConfig {
   urlField: string | null;
   color: string;
   detailFields: DetailField[];
+}
+
+export interface RoleGroup {
+  id: string;
+  name: string;
+}
+
+export interface WSRoleMapping extends RoleMapping {
+  allGroups: boolean;
+  groups: RoleGroup[];
 }

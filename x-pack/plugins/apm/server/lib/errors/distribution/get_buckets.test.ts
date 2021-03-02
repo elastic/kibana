@@ -44,7 +44,6 @@ describe('get buckets', () => {
           }
         ) as APMConfig,
         uiFilters: {},
-        esFilter: [],
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',

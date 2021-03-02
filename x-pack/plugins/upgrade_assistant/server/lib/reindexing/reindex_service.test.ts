@@ -20,10 +20,11 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { mockKibanaVersion } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
@@ -88,7 +89,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(MOCK_VERSION_STRING);
+    versionService.setup(mockKibanaVersion);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -215,7 +216,7 @@ describe('reindexService', () => {
           'index.provided_name': indexName,
         },
         mappings: {
-          properties: { https: { type: 'boolean' } },
+          _doc: { properties: { https: { type: 'boolean' } } },
         },
       });
 
@@ -571,7 +572,10 @@ describe('reindexService', () => {
 
           const mlReindexedOp = {
             id: '2',
-            attributes: { ...reindexOp.attributes, indexName: '.reindexed-v7-ml-anomalies' },
+            attributes: {
+              ...reindexOp.attributes,
+              indexName: `.reindexed-v${prevMajor}-ml-anomalies`,
+            },
           } as ReindexSavedObject;
           const updatedOp = await service.processNextStep(mlReindexedOp);
 

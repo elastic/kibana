@@ -81,6 +81,7 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  profilingEnabled: false,
 };
 
 const mockPlugin = {

@@ -60,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           saveAsNew: false,
           waitDialogIsClosed: true,
+          exitFromEditMode: true,
         }
       );
 

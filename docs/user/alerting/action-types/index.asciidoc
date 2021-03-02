@@ -31,7 +31,7 @@ Execution time field::  This field will be automatically set to the time the ale
 --
 
 [[index-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -40,7 +40,7 @@ Execution time field::  This field will be automatically set to the time the ale
 | A string that corresponds to *Index*.
 
 |`refresh`
-| A boolean that corresponds to *Refresh*.
+| A boolean that corresponds to *Refresh*. Defaults to `false`.
 
 |`executionTimeField`
 | A string that corresponds to *Execution time field*.
