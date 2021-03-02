@@ -13,8 +13,11 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     E2E_DIR = 'x-pack/plugins/apm/e2e'
+    UPTIME_E2E_DIR = 'x-pack/plugins/uptime/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
     KBN_OPTIMIZER_THEMES = 'v7light'
+    GITHUB_CHECK_APM_UI = 'end2end-for-apm-ui'
+    GITHUB_CHECK_UPTIME_UI = 'end2end-for-uptime-ui'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -37,93 +40,174 @@ pipeline {
         deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
-
-        // Filter when to run based on the below reasons:
-        //  - On a PRs when:
-        //    - There are changes related to the APM UI project
-        //      - only when the owners of those changes are members of the given GitHub teams
-        //  - On merges to branches when:
-        //    - There are changes related to the APM UI project
-        //  - FORCE parameter is set to true.
-        script {
-          def apm_updated = false
-          dir("${BASE_DIR}"){
-            apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
-          }
-          if (isPR()) {
-            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
-            setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
-          } else {
-            setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)
-          }
-        }
+        setEnvVar('RUN_APM_E2E', (params.FORCE || analyseBuildReasonForApmUI()))
+        setEnvVar('RUN_UPTIME_E2E', (params.FORCE || analyseBuildReasonForUptimeUI()))
       }
     }
-    stage('Prepare Kibana') {
-      options { skipDefaultCheckout() }
-      when { expression { return env.RUN_APM_E2E != "false" } }
-      environment {
-        JENKINS_NODE_COOKIE = 'dontKillMe'
-      }
-      steps {
-        notifyStatus('Preparing kibana', 'PENDING')
-        dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/ci/prepare-kibana.sh"
+    stage('e2e') {
+      when {
+        anyOf {
+          expression { return env.RUN_APM_E2E != "false" }
+          expression { return env.RUN_UPTIME_E2E != "false" }
         }
       }
-      post {
-        unsuccessful {
-          notifyStatus('Kibana warm up failed', 'FAILURE')
-        }
-      }
-    }
-    stage('Smoke Tests'){
-      options { skipDefaultCheckout() }
-      when { expression { return env.RUN_APM_E2E != "false" } }
-      steps{
-        notifyTestStatus('Running smoke tests', 'PENDING')
-        dir("${BASE_DIR}"){
-          sh "${E2E_DIR}/ci/run-e2e.sh"
-        }
-      }
-      post {
-        always {
-          dir("${BASE_DIR}/${E2E_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: 'cypress/screenshots/**,cypress/videos/**,cypress/test-results/*e2e-tests.xml')
-            junit(allowEmptyResults: true, testResults: 'cypress/test-results/*e2e-tests.xml')
-            dir('tmp/apm-integration-testing'){
-              sh 'docker-compose logs > apm-its-docker.log || true'
-              sh 'docker-compose down -v || true'
-              archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its-docker.log')
+      parallel {
+        stage('APM-UI') {
+          stages {
+            stage('Prepare Kibana') {
+              options { skipDefaultCheckout() }
+              when { expression { return env.RUN_APM_E2E != "false" } }
+              environment {
+                JENKINS_NODE_COOKIE = 'dontKillMe'
+              }
+              steps {
+                notifyStatus(env.GITHUB_CHECK_APM_UI, 'Preparing kibana', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${E2E_DIR}/ci/prepare-kibana.sh"
+                }
+              }
+              post {
+                unsuccessful {
+                  notifyStatus(env.GITHUB_CHECK_APM_UI, 'Kibana warm up failed', 'FAILURE')
+                }
+              }
             }
-            archiveArtifacts(allowEmptyArchive: true, artifacts: 'tmp/*.log')
+            stage('Smoke Tests'){
+              options { skipDefaultCheckout() }
+              when { expression { return env.RUN_APM_E2E != "false" } }
+              steps{
+                notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Running smoke tests', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${E2E_DIR}/ci/run-e2e.sh"
+                }
+              }
+              post {
+                always {
+                  dir("${BASE_DIR}/${E2E_DIR}"){
+                    archiveArtifacts(allowEmptyArchive: false, artifacts: 'cypress/screenshots/**,cypress/videos/**,cypress/test-results/*e2e-tests.xml')
+                    junit(allowEmptyResults: true, testResults: 'cypress/test-results/*e2e-tests.xml')
+                    dir('tmp/apm-integration-testing'){
+                      sh 'docker-compose logs > apm-its-docker.log || true'
+                      sh 'docker-compose down -v || true'
+                      archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its-docker.log')
+                    }
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: 'tmp/*.log')
+                  }
+                }
+                unsuccessful {
+                  notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Test failures', 'FAILURE')
+                }
+                success {
+                  notifyTestStatus(env.GITHUB_CHECK_APM_UI, 'Tests passed', 'SUCCESS')
+                }
+              }
+            }
+          }
+          post {
+            always {
+              dir("${BASE_DIR}"){
+                archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
+              }
+            }
           }
         }
-        unsuccessful {
-          notifyTestStatus('Test failures', 'FAILURE')
-        }
-        success {
-          notifyTestStatus('Tests passed', 'SUCCESS')
+        stage('UPTIME-UI') {
+          agent { label 'linux && immutable' }
+          options { skipDefaultCheckout() }
+          when { expression { return env.RUN_UPTIME_E2E != "false" } }
+          stages {
+            stage('Prepare Kibana') {
+              options { skipDefaultCheckout() }
+              environment {
+                JENKINS_NODE_COOKIE = 'dontKillMe'
+              }
+              steps {
+                notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Preparing kibana', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${UPTIME_E2E_DIR}/ci/prepare-kibana.sh"
+                }
+              }
+              post {
+                unsuccessful {
+                  notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Kibana warm up failed', 'FAILURE')
+                }
+              }
+            }
+            stage('Smoke Tests'){
+              options { skipDefaultCheckout() }
+              steps{
+                notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Running smoke tests', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${UPTIME_E2E_DIR}/ci/run-e2e.sh"
+                }
+              }
+              post {
+                always {
+                  echo "TBD"
+                }
+                unsuccessful {
+                  notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Test failures', 'FAILURE')
+                }
+                success {
+                  notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Tests passed', 'SUCCESS')
+                }
+              }
+            }
+          }
+          post {
+            always {
+              dir("${BASE_DIR}"){
+                archiveArtifacts(allowEmptyArchive: true, artifacts: "${UPTIME_E2E_DIR}/kibana.log")
+              }
+            }
+          }
         }
       }
     }
   }
   post {
-    always {
-      dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
-      }
-    }
     cleanup {
       notifyBuildResult(prComment: false, analyzeFlakey: false, shouldNotify: false)
     }
   }
 }
 
-def notifyStatus(String description, String status) {
-  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+def notifyStatus(String check, String description, String status) {
+  withGithubStatus.notify(check, description, status, getBlueoceanTabURL('pipeline'))
 }
 
-def notifyTestStatus(String description, String status) {
-  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
+def notifyTestStatus(String check, String description, String status) {
+  withGithubStatus.notify(check, description, status, getBlueoceanTabURL('tests'))
+}
+
+def analyseBuildReasonForApmUI() {
+  return shouldTriggerABuild(patterns: [ "^x-pack/plugins/apm/.*" ], team: ['apm-ui', 'uptime'])
+}
+
+def analyseBuildReasonForUptimeUI() {
+  return shouldTriggerABuild(patterns: [ "^x-pack/plugins/uptime/.*" ], team: ['uptime'])
+}
+
+/**
+* Filter when to run based on the below reasons:
+*  - On a PRs when:
+*    - There are changes related to the given subfolder
+*      - only when the owners of those changes are members of the given GitHub teams
+*  - On merges to branches when:
+*    - There are changes related to the given subfolder
+*  - FORCE parameter is set to true.
+*/
+def shouldTriggerABuild(Map args = [:]) {
+  def patterns = args.patterns
+  def team = args.team
+  def updated = false
+  dir("${BASE_DIR}"){
+    updated = isGitRegionMatch(patterns: patterns)
+  }
+  if (isPR()) {
+    def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: team)
+    return (params.FORCE || (updated && isMember))
+  } else {
+    return (params.FORCE || apm_updated)
+  }
 }

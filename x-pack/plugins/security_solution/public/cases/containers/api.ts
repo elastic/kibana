@@ -15,6 +15,7 @@ import {
   CasesResponse,
   CasesStatusResponse,
   CaseStatuses,
+  CaseType,
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
@@ -165,6 +166,7 @@ export const getSubCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
+    onlyCollectionType: false,
     search: '',
     reporters: [],
     status: CaseStatuses.open,
@@ -183,6 +185,7 @@ export const getCases = async ({
     tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
+    ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),
     ...queryParams,
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
