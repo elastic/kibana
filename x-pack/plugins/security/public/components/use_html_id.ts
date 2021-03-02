@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
+import { useMemo } from 'react';
 
 /**
  * Generates an ID that can be used for HTML elements.

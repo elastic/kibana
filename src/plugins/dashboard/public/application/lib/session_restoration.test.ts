@@ -11,6 +11,7 @@ import { createSessionRestorationDataProvider } from './session_restoration';
 import { getAppStateDefaults } from './get_app_state_defaults';
 import { getSavedDashboardMock } from '../test_helpers';
 import { SavedObjectTagDecoratorTypeGuard } from '../../../../saved_objects_tagging_oss/public';
+import { ViewMode } from '../../services/embeddable';
 
 describe('createSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
@@ -18,8 +19,8 @@ describe('createSessionRestorationDataProvider', () => {
     data: mockDataPlugin,
     getAppState: () =>
       getAppStateDefaults(
+        ViewMode.VIEW,
         getSavedDashboardMock(),
-        false,
         ((() => false) as unknown) as SavedObjectTagDecoratorTypeGuard
       ),
     getDashboardTitle: () => 'Dashboard',

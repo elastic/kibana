@@ -17,7 +17,8 @@ import * as i18n from '../../translations';
 
 export interface CreateCaseModalProps {
   onCloseFlyout: () => void;
-  onCaseCreated: (theCase: Case) => void;
+  onSuccess: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case) => Promise<void>;
 }
 
 const Container = styled.div`
@@ -40,7 +41,8 @@ const FormWrapper = styled.div`
 `;
 
 const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
-  onCaseCreated,
+  onSuccess,
+  afterCaseCreated,
   onCloseFlyout,
 }) => {
   return (
@@ -52,7 +54,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormWrapper>
-          <FormContext onSuccess={onCaseCreated}>
+          <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated}>
             <CreateCaseForm withSteps={false} />
             <Container>
               <SubmitCaseButton />
