@@ -21,6 +21,7 @@ import type {
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
+import { pkgToPkgKey } from '../registry';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
 import type { ArchiveEntry } from './index';

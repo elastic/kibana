@@ -9,8 +9,6 @@ import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from
 
 import type { FullAgentPolicy } from './agent_policy';
 
-import { FullAgentPolicy } from './agent_policy';
-
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
