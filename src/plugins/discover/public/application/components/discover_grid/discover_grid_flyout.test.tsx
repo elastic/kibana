@@ -61,7 +61,7 @@ describe('Discover flyout', function () {
         services={
           ({
             filterManager: createFilterManagerMock(),
-            addBasePath: (path: string) => path,
+            addBasePath: (path: string) => `/base${path}`,
           } as unknown) as DiscoverServices
         }
       />
@@ -70,10 +70,10 @@ describe('Discover flyout', function () {
     const actions = findTestSubject(component, 'docTableRowAction');
     expect(actions.length).toBe(2);
     expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"#/doc/index-pattern-with-timefield-id/i?id=1"`
+      `"/base#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
+      `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
     );
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(onClose).toHaveBeenCalled();

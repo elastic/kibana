@@ -88,8 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
     });
 
-    // Skipped because there is a bug in the data grid row expansion
-    it.skip('navigates to context view from embeddable', async () => {
+    it('navigates to context view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -101,16 +100,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await docTable.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
       await PageObjects.common.sleep(250);
       // accept alert if it pops up
       const alert = await browser.getAlert();
       await alert?.accept();
-      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
+      expect(await docTable.getRowsText()).to.have.length(6);
     });
   });
 }

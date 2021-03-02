@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
-    it('navigates to context view from embeddable', async () => {
+    it('navigates to doc view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
