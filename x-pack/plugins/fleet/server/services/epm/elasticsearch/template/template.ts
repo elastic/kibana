@@ -406,10 +406,7 @@ const getDataStreams = async (
   template: TemplateRef
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  const { body } = await esClient.transport.request({
-    method: 'GET',
-    path: `/_data_stream/${templateName}-*`,
-  });
+  const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
   const dataStreams = body.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({

@@ -60,14 +60,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       },
       packageSavedObjects,
     ] = await Promise.all([
-      esClient.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}`,
-      }),
-      esClient.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}/_stats`,
-      }),
+      esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
       getPackageSavedObjects(context.core.savedObjects.client),
     ]);
 
