@@ -48,7 +48,7 @@ While in development, we rely on [@babel/register](https://babel.dev/docs/en/bab
 
 ---
 
-These steps cost developers move than ten minutes of their time when updating or changing branches. These times will continue to worsen as the project continues to grow. Instead of making small incremental changes as we have done in the past, like improving caching in a single area, we would like to leverage Bazel, where there are already solutions to many of these problems.
+These steps cost developers more than ten minutes of their time when updating or changing branches. These times will continue to worsen as the project continues to grow. Instead of making small incremental changes as we have done in the past, like improving caching in a single area, we would like to leverage Bazel, where there are already solutions to many of these problems.
 
 One of the primary advantages Bazel provides is that the builds are hermetic, meaning they are dependent only on a known set of inputs to ensure the builds are reproducible and cacheable. To create these assurances, builds utilize a sandbox environment with only the defined dependencies available. This not only allows for aggressive local caching but the use of remote caching as well. If Bazel determines that a package or plugin needs to be re-built and it's not in the local cache, it will check the remote cache and, if found, will persist locally for subsequent builds. Once the project has completely migrated to Bazel, a developer will only build code they have directly modified or is dependent on those changes. In building packages and plugins, the expected cost for most developers will be downloading the builds from the remote cache for anything changed since their last build.
 
