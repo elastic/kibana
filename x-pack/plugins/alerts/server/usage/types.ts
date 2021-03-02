@@ -12,14 +12,14 @@ export interface AlertsUsage {
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
   throttle_time: {
-    min: number;
-    avg: number;
-    max: number;
+    min: string;
+    avg: string;
+    max: string;
   };
   schedule_time: {
-    min: number;
-    avg: number;
-    max: number;
+    min: string;
+    avg: string;
+    max: string;
   };
   connectors_per_alert: {
     min: number;

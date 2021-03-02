@@ -25,7 +25,7 @@ export type MaybeReadonlyArray<T> = T[] | readonly T[];
 
 interface CollapseQuery {
   field: string;
-  inner_hits: {
+  inner_hits?: {
     name: string;
     size?: number;
     sort?: SortOptions;

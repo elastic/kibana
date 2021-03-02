@@ -31,7 +31,7 @@ jest.mock('./add_percentage_column', () => ({
 }));
 
 import { Datatable } from 'src/plugins/expressions';
-import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
 import { AggTypes } from '../../common';
 import { TableGroup, TableVisConfig } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
@@ -47,10 +47,8 @@ const visConfig: TableVisConfig = {
   totalFunc: AggTypes.AVG,
   percentageCol: '',
   title: 'My data table',
-  dimensions: {
-    buckets: [],
-    metrics: [],
-  },
+  buckets: [],
+  metrics: [],
 };
 
 describe('tableVisResponseHandler', () => {
@@ -97,15 +95,11 @@ describe('tableVisResponseHandler', () => {
       ],
       type: 'datatable',
     };
-    const split: SchemaConfig[] = [
-      {
-        accessor: 1,
-        label: 'Split',
-        format: {},
-        params: {},
-        aggType: 'terms',
-      },
-    ];
+    const split: ExpressionValueVisDimension = {
+      accessor: 1,
+      format: { params: {} },
+      type: 'vis_dimension',
+    };
     const expectedOutput: TableGroup[] = [
       {
         title: 'By Men: Gender',
@@ -128,7 +122,7 @@ describe('tableVisResponseHandler', () => {
     it('should split data by row', () => {
       const output = tableVisResponseHandler(input, {
         ...visConfig,
-        dimensions: { ...visConfig.dimensions, splitRow: split },
+        splitRow: split,
       });
 
       expect(output.direction).toEqual('row');
@@ -139,7 +133,7 @@ describe('tableVisResponseHandler', () => {
     it('should split data by column', () => {
       const output = tableVisResponseHandler(input, {
         ...visConfig,
-        dimensions: { ...visConfig.dimensions, splitColumn: split },
+        splitColumn: split,
       });
 
       expect(output.direction).toEqual('column');
@@ -151,7 +145,7 @@ describe('tableVisResponseHandler', () => {
       const output = tableVisResponseHandler(input, {
         ...visConfig,
         percentageCol: 'Count',
-        dimensions: { ...visConfig.dimensions, splitColumn: split },
+        splitColumn: split,
       });
 
       expect(output.direction).toEqual('column');

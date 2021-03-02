@@ -11,11 +11,16 @@ Mute all alert instances.
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_mute_all`
 
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_mute_all`
+
 [[alerts-api-mute-all-path-params]]
 ==== Path parameters
 
 `id`::
   (Required, string) The ID of the alert whose instances you want to mute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[alerts-api-mute-all-response-codes]]
 ==== Response code

@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { HeaderMenuPortal } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
@@ -35,6 +36,8 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { ActionMenu } from './action_menu';
 
 const MainContainer = euiStyled.div`
   height: 100%;
@@ -42,6 +45,7 @@ const MainContainer = euiStyled.div`
 
 function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { appMountParameters } = useApmPluginContext();
 
   useBreadcrumbs(routes);
 
@@ -54,6 +58,11 @@ function App() {
       })}
     >
       <MainContainer data-test-subj="apmMainContainer" role="main">
+        <HeaderMenuPortal
+          setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+        >
+          <ActionMenu />
+        </HeaderMenuPortal>
         <Route component={ScrollToTopOnPathChange} />
         <Switch>
           {routes.map((route, i) => (

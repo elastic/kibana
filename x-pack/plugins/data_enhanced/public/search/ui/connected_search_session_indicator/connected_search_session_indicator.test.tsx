@@ -27,6 +27,7 @@ import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins
 
 const coreStart = coreMock.createStart();
 const application = coreStart.application;
+const basePath = coreStart.http.basePath;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
@@ -63,6 +64,7 @@ test("shouldn't show indicator in case no active search session", async () => {
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
+    basePath,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -91,6 +93,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
+    basePath,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -121,6 +124,7 @@ test('should show indicator in case there is an active search session', async ()
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
+    basePath,
   });
   const { getByTestId } = render(
     <Container>
@@ -146,6 +150,7 @@ test('should be disabled in case uiConfig says so ', async () => {
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
+    basePath,
   });
 
   render(
@@ -169,6 +174,7 @@ test('should be disabled in case not enough permissions', async () => {
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
+    basePath,
   });
 
   render(
@@ -195,6 +201,7 @@ test('should be disabled during auto-refresh', async () => {
     storage,
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
+    basePath,
   });
 
   render(
@@ -233,6 +240,7 @@ describe('Completed inactivity', () => {
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
+      basePath,
     });
 
     render(
@@ -294,6 +302,7 @@ describe('tour steps', () => {
         storage,
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
+        basePath,
       });
       const rendered = render(
         <Container>
@@ -335,6 +344,7 @@ describe('tour steps', () => {
         storage,
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
+        basePath,
       });
       const rendered = render(
         <Container>
@@ -370,6 +380,7 @@ describe('tour steps', () => {
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
+      basePath,
     });
     const rendered = render(
       <Container>
@@ -397,6 +408,7 @@ describe('tour steps', () => {
       storage,
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
+      basePath,
     });
     const rendered = render(
       <Container>

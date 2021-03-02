@@ -6,7 +6,6 @@
  */
 
 import { EuiFilterButtonProps } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -17,12 +16,16 @@ import { SearchRow } from '.';
 
 import * as i18n from '../translations';
 
-describe('SearchRow', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+const mockTheme = {
+  eui: {
+    euiSizeL: '10px',
+  },
+};
 
+describe('SearchRow', () => {
   test('it renders a search input with the expected placeholder when the query is empty', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <SearchRow
           onlyFavorites={false}
           onQueryChange={jest.fn()}
@@ -42,7 +45,7 @@ describe('SearchRow', () => {
   describe('Only Favorites Button', () => {
     test('it renders the expected button text', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -62,7 +65,7 @@ describe('SearchRow', () => {
       const onToggleOnlyFavorites = jest.fn();
 
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -80,7 +83,7 @@ describe('SearchRow', () => {
 
     test('it sets the button to the toggled state when onlyFavorites is true', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={true}
             onQueryChange={jest.fn()}
@@ -101,7 +104,7 @@ describe('SearchRow', () => {
 
     test('it sets the button to the NON-toggled state when onlyFavorites is false', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -126,7 +129,7 @@ describe('SearchRow', () => {
 
     test('it invokes onQueryChange when the user enters a query', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={onQueryChange}

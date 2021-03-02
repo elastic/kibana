@@ -47,6 +47,7 @@ import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
+import { handleSourceColumnState } from '../angular/helpers';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -371,7 +372,10 @@ export class SearchEmbeddable
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
-    searchScope.columns = this.input.columns || this.savedSearch.columns;
+    searchScope.columns = handleSourceColumnState(
+      { columns: this.input.columns || this.savedSearch.columns },
+      this.services.core.uiSettings
+    ).columns;
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
