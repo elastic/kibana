@@ -9,7 +9,7 @@ source src/dev/ci_setup/setup_env.sh true
 set -ex
 
 # variables
-KIBANA_PORT=5601
+KIBANA_PORT=5620
 
 # formatting
 bold=$(tput bold)
@@ -17,7 +17,7 @@ normal=$(tput sgr0)
 
 # paths
 E2E_DIR="${0%/*}/.."
-WAIT_ON_BIN="../../../../../node_modules/.bin/wait-on"
+WAIT_ON_BIN="../../../../node_modules/.bin/wait-on"
 
 cd "${E2E_DIR}"
 
