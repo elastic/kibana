@@ -36,7 +36,8 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>, logger: L
         },
       });
 
-      const { buckets } = esResponse.aggregations.persisted;
+      // @ts-expect-error buckets is not declared
+      const buckets: SessionPersistedTermsBucket[] = esResponse.aggregations!.persisted.buckets;
       if (!buckets.length) {
         return { transientCount: 0, persistedCount: 0, totalCount: 0 };
       }
