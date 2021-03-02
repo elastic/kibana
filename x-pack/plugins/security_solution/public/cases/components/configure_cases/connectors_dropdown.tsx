@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { ConnectorTypes } from '../../../../../case/common/api';
 import { ActionConnector } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
@@ -20,6 +21,7 @@ export interface Props {
   onChange: (id: string) => void;
   selectedConnector: string;
   appendAddConnectorButton?: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const ICON_SIZE = 'm';
@@ -61,29 +63,36 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   onChange,
   selectedConnector,
   appendAddConnectorButton = false,
+  hideConnectorServiceNowSir = false,
 }) => {
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
-      (acc, connector) => [
-        ...acc,
-        {
-          value: connector.id,
-          inputDisplay: (
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIconExtended
-                  type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
-                  size={ICON_SIZE}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <span>{connector.name}</span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          'data-test-subj': `dropdown-connector-${connector.id}`,
-        },
-      ],
+      (acc, connector) => {
+        if (hideConnectorServiceNowSir && connector.actionTypeId === ConnectorTypes.serviceNowSIR) {
+          return acc;
+        }
+
+        return [
+          ...acc,
+          {
+            value: connector.id,
+            inputDisplay: (
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIconExtended
+                    type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
+                    size={ICON_SIZE}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>{connector.name}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            'data-test-subj': `dropdown-connector-${connector.id}`,
+          },
+        ];
+      },
       [noConnectorOption]
     );
 
