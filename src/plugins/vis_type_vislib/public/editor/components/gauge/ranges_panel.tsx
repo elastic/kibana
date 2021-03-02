@@ -15,6 +15,7 @@ import {
   SetColorRangeValue,
   SwitchOption,
   ColorSchemaOptions,
+  PercentageModeOption,
 } from '../../../../../vis_default_editor/public';
 import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../charts/public';
 import { GaugeOptionsInternalProps } from '../gauge';
@@ -77,13 +78,10 @@ function RangesPanel({
         setValue={setGaugeValue}
       />
 
-      <SwitchOption
+      <PercentageModeOption
         data-test-subj="gaugePercentageMode"
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.percentageModeLabel', {
-          defaultMessage: 'Percentage mode',
-        })}
-        paramName="percentageMode"
-        value={stateParams.gauge.percentageMode}
+        percentageMode={stateParams.gauge.percentageMode}
+        formatPattern={stateParams.gauge.percentageFormatPattern}
         setValue={setGaugeValue}
       />
 
