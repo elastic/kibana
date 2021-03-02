@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AppMount } from 'src/core/public';
-import { logoutApp } from './logout_app';
+import type { AppMount } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { logoutApp } from './logout_app';
 
 describe('logoutApp', () => {
   beforeAll(() => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { authenticationMock } from './authentication/index.mock';
-import { createSessionTimeoutMock } from './session/session_timeout.mock';
 import { licenseMock } from '../common/licensing/index.mock';
+import { authenticationMock } from './authentication/index.mock';
 import { navControlServiceMock } from './nav_control/index.mock';
+import { createSessionTimeoutMock } from './session/session_timeout.mock';
 
 function createSetupMock() {
   return {
