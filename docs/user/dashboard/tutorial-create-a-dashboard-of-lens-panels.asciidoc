@@ -234,7 +234,7 @@ image::images/lens_end_to_end_4_3.png[Turn off axis name]
 
 For each response code that you want to display, create a filter. 
 
-. In the editor, click the *Drop a field or click to add* field for *Break down by*. 
+. In the editor, click the *Drop a field or click to add* field for *Break down by*.
 
 . From *Select a function*, click *Filters*.
 

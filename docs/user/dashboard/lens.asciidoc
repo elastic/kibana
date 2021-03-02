@@ -22,7 +22,6 @@ image::images/lens_data_info.png[Data summary window with Other]
 
 NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
 
-
 [float]
 [[drag-and-drop-keyboard-navigation]]
 === Create your visualizations faster with keyboard navigation
@@ -158,3 +157,4 @@ At the moment it is not possible to inspect the Elasticsearch query for a *Lens*
 // ===== What {es} aggregations are renamed as Lens functions?
 
 // Show a table here like the aggregation-reference in Kibana guide
+
