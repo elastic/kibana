@@ -665,7 +665,13 @@ const EXPECTED_DATA = [
     originalValue: ['filebeat-7.0.0-iot-2019.06'],
     isObjectArray: false,
   },
-  { category: '_type', field: '_type', values: ['_doc'], originalValue: ['_doc'], isObjectArray: false },
+  {
+    category: '_type',
+    field: '_type',
+    values: ['_doc'],
+    originalValue: ['_doc'],
+    isObjectArray: false,
+  },
   {
     category: '_id',
     field: '_id',
