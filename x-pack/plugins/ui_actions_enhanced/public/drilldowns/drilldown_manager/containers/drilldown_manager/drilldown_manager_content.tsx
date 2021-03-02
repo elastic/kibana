@@ -6,12 +6,8 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
 import { Tabs } from '../tabs';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
-  const route = drilldowns.useRoute();
-
   return <Tabs />;
 };

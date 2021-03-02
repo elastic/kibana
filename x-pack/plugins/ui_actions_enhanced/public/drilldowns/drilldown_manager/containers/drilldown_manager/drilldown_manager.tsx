@@ -10,9 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
 import { txtDrilldowns, txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
 import { FlyoutFrame } from '../../components/flyout_frame';
-import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
-import { DrilldownList } from '../drilldown_list';
 import { DrilldownManagerContent } from './drilldown_manager_content';
 
 export const DrilldownManager: React.FC = ({}) => {
@@ -31,10 +29,6 @@ export const DrilldownManager: React.FC = ({}) => {
         {route[0] === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
       </EuiButton>
     ) : null;
-
-  let content: React.ReactNode = null;
-  if (route[0] === 'create') content = <FormDrilldownWizard />;
-  if (route[0] === 'manage') content = <DrilldownList />;
 
   const banner = !hideWelcomeMessage && (
     <DrilldownHelloBar
