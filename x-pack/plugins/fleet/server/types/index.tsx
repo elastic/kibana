@@ -86,8 +86,6 @@ export {
   FleetServerPolicy,
 } from '../../common';
 
-export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
-
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
   agentPolicyId: string
