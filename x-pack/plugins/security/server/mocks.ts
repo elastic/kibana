@@ -6,10 +6,11 @@
  */
 
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { authenticationServiceMock } from './authentication/authentication_service.mock';
-import { authorizationMock } from './authorization/index.mock';
+
 import { licenseMock } from '../common/licensing/index.mock';
 import { auditServiceMock } from './audit/index.mock';
+import { authenticationServiceMock } from './authentication/authentication_service.mock';
+import { authorizationMock } from './authorization/index.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
