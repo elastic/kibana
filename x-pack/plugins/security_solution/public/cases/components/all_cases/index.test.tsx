@@ -466,7 +466,7 @@ describe('AllCases', () => {
         .last()
         .simulate('click');
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-        useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
+        useGetCasesMockState.data.cases.map(({ id }) => ({ id, type: 'individual' }))
       );
     });
   });
