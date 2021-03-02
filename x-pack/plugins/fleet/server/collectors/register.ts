@@ -40,7 +40,7 @@ export function registerFleetUsageCollector(
       const [soClient, esClient] = await getInternalClients(core);
       return {
         agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(soClient, esClient),
+        agents: await getAgentUsage(config, soClient, esClient),
         packages: await getPackageUsage(soClient),
       };
     },
