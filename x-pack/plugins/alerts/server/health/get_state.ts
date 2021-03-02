@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { defer, of, interval, Observable } from 'rxjs';
-import { catchError, retry, switchMap } from 'rxjs/operators';
+import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
+import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
 import { HealthStatus } from '../types';
 
-const HEALTH_STATUS_INTERVAL = 15000; // 60000 * 5; // Five minutes
-const MAX_RETRY_ATTEMPTS = 3;
+export const MAX_RETRY_ATTEMPTS = 3;
+const HEALTH_STATUS_INTERVAL = 60000 * 5; // Five minutes
+const RETRY_DELAY = 5000; // Wait 5 seconds before retrying on errors
 
-const shouldReturnError = [false, false, true, true, true, false, false, false];
-let counter = 0;
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
-  console.log('GET LATEST TASK STATE');
-  if (counter < shouldReturnError.length && shouldReturnError[counter++]) {
-    console.log('throwing error for task state');
-    throw new Boom.Boom(`error! ${counter}`, {
-      statusCode: 503,
-    });
-  }
-  console.log('successful task state');
   try {
     const result = await taskManager.get(HEALTH_TASK_ID);
     return result;
@@ -65,7 +55,6 @@ const LEVEL_SUMMARY = {
 const getHealthServiceStatus = async (
   taskManager: TaskManagerStartContract
 ): Promise<ServiceStatus<unknown>> => {
-  console.log('GETTING HEALTH STATUS');
   const doc = await getLatestTaskState(taskManager);
   const level =
     doc?.state?.health_status === HealthStatus.OK
@@ -79,13 +68,23 @@ const getHealthServiceStatus = async (
   };
 };
 
-const getHealthServiceStatusWithRetryAndErrorHandling = (
-  taskManager: TaskManagerStartContract
+export const getHealthServiceStatusWithRetryAndErrorHandling = (
+  taskManager: TaskManagerStartContract,
+  retryDelay?: number
 ): Observable<ServiceStatus<unknown>> => {
   return defer(() => getHealthServiceStatus(taskManager)).pipe(
-    retry(MAX_RETRY_ATTEMPTS),
+    retryWhen((errors) => {
+      return errors.pipe(
+        mergeMap((error, i) => {
+          const retryAttempt = i + 1;
+          if (retryAttempt > MAX_RETRY_ATTEMPTS) {
+            return throwError(error);
+          }
+          return timer(retryDelay ?? RETRY_DELAY);
+        })
+      );
+    }),
     catchError((error) => {
-      console.log(`ERROR getting health status ${JSON.stringify(error)}`);
       return of({
         level: ServiceStatusLevels.unavailable,
         summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
