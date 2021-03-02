@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   EsAssetReference,
@@ -162,22 +163,17 @@ async function installPipeline({
   esClient: ElasticsearchClient;
   pipeline: any;
 }): Promise<EsAssetReference> {
-  const esClientParams: {
-    method: string;
-    path: string;
-    body: any;
-  } = {
-    method: 'PUT',
-    path: `/_ingest/pipeline/${pipeline.nameForInstallation}`,
+  const esClientParams = {
+    id: pipeline.nameForInstallation,
     body: pipeline.contentForInstallation,
   };
 
-  const esClientRequestParams: { ignore: number[]; headers?: any } = {
+  const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
 
   if (pipeline.extension === 'yml') {
-    esClientRequestParams.headers = {
+    esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
       // but we want JSON responses (to extract error messages, status code, or other metadata)
@@ -185,12 +181,7 @@ async function installPipeline({
     };
   }
 
-  // This uses the catch-all endpoint 'transport.request' because we have to explicitly
-  // set the Content-Type header above for sending yml data. Setting the headers is not
-  // exposed in the convenience endpoint 'ingest.putPipeline' of elasticsearch-js-legacy
-  // which we could otherwise use.
-  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-  await esClient.transport.request(esClientParams, esClientRequestParams);
+  await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
 
   return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
 }
