@@ -6,6 +6,8 @@
  */
 
 import { Job, JobStats } from './anomaly_detection_jobs';
+import { RuntimeMappings, IndicesOptions } from './fields';
+import { ES_AGGREGATION } from '../constants/aggregation_types';
 
 export interface MlJobsResponse {
   jobs: Job[];
@@ -22,4 +24,19 @@ export interface JobsExistResponse {
     exists: boolean;
     isGroup: boolean;
   };
+}
+
+export interface BucketSpanEstimatorData {
+  aggTypes: Array<ES_AGGREGATION | null>;
+  duration: {
+    start: number;
+    end: number;
+  };
+  fields: Array<string | null>;
+  index: string;
+  query: any;
+  splitField: string | undefined;
+  timeField: string | undefined;
+  runtimeMappings: RuntimeMappings | undefined;
+  indicesOptions: IndicesOptions | undefined;
 }

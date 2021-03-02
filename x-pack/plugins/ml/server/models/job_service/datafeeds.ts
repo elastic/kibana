@@ -217,7 +217,8 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const { start } = await getTimeFieldRange(
       datafeed.indices,
       job.data_description.time_field,
-      query
+      query,
+      datafeed.indices_options
     );
 
     // Get bucket span

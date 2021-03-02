@@ -22,8 +22,8 @@ function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {
 
 function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
   const fs = fieldsServiceProvider(client);
-  const { index, timeFieldName, query } = payload;
-  return fs.getTimeFieldRange(index, timeFieldName, query);
+  const { index, timeFieldName, query, indicesOptions } = payload;
+  return fs.getTimeFieldRange(index, timeFieldName, query, indicesOptions);
 }
 
 /**

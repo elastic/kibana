@@ -11,6 +11,7 @@ import {
   AggFieldNamePair,
   EVENT_RATE_FIELD_ID,
   RuntimeMappings,
+  IndicesOptions,
 } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
@@ -44,7 +45,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const json: object = getPopulationSearchJsonFromConfig(
       indexPatternTitle,
@@ -55,7 +57,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       query,
       aggFieldNamePairs,
       splitFieldName,
-      runtimeMappings
+      runtimeMappings,
+      indicesOptions
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -138,7 +141,8 @@ function getPopulationSearchJsonFromConfig(
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
   splitFieldName: string | null,
-  runtimeMappings: RuntimeMappings | undefined
+  runtimeMappings: RuntimeMappings | undefined,
+  indicesOptions: IndicesOptions | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -162,6 +166,7 @@ function getPopulationSearchJsonFromConfig(
       },
       ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
+    ...(indicesOptions ?? {}),
   };
 
   if (query.bool === undefined) {

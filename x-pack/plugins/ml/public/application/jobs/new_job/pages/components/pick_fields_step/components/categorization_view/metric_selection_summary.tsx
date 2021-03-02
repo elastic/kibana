@@ -54,7 +54,8 @@ export const CategorizationDetectorsSummary: FC = () => {
       const resp = await chartLoader.loadEventRateChart(
         jobCreator.start,
         jobCreator.end,
-        chartInterval.getInterval().asMilliseconds()
+        chartInterval.getInterval().asMilliseconds(),
+        jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);
     } catch (error) {

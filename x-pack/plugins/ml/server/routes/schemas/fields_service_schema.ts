@@ -29,4 +29,6 @@ export const getTimeFieldRangeSchema = schema.object({
   timeFieldName: schema.maybe(schema.string()),
   /** Query to match documents in the index(es). */
   query: schema.maybe(schema.any()),
+  /** Additional search options. */
+  indicesOptions: schema.maybe(schema.any()),
 });

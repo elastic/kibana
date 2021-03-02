@@ -17,6 +17,7 @@ export const categorizationFieldExamplesSchema = {
   end: schema.number(),
   analyzer: schema.any(),
   runtimeMappings: schema.maybe(schema.any()),
+  indicesOptions: schema.maybe(schema.any()),
 };
 
 export const chartSchema = {
@@ -30,6 +31,7 @@ export const chartSchema = {
   splitFieldName: schema.maybe(schema.nullable(schema.string())),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
   runtimeMappings: schema.maybe(schema.any()),
+  indicesOptions: schema.maybe(schema.any()),
 };
 
 export const datafeedIdsSchema = schema.object({
