@@ -460,7 +460,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await objectRemover.removeAll();
       });
 
-      it.only('renders the alert details view in app button', async () => {
+      it('renders the alert details view in app button', async () => {
         const alert = await createAlert({
           name: alertName,
           consumer: 'alerting_fixture',
