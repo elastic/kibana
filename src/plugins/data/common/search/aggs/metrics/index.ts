@@ -16,6 +16,8 @@ export * from './bucket_min_fn';
 export * from './bucket_min';
 export * from './bucket_sum_fn';
 export * from './bucket_sum';
+export * from './filtered_metric_fn';
+export * from './filtered_metric';
 export * from './cardinality_fn';
 export * from './cardinality';
 export * from './count';

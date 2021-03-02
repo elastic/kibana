@@ -87,4 +87,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return true;
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };

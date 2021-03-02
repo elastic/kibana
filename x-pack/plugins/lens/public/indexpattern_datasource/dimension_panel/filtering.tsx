@@ -7,40 +7,28 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import {
-  EuiLink,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
-  EuiText,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import {
-  adjustTimeScaleLabelSuffix,
-  DEFAULT_TIME_SCALE,
-  IndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
+import React from 'react';
+import { Query } from 'src/plugins/data/public';
+import { IndexPatternColumn, operationDefinitionMap } from '../operations';
 import { QueryInput } from '../operations/definitions/filters/filter_popover';
-import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
 import { IndexPattern, IndexPatternLayer } from '../types';
 
+// to do: get the language from uiSettings
+const defaultFilter: Query = {
+  query: '',
+  language: 'kuery',
+};
+
 export function setFilter(columnId: string, layer: IndexPatternLayer, query: Query) {
-  const currentColumn = layer.columns[columnId];
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
-        filter: query,
+        filter: query.query !== '' ? query : undefined,
       },
     },
   };
@@ -89,7 +77,7 @@ export function Filtering({
           <QueryInput
             indexPattern={indexPattern}
             data-test-subj="indexPattern-time-scaling-unit"
-            value={selectedColumn.filter!}
+            value={selectedColumn.filter || defaultFilter}
             onChange={(newQuery) => {
               updateLayer(setFilter(columnId, layer, newQuery));
             }}

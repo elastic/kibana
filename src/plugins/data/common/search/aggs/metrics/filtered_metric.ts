@@ -7,44 +7,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { aggBucketAvgFnName } from './bucket_avg_fn';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
 import { AggConfigSerialized, BaseAggParams } from '../types';
+import { aggFilteredMetricFnName } from './filtered_metric_fn';
 
-export interface AggParamsBucketAvg extends BaseAggParams {
+export interface AggParamsFilteredMetric extends BaseAggParams {
   customMetric?: AggConfigSerialized;
   customBucket?: AggConfigSerialized;
 }
 
-const overallAverageLabel = i18n.translate('data.search.aggs.metrics.overallAverageLabel', {
+const filteredMetricLabel = i18n.translate('data.search.aggs.metrics.filteredMetricLabel', {
   defaultMessage: 'filtered',
 });
 
-const averageBucketTitle = i18n.translate('data.search.aggs.metrics.averageBucketTitle', {
+const filteredMetricTitle = i18n.translate('data.search.aggs.metrics.filteredMetricLabel', {
   defaultMessage: 'Filtered metric',
 });
 
-export const getBucketAvgMetricAgg = () => {
+export const getFilteredMetricAgg = () => {
   const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
 
   return new MetricAggType({
     name: METRIC_TYPES.FILTERED_METRIC,
-    expressionName: aggBucketAvgFnName,
-    title: averageBucketTitle,
-    makeLabel: (agg) => makeNestedLabel(agg, overallAverageLabel),
+    expressionName: aggFilteredMetricFnName,
+    title: filteredMetricTitle,
+    makeLabel: (agg) => makeNestedLabel(agg, filteredMetricLabel),
     subtype,
     params: [...params(['filter'])],
     getSerializedFormat,
-    hasNoDsl: true,
     getValue(agg, bucket) {
-      // TODO read the id from the metric
-      // const customMetric = agg.getParam('customMetric');
-      // const customBucket = agg.getParam('customBucket');
+      const customMetric = agg.getParam('customMetric');
 
-      return bucket[agg.id + '-metric'] && bucket[agg.id + '-metric'].value;
+      return bucket[customMetric.id] && bucket[customMetric.id].value;
     },
   });
 };

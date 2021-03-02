@@ -54,8 +54,8 @@ function getExpressionForLayer(
           uiSettings
         );
         if (wrapInFilter) {
-          aggAst = buildExpressionFunction<AggFunctionsMapping['aggBucketAvg']>(
-            'aggBucketAvg', //aggFilteredMetric
+          aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
+            'aggFilteredMetric',
             {
               id: colId,
               enabled: true,

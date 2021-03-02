@@ -25,12 +25,6 @@ export interface AggParamsFilter extends BaseAggParams {
   geo_bounding_box?: GeoBoundingBox;
 }
 
-interface FilterValue {
-  input: Query;
-  label: string;
-  id: string;
-}
-
 export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: string) => any }) =>
   new BucketAggType({
     name: BUCKET_TYPES.FILTER,
@@ -50,12 +44,12 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
           },
         ],
         write(aggConfig, output) {
-          const filter: FilterValue = aggConfig.params.filter;
+          const filter: Query = aggConfig.params.filter;
 
-          const input = cloneDeep(filter.input);
+          const input = cloneDeep(filter);
 
           if (!input) {
-            console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+            console.log('malformed filter agg params, missing query'); // eslint-disable-line no-console
             return;
           }
 
