@@ -113,4 +113,5 @@ export const derivativeOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };

@@ -36,12 +36,13 @@ export const getFilteredMetricAgg = () => {
     title: filteredMetricTitle,
     makeLabel: (agg) => makeNestedLabel(agg, filteredMetricLabel),
     subtype,
-    params: [...params(['filter'])],
+    params: [...params(['filter'], false)],
+    hasNoDslParams: true,
     getSerializedFormat,
     getValue(agg, bucket) {
       const customMetric = agg.getParam('customMetric');
-
-      return bucket[customMetric.id] && bucket[customMetric.id].value;
+      const customBucket = agg.getParam('customBucket');
+      return customMetric.getValue(bucket[customBucket.id]);
     },
   });
 };

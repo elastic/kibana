@@ -122,6 +122,7 @@ export const movingAverageOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };
 
 function MovingAverageParamEditor({

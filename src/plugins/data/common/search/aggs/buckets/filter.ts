@@ -61,8 +61,7 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
             return;
           }
 
-          const params = output.params || (output.params = {});
-          params.filter = query;
+          output.params = query;
         },
       },
     ],

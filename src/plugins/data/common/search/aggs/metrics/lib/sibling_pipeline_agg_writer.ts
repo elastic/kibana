@@ -9,7 +9,11 @@
 import { IMetricAggConfig } from '../metric_agg_type';
 import { METRIC_TYPES } from '../metric_agg_types';
 
-export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<string, any>) => {
+export const siblingPipelineAggWriter = (
+  agg: IMetricAggConfig,
+  output: Record<string, any>,
+  writeBucketsPath: boolean = true
+) => {
   const customMetric = agg.getParam('customMetric');
 
   if (!customMetric) return;
@@ -17,12 +21,18 @@ export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<s
   const metricAgg = customMetric;
   const bucketAgg = agg.getParam('customBucket');
 
-  // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
+  // todo not sure whether this is necessary
+  if (writeBucketsPath) {
+    // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
+    if (metricAgg.type.name !== METRIC_TYPES.COUNT) {
+      bucketAgg.subAggs = (output.subAggs || []).concat(metricAgg);
+      output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
+    } else {
+      output.params.buckets_path = bucketAgg.id + '>_count';
+    }
+  }
   if (metricAgg.type.name !== METRIC_TYPES.COUNT) {
     bucketAgg.subAggs = (output.subAggs || []).concat(metricAgg);
-    output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
-  } else {
-    output.params.buckets_path = bucketAgg.id + '>_count';
   }
 
   output.parentAggs = (output.parentAggs || []).concat(bucketAgg);

@@ -111,4 +111,5 @@ export const counterRateOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'mandatory',
+  filterable: true,
 };

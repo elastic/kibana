@@ -106,4 +106,5 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     )?.join(', ');
   },
+  filterable: true,
 };

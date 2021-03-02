@@ -30,10 +30,31 @@ function getExpressionForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient
 ): ExpressionAstExpression | null {
-  const { columns, columnOrder } = layer;
+  const { columnOrder } = layer;
   if (columnOrder.length === 0) {
     return null;
   }
+
+  const columns = { ...layer.columns };
+  Object.keys(columns).forEach((columnId) => {
+    const column = columns[columnId];
+    const rootDef = operationDefinitionMap[column.operationType];
+    if (
+      'references' in column &&
+      rootDef.filterable &&
+      rootDef.input === 'fullReference' &&
+      column.filter
+    ) {
+      // inherit filter to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.filterable) {
+          columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
+        }
+      });
+    }
+  });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 

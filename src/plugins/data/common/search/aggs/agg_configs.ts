@@ -193,10 +193,12 @@ export class AggConfigs {
           // advance the cursor and nest under the previous agg, or
           // put it on the same level if the previous agg doesn't accept
           // sub aggs
-          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
+          dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
         }
 
-        const dsl = (dslLvlCursor[config.id] = config.toDsl(this));
+        const dsl = config.type.hasNoDslParams
+          ? config.toDsl(this)
+          : (dslLvlCursor[config.id] = config.toDsl(this));
         let subAggs: any;
 
         parseParentAggs(dslLvlCursor, dsl);
