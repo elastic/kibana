@@ -17,9 +17,8 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  ILegacyScopedClusterClient,
+  ElasticsearchClient,
 } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { Logger } from '../../../../../../src/core/server';
 
 const bodySchema = schema.object({
@@ -54,14 +53,14 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
+      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting aliases from pattern "${pattern}": ${err.message}`);
     }
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
+      indices = await getIndicesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
@@ -81,7 +80,7 @@ function uniqueCombined(list1: string[], list2: string[], limit: number) {
 }
 
 async function getIndicesFromPattern(
-  dataClient: ILegacyScopedClusterClient,
+  esClient: ElasticsearchClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
@@ -100,7 +99,7 @@ async function getIndicesFromPattern(
       },
     },
   };
-  const response: SearchResponse<unknown> = await dataClient.callAsCurrentUser('search', params);
+  const { body: response } = await esClient.search(params);
   // TODO: Investigate when the status field might appear here, type suggests it shouldn't ever happen
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((response as any).status === 404 || !response.aggregations) {
@@ -111,7 +110,7 @@ async function getIndicesFromPattern(
 }
 
 async function getAliasesFromPattern(
-  dataClient: ILegacyScopedClusterClient,
+  esClient: ElasticsearchClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
@@ -121,7 +120,7 @@ async function getAliasesFromPattern(
   };
   const result: string[] = [];
 
-  const response = await dataClient.callAsCurrentUser('indices.getAlias', params);
+  const { body: response } = await esClient.indices.getAlias(params);
 
   if (response.status === 404) {
     return result;
