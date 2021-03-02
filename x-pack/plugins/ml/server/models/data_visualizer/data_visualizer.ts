@@ -183,7 +183,8 @@ const getAggIntervals = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ): Promise<NumericColumnStatsMap> => {
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
@@ -210,6 +211,7 @@ const getAggIntervals = async (
       query,
       aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
       size: 0,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -249,7 +251,8 @@ export const getHistogramsForFields = async (
     indexPatternTitle,
     query,
     fields,
-    samplerShardSize
+    samplerShardSize,
+    runtimeMappings
   );
 
   const chartDataAggs = fields.reduce((aggs, field) => {

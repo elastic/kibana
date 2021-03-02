@@ -78,7 +78,12 @@ export function isRuntimeField(arg: any): arg is RuntimeField {
     ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
       (Object.keys(arg).length === 2 &&
         arg.hasOwnProperty('type') &&
-        arg.hasOwnProperty('script'))) &&
+        arg.hasOwnProperty('script') &&
+        (typeof arg.script === 'string' ||
+          (isPopulatedObject(arg.script) &&
+            Object.keys(arg.script).length === 1 &&
+            arg.script.hasOwnProperty('source') &&
+            typeof arg.script.source === 'string')))) &&
     RUNTIME_FIELD_TYPES.includes(arg.type)
   );
 }

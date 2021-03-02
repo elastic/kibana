@@ -36,6 +36,21 @@ describe('Transform: step_define type guards', () => {
         fieldName2: { type: 'keyword', someAttribute: 'some value' },
       })
     ).toBe(false);
+    expect(
+      isRuntimeMappings({
+        fieldName: { type: 'long', script: 1234 },
+      })
+    ).toBe(false);
+    expect(
+      isRuntimeMappings({
+        fieldName: { type: 'long', script: { someAttribute: 'some value' } },
+      })
+    ).toBe(false);
+    expect(
+      isRuntimeMappings({
+        fieldName: { type: 'long', script: { source: 1234 } },
+      })
+    ).toBe(false);
 
     expect(isRuntimeMappings({ fieldName: { type: 'keyword' } })).toBe(true);
     expect(
@@ -44,7 +59,12 @@ describe('Transform: step_define type guards', () => {
     expect(
       isRuntimeMappings({
         fieldName1: { type: 'keyword' },
-        fieldName2: { type: 'keyword', script: 'some script' },
+        fieldName2: { type: 'keyword', script: 'some script as script' },
+      })
+    ).toBe(true);
+    expect(
+      isRuntimeMappings({
+        fieldName: { type: 'long', script: { source: 'some script as source' } },
       })
     ).toBe(true);
   });
