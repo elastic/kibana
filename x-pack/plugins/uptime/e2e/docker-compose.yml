@@ -10,7 +10,7 @@ services:
     container_name: uptime-e2e-es
     healthcheck:
       test:
-        ['CMD-SHELL', 'curl -s http://localhost:9220/_cluster/health | grep -vq ''"status":"red"''']
+        ['CMD-SHELL', 'curl -s http://localhost:9200/_cluster/health | grep -vq ''"status":"red"''']
       retries: 10
       interval: 20s
     environment:
