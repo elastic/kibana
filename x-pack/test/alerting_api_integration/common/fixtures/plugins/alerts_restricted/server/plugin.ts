@@ -23,7 +23,7 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, alerts }: FixtureSetupDeps) {
+  public setup(core: CoreSetup<FixtureStartDeps>, { features, alerting }: FixtureSetupDeps) {
     features.registerKibanaFeature({
       id: 'alertsRestrictedFixture',
       name: 'AlertRestricted',
@@ -56,7 +56,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
-    defineAlertTypes(core, { alerts });
+    defineAlertTypes(core, { alerting });
   }
 
   public start() {}
