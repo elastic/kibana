@@ -9,10 +9,24 @@
 import { uniq } from 'lodash';
 import { PanelSchema, IndexPatternObject } from '../common/types';
 
-export function extractIndexPatterns(
+export const isStringTypeIndexPattern = (
+  indexPatternObject: IndexPatternObject
+): indexPatternObject is string => typeof indexPatternObject === 'string';
+
+export const convertIndexPatternObjectToStringRepresentation = (
+  indexPatternObject: IndexPatternObject
+) =>
+  isStringTypeIndexPattern(indexPatternObject)
+    ? indexPatternObject
+    : indexPatternObject?.title ?? '';
+
+export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
+  isStringTypeIndexPattern(indexPatternObject) ? indexPatternObject : indexPatternObject?.id ?? '';
+
+export const extractIndexPatterns = (
   panel: PanelSchema,
   defaultIndex?: PanelSchema['default_index_pattern']
-) {
+) => {
   const patterns: IndexPatternObject[] = [];
 
   if (panel.index_pattern) {
@@ -40,12 +54,4 @@ export function extractIndexPatterns(
   }
 
   return uniq<IndexPatternObject>(patterns).sort();
-}
-
-export const convertIndexPatternObjectToStringRepresentation = (
-  indexPatternObject: IndexPatternObject
-) =>
-  typeof indexPatternObject === 'string' ? indexPatternObject : indexPatternObject?.title ?? '';
-
-export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
-  typeof indexPatternObject === 'string' ? indexPatternObject : indexPatternObject?.id ?? '';
+};

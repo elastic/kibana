@@ -33,9 +33,9 @@ export const IndexPatternSelect = ({
   allowSwitchUseKibanaIndexesMode,
 }: IndexPatternSelectProps) => {
   const panelModel = useContext(PanelModelContext);
-  const useFieldTextControl = !Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
+  const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const [inputValue, setInputValue] = useState<IndexPatternObject>(value);
-  const Component = useFieldTextControl ? FieldTextSelect : ComboBoxSelect;
+  const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
 
   useDebounce(
     () => {

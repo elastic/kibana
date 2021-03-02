@@ -11,10 +11,12 @@ import type { UnwrapPromise } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { getDataStart } from '../../../../services';
 
+import { SwitchModePopover } from './switch_mode_popover';
+import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
+
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternObject } from '../../../../../common/types';
 import type { IndexPatternsService } from '../../../../../../data/public';
-import { SwitchModePopover } from './switch_mode_popover';
 
 /** @internal **/
 type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
@@ -22,18 +24,17 @@ type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTit
 const toSelectedOptions = (
   value: IndexPatternObject
 ): EuiComboBoxProps<IndexPatternObject>['selectedOptions'] => {
-  if (value) {
-    if (typeof value === 'string') {
-      return [{ label: value ?? '' }];
-    }
-    return [
-      {
-        id: value.id ?? '',
-        label: value.title ?? '',
-      },
-    ];
+  if (!value) {
+    return [];
   }
-  return [];
+  return isStringTypeIndexPattern(value)
+    ? [{ label: value ?? '' }]
+    : [
+        {
+          id: value.id ?? '',
+          label: value.title ?? '',
+        },
+      ];
 };
 
 const toComboBoxOptions = (options: IdsWithTitle) =>
@@ -75,7 +76,9 @@ export const ComboBoxSelect = ({
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
       {...(allowSwitchUseKibanaIndexesMode && {
-        append: <SwitchModePopover isKibanaIndicesModeOn={true} onModeChange={onModeChange} />,
+        append: (
+          <SwitchModePopover onModeChange={onModeChange} value={value} useKibanaIndices={true} />
+        ),
       })}
     />
   );

@@ -6,41 +6,73 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectIndexComponentProps } from './types';
+import { MigrationCallout } from './migration_callout';
+import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
+import { IndexPatternObject } from '../../../../../common/types';
+import { getDataStart } from '../../../../services';
 
-type SwitchModePopoverProps = Pick<SelectIndexComponentProps, 'onModeChange'> & {
-  isKibanaIndicesModeOn: boolean;
-};
+type SwitchModePopoverProps = Assign<
+  Pick<SelectIndexComponentProps, 'onModeChange' | 'value'>,
+  {
+    useKibanaIndices: boolean;
+  }
+>;
 
 export const SwitchModePopover = ({
-  isKibanaIndicesModeOn,
   onModeChange,
+  value,
+  useKibanaIndices,
 }: SwitchModePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [matchedIndex, setMatchedIndex] = useState<IndexPatternObject>();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
-  const onChange = useCallback(
-    (e) => {
-      onModeChange(e.target.checked);
-    },
-    [onModeChange]
-  );
+  const switchMode = useCallback(() => {
+    onModeChange(!useKibanaIndices, matchedIndex);
+  }, [onModeChange, matchedIndex, useKibanaIndices]);
+
+  useEffect(() => {
+    async function retrieveIndex() {
+      const { indexPatterns } = getDataStart();
+
+      if (isStringTypeIndexPattern(value)) {
+        const index = (await indexPatterns.find(value)).find((i) => i.title === value);
+
+        if (index) {
+          return setMatchedIndex({ id: index.id!, title: index.title });
+        }
+      }
+
+      setMatchedIndex(undefined);
+    }
+
+    retrieveIndex();
+  }, [value]);
 
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
+        <EuiButtonIcon
           iconType={'gear'}
-          size="xs"
           aria-label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
-              defaultMessage: 'Switch index pattern selection mode',
+              defaultMessage: 'Configure index pattern selection mode',
             }
           )}
           onClick={onButtonClick}
@@ -50,30 +82,36 @@ export const SwitchModePopover = ({
       closePopover={closePopover}
       style={{ height: 'auto' }}
     >
-      <EuiFormRow
-        label={i18n.translate(
-          'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
-          {
-            defaultMessage: 'Use Kibana indices?',
-          }
+      <div style={{ width: '360px' }}>
+        <EuiPopoverTitle>
+          {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
+            defaultMessage: 'Index pattern selection mode',
+          })}
+        </EuiPopoverTitle>
+        <EuiText>
+          <FormattedMessage
+            id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
+            defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
+            There are currently two selection modes available: Elasticsearch indices and Kibana
+            indices (recommended way)."
+          />
+        </EuiText>
+        <EuiSpacer />
+        {value && isStringTypeIndexPattern(value) && (
+          <MigrationCallout value={value} switchMode={switchMode} matchedIndex={matchedIndex} />
         )}
-        hasChildLabel={false}
-      >
         <EuiSwitch
           name="switch"
-          checked={isKibanaIndicesModeOn}
-          label={
-            isKibanaIndicesModeOn
-              ? i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.on', {
-                  defaultMessage: 'On',
-                })
-              : i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.off', {
-                  defaultMessage: 'Off',
-                })
-          }
-          onChange={onChange}
+          checked={useKibanaIndices}
+          label={i18n.translate(
+            'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
+            {
+              defaultMessage: 'Use Kibana indices?',
+            }
+          )}
+          onChange={switchMode}
         />
-      </EuiFormRow>
+      </div>
     </EuiPopover>
   );
 };

@@ -8,7 +8,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
-import { LegacyModePopover } from './legacy_mode_popover';
 import { SwitchModePopover } from './switch_mode_popover';
 import { convertIndexPatternObjectToStringRepresentation } from '../../../../../common/index_patterns_utils';
 
@@ -24,7 +23,6 @@ export const FieldTextSelect = ({
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const textualValue = convertIndexPatternObjectToStringRepresentation(value);
-  const append = [<LegacyModePopover index={textualValue} onModeChange={onModeChange} />];
 
   const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback(
     (e) => {
@@ -33,18 +31,18 @@ export const FieldTextSelect = ({
     [onIndexChange]
   );
 
-  if (allowSwitchUseKibanaIndexesMode) {
-    append.push(<SwitchModePopover isKibanaIndicesModeOn={false} onModeChange={onModeChange} />);
-  }
-
   return (
     <EuiFieldText
       disabled={disabled}
       onChange={onFieldTextChange}
       value={textualValue}
       placeholder={placeholder}
-      append={append}
       data-test-subj={dataTestSubj}
+      {...(allowSwitchUseKibanaIndexesMode && {
+        append: (
+          <SwitchModePopover onModeChange={onModeChange} value={value} useKibanaIndices={false} />
+        ),
+      })}
     />
   );
 };
