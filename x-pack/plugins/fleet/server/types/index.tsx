@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LegacyScopedClusterClient } from 'src/core/server';
-
 export {
   // Object types
   Agent,
