@@ -18,13 +18,15 @@ async function addLifecyclePolicy(
   alias: string
 ) {
   const body = {
-    lifecycle: {
-      name: policyName,
-      rollover_alias: alias,
+    [indexName]: {
+      lifecycle: {
+        name: policyName,
+        rollover_alias: alias,
+      },
     },
   };
 
-  return client.indices.putSettings({ index: indexName, body });
+  return client.indices.putSettings({ body });
 }
 
 const bodySchema = schema.object({
