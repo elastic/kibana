@@ -25,10 +25,7 @@ const TeamsActionFields: React.FunctionComponent<
         id="webhookUrl"
         fullWidth
         helpText={
-          <EuiLink
-            href={`${docLinks.links.alerting.teamsAction}#configuring-teams`}
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlHelpLabel"
               defaultMessage="Create a Microsoft Teams Webhook URL"

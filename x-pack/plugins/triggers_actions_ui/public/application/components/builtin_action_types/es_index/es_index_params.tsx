@@ -61,10 +61,7 @@ export const IndexParamsFields = ({
       errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
-        <EuiLink
-          href={`${docLinks.links.alerting.indexAction}#index-action-configuration`}
-          target="_blank"
-        >
+        <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
             defaultMessage="Index document example."

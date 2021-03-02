@@ -25,10 +25,7 @@ const SlackActionFields: React.FunctionComponent<
         id="webhookUrl"
         fullWidth
         helpText={
-          <EuiLink
-            href={`${docLinks.links.alerting.slackAction}#configuring-slack`}
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.slackAction} target="_blank">
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
               defaultMessage="Create a Slack Webhook URL"

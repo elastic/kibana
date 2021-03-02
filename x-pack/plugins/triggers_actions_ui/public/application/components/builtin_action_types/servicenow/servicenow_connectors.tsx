@@ -60,10 +60,7 @@ const ServiceNowConnectorFields: React.FC<
             isInvalid={isApiUrlInvalid}
             label={i18n.API_URL_LABEL}
             helpText={
-              <EuiLink
-                href={`${docLinks.links.alerting.serviceNowAction}#configuring-servicenow`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
                   defaultMessage="Configure a Personal Developer Instance"
