@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { DeleteFieldModal } from '../delete_field_modal/delete_field_modal';
+import { DeleteFieldModal } from '../delete_field_modal';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 
