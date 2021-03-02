@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  useRequest,
-  sendRequest,
-  useConditionalRequest,
-  SendConditionalRequestConfig,
-} from './use_request';
+import { useRequest, sendRequest, useConditionalRequest } from './use_request';
+import type { SendConditionalRequestConfig } from './use_request';
 import { agentPolicyRouteService } from '../../services';
-import {
+import type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetOneAgentPolicyResponse,

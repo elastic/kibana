@@ -7,19 +7,19 @@
 
 import Boom from '@hapi/boom';
 import type from 'type-detect';
-import { KibanaRequest } from '../../../../../../src/core/server';
+
+import type { KibanaRequest } from 'src/core/server';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
-import {
-  AuthenticationProviderOptions,
-  BaseAuthenticationProvider,
-  AuthenticationProviderSpecificOptions,
-} from './base';
+import type { RefreshTokenResult, TokenPair } from '../tokens';
+import { Tokens } from '../tokens';
+import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes possible OpenID Connect login flows.

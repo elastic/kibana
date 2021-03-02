@@ -9,12 +9,12 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
-import {
+import { KibanaAssetType } from '../../../types';
+import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
   InstallSource,
-  KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
