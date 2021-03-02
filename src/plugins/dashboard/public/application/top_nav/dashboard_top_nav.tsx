@@ -166,7 +166,6 @@ export function DashboardTopNav({
 
       function switchViewMode() {
         dashboardStateManager.switchViewMode(newMode);
-        dashboardStateManager.restorePanels();
 
         if (savedDashboard?.id && allowByValueEmbeddables) {
           const { getFullEditPath, title, id } = savedDashboard;
