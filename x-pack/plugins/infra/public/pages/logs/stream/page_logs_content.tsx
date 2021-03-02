@@ -89,8 +89,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     const newDateRangeDoesNotOverlap =
       (prevStartTimestamp != null &&
         startTimestamp != null &&
-        prevStartTimestamp < startTimestamp) ||
-      (prevEndTimestamp != null && endTimestamp != null && prevEndTimestamp > endTimestamp);
+        startTimestamp < prevStartTimestamp) ||
+      (prevEndTimestamp != null && endTimestamp != null && endTimestamp > prevEndTimestamp);
 
     const isCenterPointOutsideLoadedRange =
       targetPosition != null &&
