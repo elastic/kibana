@@ -24,13 +24,14 @@ kibanaPipeline(timeoutMinutes: 210) {
               withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
                 withEnv([
                   'BUILD_TS_REFS_CACHE_ENABLE=true',
-                  'BUILD_TS_REFS_CACHE_CAPTURE=true'
+                  'BUILD_TS_REFS_CACHE_CAPTURE=true',
+                  'DISABLE_BOOTSTRAP_VALIDATIONS=true',
                 ]) {
                   kibanaPipeline.doSetup()
                 }
               }
 
-              withCiTaskQueue([parallel: 2]) {
+              kibanaPipeline.withCiTaskQueue([parallel: 2]) {
                 catchErrors {
                   task {
                     kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
