@@ -61,3 +61,18 @@ export const VIEW_CASE = i18n.translate(
     defaultMessage: 'View Case',
   }
 );
+
+export const PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.permissionsMessage',
+  {
+    defaultMessage:
+      'You are currently missing the required permissions to attach alerts to cases. Please contact your administrator for further assistance.',
+  }
+);
+
+export const UNSUPPORTED_EVENTS_MSG = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.unsupportedEventsMessage',
+  {
+    defaultMessage: 'This event cannot be attached to a case',
+  }
+);

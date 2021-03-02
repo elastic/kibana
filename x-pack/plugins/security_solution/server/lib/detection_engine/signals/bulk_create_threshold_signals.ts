@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import set from 'set-value';
 
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
@@ -56,59 +57,19 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
 ) => {
-  if (isEmpty(threshold.field)) {
-    const totalResults =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+  const aggParts = threshold.field.length
+    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    : {
+        field: null,
+        index: 0,
+        name: 'threshold_0',
+      };
 
-    if (totalResults < threshold.value) {
-      return [];
-    }
-
-    const hit = results.hits.hits[0];
-    if (hit == null) {
-      logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
-      return [];
-    }
-    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-    if (timestampArray == null) {
-      return [];
-    }
-    const timestamp = timestampArray[0];
-    if (typeof timestamp !== 'string') {
-      return [];
-    }
-
-    const source = {
-      '@timestamp': timestamp,
-      threshold_result: {
-        terms: [
-          {
-            value: ruleId,
-          },
-        ],
-        count: totalResults,
-      },
-    };
-
-    return [
-      {
-        _index: inputIndex,
-        _id: calculateThresholdSignalUuid(
-          ruleId,
-          startedAt,
-          Array.isArray(threshold.field) ? threshold.field : [threshold.field]
-        ),
-        _source: source,
-      },
-    ];
-  }
-
-  const aggParts = results.aggregations && getThresholdAggregationParts(results.aggregations);
   if (!aggParts) {
     return [];
   }
@@ -119,7 +80,7 @@ const getTransformedHits = (
         const nextLevelIdx = i + 1;
         const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
         if (nextLevelAggParts == null) {
-          throw new Error('Something went horribly wrong');
+          throw new Error('Unable to parse aggregation.');
         }
         const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
         const nextBuckets = get(nextLevelPath, bucket);
@@ -132,7 +93,7 @@ const getTransformedHits = (
                 value: bucket.key,
               },
               ...val.terms,
-            ],
+            ].filter((term) => term.field != null),
             cardinality: val.cardinality,
             topThresholdHits: val.topThresholdHits,
             docCount: val.docCount,
@@ -146,13 +107,11 @@ const getTransformedHits = (
               field,
               value: bucket.key,
             },
-          ],
-          cardinality: !isEmpty(threshold.cardinality_field)
+          ].filter((term) => term.field != null),
+          cardinality: threshold.cardinality?.length
             ? [
                 {
-                  field: Array.isArray(threshold.cardinality_field)
-                    ? threshold.cardinality_field[0]
-                    : threshold.cardinality_field!,
+                  field: threshold.cardinality[0].field,
                   value: bucket.cardinality_count!.value,
                 },
               ]
@@ -208,7 +167,7 @@ const getTransformedHits = (
         _id: calculateThresholdSignalUuid(
           ruleId,
           startedAt,
-          Array.isArray(threshold.field) ? threshold.field : [threshold.field],
+          threshold.field,
           bucket.terms.map((term) => term.value).join(',')
         ),
         _source: source,
@@ -226,7 +185,7 @@ export const transformThresholdResultsToEcs = (
   startedAt: Date,
   filter: unknown,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   timestampOverride: TimestampOverrideOrUndefined
 ): SignalSearchResponse => {
@@ -259,13 +218,17 @@ export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
+  const threshold = params.ruleParams.threshold!;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.filter,
     params.logger,
-    params.ruleParams.threshold!,
+    {
+      ...threshold,
+      field: normalizeThresholdField(threshold.field),
+    },
     params.ruleParams.ruleId,
     params.timestampOverride
   );

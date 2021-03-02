@@ -160,8 +160,10 @@ export interface DefineStepRuleJson {
   threshold?: {
     field: string[];
     value: number;
-    cardinality_field: string;
-    cardinality_value: number;
+    cardinality: Array<{
+      field: string;
+      value: number;
+    }>;
   };
   threat_query?: string;
   threat_mapping?: ThreatMapping;
