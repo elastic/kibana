@@ -6,7 +6,8 @@
  */
 
 import { parse } from 'url';
-import { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
+
+import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
 
 interface CreateDeps {
   application: ApplicationSetup;

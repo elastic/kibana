@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import React, { Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RoleMapping, Role, isRoleDeprecated } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
+
+import type { Role, RoleMapping } from '../../../../../common/model';
+import { isRoleDeprecated } from '../../../../../common/model';
+import { RoleComboBox } from '../../../role_combo_box';
+import type { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
-import { RoleComboBox } from '../../../role_combo_box';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
