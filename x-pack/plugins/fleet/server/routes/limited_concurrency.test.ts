@@ -11,7 +11,7 @@ import {
   isLimitedRoute,
   registerLimitedConcurrencyRoutes,
 } from './limited_concurrency';
-import { FleetConfigType } from '../index';
+import type { FleetConfigType } from '../index';
 
 describe('registerLimitedConcurrencyRoutes', () => {
   test(`doesn't call registerOnPreAuth if maxConcurrentConnections is 0`, async () => {

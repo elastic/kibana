@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RegistryDataStream } from '../../../../types';
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
-import { Field } from '../../fields/field';
+import type { RegistryDataStream } from '../../../../types';
+import type { Field } from '../../fields/field';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { installTemplate } from './install';
 

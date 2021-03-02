@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Field, Fields } from '../../fields/field';
-import {
+import type { Field, Fields } from '../../fields/field';
+import type {
   RegistryDataStream,
   CallESAsCurrentUser,
   TemplateRef,

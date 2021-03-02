@@ -8,6 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import {
+  POLICY_WITH_MIGRATE_OFF,
+  POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
+  POLICY_WITH_NODE_ROLE_ALLOCATION,
+} from '../constants';
 
 describe('<EditPolicy /> node allocation', () => {
   let testBed: EditPolicyTestBed;
@@ -308,7 +313,7 @@ describe('<EditPolicy /> node allocation', () => {
   });
 
   describe('on cloud', () => {
-    describe('with deprecated data role config', () => {
+    describe('using legacy data role config', () => {
       test('should hide data tier option on cloud', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
@@ -319,7 +324,7 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        const { actions, component, exists, find } = testBed;
 
         component.update();
         await actions.warm.enable(true);
@@ -330,30 +335,13 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeFalsy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-      });
-
-      test('should ask users to migrate to node roles when on cloud using legacy data role', async () => {
-        httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: { test: ['123'] },
-          // On cloud, if using legacy config there will not be any "data_*" roles set.
-          nodesByRoles: { data: ['test'] },
-          isUsingDeprecatedDataRoleConfig: true,
-        });
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
-        const { actions, component, exists } = testBed;
-
-        component.update();
-        await actions.warm.enable(true);
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-
-        expect(exists('cloudDataTierCallout')).toBeTruthy();
+        // Show the call-to-action for users to migrate their cluster to use node roles
+        expect(find('cloudDataTierCallout').exists()).toBeTruthy();
       });
     });
 
-    describe('with node role config', () => {
-      test('shows data role, custom and "off" options on cloud with data roles', async () => {
+    describe('using node role config', () => {
+      test('shows recommended, custom and "off" options on cloud with data roles', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
@@ -362,7 +350,7 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        const { actions, component, exists, find } = testBed;
 
         component.update();
         await actions.warm.enable(true);
@@ -372,8 +360,10 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeTruthy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-        // We should not be showing the call-to-action for users to activate data tiers in cloud
+        // We should not be showing the call-to-action for users to activate data tier in cloud
         expect(exists('cloudDataTierCallout')).toBeFalsy();
+        // Do not show the call-to-action for users to migrate their cluster to use node roles
+        expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
 
       test('shows cloud notice when cold tier nodes do not exist', async () => {
@@ -395,6 +385,104 @@ describe('<EditPolicy /> node allocation', () => {
         // Assert that other notices are not showing
         expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
         expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
+      });
+    });
+  });
+
+  describe('data allocation', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_MIGRATE_OFF]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('setting node_attr based allocation, but not selecting node attribute', async () => {
+      const { actions } = testBed;
+      await actions.warm.setDataAllocation('node_attrs');
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
+
+      expect(warmPhase.actions.migrate).toEqual({ enabled: false });
+    });
+
+    describe('node roles', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ROLE_ALLOCATION]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('detecting use of the recommended allocation type', () => {
+        const { find } = testBed;
+        const selectedDataAllocation = find(
+          'warm-dataTierAllocationControls.dataTierSelect'
+        ).text();
+        expect(selectedDataAllocation).toBe('Use warm nodes (recommended)');
+      });
+
+      test('setting replicas serialization', async () => {
+        const { actions } = testBed;
+        await actions.warm.setReplicas('123');
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const warmPhaseActions = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
+          .actions;
+        expect(warmPhaseActions).toMatchInlineSnapshot(`
+          Object {
+            "allocate": Object {
+              "number_of_replicas": 123,
+            },
+          }
+        `);
+      });
+    });
+
+    describe('node attr and none', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('detecting use of the custom allocation type', () => {
+        const { find } = testBed;
+        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
+      });
+      test('detecting use of the "off" allocation type', () => {
+        const { find } = testBed;
+        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
       });
     });
   });

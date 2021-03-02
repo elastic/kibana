@@ -6,16 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
-import {
+import type { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchAssetType } from '../../../../types';
+import type {
   RegistryDataStream,
-  ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
   InstallablePackage,
+  CallESAsCurrentUser,
 } from '../../../../types';
-import { CallESAsCurrentUser } from '../../../../types';
-import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
+import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import {
   generateMappings,
