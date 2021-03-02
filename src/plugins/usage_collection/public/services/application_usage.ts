@@ -18,7 +18,10 @@ const DO_NOT_REPORT = ['kibana'];
 
 export function trackApplicationUsageChange(
   currentAppId$: Observable<string | undefined>,
-  applicationUsageTracker: ApplicationUsageTracker
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'updateViewClickCounter' | 'setCurrentAppId' | 'trackApplicationViewUsage'
+  >
 ) {
   const windowClickSubscrition = fromEvent(window, 'click').subscribe(() => {
     applicationUsageTracker.updateViewClickCounter(MAIN_APP_DEFAULT_VIEW_ID);
