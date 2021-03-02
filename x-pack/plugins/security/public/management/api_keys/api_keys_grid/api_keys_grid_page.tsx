@@ -122,7 +122,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (isLoadingApp) {
       return (
         <EuiPageContent>
-          <SectionLoading data-test-subj="apiKeysSectionLoading">
+          <SectionLoading>
             <FormattedMessage
               id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
               defaultMessage="Loading API keys…"
@@ -137,25 +137,16 @@ export class APIKeysGridPage extends Component<Props, State> {
     }
 
     if (error) {
-      const {
-        body: { error: errorTitle, message, statusCode },
-      } = error;
-
       return (
         <EuiPageContent>
-          <EuiCallOut
-            title={
+          <ApiKeysEmptyPrompt error={error}>
+            <EuiButton iconType="refresh" onClick={this.loadApiKeys}>
               <FormattedMessage
-                id="xpack.security.management.apiKeys.table.loadingApiKeysErrorTitle"
-                defaultMessage="Error loading API keys"
+                id="xpack.security.accountManagement.apiKeys.retryButton"
+                defaultMessage="Try again"
               />
-            }
-            color="danger"
-            iconType="alert"
-            data-test-subj="apiKeysError"
-          >
-            {statusCode}: {errorTitle} - {message}
-          </EuiCallOut>
+            </EuiButton>
+          </ApiKeysEmptyPrompt>
         </EuiPageContent>
       );
     }
@@ -372,31 +363,23 @@ export class APIKeysGridPage extends Component<Props, State> {
               }
               color="primary"
               iconType="user"
-              data-test-subj="apiKeyManageOwnKeysCallOut"
             />
             <EuiSpacer />
           </>
         ) : undefined}
 
-        {
-          <EuiInMemoryTable
-            items={apiKeys}
-            itemId="id"
-            columns={this.getColumnConfig()}
-            search={search}
-            sorting={sorting}
-            selection={selection}
-            pagination={pagination}
-            loading={isLoadingTable}
-            message={message}
-            isSelectable={true}
-            rowProps={() => {
-              return {
-                'data-test-subj': 'apiKeyRow',
-              };
-            }}
-          />
-        }
+        <EuiInMemoryTable
+          items={apiKeys}
+          itemId="id"
+          columns={this.getColumnConfig()}
+          search={search}
+          sorting={sorting}
+          selection={selection}
+          pagination={pagination}
+          loading={isLoadingTable}
+          message={message}
+          isSelectable={true}
+        />
       </>
     );
   };
@@ -404,7 +387,7 @@ export class APIKeysGridPage extends Component<Props, State> {
   private getColumnConfig = () => {
     const { isAdmin, isLoadingTable } = this.state;
 
-    let config: Array<EuiBasicTableColumn<any>> = [];
+    let config: Array<EuiBasicTableColumn<ApiKey>> = [];
 
     config = config.concat([
       {

@@ -5,189 +5,177 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-
-import { mountWithIntl } from '@kbn/test/jest';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import {
+  render,
+  fireEvent,
+  waitFor,
+  within,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-
-import type { APIKeysAPIClient } from '../api_keys_api_client';
-import { apiKeysAPIClientMock } from '../index.mock';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { securityMock } from '../../../mocks';
+import { Providers } from '../api_keys_management_app';
 import { APIKeysGridPage } from './api_keys_grid_page';
-import { NotEnabled } from './not_enabled';
-import { PermissionDenied } from './permission_denied';
+import { apiKeysAPIClientMock } from '../index.mock';
+import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 
-const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
 
-const waitForRender = async (
-  wrapper: ReactWrapper<any>,
-  condition: (wrapper: ReactWrapper<any>) => boolean
-) => {
-  return new Promise<void>((resolve, reject) => {
-    const interval = setInterval(async () => {
-      await Promise.resolve();
-      wrapper.update();
-      if (condition(wrapper)) {
-        resolve();
-      }
-    }, 10);
+const coreStart = coreMock.createStart();
 
-    setTimeout(() => {
-      clearInterval(interval);
-      reject(new Error('waitForRender timeout after 2000ms'));
-    }, 2000);
-  });
-};
+const apiClientMock = apiKeysAPIClientMock.create();
+apiClientMock.checkPrivileges.mockResolvedValue({
+  areApiKeysEnabled: true,
+  canManage: true,
+  isAdmin: true,
+});
+apiClientMock.getApiKeys.mockResolvedValue({
+  apiKeys: [
+    {
+      creation: 1571322182082,
+      expiration: 1571408582082,
+      id: '0QQZ2m0BO2XZwgJFuWTT',
+      invalidated: false,
+      name: 'my-api-key',
+      realm: 'reserved',
+      username: 'elastic',
+    },
+  ],
+});
+
+const authc = securityMock.createSetup().authc;
+authc.getCurrentUser.mockResolvedValue(
+  mockAuthenticatedUser({
+    username: 'jdoe',
+    full_name: '',
+    email: '',
+    enabled: true,
+    roles: ['superuser'],
+  })
+);
 
 describe('APIKeysGridPage', () => {
-  let apiClientMock: jest.Mocked<PublicMethodsOf<APIKeysAPIClient>>;
-  beforeEach(() => {
-    apiClientMock = apiKeysAPIClientMock.create();
-    apiClientMock.checkPrivileges.mockResolvedValue({
-      isAdmin: true,
-      areApiKeysEnabled: true,
-      canManage: true,
-    });
-    apiClientMock.getApiKeys.mockResolvedValue({
-      apiKeys: [
-        {
-          creation: 1571322182082,
-          expiration: 1571408582082,
-          id: '0QQZ2m0BO2XZwgJFuWTT',
-          invalidated: false,
-          name: 'my-api-key',
-          realm: 'reserved',
-          username: 'elastic',
-        },
-      ],
-    });
-  });
+  it('loads and displays API keys', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
 
-  const coreStart = coreMock.createStart();
-  const renderView = () => {
-    const history = createMemoryHistory({ initialEntries: ['/create'] });
-    return mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
+    const { getByText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
           history={history}
         />
-      </KibanaContextProvider>
+      </Providers>
     );
-  };
 
-  it('renders a loading state when fetching API keys', async () => {
-    expect(renderView().find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
+    await waitForElementToBeRemoved(() => getByText(/Loading API keys/));
+    getByText(/my-api-key/);
   });
 
-  it('renders a callout when API keys are not enabled', async () => {
-    apiClientMock.checkPrivileges.mockResolvedValue({
-      isAdmin: true,
-      canManage: true,
+  it('displays callout when API keys are disabled', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    apiClientMock.checkPrivileges.mockResolvedValueOnce({
       areApiKeysEnabled: false,
+      canManage: true,
+      isAdmin: true,
     });
 
-    const wrapper = renderView();
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(NotEnabled).length > 0;
-    });
+    const { getByText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
 
-    expect(wrapper.find(NotEnabled).find(EuiCallOut)).toMatchSnapshot();
+    await waitForElementToBeRemoved(() => getByText(/Loading API keys/));
+    getByText(/API keys not enabled/);
   });
 
-  it('renders permission denied if user does not have required permissions', async () => {
-    apiClientMock.checkPrivileges.mockResolvedValue({
+  it('displays error when user does not have required permissions', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    apiClientMock.checkPrivileges.mockResolvedValueOnce({
+      areApiKeysEnabled: true,
       canManage: false,
       isAdmin: false,
-      areApiKeysEnabled: true,
     });
 
-    const wrapper = renderView();
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(PermissionDenied).length > 0;
-    });
+    const { getByText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
 
-    expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
+    await waitForElementToBeRemoved(() => getByText(/Loading API keys/));
+    getByText(/You need permission to manage API keys/);
   });
 
-  it('renders error callout if error fetching API keys', async () => {
-    apiClientMock.getApiKeys.mockRejectedValue(mock500());
-
-    const wrapper = renderView();
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(EuiCallOut).length > 0;
+  it('displays error when fetching API keys fails', async () => {
+    apiClientMock.getApiKeys.mockRejectedValueOnce({
+      body: { error: 'Internal Server Error', message: '', statusCode: 500 },
     });
+    const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    expect(wrapper.find('EuiCallOut[data-test-subj="apiKeysError"]')).toHaveLength(1);
+    const { getByText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
+
+    await waitForElementToBeRemoved(() => getByText(/Loading API keys/));
+    getByText(/Could not load API keys/);
   });
 
-  describe('Admin view', () => {
-    let wrapper: ReactWrapper<any>;
-    beforeEach(() => {
-      wrapper = renderView();
+  it('creates user when submitting form and redirects back', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/create'] });
+    coreStart.http.get.mockResolvedValue([{ name: 'superuser' }]);
+    coreStart.http.post.mockResolvedValue({ api_key: 's3Cr3t_aP1-K3Y=' });
+
+    const { findByRole, findByText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
+    expect(coreStart.http.get).toHaveBeenCalledWith('/api/security/role');
+
+    const dialog = await findByRole('dialog');
+
+    fireEvent.click(await findByRole('button', { name: 'Create API key' }));
+
+    const alert = await findByRole('alert');
+    within(alert).getByText(/Enter a name/i);
+
+    fireEvent.change(await within(dialog).findByLabelText('Name'), {
+      target: { value: 'Test' },
     });
 
-    it('renders a callout indicating the user is an administrator', async () => {
-      const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
+    fireEvent.click(await findByRole('button', { name: 'Create API key' }));
 
-      await waitForRender(wrapper, (updatedWrapper) => {
-        return updatedWrapper.find(calloutEl).length > 0;
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/api_key', {
+        body: JSON.stringify({ name: 'Test' }),
       });
-
-      expect(wrapper.find(calloutEl).text()).toEqual('You are an API Key administrator.');
+      expect(history.location.pathname).toBe('/');
     });
 
-    it('renders the correct description text', async () => {
-      const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
-
-      await waitForRender(wrapper, (updatedWrapper) => {
-        return updatedWrapper.find(descriptionEl).length > 0;
-      });
-
-      expect(wrapper.find(descriptionEl).text()).toEqual(
-        'View and invalidate API keys. An API key sends requests on behalf of a user.'
-      );
-    });
-  });
-
-  describe('Non-admin view', () => {
-    let wrapper: ReactWrapper<any>;
-    beforeEach(() => {
-      apiClientMock.checkPrivileges.mockResolvedValue({
-        isAdmin: false,
-        canManage: true,
-        areApiKeysEnabled: true,
-      });
-
-      wrapper = renderView();
-    });
-
-    it('does NOT render a callout indicating the user is an administrator', async () => {
-      const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
-      const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
-
-      await waitForRender(wrapper, (updatedWrapper) => {
-        return updatedWrapper.find(descriptionEl).length > 0;
-      });
-
-      expect(wrapper.find(calloutEl).length).toEqual(0);
-    });
-
-    it('renders the correct description text', async () => {
-      const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
-
-      await waitForRender(wrapper, (updatedWrapper) => {
-        return updatedWrapper.find(descriptionEl).length > 0;
-      });
-
-      expect(wrapper.find(descriptionEl).text()).toEqual(
-        'View and invalidate your API keys. An API key sends requests on your behalf.'
-      );
-    });
+    await findByText('s3Cr3t_aP1-K3Y=');
   });
 });

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiCode,
@@ -30,6 +32,9 @@ export const CopyCodeField: FunctionComponent<CopyCodeFieldProps> = (props) => {
         <EuiCopy textToCopy={props.value}>
           {(copyText) => (
             <EuiButtonIcon
+              aria-label={i18n.translate('xpack.security.copyCodeField.copyButton', {
+                defaultMessage: 'Copy code',
+              })}
               iconType="copyClipboard"
               color="success"
               style={{ backgroundColor: 'transparent' }}
