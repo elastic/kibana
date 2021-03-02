@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
+import type { AuthenticatedUser } from './authenticated_user';
+import { canUserChangePassword } from './authenticated_user';
 
 describe('#canUserChangePassword', () => {
   ['reserved', 'native'].forEach((realm) => {

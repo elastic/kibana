@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import BroadcastChannel from 'broadcast-channel';
-import { SessionTimeout } from './session_timeout';
-import { createSessionExpiredMock } from './session_expired.mock';
+
 import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { createSessionExpiredMock } from './session_expired.mock';
+import { SessionTimeout } from './session_timeout';
 
 jest.useFakeTimers();
 

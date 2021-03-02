@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { PackagePolicy } from './';
+import type { ApplicationStart } from 'kibana/public';
+import type { PackagePolicy } from './';
 
 /**
  * Supported routing state for the create package policy page routes

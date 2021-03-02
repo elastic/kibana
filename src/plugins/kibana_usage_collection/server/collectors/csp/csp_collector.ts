@@ -34,12 +34,15 @@ export function createCspCollector(http: HttpServiceSetup): UsageCollectorOption
     schema: {
       strict: {
         type: 'boolean',
+        _meta: { description: 'Indicates if strict mode should be used.' },
       },
       warnLegacyBrowsers: {
         type: 'boolean',
+        _meta: { description: 'Indicates if legacy browser versions should be warned.' },
       },
       rulesChangedFromDefault: {
         type: 'boolean',
+        _meta: { description: 'Indicates if the rules have been changed from the default.' },
       },
     },
   };
