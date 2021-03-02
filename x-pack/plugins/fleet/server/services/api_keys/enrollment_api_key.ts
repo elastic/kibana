@@ -95,9 +95,26 @@ export async function deleteEnrollmentApiKey(
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentPolicyId: string
 ) {
-  throw new Error('NOT IMPLEMENTED');
+  let hasMore = true;
+  let page = 1;
+  while (hasMore) {
+    const { items } = await listEnrollmentApiKeys(esClient, {
+      page: page++,
+      perPage: 100,
+      kuery: `policy_id:${agentPolicyId}`,
+    });
+
+    if (items.length === 0) {
+      hasMore = false;
+    }
+
+    for (const apiKey of items) {
+      await deleteEnrollmentApiKey(soClient, esClient, apiKey.id);
+    }
+  }
 }
 
 export async function generateEnrollmentAPIKey(
