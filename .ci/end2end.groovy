@@ -13,6 +13,7 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     E2E_DIR = 'x-pack/plugins/apm/e2e'
+    UPTIME_E2E_DIR = 'x-pack/plugins/uptime/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
     KBN_OPTIMIZER_THEMES = 'v7light'
     GITHUB_CHECK_APM_UI = 'end2end-for-apm-ui'
@@ -51,7 +52,6 @@ pipeline {
         }
       }
       parallel {
-        // One or more stages need to be included within the parallel block.
         stage('APM-UI') {
           stages {
             stage('Prepare Kibana') {
@@ -115,9 +115,51 @@ pipeline {
           agent { label 'linux && immutable' }
           options { skipDefaultCheckout() }
           when { expression { return env.RUN_UPTIME_E2E != "false" } }
-          steps {
-            notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Preparing kibana', 'PENDING')
-            echo 'TBC'
+          stages {
+            stage('Prepare Kibana') {
+              options { skipDefaultCheckout() }
+              environment {
+                JENKINS_NODE_COOKIE = 'dontKillMe'
+              }
+              steps {
+                notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Preparing kibana', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${UPTIME_E2E_DIR}/ci/prepare-kibana.sh"
+                }
+              }
+              post {
+                unsuccessful {
+                  notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Kibana warm up failed', 'FAILURE')
+                }
+              }
+            }
+            stage('Smoke Tests'){
+              options { skipDefaultCheckout() }
+              steps{
+                notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Running smoke tests', 'PENDING')
+                dir("${BASE_DIR}"){
+                  sh "${UPTIME_E2E_DIR}/ci/run-e2e.sh"
+                }
+              }
+              post {
+                always {
+                  echo "TBD"
+                }
+                unsuccessful {
+                  notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Test failures', 'FAILURE')
+                }
+                success {
+                  notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Tests passed', 'SUCCESS')
+                }
+              }
+            }
+          }
+          post {
+            always {
+              dir("${BASE_DIR}"){
+                archiveArtifacts(allowEmptyArchive: true, artifacts: "${UPTIME_E2E_DIR}/kibana.log")
+              }
+            }
           }
         }
       }
