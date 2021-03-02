@@ -397,7 +397,7 @@ describe('createExtentFilter', () => {
         minLat: 35,
         minLon: -89,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       expect(filter).toEqual({
         geo_bounding_box: {
           location: {
@@ -415,7 +415,7 @@ describe('createExtentFilter', () => {
         minLat: -100,
         minLon: -190,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       expect(filter).toEqual({
         geo_bounding_box: {
           location: {
@@ -433,7 +433,7 @@ describe('createExtentFilter', () => {
         minLat: 35,
         minLon: 100,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       const leftLon = filter.geo_bounding_box.location.top_left[0];
       const rightLon = filter.geo_bounding_box.location.bottom_right[0];
       expect(leftLon).toBeGreaterThan(rightLon);
@@ -454,7 +454,7 @@ describe('createExtentFilter', () => {
         minLat: 35,
         minLon: -200,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       const leftLon = filter.geo_bounding_box.location.top_left[0];
       const rightLon = filter.geo_bounding_box.location.bottom_right[0];
       expect(leftLon).toBeGreaterThan(rightLon);
@@ -477,52 +477,30 @@ describe('createExtentFilter', () => {
         minLat: 35,
         minLon: -89,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       expect(filter).toEqual({
-        geo_shape: {
+        geo_bounding_box: {
           location: {
-            relation: 'INTERSECTS',
-            shape: {
-              coordinates: [
-                [
-                  [-89, 39],
-                  [-89, 35],
-                  [-83, 35],
-                  [-83, 39],
-                  [-89, 39],
-                ],
-              ],
-              type: 'Polygon',
-            },
+            top_left: [-89, 39],
+            bottom_right: [-83, 35],
           },
         },
       });
     });
 
-    it('should clamp longitudes to -180 to 180 when lonitude wraps globe', () => {
+    it('should clamp longitudes to -180 to 180 when longitude wraps globe', () => {
       const mapExtent = {
         maxLat: 39,
         maxLon: 209,
         minLat: 35,
         minLon: -191,
       };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
+      const filter = createExtentFilter(mapExtent, geoFieldName);
       expect(filter).toEqual({
-        geo_shape: {
+        geo_bounding_box: {
           location: {
-            relation: 'INTERSECTS',
-            shape: {
-              coordinates: [
-                [
-                  [-180, 39],
-                  [-180, 35],
-                  [180, 35],
-                  [180, 39],
-                  [-180, 39],
-                ],
-              ],
-              type: 'Polygon',
-            },
+            top_left: [-180, 39],
+            bottom_right: [180, 35],
           },
         },
       });
