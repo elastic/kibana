@@ -63,13 +63,18 @@ export const createFleetSetupHandler: RequestHandler<
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    await setupIngestManager(soClient, esClient);
+    const packageInstallUpgradeErrors = [];
+    try {
+      await setupIngestManager(soClient, esClient);
+    } catch (error) {
+      packageInstallUpgradeErrors.push(error);
+    }
     await setupFleet(soClient, esClient, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 
     return response.ok({
-      body: { isInitialized: true },
+      body: { isInitialized: true, packageInstallUpgradeErrors },
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
@@ -81,8 +86,13 @@ export const FleetSetupHandler: RequestHandler = async (context, request, respon
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient);
+    const packageInstallUpgradeErrors = [];
+    try {
+      await setupIngestManager(soClient, esClient);
+    } catch (error) {
+      packageInstallUpgradeErrors.push(error);
+    }
+    const body: PostIngestSetupResponse = { isInitialized: true, packageInstallUpgradeErrors };
     return response.ok({
       body,
     });
