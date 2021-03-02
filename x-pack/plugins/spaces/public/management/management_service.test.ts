@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ManagementService } from '.';
+import type { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
+import type { ManagementSection } from 'src/plugins/management/public';
+import { managementPluginMock } from 'src/plugins/management/public/mocks';
+
+import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { managementPluginMock } from '../../../../../src/plugins/management/public/mocks';
-import { ManagementSection } from 'src/plugins/management/public';
-import { PluginsStart } from '../plugin';
-import { CoreSetup } from 'src/core/public';
+import { ManagementService } from './management_service';
 
 describe('ManagementService', () => {
   describe('#setup', () => {

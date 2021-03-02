@@ -6,4 +6,4 @@
  */
 
 export { useSpaces } from './context';
-export { getSpacesContextWrapper } from './wrapper';
+export { getSpacesContextProviderWrapper } from './wrapper';
