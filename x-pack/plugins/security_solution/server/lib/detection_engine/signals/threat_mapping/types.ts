@@ -202,6 +202,7 @@ export interface SortWithTieBreaker {
 
 export interface ThreatMatchNamedQuery {
   id: string;
+  index: string;
   field: string;
   value: string;
 }
