@@ -17,7 +17,6 @@ normal=$(tput sgr0)
 
 # paths
 E2E_DIR="${0%/*}/../.."
-WAIT_ON_BIN="../../../node_modules/.bin/wait-on"
 
 cd "${E2E_DIR}"
 
@@ -27,21 +26,6 @@ cd "${E2E_DIR}"
 echo "" # newline
 echo "${bold}To start Kibana please run the following command:${normal}
 node ./scripts/start_e2e_server.js"
-
-#
-# Wait for Kibana to start
-##################################################
-echo "" # newline
-echo "${bold}Waiting for Kibana to start...${normal}"
-echo "Note: you need to start Kibana manually. Find the instructions at the top."
-$WAIT_ON_BIN -i 500 -w 500 http-get://kibana_system:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
-
-## Workaround to wait for the http server running
-## See: https://github.com/elastic/kibana/issues/66326
-if [ -e kibana.log ] ; then
-    grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
-    echo "✅ Kibana server running..."
-fi
 
 echo "✅ Setup completed successfully. Running tests..."
 node ./scripts/start_e2e_runner.js
