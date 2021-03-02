@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
+
 import { getCreateMigration } from './create_migration';
+import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
 afterEach(() => {
   jest.clearAllMocks();
