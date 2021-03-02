@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@spalger-patch-1'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
