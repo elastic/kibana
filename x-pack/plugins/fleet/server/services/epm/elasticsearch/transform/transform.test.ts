@@ -97,7 +97,7 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    esClient.transport.request.mockReturnValueOnce(
+    esClient.transform.getTransform.mockReturnValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [
@@ -154,30 +154,34 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
+    expect(esClient.transform.getTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
+        },
+        { ignore: [404] },
+      ],
+    ]);
+    expect(esClient.transform.stopTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+    expect(esClient.transform.deleteTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
     expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'GET',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-      [
-        {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0/_stop',
-          querystring: 'force=true',
-        },
-        { ignore: [404] },
-      ],
-      [
-        {
-          method: 'DELETE',
-          querystring: 'force=true',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
       [
         {
           method: 'DELETE',
@@ -185,33 +189,34 @@ describe('test transform install', () => {
         },
         { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0',
-          querystring: 'defer_validation=true',
+          transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
       [
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          querystring: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
+    ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0/_start',
+          transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
         },
         { ignore: [409] },
       ],
       [
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
         },
         { ignore: [409] },
       ],
@@ -319,23 +324,24 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
-    expect(esClient.transport.request.mock.calls).toEqual([
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          querystring: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
+    ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
         },
         { ignore: [409] },
       ],
     ]);
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
@@ -375,7 +381,7 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    esClient.transport.request.mockReturnValueOnce(
+    esClient.transform.getTransform.mockReturnValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [
@@ -428,30 +434,36 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
+    expect(esClient.transform.getTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
+    expect(esClient.transform.stopTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
+    expect(esClient.transform.deleteTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
     expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'GET',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-      [
-        {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0/_stop',
-          querystring: 'force=true',
-        },
-        { ignore: [404] },
-      ],
-      [
-        {
-          method: 'DELETE',
-          querystring: 'force=true',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
       [
         {
           method: 'DELETE',
@@ -460,6 +472,7 @@ describe('test transform install', () => {
         { ignore: [404] },
       ],
     ]);
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
@@ -536,22 +549,17 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
-    expect(esClient.transport.request.mock.calls).toEqual([
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          querystring: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
-      [
-        {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
-        },
-        { ignore: [409] },
-      ],
+    ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
+      [{ transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0' }, { ignore: [409] }],
     ]);
 
     expect(savedObjectsClient.update.mock.calls).toEqual([
