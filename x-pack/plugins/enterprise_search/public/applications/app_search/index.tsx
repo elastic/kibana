@@ -25,6 +25,7 @@ import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
+import { MetaEngineCreation } from './components/meta_engine_creation';
 import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
@@ -38,6 +39,7 @@ import {
   ENGINES_PATH,
   ENGINE_PATH,
   LIBRARY_PATH,
+  META_ENGINE_CREATION_PATH,
 } from './routes';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
@@ -60,7 +62,7 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
   const {
     hasInitialized,
-    myRole: { canManageEngines },
+    myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
@@ -104,6 +106,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
               {canManageEngines && (
                 <Route exact path={ENGINE_CREATION_PATH}>
                   <EngineCreation />
+                </Route>
+              )}
+              {canManageMetaEngines && (
+                <Route exact path={META_ENGINE_CREATION_PATH}>
+                  <MetaEngineCreation />
                 </Route>
               )}
               <Route>

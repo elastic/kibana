@@ -6,18 +6,19 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { Logger } from '../../../../../src/core/server';
-import { ConfigSchema, createConfig } from '../config';
-import { AnonymousAccessService } from './anonymous_access_service';
 
+import type { Logger } from 'src/core/server';
 import {
   coreMock,
+  elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-  elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
 import { spacesMock } from '../../../spaces/server/mocks';
+import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
+import { AnonymousAccessService } from './anonymous_access_service';
 
 const createSecurityConfig = (config: Record<string, any> = {}) => {
   return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
