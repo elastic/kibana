@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         'Oct 15, 2019 @ 19:31:44.000'
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
-      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);

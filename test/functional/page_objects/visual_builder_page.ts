@@ -431,9 +431,30 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async setIndexPatternValue(value: string) {
-      await comboBox.clearInputField('metricsIndexPatternInput');
-      await comboBox.setCustom('metricsIndexPatternInput', value);
+    public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
+      await testSubjects.click('switchIndexPatternSelectionModePopover');
+      await testSubjects.setEuiSwitch(
+        'switchIndexPatternSelectionMode',
+        useKibanaIndices ? 'check' : 'uncheck'
+      );
+    }
+
+    public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
+      const metricsIndexPatternInput = 'metricsIndexPatternInput';
+
+      if (useKibanaIndices !== undefined) {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      }
+
+      if (useKibanaIndices === false) {
+        const el = await testSubjects.find(metricsIndexPatternInput);
+        await el.clearValue();
+        await el.type(value, { charByChar: true });
+      } else {
+        await comboBox.clearInputField(metricsIndexPatternInput);
+        await comboBox.setCustom(metricsIndexPatternInput, value);
+      }
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

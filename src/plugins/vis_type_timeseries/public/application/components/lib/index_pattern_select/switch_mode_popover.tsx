@@ -76,6 +76,7 @@ export const SwitchModePopover = ({
             }
           )}
           onClick={onButtonClick}
+          data-test-subj="switchIndexPatternSelectionModePopover"
         />
       }
       isOpen={isPopoverOpen}
@@ -107,6 +108,7 @@ export const SwitchModePopover = ({
             }
           )}
           onChange={switchMode}
+          data-test-subj="switchIndexPatternSelectionMode"
         />
         {value && isStringTypeIndexPattern(value) && (
           <MigrationCallout value={value} switchMode={switchMode} matchedIndex={matchedIndex} />
