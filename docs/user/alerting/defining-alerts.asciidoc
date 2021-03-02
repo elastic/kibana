@@ -102,7 +102,7 @@ image::images/alert-flyout-add-action.png[You can add multiple actions on an ale
 
 [NOTE]
 ==============================================
-Actions are not required on alerts. In some cases you may want to run an alert without actions first to understand its behavior, and configure actions later.
+Actions are not required on alerts. You can run an alert without actions to understand its behavior, and then <<action-settings, configure actions>> later.
 ==============================================
 
 [float]
