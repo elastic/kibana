@@ -142,7 +142,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    this.props.advanceToNextStep();
+    this.props.stopStepLoading();
+    this.props.disableNextBtn();
 
     this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };
