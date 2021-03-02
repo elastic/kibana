@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { ToastInput } from 'src/core/public';
+import { EuiProgress } from '@elastic/eui';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { EuiProgress } from '@elastic/eui';
+import type { ToastInput } from 'src/core/public';
+
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface Props {
