@@ -50,7 +50,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
         if (configItem) {
           switch (key) {
             case ConfigKeys.SCHEDULE:
-              configItem.value = `@every ${config[key]}`; // convert to cron
+              configItem.value = `@every ${config[key]}s`; // convert to cron
               break;
             case ConfigKeys.TAGS:
               configItem.value = JSON.stringify(config[key]); // convert to yaml string

@@ -46,6 +46,8 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
 const defaultValues = {
+  [ConfigKeys.PORTS]: [],
+  [ConfigKeys.HOSTS]: '',
   [ConfigKeys.MAX_REDIRECTS]: 0,
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKeys.PROXY_URL]: '',

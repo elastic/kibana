@@ -35,9 +35,10 @@ const isValid = (value: string) => {
 };
 
 export const CustomFields = ({ defaultValues, onChange }: Props) => {
-  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [isInvalid, setInvalid] = useState(false);
   const [fields, setFields] = useState<ICustomFields>(defaultValues);
+
+  const isHTTP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP;
+  const isTCP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.TCP;
 
   useDebounce(
     () => {
@@ -61,38 +62,6 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
     [fields]
   );
 
-  const onCreateOption = (tag: string) => {
-    const formattedTag = tag.trim();
-    const newOption = {
-      label: formattedTag,
-    };
-
-    setFields((currentFields) => ({
-      ...currentFields,
-      [ConfigKeys.TAGS]: [...currentFields[ConfigKeys.TAGS], formattedTag],
-    }));
-
-    // Select the option.
-    setSelected([...selectedOptions, newOption]);
-  };
-
-  const onSearchChange = (searchValue: string) => {
-    if (!searchValue) {
-      setInvalid(false);
-
-      return;
-    }
-
-    setInvalid(!isValid(searchValue));
-  };
-
-  const onTagsChange = (tags: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelected(tags);
-    const formattedTags = tags.map((tag) => tag.label);
-    setFields((currentFields) => ({ ...currentFields, [ConfigKeys.TAGS]: formattedTags }));
-    setInvalid(false);
-  };
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem />
@@ -109,16 +78,39 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
               onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.MONITOR_TYPE })}
             />
           </EuiFormRow>
-          <EuiFormRow
-            label="URL"
-            isInvalid={!fields[ConfigKeys.URLS]}
-            error={!fields[ConfigKeys.URLS] ? ['URL is required'] : undefined}
-          >
-            <EuiFieldText
-              value={fields[ConfigKeys.URLS]}
-              onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.URLS })}
-            />
-          </EuiFormRow>
+          {isHTTP && (
+            <EuiFormRow
+              label="URL"
+              isInvalid={!fields[ConfigKeys.URLS]}
+              error={!fields[ConfigKeys.URLS] ? ['URL is required'] : undefined}
+            >
+              <EuiFieldText
+                value={fields[ConfigKeys.URLS]}
+                onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.URLS })}
+              />
+            </EuiFormRow>
+          )}
+          {isTCP && (
+            <EuiFormRow
+              label="Host"
+              isInvalid={!fields[ConfigKeys.HOSTS]}
+              error={!fields[ConfigKeys.HOSTS] ? ['Host is required'] : undefined}
+            >
+              <EuiFieldText
+                value={fields[ConfigKeys.HOSTS]}
+                onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.HOSTS })}
+              />
+            </EuiFormRow>
+          )}
+          {isTCP && (
+            <EuiFormRow label="Ports">
+              <ComboBox
+                configKey={ConfigKeys.PORTS}
+                selectedOptions={fields[ConfigKeys.PORTS]}
+                setFields={setFields}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label="Monitor interval in seconds"
             isInvalid={!fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE] < 1}
@@ -163,18 +155,75 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
             />
           </EuiFormRow>
           <EuiFormRow label="Tags">
-            <EuiComboBox<string>
-              noSuggestions
-              selectedOptions={selectedOptions}
-              onCreateOption={onCreateOption}
-              onChange={onTagsChange}
-              onSearchChange={onSearchChange}
-              isInvalid={isInvalid}
+            <ComboBox
+              configKey={ConfigKeys.TAGS}
+              selectedOptions={fields[ConfigKeys.TAGS]}
+              setFields={setFields}
             />
           </EuiFormRow>
         </EuiForm>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+type ComboBoxKeys = ConfigKeys.PORTS | ConfigKeys.TAGS;
+
+const ComboBox = ({
+  configKey,
+  setFields,
+  selectedOptions,
+}: {
+  configKey: ComboBoxKeys;
+  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  selectedOptions: string[];
+}) => {
+  const [formattedSelectedOptions, setSelectedOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(selectedOptions.map((option) => ({ label: option, key: option })));
+  const [isInvalid, setInvalid] = useState(false);
+
+  const onOptionsChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedOptions(options);
+    const formattedTags = options.map((option) => option.label);
+    setFields((currentFields) => ({ ...currentFields, [configKey]: formattedTags }));
+    setInvalid(false);
+  };
+
+  const onCreateOption = (tag: string) => {
+    const formattedTag = tag.trim();
+    const newOption = {
+      label: formattedTag,
+    };
+
+    setFields((currentFields) => ({
+      ...currentFields,
+      [configKey]: [...currentFields[configKey], formattedTag],
+    }));
+
+    // Select the option.
+    setSelectedOptions([...formattedSelectedOptions, newOption]);
+  };
+
+  const onSearchChange = (searchValue: string) => {
+    if (!searchValue) {
+      setInvalid(false);
+
+      return;
+    }
+
+    setInvalid(!isValid(searchValue));
+  };
+
+  return (
+    <EuiComboBox<string>
+      noSuggestions
+      selectedOptions={formattedSelectedOptions}
+      onCreateOption={onCreateOption}
+      onChange={onOptionsChange}
+      onSearchChange={onSearchChange}
+      isInvalid={isInvalid}
+    />
   );
 };
 

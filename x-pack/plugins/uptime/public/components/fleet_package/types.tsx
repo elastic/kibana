@@ -13,6 +13,8 @@ export enum DataStream {
 
 // values must match keys in the integration package
 export enum ConfigKeys {
+  PORTS = 'ports',
+  HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
   MONITOR_TYPE = 'type',
   NAME = 'name',
@@ -27,6 +29,8 @@ export enum ConfigKeys {
 export type Config = Record<ConfigKeys, string | number | string[]>;
 
 export interface ICustomFields {
+  [ConfigKeys.PORTS]: string[];
+  [ConfigKeys.HOSTS]: string;
   [ConfigKeys.MAX_REDIRECTS]: number;
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.PROXY_URL]: string;

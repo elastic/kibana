@@ -32,6 +32,8 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       [ConfigKeys.TIMEOUT]:
         currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SERVICE_NAME].value,
       [ConfigKeys.TAGS]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.SERVICE_NAME].value,
+      [ConfigKeys.PORTS]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.PORTS].value,
+      [ConfigKeys.HOSTS]: currentPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.HOSTS].value,
     };
     const { setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange });
 
