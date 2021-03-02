@@ -60,7 +60,7 @@ You can configure the following settings in the `kibana.yml` file.
   | Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 
 | `xpack.actions.proxyHeaders` {ess-icon}
-  | Specifies HTTP headers for the proxy, if using a proxy for actions.
+  | Specifies HTTP headers for the proxy, if using a proxy for actions. Defaults to {}.
 
 a|`xpack.actions.`
 `proxyRejectUnauthorizedCertificates` {ess-icon}
