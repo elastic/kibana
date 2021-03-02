@@ -50,7 +50,12 @@ export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesO
   }
 
   if (!ccsEnabled || !ccs) {
-    return appendMetricbeatIndex(config, indexPattern, ccs, monitoringIndicesOnly);
+    return appendMetricbeatIndex(
+      config,
+      indexPattern,
+      ccsEnabled ? ccs : undefined,
+      monitoringIndicesOnly
+    );
   }
 
   const patterns = indexPattern.split(',');
