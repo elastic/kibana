@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { RegistryDataStream } from '../../../types';
-
+import type { RegistryDataStream } from '../../../types';
 import { getRegistryDataStreamAssetBaseName } from './index';
 
 test('getBaseName', () => {

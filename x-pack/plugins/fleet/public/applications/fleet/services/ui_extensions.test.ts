@@ -6,8 +6,7 @@
  */
 
 import { lazy } from 'react';
-
-import {
+import type {
   PackagePolicyEditExtensionComponent,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,

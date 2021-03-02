@@ -6,7 +6,7 @@
  */
 
 import { epmRouteService } from '../../services';
-import {
+import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
   GetPackagesRequest,
@@ -16,7 +16,7 @@ import {
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
-import { GetStatsResponse } from '../../../../../common';
+import type { GetStatsResponse } from '../../../../../common';
 
 import { useRequest, sendRequest } from './use_request';
 

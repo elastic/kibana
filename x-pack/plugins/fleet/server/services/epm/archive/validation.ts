@@ -7,8 +7,7 @@
 
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
-
-import {
+import type {
   ArchivePackage,
   RegistryPolicyTemplate,
   RegistryDataStream,

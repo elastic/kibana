@@ -6,13 +6,12 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
 } from 'src/core/server';
-
-import {
+import type {
   Agent,
   NewAgentEvent,
   AgentEvent,

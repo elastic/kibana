@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { useRequest, sendRequest } from './use_request';
+import type { UseRequestConfig } from './use_request';
 import { agentRouteService } from '../../services';
-import {
+import type {
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
   GetOneAgentEventsRequest,

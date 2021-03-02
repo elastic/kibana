@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,

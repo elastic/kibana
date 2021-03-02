@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import {
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
+import type {
   ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -17,9 +18,9 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
-import { PostAgentAcksResponse } from '../../../common/types/rest_spec';
+import type { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { AckEventSchema } from '../../types/models';
-import { AcksService } from '../../services/agents';
+import type { AcksService } from '../../services/agents';
 
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 

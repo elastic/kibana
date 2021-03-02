@@ -9,8 +9,7 @@ import tar from 'tar';
 import yauzl from 'yauzl';
 
 import { bufferToStream, streamToBuffer } from '../streams';
-
-import { ArchiveEntry } from './index';
+import type { ArchiveEntry } from './index';
 
 export async function untarBuffer(
   buffer: Buffer,

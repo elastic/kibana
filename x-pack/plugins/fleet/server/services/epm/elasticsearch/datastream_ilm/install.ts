@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
-  ElasticsearchAssetType,
+import type { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type {
   EsAssetReference,
   InstallablePackage,
   RegistryDataStream,
 } from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
+import type { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';

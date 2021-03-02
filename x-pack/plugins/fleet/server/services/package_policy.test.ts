@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { SavedObjectsUpdateResponse } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
-import { KibanaRequest } from 'kibana/server';
-
-import { PackageInfo, PackagePolicySOAttributes } from '../types';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
-import { ExternalCallback } from '..';
+import { packagePolicyService } from './package_policy';
+import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+import type { SavedObjectsUpdateResponse } from 'src/core/server';
+import { KibanaRequest } from 'kibana/server';
+import type { ExternalCallback } from '..';
+import { appContextService } from './app_context';
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { packagePolicyService } from './package_policy';

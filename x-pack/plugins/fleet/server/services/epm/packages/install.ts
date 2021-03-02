@@ -8,42 +8,32 @@
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-
+import type { UnwrapPromise } from '@kbn/utility-types';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import {
-  BulkInstallPackageInfo,
-  InstallablePackage,
-  InstallSource,
-  defaultPackages,
-} from '../../../../common';
+  isRequiredPackage,
+  getInstallation,
+  getInstallationObject,
+  bulkInstallPackages,
+  isBulkInstallError,
+} from './index';
+import { defaultPackages } from '../../../../common';
+import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import {
+import { KibanaAssetType } from '../../../types';
+import type {
   AssetReference,
   Installation,
   CallESAsCurrentUser,
   AssetType,
   EsAssetReference,
   InstallType,
-  KibanaAssetType,
 } from '../../../types';
 import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
-import { toAssetReference, ArchiveAsset } from '../kibana/assets/install';
-import {
-  IngestManagerError,
-  PackageOperationNotSupportedError,
-  PackageOutdatedError,
-} from '../../../errors';
-import { appContextService } from '../../app_context';
-
-import {
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
+import { toAssetReference } from '../kibana/assets/install';
+import type { ArchiveAsset } from '../kibana/assets/install';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { isRequiredPackage } from './index';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-
+import type { IRouter } from 'src/core/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
   GetCategoriesRequestSchema,

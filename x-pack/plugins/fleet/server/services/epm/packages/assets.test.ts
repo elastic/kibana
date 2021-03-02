@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { InstallablePackage } from '../../../types';
+import type { InstallablePackage } from '../../../types';
+import { getAssets } from './assets';
 import { getArchiveFilelist } from '../archive/cache';
 
 import { getAssets } from './assets';

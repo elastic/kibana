@@ -6,7 +6,7 @@
  */
 
 import { dataStreamRouteService } from '../../services';
-import { GetDataStreamsResponse } from '../../types';
+import type { GetDataStreamsResponse } from '../../types';
 
 import { useRequest } from './use_request';
 

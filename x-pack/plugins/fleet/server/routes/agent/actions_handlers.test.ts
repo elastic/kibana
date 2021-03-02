@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import {
+import { NewAgentActionSchema } from '../../types/models';
+import type {
   ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -16,11 +17,10 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
-
-import { NewAgentActionSchema } from '../../types/models';
-import { ActionsService } from '../../services/agents';
-import { AgentAction } from '../../../common/types/models';
-import {
+import type { ActionsService } from '../../services/agents';
+import type { AgentAction } from '../../../common/types/models';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../../common/types/rest_spec';

@@ -9,9 +9,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import { SavedObject } from 'kibana/server';
 
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
-import { AgentSOAttributes } from '../../../common/types/models';
-
-import { getAgentStatusById } from './status';
+import type { AgentSOAttributes } from '../../../common/types/models';
+import type { SavedObject } from 'kibana/server';
 
 describe('Agent status service', () => {
   it('should return inactive when agent is not active', async () => {

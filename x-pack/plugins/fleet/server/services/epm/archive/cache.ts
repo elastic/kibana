@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ArchivePackage, RegistryPackage } from '../../../../common';
+import type { ArchiveEntry } from './index';
+import type { ArchivePackage, RegistryPackage } from '../../../../common';
 
 import { ArchiveEntry } from './index';
 

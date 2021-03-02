@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
 import { getFlattenedObject, isValidNamespace } from '../../../../services';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,

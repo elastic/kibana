@@ -7,12 +7,11 @@
 
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
-import { GetResponse } from 'elasticsearch';
+import type { GetResponse } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-
-import { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
-import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
+import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';

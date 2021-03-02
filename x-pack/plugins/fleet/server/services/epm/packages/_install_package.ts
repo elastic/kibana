@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-
-import {
-  InstallablePackage,
-  InstallSource,
-  PackageAssetReference,
-  MAX_TIME_COMPLETE_INSTALL,
-  ASSETS_SAVED_OBJECT_TYPE,
-} from '../../../../common';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
+import { ElasticsearchAssetType } from '../../../types';
+import type {
   AssetReference,
   Installation,
   CallESAsCurrentUser,
-  ElasticsearchAssetType,
   InstallType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';

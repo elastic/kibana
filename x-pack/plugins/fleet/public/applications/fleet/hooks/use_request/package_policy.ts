@@ -6,13 +6,13 @@
  */
 
 import { packagePolicyRouteService } from '../../services';
-import {
+import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
 } from '../../types';
-import {
+import type {
   DeletePackagePoliciesRequest,
   DeletePackagePoliciesResponse,
   GetPackagePoliciesRequest,

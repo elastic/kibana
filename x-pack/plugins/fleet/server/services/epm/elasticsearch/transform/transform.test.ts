@@ -19,9 +19,14 @@ jest.mock('./common', () => {
 });
 
 import { errors as LegacyESErrors } from 'elasticsearch';
-import { ILegacyScopedClusterClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
-
-import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
+import { installTransform } from './install';
+import type {
+  ILegacyScopedClusterClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';

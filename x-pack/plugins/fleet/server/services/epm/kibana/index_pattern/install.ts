@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
-import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
+import { loadFieldsFromYaml } from '../../fields/field';
+import type { Fields, Field } from '../../fields/field';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
-import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
-import { RegistryPackage, DataType } from '../../../../types';
+import type {
+  ArchivePackage,
+  Installation,
+  InstallSource,
+  ValueOf,
+} from '../../../../../common/types';
+import type { RegistryPackage, DataType } from '../../../../types';
 import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {

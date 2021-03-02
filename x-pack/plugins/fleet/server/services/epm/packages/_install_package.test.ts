@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, LegacyScopedClusterClient } from 'src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { appContextService } from '../../app_context';

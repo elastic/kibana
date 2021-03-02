@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
@@ -13,13 +13,8 @@ import {
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
-import {
-  AssetType,
-  KibanaAssetType,
-  AssetReference,
-  AssetParts,
-  KibanaSavedObjectType,
-} from '../../../../types';
+import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
+import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
 

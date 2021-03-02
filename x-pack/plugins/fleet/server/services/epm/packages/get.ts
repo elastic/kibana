@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import {
   isPackageLimited,
   installationStatuses,
-  PackageUsageStats,
-  PackagePolicySOAttributes,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common';
+import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
-import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
+import type {
+  ArchivePackage,
+  RegistryPackage,
+  EpmPackageAdditions,
+} from '../../../../common/types';
+import { KibanaAssetType } from '../../../types';
+import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';

@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
-
+import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { appContextService } from '../../services';
-import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { esKuery } from '../../../../../../src/plugins/data/server';
+import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { savedObjectToAgent } from './saved_objects';
 

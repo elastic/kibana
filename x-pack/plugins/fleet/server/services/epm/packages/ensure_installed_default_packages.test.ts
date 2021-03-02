@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/order
-import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
-
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
+import type { Installation } from '../../../types';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 jest.mock('./install');
 jest.mock('./bulk_install_packages');

@@ -10,13 +10,13 @@ import { URL } from 'url';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
-
-import {
+import { URL } from 'url';
+import { KibanaAssetType } from '../../../types';
+import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
   InstallSource,
-  KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,

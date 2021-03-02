@@ -6,16 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { SearchResponse } from 'elasticsearch';
-import { ElasticsearchClient } from 'src/core/server';
-
-import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
+import type { SearchResponse } from 'elasticsearch';
+import type { ElasticsearchClient } from 'src/core/server';
+import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
+import type { FleetServerAgent } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { ESSearchHit } from '../../../../../typings/elasticsearch';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { appContextService } from '../../services';
-import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { esKuery } from '../../../../../../src/plugins/data/server';
+import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 

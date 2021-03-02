@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-
+import type { IRouter } from 'src/core/server';
 import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import { FleetConfigType } from '../../../common';
+import type { FleetConfigType } from '../../../common';
+import { getFleetStatusHandler, createFleetSetupHandler, FleetSetupHandler } from './handlers';
 import { PostFleetSetupRequestSchema } from '../../types';
 
 import { getFleetStatusHandler, createFleetSetupHandler, FleetSetupHandler } from './handlers';

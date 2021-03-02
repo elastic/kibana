@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-
-import { ESIndexPatternService } from '../../server';
+import type { SavedObjectsClientContract } from 'kibana/server';
+import { getInstallation } from './epm/packages';
+import type { ESIndexPatternService } from '../../server';
 
 import { getInstallation } from './epm/packages';
 

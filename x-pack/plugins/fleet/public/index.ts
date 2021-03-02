@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-
+import type { PluginInitializerContext } from 'src/core/public';
 import { FleetPlugin } from './plugin';
 
 export { FleetSetup, FleetStart } from './plugin';

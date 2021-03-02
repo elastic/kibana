@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, RouteValidationResultFactory } from 'src/core/server';
+import type { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
 
 import {
@@ -54,6 +54,7 @@ import {
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import type { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({

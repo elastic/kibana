@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { appContextService } from '../../../';
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { CallESAsCurrentUser } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import type { EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
   callCluster: CallESAsCurrentUser,

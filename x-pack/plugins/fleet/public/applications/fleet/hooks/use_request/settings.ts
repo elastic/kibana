@@ -6,7 +6,7 @@
  */
 
 import { settingsRoutesService } from '../../services';
-import { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
+import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
 
 import { sendRequest, useRequest } from './use_request';
 
