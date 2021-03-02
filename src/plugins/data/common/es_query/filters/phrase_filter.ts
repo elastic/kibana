@@ -109,6 +109,10 @@ export const getConvertedValueForField = (field: IFieldType, value: any) => {
       throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
     }
   }
+
+  if (typeof value !== 'number' && field.type === 'number') {
+    return Number(value);
+  }
   return value;
 };
 
