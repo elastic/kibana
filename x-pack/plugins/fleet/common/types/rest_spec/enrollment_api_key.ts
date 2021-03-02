@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnrollmentAPIKey } from '../models';
+import type { EnrollmentAPIKey } from '../models';
 
 export interface GetEnrollmentAPIKeysRequest {
   query: {
