@@ -27,8 +27,8 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
-    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.open,
-    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.open,
+    available: (item: Case | SubCase) => item.status !== CaseStatuses.open,
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -44,9 +44,8 @@ export const getActions = ({
   };
 
   const makeInProgressAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses['in-progress'],
-    enabled: (item: Case | SubCase) =>
-      isIndividual(item) && item.status !== CaseStatuses['in-progress'],
+    available: (item: Case) => item.status !== CaseStatuses['in-progress'],
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -62,8 +61,8 @@ export const getActions = ({
   };
 
   const closeCaseAction = {
-    available: (item: Case | SubCase) => caseStatus !== CaseStatuses.closed,
-    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.closed,
+    available: (item: Case | SubCase) => item.status !== CaseStatuses.closed,
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,
