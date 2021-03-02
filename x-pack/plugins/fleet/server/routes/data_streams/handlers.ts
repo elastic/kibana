@@ -14,40 +14,37 @@ import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
 
-interface ESDataStreamInfoResponse {
-  data_streams: Array<{
+interface ESDataStreamInfo {
+  name: string;
+  timestamp_field: {
     name: string;
-    timestamp_field: {
+  };
+  indices: Array<{ index_name: string; index_uuid: string }>;
+  generation: number;
+  _meta?: {
+    package?: {
       name: string;
     };
-    indices: Array<{ index_name: string; index_uuid: string }>;
-    generation: number;
-    _meta?: {
-      package?: {
-        name: string;
-      };
-      managed_by?: string;
-      managed?: boolean;
-      [key: string]: any;
-    };
-    status: string;
-    template: string;
-    ilm_policy: string;
-    hidden: boolean;
-  }>;
+    managed_by?: string;
+    managed?: boolean;
+    [key: string]: any;
+  };
+  status: string;
+  template: string;
+  ilm_policy: string;
+  hidden: boolean;
 }
 
-interface ESDataStreamStatsResponse {
-  data_streams: Array<{
-    data_stream: string;
-    backing_indices: number;
-    store_size_bytes: number;
-    maximum_timestamp: number;
-  }>;
+interface ESDataStreamStats {
+  data_stream: string;
+  backing_indices: number;
+  store_size_bytes: number;
+  maximum_timestamp: number;
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   const body: GetDataStreamsResponse = {
     data_streams: [],
   };
@@ -55,22 +52,27 @@ export const getListHandler: RequestHandler = async (context, request, response)
   try {
     // Get matching data streams, their stats, and package SOs
     const [
-      { data_streams: dataStreamsInfo },
-      { data_streams: dataStreamStats },
+      {
+        body: { data_streams: dataStreamsInfo },
+      },
+      {
+        body: { data_streams: dataStreamStats },
+      },
       packageSavedObjects,
     ] = await Promise.all([
-      callCluster('transport.request', {
+      esClient.transport.request({
         method: 'GET',
         path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}`,
-      }) as Promise<ESDataStreamInfoResponse>,
-      callCluster('transport.request', {
+      }),
+      esClient.transport.request({
         method: 'GET',
         path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}/_stats`,
-      }) as Promise<ESDataStreamStatsResponse>,
+      }),
       getPackageSavedObjects(context.core.savedObjects.client),
     ]);
-    const dataStreamsInfoByName = keyBy(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
+
+    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
+    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -97,8 +99,10 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
       // Query backing indices to extract data stream dataset, namespace, and type values
       const {
-        aggregations: { dataset, namespace, type },
-      } = await callCluster('search', {
+        body: {
+          aggregations: { dataset, namespace, type },
+        },
+      } = await esClient.search({
         index: dataStream.indices.map((index) => index.index_name),
         body: {
           size: 0,
