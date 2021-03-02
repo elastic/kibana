@@ -111,8 +111,10 @@
         "type": "Interface",
         "label": "ActionsPlugin",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionsPlugin.setup",
             "type": "Object",
             "label": "setup",
@@ -133,6 +135,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionsPlugin.start",
             "type": "Object",
             "label": "start",
@@ -175,8 +178,10 @@
           "<Config>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionResult.id",
             "type": "string",
             "label": "id",
@@ -188,6 +193,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionResult.actionTypeId",
             "type": "string",
             "label": "actionTypeId",
@@ -199,6 +205,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionResult.name",
             "type": "string",
             "label": "name",
@@ -210,6 +217,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionResult.config",
             "type": "Uncategorized",
             "label": "config",
@@ -224,6 +232,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionResult.isPreconfigured",
             "type": "boolean",
             "label": "isPreconfigured",
@@ -257,8 +266,10 @@
           "<Config, Secrets, Params>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionTypeExecutorOptions.actionId",
             "type": "string",
             "label": "actionId",
@@ -270,6 +281,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionTypeExecutorOptions.services",
             "type": "Object",
             "label": "services",
@@ -290,6 +302,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionTypeExecutorOptions.config",
             "type": "Uncategorized",
             "label": "config",
@@ -304,6 +317,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionTypeExecutorOptions.secrets",
             "type": "Uncategorized",
             "label": "secrets",
@@ -318,6 +332,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionTypeExecutorOptions.params",
             "type": "Uncategorized",
             "label": "params",
@@ -354,8 +369,10 @@
           "<Config, Secrets, Params, ExecutorResultData>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionType.id",
             "type": "string",
             "label": "id",
@@ -367,6 +384,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionType.name",
             "type": "string",
             "label": "name",
@@ -378,6 +396,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionType.maxAttempts",
             "type": "number",
             "label": "maxAttempts",
@@ -392,6 +411,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionType.minimumLicenseRequired",
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
@@ -406,6 +426,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionType.validate",
             "type": "Object",
             "label": "validate",
@@ -466,6 +487,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionType.executor",
             "type": "Function",
             "label": "executor",
@@ -517,8 +539,10 @@
           "<Config>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PreConfiguredAction.secrets",
             "type": "Uncategorized",
             "label": "secrets",
@@ -545,8 +569,10 @@
         "type": "Interface",
         "label": "ActionsApiRequestHandlerContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionsApiRequestHandlerContext.getActionsClient",
             "type": "Function",
             "label": "getActionsClient",
@@ -568,6 +594,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionsApiRequestHandlerContext.listTypes",
             "type": "Function",
             "label": "listTypes",
@@ -604,6 +631,7 @@
         "id": "def-server.ActionsClient",
         "type": "Type",
         "label": "ActionsClient",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/index.ts",
@@ -652,6 +680,7 @@
         "id": "def-server.ActionsAuthorization",
         "type": "Type",
         "label": "ActionsAuthorization",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/index.ts",
@@ -664,6 +693,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -682,6 +712,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
@@ -694,6 +725,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -712,6 +744,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
@@ -724,6 +757,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -742,6 +776,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
@@ -754,6 +789,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -772,6 +808,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
@@ -784,6 +821,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -802,6 +840,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
@@ -814,6 +853,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -832,6 +872,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
@@ -844,6 +885,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ServiceNowITSMActionTypeId",
         "type": "string",
         "label": "ServiceNowITSMActionTypeId",
@@ -859,6 +901,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ServiceNowSIRActionTypeId",
         "type": "string",
         "label": "ServiceNowSIRActionTypeId",
@@ -877,6 +920,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
@@ -889,6 +933,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -907,6 +952,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
@@ -919,6 +965,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -937,6 +984,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
@@ -949,6 +997,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
         "label": "ActionTypeId",
@@ -967,6 +1016,7 @@
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "label": "ActionParamsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
@@ -985,6 +1035,7 @@
       "type": "Interface",
       "label": "PluginSetupContract",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-server.PluginSetupContract.registerType",
@@ -1047,6 +1098,7 @@
       "type": "Interface",
       "label": "PluginStartContract",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-server.PluginStartContract.isActionTypeEnabled",
@@ -1075,9 +1127,11 @@
               "id": "def-server.PluginStartContract.isActionTypeEnabled.options",
               "type": "Object",
               "label": "options",
+              "tags": [],
               "description": [],
               "children": [
                 {
+                  "tags": [],
                   "id": "def-server.PluginStartContract.isActionTypeEnabled.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
@@ -1145,9 +1199,11 @@
               "id": "def-server.PluginStartContract.isActionExecutable.options",
               "type": "Object",
               "label": "options",
+              "tags": [],
               "description": [],
               "children": [
                 {
+                  "tags": [],
                   "id": "def-server.PluginStartContract.isActionExecutable.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
@@ -1285,6 +1341,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-server.PluginStartContract.preconfiguredActions",
           "type": "Array",
           "label": "preconfiguredActions",
@@ -1418,8 +1475,10 @@
         "type": "Interface",
         "label": "ActionType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ActionType.id",
             "type": "string",
             "label": "id",
@@ -1431,6 +1490,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionType.name",
             "type": "string",
             "label": "name",
@@ -1442,6 +1502,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionType.enabled",
             "type": "boolean",
             "label": "enabled",
@@ -1453,6 +1514,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionType.enabledInConfig",
             "type": "boolean",
             "label": "enabledInConfig",
@@ -1464,6 +1526,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionType.enabledInLicense",
             "type": "boolean",
             "label": "enabledInLicense",
@@ -1475,6 +1538,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionType.minimumLicenseRequired",
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
@@ -1501,8 +1565,10 @@
         "type": "Interface",
         "label": "ActionResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ActionResult.id",
             "type": "string",
             "label": "id",
@@ -1514,6 +1580,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionResult.actionTypeId",
             "type": "string",
             "label": "actionTypeId",
@@ -1525,6 +1592,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionResult.name",
             "type": "string",
             "label": "name",
@@ -1536,6 +1604,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionResult.config",
             "type": "Object",
             "label": "config",
@@ -1550,6 +1619,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionResult.isPreconfigured",
             "type": "boolean",
             "label": "isPreconfigured",
@@ -1583,8 +1653,10 @@
           "<Data>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.actionId",
             "type": "string",
             "label": "actionId",
@@ -1596,6 +1668,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.status",
             "type": "CompoundType",
             "label": "status",
@@ -1610,6 +1683,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.message",
             "type": "string",
             "label": "message",
@@ -1624,6 +1698,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.serviceMessage",
             "type": "string",
             "label": "serviceMessage",
@@ -1638,6 +1713,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.data",
             "type": "Uncategorized",
             "label": "data",
@@ -1652,6 +1728,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionTypeExecutorResult.retry",
             "type": "CompoundType",
             "label": "retry",
@@ -1677,6 +1754,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.BASE_ACTION_API_PATH",
         "type": "string",
         "label": "BASE_ACTION_API_PATH",

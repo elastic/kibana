@@ -12,6 +12,7 @@
       "type": "Interface",
       "label": "OsqueryPluginSetup",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
@@ -26,6 +27,7 @@
       "type": "Interface",
       "label": "OsqueryPluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
@@ -48,6 +50,7 @@
       "type": "Interface",
       "label": "OsqueryPluginSetup",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
@@ -62,6 +65,7 @@
       "type": "Interface",
       "label": "OsqueryPluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
@@ -79,6 +83,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "label": "PLUGIN_ID",
@@ -94,6 +99,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.PLUGIN_NAME",
         "type": "string",
         "label": "PLUGIN_NAME",
@@ -109,6 +115,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_MAX_TABLE_QUERY_SIZE",
         "type": "number",
         "label": "DEFAULT_MAX_TABLE_QUERY_SIZE",
@@ -124,6 +131,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_DARK_MODE",
         "type": "string",
         "label": "DEFAULT_DARK_MODE",

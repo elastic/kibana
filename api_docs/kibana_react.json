@@ -5,6 +5,7 @@
       {
         "id": "def-public.ValidatedDualRange",
         "type": "Class",
+        "tags": [],
         "label": "ValidatedDualRange",
         "description": [],
         "signature": [
@@ -21,8 +22,10 @@
           {
             "id": "def-public.ValidatedDualRange.defaultProps",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.ValidatedDualRange.defaultProps.allowEmptyRange",
                 "type": "boolean",
                 "label": "allowEmptyRange",
@@ -37,6 +40,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.ValidatedDualRange.defaultProps.fullWidth",
                 "type": "boolean",
                 "label": "fullWidth",
@@ -51,6 +55,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.ValidatedDualRange.defaultProps.compressed",
                 "type": "boolean",
                 "label": "compressed",
@@ -130,6 +135,7 @@
           {
             "id": "def-public.ValidatedDualRange.state",
             "type": "Object",
+            "tags": [],
             "children": [],
             "description": [],
             "label": "state",
@@ -168,6 +174,7 @@
               "lineNumber": 68,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L68"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -198,6 +205,7 @@
       {
         "id": "def-public.TableListView",
         "type": "Class",
+        "tags": [],
         "label": "TableListView",
         "description": [],
         "signature": [
@@ -317,6 +325,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListView.debouncedFetch",
             "type": "Function",
             "label": "debouncedFetch",
@@ -344,6 +353,7 @@
               "lineNumber": 156,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L156"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -360,6 +370,7 @@
               "lineNumber": 166,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L166"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -376,6 +387,7 @@
               "lineNumber": 196,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L196"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -392,6 +404,7 @@
               "lineNumber": 200,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L200"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -407,9 +420,11 @@
                 "id": "def-public.TableListView.setFilter.{-queryText }",
                 "type": "Object",
                 "label": "{ queryText }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.TableListView.setFilter.{-queryText }.queryText",
                     "type": "string",
                     "label": "queryText",
@@ -670,6 +685,7 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/markdown/index.tsx#L28"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -710,6 +726,7 @@
           "lineNumber": 21,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/markdown/index.tsx#L21"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -752,6 +769,7 @@
           "lineNumber": 18,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/adapters/react_to_ui_component.ts#L18"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -815,6 +833,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/adapters/ui_to_react_component.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -857,6 +876,7 @@
           "lineNumber": 19,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/util/to_mount_point.tsx#L19"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -891,6 +911,7 @@
           "lineNumber": 22,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/util/mount_point_portal.tsx#L22"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -925,6 +946,10 @@
           "lineNumber": 38,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L38"
         },
+        "tags": [
+          "example",
+          "remarks"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -967,6 +992,7 @@
           "lineNumber": 22,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/code_editor/index.tsx#L22"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1015,6 +1041,7 @@
           "lineNumber": 40,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L40"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1063,6 +1090,7 @@
           "lineNumber": 45,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/context/context.tsx#L45"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1070,6 +1098,7 @@
         "id": "def-public.KibanaContextProvider",
         "type": "Function",
         "label": "KibanaContextProvider",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/context/context.tsx",
@@ -1111,6 +1140,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/context/context.tsx#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1151,6 +1181,7 @@
           "lineNumber": 31,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/context/context.tsx#L31"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1199,6 +1230,7 @@
           "lineNumber": 41,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/context/context.tsx#L41"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1231,6 +1263,7 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx#L28"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1263,6 +1296,7 @@
           "lineNumber": 35,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx#L35"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1318,6 +1352,7 @@
           "lineNumber": 14,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/overlays/create_react_overlays.tsx#L14"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1366,6 +1401,7 @@
           "lineNumber": 22,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L22"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1414,6 +1450,7 @@
           "lineNumber": 47,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L47"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1558,6 +1595,7 @@
           "lineNumber": 49,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L49"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1719,6 +1757,7 @@
           "lineNumber": 26,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L26"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1798,6 +1837,7 @@
           "lineNumber": 35,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L35"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1853,6 +1893,7 @@
           "lineNumber": 14,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/notifications/create_notifications.tsx#L14"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1863,8 +1904,10 @@
         "type": "Interface",
         "label": "UrlTemplateEditorVariable",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorVariable.label",
             "type": "string",
             "label": "label",
@@ -1876,6 +1919,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorVariable.title",
             "type": "string",
             "label": "title",
@@ -1890,6 +1934,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorVariable.documentation",
             "type": "string",
             "label": "documentation",
@@ -1904,6 +1949,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorVariable.kind",
             "type": "CompoundType",
             "label": "kind",
@@ -1919,6 +1965,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorVariable.sortText",
             "type": "string",
             "label": "sortText",
@@ -1945,8 +1992,10 @@
         "type": "Interface",
         "label": "UrlTemplateEditorProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.value",
             "type": "string",
             "label": "value",
@@ -1958,6 +2007,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.height",
             "type": "CompoundType",
             "label": "height",
@@ -1972,6 +2022,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.variables",
             "type": "Array",
             "label": "variables",
@@ -1993,6 +2044,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.onChange",
             "type": "Function",
             "label": "onChange",
@@ -2007,6 +2059,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.onEditor",
             "type": "Function",
             "label": "onEditor",
@@ -2023,6 +2076,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlTemplateEditorProps.Editor",
             "type": "CompoundType",
             "label": "Editor",
@@ -2065,8 +2119,10 @@
         "type": "Interface",
         "label": "ExitFullScreenButtonProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExitFullScreenButtonProps.onExitFullScreenMode",
             "type": "Function",
             "label": "onExitFullScreenMode",
@@ -2103,8 +2159,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaReactContext.value",
             "type": "Object",
             "label": "value",
@@ -2126,6 +2184,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaReactContext.Provider",
             "type": "Function",
             "label": "Provider",
@@ -2140,6 +2199,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaReactContext.Consumer",
             "type": "Function",
             "label": "Consumer",
@@ -2184,8 +2244,10 @@
           "<Services>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaReactContextValue.services",
             "type": "Uncategorized",
             "label": "services",
@@ -2200,6 +2262,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaReactContextValue.overlays",
             "type": "Object",
             "label": "overlays",
@@ -2220,6 +2283,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaReactContextValue.notifications",
             "type": "Object",
             "label": "notifications",
@@ -2252,8 +2316,10 @@
         "type": "Interface",
         "label": "KibanaReactOverlays",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaReactOverlays.openFlyout",
             "type": "Function",
             "label": "openFlyout",
@@ -2283,6 +2349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaReactOverlays.openModal",
             "type": "Function",
             "label": "openModal",
@@ -2336,8 +2403,10 @@
           ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"size\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"fill\" | \"shape\">"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FieldIconProps.type",
             "type": "string",
             "label": "type",
@@ -2349,6 +2418,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FieldIconProps.label",
             "type": "string",
             "label": "label",
@@ -2363,6 +2433,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldIconProps.scripted",
             "type": "CompoundType",
             "label": "scripted",
@@ -2399,8 +2470,10 @@
           " extends React.HTMLAttributes<HTMLDivElement>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.fieldName",
             "type": "CompoundType",
             "label": "fieldName",
@@ -2417,6 +2490,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.fieldIcon",
             "type": "CompoundType",
             "label": "fieldIcon",
@@ -2433,6 +2507,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.fieldInfoIcon",
             "type": "CompoundType",
             "label": "fieldInfoIcon",
@@ -2449,6 +2524,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.fieldAction",
             "type": "CompoundType",
             "label": "fieldAction",
@@ -2465,6 +2541,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.isActive",
             "type": "CompoundType",
             "label": "isActive",
@@ -2481,6 +2558,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.isDraggable",
             "type": "CompoundType",
             "label": "isDraggable",
@@ -2497,6 +2575,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.size",
             "type": "CompoundType",
             "label": "size",
@@ -2513,6 +2592,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.className",
             "type": "string",
             "label": "className",
@@ -2527,6 +2607,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.onClick",
             "type": "Function",
             "label": "onClick",
@@ -2543,6 +2624,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.dataTestSubj",
             "type": "string",
             "label": "dataTestSubj",
@@ -2559,6 +2641,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldButtonProps.buttonProps",
             "type": "CompoundType",
             "label": "buttonProps",
@@ -2589,6 +2672,7 @@
         "type": "Interface",
         "label": "TableListViewProps",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.TableListViewProps.createItem",
@@ -2672,6 +2756,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.entityName",
             "type": "string",
             "label": "entityName",
@@ -2683,6 +2768,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.entityNamePlural",
             "type": "string",
             "label": "entityNamePlural",
@@ -2726,6 +2812,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.listingLimit",
             "type": "number",
             "label": "listingLimit",
@@ -2737,6 +2824,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.initialFilter",
             "type": "string",
             "label": "initialFilter",
@@ -2748,6 +2836,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.initialPageSize",
             "type": "number",
             "label": "initialPageSize",
@@ -2759,6 +2848,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.noItemsFragment",
             "type": "Object",
             "label": "noItemsFragment",
@@ -2773,6 +2863,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.tableColumns",
             "type": "Array",
             "label": "tableColumns",
@@ -2788,6 +2879,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.tableListTitle",
             "type": "string",
             "label": "tableListTitle",
@@ -2799,6 +2891,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.toastNotifications",
             "type": "Object",
             "label": "toastNotifications",
@@ -2821,6 +2914,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.headingId",
             "type": "string",
             "label": "headingId",
@@ -2837,6 +2931,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.rowHeader",
             "type": "string",
             "label": "rowHeader",
@@ -2850,6 +2945,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.tableCaption",
             "type": "string",
             "label": "tableCaption",
@@ -2866,6 +2962,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewProps.searchFilters",
             "type": "Array",
             "label": "searchFilters",
@@ -2893,8 +2990,10 @@
         "type": "Interface",
         "label": "TableListViewState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TableListViewState.items",
             "type": "Array",
             "label": "items",
@@ -2909,6 +3008,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.hasInitialFetchReturned",
             "type": "boolean",
             "label": "hasInitialFetchReturned",
@@ -2920,6 +3020,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.isFetchingItems",
             "type": "boolean",
             "label": "isFetchingItems",
@@ -2931,6 +3032,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.isDeletingItems",
             "type": "boolean",
             "label": "isDeletingItems",
@@ -2942,6 +3044,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.showDeleteModal",
             "type": "boolean",
             "label": "showDeleteModal",
@@ -2953,6 +3056,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.showLimitError",
             "type": "boolean",
             "label": "showLimitError",
@@ -2964,6 +3068,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.fetchError",
             "type": "Object",
             "label": "fetchError",
@@ -2985,6 +3090,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.filter",
             "type": "string",
             "label": "filter",
@@ -2996,6 +3102,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.selectedIds",
             "type": "Array",
             "label": "selectedIds",
@@ -3010,6 +3117,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TableListViewState.totalItems",
             "type": "number",
             "label": "totalItems",
@@ -3033,8 +3141,10 @@
         "type": "Interface",
         "label": "ToastInput",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ToastInput.title",
             "type": "CompoundType",
             "label": "title",
@@ -3049,6 +3159,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ToastInput.body",
             "type": "CompoundType",
             "label": "body",
@@ -3063,6 +3174,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ToastInput.color",
             "type": "CompoundType",
             "label": "color",
@@ -3077,6 +3189,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ToastInput.iconType",
             "type": "CompoundType",
             "label": "iconType",
@@ -3091,6 +3204,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ToastInput.toastLifeTimeMs",
             "type": "number",
             "label": "toastLifeTimeMs",
@@ -3105,6 +3219,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ToastInput.onClose",
             "type": "Function",
             "label": "onClose",
@@ -3131,8 +3246,10 @@
         "type": "Interface",
         "label": "KibanaReactNotifications",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaReactNotifications.toasts",
             "type": "Object",
             "label": "toasts",
@@ -3193,6 +3310,7 @@
         "id": "def-public.Value",
         "type": "Type",
         "label": "Value",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
@@ -3208,6 +3326,7 @@
         "id": "def-public.KibanaServices",
         "type": "Type",
         "label": "KibanaServices",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/context/types.ts",
@@ -3262,6 +3381,7 @@
         "id": "def-public.ButtonSize",
         "type": "Type",
         "label": "ButtonSize",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
@@ -3274,6 +3394,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.SIZES",
         "type": "Array",
         "label": "SIZES",
@@ -3289,6 +3410,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.POSITIONS",
         "type": "Array",
         "label": "POSITIONS",
@@ -3304,6 +3426,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.WEIGHTS",
         "type": "Array",
         "label": "WEIGHTS",
@@ -3319,6 +3442,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.TOOLBAR_BUTTON_SIZES",
         "type": "Array",
         "label": "TOOLBAR_BUTTON_SIZES",
@@ -3337,6 +3461,7 @@
         "id": "def-public.ToolbarButtonProps",
         "type": "Type",
         "label": "ToolbarButtonProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
@@ -3359,6 +3484,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-public.ExitFullScreenButton",
         "type": "Object",
         "label": "ExitFullScreenButton",
@@ -3374,6 +3500,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.context",
         "type": "Object",
         "label": "context",
@@ -3407,12 +3534,15 @@
       {
         "id": "def-public.typeToEuiIconMap",
         "type": "Object",
+        "tags": [],
         "children": [
           {
             "id": "def-public.typeToEuiIconMap.boolean",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.boolean.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3435,8 +3565,10 @@
           {
             "id": "def-public.typeToEuiIconMap.conflict",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.conflict.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3448,6 +3580,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.conflict.color",
                 "type": "string",
                 "label": "color",
@@ -3459,6 +3592,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.conflict.shape",
                 "type": "string",
                 "label": "shape",
@@ -3486,8 +3620,10 @@
           {
             "id": "def-public.typeToEuiIconMap.date",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.date.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3510,8 +3646,10 @@
           {
             "id": "def-public.typeToEuiIconMap.geo_point",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.geo_point.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3534,8 +3672,10 @@
           {
             "id": "def-public.typeToEuiIconMap.geo_shape",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.geo_shape.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3558,8 +3698,10 @@
           {
             "id": "def-public.typeToEuiIconMap.ip",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.ip.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3582,8 +3724,10 @@
           {
             "id": "def-public.typeToEuiIconMap.murmur3",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.murmur3.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3608,8 +3752,10 @@
           {
             "id": "def-public.typeToEuiIconMap.number",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.number.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3632,8 +3778,10 @@
           {
             "id": "def-public.typeToEuiIconMap._source",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap._source.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3645,6 +3793,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap._source.color",
                 "type": "string",
                 "label": "color",
@@ -3667,8 +3816,10 @@
           {
             "id": "def-public.typeToEuiIconMap.string",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.string.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3691,8 +3842,10 @@
           {
             "id": "def-public.typeToEuiIconMap.nested",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.typeToEuiIconMap.nested.iconType",
                 "type": "string",
                 "label": "iconType",
@@ -3739,6 +3892,7 @@
         "id": "def-common.css",
         "type": "Function",
         "label": "css",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -3763,6 +3917,7 @@
         "id": "def-common.euiStyled",
         "type": "Function",
         "label": "euiStyled",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -3836,6 +3991,7 @@
           "lineNumber": 21,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/common/eui_styled_components.tsx#L21"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3843,6 +3999,7 @@
         "id": "def-common.createGlobalStyle",
         "type": "Function",
         "label": "createGlobalStyle",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -3873,6 +4030,7 @@
         "id": "def-common.keyframes",
         "type": "Function",
         "label": "keyframes",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -3893,6 +4051,7 @@
         "id": "def-common.withTheme",
         "type": "Function",
         "label": "withTheme",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -3920,8 +4079,10 @@
         "type": "Interface",
         "label": "EuiTheme",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.EuiTheme.eui",
             "type": "CompoundType",
             "label": "eui",
@@ -3936,6 +4097,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.EuiTheme.darkMode",
             "type": "boolean",
             "label": "darkMode",

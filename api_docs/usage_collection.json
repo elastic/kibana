@@ -44,6 +44,10 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
         },
+        "tags": [
+          "Link",
+          "constructor"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -54,6 +58,7 @@
         "id": "def-public.METRIC_TYPE",
         "type": "Enum",
         "label": "METRIC_TYPE",
+        "tags": [],
         "description": [],
         "source": {
           "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
@@ -73,8 +78,10 @@
       "type": "Interface",
       "label": "UsageCollectionSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.UsageCollectionSetup.components",
           "type": "Object",
           "label": "components",
@@ -89,6 +96,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.UsageCollectionSetup.reportUiCounter",
           "type": "Function",
           "label": "reportUiCounter",
@@ -118,8 +126,10 @@
       "type": "Interface",
       "label": "UsageCollectionStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.UsageCollectionStart.reportUiCounter",
           "type": "Function",
           "label": "reportUiCounter",
@@ -150,6 +160,7 @@
       {
         "id": "def-server.Collector",
         "type": "Class",
+        "tags": [],
         "label": "Collector",
         "description": [],
         "signature": [
@@ -164,6 +175,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Collector.extendFetchContext",
             "type": "CompoundType",
             "label": "extendFetchContext",
@@ -185,6 +197,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Collector.type",
             "type": "string",
             "label": "type",
@@ -196,6 +209,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Collector.init",
             "type": "Object",
             "label": "init",
@@ -210,6 +224,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Collector.fetch",
             "type": "Function",
             "label": "fetch",
@@ -231,6 +246,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Collector.isReady",
             "type": "Function",
             "label": "isReady",
@@ -317,8 +333,10 @@
         "type": "Interface",
         "label": "SchemaField",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SchemaField.type",
             "type": "string",
             "label": "type",
@@ -344,6 +362,7 @@
         "id": "def-server.AllowedSchemaTypes",
         "type": "Type",
         "label": "AllowedSchemaTypes",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
@@ -359,6 +378,7 @@
         "id": "def-server.MakeSchemaFrom",
         "type": "Type",
         "label": "MakeSchemaFrom",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
@@ -374,6 +394,7 @@
         "id": "def-server.CollectorOptions",
         "type": "Type",
         "label": "CollectorOptions",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
@@ -389,6 +410,7 @@
         "id": "def-server.UsageCollectorOptions",
         "type": "Type",
         "label": "UsageCollectorOptions",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
@@ -418,6 +440,9 @@
         "id": "def-server.CollectorFetchContext",
         "type": "Type",
         "label": "CollectorFetchContext",
+        "tags": [
+          "remark"
+        ],
         "description": [
           "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
         ],
@@ -435,6 +460,7 @@
         "id": "def-server.UsageCollectionSetup",
         "type": "Type",
         "label": "UsageCollectionSetup",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/plugin.ts",

@@ -9,8 +9,12 @@
         "type": "Interface",
         "label": "SavedObjectsTaggingApi",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApi.client",
             "type": "Object",
             "label": "client",
@@ -33,6 +37,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApi.cache",
             "type": "Object",
             "label": "cache",
@@ -55,6 +60,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApi.ui",
             "type": "Object",
             "label": "ui",
@@ -90,6 +96,9 @@
         "label": "SavedObjectsTaggingApiUi",
         "description": [
           "\nReact components and utility methods to use the SO tagging feature\n"
+        ],
+        "tags": [
+          "public"
         ],
         "children": [
           {
@@ -565,6 +574,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApiUi.components",
             "type": "Object",
             "label": "components",
@@ -601,8 +611,12 @@
         "description": [
           "\nReact UI components to be used to display the tagging feature in any application.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApiUiComponent.TagList",
             "type": "Function",
             "label": "TagList",
@@ -627,6 +641,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector",
             "type": "Function",
             "label": "TagSelector",
@@ -651,6 +666,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector",
             "type": "Function",
             "label": "SavedObjectSaveModalTagSelector",
@@ -687,6 +703,9 @@
         "type": "Interface",
         "label": "ITagsCache",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.ITagsCache.getState",
@@ -759,8 +778,12 @@
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TagListComponentProps.object",
             "type": "Object",
             "label": "object",
@@ -798,8 +821,12 @@
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TagSelectorComponentProps.selected",
             "type": "Array",
             "label": "selected",
@@ -816,6 +843,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TagSelectorComponentProps.onTagsSelected",
             "type": "Function",
             "label": "onTagsSelected",
@@ -846,8 +874,15 @@
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "example",
+              "remarks"
+            ],
             "id": "def-public.GetSearchBarFilterOptions.useName",
             "type": "CompoundType",
             "label": "useName",
@@ -864,6 +899,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.GetSearchBarFilterOptions.tagField",
             "type": "string",
             "label": "tagField",
@@ -892,8 +930,12 @@
         "type": "Interface",
         "label": "ParsedSearchQuery",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ParsedSearchQuery.searchTerm",
             "type": "string",
             "label": "searchTerm",
@@ -905,6 +947,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ParsedSearchQuery.tagReferences",
             "type": "Array",
             "label": "tagReferences",
@@ -926,6 +969,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ParsedSearchQuery.valid",
             "type": "boolean",
             "label": "valid",
@@ -951,8 +995,14 @@
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.ParseSearchQueryOptions.useName",
             "type": "CompoundType",
             "label": "useName",
@@ -969,6 +1019,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.ParseSearchQueryOptions.tagField",
             "type": "string",
             "label": "tagField",
@@ -999,8 +1052,12 @@
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.initialSelection",
             "type": "Array",
             "label": "initialSelection",
@@ -1017,6 +1074,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected",
             "type": "Function",
             "label": "onTagsSelected",
@@ -1047,6 +1105,9 @@
         "id": "def-public.SavedObjectTagDecoratorTypeGuard",
         "type": "Type",
         "label": "SavedObjectTagDecoratorTypeGuard",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1070,6 +1131,9 @@
         "id": "def-public.TagDecoratedSavedObject",
         "type": "Type",
         "label": "TagDecoratedSavedObject",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
@@ -1088,6 +1152,7 @@
       "type": "Interface",
       "label": "SavedObjectTaggingOssPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi",
@@ -1155,6 +1220,7 @@
       "type": "Interface",
       "label": "SavedObjectTaggingOssPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-public.SavedObjectTaggingOssPluginStart.isTaggingAvailable",
@@ -1229,8 +1295,10 @@
         "type": "Interface",
         "label": "Tag",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Tag.id",
             "type": "string",
             "label": "id",
@@ -1242,6 +1310,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.name",
             "type": "string",
             "label": "name",
@@ -1253,6 +1322,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.description",
             "type": "string",
             "label": "description",
@@ -1264,6 +1334,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.color",
             "type": "string",
             "label": "color",
@@ -1287,8 +1358,10 @@
         "type": "Interface",
         "label": "TagAttributes",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TagAttributes.name",
             "type": "string",
             "label": "name",
@@ -1300,6 +1373,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagAttributes.description",
             "type": "string",
             "label": "description",
@@ -1311,6 +1385,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagAttributes.color",
             "type": "string",
             "label": "color",
@@ -1334,8 +1409,10 @@
         "type": "Interface",
         "label": "GetAllTagsOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.GetAllTagsOptions.asSystemRequest",
             "type": "CompoundType",
             "label": "asSystemRequest",
@@ -1362,6 +1439,7 @@
         "type": "Interface",
         "label": "ITagsClient",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.ITagsClient.create",

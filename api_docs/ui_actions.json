@@ -5,10 +5,12 @@
       {
         "id": "def-public.UiActionsService",
         "type": "Class",
+        "tags": [],
         "label": "UiActionsService",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UiActionsService.executionService",
             "type": "Object",
             "label": "executionService",
@@ -29,6 +31,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UiActionsService.triggers",
             "type": "Object",
             "label": "triggers",
@@ -49,6 +52,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UiActionsService.actions",
             "type": "Object",
             "label": "actions",
@@ -69,6 +73,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UiActionsService.triggerToActions",
             "type": "Object",
             "label": "triggerToActions",
@@ -169,6 +174,7 @@
               "lineNumber": 42,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L42"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -208,6 +214,7 @@
               "lineNumber": 53,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L53"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -263,6 +270,7 @@
               "lineNumber": 63,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L63"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -294,6 +302,7 @@
               "lineNumber": 77,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L77"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -325,6 +334,7 @@
               "lineNumber": 85,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L85"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -370,6 +380,7 @@
               "lineNumber": 89,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -415,6 +426,7 @@
               "lineNumber": 105,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -477,6 +489,7 @@
               "lineNumber": 126,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L126"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -532,6 +545,7 @@
               "lineNumber": 134,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L134"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -571,6 +585,7 @@
               "lineNumber": 144,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L144"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -624,6 +639,7 @@
               "lineNumber": 157,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L157"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -669,6 +685,9 @@
               "lineNumber": 181,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
             },
+            "tags": [
+              "deprecated"
+            ],
             "returnComment": []
           },
           {
@@ -687,6 +706,7 @@
               "lineNumber": 189,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L189"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -712,6 +732,7 @@
               "lineNumber": 200,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/ui_actions/public/service/ui_actions_service.ts#L200"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -725,6 +746,7 @@
       {
         "id": "def-public.IncompatibleActionError",
         "type": "Class",
+        "tags": [],
         "label": "IncompatibleActionError",
         "description": [],
         "signature": [
@@ -739,6 +761,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IncompatibleActionError.code",
             "type": "string",
             "label": "code",
@@ -884,8 +907,10 @@
         "type": "Interface",
         "label": "UiActionsServiceParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UiActionsServiceParams.triggers",
             "type": "Object",
             "label": "triggers",
@@ -907,6 +932,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UiActionsServiceParams.actions",
             "type": "Object",
             "label": "actions",
@@ -928,6 +954,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UiActionsServiceParams.triggerToActions",
             "type": "Object",
             "label": "triggerToActions",
@@ -989,8 +1016,10 @@
           "<Context>>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Action.order",
             "type": "number",
             "label": "order",
@@ -1007,6 +1036,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Action.id",
             "type": "string",
             "label": "id",
@@ -1020,6 +1050,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Action.type",
             "type": "string",
             "label": "type",
@@ -1131,6 +1162,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Action.MenuItem",
             "type": "Function",
             "label": "MenuItem",
@@ -1392,8 +1424,10 @@
         "description": [
           "\nA convenience interface used to register an action."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ActionDefinition.id",
             "type": "string",
             "label": "id",
@@ -1407,6 +1441,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionDefinition.type",
             "type": "string",
             "label": "type",
@@ -1643,8 +1678,10 @@
         "description": [
           "\nRepresents something that can be displayed to user in UI."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Presentable.id",
             "type": "string",
             "label": "id",
@@ -1658,6 +1695,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Presentable.order",
             "type": "number",
             "label": "order",
@@ -1671,6 +1709,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Presentable.MenuItem",
             "type": "Function",
             "label": "MenuItem",
@@ -1864,6 +1903,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Presentable.grouping",
             "type": "Array",
             "label": "grouping",
@@ -1901,8 +1941,10 @@
         "description": [
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Trigger.id",
             "type": "string",
             "label": "id",
@@ -1916,6 +1958,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Trigger.title",
             "type": "string",
             "label": "title",
@@ -1932,6 +1975,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Trigger.description",
             "type": "string",
             "label": "description",
@@ -1960,8 +2004,10 @@
         "type": "Interface",
         "label": "RowClickContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RowClickContext.embeddable",
             "type": "Unknown",
             "label": "embeddable",
@@ -1976,6 +2022,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RowClickContext.data",
             "type": "Object",
             "label": "data",
@@ -2010,8 +2057,10 @@
         "type": "Interface",
         "label": "VisualizeFieldContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisualizeFieldContext.fieldName",
             "type": "string",
             "label": "fieldName",
@@ -2023,6 +2072,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeFieldContext.indexPatternId",
             "type": "string",
             "label": "indexPatternId",
@@ -2034,6 +2084,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeFieldContext.contextualFields",
             "type": "Array",
             "label": "contextualFields",
@@ -2062,8 +2113,10 @@
         "description": [
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ActionExecutionMeta.trigger",
             "type": "Object",
             "label": "trigger",
@@ -2100,6 +2153,7 @@
         "id": "def-public.PresentableGrouping",
         "type": "Type",
         "label": "PresentableGrouping",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/ui_actions/public/util/presentable.ts",
@@ -2112,6 +2166,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.VISUALIZE_FIELD_TRIGGER",
         "type": "string",
         "label": "VISUALIZE_FIELD_TRIGGER",
@@ -2127,6 +2182,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.VISUALIZE_GEO_FIELD_TRIGGER",
         "type": "string",
         "label": "VISUALIZE_GEO_FIELD_TRIGGER",
@@ -2142,6 +2198,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ROW_CLICK_TRIGGER",
         "type": "string",
         "label": "ROW_CLICK_TRIGGER",
@@ -2157,6 +2214,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ACTION_VISUALIZE_FIELD",
         "type": "string",
         "label": "ACTION_VISUALIZE_FIELD",
@@ -2172,6 +2230,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ACTION_VISUALIZE_GEO_FIELD",
         "type": "string",
         "label": "ACTION_VISUALIZE_GEO_FIELD",
@@ -2187,6 +2246,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ACTION_VISUALIZE_LENS_FIELD",
         "type": "string",
         "label": "ACTION_VISUALIZE_LENS_FIELD",
@@ -2205,6 +2265,7 @@
         "id": "def-public.ActionExecutionContext",
         "type": "Type",
         "label": "ActionExecutionContext",
+        "tags": [],
         "description": [
           "\nAction methods are executed with Context from trigger + {@link ActionExecutionMeta}"
         ],
@@ -2223,8 +2284,10 @@
       {
         "id": "def-public.visualizeFieldTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.visualizeFieldTrigger.id",
             "type": "string",
             "label": "id",
@@ -2236,6 +2299,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.visualizeFieldTrigger.title",
             "type": "string",
             "label": "title",
@@ -2247,6 +2311,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.visualizeFieldTrigger.description",
             "type": "string",
             "label": "description",
@@ -2270,8 +2335,10 @@
       {
         "id": "def-public.visualizeGeoFieldTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.visualizeGeoFieldTrigger.id",
             "type": "string",
             "label": "id",
@@ -2283,6 +2350,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.visualizeGeoFieldTrigger.title",
             "type": "string",
             "label": "title",
@@ -2294,6 +2362,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.visualizeGeoFieldTrigger.description",
             "type": "string",
             "label": "description",
@@ -2317,8 +2386,10 @@
       {
         "id": "def-public.rowClickTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.rowClickTrigger.id",
             "type": "string",
             "label": "id",
@@ -2330,6 +2401,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.rowClickTrigger.title",
             "type": "string",
             "label": "title",
@@ -2341,6 +2413,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.rowClickTrigger.description",
             "type": "string",
             "label": "description",
@@ -2366,6 +2439,7 @@
       "id": "def-public.UiActionsSetup",
       "type": "Type",
       "label": "UiActionsSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/ui_actions/public/plugin.ts",
@@ -2402,6 +2476,7 @@
       "id": "def-public.UiActionsStart",
       "type": "Type",
       "label": "UiActionsStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/ui_actions/public/plugin.ts",

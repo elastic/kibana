@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "IlmUrlGeneratorState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IlmUrlGeneratorState.page",
             "type": "CompoundType",
             "label": "page",
@@ -25,6 +27,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IlmUrlGeneratorState.policyName",
             "type": "string",
             "label": "policyName",
@@ -39,6 +42,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IlmUrlGeneratorState.absolute",
             "type": "CompoundType",
             "label": "absolute",
@@ -64,6 +68,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.ILM_URL_GENERATOR_ID",
         "type": "string",
         "label": "ILM_URL_GENERATOR_ID",

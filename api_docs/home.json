@@ -50,8 +50,12 @@
         "type": "Interface",
         "label": "FeatureCatalogueEntry",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.id",
             "type": "string",
             "label": "id",
@@ -65,6 +69,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.title",
             "type": "string",
             "label": "title",
@@ -78,6 +83,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.category",
             "type": "Enum",
             "label": "category",
@@ -100,6 +106,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.subtitle",
             "type": "string",
             "label": "subtitle",
@@ -116,6 +123,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.description",
             "type": "string",
             "label": "description",
@@ -129,6 +137,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.icon",
             "type": "CompoundType",
             "label": "icon",
@@ -145,6 +154,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.path",
             "type": "string",
             "label": "path",
@@ -158,6 +168,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.showOnHomePage",
             "type": "boolean",
             "label": "showOnHomePage",
@@ -171,6 +182,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.order",
             "type": "number",
             "label": "order",
@@ -187,6 +199,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.visible",
             "type": "Function",
             "label": "visible",
@@ -203,6 +216,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueEntry.solutionId",
             "type": "string",
             "label": "solutionId",
@@ -231,8 +245,12 @@
         "type": "Interface",
         "label": "FeatureCatalogueSolution",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.id",
             "type": "string",
             "label": "id",
@@ -246,6 +264,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.title",
             "type": "string",
             "label": "title",
@@ -259,6 +278,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.subtitle",
             "type": "string",
             "label": "subtitle",
@@ -272,6 +292,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.description",
             "type": "string",
             "label": "description",
@@ -288,6 +309,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.appDescriptions",
             "type": "Array",
             "label": "appDescriptions",
@@ -304,6 +326,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.icon",
             "type": "CompoundType",
             "label": "icon",
@@ -320,6 +343,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.path",
             "type": "string",
             "label": "path",
@@ -333,6 +357,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FeatureCatalogueSolution.order",
             "type": "number",
             "label": "order",
@@ -361,8 +386,12 @@
         "type": "Interface",
         "label": "Environment",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Environment.cloud",
             "type": "boolean",
             "label": "cloud",
@@ -376,6 +405,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Environment.apmUi",
             "type": "boolean",
             "label": "apmUi",
@@ -389,6 +419,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Environment.ml",
             "type": "boolean",
             "label": "ml",
@@ -415,6 +446,9 @@
         "id": "def-public.FeatureCatalogueCategory",
         "type": "Enum",
         "label": "FeatureCatalogueCategory",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -429,6 +463,9 @@
         "id": "def-public.FeatureCatalogueSetup",
         "type": "Type",
         "label": "FeatureCatalogueSetup",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
@@ -460,6 +497,9 @@
         "id": "def-public.EnvironmentSetup",
         "type": "Type",
         "label": "EnvironmentSetup",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
@@ -483,6 +523,9 @@
         "id": "def-public.TutorialSetup",
         "type": "Type",
         "label": "TutorialSetup",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
@@ -504,6 +547,9 @@
         "id": "def-public.TutorialVariables",
         "type": "Type",
         "label": "TutorialVariables",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -519,6 +565,9 @@
         "id": "def-public.TutorialDirectoryNoticeComponent",
         "type": "Type",
         "label": "TutorialDirectoryNoticeComponent",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -534,6 +583,9 @@
         "id": "def-public.TutorialDirectoryHeaderLinkComponent",
         "type": "Type",
         "label": "TutorialDirectoryHeaderLinkComponent",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -549,6 +601,9 @@
         "id": "def-public.TutorialModuleNoticeComponent",
         "type": "Type",
         "label": "TutorialModuleNoticeComponent",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -565,8 +620,10 @@
       {
         "id": "def-public.INSTRUCTION_VARIANT",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.ESC",
             "type": "string",
             "label": "ESC",
@@ -578,6 +635,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.OSX",
             "type": "string",
             "label": "OSX",
@@ -589,6 +647,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.DEB",
             "type": "string",
             "label": "DEB",
@@ -600,6 +659,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.RPM",
             "type": "string",
             "label": "RPM",
@@ -611,6 +671,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.DOCKER",
             "type": "string",
             "label": "DOCKER",
@@ -622,6 +683,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.WINDOWS",
             "type": "string",
             "label": "WINDOWS",
@@ -633,6 +695,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.NODE",
             "type": "string",
             "label": "NODE",
@@ -644,6 +707,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.DJANGO",
             "type": "string",
             "label": "DJANGO",
@@ -655,6 +719,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.FLASK",
             "type": "string",
             "label": "FLASK",
@@ -666,6 +731,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.RAILS",
             "type": "string",
             "label": "RAILS",
@@ -677,6 +743,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.RACK",
             "type": "string",
             "label": "RACK",
@@ -688,6 +755,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.JS",
             "type": "string",
             "label": "JS",
@@ -699,6 +767,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.GO",
             "type": "string",
             "label": "GO",
@@ -710,6 +779,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.JAVA",
             "type": "string",
             "label": "JAVA",
@@ -721,6 +791,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.DOTNET",
             "type": "string",
             "label": "DOTNET",
@@ -732,6 +803,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.LINUX",
             "type": "string",
             "label": "LINUX",
@@ -743,6 +815,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.INSTRUCTION_VARIANT.PHP",
             "type": "string",
             "label": "PHP",
@@ -769,8 +842,12 @@
       "type": "Interface",
       "label": "HomePublicPluginSetup",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [],
           "id": "def-public.HomePublicPluginSetup.tutorials",
           "type": "Object",
           "label": "tutorials",
@@ -785,6 +862,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.HomePublicPluginSetup.featureCatalogue",
           "type": "Object",
           "label": "featureCatalogue",
@@ -815,6 +893,9 @@
           ]
         },
         {
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.HomePublicPluginSetup.environment",
           "type": "Object",
           "label": "environment",
@@ -852,8 +933,10 @@
       "type": "Interface",
       "label": "HomePublicPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.HomePublicPluginStart.featureCatalogue",
           "type": "Object",
           "label": "featureCatalogue",
@@ -892,8 +975,10 @@
         "type": "Interface",
         "label": "ArtifactsSchema",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ArtifactsSchema.exportedFields",
             "type": "Object",
             "label": "exportedFields",
@@ -908,6 +993,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ArtifactsSchema.dashboards",
             "type": "Array",
             "label": "dashboards",
@@ -929,6 +1015,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ArtifactsSchema.application",
             "type": "Object",
             "label": "application",
@@ -956,6 +1043,9 @@
         "id": "def-server.TutorialsCategory",
         "type": "Enum",
         "label": "TutorialsCategory",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
@@ -970,6 +1060,7 @@
         "id": "def-server.TutorialProvider",
         "type": "Type",
         "label": "TutorialProvider",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
@@ -988,6 +1079,7 @@
         "id": "def-server.SampleDatasetProvider",
         "type": "Type",
         "label": "SampleDatasetProvider",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
@@ -1005,6 +1097,9 @@
         "id": "def-server.SampleDataRegistrySetup",
         "type": "Type",
         "label": "SampleDataRegistrySetup",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
@@ -1021,8 +1116,10 @@
       {
         "id": "def-server.INSTRUCTION_VARIANT",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.ESC",
             "type": "string",
             "label": "ESC",
@@ -1034,6 +1131,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.OSX",
             "type": "string",
             "label": "OSX",
@@ -1045,6 +1143,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.DEB",
             "type": "string",
             "label": "DEB",
@@ -1056,6 +1155,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.RPM",
             "type": "string",
             "label": "RPM",
@@ -1067,6 +1167,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.DOCKER",
             "type": "string",
             "label": "DOCKER",
@@ -1078,6 +1179,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.WINDOWS",
             "type": "string",
             "label": "WINDOWS",
@@ -1089,6 +1191,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.NODE",
             "type": "string",
             "label": "NODE",
@@ -1100,6 +1203,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.DJANGO",
             "type": "string",
             "label": "DJANGO",
@@ -1111,6 +1215,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.FLASK",
             "type": "string",
             "label": "FLASK",
@@ -1122,6 +1227,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.RAILS",
             "type": "string",
             "label": "RAILS",
@@ -1133,6 +1239,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.RACK",
             "type": "string",
             "label": "RACK",
@@ -1144,6 +1251,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.JS",
             "type": "string",
             "label": "JS",
@@ -1155,6 +1263,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.GO",
             "type": "string",
             "label": "GO",
@@ -1166,6 +1275,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.JAVA",
             "type": "string",
             "label": "JAVA",
@@ -1177,6 +1287,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.DOTNET",
             "type": "string",
             "label": "DOTNET",
@@ -1188,6 +1299,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.LINUX",
             "type": "string",
             "label": "LINUX",
@@ -1199,6 +1311,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.INSTRUCTION_VARIANT.PHP",
             "type": "string",
             "label": "PHP",
@@ -1225,8 +1338,12 @@
       "type": "Interface",
       "label": "HomeServerPluginSetup",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [],
           "id": "def-server.HomeServerPluginSetup.tutorials",
           "type": "Object",
           "label": "tutorials",
@@ -1265,6 +1382,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.HomeServerPluginSetup.sampleData",
           "type": "Object",
           "label": "sampleData",
@@ -1331,8 +1449,12 @@
       "type": "Interface",
       "label": "HomeServerPluginStart",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [],
           "id": "def-server.HomeServerPluginStart.tutorials",
           "type": "Object",
           "label": "tutorials",
@@ -1347,6 +1469,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.HomeServerPluginStart.sampleData",
           "type": "Object",
           "label": "sampleData",

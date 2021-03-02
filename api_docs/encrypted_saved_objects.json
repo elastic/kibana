@@ -13,6 +13,7 @@
       {
         "id": "def-server.EncryptionError",
         "type": "Class",
+        "tags": [],
         "label": "EncryptionError",
         "description": [],
         "signature": [
@@ -141,8 +142,10 @@
         "description": [
           "\nDescribes the registration entry for the saved object type that contain attributes that need to\nbe encrypted."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.EncryptedSavedObjectTypeRegistration.type",
             "type": "string",
             "label": "type",
@@ -154,6 +157,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToEncrypt",
             "type": "Object",
             "label": "attributesToEncrypt",
@@ -176,6 +180,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToExcludeFromAAD",
             "type": "Object",
             "label": "attributesToExcludeFromAAD",
@@ -202,8 +207,10 @@
         "type": "Interface",
         "label": "EncryptedSavedObjectsClient",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.EncryptedSavedObjectsClient.getDecryptedAsInternalUser",
             "type": "Function",
             "label": "getDecryptedAsInternalUser",
@@ -250,8 +257,10 @@
       "type": "Interface",
       "label": "EncryptedSavedObjectsPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.EncryptedSavedObjectsPluginSetup.canEncrypt",
           "type": "boolean",
           "label": "canEncrypt",
@@ -265,6 +274,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-server.EncryptedSavedObjectsPluginSetup.registerType",
           "type": "Function",
           "label": "registerType",
@@ -287,6 +297,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.EncryptedSavedObjectsPluginSetup.createMigration",
           "type": "Function",
           "label": "createMigration",
@@ -320,8 +331,10 @@
       "type": "Interface",
       "label": "EncryptedSavedObjectsPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.EncryptedSavedObjectsPluginStart.isEncryptionError",
           "type": "Function",
           "label": "isEncryptionError",
@@ -336,6 +349,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.EncryptedSavedObjectsPluginStart.getClient",
           "type": "Function",
           "label": "getClient",

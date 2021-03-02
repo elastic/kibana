@@ -5,6 +5,7 @@
       {
         "id": "def-public.KibanaLegacyPlugin",
         "type": "Class",
+        "tags": [],
         "label": "KibanaLegacyPlugin",
         "description": [],
         "children": [
@@ -175,10 +176,12 @@
       {
         "id": "def-public.ToastNotifications",
         "type": "Class",
+        "tags": [],
         "label": "ToastNotifications",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ToastNotifications.list",
             "type": "Array",
             "label": "list",
@@ -268,6 +271,7 @@
               "lineNumber": 26,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L26"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -320,6 +324,7 @@
               "lineNumber": 30,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L30"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -365,6 +370,7 @@
               "lineNumber": 31,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L31"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -417,6 +423,7 @@
               "lineNumber": 32,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L32"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -469,6 +476,7 @@
               "lineNumber": 33,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L33"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -521,6 +529,7 @@
               "lineNumber": 34,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L34"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -587,6 +596,7 @@
               "lineNumber": 35,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L35"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -600,6 +610,7 @@
     ],
     "functions": [
       {
+        "tags": [],
         "id": "def-public.initAngularBootstrap",
         "type": "Function",
         "label": "initAngularBootstrap",
@@ -760,6 +771,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.createTopNavHelper",
         "type": "Function",
         "label": "createTopNavHelper",
@@ -921,9 +933,11 @@
             "id": "def-public.configureAppAngularModule.newPlatform",
             "type": "Object",
             "label": "newPlatform",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.configureAppAngularModule.newPlatform.core",
                 "type": "Object",
                 "label": "core",
@@ -944,6 +958,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.configureAppAngularModule.newPlatform.env",
                 "type": "Object",
                 "label": "env",
@@ -1023,6 +1038,7 @@
           "lineNumber": 62,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L62"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1055,6 +1071,7 @@
           "lineNumber": 136,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L136"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1089,6 +1106,7 @@
           "lineNumber": 18,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts#L18"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1486,8 +1504,10 @@
         "type": "Interface",
         "label": "RouteConfiguration",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.controller",
             "type": "CompoundType",
             "label": "controller",
@@ -1502,6 +1522,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.redirectTo",
             "type": "string",
             "label": "redirectTo",
@@ -1516,6 +1537,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.resolveRedirectTo",
             "type": "Function",
             "label": "resolveRedirectTo",
@@ -1530,6 +1552,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.reloadOnSearch",
             "type": "CompoundType",
             "label": "reloadOnSearch",
@@ -1544,6 +1567,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.reloadOnUrl",
             "type": "CompoundType",
             "label": "reloadOnUrl",
@@ -1558,6 +1582,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.outerAngularWrapperRoute",
             "type": "CompoundType",
             "label": "outerAngularWrapperRoute",
@@ -1572,6 +1597,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.resolve",
             "type": "Uncategorized",
             "label": "resolve",
@@ -1586,6 +1612,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.template",
             "type": "string",
             "label": "template",
@@ -1600,6 +1627,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.k7Breadcrumbs",
             "type": "Function",
             "label": "k7Breadcrumbs",
@@ -1616,6 +1644,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RouteConfiguration.requireUICapability",
             "type": "string",
             "label": "requireUICapability",
@@ -1644,6 +1673,7 @@
         "id": "def-public.KibanaLegacySetup",
         "type": "Type",
         "label": "KibanaLegacySetup",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/plugin.ts",
@@ -1659,6 +1689,7 @@
         "id": "def-public.KibanaLegacyStart",
         "type": "Type",
         "label": "KibanaLegacyStart",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/plugin.ts",
@@ -1673,6 +1704,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.createTopNavDirective",
         "type": "CompoundType",
         "label": "createTopNavDirective",
@@ -1691,6 +1723,7 @@
         "id": "def-public.AngularHttpError",
         "type": "Type",
         "label": "AngularHttpError",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
@@ -1703,6 +1736,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.KbnAccessibleClickProvider",
         "type": "CompoundType",
         "label": "KbnAccessibleClickProvider",
@@ -1721,6 +1755,7 @@
         "id": "def-public.IPrivate",
         "type": "Type",
         "label": "IPrivate",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",

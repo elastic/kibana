@@ -19,6 +19,9 @@
       "id": "def-server.ConsoleSetup",
       "type": "Type",
       "label": "ConsoleSetup",
+      "tags": [
+        "public"
+      ],
       "description": [],
       "source": {
         "path": "src/plugins/console/server/types.ts",
@@ -35,6 +38,9 @@
       "id": "def-server.ConsoleStart",
       "type": "Type",
       "label": "ConsoleStart",
+      "tags": [
+        "public"
+      ],
       "description": [],
       "source": {
         "path": "src/plugins/console/server/types.ts",

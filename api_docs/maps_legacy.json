@@ -13,6 +13,7 @@
       {
         "id": "def-server.MapsLegacyPlugin",
         "type": "Class",
+        "tags": [],
         "label": "MapsLegacyPlugin",
         "description": [],
         "signature": [
@@ -43,6 +44,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.MapsLegacyPlugin._initializerContext",
             "type": "Object",
             "label": "_initializerContext",
@@ -182,8 +184,10 @@
         "type": "Interface",
         "label": "MapsLegacyPluginSetup",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.MapsLegacyPluginSetup.config",
             "type": "Object",
             "label": "config",
@@ -217,6 +221,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.DEFAULT_EMS_FILE_API_URL",
         "type": "string",
         "label": "DEFAULT_EMS_FILE_API_URL",
@@ -232,6 +237,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_EMS_TILE_API_URL",
         "type": "string",
         "label": "DEFAULT_EMS_TILE_API_URL",
@@ -247,6 +253,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_EMS_LANDING_PAGE_URL",
         "type": "string",
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
@@ -262,6 +269,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_EMS_FONT_LIBRARY_URL",
         "type": "string",
         "label": "DEFAULT_EMS_FONT_LIBRARY_URL",

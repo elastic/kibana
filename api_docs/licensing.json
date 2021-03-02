@@ -9,8 +9,12 @@
         "type": "Interface",
         "label": "LicenseFeature",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LicenseFeature.isAvailable",
             "type": "boolean",
             "label": "isAvailable",
@@ -22,6 +26,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.LicenseFeature.isEnabled",
             "type": "boolean",
             "label": "isEnabled",
@@ -47,8 +52,12 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PublicLicense.uid",
             "type": "string",
             "label": "uid",
@@ -62,6 +71,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PublicLicense.status",
             "type": "CompoundType",
             "label": "status",
@@ -84,6 +94,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PublicLicense.expiryDateInMillis",
             "type": "number",
             "label": "expiryDateInMillis",
@@ -97,6 +108,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PublicLicense.type",
             "type": "CompoundType",
             "label": "type",
@@ -113,6 +125,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-public.PublicLicense.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -143,8 +158,12 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PublicLicenseJSON.license",
             "type": "Object",
             "label": "license",
@@ -166,6 +185,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PublicLicenseJSON.features",
             "type": "Object",
             "label": "features",
@@ -188,6 +208,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PublicLicenseJSON.signature",
             "type": "string",
             "label": "signature",
@@ -211,8 +232,12 @@
         "type": "Interface",
         "label": "LicenseCheck",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LicenseCheck.state",
             "type": "CompoundType",
             "label": "state",
@@ -235,6 +260,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LicenseCheck.message",
             "type": "string",
             "label": "message",
@@ -263,8 +289,12 @@
         "type": "Interface",
         "label": "ILicense",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ILicense.uid",
             "type": "string",
             "label": "uid",
@@ -281,6 +311,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.status",
             "type": "CompoundType",
             "label": "status",
@@ -297,6 +328,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.isActive",
             "type": "boolean",
             "label": "isActive",
@@ -310,6 +342,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.expiryDateInMillis",
             "type": "number",
             "label": "expiryDateInMillis",
@@ -326,6 +359,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.type",
             "type": "CompoundType",
             "label": "type",
@@ -342,6 +376,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-public.ILicense.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -358,6 +395,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.signature",
             "type": "string",
             "label": "signature",
@@ -371,6 +409,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.isAvailable",
             "type": "boolean",
             "label": "isAvailable",
@@ -384,6 +423,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.toJSON",
             "type": "Function",
             "label": "toJSON",
@@ -407,6 +447,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.error",
             "type": "string",
             "label": "error",
@@ -423,6 +464,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ILicense.getUnavailableReason",
             "type": "Function",
             "label": "getUnavailableReason",
@@ -590,6 +632,7 @@
         "id": "def-public.LICENSE_TYPE",
         "type": "Enum",
         "label": "LICENSE_TYPE",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -604,6 +647,7 @@
         "id": "def-public.LicenseCheckState",
         "type": "Type",
         "label": "LicenseCheckState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -619,6 +663,9 @@
         "id": "def-public.LicenseType",
         "type": "Type",
         "label": "LicenseType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -634,6 +681,9 @@
         "id": "def-public.LicenseStatus",
         "type": "Type",
         "label": "LicenseStatus",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -649,6 +699,9 @@
         "id": "def-public.PublicFeatures",
         "type": "Type",
         "label": "PublicFeatures",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nProvides information about feature availability for the current license."
         ],
@@ -669,8 +722,14 @@
       "type": "Interface",
       "label": "LicensingPluginSetup",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.LicensingPluginSetup.license$",
           "type": "Object",
           "label": "license$",
@@ -725,6 +784,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-public.LicensingPluginSetup.featureUsage",
           "type": "Object",
           "label": "featureUsage",
@@ -760,8 +820,12 @@
       "type": "Interface",
       "label": "LicensingPluginStart",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [],
           "id": "def-public.LicensingPluginStart.license$",
           "type": "Object",
           "label": "license$",
@@ -814,6 +878,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-public.LicensingPluginStart.featureUsage",
           "type": "Object",
           "label": "featureUsage",
@@ -967,6 +1032,9 @@
         "type": "Interface",
         "label": "FeatureUsageServiceSetup",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-server.FeatureUsageServiceSetup.register",
@@ -1029,6 +1097,9 @@
         "type": "Interface",
         "label": "FeatureUsageServiceStart",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-server.FeatureUsageServiceStart.notifyUsage",
@@ -1122,8 +1193,12 @@
         "type": "Interface",
         "label": "LicenseFeature",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.LicenseFeature.isAvailable",
             "type": "boolean",
             "label": "isAvailable",
@@ -1135,6 +1210,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.LicenseFeature.isEnabled",
             "type": "boolean",
             "label": "isEnabled",
@@ -1160,8 +1236,12 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PublicLicense.uid",
             "type": "string",
             "label": "uid",
@@ -1175,6 +1255,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.PublicLicense.status",
             "type": "CompoundType",
             "label": "status",
@@ -1197,6 +1278,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PublicLicense.expiryDateInMillis",
             "type": "number",
             "label": "expiryDateInMillis",
@@ -1210,6 +1292,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.PublicLicense.type",
             "type": "CompoundType",
             "label": "type",
@@ -1226,6 +1309,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.PublicLicense.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -1256,8 +1342,12 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PublicLicenseJSON.license",
             "type": "Object",
             "label": "license",
@@ -1279,6 +1369,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PublicLicenseJSON.features",
             "type": "Object",
             "label": "features",
@@ -1301,6 +1392,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PublicLicenseJSON.signature",
             "type": "string",
             "label": "signature",
@@ -1324,8 +1416,12 @@
         "type": "Interface",
         "label": "LicenseCheck",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.LicenseCheck.state",
             "type": "CompoundType",
             "label": "state",
@@ -1348,6 +1444,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LicenseCheck.message",
             "type": "string",
             "label": "message",
@@ -1376,8 +1473,12 @@
         "type": "Interface",
         "label": "ILicense",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ILicense.uid",
             "type": "string",
             "label": "uid",
@@ -1394,6 +1495,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.status",
             "type": "CompoundType",
             "label": "status",
@@ -1410,6 +1512,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.isActive",
             "type": "boolean",
             "label": "isActive",
@@ -1423,6 +1526,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.expiryDateInMillis",
             "type": "number",
             "label": "expiryDateInMillis",
@@ -1439,6 +1543,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.type",
             "type": "CompoundType",
             "label": "type",
@@ -1455,6 +1560,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.ILicense.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -1471,6 +1579,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.signature",
             "type": "string",
             "label": "signature",
@@ -1484,6 +1593,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.isAvailable",
             "type": "boolean",
             "label": "isAvailable",
@@ -1497,6 +1607,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.toJSON",
             "type": "Function",
             "label": "toJSON",
@@ -1520,6 +1631,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.error",
             "type": "string",
             "label": "error",
@@ -1536,6 +1648,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ILicense.getUnavailableReason",
             "type": "Function",
             "label": "getUnavailableReason",
@@ -1712,8 +1825,10 @@
           " extends Error"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ElasticsearchError.status",
             "type": "number",
             "label": "status",
@@ -1736,168 +1851,18 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.RawFeature",
-        "type": "Interface",
-        "label": "RawFeature",
-        "description": [
-          "\nResult from remote request fetching raw feature set."
-        ],
-        "children": [
-          {
-            "id": "def-server.RawFeature.available",
-            "type": "boolean",
-            "label": "available",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L21"
-            }
-          },
-          {
-            "id": "def-server.RawFeature.enabled",
-            "type": "boolean",
-            "label": "enabled",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L22"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L20"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.RawFeatures",
-        "type": "Interface",
-        "label": "RawFeatures",
-        "description": [
-          "\nResults from remote request fetching raw feature sets."
-        ],
-        "children": [
-          {
-            "id": "def-server.RawFeatures.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L30"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L29"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.RawLicense",
-        "type": "Interface",
-        "label": "RawLicense",
-        "description": [
-          "\nResults from remote request fetching a raw license."
-        ],
-        "children": [
-          {
-            "id": "def-server.RawLicense.uid",
-            "type": "string",
-            "label": "uid",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L38"
-            }
-          },
-          {
-            "id": "def-server.RawLicense.status",
-            "type": "CompoundType",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L39"
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseStatus",
-                "text": "LicenseStatus"
-              }
-            ]
-          },
-          {
-            "id": "def-server.RawLicense.expiry_date_in_millis",
-            "type": "number",
-            "label": "expiry_date_in_millis",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L40"
-            }
-          },
-          {
-            "id": "def-server.RawLicense.type",
-            "type": "CompoundType",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L41"
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          },
-          {
-            "id": "def-server.RawLicense.mode",
-            "type": "CompoundType",
-            "label": "mode",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L42"
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L37"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.LicensingApiRequestHandlerContext",
         "type": "Interface",
         "label": "LicensingApiRequestHandlerContext",
         "description": [
           "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.LicensingApiRequestHandlerContext.featureUsage",
             "type": "Object",
             "label": "featureUsage",
@@ -1918,6 +1883,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LicensingApiRequestHandlerContext.license",
             "type": "Object",
             "label": "license",
@@ -1944,57 +1910,6 @@
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L49"
         },
         "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LicensingRequestHandlerContext",
-        "type": "Interface",
-        "label": "LicensingRequestHandlerContext",
-        "signature": [
-          {
-            "pluginId": "licensing",
-            "scope": "server",
-            "docId": "kibLicensingPluginApi",
-            "section": "def-server.LicensingRequestHandlerContext",
-            "text": "LicensingRequestHandlerContext"
-          },
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          }
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.LicensingRequestHandlerContext.licensing",
-            "type": "Object",
-            "label": "licensing",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L58"
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingApiRequestHandlerContext",
-                "text": "LicensingApiRequestHandlerContext"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L57"
-        },
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -2002,6 +1917,7 @@
         "id": "def-server.LICENSE_TYPE",
         "type": "Enum",
         "label": "LICENSE_TYPE",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2016,6 +1932,7 @@
         "id": "def-server.CheckLicense",
         "type": "Type",
         "label": "CheckLicense",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -2033,6 +1950,7 @@
         "id": "def-server.LicenseCheckState",
         "type": "Type",
         "label": "LicenseCheckState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2048,6 +1966,9 @@
         "id": "def-server.LicenseType",
         "type": "Type",
         "label": "LicenseType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2063,6 +1984,9 @@
         "id": "def-server.LicenseStatus",
         "type": "Type",
         "label": "LicenseStatus",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
@@ -2078,6 +2002,9 @@
         "id": "def-server.PublicFeatures",
         "type": "Type",
         "label": "PublicFeatures",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nProvides information about feature availability for the current license."
         ],
@@ -2090,21 +2017,6 @@
           "{ [x: string]: LicenseFeature; }"
         ],
         "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LicensingRouter",
-        "type": "Type",
-        "label": "LicensingRouter",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L64"
-        },
-        "signature": [
-          "IRouter<LicensingRequestHandlerContext>"
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -2113,8 +2025,14 @@
       "type": "Interface",
       "label": "LicensingPluginSetup",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-server.LicensingPluginSetup.license$",
           "type": "Object",
           "label": "license$",
@@ -2169,6 +2087,9 @@
           }
         },
         {
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-server.LicensingPluginSetup.createLicensePoller",
           "type": "Function",
           "label": "createLicensePoller",
@@ -2211,6 +2132,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.LicensingPluginSetup.featureUsage",
           "type": "Object",
           "label": "featureUsage",
@@ -2246,8 +2168,12 @@
       "type": "Interface",
       "label": "LicensingPluginStart",
       "description": [],
+      "tags": [
+        "public"
+      ],
       "children": [
         {
+          "tags": [],
           "id": "def-server.LicensingPluginStart.license$",
           "type": "Object",
           "label": "license$",
@@ -2300,6 +2226,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-server.LicensingPluginStart.createLicensePoller",
           "type": "Function",
           "label": "createLicensePoller",
@@ -2342,6 +2269,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.LicensingPluginStart.featureUsage",
           "type": "Object",
           "label": "featureUsage",

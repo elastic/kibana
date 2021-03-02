@@ -5,10 +5,12 @@
       {
         "id": "def-public.IndexPatternCreationConfig",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternCreationConfig",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.key",
             "type": "string",
             "label": "key",
@@ -23,6 +25,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.type",
             "type": "string",
             "label": "type",
@@ -37,6 +40,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.name",
             "type": "string",
             "label": "name",
@@ -48,6 +52,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.showSystemIndices",
             "type": "boolean",
             "label": "showSystemIndices",
@@ -59,6 +64,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.httpClient",
             "type": "CompoundType",
             "label": "httpClient",
@@ -73,6 +79,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationConfig.isBeta",
             "type": "boolean",
             "label": "isBeta",
@@ -96,9 +103,11 @@
                 "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "type": "Object",
                 "label": "{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.type",
                     "type": "string",
                     "label": "type",
@@ -113,6 +122,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.name",
                     "type": "string",
                     "label": "name",
@@ -127,6 +137,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.showSystemIndices",
                     "type": "CompoundType",
                     "label": "showSystemIndices",
@@ -141,6 +152,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.httpClient",
                     "type": "CompoundType",
                     "label": "httpClient",
@@ -155,6 +167,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.isBeta",
                     "type": "CompoundType",
                     "label": "isBeta",
@@ -446,10 +459,12 @@
       {
         "id": "def-public.IndexPatternListConfig",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternListConfig",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IndexPatternListConfig.key",
             "type": "string",
             "label": "key",
@@ -700,8 +715,10 @@
         "type": "Interface",
         "label": "IndexPatternCreationOption",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationOption.text",
             "type": "string",
             "label": "text",
@@ -713,6 +730,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationOption.description",
             "type": "string",
             "label": "description",
@@ -724,6 +742,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationOption.testSubj",
             "type": "string",
             "label": "testSubj",
@@ -735,6 +754,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationOption.onClick",
             "type": "Function",
             "label": "onClick",
@@ -749,6 +769,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IndexPatternCreationOption.isBeta",
             "type": "CompoundType",
             "label": "isBeta",
@@ -776,6 +797,7 @@
         "id": "def-public.MlCardState",
         "type": "Enum",
         "label": "MlCardState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/index_pattern_management/public/types.ts",
@@ -791,6 +813,7 @@
       "id": "def-public.IndexPatternManagementSetup",
       "type": "Type",
       "label": "IndexPatternManagementSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/index_pattern_management/public/plugin.ts",
@@ -825,6 +848,7 @@
       "id": "def-public.IndexPatternManagementStart",
       "type": "Type",
       "label": "IndexPatternManagementStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/index_pattern_management/public/plugin.ts",

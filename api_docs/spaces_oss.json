@@ -26,8 +26,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesAvailableStartContract.isSpacesAvailable",
             "type": "boolean",
             "label": "isSpacesAvailable",
@@ -54,8 +56,10 @@
         "type": "Interface",
         "label": "SpacesUnavailableStartContract",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesUnavailableStartContract.isSpacesAvailable",
             "type": "boolean",
             "label": "isSpacesAvailable",
@@ -82,8 +86,12 @@
         "type": "Interface",
         "label": "SpacesApi",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesApi.activeSpace$",
             "type": "Object",
             "label": "activeSpace$",
@@ -132,6 +140,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApi.ui",
             "type": "Object",
             "label": "ui",
@@ -166,8 +175,12 @@
         "type": "Interface",
         "label": "SpacesApiUi",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesApiUi.components",
             "type": "Object",
             "label": "components",
@@ -190,6 +203,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApiUi.redirectLegacyUrl",
             "type": "Function",
             "label": "redirectLegacyUrl",
@@ -220,8 +234,12 @@
         "description": [
           "\nReact UI components to be used to display the spaces feature in any application.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesApiUiComponent.getSpacesContextProvider",
             "type": "Function",
             "label": "getSpacesContextProvider",
@@ -253,6 +271,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApiUiComponent.getShareToSpaceFlyout",
             "type": "Function",
             "label": "getShareToSpaceFlyout",
@@ -284,6 +303,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApiUiComponent.getSpaceList",
             "type": "Function",
             "label": "getSpaceList",
@@ -315,6 +335,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApiUiComponent.getLegacyUrlConflict",
             "type": "Function",
             "label": "getLegacyUrlConflict",
@@ -346,6 +367,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpacesApiUiComponent.getSpaceAvatar",
             "type": "Function",
             "label": "getSpaceAvatar",
@@ -389,8 +411,12 @@
         "type": "Interface",
         "label": "SpacesContextProps",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpacesContextProps.feature",
             "type": "string",
             "label": "feature",
@@ -419,8 +445,12 @@
         "type": "Interface",
         "label": "ShareToSpaceFlyoutProps",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.savedObjectTarget",
             "type": "Object",
             "label": "savedObjectTarget",
@@ -443,6 +473,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.flyoutIcon",
             "type": "string",
             "label": "flyoutIcon",
@@ -459,6 +490,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.flyoutTitle",
             "type": "string",
             "label": "flyoutTitle",
@@ -475,6 +507,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.enableCreateCopyCallout",
             "type": "CompoundType",
             "label": "enableCreateCopyCallout",
@@ -491,6 +524,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.enableCreateNewSpaceLink",
             "type": "CompoundType",
             "label": "enableCreateNewSpaceLink",
@@ -507,6 +541,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.behaviorContext",
             "type": "CompoundType",
             "label": "behaviorContext",
@@ -523,6 +558,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler",
             "type": "Function",
             "label": "changeSpacesHandler",
@@ -539,6 +575,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.onUpdate",
             "type": "Function",
             "label": "onUpdate",
@@ -555,6 +592,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceFlyoutProps.onClose",
             "type": "Function",
             "label": "onClose",
@@ -583,8 +621,12 @@
         "type": "Interface",
         "label": "ShareToSpaceSavedObjectTarget",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.type",
             "type": "string",
             "label": "type",
@@ -598,6 +640,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.id",
             "type": "string",
             "label": "id",
@@ -611,6 +654,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -627,6 +671,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.icon",
             "type": "string",
             "label": "icon",
@@ -643,6 +688,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.title",
             "type": "string",
             "label": "title",
@@ -659,6 +705,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareToSpaceSavedObjectTarget.noun",
             "type": "string",
             "label": "noun",
@@ -687,8 +734,12 @@
         "type": "Interface",
         "label": "SpaceListProps",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpaceListProps.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -705,6 +756,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpaceListProps.displayLimit",
             "type": "number",
             "label": "displayLimit",
@@ -721,6 +773,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpaceListProps.behaviorContext",
             "type": "CompoundType",
             "label": "behaviorContext",
@@ -749,8 +802,12 @@
         "type": "Interface",
         "label": "LegacyUrlConflictProps",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LegacyUrlConflictProps.objectNoun",
             "type": "string",
             "label": "objectNoun",
@@ -767,6 +824,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LegacyUrlConflictProps.currentObjectId",
             "type": "string",
             "label": "currentObjectId",
@@ -780,6 +838,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.LegacyUrlConflictProps.otherObjectId",
             "type": "string",
             "label": "otherObjectId",
@@ -793,6 +852,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.LegacyUrlConflictProps.otherObjectPath",
             "type": "string",
             "label": "otherObjectPath",
@@ -818,8 +878,12 @@
         "type": "Interface",
         "label": "SpaceAvatarProps",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SpaceAvatarProps.space",
             "type": "Object",
             "label": "space",
@@ -842,6 +906,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpaceAvatarProps.size",
             "type": "CompoundType",
             "label": "size",
@@ -856,6 +921,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpaceAvatarProps.className",
             "type": "string",
             "label": "className",
@@ -870,6 +936,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SpaceAvatarProps.announceSpaceName",
             "type": "CompoundType",
             "label": "announceSpaceName",
@@ -900,6 +967,9 @@
         "id": "def-public.LazyComponentFn",
         "type": "Type",
         "label": "LazyComponentFn",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nFunction that returns a promise for a lazy-loadable component.\n"
         ],
@@ -920,6 +990,7 @@
       "type": "Interface",
       "label": "SpacesOssPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-public.SpacesOssPluginSetup.registerSpacesApi",
@@ -982,6 +1053,7 @@
       "id": "def-public.SpacesOssPluginStart",
       "type": "Type",
       "label": "SpacesOssPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/spaces_oss/public/types.ts",
@@ -1026,8 +1098,10 @@
         "type": "Interface",
         "label": "Space",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Space.id",
             "type": "string",
             "label": "id",
@@ -1039,6 +1113,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Space.name",
             "type": "string",
             "label": "name",
@@ -1050,6 +1125,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Space.description",
             "type": "string",
             "label": "description",
@@ -1064,6 +1140,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Space.color",
             "type": "string",
             "label": "color",
@@ -1078,6 +1155,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Space.initials",
             "type": "string",
             "label": "initials",
@@ -1092,6 +1170,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Space.disabledFeatures",
             "type": "Array",
             "label": "disabledFeatures",
@@ -1106,6 +1185,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Space._reserved",
             "type": "CompoundType",
             "label": "_reserved",
@@ -1120,6 +1200,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Space.imageUrl",
             "type": "string",
             "label": "imageUrl",

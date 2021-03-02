@@ -17,8 +17,10 @@
         "type": "Interface",
         "label": "ESLicense",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ESLicense.status",
             "type": "string",
             "label": "status",
@@ -30,6 +32,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.uid",
             "type": "string",
             "label": "uid",
@@ -41,6 +44,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.type",
             "type": "string",
             "label": "type",
@@ -52,6 +56,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.issue_date",
             "type": "string",
             "label": "issue_date",
@@ -63,6 +68,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.issue_date_in_millis",
             "type": "number",
             "label": "issue_date_in_millis",
@@ -74,6 +80,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.expiry_date",
             "type": "string",
             "label": "expiry_date",
@@ -85,6 +92,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.expirty_date_in_millis",
             "type": "number",
             "label": "expirty_date_in_millis",
@@ -96,6 +104,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.max_nodes",
             "type": "number",
             "label": "max_nodes",
@@ -107,6 +116,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.issued_to",
             "type": "string",
             "label": "issued_to",
@@ -118,6 +128,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.issuer",
             "type": "string",
             "label": "issuer",
@@ -129,6 +140,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ESLicense.start_date_in_millis",
             "type": "number",
             "label": "start_date_in_millis",

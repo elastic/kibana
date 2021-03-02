@@ -70,6 +70,7 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -91,8 +92,10 @@
           "Server"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.KibanaServer.route",
             "type": "Function",
             "label": "route",

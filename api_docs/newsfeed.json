@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "FetchResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FetchResult.kibanaVersion",
             "type": "string",
             "label": "kibanaVersion",
@@ -22,6 +24,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FetchResult.hasNew",
             "type": "boolean",
             "label": "hasNew",
@@ -33,6 +36,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FetchResult.feedItems",
             "type": "Array",
             "label": "feedItems",
@@ -54,6 +58,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FetchResult.error",
             "type": "CompoundType",
             "label": "error",
@@ -80,8 +85,10 @@
         "type": "Interface",
         "label": "NewsfeedItem",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.title",
             "type": "string",
             "label": "title",
@@ -93,6 +100,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.description",
             "type": "string",
             "label": "description",
@@ -104,6 +112,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.linkText",
             "type": "CompoundType",
             "label": "linkText",
@@ -118,6 +127,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.linkUrl",
             "type": "string",
             "label": "linkUrl",
@@ -129,6 +139,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.badge",
             "type": "CompoundType",
             "label": "badge",
@@ -143,6 +154,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.publishOn",
             "type": "Object",
             "label": "publishOn",
@@ -157,6 +169,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.expireOn",
             "type": "Object",
             "label": "expireOn",
@@ -171,6 +184,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NewsfeedItem.hash",
             "type": "string",
             "label": "hash",
@@ -195,6 +209,7 @@
         "id": "def-public.NewsfeedApiEndpoint",
         "type": "Enum",
         "label": "NewsfeedApiEndpoint",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
@@ -210,6 +225,7 @@
       "id": "def-public.NewsfeedPublicPluginSetup",
       "type": "Type",
       "label": "NewsfeedPublicPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",
@@ -226,6 +242,7 @@
       "id": "def-public.NewsfeedPublicPluginStart",
       "type": "Type",
       "label": "NewsfeedPublicPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",

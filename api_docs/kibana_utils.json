@@ -5,6 +5,7 @@
       {
         "id": "def-public.AbortError",
         "type": "Class",
+        "tags": [],
         "label": "AbortError",
         "description": [
           "\nClass used to signify that something was aborted. Useful for applications to conditionally handle\nthis type of error differently than other errors."
@@ -63,6 +64,7 @@
       {
         "id": "def-public.Defer",
         "type": "Class",
+        "tags": [],
         "label": "Defer",
         "description": [
           "\nAn externally resolvable/rejectable \"promise\". Use it to resolve/reject\npromise at any time.\n\n```ts\nconst future = new Defer();\n\nfuture.promise.then(value => console.log(value));\n\nfuture.resolve(123);\n```"
@@ -79,6 +81,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Defer.resolve",
             "type": "Function",
             "label": "resolve",
@@ -93,6 +96,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Defer.reject",
             "type": "Function",
             "label": "reject",
@@ -107,6 +111,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Defer.promise",
             "type": "Object",
             "label": "promise",
@@ -131,6 +136,7 @@
       {
         "id": "def-public.HashedItemStore",
         "type": "Class",
+        "tags": [],
         "label": "HashedItemStore",
         "description": [],
         "signature": [
@@ -153,6 +159,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HashedItemStore.PERSISTED_INDEX_KEY",
             "type": "string",
             "label": "PERSISTED_INDEX_KEY",
@@ -338,6 +345,7 @@
       {
         "id": "def-public.KbnError",
         "type": "Class",
+        "tags": [],
         "label": "KbnError",
         "description": [],
         "signature": [
@@ -394,6 +402,7 @@
       {
         "id": "def-public.DuplicateField",
         "type": "Class",
+        "tags": [],
         "label": "DuplicateField",
         "description": [
           "\nwhen a mapping already exists for a field the user is attempting to add"
@@ -459,6 +468,7 @@
       {
         "id": "def-public.SavedObjectNotFound",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectNotFound",
         "description": [
           "\nA saved object was not found"
@@ -482,6 +492,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectNotFound.savedObjectType",
             "type": "string",
             "label": "savedObjectType",
@@ -493,6 +504,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectNotFound.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -577,6 +589,7 @@
       {
         "id": "def-public.InvalidJSONProperty",
         "type": "Class",
+        "tags": [],
         "label": "InvalidJSONProperty",
         "description": [
           "\nThis error is for scenarios where a saved object is detected that has invalid JSON properties.\nThere was a scenario where we were importing objects with double-encoded JSON, and the system\nwas silently failing. This error is now thrown in those scenarios."
@@ -642,6 +655,7 @@
       {
         "id": "def-public.RenderCompleteListener",
         "type": "Class",
+        "tags": [],
         "label": "RenderCompleteListener",
         "description": [],
         "children": [
@@ -691,6 +705,7 @@
               "lineNumber": 16,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/render_complete/render_complete_listener.ts#L16"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -707,6 +722,7 @@
               "lineNumber": 21,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/render_complete/render_complete_listener.ts#L21"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -723,6 +739,7 @@
               "lineNumber": 27,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/render_complete/render_complete_listener.ts#L27"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -736,6 +753,7 @@
       {
         "id": "def-public.RenderCompleteDispatcher",
         "type": "Class",
+        "tags": [],
         "label": "RenderCompleteDispatcher",
         "description": [
           "\nShould call `dispatchComplete()` when UI block has finished loading its data and has\ncompletely rendered. Should `dispatchInProgress()` every time UI block\nstarts loading data again. At the start it is assumed that UI block is loading\nso it dispatches \"in progress\" automatically, so you need to call `setRenderComplete`\nat least once.\n\nThis is used for reporting to know that UI block is ready, so\nit can take a screenshot. It is also used in functional tests to know that\npage has stabilized."
@@ -899,6 +917,7 @@
       {
         "id": "def-public.ResizeChecker",
         "type": "Class",
+        "tags": [],
         "label": "ResizeChecker",
         "description": [
           "\n ResizeChecker receives an element and emits a \"resize\" event every time it changes size."
@@ -942,9 +961,11 @@
                 "id": "def-public.ResizeChecker.Unnamed.args",
                 "type": "Object",
                 "label": "args",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.ResizeChecker.Unnamed.args.disabled",
                     "type": "CompoundType",
                     "label": "disabled",
@@ -1055,6 +1076,7 @@
       {
         "id": "def-public.Storage",
         "type": "Class",
+        "tags": [],
         "label": "Storage",
         "description": [],
         "signature": [
@@ -1077,6 +1099,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Storage.store",
             "type": "Object",
             "label": "store",
@@ -1165,6 +1188,7 @@
               "lineNumber": 18,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/storage/storage.ts#L18"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1210,6 +1234,7 @@
               "lineNumber": 35,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/storage/storage.ts#L35"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1241,6 +1266,7 @@
               "lineNumber": 43,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/storage/storage.ts#L43"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1257,6 +1283,7 @@
               "lineNumber": 47,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/storage/storage.ts#L47"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -1307,6 +1334,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.calculateObjectHash",
         "type": "Function",
         "label": "calculateObjectHash",
@@ -1343,6 +1371,7 @@
           "lineNumber": 30,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/defer.ts#L30"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1506,6 +1535,7 @@
           "lineNumber": 18,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/of.ts#L18"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1554,6 +1584,7 @@
           "lineNumber": 12,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/create_getter_setter.ts#L12"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1704,6 +1735,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.hashQuery",
         "type": "Function",
         "label": "hashQuery",
@@ -1719,6 +1751,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.hashUrl",
         "type": "Function",
         "label": "hashUrl",
@@ -1734,6 +1767,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.unhashUrl",
         "type": "Function",
         "label": "unhashUrl",
@@ -1749,6 +1783,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.unhashQuery",
         "type": "Function",
         "label": "unhashQuery",
@@ -1849,9 +1884,11 @@
             "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
             "type": "Object",
             "label": "{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.baseUrl",
                 "type": "string",
                 "label": "baseUrl",
@@ -1865,6 +1902,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.defaultSubUrl",
                 "type": "string",
                 "label": "defaultSubUrl",
@@ -1878,6 +1916,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.stateParams",
                 "type": "Array",
                 "label": "stateParams",
@@ -1896,6 +1935,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storageKey",
                 "type": "string",
                 "label": "storageKey",
@@ -1909,6 +1949,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.navLinkUpdater$",
                 "type": "Object",
                 "label": "navLinkUpdater$",
@@ -1934,6 +1975,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
@@ -1958,6 +2000,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.history",
                 "type": "Object",
                 "label": "history",
@@ -1975,6 +2018,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.getHistory",
                 "type": "Function",
                 "label": "getHistory",
@@ -1993,6 +2037,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storage",
                 "type": "Object",
                 "label": "storage",
@@ -2009,6 +2054,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.shouldTrackUrlUpdate",
                 "type": "Function",
                 "label": "shouldTrackUrlUpdate",
@@ -2025,6 +2071,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.onBeforeNavLinkSaved",
                 "type": "Function",
                 "label": "onBeforeNavLinkSaved",
@@ -2090,6 +2137,7 @@
           "lineNumber": 163,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts#L163"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2136,9 +2184,11 @@
             "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
@@ -2209,9 +2259,11 @@
             "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
@@ -2282,9 +2334,11 @@
             "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }",
             "type": "Object",
             "label": "{ useHash = false, storeInHashQuery = true }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.useHash",
                 "type": "boolean",
                 "label": "useHash",
@@ -2296,6 +2350,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.storeInHashQuery",
                 "type": "CompoundType",
                 "label": "storeInHashQuery",
@@ -2387,6 +2442,9 @@
           "lineNumber": 38,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/state_management/url/errors.ts#L38"
         },
+        "tags": [
+          "example"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2658,9 +2716,11 @@
             "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "type": "Object",
             "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.useHash",
                 "type": "boolean",
                 "label": "useHash",
@@ -2672,6 +2732,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.history",
                 "type": "Object",
                 "label": "history",
@@ -2687,6 +2748,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onGetError",
                 "type": "Function",
                 "label": "onGetError",
@@ -2701,6 +2763,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onSetError",
                 "type": "Function",
                 "label": "onSetError",
@@ -2743,6 +2806,9 @@
           "lineNumber": 58,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts#L58"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- {@link IKbnUrlStateStorage}"
         ],
@@ -2786,6 +2852,9 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts#L28"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- {@link ISessionStorageStateStorage}"
         ],
@@ -2903,9 +2972,11 @@
             "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
             "type": "Object",
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.history",
                 "type": "Object",
                 "label": "history",
@@ -2921,6 +2992,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.navigateToApp",
                 "type": "Function",
                 "label": "navigateToApp",
@@ -2943,6 +3015,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.basePath",
                 "type": "Object",
                 "label": "basePath",
@@ -2963,6 +3036,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.mapping",
                 "type": "CompoundType",
                 "label": "mapping",
@@ -2979,6 +3053,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
@@ -3003,6 +3078,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.onBeforeRedirect",
                 "type": "Function",
                 "label": "onBeforeRedirect",
@@ -3339,6 +3415,7 @@
           "lineNumber": 65,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/public/core/create_start_service_getter.ts#L65"
         },
+        "tags": [],
         "returnComment": [
           "Returns a function which synchronously returns *start* core services\nand plugin contracts. If you call this function before the *start* life-cycle\nhas started it will throw."
         ],
@@ -3688,6 +3765,9 @@
           "lineNumber": 69,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L69"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3789,6 +3869,9 @@
           "lineNumber": 39,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L39"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- result of a selector(state)"
         ],
@@ -3841,6 +3924,9 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L23"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- latest {@link StateContainer} state"
         ],
@@ -3871,6 +3957,7 @@
           "[]"
         ],
         "description": [],
+        "tags": [],
         "children": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -3884,11 +3971,13 @@
         "type": "Interface",
         "label": "JsonObject",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.JsonObject.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -3924,6 +4013,7 @@
         "description": [
           "\nInstance of an UiComponent, corresponds to React virtual DOM node."
         ],
+        "tags": [],
         "children": [
           {
             "id": "def-public.UiComponentInstance.render",
@@ -4021,8 +4111,14 @@
         "description": [
           "\nConfig for setting up state syncing with {@link stateSync}"
         ],
+        "tags": [
+          "typeParam",
+          "typeParam",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IStateSyncConfig.storageKey",
             "type": "string",
             "label": "storageKey",
@@ -4036,6 +4132,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IStateSyncConfig.stateContainer",
             "type": "Object",
             "label": "stateContainer",
@@ -4059,6 +4156,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStateSyncConfig.stateStorage",
             "type": "Uncategorized",
             "label": "stateStorage",
@@ -4097,8 +4195,12 @@
           "<StateStorage>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ISyncStateRef.stop",
             "type": "Function",
             "label": "stop",
@@ -4121,6 +4223,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISyncStateRef.start",
             "type": "Function",
             "label": "start",
@@ -4168,8 +4271,12 @@
         "description": [
           "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IKbnUrlStateStorage.set",
             "type": "Function",
             "label": "set",
@@ -4184,6 +4291,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IKbnUrlStateStorage.get",
             "type": "Function",
             "label": "get",
@@ -4198,6 +4306,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IKbnUrlStateStorage.change$",
             "type": "Function",
             "label": "change$",
@@ -4214,6 +4323,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IKbnUrlStateStorage.cancel",
             "type": "Function",
             "label": "cancel",
@@ -4230,6 +4340,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IKbnUrlStateStorage.kbnUrlControls",
             "type": "Object",
             "label": "kbnUrlControls",
@@ -4284,8 +4395,13 @@
         "description": [
           "\nExtension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state"
         ],
+        "tags": [
+          "remarks",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.INullableBaseStateContainer.set",
             "type": "Function",
             "label": "set",
@@ -4325,8 +4441,12 @@
         "description": [
           "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ISessionStorageStateStorage.set",
             "type": "Function",
             "label": "set",
@@ -4341,6 +4461,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISessionStorageStateStorage.get",
             "type": "Function",
             "label": "get",
@@ -4379,8 +4500,10 @@
         "description": [
           "\nRepresents something that can be configured by user using UI."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Configurable.createConfig",
             "type": "Function",
             "label": "createConfig",
@@ -4397,6 +4520,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Configurable.isConfigValid",
             "type": "Function",
             "label": "isConfigValid",
@@ -4413,6 +4537,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Configurable.CollectConfig",
             "type": "Function",
             "label": "CollectConfig",
@@ -4468,8 +4593,10 @@
         "description": [
           "\nProps provided to `CollectConfig` component on every re-render."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.CollectConfigProps.config",
             "type": "Uncategorized",
             "label": "config",
@@ -4486,6 +4613,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CollectConfigProps.onConfig",
             "type": "Function",
             "label": "onConfig",
@@ -4502,6 +4630,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CollectConfigProps.context",
             "type": "Uncategorized",
             "label": "context",
@@ -4540,8 +4669,10 @@
           "<Plugins, OwnContract, Core>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.StartServices.plugins",
             "type": "Uncategorized",
             "label": "plugins",
@@ -4556,6 +4687,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.StartServices.self",
             "type": "Uncategorized",
             "label": "self",
@@ -4570,6 +4702,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.StartServices.core",
             "type": "Uncategorized",
             "label": "core",
@@ -4606,8 +4739,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaServerError.statusCode",
             "type": "number",
             "label": "statusCode",
@@ -4619,6 +4754,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaServerError.message",
             "type": "string",
             "label": "message",
@@ -4630,6 +4766,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaServerError.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -4668,8 +4805,15 @@
         "description": [
           "\nBase state container shape without transitions or selectors"
         ],
+        "tags": [
+          "typeParam",
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-public.BaseStateContainer.get",
             "type": "Function",
             "label": "get",
@@ -4686,6 +4830,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.BaseStateContainer.set",
             "type": "Function",
             "label": "set",
@@ -4702,6 +4847,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.BaseStateContainer.state$",
             "type": "Object",
             "label": "state$",
@@ -4723,58 +4869,6 @@
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
           "lineNumber": 56,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L56"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TransitionDescription",
-        "type": "Interface",
-        "label": "TransitionDescription",
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
-          "<Type, Args>"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.TransitionDescription.type",
-            "type": "Uncategorized",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L23"
-            },
-            "signature": [
-              "Type"
-            ]
-          },
-          {
-            "id": "def-public.TransitionDescription.args",
-            "type": "Uncategorized",
-            "label": "args",
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L24"
-            },
-            "signature": [
-              "Args"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L22"
         },
         "initialIsOpen": false
       },
@@ -4803,8 +4897,15 @@
         "description": [
           "\nFully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}."
         ],
+        "tags": [
+          "typeParam",
+          "typeParam",
+          "typeParam",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.StateContainer.transitions",
             "type": "Object",
             "label": "transitions",
@@ -4827,6 +4928,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.StateContainer.selectors",
             "type": "Object",
             "label": "selectors",
@@ -4881,8 +4983,12 @@
         "description": [
           "\nFully featured state container which matches Redux store interface. Extends {@link StateContainer}.\nAllows to use state container with redux libraries."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.getState",
             "type": "Function",
             "label": "getState",
@@ -4897,6 +5003,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.reducer",
             "type": "Function",
             "label": "reducer",
@@ -4918,6 +5025,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.replaceReducer",
             "type": "Function",
             "label": "replaceReducer",
@@ -4940,6 +5048,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.dispatch",
             "type": "Function",
             "label": "dispatch",
@@ -4962,6 +5071,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.addMiddleware",
             "type": "Function",
             "label": "addMiddleware",
@@ -4984,6 +5094,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReduxLikeStateContainer.subscribe",
             "type": "Function",
             "label": "subscribe",
@@ -5012,8 +5123,14 @@
         "description": [
           "\nState container options"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.CreateStateContainerOptions.freeze",
             "type": "Function",
             "label": "freeze",
@@ -5052,8 +5169,10 @@
           "<T, S>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IStorage.getItem",
             "type": "Function",
             "label": "getItem",
@@ -5068,6 +5187,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorage.setItem",
             "type": "Function",
             "label": "setItem",
@@ -5082,6 +5202,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorage.removeItem",
             "type": "Function",
             "label": "removeItem",
@@ -5096,6 +5217,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorage.clear",
             "type": "Function",
             "label": "clear",
@@ -5132,8 +5254,10 @@
           "<T, S>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IStorageWrapper.get",
             "type": "Function",
             "label": "get",
@@ -5148,6 +5272,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorageWrapper.set",
             "type": "Function",
             "label": "set",
@@ -5162,6 +5287,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorageWrapper.remove",
             "type": "Function",
             "label": "remove",
@@ -5176,6 +5302,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IStorageWrapper.clear",
             "type": "Function",
             "label": "clear",
@@ -5204,6 +5331,7 @@
         "id": "def-public.Get",
         "type": "Type",
         "label": "Get",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -5219,6 +5347,7 @@
         "id": "def-public.JsonValue",
         "type": "Type",
         "label": "JsonValue",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -5249,6 +5378,7 @@
         "id": "def-public.Set",
         "type": "Type",
         "label": "Set",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -5264,6 +5394,7 @@
         "id": "def-public.UiComponent",
         "type": "Type",
         "label": "UiComponent",
+        "tags": [],
         "description": [
           "\nIn many places in Kibana we want to be agnostic to frontend view library,\ni.e. instead of exposing React-specific APIs we want to expose APIs that\nare orthogonal to any rendering library. This interface represents such UI\ncomponents. UI component receives a DOM element and `props` through `render()`\nmethod, the `render()` method can be called many times.\n\nAlthough Kibana aims to be library agnostic, Kibana itself is written in React,\nthus here we define `UiComponent` which is an abstract unit of UI that can be\nimplemented in any framework, but it maps easily to React components, i.e.\n`UiComponent<Props>` is like `React.ComponentType<Props>`."
         ],
@@ -5289,6 +5420,9 @@
         "id": "def-public.StartSyncStateFnType",
         "type": "Type",
         "label": "StartSyncStateFnType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -5304,6 +5438,9 @@
         "id": "def-public.StopSyncStateFnType",
         "type": "Type",
         "label": "StopSyncStateFnType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -5319,6 +5456,7 @@
         "id": "def-public.StartServicesGetter",
         "type": "Type",
         "label": "StartServicesGetter",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
@@ -5350,6 +5488,9 @@
         "id": "def-public.BaseState",
         "type": "Type",
         "label": "BaseState",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nBase {@link StateContainer} state shape"
         ],
@@ -5367,6 +5508,9 @@
         "id": "def-public.Dispatch",
         "type": "Type",
         "label": "Dispatch",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like dispatch"
         ],
@@ -5384,6 +5528,9 @@
         "id": "def-public.Middleware",
         "type": "Type",
         "label": "Middleware",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like Middleware"
         ],
@@ -5402,13 +5549,7 @@
             "text": "ReduxLikeStateContainer"
           },
           "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>) => any) => ",
           {
             "pluginId": "kibanaUtils",
@@ -5418,13 +5559,7 @@
             "text": "Dispatch"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>>"
         ],
         "initialIsOpen": false
@@ -5433,6 +5568,9 @@
         "id": "def-public.Selector",
         "type": "Type",
         "label": "Selector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5448,6 +5586,9 @@
         "id": "def-public.Comparator",
         "type": "Type",
         "label": "Comparator",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nUsed to compare state, see {@link useContainerSelector}."
         ],
@@ -5465,6 +5606,9 @@
         "id": "def-public.MapStateToProps",
         "type": "Type",
         "label": "MapStateToProps",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nState container state to component props mapper.\nSee {@link Connect}"
         ],
@@ -5482,6 +5626,9 @@
         "id": "def-public.Connect",
         "type": "Type",
         "label": "Connect",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSimilar to `connect` from react-redux,\nallows to map state from state container to component's props."
         ],
@@ -5507,6 +5654,9 @@
         "id": "def-public.Reducer",
         "type": "Type",
         "label": "Reducer",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like Reducer"
         ],
@@ -5517,13 +5667,7 @@
         },
         "signature": [
           "(state: State, action: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>) => State"
         ],
         "initialIsOpen": false
@@ -5532,6 +5676,9 @@
         "id": "def-public.UnboxState",
         "type": "Type",
         "label": "UnboxState",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nUtility type for inferring state shape from {@link StateContainer}"
         ],
@@ -5549,6 +5696,9 @@
         "id": "def-public.PureSelectorToSelector",
         "type": "Type",
         "label": "PureSelectorToSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5564,6 +5714,9 @@
         "id": "def-public.PureSelectorsToSelectors",
         "type": "Type",
         "label": "PureSelectorsToSelectors",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5579,6 +5732,9 @@
         "id": "def-public.EnsurePureSelector",
         "type": "Type",
         "label": "EnsurePureSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5599,39 +5755,12 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-public.PureTransitionsToTransitions",
-        "type": "Type",
-        "label": "PureTransitionsToTransitions",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L47"
-        },
-        "signature": [
-          "{ [K in keyof T]: ReturnType<Ensure<T[K], PureTransition<any, any>>>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PureTransitionToTransition",
-        "type": "Type",
-        "label": "PureTransitionToTransition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L43"
-        },
-        "signature": [
-          "(args: any) => any"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.EnsurePureTransition",
         "type": "Type",
         "label": "EnsurePureTransition",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5640,13 +5769,7 @@
         },
         "signature": [
           "(state: any) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Transition",
-            "text": "Transition"
-          },
+          "Transition",
           "<any, any>"
         ],
         "initialIsOpen": false
@@ -5655,6 +5778,9 @@
         "id": "def-public.PureSelector",
         "type": "Type",
         "label": "PureSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -5673,52 +5799,16 @@
           "<Result, Args>"
         ],
         "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PureTransition",
-        "type": "Type",
-        "label": "PureTransition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L33"
-        },
-        "signature": [
-          "(state: State) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Transition",
-            "text": "Transition"
-          },
-          "<State, Args>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Transition",
-        "type": "Type",
-        "label": "Transition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L29"
-        },
-        "signature": [
-          "(args: Args) => State"
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [
       {
         "id": "def-public.url",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.url.encodeQuery",
             "type": "Function",
             "label": "encodeQuery",
@@ -5737,6 +5827,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.url.encodeUriQuery",
             "type": "Function",
             "label": "encodeUriQuery",
@@ -5758,6 +5849,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.url.addQueryParam",
             "type": "Function",
             "label": "addQueryParam",
@@ -5782,6 +5874,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.hashedItemStore",
         "type": "Object",
         "label": "hashedItemStore",
@@ -5809,6 +5902,7 @@
       {
         "id": "def-server.AbortError",
         "type": "Class",
+        "tags": [],
         "label": "AbortError",
         "description": [
           "\nClass used to signify that something was aborted. Useful for applications to conditionally handle\nthis type of error differently than other errors."
@@ -5867,6 +5961,7 @@
       {
         "id": "def-server.KbnServerError",
         "type": "Class",
+        "tags": [],
         "label": "KbnServerError",
         "description": [],
         "signature": [
@@ -5888,6 +5983,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.KbnServerError.errBody",
             "type": "Object",
             "label": "errBody",
@@ -6053,6 +6149,7 @@
           "lineNumber": 12,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/create_getter_setter.ts#L12"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -6350,6 +6447,7 @@
         "id": "def-server.Get",
         "type": "Type",
         "label": "Get",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -6365,6 +6463,7 @@
         "id": "def-server.Set",
         "type": "Type",
         "label": "Set",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -6381,8 +6480,10 @@
       {
         "id": "def-server.url",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.url.encodeQuery",
             "type": "Function",
             "label": "encodeQuery",
@@ -6401,6 +6502,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.url.encodeUriQuery",
             "type": "Function",
             "label": "encodeUriQuery",
@@ -6422,6 +6524,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.url.addQueryParam",
             "type": "Function",
             "label": "addQueryParam",
@@ -6452,6 +6555,7 @@
       {
         "id": "def-common.AbortError",
         "type": "Class",
+        "tags": [],
         "label": "AbortError",
         "description": [
           "\nClass used to signify that something was aborted. Useful for applications to conditionally handle\nthis type of error differently than other errors."
@@ -6510,6 +6614,7 @@
       {
         "id": "def-common.Defer",
         "type": "Class",
+        "tags": [],
         "label": "Defer",
         "description": [
           "\nAn externally resolvable/rejectable \"promise\". Use it to resolve/reject\npromise at any time.\n\n```ts\nconst future = new Defer();\n\nfuture.promise.then(value => console.log(value));\n\nfuture.resolve(123);\n```"
@@ -6526,6 +6631,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Defer.resolve",
             "type": "Function",
             "label": "resolve",
@@ -6540,6 +6646,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Defer.reject",
             "type": "Function",
             "label": "reject",
@@ -6554,6 +6661,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Defer.promise",
             "type": "Object",
             "label": "promise",
@@ -6578,6 +6686,7 @@
       {
         "id": "def-common.KbnError",
         "type": "Class",
+        "tags": [],
         "label": "KbnError",
         "description": [],
         "signature": [
@@ -6634,6 +6743,7 @@
       {
         "id": "def-common.DuplicateField",
         "type": "Class",
+        "tags": [],
         "label": "DuplicateField",
         "description": [
           "\nwhen a mapping already exists for a field the user is attempting to add"
@@ -6699,6 +6809,7 @@
       {
         "id": "def-common.SavedObjectNotFound",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectNotFound",
         "description": [
           "\nA saved object was not found"
@@ -6722,6 +6833,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectNotFound.savedObjectType",
             "type": "string",
             "label": "savedObjectType",
@@ -6733,6 +6845,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectNotFound.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -6817,6 +6930,7 @@
       {
         "id": "def-common.InvalidJSONProperty",
         "type": "Class",
+        "tags": [],
         "label": "InvalidJSONProperty",
         "description": [
           "\nThis error is for scenarios where a saved object is detected that has invalid JSON properties.\nThere was a scenario where we were importing objects with double-encoded JSON, and the system\nwas silently failing. This error is now thrown in those scenarios."
@@ -6998,6 +7112,7 @@
           "lineNumber": 12,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/create_getter_setter.ts#L12"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -7051,6 +7166,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.now",
         "type": "Function",
         "label": "now",
@@ -7068,6 +7184,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.calculateObjectHash",
         "type": "Function",
         "label": "calculateObjectHash",
@@ -7104,6 +7221,7 @@
           "lineNumber": 30,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/defer.ts#L30"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -7202,6 +7320,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.makeRegEx",
         "type": "Function",
         "label": "makeRegEx",
@@ -7247,6 +7366,7 @@
           "lineNumber": 18,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/of.ts#L18"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -7528,6 +7648,9 @@
           "lineNumber": 69,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L69"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -7629,6 +7752,9 @@
           "lineNumber": 39,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L39"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- result of a selector(state)"
         ],
@@ -7681,6 +7807,9 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts#L23"
         },
+        "tags": [
+          "public"
+        ],
         "returnComment": [
           "- latest {@link StateContainer} state"
         ],
@@ -7705,6 +7834,7 @@
         "description": [
           "\nInstance of an UiComponent, corresponds to React virtual DOM node."
         ],
+        "tags": [],
         "children": [
           {
             "id": "def-common.UiComponentInstance.render",
@@ -7802,8 +7932,15 @@
         "description": [
           "\nBase state container shape without transitions or selectors"
         ],
+        "tags": [
+          "typeParam",
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-common.BaseStateContainer.get",
             "type": "Function",
             "label": "get",
@@ -7820,6 +7957,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BaseStateContainer.set",
             "type": "Function",
             "label": "set",
@@ -7836,6 +7974,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BaseStateContainer.state$",
             "type": "Object",
             "label": "state$",
@@ -7857,58 +7996,6 @@
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
           "lineNumber": 56,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L56"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.TransitionDescription",
-        "type": "Interface",
-        "label": "TransitionDescription",
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
-          "<Type, Args>"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-common.TransitionDescription.type",
-            "type": "Uncategorized",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L23"
-            },
-            "signature": [
-              "Type"
-            ]
-          },
-          {
-            "id": "def-common.TransitionDescription.args",
-            "type": "Uncategorized",
-            "label": "args",
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L24"
-            },
-            "signature": [
-              "Args"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L22"
         },
         "initialIsOpen": false
       },
@@ -7937,8 +8024,15 @@
         "description": [
           "\nFully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}."
         ],
+        "tags": [
+          "typeParam",
+          "typeParam",
+          "typeParam",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.StateContainer.transitions",
             "type": "Object",
             "label": "transitions",
@@ -7961,6 +8055,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.StateContainer.selectors",
             "type": "Object",
             "label": "selectors",
@@ -8015,8 +8110,12 @@
         "description": [
           "\nFully featured state container which matches Redux store interface. Extends {@link StateContainer}.\nAllows to use state container with redux libraries."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.getState",
             "type": "Function",
             "label": "getState",
@@ -8031,6 +8130,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.reducer",
             "type": "Function",
             "label": "reducer",
@@ -8052,6 +8152,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.replaceReducer",
             "type": "Function",
             "label": "replaceReducer",
@@ -8074,6 +8175,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.dispatch",
             "type": "Function",
             "label": "dispatch",
@@ -8096,6 +8198,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.addMiddleware",
             "type": "Function",
             "label": "addMiddleware",
@@ -8118,6 +8221,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ReduxLikeStateContainer.subscribe",
             "type": "Function",
             "label": "subscribe",
@@ -8146,8 +8250,14 @@
         "description": [
           "\nState container options"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.CreateStateContainerOptions.freeze",
             "type": "Function",
             "label": "freeze",
@@ -8176,11 +8286,13 @@
         "type": "Interface",
         "label": "JsonObject",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.JsonObject.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -8222,6 +8334,7 @@
           "[]"
         ],
         "description": [],
+        "tags": [],
         "children": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -8245,8 +8358,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.KibanaServerError.statusCode",
             "type": "number",
             "label": "statusCode",
@@ -8258,6 +8373,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.KibanaServerError.message",
             "type": "string",
             "label": "message",
@@ -8269,6 +8385,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.KibanaServerError.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -8305,8 +8422,10 @@
           "<P>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PersistableStateService.telemetry",
             "type": "Function",
             "label": "telemetry",
@@ -8323,6 +8442,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableStateService.inject",
             "type": "Function",
             "label": "inject",
@@ -8347,6 +8467,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableStateService.extract",
             "type": "Function",
             "label": "extract",
@@ -8371,6 +8492,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableStateService.migrateToLatest",
             "type": "Function",
             "label": "migrateToLatest",
@@ -8395,6 +8517,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableStateService.migrate",
             "type": "Function",
             "label": "migrate",
@@ -8448,8 +8571,10 @@
           "<P>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PersistableState.telemetry",
             "type": "Function",
             "label": "telemetry",
@@ -8466,6 +8591,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableState.inject",
             "type": "Function",
             "label": "inject",
@@ -8490,6 +8616,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableState.extract",
             "type": "Function",
             "label": "extract",
@@ -8514,6 +8641,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PersistableState.migrations",
             "type": "Object",
             "label": "migrations",
@@ -8550,6 +8678,7 @@
         "id": "def-common.Get",
         "type": "Type",
         "label": "Get",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -8565,6 +8694,7 @@
         "id": "def-common.Set",
         "type": "Type",
         "label": "Set",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
@@ -8580,6 +8710,7 @@
         "id": "def-common.UiComponent",
         "type": "Type",
         "label": "UiComponent",
+        "tags": [],
         "description": [
           "\nIn many places in Kibana we want to be agnostic to frontend view library,\ni.e. instead of exposing React-specific APIs we want to expose APIs that\nare orthogonal to any rendering library. This interface represents such UI\ncomponents. UI component receives a DOM element and `props` through `render()`\nmethod, the `render()` method can be called many times.\n\nAlthough Kibana aims to be library agnostic, Kibana itself is written in React,\nthus here we define `UiComponent` which is an abstract unit of UI that can be\nimplemented in any framework, but it maps easily to React components, i.e.\n`UiComponent<Props>` is like `React.ComponentType<Props>`."
         ],
@@ -8605,6 +8736,9 @@
         "id": "def-common.BaseState",
         "type": "Type",
         "label": "BaseState",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nBase {@link StateContainer} state shape"
         ],
@@ -8622,6 +8756,9 @@
         "id": "def-common.Dispatch",
         "type": "Type",
         "label": "Dispatch",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like dispatch"
         ],
@@ -8639,6 +8776,9 @@
         "id": "def-common.Middleware",
         "type": "Type",
         "label": "Middleware",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like Middleware"
         ],
@@ -8657,13 +8797,7 @@
             "text": "ReduxLikeStateContainer"
           },
           "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>) => any) => ",
           {
             "pluginId": "kibanaUtils",
@@ -8673,13 +8807,7 @@
             "text": "Dispatch"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>>"
         ],
         "initialIsOpen": false
@@ -8688,6 +8816,9 @@
         "id": "def-common.Selector",
         "type": "Type",
         "label": "Selector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8703,6 +8834,9 @@
         "id": "def-common.Comparator",
         "type": "Type",
         "label": "Comparator",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nUsed to compare state, see {@link useContainerSelector}."
         ],
@@ -8720,6 +8854,9 @@
         "id": "def-common.MapStateToProps",
         "type": "Type",
         "label": "MapStateToProps",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nState container state to component props mapper.\nSee {@link Connect}"
         ],
@@ -8737,6 +8874,9 @@
         "id": "def-common.Connect",
         "type": "Type",
         "label": "Connect",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSimilar to `connect` from react-redux,\nallows to map state from state container to component's props."
         ],
@@ -8762,6 +8902,9 @@
         "id": "def-common.Reducer",
         "type": "Type",
         "label": "Reducer",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRedux like Reducer"
         ],
@@ -8772,13 +8915,7 @@
         },
         "signature": [
           "(state: State, action: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.TransitionDescription",
-            "text": "TransitionDescription"
-          },
+          "TransitionDescription",
           "<string, any[]>) => State"
         ],
         "initialIsOpen": false
@@ -8787,6 +8924,9 @@
         "id": "def-common.UnboxState",
         "type": "Type",
         "label": "UnboxState",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nUtility type for inferring state shape from {@link StateContainer}"
         ],
@@ -8804,6 +8944,9 @@
         "id": "def-common.PureSelectorToSelector",
         "type": "Type",
         "label": "PureSelectorToSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8819,6 +8962,9 @@
         "id": "def-common.PureSelectorsToSelectors",
         "type": "Type",
         "label": "PureSelectorsToSelectors",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8834,6 +8980,9 @@
         "id": "def-common.EnsurePureSelector",
         "type": "Type",
         "label": "EnsurePureSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8854,39 +9003,12 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.PureTransitionsToTransitions",
-        "type": "Type",
-        "label": "PureTransitionsToTransitions",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L47"
-        },
-        "signature": [
-          "{ [K in keyof T]: ReturnType<Ensure<T[K], PureTransition<any, any>>>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.PureTransitionToTransition",
-        "type": "Type",
-        "label": "PureTransitionToTransition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L43"
-        },
-        "signature": [
-          "(args: any) => any"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.EnsurePureTransition",
         "type": "Type",
         "label": "EnsurePureTransition",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8895,13 +9017,7 @@
         },
         "signature": [
           "(state: any) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Transition",
-            "text": "Transition"
-          },
+          "Transition",
           "<any, any>"
         ],
         "initialIsOpen": false
@@ -8910,6 +9026,9 @@
         "id": "def-common.PureSelector",
         "type": "Type",
         "label": "PureSelector",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -8930,47 +9049,10 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.PureTransition",
-        "type": "Type",
-        "label": "PureTransition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L33"
-        },
-        "signature": [
-          "(state: State) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Transition",
-            "text": "Transition"
-          },
-          "<State, Args>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Transition",
-        "type": "Type",
-        "label": "Transition",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_utils/common/state_containers/types.ts#L29"
-        },
-        "signature": [
-          "(args: Args) => State"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.JsonValue",
         "type": "Type",
         "label": "JsonValue",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/typed_json.ts",
@@ -9001,6 +9083,7 @@
         "id": "def-common.SerializableValue",
         "type": "Type",
         "label": "SerializableValue",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9023,6 +9106,7 @@
         "id": "def-common.Serializable",
         "type": "Type",
         "label": "Serializable",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9054,6 +9138,7 @@
         "id": "def-common.SerializableState",
         "type": "Type",
         "label": "SerializableState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9069,6 +9154,7 @@
         "id": "def-common.MigrateFunction",
         "type": "Type",
         "label": "MigrateFunction",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9084,6 +9170,7 @@
         "id": "def-common.MigrateFunctionsObject",
         "type": "Type",
         "label": "MigrateFunctionsObject",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9099,6 +9186,7 @@
         "id": "def-common.PersistableStateDefinition",
         "type": "Type",
         "label": "PersistableStateDefinition",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
@@ -9115,8 +9203,10 @@
       {
         "id": "def-common.url",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.url.encodeQuery",
             "type": "Function",
             "label": "encodeQuery",
@@ -9135,6 +9225,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.url.encodeUriQuery",
             "type": "Function",
             "label": "encodeUriQuery",
@@ -9156,6 +9247,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.url.addQueryParam",
             "type": "Function",
             "label": "addQueryParam",

@@ -46,6 +46,7 @@
           "lineNumber": 78,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -92,6 +93,7 @@
           "lineNumber": 22,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -102,8 +104,10 @@
         "type": "Interface",
         "label": "Props",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Props.onSave",
             "type": "Function",
             "label": "onSave",
@@ -128,6 +132,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Props.onCancel",
             "type": "Function",
             "label": "onCancel",
@@ -144,6 +149,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Props.docLinks",
             "type": "Object",
             "label": "docLinks",
@@ -166,6 +172,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Props.defaultValue",
             "type": "Object",
             "label": "defaultValue",
@@ -189,6 +196,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Props.ctx",
             "type": "Object",
             "label": "ctx",
@@ -217,8 +225,10 @@
         "type": "Interface",
         "label": "FormState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FormState.isValid",
             "type": "CompoundType",
             "label": "isValid",
@@ -233,6 +243,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FormState.isSubmitted",
             "type": "boolean",
             "label": "isSubmitted",
@@ -244,6 +255,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FormState.submit",
             "type": "Function",
             "label": "submit",
@@ -278,8 +290,10 @@
         "type": "Interface",
         "label": "RuntimeField",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RuntimeField.name",
             "type": "string",
             "label": "name",
@@ -291,6 +305,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.RuntimeField.type",
             "type": "CompoundType",
             "label": "type",
@@ -305,6 +320,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RuntimeField.script",
             "type": "Object",
             "label": "script",
@@ -330,6 +346,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.RUNTIME_FIELD_OPTIONS",
         "type": "Array",
         "label": "RUNTIME_FIELD_OPTIONS",
@@ -349,6 +366,7 @@
         "id": "def-public.RuntimeType",
         "type": "Type",
         "label": "RuntimeType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
@@ -367,6 +385,7 @@
       "type": "Interface",
       "label": "PluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-public.PluginSetup.loadEditor",

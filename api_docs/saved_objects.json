@@ -5,6 +5,7 @@
       {
         "id": "def-public.SavedObjectSaveModal",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectSaveModal",
         "description": [],
         "signature": [
@@ -29,8 +30,10 @@
           {
             "id": "def-public.SavedObjectSaveModal.state",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.title",
                 "type": "string",
                 "label": "title",
@@ -42,6 +45,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.copyOnSave",
                 "type": "boolean",
                 "label": "copyOnSave",
@@ -53,6 +57,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.isTitleDuplicateConfirmed",
                 "type": "boolean",
                 "label": "isTitleDuplicateConfirmed",
@@ -64,6 +69,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.hasTitleDuplicate",
                 "type": "boolean",
                 "label": "hasTitleDuplicate",
@@ -75,6 +81,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.isLoading",
                 "type": "boolean",
                 "label": "isLoading",
@@ -86,6 +93,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectSaveModal.state.visualizationDescription",
                 "type": "string",
                 "label": "visualizationDescription",
@@ -133,6 +141,7 @@
       {
         "id": "def-public.SavedObjectFinderUi",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectFinderUi",
         "description": [],
         "signature": [
@@ -151,8 +160,10 @@
           {
             "id": "def-public.SavedObjectFinderUi.propTypes",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.onChoose",
                 "type": "Function",
                 "label": "onChoose",
@@ -168,6 +179,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage",
                 "type": "Function",
                 "label": "noItemsMessage",
@@ -185,6 +197,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData",
                 "type": "Function",
                 "label": "savedObjectMetaData",
@@ -200,6 +213,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize",
                 "type": "Function",
                 "label": "initialPageSize",
@@ -215,6 +229,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize",
                 "type": "Function",
                 "label": "fixedPageSize",
@@ -230,6 +245,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.SavedObjectFinderUi.propTypes.showFilter",
                 "type": "Function",
                 "label": "showFilter",
@@ -353,12 +369,14 @@
       {
         "id": "def-public.SavedObjectLoader",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectLoader",
         "description": [
           "\nThe SavedObjectLoader class provides some convenience functions\nto load and save one kind of saved objects (specified in the constructor).\n\nIt is based on the SavedObjectClient which implements loading and saving\nin an abstract, type-agnostic way. If possible, use SavedObjectClient directly\nto avoid pulling in extra functionality which isn't used."
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoader.type",
             "type": "string",
             "label": "type",
@@ -370,6 +388,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoader.lowercaseType",
             "type": "string",
             "label": "lowercaseType",
@@ -381,6 +400,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoader.loaderProperties",
             "type": "Object",
             "label": "loaderProperties",
@@ -648,9 +668,11 @@
                 "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }",
                 "type": "Object",
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.attributes",
                     "type": "Object",
                     "label": "attributes",
@@ -665,6 +687,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.id",
                     "type": "string",
                     "label": "id",
@@ -676,6 +699,7 @@
                     }
                   },
                   {
+                    "tags": [],
                     "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.references",
                     "type": "Array",
                     "label": "references",
@@ -966,6 +990,7 @@
           "lineNumber": 526,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects/public/finder/saved_object_finder.tsx#L526"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1142,6 +1167,7 @@
             "id": "def-public.saveWithConfirmation.savedObject",
             "type": "Object",
             "label": "savedObject",
+            "tags": [],
             "description": [],
             "children": [
               {
@@ -1162,6 +1188,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.saveWithConfirmation.savedObject.title",
                 "type": "string",
                 "label": "title",
@@ -1173,6 +1200,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.saveWithConfirmation.savedObject.displayName",
                 "type": "string",
                 "label": "displayName",
@@ -1216,9 +1244,11 @@
             "id": "def-public.saveWithConfirmation.services",
             "type": "Object",
             "label": "services",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.saveWithConfirmation.services.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
@@ -1241,6 +1271,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.saveWithConfirmation.services.overlays",
                 "type": "Object",
                 "label": "overlays",
@@ -1294,9 +1325,11 @@
             "id": "def-public.isErrorNonFatal.error",
             "type": "Object",
             "label": "error",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.isErrorNonFatal.error.message",
                 "type": "string",
                 "label": "message",
@@ -1333,8 +1366,10 @@
         "type": "Interface",
         "label": "OnSaveProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.OnSaveProps.newTitle",
             "type": "string",
             "label": "newTitle",
@@ -1346,6 +1381,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.OnSaveProps.newCopyOnSave",
             "type": "boolean",
             "label": "newCopyOnSave",
@@ -1357,6 +1393,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.OnSaveProps.isTitleDuplicateConfirmed",
             "type": "boolean",
             "label": "isTitleDuplicateConfirmed",
@@ -1368,6 +1405,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.OnSaveProps.onTitleDuplicate",
             "type": "Function",
             "label": "onTitleDuplicate",
@@ -1382,6 +1420,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OnSaveProps.newDescription",
             "type": "string",
             "label": "newDescription",
@@ -1405,8 +1444,10 @@
         "type": "Interface",
         "label": "OriginSaveModalProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.originatingApp",
             "type": "string",
             "label": "originatingApp",
@@ -1421,6 +1462,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.getAppNameFromId",
             "type": "Function",
             "label": "getAppNameFromId",
@@ -1435,6 +1477,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.originatingAppName",
             "type": "string",
             "label": "originatingAppName",
@@ -1449,6 +1492,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.returnToOriginSwitchLabel",
             "type": "string",
             "label": "returnToOriginSwitchLabel",
@@ -1463,6 +1507,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.documentInfo",
             "type": "Object",
             "label": "documentInfo",
@@ -1477,6 +1522,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.objectType",
             "type": "string",
             "label": "objectType",
@@ -1488,6 +1534,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.onClose",
             "type": "Function",
             "label": "onClose",
@@ -1502,6 +1549,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.options",
             "type": "CompoundType",
             "label": "options",
@@ -1524,6 +1572,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OriginSaveModalProps.onSave",
             "type": "Function",
             "label": "onSave",
@@ -1558,8 +1607,10 @@
         "type": "Interface",
         "label": "SaveModalState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SaveModalState.title",
             "type": "string",
             "label": "title",
@@ -1571,6 +1622,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SaveModalState.copyOnSave",
             "type": "boolean",
             "label": "copyOnSave",
@@ -1582,6 +1634,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SaveModalState.isTitleDuplicateConfirmed",
             "type": "boolean",
             "label": "isTitleDuplicateConfirmed",
@@ -1593,6 +1646,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SaveModalState.hasTitleDuplicate",
             "type": "boolean",
             "label": "hasTitleDuplicate",
@@ -1604,6 +1658,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SaveModalState.isLoading",
             "type": "boolean",
             "label": "isLoading",
@@ -1615,6 +1670,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SaveModalState.visualizationDescription",
             "type": "string",
             "label": "visualizationDescription",
@@ -1648,8 +1704,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetaData.type",
             "type": "string",
             "label": "type",
@@ -1661,6 +1719,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetaData.name",
             "type": "string",
             "label": "name",
@@ -1814,6 +1873,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetaData.includeFields",
             "type": "Array",
             "label": "includeFields",
@@ -1840,8 +1900,10 @@
         "type": "Interface",
         "label": "SavedObjectLoaderFindOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoaderFindOptions.size",
             "type": "number",
             "label": "size",
@@ -1856,6 +1918,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoaderFindOptions.fields",
             "type": "Array",
             "label": "fields",
@@ -1870,6 +1933,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectLoaderFindOptions.hasReference",
             "type": "Array",
             "label": "hasReference",
@@ -1913,6 +1977,7 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.SavedObjectDecorator.getId",
@@ -1934,6 +1999,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectDecorator.decorateConfig",
             "type": "Function",
             "label": "decorateConfig",
@@ -1958,6 +2024,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.SavedObjectDecorator.decorateObject",
             "type": "Function",
             "label": "decorateObject",
@@ -1996,8 +2065,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectDecoratorConfig.id",
             "type": "string",
             "label": "id",
@@ -2011,6 +2082,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectDecoratorConfig.priority",
             "type": "number",
             "label": "priority",
@@ -2024,6 +2096,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectDecoratorConfig.factory",
             "type": "Function",
             "label": "factory",
@@ -2059,8 +2132,10 @@
         "type": "Interface",
         "label": "SavedObjectSaveOpts",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveOpts.confirmOverwrite",
             "type": "CompoundType",
             "label": "confirmOverwrite",
@@ -2075,6 +2150,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveOpts.isTitleDuplicateConfirmed",
             "type": "CompoundType",
             "label": "isTitleDuplicateConfirmed",
@@ -2089,6 +2165,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveOpts.onTitleDuplicate",
             "type": "Function",
             "label": "onTitleDuplicate",
@@ -2103,6 +2180,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectSaveOpts.returnToOrigin",
             "type": "CompoundType",
             "label": "returnToOrigin",
@@ -2129,8 +2207,10 @@
         "type": "Interface",
         "label": "SavedObject",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObject._serialize",
             "type": "Function",
             "label": "_serialize",
@@ -2161,6 +2241,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject._source",
             "type": "Object",
             "label": "_source",
@@ -2175,6 +2256,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.applyESResp",
             "type": "Function",
             "label": "applyESResp",
@@ -2197,6 +2279,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.copyOnSave",
             "type": "boolean",
             "label": "copyOnSave",
@@ -2208,6 +2291,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.creationOpts",
             "type": "Function",
             "label": "creationOpts",
@@ -2230,6 +2314,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.defaults",
             "type": "Any",
             "label": "defaults",
@@ -2244,6 +2329,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.delete",
             "type": "Function",
             "label": "delete",
@@ -2258,6 +2344,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.destroy",
             "type": "Function",
             "label": "destroy",
@@ -2272,6 +2359,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.getDisplayName",
             "type": "Function",
             "label": "getDisplayName",
@@ -2286,6 +2374,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.getEsType",
             "type": "Function",
             "label": "getEsType",
@@ -2300,6 +2389,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.getFullPath",
             "type": "Function",
             "label": "getFullPath",
@@ -2314,6 +2404,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.hydrateIndexPattern",
             "type": "Function",
             "label": "hydrateIndexPattern",
@@ -2336,6 +2427,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.id",
             "type": "string",
             "label": "id",
@@ -2350,6 +2442,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.init",
             "type": "Function",
             "label": "init",
@@ -2372,6 +2465,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.isSaving",
             "type": "boolean",
             "label": "isSaving",
@@ -2383,6 +2477,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.isTitleChanged",
             "type": "Function",
             "label": "isTitleChanged",
@@ -2397,6 +2492,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.lastSavedTitle",
             "type": "string",
             "label": "lastSavedTitle",
@@ -2408,6 +2504,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -2422,6 +2519,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.save",
             "type": "Function",
             "label": "save",
@@ -2444,6 +2542,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.searchSource",
             "type": "Object",
             "label": "searchSource",
@@ -2466,6 +2565,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.searchSourceFields",
             "type": "Object",
             "label": "searchSourceFields",
@@ -2487,6 +2587,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.showInRecentlyAccessed",
             "type": "boolean",
             "label": "showInRecentlyAccessed",
@@ -2498,6 +2599,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.title",
             "type": "string",
             "label": "title",
@@ -2509,6 +2611,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObject.unresolvedIndexPatternReference",
             "type": "Object",
             "label": "unresolvedIndexPatternReference",
@@ -2542,8 +2645,10 @@
         "type": "Interface",
         "label": "SavedObjectConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.afterESResp",
             "type": "Function",
             "label": "afterESResp",
@@ -2574,6 +2679,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.defaults",
             "type": "Any",
             "label": "defaults",
@@ -2588,6 +2694,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.extractReferences",
             "type": "Function",
             "label": "extractReferences",
@@ -2618,6 +2725,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.injectReferences",
             "type": "Function",
             "label": "injectReferences",
@@ -2648,6 +2756,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.id",
             "type": "string",
             "label": "id",
@@ -2662,6 +2771,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.init",
             "type": "Function",
             "label": "init",
@@ -2676,6 +2786,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.indexPattern",
             "type": "Object",
             "label": "indexPattern",
@@ -2697,6 +2808,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.mapping",
             "type": "Object",
             "label": "mapping",
@@ -2711,6 +2823,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -2725,6 +2838,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.path",
             "type": "string",
             "label": "path",
@@ -2739,6 +2853,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.searchSource",
             "type": "CompoundType",
             "label": "searchSource",
@@ -2761,6 +2876,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectConfig.type",
             "type": "string",
             "label": "type",
@@ -2789,6 +2905,7 @@
         "id": "def-public.SaveResult",
         "type": "Type",
         "label": "SaveResult",
+        "tags": [],
         "description": [
           "\nRepresents the result of trying to persist the saved object.\nContains `error` prop if something unexpected happened (e.g. network error).\nContains an `id` if persisting was successful. If `id` and\n`error` are undefined, persisting was not successful, but the\nmodal can still recover (e.g. the name of the saved object was already taken)."
         ],
@@ -2806,6 +2923,7 @@
         "id": "def-public.SavedObjectDecoratorFactory",
         "type": "Type",
         "label": "SavedObjectDecoratorFactory",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
@@ -2828,6 +2946,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.PER_PAGE_SETTING",
         "type": "string",
         "label": "PER_PAGE_SETTING",
@@ -2843,6 +2962,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.LISTING_LIMIT_SETTING",
         "type": "string",
         "label": "LISTING_LIMIT_SETTING",
@@ -2864,8 +2984,10 @@
       "type": "Interface",
       "label": "SavedObjectsStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SavedObjectsStart.SavedObjectClass",
           "type": "Object",
           "label": "SavedObjectClass",
@@ -2887,6 +3009,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.SavedObjectsStart.settings",
           "type": "Object",
           "label": "settings",
@@ -2914,8 +3037,10 @@
       "type": "Interface",
       "label": "SavedObjectSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SavedObjectSetup.registerDecorator",
           "type": "Function",
           "label": "registerDecorator",
@@ -2962,6 +3087,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.PER_PAGE_SETTING",
         "type": "string",
         "label": "PER_PAGE_SETTING",
@@ -2977,6 +3103,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.LISTING_LIMIT_SETTING",
         "type": "string",
         "label": "LISTING_LIMIT_SETTING",

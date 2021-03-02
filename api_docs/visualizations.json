@@ -5,6 +5,7 @@
       {
         "id": "def-public.Vis",
         "type": "Class",
+        "tags": [],
         "label": "Vis",
         "description": [],
         "signature": [
@@ -19,6 +20,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Vis.type",
             "type": "Object",
             "label": "type",
@@ -40,6 +42,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Vis.id",
             "type": "string",
             "label": "id",
@@ -54,6 +57,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Vis.title",
             "type": "string",
             "label": "title",
@@ -65,6 +69,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Vis.description",
             "type": "string",
             "label": "description",
@@ -76,6 +81,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Vis.params",
             "type": "Uncategorized",
             "label": "params",
@@ -92,6 +98,7 @@
           {
             "id": "def-public.Vis.data",
             "type": "Object",
+            "tags": [],
             "children": [],
             "description": [],
             "label": "data",
@@ -102,6 +109,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Vis.uiState",
             "type": "Object",
             "label": "uiState",
@@ -336,130 +344,9 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-public.TypesService",
-        "type": "Class",
-        "label": "TypesService",
-        "description": [
-          "\nVis Types Service\n"
-        ],
-        "children": [
-          {
-            "id": "def-public.TypesService.setup",
-            "type": "Function",
-            "label": "setup",
-            "signature": [
-              "() => { createBaseVisualization: <TVisParams>(config: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisTypeDefinition",
-                "text": "VisTypeDefinition"
-              },
-              "<TVisParams>) => void; registerAlias: (newVisTypeAlias: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisTypeAlias",
-                "text": "VisTypeAlias"
-              },
-              ") => void; hideTypes: (typeNames: string[]) => void; }"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types_service.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/vis_types/types_service.ts#L33"
-            }
-          },
-          {
-            "id": "def-public.TypesService.start",
-            "type": "Function",
-            "label": "start",
-            "signature": [
-              "() => { get: <TVisParams>(visualization: string) => ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.BaseVisType",
-                "text": "BaseVisType"
-              },
-              "<TVisParams> | undefined; all: () => ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.BaseVisType",
-                "text": "BaseVisType"
-              },
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              },
-              ">[]; getAliases: () => ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisTypeAlias",
-                "text": "VisTypeAlias"
-              },
-              "[]; unRegisterAlias: (visTypeAliasName: string) => void; getByGroup: (group: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisGroups",
-                "text": "VisGroups"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types_service.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/vis_types/types_service.ts#L65"
-            }
-          },
-          {
-            "id": "def-public.TypesService.stop",
-            "type": "Function",
-            "label": "stop",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types_service.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/vis_types/types_service.ts#L102"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types_service.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/vis_types/types_service.ts#L18"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.PersistedState",
         "type": "Class",
+        "tags": [],
         "label": "PersistedState",
         "description": [],
         "signature": [
@@ -829,6 +716,7 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/components/visualization_container.tsx#L23"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -905,6 +793,7 @@
           "lineNumber": 44,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/visualizations/public/vis_schemas.ts#L44"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -964,8 +853,10 @@
         "type": "Interface",
         "label": "VisTypeAlias",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.aliasPath",
             "type": "string",
             "label": "aliasPath",
@@ -977,6 +868,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.aliasApp",
             "type": "string",
             "label": "aliasApp",
@@ -988,6 +880,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.name",
             "type": "string",
             "label": "name",
@@ -999,6 +892,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.title",
             "type": "string",
             "label": "title",
@@ -1010,6 +904,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.icon",
             "type": "string",
             "label": "icon",
@@ -1021,6 +916,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.promotion",
             "type": "CompoundType",
             "label": "promotion",
@@ -1035,6 +931,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.description",
             "type": "string",
             "label": "description",
@@ -1046,6 +943,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.note",
             "type": "string",
             "label": "note",
@@ -1060,6 +958,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.getSupportedTriggers",
             "type": "Function",
             "label": "getSupportedTriggers",
@@ -1074,6 +973,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.stage",
             "type": "CompoundType",
             "label": "stage",
@@ -1094,6 +994,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeAlias.appExtensions",
             "type": "Object",
             "label": "appExtensions",
@@ -1140,8 +1041,10 @@
         "description": [
           "\nA visualization type definition representing a spec of one specific type of \"classical\"\nvisualizations (i.e. not Lens visualizations)."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.name",
             "type": "string",
             "label": "name",
@@ -1155,6 +1058,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.title",
             "type": "string",
             "label": "title",
@@ -1168,6 +1072,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.description",
             "type": "string",
             "label": "description",
@@ -1184,6 +1089,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.note",
             "type": "string",
             "label": "note",
@@ -1200,6 +1106,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.getSupportedTriggers",
             "type": "Function",
             "label": "getSupportedTriggers",
@@ -1216,6 +1123,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.getUsedIndexPattern",
             "type": "Function",
             "label": "getUsedIndexPattern",
@@ -1256,6 +1164,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.isAccessible",
             "type": "CompoundType",
             "label": "isAccessible",
@@ -1270,6 +1179,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.icon",
             "type": "CompoundType",
             "label": "icon",
@@ -1286,6 +1196,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.image",
             "type": "string",
             "label": "image",
@@ -1302,6 +1213,9 @@
             ]
           },
           {
+            "tags": [
+              "default"
+            ],
             "id": "def-public.VisTypeDefinition.stage",
             "type": "CompoundType",
             "label": "stage",
@@ -1318,6 +1232,9 @@
             ]
           },
           {
+            "tags": [
+              "default"
+            ],
             "id": "def-public.VisTypeDefinition.group",
             "type": "CompoundType",
             "label": "group",
@@ -1341,6 +1258,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.titleInWizard",
             "type": "string",
             "label": "titleInWizard",
@@ -1357,6 +1275,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.requiresSearch",
             "type": "CompoundType",
             "label": "requiresSearch",
@@ -1373,6 +1292,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.hierarchicalData",
             "type": "CompoundType",
             "label": "hierarchicalData",
@@ -1387,6 +1307,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.inspectorAdapters",
             "type": "CompoundType",
             "label": "inspectorAdapters",
@@ -1416,6 +1337,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.getInfoMessage",
             "type": "Function",
             "label": "getInfoMessage",
@@ -1448,6 +1370,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.toExpressionAst",
             "type": "Function",
             "label": "toExpressionAst",
@@ -1471,6 +1394,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.setup",
             "type": "Function",
             "label": "setup",
@@ -1501,6 +1425,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.hidden",
             "type": "CompoundType",
             "label": "hidden",
@@ -1515,6 +1440,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.options",
             "type": "Object",
             "label": "options",
@@ -1537,6 +1463,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.editorConfig",
             "type": "CompoundType",
             "label": "editorConfig",
@@ -1553,6 +1480,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisTypeDefinition.visConfig",
             "type": "Object",
             "label": "visConfig",
@@ -1581,8 +1509,10 @@
         "type": "Interface",
         "label": "Schema",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Schema.aggFilter",
             "type": "Array",
             "label": "aggFilter",
@@ -1597,6 +1527,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.group",
             "type": "CompoundType",
             "label": "group",
@@ -1612,6 +1543,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.max",
             "type": "number",
             "label": "max",
@@ -1623,6 +1555,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Schema.min",
             "type": "number",
             "label": "min",
@@ -1634,6 +1567,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Schema.name",
             "type": "string",
             "label": "name",
@@ -1645,6 +1579,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Schema.params",
             "type": "Array",
             "label": "params",
@@ -1666,6 +1601,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.title",
             "type": "string",
             "label": "title",
@@ -1677,6 +1613,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Schema.defaults",
             "type": "Unknown",
             "label": "defaults",
@@ -1691,6 +1628,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.hideCustomLabel",
             "type": "CompoundType",
             "label": "hideCustomLabel",
@@ -1705,6 +1643,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.mustBeFirst",
             "type": "CompoundType",
             "label": "mustBeFirst",
@@ -1719,6 +1658,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.aggSettings",
             "type": "Any",
             "label": "aggSettings",
@@ -1733,6 +1673,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.disabled",
             "type": "CompoundType",
             "label": "disabled",
@@ -1747,6 +1688,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Schema.tooltip",
             "type": "CompoundType",
             "label": "tooltip",
@@ -1773,8 +1715,10 @@
         "type": "Interface",
         "label": "ISchemas",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ISchemas.[AggGroupNames.Buckets]",
             "type": "Array",
             "label": "[AggGroupNames.Buckets]",
@@ -1796,6 +1740,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISchemas.[AggGroupNames.Metrics]",
             "type": "Array",
             "label": "[AggGroupNames.Metrics]",
@@ -1817,6 +1762,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISchemas.all",
             "type": "Array",
             "label": "all",
@@ -1850,8 +1796,10 @@
         "type": "Interface",
         "label": "SerializedVis",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SerializedVis.id",
             "type": "string",
             "label": "id",
@@ -1866,6 +1814,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.title",
             "type": "string",
             "label": "title",
@@ -1877,6 +1826,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.description",
             "type": "string",
             "label": "description",
@@ -1891,6 +1841,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.type",
             "type": "string",
             "label": "type",
@@ -1902,6 +1853,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.params",
             "type": "Object",
             "label": "params",
@@ -1922,6 +1874,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.uiState",
             "type": "Any",
             "label": "uiState",
@@ -1936,6 +1889,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVis.data",
             "type": "Object",
             "label": "data",
@@ -1968,8 +1922,10 @@
         "type": "Interface",
         "label": "SerializedVisData",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SerializedVisData.expression",
             "type": "string",
             "label": "expression",
@@ -1984,6 +1940,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVisData.aggs",
             "type": "Array",
             "label": "aggs",
@@ -2022,6 +1979,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVisData.searchSource",
             "type": "Object",
             "label": "searchSource",
@@ -2042,6 +2000,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SerializedVisData.savedSearchId",
             "type": "string",
             "label": "savedSearchId",
@@ -2068,8 +2027,10 @@
         "type": "Interface",
         "label": "VisData",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisData.ast",
             "type": "string",
             "label": "ast",
@@ -2084,6 +2045,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisData.aggs",
             "type": "Object",
             "label": "aggs",
@@ -2105,6 +2067,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisData.indexPattern",
             "type": "Object",
             "label": "indexPattern",
@@ -2126,6 +2089,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisData.searchSource",
             "type": "Object",
             "label": "searchSource",
@@ -2148,6 +2112,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisData.savedSearchId",
             "type": "string",
             "label": "savedSearchId",
@@ -2191,8 +2156,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.vis",
             "type": "Object",
             "label": "vis",
@@ -2207,6 +2174,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.savedVis",
             "type": "Object",
             "label": "savedVis",
@@ -2228,6 +2196,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.table",
             "type": "Unknown",
             "label": "table",
@@ -2242,6 +2211,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.query",
             "type": "Object",
             "label": "query",
@@ -2263,6 +2233,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.filters",
             "type": "Array",
             "label": "filters",
@@ -2284,6 +2255,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizeInput.timeRange",
             "type": "Object",
             "label": "timeRange",
@@ -2317,8 +2289,10 @@
         "type": "Interface",
         "label": "SchemaConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SchemaConfig.accessor",
             "type": "number",
             "label": "accessor",
@@ -2330,6 +2304,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SchemaConfig.label",
             "type": "string",
             "label": "label",
@@ -2341,6 +2316,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SchemaConfig.format",
             "type": "Object",
             "label": "format",
@@ -2362,6 +2338,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SchemaConfig.params",
             "type": "Object",
             "label": "params",
@@ -2376,6 +2353,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SchemaConfig.aggType",
             "type": "string",
             "label": "aggType",
@@ -2399,8 +2377,10 @@
         "type": "Interface",
         "label": "ISavedVis",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ISavedVis.id",
             "type": "string",
             "label": "id",
@@ -2415,6 +2395,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.title",
             "type": "string",
             "label": "title",
@@ -2426,6 +2407,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.description",
             "type": "string",
             "label": "description",
@@ -2440,6 +2422,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.visState",
             "type": "Object",
             "label": "visState",
@@ -2460,6 +2443,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.searchSourceFields",
             "type": "Object",
             "label": "searchSourceFields",
@@ -2481,6 +2465,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.uiStateJSON",
             "type": "string",
             "label": "uiStateJSON",
@@ -2495,6 +2480,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.savedSearchRefName",
             "type": "string",
             "label": "savedSearchRefName",
@@ -2509,6 +2495,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ISavedVis.savedSearchId",
             "type": "string",
             "label": "savedSearchId",
@@ -2560,6 +2547,7 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
@@ -2573,8 +2561,10 @@
         "type": "Interface",
         "label": "VisToExpressionAstParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisToExpressionAstParams.timefilter",
             "type": "Object",
             "label": "timefilter",
@@ -2597,6 +2587,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisToExpressionAstParams.timeRange",
             "type": "Any",
             "label": "timeRange",
@@ -2611,6 +2602,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisToExpressionAstParams.abortSignal",
             "type": "Object",
             "label": "abortSignal",
@@ -2647,8 +2639,10 @@
           "<VisParamType>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.aggs",
             "type": "Object",
             "label": "aggs",
@@ -2669,6 +2663,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.hasHistogramAgg",
             "type": "boolean",
             "label": "hasHistogramAgg",
@@ -2680,6 +2675,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.isTabSelected",
             "type": "boolean",
             "label": "isTabSelected",
@@ -2691,6 +2687,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.stateParams",
             "type": "Uncategorized",
             "label": "stateParams",
@@ -2705,6 +2702,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.vis",
             "type": "Object",
             "label": "vis",
@@ -2734,6 +2732,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisEditorOptionsProps.uiState",
             "type": "Object",
             "label": "uiState",
@@ -2876,8 +2875,10 @@
         "type": "Interface",
         "label": "VisualizationListItem",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.editUrl",
             "type": "string",
             "label": "editUrl",
@@ -2889,6 +2890,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.editApp",
             "type": "string",
             "label": "editApp",
@@ -2903,6 +2905,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.error",
             "type": "string",
             "label": "error",
@@ -2917,6 +2920,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.icon",
             "type": "string",
             "label": "icon",
@@ -2928,6 +2932,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.id",
             "type": "string",
             "label": "id",
@@ -2939,6 +2944,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.stage",
             "type": "CompoundType",
             "label": "stage",
@@ -2959,6 +2965,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.savedObjectType",
             "type": "string",
             "label": "savedObjectType",
@@ -2970,6 +2977,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.title",
             "type": "string",
             "label": "title",
@@ -2981,6 +2989,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.description",
             "type": "string",
             "label": "description",
@@ -2995,6 +3004,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.getSupportedTriggers",
             "type": "Function",
             "label": "getSupportedTriggers",
@@ -3009,6 +3019,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.typeTitle",
             "type": "string",
             "label": "typeTitle",
@@ -3020,6 +3031,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.VisualizationListItem.image",
             "type": "string",
             "label": "image",
@@ -3056,8 +3068,10 @@
           "<TVisParams>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedVisState.title",
             "type": "string",
             "label": "title",
@@ -3069,6 +3083,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedVisState.type",
             "type": "string",
             "label": "type",
@@ -3080,6 +3095,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedVisState.params",
             "type": "Uncategorized",
             "label": "params",
@@ -3094,6 +3110,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedVisState.aggs",
             "type": "Array",
             "label": "aggs",
@@ -3144,11 +3161,13 @@
         "type": "Interface",
         "label": "VisParams",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.VisParams.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
@@ -3173,6 +3192,7 @@
         "id": "def-public.VisGroups",
         "type": "Enum",
         "label": "VisGroups",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -3184,6 +3204,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.VISUALIZE_EMBEDDABLE_TYPE",
         "type": "string",
         "label": "VISUALIZE_EMBEDDABLE_TYPE",
@@ -3202,6 +3223,7 @@
         "id": "def-public.VisualizeEmbeddableFactoryContract",
         "type": "Type",
         "label": "VisualizeEmbeddableFactoryContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
@@ -3256,6 +3278,7 @@
         "id": "def-public.VisualizeEmbeddableContract",
         "type": "Type",
         "label": "VisualizeEmbeddableContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
@@ -3310,6 +3333,7 @@
         "id": "def-public.VisToExpressionAst",
         "type": "Type",
         "label": "VisToExpressionAst",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
@@ -3357,6 +3381,7 @@
         "id": "def-public.VisualizationStage",
         "type": "Type",
         "label": "VisualizationStage",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
@@ -3369,6 +3394,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.VISUALIZE_ENABLE_LABS_SETTING",
         "type": "string",
         "label": "VISUALIZE_ENABLE_LABS_SETTING",
@@ -3387,6 +3413,7 @@
         "id": "def-public.ExpressionValueVisDimension",
         "type": "Type",
         "label": "ExpressionValueVisDimension",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/expression_functions/vis_dimension.ts",
@@ -3403,8 +3430,10 @@
       {
         "id": "def-public.VIS_EVENT_TO_TRIGGER",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.VIS_EVENT_TO_TRIGGER.applyFilter",
             "type": "string",
             "label": "applyFilter",
@@ -3419,6 +3448,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VIS_EVENT_TO_TRIGGER.brush",
             "type": "string",
             "label": "brush",
@@ -3433,6 +3463,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VIS_EVENT_TO_TRIGGER.filter",
             "type": "string",
             "label": "filter",
@@ -3447,6 +3478,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick",
             "type": "string",
             "label": "tableRowContextMenuClick",
@@ -3475,6 +3507,9 @@
       "id": "def-public.VisualizationsSetup",
       "type": "Type",
       "label": "VisualizationsSetup",
+      "tags": [
+        "public"
+      ],
       "description": [
         "\nInterface for this plugin's returned setup/start contracts.\n"
       ],
@@ -3539,8 +3574,10 @@
         }
       ],
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.savedVisualizationsLoader",
           "type": "CompoundType",
           "label": "savedVisualizationsLoader",
@@ -3570,6 +3607,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.createVis",
           "type": "Function",
           "label": "createVis",
@@ -3608,6 +3646,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.convertToSerializedVis",
           "type": "Function",
           "label": "convertToSerializedVis",
@@ -3637,6 +3676,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.convertFromSerializedVis",
           "type": "Function",
           "label": "convertFromSerializedVis",
@@ -3666,6 +3706,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.showNewVisModal",
           "type": "Function",
           "label": "showNewVisModal",
@@ -3687,6 +3728,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.VisualizationsStart.__LEGACY",
           "type": "Object",
           "label": "__LEGACY",
@@ -3766,11 +3808,13 @@
         "type": "Interface",
         "label": "VisParams",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.VisParams.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
@@ -3804,8 +3848,10 @@
           "<TVisParams>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedVisState.title",
             "type": "string",
             "label": "title",
@@ -3817,6 +3863,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedVisState.type",
             "type": "string",
             "label": "type",
@@ -3828,6 +3875,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedVisState.params",
             "type": "Uncategorized",
             "label": "params",
@@ -3842,6 +3890,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedVisState.aggs",
             "type": "Array",
             "label": "aggs",
@@ -3903,8 +3952,10 @@
           "SavedObjectAttributes"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.description",
             "type": "string",
             "label": "description",
@@ -3916,6 +3967,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.kibanaSavedObjectMeta",
             "type": "Object",
             "label": "kibanaSavedObjectMeta",
@@ -3930,6 +3982,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.title",
             "type": "string",
             "label": "title",
@@ -3941,6 +3994,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.version",
             "type": "number",
             "label": "version",
@@ -3952,6 +4006,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.visState",
             "type": "string",
             "label": "visState",
@@ -3963,6 +4018,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.VisualizationSavedObjectAttributes.uiStateJSON",
             "type": "string",
             "label": "uiStateJSON",

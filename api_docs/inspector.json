@@ -5,6 +5,7 @@
       {
         "id": "def-public.InspectorPublicPlugin",
         "type": "Class",
+        "tags": [],
         "label": "InspectorPublicPlugin",
         "description": [],
         "signature": [
@@ -43,6 +44,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.InspectorPublicPlugin.views",
             "type": "Object",
             "label": "views",
@@ -270,6 +272,9 @@
       {
         "id": "def-public.RequestAdapter",
         "type": "Class",
+        "tags": [
+          "extends"
+        ],
         "label": "RequestAdapter",
         "description": [
           "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
@@ -463,6 +468,7 @@
       {
         "id": "def-public.RequestResponder",
         "type": "Class",
+        "tags": [],
         "label": "RequestResponder",
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
@@ -806,8 +812,10 @@
         "description": [
           "\nThe props interface that a custom inspector view component, that will be passed\nto {@link InspectorViewDescription#component}, must use."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.InspectorViewProps.adapters",
             "type": "Uncategorized",
             "label": "adapters",
@@ -824,6 +832,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewProps.title",
             "type": "string",
             "label": "title",
@@ -837,6 +846,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewProps.options",
             "type": "Unknown",
             "label": "options",
@@ -867,8 +877,12 @@
         "description": [
           "\nAn object describing an inspector view."
         ],
+        "tags": [
+          "typedef"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.InspectorViewDescription.component",
             "type": "CompoundType",
             "label": "component",
@@ -899,6 +913,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewDescription.help",
             "type": "string",
             "label": "help",
@@ -913,6 +928,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewDescription.order",
             "type": "number",
             "label": "order",
@@ -927,6 +943,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewDescription.shouldShow",
             "type": "Function",
             "label": "shouldShow",
@@ -949,6 +966,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorViewDescription.title",
             "type": "string",
             "label": "title",
@@ -974,8 +992,13 @@
         "description": [
           "\nOptions that can be specified when opening the inspector."
         ],
+        "tags": [
+          "property",
+          "property"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.InspectorOptions.title",
             "type": "string",
             "label": "title",
@@ -990,6 +1013,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.InspectorOptions.options",
             "type": "Unknown",
             "label": "options",
@@ -1016,8 +1040,10 @@
         "type": "Interface",
         "label": "RequestStatistic",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RequestStatistic.label",
             "type": "string",
             "label": "label",
@@ -1029,6 +1055,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.RequestStatistic.description",
             "type": "string",
             "label": "description",
@@ -1043,6 +1070,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RequestStatistic.value",
             "type": "Any",
             "label": "value",
@@ -1069,11 +1097,13 @@
         "type": "Interface",
         "label": "RequestStatistics",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.RequestStatistics.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/inspector/common/adapters/request/types.ts",
@@ -1099,8 +1129,10 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Adapters.requests",
             "type": "Object",
             "label": "requests",
@@ -1125,6 +1157,7 @@
             "id": "def-public.Adapters.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/inspector/common/adapters/types.ts",
@@ -1149,6 +1182,7 @@
         "id": "def-public.RequestStatus",
         "type": "Enum",
         "label": "RequestStatus",
+        "tags": [],
         "description": [
           "\nThe status a request can have."
         ],
@@ -1165,6 +1199,7 @@
         "id": "def-public.InspectorSession",
         "type": "Type",
         "label": "InspectorSession",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/inspector/public/types.ts",
@@ -1183,8 +1218,10 @@
       "type": "Interface",
       "label": "Setup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.Setup.registerView",
           "type": "Function",
           "label": "registerView",
@@ -1207,6 +1244,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.Setup.__LEGACY",
           "type": "Object",
           "label": "__LEGACY",
@@ -1242,8 +1280,10 @@
       "type": "Interface",
       "label": "Start",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.Start.isAvailable",
           "type": "Function",
           "label": "isAvailable",
@@ -1268,6 +1308,10 @@
           ]
         },
         {
+          "tags": [
+            "return",
+            "throws"
+          ],
           "id": "def-public.Start.open",
           "type": "Function",
           "label": "open",
@@ -1329,6 +1373,9 @@
       {
         "id": "def-common.RequestAdapter",
         "type": "Class",
+        "tags": [
+          "extends"
+        ],
         "label": "RequestAdapter",
         "description": [
           "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
@@ -1522,6 +1569,7 @@
       {
         "id": "def-common.RequestResponder",
         "type": "Class",
+        "tags": [],
         "label": "RequestResponder",
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
@@ -1855,8 +1903,10 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Adapters.requests",
             "type": "Object",
             "label": "requests",
@@ -1881,6 +1931,7 @@
             "id": "def-common.Adapters.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/inspector/common/adapters/types.ts",
@@ -1904,8 +1955,10 @@
         "type": "Interface",
         "label": "RequestStatistic",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.RequestStatistic.label",
             "type": "string",
             "label": "label",
@@ -1917,6 +1970,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.RequestStatistic.description",
             "type": "string",
             "label": "description",
@@ -1931,6 +1985,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.RequestStatistic.value",
             "type": "Any",
             "label": "value",
@@ -1957,11 +2012,13 @@
         "type": "Interface",
         "label": "RequestStatistics",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.RequestStatistics.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/inspector/common/adapters/request/types.ts",
@@ -1986,6 +2043,7 @@
         "id": "def-common.RequestStatus",
         "type": "Enum",
         "label": "RequestStatus",
+        "tags": [],
         "description": [
           "\nThe status a request can have."
         ],

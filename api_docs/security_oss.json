@@ -12,8 +12,10 @@
       "type": "Interface",
       "label": "SecurityOssPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SecurityOssPluginSetup.insecureCluster",
           "type": "Object",
           "label": "insecureCluster",
@@ -47,8 +49,10 @@
       "type": "Interface",
       "label": "SecurityOssPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SecurityOssPluginStart.insecureCluster",
           "type": "Object",
           "label": "insecureCluster",
@@ -69,6 +73,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.SecurityOssPluginStart.anonymousAccess",
           "type": "Object",
           "label": "anonymousAccess",
@@ -112,8 +117,10 @@
       "type": "Interface",
       "label": "SecurityOssPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.SecurityOssPluginSetup.showInsecureClusterWarning$",
           "type": "Object",
           "label": "showInsecureClusterWarning$",
@@ -131,6 +138,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.SecurityOssPluginSetup.setAnonymousAccessServiceProvider",
           "type": "Function",
           "label": "setAnonymousAccessServiceProvider",
@@ -175,8 +183,10 @@
         "description": [
           "\nDefines Security OSS application state."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AppState.insecureClusterAlert",
             "type": "Object",
             "label": "insecureClusterAlert",
@@ -191,6 +201,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AppState.anonymousAccess",
             "type": "Object",
             "label": "anonymousAccess",

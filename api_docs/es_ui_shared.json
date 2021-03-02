@@ -5,6 +5,7 @@
       {
         "id": "def-public.CronEditor",
         "type": "Class",
+        "tags": [],
         "label": "CronEditor",
         "description": [],
         "signature": [
@@ -135,6 +136,7 @@
               "lineNumber": 80,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L80"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -180,6 +182,7 @@
               "lineNumber": 104,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx#L104"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -227,6 +230,7 @@
     ],
     "functions": [
       {
+        "tags": [],
         "id": "def-public.JsonEditor",
         "type": "Function",
         "label": "JsonEditor",
@@ -270,6 +274,7 @@
           "lineNumber": 26,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx#L26"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -352,6 +357,7 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/send_request.ts#L28"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -434,6 +440,7 @@
           "lineNumber": 28,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/request/use_request.ts#L28"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -466,6 +473,7 @@
           "lineNumber": 49,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L49"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -498,6 +506,7 @@
           "lineNumber": 17,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx#L17"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -530,6 +539,7 @@
           "lineNumber": 32,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx#L32"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -562,6 +572,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -579,6 +590,7 @@
           "lineNumber": 35,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx#L35"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -646,6 +658,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -666,8 +679,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.JsonEditorState.data",
             "type": "Object",
             "label": "data",
@@ -699,6 +714,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.JsonEditorState.isValid",
             "type": "CompoundType",
             "label": "isValid",
@@ -725,8 +741,10 @@
         "type": "Interface",
         "label": "SendRequestConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SendRequestConfig.path",
             "type": "string",
             "label": "path",
@@ -738,6 +756,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SendRequestConfig.method",
             "type": "CompoundType",
             "label": "method",
@@ -752,6 +771,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SendRequestConfig.query",
             "type": "Object",
             "label": "query",
@@ -773,6 +793,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SendRequestConfig.body",
             "type": "Any",
             "label": "body",
@@ -787,6 +808,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SendRequestConfig.asSystemRequest",
             "type": "CompoundType",
             "label": "asSystemRequest",
@@ -825,8 +847,10 @@
           "<D, E>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SendRequestResponse.data",
             "type": "CompoundType",
             "label": "data",
@@ -841,6 +865,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SendRequestResponse.error",
             "type": "CompoundType",
             "label": "error",
@@ -884,8 +909,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UseRequestConfig.pollIntervalMs",
             "type": "number",
             "label": "pollIntervalMs",
@@ -900,6 +927,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestConfig.initialData",
             "type": "Any",
             "label": "initialData",
@@ -914,6 +942,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestConfig.deserializer",
             "type": "Function",
             "label": "deserializer",
@@ -950,8 +979,10 @@
           "<D, E>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UseRequestResponse.isInitialRequest",
             "type": "boolean",
             "label": "isInitialRequest",
@@ -963,6 +994,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestResponse.isLoading",
             "type": "boolean",
             "label": "isLoading",
@@ -974,6 +1006,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestResponse.error",
             "type": "CompoundType",
             "label": "error",
@@ -988,6 +1021,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestResponse.data",
             "type": "CompoundType",
             "label": "data",
@@ -1002,6 +1036,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseRequestResponse.resendRequest",
             "type": "Function",
             "label": "resendRequest",
@@ -1028,8 +1063,10 @@
         "type": "Interface",
         "label": "Privileges",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Privileges.hasAllPrivileges",
             "type": "boolean",
             "label": "hasAllPrivileges",
@@ -1041,6 +1078,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Privileges.missingPrivileges",
             "type": "Object",
             "label": "missingPrivileges",
@@ -1073,11 +1111,13 @@
         "type": "Interface",
         "label": "MissingPrivileges",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.MissingPrivileges.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
@@ -1101,8 +1141,10 @@
         "type": "Interface",
         "label": "Error",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Error.error",
             "type": "string",
             "label": "error",
@@ -1114,6 +1156,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Error.cause",
             "type": "Array",
             "label": "cause",
@@ -1128,6 +1171,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Error.message",
             "type": "string",
             "label": "message",
@@ -1156,6 +1200,7 @@
         "id": "def-public.OnJsonEditorUpdateHandler",
         "type": "Type",
         "label": "OnJsonEditorUpdateHandler",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
@@ -1179,6 +1224,7 @@
         "id": "def-public.Frequency",
         "type": "Type",
         "label": "Frequency",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
@@ -1195,8 +1241,10 @@
       {
         "id": "def-public.indices",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE",
             "type": "Array",
             "label": "INDEX_ILLEGAL_CHARACTERS_VISIBLE",
@@ -1211,6 +1259,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.indices.indexNameBeginsWithPeriod",
             "type": "Function",
             "label": "indexNameBeginsWithPeriod",
@@ -1232,6 +1281,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.indices.findIllegalCharactersInIndexName",
             "type": "Function",
             "label": "findIllegalCharactersInIndexName",
@@ -1253,6 +1303,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.indices.indexNameContainsSpaces",
             "type": "Function",
             "label": "indexNameContainsSpaces",
@@ -1284,6 +1335,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.AuthorizationContext",
         "type": "Object",
         "label": "AuthorizationContext",
@@ -1373,6 +1425,7 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts#L23"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1405,6 +1458,7 @@
           "lineNumber": 27,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts#L27"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1423,8 +1477,10 @@
         "type": "Interface",
         "label": "Privileges",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Privileges.hasAllPrivileges",
             "type": "boolean",
             "label": "hasAllPrivileges",
@@ -1436,6 +1492,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Privileges.missingPrivileges",
             "type": "Object",
             "label": "missingPrivileges",
@@ -1468,11 +1525,13 @@
         "type": "Interface",
         "label": "MissingPrivileges",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.MissingPrivileges.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",

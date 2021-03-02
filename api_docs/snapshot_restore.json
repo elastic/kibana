@@ -25,6 +25,7 @@
         "id": "def-common.REPOSITORY_TYPES",
         "type": "Enum",
         "label": "REPOSITORY_TYPES",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
@@ -36,6 +37,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.API_BASE_PATH",
         "type": "string",
         "label": "API_BASE_PATH",
@@ -51,6 +53,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DEFAULT_REPOSITORY_TYPES",
         "type": "Array",
         "label": "DEFAULT_REPOSITORY_TYPES",
@@ -67,6 +70,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.PLUGIN_REPOSITORY_TYPES",
         "type": "Array",
         "label": "PLUGIN_REPOSITORY_TYPES",
@@ -83,6 +87,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.APP_REQUIRED_CLUSTER_PRIVILEGES",
         "type": "Array",
         "label": "APP_REQUIRED_CLUSTER_PRIVILEGES",
@@ -98,6 +103,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.APP_RESTORE_INDEX_PRIVILEGES",
         "type": "Array",
         "label": "APP_RESTORE_INDEX_PRIVILEGES",
@@ -113,6 +119,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.APP_SLM_CLUSTER_PRIVILEGES",
         "type": "Array",
         "label": "APP_SLM_CLUSTER_PRIVILEGES",
@@ -132,8 +139,10 @@
       {
         "id": "def-common.PLUGIN",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PLUGIN.id",
             "type": "string",
             "label": "id",
@@ -145,6 +154,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PLUGIN.minimumLicenseType",
             "type": "string",
             "label": "minimumLicenseType",
@@ -187,6 +197,7 @@
               "lineNumber": 16,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/snapshot_restore/common/constants.ts#L16"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -202,8 +213,10 @@
       {
         "id": "def-common.REPOSITORY_PLUGINS_MAP",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-s3'",
             "type": "string",
             "label": "'repository-s3'",
@@ -225,6 +238,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-hdfs'",
             "type": "string",
             "label": "'repository-hdfs'",
@@ -246,6 +260,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-azure'",
             "type": "string",
             "label": "'repository-azure'",
@@ -267,6 +282,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.REPOSITORY_PLUGINS_MAP.'repository-gcs'",
             "type": "string",
             "label": "'repository-gcs'",
@@ -300,8 +316,10 @@
       {
         "id": "def-common.TIME_UNITS",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TIME_UNITS.DAY",
             "type": "string",
             "label": "DAY",
@@ -316,6 +334,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TIME_UNITS.HOUR",
             "type": "string",
             "label": "HOUR",
@@ -330,6 +349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TIME_UNITS.MINUTE",
             "type": "string",
             "label": "MINUTE",
@@ -344,6 +364,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TIME_UNITS.SECOND",
             "type": "string",
             "label": "SECOND",

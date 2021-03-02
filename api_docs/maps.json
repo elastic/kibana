@@ -9,6 +9,7 @@
         "type": "Interface",
         "label": "RenderTooltipContentParams",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.RenderTooltipContentParams.addFilters",
@@ -60,6 +61,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.RenderTooltipContentParams.features",
             "type": "Array",
             "label": "features",
@@ -81,6 +83,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RenderTooltipContentParams.isLocked",
             "type": "boolean",
             "label": "isLocked",
@@ -242,6 +245,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.MAP_SAVED_OBJECT_TYPE",
         "type": "string",
         "label": "MAP_SAVED_OBJECT_TYPE",
@@ -263,8 +267,10 @@
       "type": "Interface",
       "label": "MapsStartApi",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.MapsStartApi.createLayerDescriptors",
           "type": "Object",
           "label": "createLayerDescriptors",

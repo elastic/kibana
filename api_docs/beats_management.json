@@ -26,6 +26,7 @@
         "id": "def-common.BeatsManagementConfigType",
         "type": "Type",
         "label": "BeatsManagementConfigType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/beats_management/common/index.ts",
@@ -40,6 +41,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.beatsManagementConfigSchema",
         "type": "Object",
         "label": "beatsManagementConfigSchema",

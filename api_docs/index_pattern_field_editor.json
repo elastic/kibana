@@ -5,6 +5,7 @@
       {
         "id": "def-public.DefaultFormatEditor",
         "type": "Class",
+        "tags": [],
         "label": "DefaultFormatEditor",
         "description": [],
         "signature": [
@@ -23,6 +24,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DefaultFormatEditor.formatId",
             "type": "string",
             "label": "formatId",
@@ -34,6 +36,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.DefaultFormatEditor.state",
             "type": "CompoundType",
             "label": "state",
@@ -150,6 +153,7 @@
               "lineNumber": 92,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L92"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -185,8 +189,10 @@
         "type": "Interface",
         "label": "OpenFieldEditorOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.OpenFieldEditorOptions.ctx",
             "type": "Object",
             "label": "ctx",
@@ -209,6 +215,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OpenFieldEditorOptions.onSave",
             "type": "Function",
             "label": "onSave",
@@ -231,6 +238,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.OpenFieldEditorOptions.fieldName",
             "type": "string",
             "label": "fieldName",
@@ -257,8 +265,10 @@
         "type": "Interface",
         "label": "FieldEditorContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FieldEditorContext.indexPattern",
             "type": "Object",
             "label": "indexPattern",
@@ -279,6 +289,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldEditorContext.fieldTypeToProcess",
             "type": "CompoundType",
             "label": "fieldTypeToProcess",
@@ -301,6 +312,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FieldEditorContext.search",
             "type": "Object",
             "label": "search",
@@ -339,6 +351,7 @@
       "type": "Interface",
       "label": "PluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-public.PluginStart.openEditor",
@@ -387,6 +400,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-public.PluginStart.fieldFormatEditors",
           "type": "Object",
           "label": "fieldFormatEditors",
@@ -417,6 +431,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.PluginStart.userPermissions",
           "type": "Object",
           "label": "userPermissions",
@@ -431,6 +446,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.PluginStart.DeleteRuntimeFieldProvider",
           "type": "Function",
           "label": "DeleteRuntimeFieldProvider",

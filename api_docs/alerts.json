@@ -12,8 +12,10 @@
       "type": "Interface",
       "label": "PluginSetupContract",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.PluginSetupContract.registerNavigation",
           "type": "Function",
           "label": "registerNavigation",
@@ -36,6 +38,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.PluginSetupContract.registerDefaultNavigation",
           "type": "Function",
           "label": "registerDefaultNavigation",
@@ -71,8 +74,10 @@
       "type": "Interface",
       "label": "PluginStartContract",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.PluginStartContract.getNavigation",
           "type": "Function",
           "label": "getNavigation",
@@ -155,8 +160,10 @@
         "type": "Interface",
         "label": "ActionVariable",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionVariable.name",
             "type": "string",
             "label": "name",
@@ -168,6 +175,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionVariable.description",
             "type": "string",
             "label": "description",
@@ -179,6 +187,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ActionVariable.useWithTripleBracesInTemplates",
             "type": "CompoundType",
             "label": "useWithTripleBracesInTemplates",
@@ -215,8 +224,10 @@
           "<Params, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AlertType.id",
             "type": "string",
             "label": "id",
@@ -228,6 +239,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.name",
             "type": "string",
             "label": "name",
@@ -239,6 +251,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.validate",
             "type": "Object",
             "label": "validate",
@@ -261,6 +274,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.actionGroups",
             "type": "Array",
             "label": "actionGroups",
@@ -282,6 +296,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.defaultActionGroupId",
             "type": "Uncategorized",
             "label": "defaultActionGroupId",
@@ -296,6 +311,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.recoveryActionGroup",
             "type": "Object",
             "label": "recoveryActionGroup",
@@ -317,6 +333,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.executor",
             "type": "Function",
             "label": "executor",
@@ -346,6 +363,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.producer",
             "type": "string",
             "label": "producer",
@@ -357,6 +375,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.actionVariables",
             "type": "Object",
             "label": "actionVariables",
@@ -395,6 +414,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertType.minimumLicenseRequired",
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
@@ -431,8 +451,10 @@
           "<ActionGroupIds>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionGroup.id",
             "type": "Uncategorized",
             "label": "id",
@@ -447,6 +469,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ActionGroup.name",
             "type": "string",
             "label": "name",
@@ -470,8 +493,10 @@
         "type": "Interface",
         "label": "AlertingPlugin",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AlertingPlugin.setup",
             "type": "Object",
             "label": "setup",
@@ -492,6 +517,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertingPlugin.start",
             "type": "Object",
             "label": "start",
@@ -534,8 +560,10 @@
           "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.alertId",
             "type": "string",
             "label": "alertId",
@@ -547,6 +575,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.startedAt",
             "type": "Object",
             "label": "startedAt",
@@ -561,6 +590,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.previousStartedAt",
             "type": "CompoundType",
             "label": "previousStartedAt",
@@ -575,6 +605,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.services",
             "type": "Object",
             "label": "services",
@@ -596,6 +627,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.params",
             "type": "Uncategorized",
             "label": "params",
@@ -610,6 +642,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.state",
             "type": "Uncategorized",
             "label": "state",
@@ -624,6 +657,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.spaceId",
             "type": "string",
             "label": "spaceId",
@@ -635,6 +669,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -649,6 +684,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.name",
             "type": "string",
             "label": "name",
@@ -660,6 +696,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.tags",
             "type": "Array",
             "label": "tags",
@@ -674,6 +711,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.createdBy",
             "type": "CompoundType",
             "label": "createdBy",
@@ -688,6 +726,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertExecutorOptions.updatedBy",
             "type": "CompoundType",
             "label": "updatedBy",
@@ -725,8 +764,10 @@
           "Services"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AlertServices.alertInstanceFactory",
             "type": "Function",
             "label": "alertInstanceFactory",
@@ -761,8 +802,12 @@
         "type": "Interface",
         "label": "AlertingApiRequestHandlerContext",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AlertingApiRequestHandlerContext.getAlertsClient",
             "type": "Function",
             "label": "getAlertsClient",
@@ -784,6 +829,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertingApiRequestHandlerContext.listTypes",
             "type": "Function",
             "label": "listTypes",
@@ -806,6 +852,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AlertingApiRequestHandlerContext.getFrameworkHealth",
             "type": "Function",
             "label": "getFrameworkHealth",
@@ -840,6 +887,7 @@
         "type": "Interface",
         "label": "PluginSetupContract",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.PluginSetupContract.registerType",
@@ -901,8 +949,10 @@
         "type": "Interface",
         "label": "PluginStartContract",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PluginStartContract.listTypes",
             "type": "Function",
             "label": "listTypes",
@@ -980,6 +1030,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.PluginStartContract.getFrameworkHealth",
             "type": "Function",
             "label": "getFrameworkHealth",
@@ -1024,8 +1075,10 @@
           "<Params>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.FindResult.page",
             "type": "number",
             "label": "page",
@@ -1037,6 +1090,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FindResult.perPage",
             "type": "number",
             "label": "perPage",
@@ -1048,6 +1102,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FindResult.total",
             "type": "number",
             "label": "total",
@@ -1059,6 +1114,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FindResult.data",
             "type": "Array",
             "label": "data",
@@ -1095,6 +1151,7 @@
         "id": "def-server.AlertsClient",
         "type": "Type",
         "label": "AlertsClient",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/server/index.ts",
@@ -1137,6 +1194,7 @@
         "id": "def-server.ActionGroupIdsOf",
         "type": "Type",
         "label": "ActionGroupIdsOf",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_type.ts",
@@ -1152,6 +1210,7 @@
         "id": "def-server.AlertActionParams",
         "type": "Type",
         "label": "AlertActionParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -1167,6 +1226,7 @@
         "id": "def-server.AlertTypeState",
         "type": "Type",
         "label": "AlertTypeState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -1182,6 +1242,7 @@
         "id": "def-server.AlertTypeParams",
         "type": "Type",
         "label": "AlertTypeParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -1197,6 +1258,7 @@
         "id": "def-server.PartialAlert",
         "type": "Type",
         "label": "PartialAlert",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/server/types.ts",
@@ -1212,6 +1274,7 @@
         "id": "def-server.AlertInstanceState",
         "type": "Type",
         "label": "AlertInstanceState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -1227,6 +1290,7 @@
         "id": "def-server.AlertInstanceContext",
         "type": "Type",
         "label": "AlertInstanceContext",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -1242,6 +1306,7 @@
         "id": "def-server.PublicAlertInstance",
         "type": "Type",
         "label": "PublicAlertInstance",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/server/alert_instance/alert_instance.ts",
@@ -1542,8 +1607,10 @@
         "type": "Interface",
         "label": "AlertingFrameworkHealth",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertingFrameworkHealth.isSufficientlySecure",
             "type": "boolean",
             "label": "isSufficientlySecure",
@@ -1555,6 +1622,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertingFrameworkHealth.hasPermanentEncryptionKey",
             "type": "boolean",
             "label": "hasPermanentEncryptionKey",
@@ -1566,6 +1634,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHeath",
             "type": "Object",
             "label": "alertingFrameworkHeath",
@@ -1609,8 +1678,10 @@
           "SavedObjectAttributes"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IntervalSchedule.interval",
             "type": "string",
             "label": "interval",
@@ -1634,8 +1705,10 @@
         "type": "Interface",
         "label": "AlertExecutionStatus",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertExecutionStatus.status",
             "type": "CompoundType",
             "label": "status",
@@ -1650,6 +1723,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertExecutionStatus.lastExecutionDate",
             "type": "Object",
             "label": "lastExecutionDate",
@@ -1664,6 +1738,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertExecutionStatus.error",
             "type": "Object",
             "label": "error",
@@ -1698,8 +1773,10 @@
         "type": "Interface",
         "label": "AlertAction",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertAction.group",
             "type": "string",
             "label": "group",
@@ -1711,6 +1788,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertAction.id",
             "type": "string",
             "label": "id",
@@ -1722,6 +1800,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertAction.actionTypeId",
             "type": "string",
             "label": "actionTypeId",
@@ -1733,6 +1812,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertAction.params",
             "type": "Object",
             "label": "params",
@@ -1765,8 +1845,10 @@
         "type": "Interface",
         "label": "AlertAggregations",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertAggregations.alertExecutionStatus",
             "type": "Object",
             "label": "alertExecutionStatus",
@@ -1803,8 +1885,10 @@
           "<Params>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Alert.id",
             "type": "string",
             "label": "id",
@@ -1816,6 +1900,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.enabled",
             "type": "boolean",
             "label": "enabled",
@@ -1827,6 +1912,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.name",
             "type": "string",
             "label": "name",
@@ -1838,6 +1924,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.tags",
             "type": "Array",
             "label": "tags",
@@ -1852,6 +1939,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.alertTypeId",
             "type": "string",
             "label": "alertTypeId",
@@ -1863,6 +1951,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.consumer",
             "type": "string",
             "label": "consumer",
@@ -1874,6 +1963,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.schedule",
             "type": "Object",
             "label": "schedule",
@@ -1894,6 +1984,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.actions",
             "type": "Array",
             "label": "actions",
@@ -1915,6 +2006,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.params",
             "type": "Uncategorized",
             "label": "params",
@@ -1929,6 +2021,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.scheduledTaskId",
             "type": "string",
             "label": "scheduledTaskId",
@@ -1943,6 +2036,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.createdBy",
             "type": "CompoundType",
             "label": "createdBy",
@@ -1957,6 +2051,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.updatedBy",
             "type": "CompoundType",
             "label": "updatedBy",
@@ -1971,6 +2066,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.createdAt",
             "type": "Object",
             "label": "createdAt",
@@ -1985,6 +2081,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.updatedAt",
             "type": "Object",
             "label": "updatedAt",
@@ -1999,6 +2096,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.apiKey",
             "type": "CompoundType",
             "label": "apiKey",
@@ -2013,6 +2111,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.apiKeyOwner",
             "type": "CompoundType",
             "label": "apiKeyOwner",
@@ -2027,6 +2126,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.throttle",
             "type": "CompoundType",
             "label": "throttle",
@@ -2041,6 +2141,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.notifyWhen",
             "type": "CompoundType",
             "label": "notifyWhen",
@@ -2055,6 +2156,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.muteAll",
             "type": "boolean",
             "label": "muteAll",
@@ -2066,6 +2168,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Alert.mutedInstanceIds",
             "type": "Array",
             "label": "mutedInstanceIds",
@@ -2080,6 +2183,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Alert.executionStatus",
             "type": "Object",
             "label": "executionStatus",
@@ -2112,8 +2216,10 @@
         "type": "Interface",
         "label": "AlertsHealth",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertsHealth.decryptionHealth",
             "type": "Object",
             "label": "decryptionHealth",
@@ -2136,6 +2242,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertsHealth.executionHealth",
             "type": "Object",
             "label": "executionHealth",
@@ -2158,6 +2265,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertsHealth.readHealth",
             "type": "Object",
             "label": "readHealth",
@@ -2202,8 +2310,10 @@
           "<ActionGroupIds, RecoveryActionGroupId>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertType.id",
             "type": "string",
             "label": "id",
@@ -2215,6 +2325,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.name",
             "type": "string",
             "label": "name",
@@ -2226,6 +2337,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.actionGroups",
             "type": "Array",
             "label": "actionGroups",
@@ -2247,6 +2359,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.recoveryActionGroup",
             "type": "Object",
             "label": "recoveryActionGroup",
@@ -2268,6 +2381,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.actionVariables",
             "type": "Array",
             "label": "actionVariables",
@@ -2282,6 +2396,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.defaultActionGroupId",
             "type": "Uncategorized",
             "label": "defaultActionGroupId",
@@ -2296,6 +2411,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.producer",
             "type": "string",
             "label": "producer",
@@ -2307,6 +2423,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertType.minimumLicenseRequired",
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
@@ -2343,8 +2460,10 @@
           "<ActionGroupIds>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ActionGroup.id",
             "type": "Uncategorized",
             "label": "id",
@@ -2359,6 +2478,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ActionGroup.name",
             "type": "string",
             "label": "name",
@@ -2382,8 +2502,10 @@
         "type": "Interface",
         "label": "AlertUrlNavigation",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertUrlNavigation.path",
             "type": "string",
             "label": "path",
@@ -2407,8 +2529,10 @@
         "type": "Interface",
         "label": "AlertStateNavigation",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertStateNavigation.state",
             "type": "Object",
             "label": "state",
@@ -2441,8 +2565,10 @@
         "type": "Interface",
         "label": "AlertInstanceSummary",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.id",
             "type": "string",
             "label": "id",
@@ -2454,6 +2580,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.name",
             "type": "string",
             "label": "name",
@@ -2465,6 +2592,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.tags",
             "type": "Array",
             "label": "tags",
@@ -2479,6 +2607,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.alertTypeId",
             "type": "string",
             "label": "alertTypeId",
@@ -2490,6 +2619,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.consumer",
             "type": "string",
             "label": "consumer",
@@ -2501,6 +2631,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.muteAll",
             "type": "boolean",
             "label": "muteAll",
@@ -2512,6 +2643,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.throttle",
             "type": "CompoundType",
             "label": "throttle",
@@ -2526,6 +2658,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.enabled",
             "type": "boolean",
             "label": "enabled",
@@ -2537,6 +2670,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.statusStartDate",
             "type": "string",
             "label": "statusStartDate",
@@ -2548,6 +2682,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.statusEndDate",
             "type": "string",
             "label": "statusEndDate",
@@ -2559,6 +2694,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.status",
             "type": "CompoundType",
             "label": "status",
@@ -2579,6 +2715,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.lastRun",
             "type": "string",
             "label": "lastRun",
@@ -2593,6 +2730,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.errorMessages",
             "type": "Array",
             "label": "errorMessages",
@@ -2607,6 +2745,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceSummary.instances",
             "type": "Object",
             "label": "instances",
@@ -2641,8 +2780,10 @@
         "type": "Interface",
         "label": "AlertInstanceStatus",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.AlertInstanceStatus.status",
             "type": "CompoundType",
             "label": "status",
@@ -2663,6 +2804,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceStatus.muted",
             "type": "boolean",
             "label": "muted",
@@ -2674,6 +2816,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceStatus.actionGroupId",
             "type": "string",
             "label": "actionGroupId",
@@ -2688,6 +2831,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceStatus.actionSubgroup",
             "type": "string",
             "label": "actionSubgroup",
@@ -2702,6 +2846,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.AlertInstanceStatus.activeStartDate",
             "type": "string",
             "label": "activeStartDate",
@@ -2729,6 +2874,7 @@
         "id": "def-common.AlertExecutionStatusErrorReasons",
         "type": "Enum",
         "label": "AlertExecutionStatusErrorReasons",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2741,6 +2887,7 @@
         "id": "def-common.HealthStatus",
         "type": "Enum",
         "label": "HealthStatus",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2752,6 +2899,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.BASE_ALERT_API_PATH",
         "type": "string",
         "label": "BASE_ALERT_API_PATH",
@@ -2767,6 +2915,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.ALERTS_FEATURE_ID",
         "type": "string",
         "label": "ALERTS_FEATURE_ID",
@@ -2785,6 +2934,7 @@
         "id": "def-common.AlertTypeState",
         "type": "Type",
         "label": "AlertTypeState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2800,6 +2950,7 @@
         "id": "def-common.AlertTypeParams",
         "type": "Type",
         "label": "AlertTypeParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2815,6 +2966,7 @@
         "id": "def-common.AlertExecutionStatuses",
         "type": "Type",
         "label": "AlertExecutionStatuses",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2830,6 +2982,7 @@
         "id": "def-common.AlertActionParams",
         "type": "Type",
         "label": "AlertActionParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2845,6 +2998,7 @@
         "id": "def-common.AlertActionParam",
         "type": "Type",
         "label": "AlertActionParam",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2864,6 +3018,7 @@
         "id": "def-common.SanitizedAlert",
         "type": "Type",
         "label": "SanitizedAlert",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2879,6 +3034,7 @@
         "id": "def-common.ActionGroupIdsOf",
         "type": "Type",
         "label": "ActionGroupIdsOf",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_type.ts",
@@ -2894,6 +3050,7 @@
         "id": "def-common.AlertInstanceMeta",
         "type": "Type",
         "label": "AlertInstanceMeta",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -2909,6 +3066,7 @@
         "id": "def-common.AlertInstanceState",
         "type": "Type",
         "label": "AlertInstanceState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -2924,6 +3082,7 @@
         "id": "def-common.AlertInstanceContext",
         "type": "Type",
         "label": "AlertInstanceContext",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -2939,6 +3098,7 @@
         "id": "def-common.RawAlertInstance",
         "type": "Type",
         "label": "RawAlertInstance",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance.ts",
@@ -2954,6 +3114,7 @@
         "id": "def-common.AlertTaskState",
         "type": "Type",
         "label": "AlertTaskState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
@@ -2969,6 +3130,7 @@
         "id": "def-common.AlertTaskParams",
         "type": "Type",
         "label": "AlertTaskParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
@@ -2984,6 +3146,7 @@
         "id": "def-common.AlertNavigation",
         "type": "Type",
         "label": "AlertNavigation",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
@@ -3013,6 +3176,7 @@
         "id": "def-common.AlertStatusValues",
         "type": "Type",
         "label": "AlertStatusValues",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
@@ -3028,6 +3192,7 @@
         "id": "def-common.AlertInstanceStatusValues",
         "type": "Type",
         "label": "AlertInstanceStatusValues",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
@@ -3043,6 +3208,7 @@
         "id": "def-common.DefaultActionGroupId",
         "type": "Type",
         "label": "DefaultActionGroupId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
@@ -3058,6 +3224,7 @@
         "id": "def-common.RecoveredActionGroupId",
         "type": "Type",
         "label": "RecoveredActionGroupId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
@@ -3073,6 +3240,7 @@
         "id": "def-common.ReservedActionGroups",
         "type": "Type",
         "label": "ReservedActionGroups",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
@@ -3088,6 +3256,7 @@
         "id": "def-common.WithoutReservedActionGroups",
         "type": "Type",
         "label": "WithoutReservedActionGroups",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
@@ -3103,6 +3272,7 @@
         "id": "def-common.AlertNotifyWhenType",
         "type": "Type",
         "label": "AlertNotifyWhenType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert_notify_when_type.ts",
@@ -3117,6 +3287,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.AlertExecutionStatusValues",
         "type": "Object",
         "label": "AlertExecutionStatusValues",
@@ -3132,6 +3303,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.rawAlertInstance",
         "type": "Object",
         "label": "rawAlertInstance",
@@ -3155,6 +3327,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.alertStateSchema",
         "type": "Object",
         "label": "alertStateSchema",
@@ -3178,6 +3351,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.alertParamsSchema",
         "type": "Object",
         "label": "alertParamsSchema",
@@ -3201,6 +3375,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.RecoveredActionGroup",
         "type": "Object",
         "label": "RecoveredActionGroup",
@@ -3224,6 +3399,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DisabledActionTypeIdsForActionGroup",
         "type": "Object",
         "label": "DisabledActionTypeIdsForActionGroup",

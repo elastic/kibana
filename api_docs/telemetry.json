@@ -12,8 +12,10 @@
       "type": "Interface",
       "label": "TelemetryPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.TelemetryPluginStart.telemetryService",
           "type": "Object",
           "label": "telemetryService",
@@ -34,6 +36,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TelemetryPluginStart.telemetryNotifications",
           "type": "Object",
           "label": "telemetryNotifications",
@@ -54,6 +57,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TelemetryPluginStart.telemetryConstants",
           "type": "Object",
           "label": "telemetryConstants",
@@ -81,8 +85,10 @@
       "type": "Interface",
       "label": "TelemetryPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.TelemetryPluginSetup.telemetryService",
           "type": "Object",
           "label": "telemetryService",
@@ -117,6 +123,7 @@
       {
         "id": "def-server.FetcherTask",
         "type": "Class",
+        "tags": [],
         "label": "FetcherTask",
         "description": [],
         "children": [
@@ -376,6 +383,7 @@
           "lineNumber": 25,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/telemetry_collection/get_cluster_stats.ts#L25"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -471,6 +479,7 @@
           "lineNumber": 58,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry/server/telemetry_collection/get_local_stats.ts#L58"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -536,8 +545,10 @@
         "type": "Interface",
         "label": "DataTelemetryIndex",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.name",
             "type": "string",
             "label": "name",
@@ -549,6 +560,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.packageName",
             "type": "string",
             "label": "packageName",
@@ -563,6 +575,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.managedBy",
             "type": "string",
             "label": "managedBy",
@@ -577,6 +590,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.dataStreamDataset",
             "type": "string",
             "label": "dataStreamDataset",
@@ -591,6 +605,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.dataStreamType",
             "type": "string",
             "label": "dataStreamType",
@@ -605,6 +620,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.shipper",
             "type": "string",
             "label": "shipper",
@@ -619,6 +635,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.isECS",
             "type": "CompoundType",
             "label": "isECS",
@@ -633,6 +650,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.docCount",
             "type": "number",
             "label": "docCount",
@@ -647,6 +665,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataTelemetryIndex.sizeInBytes",
             "type": "number",
             "label": "sizeInBytes",
@@ -675,6 +694,7 @@
         "id": "def-server.TelemetryLocalStats",
         "type": "Type",
         "label": "TelemetryLocalStats",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
@@ -687,6 +707,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.DATA_TELEMETRY_ID",
         "type": "string",
         "label": "DATA_TELEMETRY_ID",
@@ -705,6 +726,7 @@
         "id": "def-server.DataTelemetryPayload",
         "type": "Type",
         "label": "DataTelemetryPayload",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
@@ -723,8 +745,10 @@
       "type": "Interface",
       "label": "TelemetryPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.TelemetryPluginSetup.getTelemetryUrl",
           "type": "Function",
           "label": "getTelemetryUrl",
@@ -756,8 +780,10 @@
       "type": "Interface",
       "label": "TelemetryPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.TelemetryPluginStart.getIsOptedIn",
           "type": "Function",
           "label": "getIsOptedIn",

@@ -42,6 +42,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -52,6 +53,7 @@
         "id": "def-public.InfraFormatterType",
         "type": "Enum",
         "label": "InfraFormatterType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/public/lib/lib.ts",
@@ -66,6 +68,7 @@
         "id": "def-public.InfraAppId",
         "type": "Type",
         "label": "InfraAppId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/public/index.ts",
@@ -82,8 +85,10 @@
       {
         "id": "def-public.FORMATTERS",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.number",
             "type": "Function",
             "label": "number",
@@ -98,6 +103,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.abbreviatedNumber",
             "type": "Function",
             "label": "abbreviatedNumber",
@@ -114,6 +120,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.bytes",
             "type": "Function",
             "label": "bytes",
@@ -130,6 +137,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.bits",
             "type": "Function",
             "label": "bits",
@@ -146,6 +154,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.percent",
             "type": "Function",
             "label": "percent",
@@ -160,6 +169,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FORMATTERS.highPercision",
             "type": "Function",
             "label": "highPercision",
@@ -195,6 +205,7 @@
         "id": "def-server.InfraConfig",
         "type": "Type",
         "label": "InfraConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/server/plugin.ts",
@@ -213,8 +224,10 @@
       "type": "Interface",
       "label": "InfraPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration",
           "type": "Function",
           "label": "defineInternalSourceConfiguration",

@@ -17,8 +17,10 @@
         "type": "Interface",
         "label": "IBulkUploader",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.IBulkUploader.getKibanaStats",
             "type": "Function",
             "label": "getKibanaStats",
@@ -33,6 +35,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.IBulkUploader.stop",
             "type": "Function",
             "label": "stop",
@@ -61,6 +64,7 @@
         "id": "def-server.KibanaSettingsCollector",
         "type": "Type",
         "label": "KibanaSettingsCollector",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
@@ -76,6 +80,7 @@
         "id": "def-server.MonitoringConfig",
         "type": "Type",
         "label": "MonitoringConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/config.ts",
@@ -96,8 +101,10 @@
       "type": "Interface",
       "label": "MonitoringPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.MonitoringPluginSetup.getKibanaStats",
           "type": "Function",
           "label": "getKibanaStats",

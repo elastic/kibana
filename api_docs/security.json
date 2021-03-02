@@ -16,8 +16,10 @@
         "description": [
           "\nRepresents the currently authenticated user."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AuthenticatedUser.authentication_realm",
             "type": "Object",
             "label": "authentication_realm",
@@ -40,6 +42,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AuthenticatedUser.lookup_realm",
             "type": "Object",
             "label": "lookup_realm",
@@ -62,6 +65,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AuthenticatedUser.authentication_provider",
             "type": "Object",
             "label": "authentication_provider",
@@ -84,6 +88,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.AuthenticatedUser.authentication_type",
             "type": "string",
             "label": "authentication_type",
@@ -109,6 +116,7 @@
         "type": "Interface",
         "label": "SecurityLicense",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.SecurityLicense.isLicenseAvailable",
@@ -186,6 +194,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicense.features$",
             "type": "Object",
             "label": "features$",
@@ -223,8 +232,10 @@
         "description": [
           "\nDescribes Security plugin features that depend on license."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.showLogin",
             "type": "boolean",
             "label": "showLogin",
@@ -238,6 +249,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowLogin",
             "type": "boolean",
             "label": "allowLogin",
@@ -251,6 +263,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.showLinks",
             "type": "boolean",
             "label": "showLinks",
@@ -264,6 +277,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.showRoleMappingsManagement",
             "type": "boolean",
             "label": "showRoleMappingsManagement",
@@ -277,6 +291,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowAccessAgreement",
             "type": "boolean",
             "label": "allowAccessAgreement",
@@ -290,6 +305,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowAuditLogging",
             "type": "boolean",
             "label": "allowAuditLogging",
@@ -303,6 +319,9 @@
             }
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-public.SecurityLicenseFeatures.allowLegacyAuditLogging",
             "type": "boolean",
             "label": "allowLegacyAuditLogging",
@@ -316,6 +335,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowRoleDocumentLevelSecurity",
             "type": "boolean",
             "label": "allowRoleDocumentLevelSecurity",
@@ -329,6 +349,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowRoleFieldLevelSecurity",
             "type": "boolean",
             "label": "allowRoleFieldLevelSecurity",
@@ -342,6 +363,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "label": "allowRbac",
@@ -355,6 +377,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.allowSubFeaturePrivileges",
             "type": "boolean",
             "label": "allowSubFeaturePrivileges",
@@ -368,6 +391,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SecurityLicenseFeatures.layout",
             "type": "CompoundType",
             "label": "layout",
@@ -396,8 +420,10 @@
         "type": "Interface",
         "label": "UserMenuLink",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UserMenuLink.label",
             "type": "string",
             "label": "label",
@@ -409,6 +435,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UserMenuLink.iconType",
             "type": "CompoundType",
             "label": "iconType",
@@ -423,6 +450,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UserMenuLink.href",
             "type": "string",
             "label": "href",
@@ -434,6 +462,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UserMenuLink.order",
             "type": "number",
             "label": "order",
@@ -463,6 +492,7 @@
       "id": "def-public.SecurityPluginSetup",
       "type": "Type",
       "label": "SecurityPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
@@ -485,6 +515,7 @@
       "id": "def-public.SecurityPluginStart",
       "type": "Type",
       "label": "SecurityPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
@@ -511,8 +542,10 @@
         "description": [
           "\nThe return value when creating an API key in Elasticsearch. The API key returned by this API\ncan then be used by sending a request with a Authorization header with a value having the\nprefix ApiKey `{token}` where token is id and api_key joined by a colon `{id}:{api_key}` and\nthen encoded to base64."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CreateAPIKeyResult.id",
             "type": "string",
             "label": "id",
@@ -526,6 +559,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateAPIKeyResult.name",
             "type": "string",
             "label": "name",
@@ -539,6 +573,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateAPIKeyResult.expiration",
             "type": "number",
             "label": "expiration",
@@ -555,6 +590,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateAPIKeyResult.api_key",
             "type": "string",
             "label": "api_key",
@@ -582,8 +618,10 @@
         "description": [
           "\nRepresents the params for invalidating multiple API keys"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.InvalidateAPIKeysParams.ids",
             "type": "Array",
             "label": "ids",
@@ -612,8 +650,10 @@
         "description": [
           "\nThe return value when invalidating an API key in Elasticsearch."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.InvalidateAPIKeyResult.invalidated_api_keys",
             "type": "Array",
             "label": "invalidated_api_keys",
@@ -630,6 +670,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.InvalidateAPIKeyResult.previously_invalidated_api_keys",
             "type": "Array",
             "label": "previously_invalidated_api_keys",
@@ -646,6 +687,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.InvalidateAPIKeyResult.error_count",
             "type": "number",
             "label": "error_count",
@@ -659,6 +701,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.InvalidateAPIKeyResult.error_details",
             "type": "Array",
             "label": "error_details",
@@ -687,8 +730,10 @@
         "type": "Interface",
         "label": "GrantAPIKeyResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GrantAPIKeyResult.id",
             "type": "string",
             "label": "id",
@@ -702,6 +747,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GrantAPIKeyResult.name",
             "type": "string",
             "label": "name",
@@ -715,6 +761,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GrantAPIKeyResult.api_key",
             "type": "string",
             "label": "api_key",
@@ -740,8 +787,12 @@
         "type": "Interface",
         "label": "LegacyAuditLogger",
         "description": [],
+        "tags": [
+          "deprecated"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.LegacyAuditLogger.log",
             "type": "Function",
             "label": "log",
@@ -768,8 +819,10 @@
         "type": "Interface",
         "label": "AuditLogger",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuditLogger.log",
             "type": "Function",
             "label": "log",
@@ -806,8 +859,14 @@
         "description": [
           "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.AuditEvent.message",
             "type": "string",
             "label": "message",
@@ -821,6 +880,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.event",
             "type": "Object",
             "label": "event",
@@ -859,6 +919,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.user",
             "type": "Object",
             "label": "user",
@@ -873,6 +934,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.kibana",
             "type": "Object",
             "label": "kibana",
@@ -887,6 +949,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.error",
             "type": "Object",
             "label": "error",
@@ -901,6 +964,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.http",
             "type": "Object",
             "label": "http",
@@ -915,6 +979,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuditEvent.url",
             "type": "Object",
             "label": "url",
@@ -943,8 +1008,12 @@
         "description": [
           "\nDescribes public Security plugin contract returned at the `setup` stage."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.SecurityPluginSetup.authc",
             "type": "Object",
             "label": "authc",
@@ -975,6 +1044,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.SecurityPluginSetup.authz",
             "type": "Object",
             "label": "authz",
@@ -997,6 +1069,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SecurityPluginSetup.license",
             "type": "Object",
             "label": "license",
@@ -1017,6 +1090,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SecurityPluginSetup.audit",
             "type": "Object",
             "label": "audit",
@@ -1051,8 +1125,10 @@
         "description": [
           "\nDescribes public Security plugin contract returned at the `start` stage."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SecurityPluginStart.authc",
             "type": "Object",
             "label": "authc",
@@ -1075,6 +1151,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SecurityPluginStart.authz",
             "type": "Object",
             "label": "authz",
@@ -1116,8 +1193,10 @@
         "description": [
           "\nRepresents the currently authenticated user."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthenticatedUser.authentication_realm",
             "type": "Object",
             "label": "authentication_realm",
@@ -1140,6 +1219,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthenticatedUser.lookup_realm",
             "type": "Object",
             "label": "lookup_realm",
@@ -1162,6 +1242,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthenticatedUser.authentication_provider",
             "type": "Object",
             "label": "authentication_provider",
@@ -1184,6 +1265,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.AuthenticatedUser.authentication_type",
             "type": "string",
             "label": "authentication_type",
@@ -1210,6 +1294,7 @@
         "id": "def-server.EventCategory",
         "type": "Enum",
         "label": "EventCategory",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
@@ -1222,6 +1307,7 @@
         "id": "def-server.EventType",
         "type": "Enum",
         "label": "EventType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",
@@ -1234,6 +1320,7 @@
         "id": "def-server.EventOutcome",
         "type": "Enum",
         "label": "EventOutcome",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/security/server/audit/audit_events.ts",

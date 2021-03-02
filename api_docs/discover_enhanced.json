@@ -5,6 +5,7 @@
       {
         "id": "def-public.ExploreDataContextMenuAction",
         "type": "Class",
+        "tags": [],
         "label": "ExploreDataContextMenuAction",
         "description": [
           "\nThis is \"Explore underlying data\" action which appears in the context\nmenu of a dashboard panel."
@@ -31,6 +32,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExploreDataContextMenuAction.id",
             "type": "string",
             "label": "id",
@@ -45,6 +47,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExploreDataContextMenuAction.type",
             "type": "string",
             "label": "type",
@@ -59,6 +62,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExploreDataContextMenuAction.order",
             "type": "number",
             "label": "order",
@@ -109,6 +113,7 @@
               "lineNumber": 43,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L43"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -122,6 +127,7 @@
       {
         "id": "def-public.ExploreDataChartAction",
         "type": "Class",
+        "tags": [],
         "label": "ExploreDataChartAction",
         "description": [
           "\nThis is \"Explore underlying data\" action which appears in popup context\nmenu when user clicks a value in visualization or brushes a time range."
@@ -151,6 +157,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExploreDataChartAction.id",
             "type": "string",
             "label": "id",
@@ -165,6 +172,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExploreDataChartAction.type",
             "type": "string",
             "label": "type",
@@ -179,6 +187,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExploreDataChartAction.order",
             "type": "number",
             "label": "order",
@@ -289,6 +298,7 @@
               "lineNumber": 46,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L46"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -302,6 +312,7 @@
       {
         "id": "def-public.DiscoverEnhancedPlugin",
         "type": "Class",
+        "tags": [],
         "label": "DiscoverEnhancedPlugin",
         "description": [],
         "signature": [
@@ -340,6 +351,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedPlugin.config",
             "type": "Object",
             "label": "config",
@@ -596,8 +608,10 @@
         "type": "Interface",
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedSetupDependencies.discover",
             "type": "Object",
             "label": "discover",
@@ -618,6 +632,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedSetupDependencies.embeddable",
             "type": "Object",
             "label": "embeddable",
@@ -638,6 +653,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedSetupDependencies.kibanaLegacy",
             "type": "Object",
             "label": "kibanaLegacy",
@@ -652,6 +668,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedSetupDependencies.share",
             "type": "CompoundType",
             "label": "share",
@@ -673,6 +690,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedSetupDependencies.uiActions",
             "type": "Object",
             "label": "uiActions",
@@ -707,8 +725,10 @@
         "type": "Interface",
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedStartDependencies.discover",
             "type": "Object",
             "label": "discover",
@@ -729,6 +749,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedStartDependencies.embeddable",
             "type": "Object",
             "label": "embeddable",
@@ -749,6 +770,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedStartDependencies.kibanaLegacy",
             "type": "Object",
             "label": "kibanaLegacy",
@@ -771,6 +793,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedStartDependencies.share",
             "type": "CompoundType",
             "label": "share",
@@ -792,6 +815,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DiscoverEnhancedStartDependencies.uiActions",
             "type": "Object",
             "label": "uiActions",
@@ -853,8 +877,10 @@
         "type": "Interface",
         "label": "Config",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Config.actions",
             "type": "Object",
             "label": "actions",

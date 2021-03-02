@@ -13,6 +13,7 @@
       {
         "id": "def-server.DashboardModeServerPlugin",
         "type": "Class",
+        "tags": [],
         "label": "DashboardModeServerPlugin",
         "description": [],
         "signature": [
@@ -222,8 +223,10 @@
       {
         "id": "def-common.UI_SETTINGS",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.UI_SETTINGS.CONFIG_DASHBOARD_ONLY_MODE_ROLES",
             "type": "string",
             "label": "CONFIG_DASHBOARD_ONLY_MODE_ROLES",

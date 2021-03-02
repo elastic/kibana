@@ -20,8 +20,10 @@
       "type": "Interface",
       "label": "VisTypeTimeseriesSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.VisTypeTimeseriesSetup.getVisData",
           "type": "Function",
           "label": "getVisData",

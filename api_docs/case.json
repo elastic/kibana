@@ -17,8 +17,10 @@
         "type": "Interface",
         "label": "CaseRequestContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CaseRequestContext.getCaseClient",
             "type": "Function",
             "label": "getCaseClient",

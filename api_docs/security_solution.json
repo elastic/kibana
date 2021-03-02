@@ -5,6 +5,7 @@
       {
         "id": "def-public.Plugin",
         "type": "Class",
+        "tags": [],
         "label": "Plugin",
         "description": [],
         "signature": [
@@ -288,8 +289,10 @@
       "type": "Interface",
       "label": "PluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.PluginSetup.resolver",
           "type": "Function",
           "label": "resolver",
@@ -325,6 +328,7 @@
       "type": "Interface",
       "label": "PluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
@@ -340,6 +344,7 @@
       {
         "id": "def-server.Plugin",
         "type": "Class",
+        "tags": [],
         "label": "Plugin",
         "description": [],
         "signature": [
@@ -608,6 +613,7 @@
       {
         "id": "def-server.AppClient",
         "type": "Class",
+        "tags": [],
         "label": "AppClient",
         "description": [],
         "children": [
@@ -671,6 +677,7 @@
               "lineNumber": 19,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L19"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -739,6 +746,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -794,6 +802,7 @@
           "lineNumber": 10,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts#L10"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -867,6 +876,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -936,6 +946,7 @@
           "lineNumber": 10,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts#L10"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1009,6 +1020,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1068,6 +1080,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1123,6 +1136,7 @@
           "lineNumber": 10,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts#L10"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1178,6 +1192,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1233,6 +1248,7 @@
           "lineNumber": 10,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts#L10"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1277,6 +1293,7 @@
           "lineNumber": 30,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts#L30"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1318,6 +1335,7 @@
           "lineNumber": 29,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L29"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1404,6 +1422,7 @@
           "lineNumber": 291,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L291"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1459,6 +1478,7 @@
           "lineNumber": 10,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts#L10"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1469,8 +1489,10 @@
         "type": "Interface",
         "label": "AppRequestContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AppRequestContext.getAppClient",
             "type": "Function",
             "label": "getAppClient",
@@ -1506,6 +1528,7 @@
         "id": "def-server.ConfigType",
         "type": "Type",
         "label": "ConfigType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/server/config.ts",
@@ -1524,6 +1547,7 @@
       "type": "Interface",
       "label": "PluginSetup",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
@@ -1538,6 +1562,7 @@
       "type": "Interface",
       "label": "PluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
@@ -1590,6 +1615,7 @@
           "lineNumber": 16,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts#L16"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1649,6 +1675,7 @@
           "lineNumber": 29,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/exact_check.ts#L29"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1690,10 +1717,12 @@
           "lineNumber": 36,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L36"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.foldLeftRight",
         "type": "Function",
         "label": "foldLeftRight",
@@ -1743,6 +1772,7 @@
           "lineNumber": 49,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L49"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1793,6 +1823,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1843,6 +1874,7 @@
           "lineNumber": 29,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L29"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1877,6 +1909,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/format_errors.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1956,6 +1989,7 @@
           "lineNumber": 12,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts#L12"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2035,6 +2069,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2067,6 +2102,7 @@
           "lineNumber": 20,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L20"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2101,6 +2137,7 @@
           "lineNumber": 33,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L33"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2112,6 +2149,7 @@
         "id": "def-common.DefaultVersionNumberDecoded",
         "type": "Type",
         "label": "DefaultVersionNumberDecoded",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
@@ -2126,6 +2164,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.NonEmptyString",
         "type": "Object",
         "label": "NonEmptyString",
@@ -2144,6 +2183,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DefaultUuid",
         "type": "Object",
         "label": "DefaultUuid",
@@ -2162,6 +2202,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DefaultStringArray",
         "type": "Object",
         "label": "DefaultStringArray",
@@ -2180,6 +2221,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DefaultVersionNumber",
         "type": "Object",
         "label": "DefaultVersionNumber",

@@ -12,8 +12,10 @@
       "type": "Interface",
       "label": "RemoteClustersPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.RemoteClustersPluginSetup.isUiEnabled",
           "type": "boolean",
           "label": "isUiEnabled",
@@ -46,8 +48,10 @@
       "type": "Interface",
       "label": "RemoteClustersPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.RemoteClustersPluginSetup.isUiEnabled",
           "type": "boolean",
           "label": "isUiEnabled",

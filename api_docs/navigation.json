@@ -5,6 +5,7 @@
       {
         "id": "def-public.NavigationPublicPlugin",
         "type": "Class",
+        "tags": [],
         "label": "NavigationPublicPlugin",
         "description": [],
         "signature": [
@@ -297,8 +298,10 @@
         "type": "Interface",
         "label": "TopNavMenuData",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.id",
             "type": "string",
             "label": "id",
@@ -313,6 +316,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.label",
             "type": "string",
             "label": "label",
@@ -324,6 +328,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.run",
             "type": "Function",
             "label": "run",
@@ -344,6 +349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.description",
             "type": "string",
             "label": "description",
@@ -358,6 +364,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.testId",
             "type": "string",
             "label": "testId",
@@ -372,6 +379,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.className",
             "type": "string",
             "label": "className",
@@ -386,6 +394,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.disableButton",
             "type": "CompoundType",
             "label": "disableButton",
@@ -400,6 +409,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.tooltip",
             "type": "CompoundType",
             "label": "tooltip",
@@ -414,6 +424,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.emphasize",
             "type": "CompoundType",
             "label": "emphasize",
@@ -428,6 +439,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.isLoading",
             "type": "CompoundType",
             "label": "isLoading",
@@ -442,6 +454,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.iconType",
             "type": "string",
             "label": "iconType",
@@ -456,6 +469,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TopNavMenuData.iconSide",
             "type": "CompoundType",
             "label": "iconSide",
@@ -484,6 +498,7 @@
         "id": "def-public.TopNavMenuProps",
         "type": "Type",
         "label": "TopNavMenuProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
@@ -510,8 +525,10 @@
       "type": "Interface",
       "label": "NavigationPublicPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.NavigationPublicPluginSetup.registerMenuItem",
           "type": "Function",
           "label": "registerMenuItem",
@@ -547,8 +564,10 @@
       "type": "Interface",
       "label": "NavigationPublicPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.NavigationPublicPluginStart.ui",
           "type": "Object",
           "label": "ui",

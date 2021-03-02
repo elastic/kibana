@@ -5,6 +5,7 @@
       {
         "id": "def-public.AdvancedUiActionsPublicPlugin",
         "type": "Class",
+        "tags": [],
         "label": "AdvancedUiActionsPublicPlugin",
         "description": [],
         "signature": [
@@ -44,6 +45,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AdvancedUiActionsPublicPlugin.licenseInfo",
             "type": "Object",
             "label": "licenseInfo",
@@ -298,6 +300,7 @@
       {
         "id": "def-public.ActionFactory",
         "type": "Class",
+        "tags": [],
         "label": "ActionFactory",
         "description": [],
         "signature": [
@@ -402,6 +405,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.id",
             "type": "string",
             "label": "id",
@@ -413,6 +417,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.isBeta",
             "type": "boolean",
             "label": "isBeta",
@@ -424,6 +429,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.minimalLicense",
             "type": "CompoundType",
             "label": "minimalLicense",
@@ -438,6 +444,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.licenseFeatureName",
             "type": "string",
             "label": "licenseFeatureName",
@@ -452,6 +459,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.order",
             "type": "number",
             "label": "order",
@@ -463,6 +471,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.MenuItem",
             "type": "Function",
             "label": "MenuItem",
@@ -484,6 +493,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.ReactMenuItem",
             "type": "Function",
             "label": "ReactMenuItem",
@@ -498,6 +508,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.CollectConfig",
             "type": "Function",
             "label": "CollectConfig",
@@ -527,6 +538,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.ReactCollectConfig",
             "type": "Function",
             "label": "ReactCollectConfig",
@@ -549,6 +561,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.createConfig",
             "type": "Function",
             "label": "createConfig",
@@ -563,6 +576,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.isConfigValid",
             "type": "Function",
             "label": "isConfigValid",
@@ -577,6 +591,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactory.migrations",
             "type": "Object",
             "label": "migrations",
@@ -1031,6 +1046,7 @@
       {
         "id": "def-public.AbstractActionStorage",
         "type": "Class",
+        "tags": [],
         "label": "AbstractActionStorage",
         "description": [],
         "signature": [
@@ -1046,6 +1062,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AbstractActionStorage.reload$",
             "type": "CompoundType",
             "label": "reload$",
@@ -1279,10 +1296,12 @@
       {
         "id": "def-public.DynamicActionManager",
         "type": "Class",
+        "tags": [],
         "label": "DynamicActionManager",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DynamicActionManager.idPrefixCounter",
             "type": "number",
             "label": "idPrefixCounter",
@@ -1294,6 +1313,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.DynamicActionManager.ui",
             "type": "Object",
             "label": "ui",
@@ -1544,6 +1564,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.DynamicActionManager.state",
             "type": "Object",
             "label": "state",
@@ -1877,6 +1898,7 @@
       {
         "id": "def-public.MemoryActionStorage",
         "type": "Class",
+        "tags": [],
         "label": "MemoryActionStorage",
         "description": [
           "\nThis is an in-memory implementation of ActionStorage. It is used in testing,\nbut can also be used production code to store events in memory."
@@ -2161,6 +2183,7 @@
           "lineNumber": 89,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2203,6 +2226,7 @@
           "lineNumber": 19,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2452,8 +2476,10 @@
         "description": [
           "\nThis is a convenience interface for registering new action factories."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ActionFactoryDefinition.id",
             "type": "string",
             "label": "id",
@@ -2467,6 +2493,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactoryDefinition.minimalLicense",
             "type": "CompoundType",
             "label": "minimalLicense",
@@ -2483,6 +2510,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactoryDefinition.licenseFeatureName",
             "type": "string",
             "label": "licenseFeatureName",
@@ -2499,6 +2527,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ActionFactoryDefinition.isBeta",
             "type": "CompoundType",
             "label": "isBeta",
@@ -2602,8 +2631,10 @@
         "type": "Interface",
         "label": "DynamicActionManagerParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DynamicActionManagerParams.storage",
             "type": "Object",
             "label": "storage",
@@ -2624,6 +2655,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DynamicActionManagerParams.uiActions",
             "type": "Object",
             "label": "uiActions",
@@ -2646,6 +2678,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DynamicActionManagerParams.isCompatible",
             "type": "Function",
             "label": "isCompatible",
@@ -2674,8 +2707,10 @@
         "description": [
           "\nAction factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.BaseActionFactoryContext.triggers",
             "type": "Array",
             "label": "triggers",
@@ -2730,8 +2765,10 @@
         "description": [
           "\nThis is a convenience interface to register a drilldown. Drilldown has\nability to collect configuration from user. Once drilldown is executed it\nreceives the collected information together with the context of the\nuser's interaction.\n\n`Config` is a serializable object containing the configuration that the\ndrilldown is able to collect using UI.\n\n`ExecutionContext` is an object created in response to user's interaction\nand provided to the `execute` function of the drilldown. This object contains\ninformation about the action user performed."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.id",
             "type": "string",
             "label": "id",
@@ -2745,6 +2782,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.isBeta",
             "type": "CompoundType",
             "label": "isBeta",
@@ -2761,6 +2799,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.minimalLicense",
             "type": "CompoundType",
             "label": "minimalLicense",
@@ -2777,6 +2816,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.licenseFeatureName",
             "type": "string",
             "label": "licenseFeatureName",
@@ -2793,6 +2833,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.order",
             "type": "number",
             "label": "order",
@@ -2809,6 +2850,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.createConfig",
             "type": "Function",
             "label": "createConfig",
@@ -2825,6 +2867,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.CollectConfig",
             "type": "Function",
             "label": "CollectConfig",
@@ -2856,6 +2899,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.isConfigValid",
             "type": "Function",
             "label": "isConfigValid",
@@ -2872,6 +2916,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.euiIcon",
             "type": "string",
             "label": "euiIcon",
@@ -2888,6 +2933,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DrilldownDefinition.getDisplayName",
             "type": "Function",
             "label": "getDisplayName",
@@ -3133,8 +3179,10 @@
         "description": [
           "\nGlobal static variables like, for example, `kibanaUrl`\nSuch variables won’t change depending on a place where url drilldown is used."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlDrilldownGlobalScope.kibanaUrl",
             "type": "string",
             "label": "kibanaUrl",
@@ -3177,8 +3225,10 @@
         "description": [
           "\nURL drilldown has 3 sources for variables: global, context and event variables"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlDrilldownScope.context",
             "type": "Uncategorized",
             "label": "context",
@@ -3195,6 +3245,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlDrilldownScope.event",
             "type": "Uncategorized",
             "label": "event",
@@ -3225,6 +3276,7 @@
         "id": "def-public.SerializedAction",
         "type": "Type",
         "label": "SerializedAction",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3240,6 +3292,7 @@
         "id": "def-public.SerializedEvent",
         "type": "Type",
         "label": "SerializedEvent",
+        "tags": [],
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
@@ -3257,6 +3310,7 @@
         "id": "def-public.DynamicActionManagerState",
         "type": "Type",
         "label": "DynamicActionManagerState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -3272,6 +3326,7 @@
         "id": "def-public.BaseActionConfig",
         "type": "Type",
         "label": "BaseActionConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3295,6 +3350,7 @@
         "id": "def-public.DynamicActionsState",
         "type": "Type",
         "label": "DynamicActionsState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3310,6 +3366,7 @@
         "id": "def-public.UrlDrilldownConfig",
         "type": "Type",
         "label": "UrlDrilldownConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
@@ -3348,6 +3405,7 @@
         ", \"registerDrilldown\">"
       ],
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
@@ -3391,8 +3449,10 @@
         "UiActionsServiceEnhancements"
       ],
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.StartContract.FlyoutManageDrilldowns",
           "type": "Function",
           "label": "FlyoutManageDrilldowns",
@@ -3429,6 +3489,7 @@
       {
         "id": "def-server.AdvancedUiActionsServerPlugin",
         "type": "Class",
+        "tags": [],
         "label": "AdvancedUiActionsServerPlugin",
         "description": [],
         "signature": [
@@ -3459,6 +3520,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AdvancedUiActionsServerPlugin.actionFactories",
             "type": "Object",
             "label": "actionFactories",
@@ -3668,6 +3730,7 @@
               "lineNumber": 48,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3704,8 +3767,10 @@
           "<P>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionFactoryDefinition.id",
             "type": "string",
             "label": "id",
@@ -3747,8 +3812,10 @@
           "<P>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ActionFactory.id",
             "type": "string",
             "label": "id",
@@ -3774,6 +3841,7 @@
         "id": "def-server.DynamicActionsState",
         "type": "Type",
         "label": "DynamicActionsState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3789,6 +3857,7 @@
         "id": "def-server.BaseActionConfig",
         "type": "Type",
         "label": "BaseActionConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3812,6 +3881,7 @@
         "id": "def-server.SerializedAction",
         "type": "Type",
         "label": "SerializedAction",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3827,6 +3897,7 @@
         "id": "def-server.SerializedEvent",
         "type": "Type",
         "label": "SerializedEvent",
+        "tags": [],
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
@@ -3847,8 +3918,10 @@
       "type": "Interface",
       "label": "SetupContract",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.SetupContract.registerActionFactory",
           "type": "Function",
           "label": "registerActionFactory",
@@ -3891,6 +3964,7 @@
       "id": "def-server.StartContract",
       "type": "Type",
       "label": "StartContract",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
@@ -3914,6 +3988,7 @@
         "id": "def-common.BaseActionConfig",
         "type": "Type",
         "label": "BaseActionConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3937,6 +4012,7 @@
         "id": "def-common.SerializedAction",
         "type": "Type",
         "label": "SerializedAction",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3952,6 +4028,7 @@
         "id": "def-common.SerializedEvent",
         "type": "Type",
         "label": "SerializedEvent",
+        "tags": [],
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
@@ -3969,6 +4046,7 @@
         "id": "def-common.DynamicActionsState",
         "type": "Type",
         "label": "DynamicActionsState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",

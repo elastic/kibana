@@ -17,8 +17,10 @@
         "type": "Interface",
         "label": "StatsCollectionConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.StatsCollectionConfig.usageCollection",
             "type": "Object",
             "label": "usageCollection",
@@ -41,6 +43,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.StatsCollectionConfig.esClient",
             "type": "CompoundType",
             "label": "esClient",
@@ -61,6 +64,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.StatsCollectionConfig.soClient",
             "type": "CompoundType",
             "label": "soClient",
@@ -91,6 +95,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.StatsCollectionConfig.kibanaRequest",
             "type": "Object",
             "label": "kibanaRequest",
@@ -124,8 +129,10 @@
         "type": "Interface",
         "label": "StatsCollectionContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.StatsCollectionContext.logger",
             "type": "CompoundType",
             "label": "logger",
@@ -141,6 +148,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.StatsCollectionContext.version",
             "type": "string",
             "label": "version",
@@ -164,8 +172,10 @@
         "type": "Interface",
         "label": "ClusterDetails",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ClusterDetails.clusterUuid",
             "type": "string",
             "label": "clusterUuid",
@@ -194,8 +204,10 @@
           "BasicStatsPayload"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.UsageStatsPayload.collectionSource",
             "type": "string",
             "label": "collectionSource",
@@ -221,6 +233,7 @@
         "id": "def-server.StatsGetter",
         "type": "Type",
         "label": "StatsGetter",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
@@ -242,6 +255,7 @@
         "id": "def-server.StatsGetterConfig",
         "type": "Type",
         "label": "StatsGetterConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
@@ -259,6 +273,7 @@
         "id": "def-server.ClusterDetailsGetter",
         "type": "Type",
         "label": "ClusterDetailsGetter",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
@@ -283,8 +298,10 @@
       "type": "Interface",
       "label": "TelemetryCollectionManagerPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginSetup.setCollectionStrategy",
           "type": "Function",
           "label": "setCollectionStrategy",
@@ -315,6 +332,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginSetup.getOptInStats",
           "type": "Function",
           "label": "getOptInStats",
@@ -337,6 +355,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginSetup.getStats",
           "type": "Function",
           "label": "getStats",
@@ -367,6 +386,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginSetup.areAllCollectorsReady",
           "type": "Function",
           "label": "areAllCollectorsReady",
@@ -394,8 +414,10 @@
       "type": "Interface",
       "label": "TelemetryCollectionManagerPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginStart.getOptInStats",
           "type": "Function",
           "label": "getOptInStats",
@@ -418,6 +440,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginStart.getStats",
           "type": "Function",
           "label": "getStats",
@@ -448,6 +471,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.TelemetryCollectionManagerPluginStart.areAllCollectorsReady",
           "type": "Function",
           "label": "areAllCollectorsReady",

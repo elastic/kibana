@@ -7,6 +7,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
@@ -22,6 +23,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.EQL_SEARCH_STRATEGY",
         "type": "string",
         "label": "EQL_SEARCH_STRATEGY",
@@ -42,6 +44,7 @@
       "id": "def-public.DataEnhancedStart",
       "type": "Type",
       "label": "DataEnhancedStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
@@ -60,6 +63,7 @@
       {
         "id": "def-server.EnhancedDataServerPlugin",
         "type": "Class",
+        "tags": [],
         "label": "EnhancedDataServerPlugin",
         "description": [],
         "signature": [
@@ -304,6 +308,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-server.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
@@ -319,6 +324,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.EQL_SEARCH_STRATEGY",
         "type": "string",
         "label": "EQL_SEARCH_STRATEGY",
@@ -420,6 +426,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/poll_search.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -456,8 +463,10 @@
           ">"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.EqlSearchStrategyRequest.options",
             "type": "Object",
             "label": "options",
@@ -502,8 +511,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IAsyncSearchOptions.pollInterval",
             "type": "number",
             "label": "pollInterval",
@@ -532,8 +543,10 @@
         "type": "Interface",
         "label": "SearchSessionSavedObjectAttributes",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.sessionId",
             "type": "string",
             "label": "sessionId",
@@ -545,6 +558,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.name",
             "type": "string",
             "label": "name",
@@ -561,6 +575,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.appId",
             "type": "string",
             "label": "appId",
@@ -577,6 +592,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.created",
             "type": "string",
             "label": "created",
@@ -590,6 +606,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.touched",
             "type": "string",
             "label": "touched",
@@ -603,6 +620,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.expires",
             "type": "string",
             "label": "expires",
@@ -616,6 +634,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.status",
             "type": "Enum",
             "label": "status",
@@ -638,6 +657,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.urlGeneratorId",
             "type": "string",
             "label": "urlGeneratorId",
@@ -654,6 +674,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.initialState",
             "type": "Object",
             "label": "initialState",
@@ -670,6 +691,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.restoreState",
             "type": "Object",
             "label": "restoreState",
@@ -686,6 +708,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.idMapping",
             "type": "Object",
             "label": "idMapping",
@@ -710,6 +733,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.persisted",
             "type": "boolean",
             "label": "persisted",
@@ -723,6 +747,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.realmType",
             "type": "string",
             "label": "realmType",
@@ -739,6 +764,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.realmName",
             "type": "string",
             "label": "realmName",
@@ -753,6 +779,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionSavedObjectAttributes.username",
             "type": "string",
             "label": "username",
@@ -779,8 +806,10 @@
         "type": "Interface",
         "label": "SearchSessionRequestInfo",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SearchSessionRequestInfo.id",
             "type": "string",
             "label": "id",
@@ -794,6 +823,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionRequestInfo.strategy",
             "type": "string",
             "label": "strategy",
@@ -807,6 +837,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionRequestInfo.status",
             "type": "string",
             "label": "status",
@@ -820,6 +851,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchSessionRequestInfo.error",
             "type": "string",
             "label": "error",
@@ -849,6 +881,7 @@
         "id": "def-common.SearchSessionStatus",
         "type": "Enum",
         "label": "SearchSessionStatus",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/session/status.ts",
@@ -860,6 +893,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.SEARCH_SESSION_TYPE",
         "type": "string",
         "label": "SEARCH_SESSION_TYPE",
@@ -875,6 +909,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
@@ -890,6 +925,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.EQL_SEARCH_STRATEGY",
         "type": "string",
         "label": "EQL_SEARCH_STRATEGY",
@@ -908,6 +944,7 @@
         "id": "def-common.EqlRequestParams",
         "type": "Type",
         "label": "EqlRequestParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
@@ -923,6 +960,7 @@
         "id": "def-common.EqlSearchStrategyResponse",
         "type": "Type",
         "label": "EqlSearchStrategyResponse",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",

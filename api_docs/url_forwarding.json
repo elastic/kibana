@@ -5,6 +5,7 @@
       {
         "id": "def-public.UrlForwardingPlugin",
         "type": "Class",
+        "tags": [],
         "label": "UrlForwardingPlugin",
         "description": [],
         "children": [
@@ -128,9 +129,11 @@
                 "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }",
                 "type": "Object",
                 "label": "{ kibanaLegacy }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }.kibanaLegacy",
                     "type": "Object",
                     "label": "kibanaLegacy",
@@ -201,8 +204,10 @@
         "type": "Interface",
         "label": "ForwardDefinition",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ForwardDefinition.legacyAppId",
             "type": "string",
             "label": "legacyAppId",
@@ -214,6 +219,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ForwardDefinition.newAppId",
             "type": "string",
             "label": "newAppId",
@@ -225,6 +231,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ForwardDefinition.rewritePath",
             "type": "Function",
             "label": "rewritePath",
@@ -253,6 +260,7 @@
         "id": "def-public.UrlForwardingSetup",
         "type": "Type",
         "label": "UrlForwardingSetup",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/url_forwarding/public/plugin.ts",
@@ -268,6 +276,7 @@
         "id": "def-public.UrlForwardingStart",
         "type": "Type",
         "label": "UrlForwardingStart",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/url_forwarding/public/plugin.ts",

@@ -5,6 +5,7 @@
       {
         "id": "def-public.FilterManager",
         "type": "Class",
+        "tags": [],
         "label": "FilterManager",
         "description": [],
         "children": [
@@ -574,6 +575,7 @@
       {
         "id": "def-public.TimeHistory",
         "type": "Class",
+        "tags": [],
         "label": "TimeHistory",
         "description": [],
         "children": [
@@ -749,6 +751,7 @@
           "lineNumber": 20,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/saved_query_service.ts#L20"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -828,9 +831,11 @@
             "id": "def-public.connectToQueryState.syncConfig",
             "type": "Object",
             "label": "syncConfig",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.connectToQueryState.syncConfig.time",
                 "type": "CompoundType",
                 "label": "time",
@@ -845,6 +850,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.connectToQueryState.syncConfig.refreshInterval",
                 "type": "CompoundType",
                 "label": "refreshInterval",
@@ -859,6 +865,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.connectToQueryState.syncConfig.filters",
                 "type": "CompoundType",
                 "label": "filters",
@@ -881,6 +888,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.connectToQueryState.syncConfig.query",
                 "type": "CompoundType",
                 "label": "query",
@@ -947,6 +955,7 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L23"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1061,6 +1070,7 @@
           "lineNumber": 26,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/sync_state_with_url.ts#L26"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1116,8 +1126,10 @@
         "description": [
           "\nAll query state service state"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.QueryState.time",
             "type": "Object",
             "label": "time",
@@ -1139,6 +1151,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryState.refreshInterval",
             "type": "Object",
             "label": "refreshInterval",
@@ -1160,6 +1173,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryState.filters",
             "type": "Array",
             "label": "filters",
@@ -1181,6 +1195,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryState.query",
             "type": "Object",
             "label": "query",
@@ -1214,8 +1229,10 @@
         "type": "Interface",
         "label": "SavedQuery",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedQuery.id",
             "type": "string",
             "label": "id",
@@ -1227,6 +1244,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedQuery.attributes",
             "type": "Object",
             "label": "attributes",
@@ -1259,8 +1277,10 @@
         "type": "Interface",
         "label": "SavedQueryService",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.saveQuery",
             "type": "Function",
             "label": "saveQuery",
@@ -1291,6 +1311,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.getAllSavedQueries",
             "type": "Function",
             "label": "getAllSavedQueries",
@@ -1313,6 +1334,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.findSavedQueries",
             "type": "Function",
             "label": "findSavedQueries",
@@ -1335,6 +1357,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.getSavedQuery",
             "type": "Function",
             "label": "getSavedQuery",
@@ -1357,6 +1380,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.deleteSavedQuery",
             "type": "Function",
             "label": "deleteSavedQuery",
@@ -1371,6 +1395,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedQueryService.getSavedQueryCount",
             "type": "Function",
             "label": "getSavedQueryCount",
@@ -1407,8 +1432,10 @@
           " extends QueryStateChangePartial"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.QueryStateChange.appFilters",
             "type": "CompoundType",
             "label": "appFilters",
@@ -1423,6 +1450,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStateChange.globalFilters",
             "type": "CompoundType",
             "label": "globalFilters",
@@ -1451,6 +1479,7 @@
         "id": "def-public.SavedQueryTimeFilter",
         "type": "Type",
         "label": "SavedQueryTimeFilter",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/saved_query/types.ts",
@@ -1466,6 +1495,7 @@
         "id": "def-public.InputTimeRange",
         "type": "Type",
         "label": "InputTimeRange",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/types.ts",
@@ -1488,6 +1518,7 @@
         "id": "def-public.TimefilterContract",
         "type": "Type",
         "label": "TimefilterContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
@@ -1512,6 +1543,7 @@
         "id": "def-public.TimeHistoryContract",
         "type": "Type",
         "label": "TimeHistoryContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/time_history.ts",
@@ -1527,6 +1559,7 @@
         "id": "def-public.QueryStart",
         "type": "Type",
         "label": "QueryStart",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/query_service.ts",
@@ -1696,6 +1729,7 @@
           "lineNumber": 22,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/dedup_filters.ts#L22"
         },
+        "tags": [],
         "returnComment": [
           "An array of filters that were not in existing"
         ],
@@ -1769,6 +1803,7 @@
           "lineNumber": 21,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/uniq_filters.ts#L21"
         },
+        "tags": [],
         "returnComment": [
           "The original filters array with duplicates removed"
         ],
@@ -1908,6 +1943,7 @@
           "lineNumber": 64,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L64"
         },
+        "tags": [],
         "returnComment": [
           "Filters are the same"
         ],
@@ -2029,9 +2065,11 @@
             "id": "def-common.getAbsoluteTimeRange.{-forceNow }",
             "type": "Object",
             "label": "{ forceNow }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-common.getAbsoluteTimeRange.{-forceNow }.forceNow",
                 "type": "Object",
                 "label": "forceNow",
@@ -2140,9 +2178,11 @@
             "id": "def-common.getTime.options",
             "type": "Object",
             "label": "options",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-common.getTime.options.forceNow",
                 "type": "Object",
                 "label": "forceNow",
@@ -2157,6 +2197,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-common.getTime.options.fieldName",
                 "type": "string",
                 "label": "fieldName",
@@ -2223,6 +2264,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/is_time_range.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2262,6 +2304,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/is_query.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2272,8 +2315,10 @@
         "type": "Interface",
         "label": "FilterCompareOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FilterCompareOptions.index",
             "type": "CompoundType",
             "label": "index",
@@ -2288,6 +2333,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FilterCompareOptions.disabled",
             "type": "CompoundType",
             "label": "disabled",
@@ -2302,6 +2348,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FilterCompareOptions.negate",
             "type": "CompoundType",
             "label": "negate",
@@ -2316,6 +2363,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FilterCompareOptions.state",
             "type": "CompoundType",
             "label": "state",
@@ -2330,6 +2378,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FilterCompareOptions.alias",
             "type": "CompoundType",
             "label": "alias",
@@ -2356,8 +2405,10 @@
         "type": "Interface",
         "label": "RefreshInterval",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.RefreshInterval.pause",
             "type": "boolean",
             "label": "pause",
@@ -2369,6 +2420,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.RefreshInterval.value",
             "type": "number",
             "label": "value",
@@ -2392,8 +2444,10 @@
         "type": "Interface",
         "label": "TimeRangeBounds",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TimeRangeBounds.min",
             "type": "Object",
             "label": "min",
@@ -2408,6 +2462,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TimeRangeBounds.max",
             "type": "Object",
             "label": "max",
@@ -2436,6 +2491,7 @@
         "id": "def-common.Query",
         "type": "Type",
         "label": "Query",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/query/types.ts",
@@ -2451,6 +2507,7 @@
         "id": "def-common.TimeRange",
         "type": "Type",
         "label": "TimeRange",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/types.ts",
@@ -2467,8 +2524,10 @@
       {
         "id": "def-common.COMPARE_ALL_OPTIONS",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.COMPARE_ALL_OPTIONS.index",
             "type": "boolean",
             "label": "index",
@@ -2483,6 +2542,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.COMPARE_ALL_OPTIONS.disabled",
             "type": "boolean",
             "label": "disabled",
@@ -2497,6 +2557,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.COMPARE_ALL_OPTIONS.negate",
             "type": "boolean",
             "label": "negate",
@@ -2511,6 +2572,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.COMPARE_ALL_OPTIONS.state",
             "type": "boolean",
             "label": "state",
@@ -2525,6 +2587,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.COMPARE_ALL_OPTIONS.alias",
             "type": "boolean",
             "label": "alias",

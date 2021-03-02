@@ -15,6 +15,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-server.ID",
         "type": "string",
         "label": "ID",
@@ -39,6 +40,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.STACK_ALERTS_FEATURE_ID",
         "type": "string",
         "label": "STACK_ALERTS_FEATURE_ID",
@@ -57,6 +59,7 @@
         "id": "def-common.Config",
         "type": "Type",
         "label": "Config",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/stack_alerts/common/config.ts",
@@ -71,6 +74,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.configSchema",
         "type": "Object",
         "label": "configSchema",

@@ -5,6 +5,7 @@
       {
         "id": "def-public.IngestPipelinesUrlGenerator",
         "type": "Class",
+        "tags": [],
         "label": "IngestPipelinesUrlGenerator",
         "description": [],
         "signature": [
@@ -59,6 +60,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IngestPipelinesUrlGenerator.id",
             "type": "string",
             "label": "id",
@@ -115,6 +117,7 @@
               "lineNumber": 61,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ingest_pipelines/public/url_generator.ts#L61"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -133,6 +136,7 @@
         "id": "def-public.INGEST_PIPELINES_PAGES",
         "type": "Enum",
         "label": "INGEST_PIPELINES_PAGES",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
@@ -144,6 +148,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.INGEST_PIPELINES_APP_ULR_GENERATOR",
         "type": "string",
         "label": "INGEST_PIPELINES_APP_ULR_GENERATOR",
@@ -162,6 +167,7 @@
         "id": "def-public.IngestPipelinesUrlGeneratorState",
         "type": "Type",
         "label": "IngestPipelinesUrlGeneratorState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",

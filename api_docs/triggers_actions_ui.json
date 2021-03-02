@@ -5,6 +5,7 @@
       {
         "id": "def-public.Plugin",
         "type": "Class",
+        "tags": [],
         "label": "Plugin",
         "description": [],
         "signature": [
@@ -179,6 +180,7 @@
     ],
     "functions": [
       {
+        "tags": [],
         "id": "def-public.AlertAdd",
         "type": "Function",
         "label": "AlertAdd",
@@ -196,6 +198,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.AlertEdit",
         "type": "Function",
         "label": "AlertEdit",
@@ -213,6 +216,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.AlertConditions",
         "type": "Function",
         "label": "AlertConditions",
@@ -230,6 +234,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.AlertConditionsGroup",
         "type": "Function",
         "label": "AlertConditionsGroup",
@@ -247,6 +252,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ActionForm",
         "type": "Function",
         "label": "ActionForm",
@@ -264,6 +270,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ConnectorAddFlyout",
         "type": "Function",
         "label": "ConnectorAddFlyout",
@@ -281,6 +288,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ConnectorEditFlyout",
         "type": "Function",
         "label": "ConnectorEditFlyout",
@@ -326,9 +334,11 @@
             "id": "def-public.loadActionTypes.{-http }",
             "type": "Object",
             "label": "{ http }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.loadActionTypes.{-http }.http",
                 "type": "Object",
                 "label": "http",
@@ -531,6 +541,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.GroupByExpression",
         "type": "Function",
         "label": "GroupByExpression",
@@ -548,6 +559,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ForLastExpression",
         "type": "Function",
         "label": "ForLastExpression",
@@ -565,6 +577,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ValueExpression",
         "type": "Function",
         "label": "ValueExpression",
@@ -582,6 +595,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.WhenExpression",
         "type": "Function",
         "label": "WhenExpression",
@@ -599,6 +613,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.OfExpression",
         "type": "Function",
         "label": "OfExpression",
@@ -616,6 +631,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ThresholdExpression",
         "type": "Function",
         "label": "ThresholdExpression",
@@ -646,6 +662,7 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L23"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -728,6 +745,7 @@
           "lineNumber": 32,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L32"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -788,6 +806,7 @@
           "lineNumber": 88,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L88"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -820,6 +839,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -860,6 +880,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -870,8 +891,10 @@
         "type": "Interface",
         "label": "AlertAction",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AlertAction.group",
             "type": "string",
             "label": "group",
@@ -883,6 +906,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertAction.id",
             "type": "string",
             "label": "id",
@@ -894,6 +918,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertAction.actionTypeId",
             "type": "string",
             "label": "actionTypeId",
@@ -905,6 +930,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertAction.params",
             "type": "Object",
             "label": "params",
@@ -947,8 +973,10 @@
           "<Params>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.id",
             "type": "string",
             "label": "id",
@@ -960,6 +988,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.description",
             "type": "string",
             "label": "description",
@@ -971,6 +1000,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.iconClass",
             "type": "string",
             "label": "iconClass",
@@ -982,6 +1012,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.documentationUrl",
             "type": "CompoundType",
             "label": "documentationUrl",
@@ -1004,6 +1035,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.validate",
             "type": "Function",
             "label": "validate",
@@ -1025,6 +1057,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.alertParamsExpression",
             "type": "Function",
             "label": "alertParamsExpression",
@@ -1047,6 +1080,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.requiresAppContext",
             "type": "boolean",
             "label": "requiresAppContext",
@@ -1058,6 +1092,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeModel.defaultActionMessage",
             "type": "string",
             "label": "defaultActionMessage",
@@ -1084,8 +1119,10 @@
         "type": "Interface",
         "label": "ActionType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ActionType.id",
             "type": "string",
             "label": "id",
@@ -1097,6 +1134,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionType.name",
             "type": "string",
             "label": "name",
@@ -1108,6 +1146,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionType.enabled",
             "type": "boolean",
             "label": "enabled",
@@ -1119,6 +1158,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionType.enabledInConfig",
             "type": "boolean",
             "label": "enabledInConfig",
@@ -1130,6 +1170,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionType.enabledInLicense",
             "type": "boolean",
             "label": "enabledInLicense",
@@ -1141,6 +1182,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionType.minimumLicenseRequired",
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
@@ -1177,8 +1219,10 @@
           "<Params, MetaData, ActionGroupIds>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.alertParams",
             "type": "Uncategorized",
             "label": "alertParams",
@@ -1193,6 +1237,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.alertInterval",
             "type": "string",
             "label": "alertInterval",
@@ -1204,6 +1249,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.alertThrottle",
             "type": "string",
             "label": "alertThrottle",
@@ -1215,6 +1261,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.alertNotifyWhen",
             "type": "CompoundType",
             "label": "alertNotifyWhen",
@@ -1229,6 +1276,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.setAlertParams",
             "type": "Function",
             "label": "setAlertParams",
@@ -1243,6 +1291,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.setAlertProperty",
             "type": "Function",
             "label": "setAlertProperty",
@@ -1265,6 +1314,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.errors",
             "type": "Object",
             "label": "errors",
@@ -1285,6 +1335,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.defaultActionGroupId",
             "type": "string",
             "label": "defaultActionGroupId",
@@ -1296,6 +1347,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.actionGroups",
             "type": "Array",
             "label": "actionGroups",
@@ -1317,6 +1369,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.metadata",
             "type": "Uncategorized",
             "label": "metadata",
@@ -1331,6 +1384,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.charts",
             "type": "Object",
             "label": "charts",
@@ -1351,6 +1405,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AlertTypeParamsExpressionProps.data",
             "type": "Object",
             "label": "data",
@@ -1383,8 +1438,10 @@
         "type": "Interface",
         "label": "ValidationResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ValidationResult.errors",
             "type": "Object",
             "label": "errors",
@@ -1411,8 +1468,10 @@
         "type": "Interface",
         "label": "ActionVariable",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ActionVariable.name",
             "type": "string",
             "label": "name",
@@ -1424,6 +1483,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionVariable.description",
             "type": "string",
             "label": "description",
@@ -1435,6 +1495,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ActionVariable.useWithTripleBracesInTemplates",
             "type": "CompoundType",
             "label": "useWithTripleBracesInTemplates",
@@ -1461,11 +1522,13 @@
         "type": "Interface",
         "label": "IErrorObject",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.IErrorObject.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -1506,8 +1569,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.data",
             "type": "Object",
             "label": "data",
@@ -1528,6 +1593,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.charts",
             "type": "Object",
             "label": "charts",
@@ -1548,6 +1614,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.alerts",
             "type": "Object",
             "label": "alerts",
@@ -1569,6 +1636,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.spaces",
             "type": "Object",
             "label": "spaces",
@@ -1590,6 +1658,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.storage",
             "type": "Object",
             "label": "storage",
@@ -1611,6 +1680,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs",
             "type": "Function",
             "label": "setBreadcrumbs",
@@ -1627,6 +1697,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.actionTypeRegistry",
             "type": "Object",
             "label": "actionTypeRegistry",
@@ -1657,6 +1728,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.alertTypeRegistry",
             "type": "Object",
             "label": "alertTypeRegistry",
@@ -1687,6 +1759,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.history",
             "type": "Object",
             "label": "history",
@@ -1708,6 +1781,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.kibanaFeatures",
             "type": "Array",
             "label": "kibanaFeatures",
@@ -1729,6 +1803,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TriggersAndActionsUiServices.element",
             "type": "Object",
             "label": "element",
@@ -1755,8 +1830,10 @@
         "type": "Interface",
         "label": "IOption",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IOption.label",
             "type": "string",
             "label": "label",
@@ -1768,6 +1845,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IOption.options",
             "type": "Array",
             "label": "options",
@@ -1794,8 +1872,10 @@
         "type": "Interface",
         "label": "Comparator",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Comparator.text",
             "type": "string",
             "label": "text",
@@ -1807,6 +1887,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Comparator.value",
             "type": "string",
             "label": "value",
@@ -1818,6 +1899,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Comparator.requiredValues",
             "type": "number",
             "label": "requiredValues",
@@ -1841,8 +1923,10 @@
         "type": "Interface",
         "label": "AggregationType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AggregationType.text",
             "type": "string",
             "label": "text",
@@ -1854,6 +1938,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AggregationType.fieldRequired",
             "type": "boolean",
             "label": "fieldRequired",
@@ -1865,6 +1950,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AggregationType.value",
             "type": "string",
             "label": "value",
@@ -1876,6 +1962,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AggregationType.validNormalizedTypes",
             "type": "Array",
             "label": "validNormalizedTypes",
@@ -1902,8 +1989,10 @@
         "type": "Interface",
         "label": "GroupByType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GroupByType.text",
             "type": "string",
             "label": "text",
@@ -1915,6 +2004,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GroupByType.sizeRequired",
             "type": "boolean",
             "label": "sizeRequired",
@@ -1926,6 +2016,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GroupByType.value",
             "type": "string",
             "label": "value",
@@ -1937,6 +2028,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GroupByType.validNormalizedTypes",
             "type": "Array",
             "label": "validNormalizedTypes",
@@ -1964,6 +2056,7 @@
         "id": "def-public.AlertFlyoutCloseReason",
         "type": "Enum",
         "label": "AlertFlyoutCloseReason",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -1976,6 +2069,7 @@
         "id": "def-public.TIME_UNITS",
         "type": "Enum",
         "label": "TIME_UNITS",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts",
@@ -1988,6 +2082,7 @@
         "id": "def-public.COMPARATORS",
         "type": "Enum",
         "label": "COMPARATORS",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
@@ -2000,6 +2095,7 @@
         "id": "def-public.AGGREGATION_TYPES",
         "type": "Enum",
         "label": "AGGREGATION_TYPES",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
@@ -2014,6 +2110,7 @@
         "id": "def-public.ActionGroupWithCondition",
         "type": "Type",
         "label": "ActionGroupWithCondition",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/alert_conditions.tsx",
@@ -2044,6 +2141,7 @@
         "id": "def-public.Alert",
         "type": "Type",
         "label": "Alert",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2075,6 +2173,7 @@
         "id": "def-public.ActionTypeRegistryContract",
         "type": "Type",
         "label": "ActionTypeRegistryContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2090,6 +2189,7 @@
         "id": "def-public.AlertTypeRegistryContract",
         "type": "Type",
         "label": "AlertTypeRegistryContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2105,6 +2205,7 @@
         "id": "def-public.ActionVariables",
         "type": "Type",
         "label": "ActionVariables",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2120,6 +2221,7 @@
         "id": "def-public.ActionConnector",
         "type": "Type",
         "label": "ActionConnector",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2138,6 +2240,7 @@
         "id": "def-public.AlertTypeParams",
         "type": "Type",
         "label": "AlertTypeParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerts/common/alert.ts",
@@ -2150,6 +2253,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.VIEW_LICENSE_OPTIONS_LINK",
         "type": "string",
         "label": "VIEW_LICENSE_OPTIONS_LINK",
@@ -2165,6 +2269,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.DEFAULT_HIDDEN_ACTION_TYPES",
         "type": "Array",
         "label": "DEFAULT_HIDDEN_ACTION_TYPES",
@@ -2180,6 +2285,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
         "type": "Array",
         "label": "DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
@@ -2199,12 +2305,15 @@
       {
         "id": "def-public.builtInComparators",
         "type": "Object",
+        "tags": [],
         "children": [
           {
             "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].text",
                 "type": "string",
                 "label": "text",
@@ -2216,6 +2325,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].value",
                 "type": "Enum",
                 "label": "value",
@@ -2236,6 +2346,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].requiredValues",
                 "type": "number",
                 "label": "requiredValues",
@@ -2258,8 +2369,10 @@
           {
             "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].text",
                 "type": "string",
                 "label": "text",
@@ -2271,6 +2384,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].value",
                 "type": "Enum",
                 "label": "value",
@@ -2291,6 +2405,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].requiredValues",
                 "type": "number",
                 "label": "requiredValues",
@@ -2313,8 +2428,10 @@
           {
             "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].text",
                 "type": "string",
                 "label": "text",
@@ -2326,6 +2443,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].value",
                 "type": "Enum",
                 "label": "value",
@@ -2346,6 +2464,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].requiredValues",
                 "type": "number",
                 "label": "requiredValues",
@@ -2368,8 +2487,10 @@
           {
             "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].text",
                 "type": "string",
                 "label": "text",
@@ -2381,6 +2502,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].value",
                 "type": "Enum",
                 "label": "value",
@@ -2401,6 +2523,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].requiredValues",
                 "type": "number",
                 "label": "requiredValues",
@@ -2423,8 +2546,10 @@
           {
             "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].text",
                 "type": "string",
                 "label": "text",
@@ -2436,6 +2561,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].value",
                 "type": "Enum",
                 "label": "value",
@@ -2456,6 +2582,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].requiredValues",
                 "type": "number",
                 "label": "requiredValues",
@@ -2488,12 +2615,15 @@
       {
         "id": "def-public.builtInAggregationTypes",
         "type": "Object",
+        "tags": [],
         "children": [
           {
             "id": "def-public.builtInAggregationTypes.count",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.count.text",
                 "type": "string",
                 "label": "text",
@@ -2505,6 +2635,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.count.fieldRequired",
                 "type": "boolean",
                 "label": "fieldRequired",
@@ -2519,6 +2650,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.count.value",
                 "type": "Enum",
                 "label": "value",
@@ -2539,6 +2671,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.count.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2564,8 +2697,10 @@
           {
             "id": "def-public.builtInAggregationTypes.avg",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.avg.text",
                 "type": "string",
                 "label": "text",
@@ -2577,6 +2712,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.avg.fieldRequired",
                 "type": "boolean",
                 "label": "fieldRequired",
@@ -2591,6 +2727,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.avg.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2605,6 +2742,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.avg.value",
                 "type": "Enum",
                 "label": "value",
@@ -2636,8 +2774,10 @@
           {
             "id": "def-public.builtInAggregationTypes.sum",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.sum.text",
                 "type": "string",
                 "label": "text",
@@ -2649,6 +2789,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.sum.fieldRequired",
                 "type": "boolean",
                 "label": "fieldRequired",
@@ -2663,6 +2804,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.sum.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2677,6 +2819,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.sum.value",
                 "type": "Enum",
                 "label": "value",
@@ -2708,8 +2851,10 @@
           {
             "id": "def-public.builtInAggregationTypes.min",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.min.text",
                 "type": "string",
                 "label": "text",
@@ -2721,6 +2866,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.min.fieldRequired",
                 "type": "boolean",
                 "label": "fieldRequired",
@@ -2735,6 +2881,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.min.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2749,6 +2896,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.min.value",
                 "type": "Enum",
                 "label": "value",
@@ -2780,8 +2928,10 @@
           {
             "id": "def-public.builtInAggregationTypes.max",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.max.text",
                 "type": "string",
                 "label": "text",
@@ -2793,6 +2943,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.max.fieldRequired",
                 "type": "boolean",
                 "label": "fieldRequired",
@@ -2807,6 +2958,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.max.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2821,6 +2973,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInAggregationTypes.max.value",
                 "type": "Enum",
                 "label": "value",
@@ -2862,12 +3015,15 @@
       {
         "id": "def-public.builtInGroupByTypes",
         "type": "Object",
+        "tags": [],
         "children": [
           {
             "id": "def-public.builtInGroupByTypes.all",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.all.text",
                 "type": "string",
                 "label": "text",
@@ -2879,6 +3035,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.all.sizeRequired",
                 "type": "boolean",
                 "label": "sizeRequired",
@@ -2893,6 +3050,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.all.value",
                 "type": "string",
                 "label": "value",
@@ -2904,6 +3062,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.all.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -2929,8 +3088,10 @@
           {
             "id": "def-public.builtInGroupByTypes.top",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.top.text",
                 "type": "string",
                 "label": "text",
@@ -2942,6 +3103,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.top.sizeRequired",
                 "type": "boolean",
                 "label": "sizeRequired",
@@ -2956,6 +3118,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.top.value",
                 "type": "string",
                 "label": "value",
@@ -2967,6 +3130,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.builtInGroupByTypes.top.validNormalizedTypes",
                 "type": "Array",
                 "label": "validNormalizedTypes",
@@ -3002,8 +3166,10 @@
       {
         "id": "def-public.firstFieldOption",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.firstFieldOption.text",
             "type": "string",
             "label": "text",
@@ -3015,6 +3181,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.firstFieldOption.value",
             "type": "string",
             "label": "value",
@@ -3041,8 +3208,10 @@
       "type": "Interface",
       "label": "TriggersAndActionsUIPublicPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginSetup.actionTypeRegistry",
           "type": "Object",
           "label": "actionTypeRegistry",
@@ -3072,6 +3241,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginSetup.alertTypeRegistry",
           "type": "Object",
           "label": "alertTypeRegistry",
@@ -3114,8 +3284,10 @@
       "type": "Interface",
       "label": "TriggersAndActionsUIPublicPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.actionTypeRegistry",
           "type": "Object",
           "label": "actionTypeRegistry",
@@ -3145,6 +3317,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.alertTypeRegistry",
           "type": "Object",
           "label": "alertTypeRegistry",
@@ -3174,6 +3347,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout",
           "type": "Function",
           "label": "getAddConnectorFlyout",
@@ -3204,6 +3378,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditConnectorFlyout",
           "type": "Function",
           "label": "getEditConnectorFlyout",
@@ -3234,6 +3409,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout",
           "type": "Function",
           "label": "getAddAlertFlyout",
@@ -3264,6 +3440,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout",
           "type": "Function",
           "label": "getEditAlertFlyout",
@@ -3380,6 +3557,7 @@
         "id": "def-server.TimeSeriesQuery",
         "type": "Type",
         "label": "TimeSeriesQuery",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
@@ -3395,6 +3573,7 @@
         "id": "def-server.CoreQueryParams",
         "type": "Type",
         "label": "CoreQueryParams",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
@@ -3407,6 +3586,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.MAX_INTERVALS",
         "type": "number",
         "label": "MAX_INTERVALS",
@@ -3422,6 +3602,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.MAX_GROUPS",
         "type": "number",
         "label": "MAX_GROUPS",
@@ -3437,6 +3618,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.DEFAULT_GROUPS",
         "type": "number",
         "label": "DEFAULT_GROUPS",
@@ -3456,8 +3638,10 @@
       {
         "id": "def-server.CoreQueryParamsSchemaProperties",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.index",
             "type": "Object",
             "label": "index",
@@ -3475,6 +3659,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.timeField",
             "type": "Object",
             "label": "timeField",
@@ -3492,6 +3677,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.aggType",
             "type": "Object",
             "label": "aggType",
@@ -3509,6 +3695,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.aggField",
             "type": "Object",
             "label": "aggField",
@@ -3526,6 +3713,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.groupBy",
             "type": "Object",
             "label": "groupBy",
@@ -3543,6 +3731,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.termField",
             "type": "Object",
             "label": "termField",
@@ -3560,6 +3749,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.termSize",
             "type": "Object",
             "label": "termSize",
@@ -3577,6 +3767,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.timeWindowSize",
             "type": "Object",
             "label": "timeWindowSize",
@@ -3594,6 +3785,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CoreQueryParamsSchemaProperties.timeWindowUnit",
             "type": "Object",
             "label": "timeWindowUnit",
@@ -3626,8 +3818,10 @@
       "type": "Interface",
       "label": "PluginStartContract",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.PluginStartContract.data",
           "type": "Object",
           "label": "data",
@@ -3668,8 +3862,10 @@
         "type": "Interface",
         "label": "TimeSeriesResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TimeSeriesResult.results",
             "type": "Array",
             "label": "results",
@@ -3703,8 +3899,10 @@
         "type": "Interface",
         "label": "TimeSeriesResultRow",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TimeSeriesResultRow.group",
             "type": "string",
             "label": "group",
@@ -3716,6 +3914,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TimeSeriesResultRow.metrics",
             "type": "Array",
             "label": "metrics",
@@ -3751,6 +3950,7 @@
         "id": "def-common.MetricResult",
         "type": "Type",
         "label": "MetricResult",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",

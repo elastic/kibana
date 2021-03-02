@@ -5,6 +5,7 @@
       {
         "id": "def-public.OptInExampleFlyout",
         "type": "Class",
+        "tags": [],
         "label": "OptInExampleFlyout",
         "description": [
           "\nReact component for displaying the example data associated with the Telemetry opt-in banner."
@@ -15,6 +16,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.OptInExampleFlyout._isMounted",
             "type": "boolean",
             "label": "_isMounted",
@@ -28,8 +30,10 @@
           {
             "id": "def-public.OptInExampleFlyout.state",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.OptInExampleFlyout.state.data",
                 "type": "Uncategorized",
                 "label": "data",
@@ -44,6 +48,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.OptInExampleFlyout.state.isLoading",
                 "type": "boolean",
                 "label": "isLoading",
@@ -58,6 +63,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.OptInExampleFlyout.state.hasPrivilegeToRead",
                 "type": "boolean",
                 "label": "hasPrivilegeToRead",
@@ -182,8 +188,10 @@
       "type": "Interface",
       "label": "TelemetryManagementSectionPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.TelemetryManagementSectionPluginSetup.toggleSecuritySolutionExample",
           "type": "Function",
           "label": "toggleSecuritySolutionExample",

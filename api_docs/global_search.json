@@ -11,8 +11,12 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchBatchedResults.results",
             "type": "Array",
             "label": "results",
@@ -50,8 +54,10 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderFindOptions.preference",
             "type": "string",
             "label": "preference",
@@ -65,6 +71,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderFindOptions.aborted$",
             "type": "Object",
             "label": "aborted$",
@@ -82,6 +89,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderFindOptions.maxResults",
             "type": "number",
             "label": "maxResults",
@@ -109,8 +117,10 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.id",
             "type": "string",
             "label": "id",
@@ -124,6 +134,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.title",
             "type": "string",
             "label": "title",
@@ -137,6 +148,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.type",
             "type": "string",
             "label": "type",
@@ -150,6 +162,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.icon",
             "type": "string",
             "label": "icon",
@@ -166,6 +179,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.GlobalSearchProviderResult.url",
             "type": "CompoundType",
             "label": "url",
@@ -188,6 +204,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.score",
             "type": "number",
             "label": "score",
@@ -201,6 +218,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchProviderResult.meta",
             "type": "Object",
             "label": "meta",
@@ -239,8 +257,12 @@
         "description": [
           "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchFindParams.term",
             "type": "string",
             "label": "term",
@@ -257,6 +279,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchFindParams.types",
             "type": "Array",
             "label": "types",
@@ -273,6 +296,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchFindParams.tags",
             "type": "Array",
             "label": "tags",
@@ -303,8 +327,10 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchResultProvider.id",
             "type": "string",
             "label": "id",
@@ -406,6 +432,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchResultProvider.getSearchableTypes",
             "type": "Function",
             "label": "getSearchableTypes",
@@ -436,8 +463,10 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.GlobalSearchFindOptions.preference",
             "type": "string",
             "label": "preference",
@@ -454,6 +483,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.GlobalSearchFindOptions.aborted$",
             "type": "Object",
             "label": "aborted$",
@@ -485,6 +515,7 @@
         "id": "def-public.GlobalSearchProviderResultUrl",
         "type": "Type",
         "label": "GlobalSearchProviderResultUrl",
+        "tags": [],
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
@@ -502,6 +533,7 @@
         "id": "def-public.GlobalSearchResult",
         "type": "Type",
         "label": "GlobalSearchResult",
+        "tags": [],
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
@@ -519,6 +551,9 @@
         "id": "def-public.GlobalSearchProviderFindParams",
         "type": "Type",
         "label": "GlobalSearchProviderFindParams",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "x-pack/plugins/global_search/common/types.ts",
@@ -536,6 +571,7 @@
       "id": "def-public.GlobalSearchPluginSetup",
       "type": "Type",
       "label": "GlobalSearchPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/global_search/public/types.ts",
@@ -552,6 +588,7 @@
       "id": "def-public.GlobalSearchPluginStart",
       "type": "Type",
       "label": "GlobalSearchPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/global_search/public/types.ts",
@@ -588,8 +625,12 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchBatchedResults.results",
             "type": "Array",
             "label": "results",
@@ -627,8 +668,10 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderFindOptions.preference",
             "type": "string",
             "label": "preference",
@@ -642,6 +685,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderFindOptions.aborted$",
             "type": "Object",
             "label": "aborted$",
@@ -659,6 +703,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderFindOptions.maxResults",
             "type": "number",
             "label": "maxResults",
@@ -686,8 +731,10 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.id",
             "type": "string",
             "label": "id",
@@ -701,6 +748,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.title",
             "type": "string",
             "label": "title",
@@ -714,6 +762,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.type",
             "type": "string",
             "label": "type",
@@ -727,6 +776,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.icon",
             "type": "string",
             "label": "icon",
@@ -743,6 +793,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.GlobalSearchProviderResult.url",
             "type": "CompoundType",
             "label": "url",
@@ -765,6 +818,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.score",
             "type": "number",
             "label": "score",
@@ -778,6 +832,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderResult.meta",
             "type": "Object",
             "label": "meta",
@@ -816,8 +871,12 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchFindOptions.preference",
             "type": "string",
             "label": "preference",
@@ -834,6 +893,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchFindOptions.aborted$",
             "type": "Object",
             "label": "aborted$",
@@ -865,8 +925,12 @@
         "description": [
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchProviderContext.core",
             "type": "Object",
             "label": "core",
@@ -928,8 +992,12 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.GlobalSearchResultProvider.id",
             "type": "string",
             "label": "id",
@@ -1058,6 +1126,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.GlobalSearchResultProvider.getSearchableTypes",
             "type": "Function",
             "label": "getSearchableTypes",
@@ -1095,6 +1164,9 @@
         "label": "RouteHandlerGlobalSearchContext",
         "description": [
           "\nglobalSearch route handler context.\n"
+        ],
+        "tags": [
+          "public"
         ],
         "children": [
           {
@@ -1184,6 +1256,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.RouteHandlerGlobalSearchContext.getSearchableTypes",
             "type": "Function",
             "label": "getSearchableTypes",
@@ -1214,6 +1287,7 @@
         "id": "def-server.GlobalSearchProviderResultUrl",
         "type": "Type",
         "label": "GlobalSearchProviderResultUrl",
+        "tags": [],
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
@@ -1231,6 +1305,7 @@
         "id": "def-server.GlobalSearchResult",
         "type": "Type",
         "label": "GlobalSearchResult",
+        "tags": [],
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
@@ -1250,6 +1325,7 @@
       "id": "def-server.GlobalSearchPluginStart",
       "type": "Type",
       "label": "GlobalSearchPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/global_search/server/types.ts",
@@ -1282,6 +1358,7 @@
       "id": "def-server.GlobalSearchPluginSetup",
       "type": "Type",
       "label": "GlobalSearchPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/global_search/server/types.ts",

@@ -7,6 +7,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.APM_STATIC_INDEX_PATTERN_ID",
         "type": "string",
         "label": "APM_STATIC_INDEX_PATTERN_ID",
@@ -28,6 +29,7 @@
       "type": "Interface",
       "label": "ApmOssPluginSetup",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
@@ -42,6 +44,7 @@
       "type": "Interface",
       "label": "ApmOssPluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
@@ -98,6 +101,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -144,6 +148,7 @@
           "lineNumber": 88,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -190,6 +195,7 @@
           "lineNumber": 173,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -236,6 +242,7 @@
           "lineNumber": 255,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -282,6 +289,7 @@
           "lineNumber": 298,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -314,6 +322,7 @@
           "lineNumber": 393,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L393"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -360,6 +369,7 @@
           "lineNumber": 492,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -406,6 +416,7 @@
           "lineNumber": 585,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -452,6 +463,7 @@
           "lineNumber": 631,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -498,6 +510,7 @@
           "lineNumber": 705,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -509,6 +522,7 @@
         "id": "def-server.APMOSSConfig",
         "type": "Type",
         "label": "APMOSSConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/apm_oss/server/index.ts",
@@ -521,6 +535,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.APM_STATIC_INDEX_PATTERN_ID",
         "type": "string",
         "label": "APM_STATIC_INDEX_PATTERN_ID",
@@ -542,8 +557,10 @@
       "type": "Interface",
       "label": "APMOSSPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.APMOSSPluginSetup.config",
           "type": "Object",
           "label": "config",
@@ -558,6 +575,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.APMOSSPluginSetup.config$",
           "type": "Object",
           "label": "config$",

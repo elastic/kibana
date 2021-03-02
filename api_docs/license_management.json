@@ -12,8 +12,10 @@
       "type": "Interface",
       "label": "LicenseManagementUIPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.LicenseManagementUIPluginSetup.enabled",
           "type": "boolean",
           "label": "enabled",
@@ -37,6 +39,7 @@
       "id": "def-public.LicenseManagementUIPluginStart",
       "type": "Type",
       "label": "LicenseManagementUIPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/license_management/public/plugin.ts",

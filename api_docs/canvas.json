@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "WithKibanaProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.WithKibanaProps.kibana",
             "type": "Object",
             "label": "kibana",
@@ -64,6 +66,9 @@
       "id": "def-public.CanvasSetup",
       "type": "Type",
       "label": "CanvasSetup",
+      "tags": [
+        "public"
+      ],
       "description": [
         "\nThese are the interfaces with your public contracts. You should export these\nfor other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces."
       ],
@@ -82,6 +87,7 @@
       "id": "def-public.CanvasStart",
       "type": "Type",
       "label": "CanvasStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",

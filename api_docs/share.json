@@ -5,6 +5,7 @@
       {
         "id": "def-public.UrlGeneratorsService",
         "type": "Class",
+        "tags": [],
         "label": "UrlGeneratorsService",
         "description": [],
         "signature": [
@@ -182,10 +183,12 @@
       {
         "id": "def-public.KibanaURL",
         "type": "Class",
+        "tags": [],
         "label": "KibanaURL",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaURL.path",
             "type": "string",
             "label": "path",
@@ -197,6 +200,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaURL.appName",
             "type": "string",
             "label": "appName",
@@ -208,6 +212,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaURL.appPath",
             "type": "string",
             "label": "appPath",
@@ -391,11 +396,13 @@
         "type": "Interface",
         "label": "UrlGeneratorStateMapping",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.UrlGeneratorStateMapping.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
@@ -419,8 +426,12 @@
         "type": "Interface",
         "label": "ShareContext",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareContext.objectType",
             "type": "string",
             "label": "objectType",
@@ -432,6 +443,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.objectId",
             "type": "string",
             "label": "objectId",
@@ -446,6 +458,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.shareableUrl",
             "type": "string",
             "label": "shareableUrl",
@@ -459,6 +472,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.sharingData",
             "type": "Object",
             "label": "sharingData",
@@ -473,6 +487,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.isDirty",
             "type": "boolean",
             "label": "isDirty",
@@ -484,6 +499,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.onClose",
             "type": "Function",
             "label": "onClose",
@@ -498,6 +514,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareContext.showPublicUrlSwitch",
             "type": "Function",
             "label": "showPublicUrlSwitch",
@@ -532,8 +549,12 @@
         "type": "Interface",
         "label": "ShareMenuProvider",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareMenuProvider.id",
             "type": "string",
             "label": "id",
@@ -545,6 +566,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareMenuProvider.getShareMenuItems",
             "type": "Function",
             "label": "getShareMenuItems",
@@ -587,8 +609,12 @@
         "type": "Interface",
         "label": "ShareMenuItem",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareMenuItem.shareMenuItem",
             "type": "Object",
             "label": "shareMenuItem",
@@ -609,6 +635,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShareMenuItem.panel",
             "type": "Object",
             "label": "panel",
@@ -653,8 +680,12 @@
           ", \"objectType\" | \"objectId\" | \"shareableUrl\" | \"sharingData\" | \"isDirty\" | \"showPublicUrlSwitch\">"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShowShareMenuOptions.anchorElement",
             "type": "Object",
             "label": "anchorElement",
@@ -669,6 +700,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ShowShareMenuOptions.allowEmbed",
             "type": "boolean",
             "label": "allowEmbed",
@@ -680,6 +712,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShowShareMenuOptions.allowShortUrl",
             "type": "boolean",
             "label": "allowShortUrl",
@@ -691,6 +724,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShowShareMenuOptions.embedUrlParamExtensions",
             "type": "Array",
             "label": "embedUrlParamExtensions",
@@ -736,8 +770,12 @@
           ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ShareContextMenuPanelItem.name",
             "type": "string",
             "label": "name",
@@ -749,6 +787,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ShareContextMenuPanelItem.sortOrder",
             "type": "number",
             "label": "sortOrder",
@@ -785,8 +824,10 @@
           "<S, I, MS>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorState.State",
             "type": "Uncategorized",
             "label": "State",
@@ -801,6 +842,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorState.MigratedId",
             "type": "Uncategorized",
             "label": "MigratedId",
@@ -815,6 +857,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorState.MigratedState",
             "type": "Uncategorized",
             "label": "MigratedState",
@@ -851,8 +894,10 @@
           "<Id>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorsDefinition.id",
             "type": "Uncategorized",
             "label": "id",
@@ -867,6 +912,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorsDefinition.createUrl",
             "type": "Function",
             "label": "createUrl",
@@ -889,6 +935,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorsDefinition.isDeprecated",
             "type": "CompoundType",
             "label": "isDeprecated",
@@ -903,6 +950,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorsDefinition.migrate",
             "type": "Function",
             "label": "migrate",
@@ -963,8 +1011,10 @@
           "<Id>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorContract.id",
             "type": "Uncategorized",
             "label": "id",
@@ -1026,6 +1076,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UrlGeneratorContract.isDeprecated",
             "type": "boolean",
             "label": "isDeprecated",
@@ -1111,6 +1162,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.CSV_QUOTE_VALUES_SETTING",
         "type": "string",
         "label": "CSV_QUOTE_VALUES_SETTING",
@@ -1126,6 +1178,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.CSV_SEPARATOR_SETTING",
         "type": "string",
         "label": "CSV_SEPARATOR_SETTING",
@@ -1144,6 +1197,7 @@
         "id": "def-public.UrlGeneratorId",
         "type": "Type",
         "label": "UrlGeneratorId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
@@ -1159,6 +1213,7 @@
         "id": "def-public.DownloadableContent",
         "type": "Type",
         "label": "DownloadableContent",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/share/public/lib/download_as.ts",
@@ -1176,6 +1231,9 @@
       "id": "def-public.SharePluginSetup",
       "type": "Type",
       "label": "SharePluginSetup",
+      "tags": [
+        "public"
+      ],
       "description": [],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
@@ -1200,6 +1258,9 @@
       "id": "def-public.SharePluginStart",
       "type": "Type",
       "label": "SharePluginStart",
+      "tags": [
+        "public"
+      ],
       "description": [],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
@@ -1228,6 +1289,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-server.CSV_QUOTE_VALUES_SETTING",
         "type": "string",
         "label": "CSV_QUOTE_VALUES_SETTING",
@@ -1243,6 +1305,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.CSV_SEPARATOR_SETTING",
         "type": "string",
         "label": "CSV_SEPARATOR_SETTING",

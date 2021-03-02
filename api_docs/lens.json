@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "XYState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.XYState.preferredSeriesType",
             "type": "CompoundType",
             "label": "preferredSeriesType",
@@ -31,6 +33,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.legend",
             "type": "Object",
             "label": "legend",
@@ -51,6 +54,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.valueLabels",
             "type": "CompoundType",
             "label": "valueLabels",
@@ -65,6 +69,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.fittingFunction",
             "type": "CompoundType",
             "label": "fittingFunction",
@@ -79,6 +84,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.layers",
             "type": "Array",
             "label": "layers",
@@ -100,6 +106,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.xTitle",
             "type": "string",
             "label": "xTitle",
@@ -114,6 +121,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.yTitle",
             "type": "string",
             "label": "yTitle",
@@ -128,6 +136,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.yRightTitle",
             "type": "string",
             "label": "yRightTitle",
@@ -142,6 +151,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.axisTitlesVisibilitySettings",
             "type": "Object",
             "label": "axisTitlesVisibilitySettings",
@@ -163,6 +173,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.tickLabelsVisibilitySettings",
             "type": "Object",
             "label": "tickLabelsVisibilitySettings",
@@ -184,6 +195,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYState.gridlinesVisibilitySettings",
             "type": "Object",
             "label": "gridlinesVisibilitySettings",
@@ -217,8 +229,10 @@
         "type": "Interface",
         "label": "AxesSettingsConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AxesSettingsConfig.x",
             "type": "boolean",
             "label": "x",
@@ -230,6 +244,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AxesSettingsConfig.yLeft",
             "type": "boolean",
             "label": "yLeft",
@@ -241,6 +256,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AxesSettingsConfig.yRight",
             "type": "boolean",
             "label": "yRight",
@@ -264,8 +280,10 @@
         "type": "Interface",
         "label": "XYLayerConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.hide",
             "type": "CompoundType",
             "label": "hide",
@@ -280,6 +298,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.layerId",
             "type": "string",
             "label": "layerId",
@@ -291,6 +310,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.xAccessor",
             "type": "string",
             "label": "xAccessor",
@@ -305,6 +325,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.accessors",
             "type": "Array",
             "label": "accessors",
@@ -319,6 +340,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.yConfig",
             "type": "Array",
             "label": "yConfig",
@@ -340,6 +362,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.seriesType",
             "type": "CompoundType",
             "label": "seriesType",
@@ -360,6 +383,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.splitAccessor",
             "type": "string",
             "label": "splitAccessor",
@@ -374,6 +398,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.XYLayerConfig.palette",
             "type": "Object",
             "label": "palette",
@@ -407,8 +432,10 @@
         "type": "Interface",
         "label": "LegendConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LegendConfig.isVisible",
             "type": "boolean",
             "label": "isVisible",
@@ -422,6 +449,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.LegendConfig.position",
             "type": "CompoundType",
             "label": "position",
@@ -439,6 +467,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LegendConfig.showSingleSeries",
             "type": "CompoundType",
             "label": "showSingleSeries",
@@ -467,8 +496,10 @@
         "type": "Interface",
         "label": "PieVisualizationState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PieVisualizationState.shape",
             "type": "CompoundType",
             "label": "shape",
@@ -483,6 +514,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PieVisualizationState.layers",
             "type": "Array",
             "label": "layers",
@@ -504,6 +536,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PieVisualizationState.palette",
             "type": "Object",
             "label": "palette",
@@ -537,8 +570,10 @@
         "type": "Interface",
         "label": "SharedPieLayerState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.groups",
             "type": "Array",
             "label": "groups",
@@ -553,6 +588,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.metric",
             "type": "string",
             "label": "metric",
@@ -567,6 +603,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.numberDisplay",
             "type": "CompoundType",
             "label": "numberDisplay",
@@ -581,6 +618,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.categoryDisplay",
             "type": "CompoundType",
             "label": "categoryDisplay",
@@ -595,6 +633,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.legendDisplay",
             "type": "CompoundType",
             "label": "legendDisplay",
@@ -609,6 +648,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.legendPosition",
             "type": "CompoundType",
             "label": "legendPosition",
@@ -623,6 +663,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.nestedLegend",
             "type": "CompoundType",
             "label": "nestedLegend",
@@ -637,6 +678,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SharedPieLayerState.percentDecimals",
             "type": "number",
             "label": "percentDecimals",
@@ -663,8 +705,10 @@
         "type": "Interface",
         "label": "DatatableVisualizationState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DatatableVisualizationState.columns",
             "type": "Array",
             "label": "columns",
@@ -686,6 +730,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DatatableVisualizationState.layerId",
             "type": "string",
             "label": "layerId",
@@ -697,6 +742,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.DatatableVisualizationState.sorting",
             "type": "Object",
             "label": "sorting",
@@ -730,8 +776,10 @@
         "type": "Interface",
         "label": "MetricState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.MetricState.layerId",
             "type": "string",
             "label": "layerId",
@@ -743,6 +791,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MetricState.accessor",
             "type": "string",
             "label": "accessor",
@@ -769,8 +818,10 @@
         "type": "Interface",
         "label": "IndexPatternPersistedState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IndexPatternPersistedState.layers",
             "type": "Object",
             "label": "layers",
@@ -805,8 +856,10 @@
         "type": "Interface",
         "label": "IncompleteColumn",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IncompleteColumn.operationType",
             "type": "CompoundType",
             "label": "operationType",
@@ -821,6 +874,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IncompleteColumn.sourceField",
             "type": "string",
             "label": "sourceField",
@@ -858,8 +912,10 @@
           "BaseIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FiltersIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -874,6 +930,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FiltersIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -919,8 +976,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RangeIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -935,6 +994,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RangeIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -988,8 +1048,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.TermsIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -1004,6 +1066,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.TermsIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -1041,8 +1104,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DateHistogramIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -1057,6 +1122,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DateHistogramIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -1096,8 +1162,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.CardinalityIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -1135,8 +1203,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PercentileIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -1151,6 +1221,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PercentileIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -1188,8 +1259,10 @@
           "FieldBasedIndexPatternColumn"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LastValueIndexPatternColumn.operationType",
             "type": "string",
             "label": "operationType",
@@ -1204,6 +1277,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LastValueIndexPatternColumn.params",
             "type": "Object",
             "label": "params",
@@ -1230,8 +1304,12 @@
         "type": "Interface",
         "label": "LensPublicStart",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "experimental"
+            ],
             "id": "def-public.LensPublicStart.EmbeddableComponent",
             "type": "CompoundType",
             "label": "EmbeddableComponent",
@@ -1256,6 +1334,9 @@
             ]
           },
           {
+            "tags": [
+              "experimental"
+            ],
             "id": "def-public.LensPublicStart.navigateToPrefilledEditor",
             "type": "Function",
             "label": "navigateToPrefilledEditor",
@@ -1280,6 +1361,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LensPublicStart.canUseEditor",
             "type": "Function",
             "label": "canUseEditor",
@@ -1310,6 +1392,7 @@
         "id": "def-public.EmbeddableComponentProps",
         "type": "Type",
         "label": "EmbeddableComponentProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
@@ -1333,6 +1416,7 @@
         "id": "def-public.TypedLensByValueInput",
         "type": "Type",
         "label": "TypedLensByValueInput",
+        "tags": [],
         "description": [
           "\nType-safe variant of by value embeddable input for Lens.\nThis can be used to hardcode certain Lens chart configurations within another app."
         ],
@@ -1350,6 +1434,7 @@
         "id": "def-public.SeriesType",
         "type": "Type",
         "label": "SeriesType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -1365,6 +1450,7 @@
         "id": "def-public.ValueLabelConfig",
         "type": "Type",
         "label": "ValueLabelConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -1380,6 +1466,7 @@
         "id": "def-public.YAxisMode",
         "type": "Type",
         "label": "YAxisMode",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -1395,6 +1482,7 @@
         "id": "def-public.PieLayerState",
         "type": "Type",
         "label": "PieLayerState",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
@@ -1410,6 +1498,7 @@
         "id": "def-public.PersistedIndexPatternLayer",
         "type": "Type",
         "label": "PersistedIndexPatternLayer",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
@@ -1425,6 +1514,7 @@
         "id": "def-public.IndexPatternColumn",
         "type": "Type",
         "label": "IndexPatternColumn",
+        "tags": [],
         "description": [
           "\nA union type of all available column types. If a column is of an unknown type somewhere\nwithing the indexpattern data source it should be typed as `IndexPatternColumn` to make\ntypeguards possible that consider all available column types."
         ],
@@ -1480,6 +1570,7 @@
         "id": "def-public.OperationType",
         "type": "Type",
         "label": "OperationType",
+        "tags": [],
         "description": [
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
@@ -1497,6 +1588,7 @@
         "id": "def-public.MinIndexPatternColumn",
         "type": "Type",
         "label": "MinIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1512,6 +1604,7 @@
         "id": "def-public.MaxIndexPatternColumn",
         "type": "Type",
         "label": "MaxIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1527,6 +1620,7 @@
         "id": "def-public.AvgIndexPatternColumn",
         "type": "Type",
         "label": "AvgIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1542,6 +1636,7 @@
         "id": "def-public.SumIndexPatternColumn",
         "type": "Type",
         "label": "SumIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1557,6 +1652,7 @@
         "id": "def-public.MedianIndexPatternColumn",
         "type": "Type",
         "label": "MedianIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -1572,6 +1668,7 @@
         "id": "def-public.CountIndexPatternColumn",
         "type": "Type",
         "label": "CountIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx",
@@ -1588,6 +1685,7 @@
         "id": "def-public.CumulativeSumIndexPatternColumn",
         "type": "Type",
         "label": "CumulativeSumIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
@@ -1604,6 +1702,7 @@
         "id": "def-public.CounterRateIndexPatternColumn",
         "type": "Type",
         "label": "CounterRateIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx",
@@ -1620,6 +1719,7 @@
         "id": "def-public.DerivativeIndexPatternColumn",
         "type": "Type",
         "label": "DerivativeIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/derivative.tsx",
@@ -1636,6 +1736,7 @@
         "id": "def-public.MovingAverageIndexPatternColumn",
         "type": "Type",
         "label": "MovingAverageIndexPatternColumn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx",
@@ -1656,6 +1757,7 @@
       {
         "id": "def-server.LensServerPlugin",
         "type": "Class",
+        "tags": [],
         "label": "LensServerPlugin",
         "description": [],
         "signature": [
@@ -1914,8 +2016,10 @@
         "type": "Interface",
         "label": "PluginSetupContract",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PluginSetupContract.usageCollection",
             "type": "Object",
             "label": "usageCollection",
@@ -1938,6 +2042,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PluginSetupContract.taskManager",
             "type": "CompoundType",
             "label": "taskManager",
@@ -1971,8 +2076,10 @@
         "type": "Interface",
         "label": "PluginStartContract",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PluginStartContract.taskManager",
             "type": "CompoundType",
             "label": "taskManager",
@@ -1994,6 +2101,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PluginStartContract.data",
             "type": "Object",
             "label": "data",
@@ -2130,8 +2238,10 @@
           "<KeyType>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.BucketedAggregation.buckets",
             "type": "Array",
             "label": "buckets",
@@ -2158,8 +2268,10 @@
         "type": "Interface",
         "label": "NumberStatsResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.NumberStatsResult.count",
             "type": "number",
             "label": "count",
@@ -2171,6 +2283,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.NumberStatsResult.histogram",
             "type": "Object",
             "label": "histogram",
@@ -2192,6 +2305,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.NumberStatsResult.topValues",
             "type": "Object",
             "label": "topValues",
@@ -2225,8 +2339,10 @@
         "type": "Interface",
         "label": "TopValuesResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TopValuesResult.count",
             "type": "number",
             "label": "count",
@@ -2238,6 +2354,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TopValuesResult.topValues",
             "type": "Object",
             "label": "topValues",
@@ -2281,8 +2398,10 @@
           "<KeyType>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldStatsResponse.totalDocuments",
             "type": "number",
             "label": "totalDocuments",
@@ -2297,6 +2416,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldStatsResponse.sampledDocuments",
             "type": "number",
             "label": "sampledDocuments",
@@ -2311,6 +2431,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldStatsResponse.sampledValues",
             "type": "number",
             "label": "sampledValues",
@@ -2325,6 +2446,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldStatsResponse.histogram",
             "type": "Object",
             "label": "histogram",
@@ -2346,6 +2468,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldStatsResponse.topValues",
             "type": "Object",
             "label": "topValues",
@@ -2379,8 +2502,10 @@
         "type": "Interface",
         "label": "ExistingFields",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ExistingFields.indexPatternTitle",
             "type": "string",
             "label": "indexPatternTitle",
@@ -2392,6 +2517,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ExistingFields.existingFieldNames",
             "type": "Array",
             "label": "existingFieldNames",
@@ -2418,8 +2544,10 @@
         "type": "Interface",
         "label": "DateRange",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DateRange.fromDate",
             "type": "string",
             "label": "fromDate",
@@ -2431,6 +2559,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DateRange.toDate",
             "type": "string",
             "label": "toDate",
@@ -2471,8 +2600,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PersistableFilterMeta.indexRefName",
             "type": "string",
             "label": "indexRefName",
@@ -2516,8 +2647,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PersistableFilter.meta",
             "type": "Object",
             "label": "meta",
@@ -2549,6 +2682,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "label": "PLUGIN_ID",
@@ -2564,6 +2698,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.APP_ID",
         "type": "string",
         "label": "APP_ID",
@@ -2579,6 +2714,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.LENS_EMBEDDABLE_TYPE",
         "type": "string",
         "label": "LENS_EMBEDDABLE_TYPE",
@@ -2594,6 +2730,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.DOC_TYPE",
         "type": "string",
         "label": "DOC_TYPE",
@@ -2609,6 +2746,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.NOT_INTERNATIONALIZED_PRODUCT_NAME",
         "type": "string",
         "label": "NOT_INTERNATIONALIZED_PRODUCT_NAME",
@@ -2624,6 +2762,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.BASE_API_URL",
         "type": "string",
         "label": "BASE_API_URL",
@@ -2639,6 +2778,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.LENS_EDIT_BY_VALUE",
         "type": "string",
         "label": "LENS_EDIT_BY_VALUE",

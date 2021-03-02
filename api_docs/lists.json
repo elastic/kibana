@@ -5,6 +5,7 @@
       {
         "id": "def-public.Plugin",
         "type": "Class",
+        "tags": [],
         "label": "Plugin",
         "description": [],
         "signature": [
@@ -320,6 +321,7 @@
           "lineNumber": 20,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/common/with_optional_signal.ts#L20"
         },
+        "tags": [],
         "returnComment": [
           "An async function where the AbortSignal argument is optional"
         ],
@@ -341,6 +343,7 @@
           "lineNumber": 16,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/common/hooks/use_is_mounted.ts#L16"
         },
+        "tags": [],
         "returnComment": [
           "A {@link GetIsMounted} getter function returning whether the component is currently mounted"
         ],
@@ -379,6 +382,7 @@
           "lineNumber": 25,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/common/hooks/use_async.ts#L25"
         },
+        "tags": [],
         "returnComment": [
           "An {@link AsyncTask} containing the underlying task's state along with a start callback"
         ],
@@ -428,6 +432,7 @@
           "lineNumber": 41,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/hooks/use_api.ts#L41"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -471,6 +476,7 @@
           "lineNumber": 35,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts#L35"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -514,6 +520,7 @@
           "lineNumber": 31,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts#L31"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -557,6 +564,7 @@
           "lineNumber": 39,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.ts#L39"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -600,6 +608,7 @@
           "lineNumber": 30,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/hooks/use_exception_lists.ts#L30"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -623,6 +632,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_find_lists.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -646,6 +656,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_import_list.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -669,6 +680,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_delete_list.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -709,6 +721,7 @@
           "lineNumber": 174,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/api.ts#L174"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -749,6 +762,7 @@
           "lineNumber": 20,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/common/hooks/use_cursor.ts#L20"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -772,6 +786,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_export_list.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -795,6 +810,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_read_list_index.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -818,6 +834,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_create_list_index.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -841,6 +858,7 @@
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/lists/hooks/use_read_list_privileges.ts#L15"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -881,6 +899,7 @@
           "lineNumber": 109,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/api.ts#L109"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -921,6 +940,7 @@
           "lineNumber": 195,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/api.ts#L195"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -961,6 +981,7 @@
           "lineNumber": 299,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/api.ts#L299"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1001,6 +1022,7 @@
           "lineNumber": 66,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/api.ts#L66"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1041,6 +1063,7 @@
           "lineNumber": 532,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/public/exceptions/api.ts#L532"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1061,8 +1084,10 @@
           " extends { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExceptionList.totalItems",
             "type": "number",
             "label": "totalItems",
@@ -1086,8 +1111,10 @@
         "type": "Interface",
         "label": "ExceptionListFilter",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExceptionListFilter.name",
             "type": "CompoundType",
             "label": "name",
@@ -1102,6 +1129,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListFilter.list_id",
             "type": "CompoundType",
             "label": "list_id",
@@ -1116,6 +1144,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListFilter.created_by",
             "type": "CompoundType",
             "label": "created_by",
@@ -1130,6 +1159,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListFilter.type",
             "type": "CompoundType",
             "label": "type",
@@ -1144,6 +1174,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListFilter.tags",
             "type": "CompoundType",
             "label": "tags",
@@ -1170,8 +1201,10 @@
         "type": "Interface",
         "label": "ExceptionListIdentifiers",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ExceptionListIdentifiers.id",
             "type": "string",
             "label": "id",
@@ -1183,6 +1216,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListIdentifiers.listId",
             "type": "string",
             "label": "listId",
@@ -1194,6 +1228,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListIdentifiers.namespaceType",
             "type": "CompoundType",
             "label": "namespaceType",
@@ -1208,6 +1243,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ExceptionListIdentifiers.type",
             "type": "CompoundType",
             "label": "type",
@@ -1234,8 +1270,10 @@
         "type": "Interface",
         "label": "Pagination",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Pagination.page",
             "type": "number",
             "label": "page",
@@ -1247,6 +1285,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Pagination.perPage",
             "type": "number",
             "label": "perPage",
@@ -1258,6 +1297,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Pagination.total",
             "type": "number",
             "label": "total",
@@ -1284,8 +1324,10 @@
         "type": "Interface",
         "label": "UseExceptionListItemsSuccess",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UseExceptionListItemsSuccess.exceptions",
             "type": "Array",
             "label": "exceptions",
@@ -1300,6 +1342,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseExceptionListItemsSuccess.pagination",
             "type": "Object",
             "label": "pagination",
@@ -1332,8 +1375,10 @@
         "type": "Interface",
         "label": "UseExceptionListsSuccess",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UseExceptionListsSuccess.exceptions",
             "type": "Array",
             "label": "exceptions",
@@ -1348,6 +1393,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UseExceptionListsSuccess.pagination",
             "type": "Object",
             "label": "pagination",
@@ -1384,6 +1430,7 @@
       "type": "Interface",
       "label": "PluginSetup",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/lists/public/types.ts",
@@ -1398,6 +1445,7 @@
       "type": "Interface",
       "label": "PluginStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/lists/public/types.ts",
@@ -1413,6 +1461,7 @@
       {
         "id": "def-server.ListClient",
         "type": "Class",
+        "tags": [],
         "label": "ListClient",
         "description": [],
         "children": [
@@ -1468,6 +1517,7 @@
               "lineNumber": 92,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L92"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1484,6 +1534,7 @@
               "lineNumber": 100,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L100"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1529,6 +1580,7 @@
               "lineNumber": 108,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L108"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1574,6 +1626,7 @@
               "lineNumber": 114,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L114"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1619,6 +1672,7 @@
               "lineNumber": 143,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L143"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1635,6 +1689,7 @@
               "lineNumber": 172,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L172"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1651,6 +1706,7 @@
               "lineNumber": 178,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L178"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1667,6 +1723,7 @@
               "lineNumber": 184,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L184"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1683,6 +1740,7 @@
               "lineNumber": 190,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L190"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1699,6 +1757,7 @@
               "lineNumber": 196,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L196"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1715,6 +1774,7 @@
               "lineNumber": 202,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L202"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1731,6 +1791,7 @@
               "lineNumber": 208,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L208"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1747,6 +1808,7 @@
               "lineNumber": 214,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L214"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1763,6 +1825,7 @@
               "lineNumber": 220,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L220"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1779,6 +1842,7 @@
               "lineNumber": 225,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L225"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1795,6 +1859,7 @@
               "lineNumber": 230,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L230"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1811,6 +1876,7 @@
               "lineNumber": 237,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L237"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1827,6 +1893,7 @@
               "lineNumber": 244,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L244"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1843,6 +1910,7 @@
               "lineNumber": 250,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L250"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1859,6 +1927,7 @@
               "lineNumber": 256,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L256"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1875,6 +1944,7 @@
               "lineNumber": 262,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L262"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1891,6 +1961,7 @@
               "lineNumber": 268,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L268"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1907,6 +1978,7 @@
               "lineNumber": 274,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L274"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1923,6 +1995,7 @@
               "lineNumber": 280,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L280"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1939,6 +2012,7 @@
               "lineNumber": 286,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L286"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1984,6 +2058,7 @@
               "lineNumber": 292,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L292"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2029,6 +2104,7 @@
               "lineNumber": 298,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L298"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2074,6 +2150,7 @@
               "lineNumber": 314,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L314"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2119,6 +2196,7 @@
               "lineNumber": 326,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L326"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2164,6 +2242,7 @@
               "lineNumber": 342,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L342"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2209,6 +2288,7 @@
               "lineNumber": 370,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L370"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2254,6 +2334,7 @@
               "lineNumber": 386,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L386"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2299,6 +2380,7 @@
               "lineNumber": 411,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L411"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2344,6 +2426,7 @@
               "lineNumber": 430,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L430"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2389,6 +2472,7 @@
               "lineNumber": 453,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L453"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2434,6 +2518,7 @@
               "lineNumber": 463,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L463"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2479,6 +2564,7 @@
               "lineNumber": 479,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L479"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2524,6 +2610,7 @@
               "lineNumber": 495,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L495"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2569,6 +2656,7 @@
               "lineNumber": 519,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/lists/list_client.ts#L519"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2582,6 +2670,7 @@
       {
         "id": "def-server.ExceptionListClient",
         "type": "Class",
+        "tags": [],
         "label": "ExceptionListClient",
         "description": [],
         "children": [
@@ -2666,6 +2755,7 @@
               "lineNumber": 66,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L66"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2711,6 +2801,7 @@
               "lineNumber": 75,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L75"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2729,6 +2820,7 @@
               "lineNumber": 90,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L90"
             },
+            "tags": [],
             "returnComment": [
               "ExceptionListSchema if it created the endpoint list, otherwise null if it already exists"
             ]
@@ -2749,6 +2841,7 @@
               "lineNumber": 102,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L102"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2796,6 +2889,7 @@
               "lineNumber": 116,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L116"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2843,6 +2937,7 @@
               "lineNumber": 152,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L152"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2890,6 +2985,7 @@
               "lineNumber": 188,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L188"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2935,6 +3031,7 @@
               "lineNumber": 196,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L196"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2980,6 +3077,7 @@
               "lineNumber": 223,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L223"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3025,6 +3123,7 @@
               "lineNumber": 254,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L254"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3070,6 +3169,7 @@
               "lineNumber": 268,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L268"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3115,6 +3215,7 @@
               "lineNumber": 299,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L299"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3160,6 +3261,7 @@
               "lineNumber": 332,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L332"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3205,6 +3307,7 @@
               "lineNumber": 346,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L346"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3252,6 +3355,7 @@
               "lineNumber": 361,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L361"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3297,6 +3401,7 @@
               "lineNumber": 374,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L374"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3342,6 +3447,7 @@
               "lineNumber": 396,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L396"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3387,6 +3493,7 @@
               "lineNumber": 418,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L418"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3432,6 +3539,7 @@
               "lineNumber": 436,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L436"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3479,6 +3587,7 @@
               "lineNumber": 464,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L464"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3497,8 +3606,10 @@
         "type": "Interface",
         "label": "CreateExceptionListItemOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.comments",
             "type": "Array",
             "label": "comments",
@@ -3513,6 +3624,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.entries",
             "type": "Array",
             "label": "entries",
@@ -3527,6 +3639,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.itemId",
             "type": "string",
             "label": "itemId",
@@ -3538,6 +3651,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.listId",
             "type": "string",
             "label": "listId",
@@ -3549,6 +3663,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.namespaceType",
             "type": "CompoundType",
             "label": "namespaceType",
@@ -3563,6 +3678,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.name",
             "type": "string",
             "label": "name",
@@ -3574,6 +3690,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.osTypes",
             "type": "Array",
             "label": "osTypes",
@@ -3588,6 +3705,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.description",
             "type": "string",
             "label": "description",
@@ -3599,6 +3717,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.meta",
             "type": "Uncategorized",
             "label": "meta",
@@ -3613,6 +3732,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.tags",
             "type": "Array",
             "label": "tags",
@@ -3627,6 +3747,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CreateExceptionListItemOptions.type",
             "type": "string",
             "label": "type",
@@ -3653,8 +3774,10 @@
         "type": "Interface",
         "label": "ListPluginSetup",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ListPluginSetup.getExceptionListClient",
             "type": "Function",
             "label": "getExceptionListClient",
@@ -3675,6 +3798,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ListPluginSetup.getListClient",
             "type": "Function",
             "label": "getListClient",
@@ -3707,8 +3831,12 @@
         "type": "Interface",
         "label": "ListsApiRequestHandlerContext",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ListsApiRequestHandlerContext.getListClient",
             "type": "Function",
             "label": "getListClient",
@@ -3730,6 +3858,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ListsApiRequestHandlerContext.getExceptionListClient",
             "type": "Function",
             "label": "getExceptionListClient",
@@ -3772,6 +3901,7 @@
         "id": "def-common.OperatorEnum",
         "type": "Enum",
         "label": "OperatorEnum",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -3784,6 +3914,7 @@
         "id": "def-common.OperatorTypeEnum",
         "type": "Enum",
         "label": "OperatorTypeEnum",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -3796,6 +3927,7 @@
         "id": "def-common.ExceptionListTypeEnum",
         "type": "Enum",
         "label": "ExceptionListTypeEnum",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -3810,6 +3942,7 @@
         "id": "def-common.ListSchema",
         "type": "Type",
         "label": "ListSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/response/list_schema.ts",
@@ -3825,6 +3958,7 @@
         "id": "def-common.CommentsArray",
         "type": "Type",
         "label": "CommentsArray",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/comment.ts",
@@ -3840,6 +3974,7 @@
         "id": "def-common.CreateCommentsArray",
         "type": "Type",
         "label": "CreateCommentsArray",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/create_comment.ts",
@@ -3855,6 +3990,7 @@
         "id": "def-common.Comment",
         "type": "Type",
         "label": "Comment",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/comment.ts",
@@ -3870,6 +4006,7 @@
         "id": "def-common.CreateComment",
         "type": "Type",
         "label": "CreateComment",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/create_comment.ts",
@@ -3885,6 +4022,7 @@
         "id": "def-common.ExceptionListSchema",
         "type": "Type",
         "label": "ExceptionListSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.ts",
@@ -3900,6 +4038,7 @@
         "id": "def-common.ExceptionListItemSchema",
         "type": "Type",
         "label": "ExceptionListItemSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts",
@@ -3915,6 +4054,7 @@
         "id": "def-common.CreateExceptionListSchema",
         "type": "Type",
         "label": "CreateExceptionListSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_schema.ts",
@@ -3930,6 +4070,7 @@
         "id": "def-common.CreateExceptionListItemSchema",
         "type": "Type",
         "label": "CreateExceptionListItemSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts",
@@ -3945,6 +4086,7 @@
         "id": "def-common.UpdateExceptionListItemSchema",
         "type": "Type",
         "label": "UpdateExceptionListItemSchema",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/request/update_exception_list_item_schema.ts",
@@ -3960,6 +4102,7 @@
         "id": "def-common.Entry",
         "type": "Type",
         "label": "Entry",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entries.ts",
@@ -3975,6 +4118,7 @@
         "id": "def-common.EntryExists",
         "type": "Type",
         "label": "EntryExists",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entry_exists.ts",
@@ -3990,6 +4134,7 @@
         "id": "def-common.EntryMatch",
         "type": "Type",
         "label": "EntryMatch",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entry_match.ts",
@@ -4005,6 +4150,7 @@
         "id": "def-common.EntryMatchAny",
         "type": "Type",
         "label": "EntryMatchAny",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entry_match_any.ts",
@@ -4020,6 +4166,7 @@
         "id": "def-common.EntryNested",
         "type": "Type",
         "label": "EntryNested",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entry_nested.ts",
@@ -4035,6 +4182,7 @@
         "id": "def-common.EntryList",
         "type": "Type",
         "label": "EntryList",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entry_list.ts",
@@ -4050,6 +4198,7 @@
         "id": "def-common.EntriesArray",
         "type": "Type",
         "label": "EntriesArray",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/entries.ts",
@@ -4065,6 +4214,7 @@
         "id": "def-common.NamespaceType",
         "type": "Type",
         "label": "NamespaceType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/default_namespace.ts",
@@ -4080,6 +4230,7 @@
         "id": "def-common.NestedEntriesArray",
         "type": "Type",
         "label": "NestedEntriesArray",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/types/non_empty_nested_entries_array.ts",
@@ -4095,6 +4246,7 @@
         "id": "def-common.Operator",
         "type": "Type",
         "label": "Operator",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -4110,6 +4262,7 @@
         "id": "def-common.ExceptionListType",
         "type": "Type",
         "label": "ExceptionListType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -4125,6 +4278,7 @@
         "id": "def-common.Type",
         "type": "Type",
         "label": "Type",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -4140,6 +4294,7 @@
         "id": "def-common.OsTypeArray",
         "type": "Type",
         "label": "OsTypeArray",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
@@ -4152,6 +4307,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.ENDPOINT_LIST_ID",
         "type": "string",
         "label": "ENDPOINT_LIST_ID",
@@ -4169,6 +4325,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_ID",
         "type": "string",
         "label": "ENDPOINT_TRUSTED_APPS_LIST_ID",
@@ -4188,6 +4345,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.comment",
         "type": "Object",
         "label": "comment",
@@ -4211,6 +4369,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.exceptionListItemSchema",
         "type": "Object",
         "label": "exceptionListItemSchema",
@@ -4234,6 +4393,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.exceptionListType",
         "type": "Object",
         "label": "exceptionListType",
@@ -4250,6 +4410,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.createExceptionListItemSchema",
         "type": "Object",
         "label": "createExceptionListItemSchema",
@@ -4273,6 +4434,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.listSchema",
         "type": "Object",
         "label": "listSchema",
@@ -4296,6 +4458,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entry",
         "type": "Object",
         "label": "entry",
@@ -4319,6 +4482,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entriesNested",
         "type": "Object",
         "label": "entriesNested",
@@ -4342,6 +4506,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.nestedEntryItem",
         "type": "Object",
         "label": "nestedEntryItem",
@@ -4365,6 +4530,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entriesMatch",
         "type": "Object",
         "label": "entriesMatch",
@@ -4388,6 +4554,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entriesMatchAny",
         "type": "Object",
         "label": "entriesMatchAny",
@@ -4411,6 +4578,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entriesExists",
         "type": "Object",
         "label": "entriesExists",
@@ -4434,6 +4602,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.entriesList",
         "type": "Object",
         "label": "entriesList",
@@ -4457,6 +4626,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.namespaceType",
         "type": "Object",
         "label": "namespaceType",
@@ -4473,6 +4643,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.osTypeArray",
         "type": "Object",
         "label": "osTypeArray",

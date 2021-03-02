@@ -46,6 +46,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/ui/query_string_input/index.tsx#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -56,8 +57,10 @@
         "type": "Interface",
         "label": "QueryStringInputProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.indexPatterns",
             "type": "Array",
             "label": "indexPatterns",
@@ -80,6 +83,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.query",
             "type": "Object",
             "label": "query",
@@ -100,6 +104,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.disableAutoFocus",
             "type": "CompoundType",
             "label": "disableAutoFocus",
@@ -114,6 +119,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.screenTitle",
             "type": "string",
             "label": "screenTitle",
@@ -128,6 +134,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.prepend",
             "type": "Any",
             "label": "prepend",
@@ -142,6 +149,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.persistedLog",
             "type": "Object",
             "label": "persistedLog",
@@ -163,6 +171,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.bubbleSubmitEvent",
             "type": "CompoundType",
             "label": "bubbleSubmitEvent",
@@ -177,6 +186,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.placeholder",
             "type": "string",
             "label": "placeholder",
@@ -191,6 +201,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.disableLanguageSwitcher",
             "type": "CompoundType",
             "label": "disableLanguageSwitcher",
@@ -205,6 +216,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.languageSwitcherPopoverAnchorPosition",
             "type": "CompoundType",
             "label": "languageSwitcherPopoverAnchorPosition",
@@ -219,6 +231,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.onBlur",
             "type": "Function",
             "label": "onBlur",
@@ -233,6 +246,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.onChange",
             "type": "Function",
             "label": "onChange",
@@ -255,6 +269,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus",
             "type": "Function",
             "label": "onChangeQueryInputFocus",
@@ -269,6 +284,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.onSubmit",
             "type": "Function",
             "label": "onSubmit",
@@ -291,6 +307,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.dataTestSubj",
             "type": "string",
             "label": "dataTestSubj",
@@ -305,6 +322,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.size",
             "type": "CompoundType",
             "label": "size",
@@ -319,6 +337,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.className",
             "type": "string",
             "label": "className",
@@ -333,6 +352,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.isInvalid",
             "type": "CompoundType",
             "label": "isInvalid",
@@ -347,6 +367,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.isClearable",
             "type": "CompoundType",
             "label": "isClearable",
@@ -361,6 +382,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.iconType",
             "type": "CompoundType",
             "label": "iconType",
@@ -375,6 +397,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.nonKqlMode",
             "type": "CompoundType",
             "label": "nonKqlMode",
@@ -389,6 +412,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.QueryStringInputProps.nonKqlModeHelpText",
             "type": "string",
             "label": "nonKqlModeHelpText",
@@ -414,6 +438,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.SearchBar",
         "type": "CompoundType",
         "label": "SearchBar",
@@ -448,6 +473,7 @@
         "id": "def-public.SearchBarProps",
         "type": "Type",
         "label": "SearchBarProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
@@ -463,6 +489,7 @@
         "id": "def-public.StatefulSearchBarProps",
         "type": "Type",
         "label": "StatefulSearchBarProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
@@ -478,6 +505,7 @@
         "id": "def-public.IndexPatternSelectProps",
         "type": "Type",
         "label": "IndexPatternSelectProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",

@@ -13,6 +13,7 @@
       {
         "id": "def-server.IndexPatternsFetcher",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternsFetcher",
         "description": [],
         "children": [
@@ -91,9 +92,11 @@
                 "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.pattern",
                     "type": "CompoundType",
                     "label": "pattern",
@@ -108,6 +111,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.metaFields",
                     "type": "Array",
                     "label": "metaFields",
@@ -122,6 +126,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.fieldCapsOptions",
                     "type": "Object",
                     "label": "fieldCapsOptions",
@@ -136,6 +141,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.type",
                     "type": "string",
                     "label": "type",
@@ -150,6 +156,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.options.rollupIndex",
                     "type": "string",
                     "label": "rollupIndex",
@@ -206,9 +213,11 @@
                 "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.pattern",
                     "type": "string",
                     "label": "pattern",
@@ -220,6 +229,7 @@
                     }
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.metaFields",
                     "type": "Array",
                     "label": "metaFields",
@@ -234,6 +244,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.lookBack",
                     "type": "number",
                     "label": "lookBack",
@@ -245,6 +256,7 @@
                     }
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IndexPatternsFetcher.getFieldsForTimePattern.options.interval",
                     "type": "string",
                     "label": "interval",
@@ -325,6 +337,7 @@
       {
         "id": "def-server.IndexPatternsServiceProvider",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternsServiceProvider",
         "description": [],
         "signature": [
@@ -617,12 +630,14 @@
             "id": "def-server.mergeCapabilitiesWithFields.rollupIndexCapabilities",
             "type": "Object",
             "label": "rollupIndexCapabilities",
+            "tags": [],
             "description": [],
             "children": [
               {
                 "id": "def-server.mergeCapabilitiesWithFields.rollupIndexCapabilities.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
+                "tags": [],
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
@@ -644,12 +659,14 @@
             "id": "def-server.mergeCapabilitiesWithFields.fieldsFromFieldCapsApi",
             "type": "Object",
             "label": "fieldsFromFieldCapsApi",
+            "tags": [],
             "description": [],
             "children": [
               {
                 "id": "def-server.mergeCapabilitiesWithFields.fieldsFromFieldCapsApi.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
+                "tags": [],
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
@@ -715,6 +732,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -731,12 +749,14 @@
             "id": "def-server.getCapabilitiesForRollupIndices.indices",
             "type": "Object",
             "label": "indices",
+            "tags": [],
             "description": [],
             "children": [
               {
                 "id": "def-server.getCapabilitiesForRollupIndices.indices.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
+                "tags": [],
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/fetcher/lib/map_capabilities.ts",
@@ -771,8 +791,10 @@
         "type": "Interface",
         "label": "FieldDescriptor",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.aggregatable",
             "type": "boolean",
             "label": "aggregatable",
@@ -784,6 +806,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.name",
             "type": "string",
             "label": "name",
@@ -795,6 +818,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.readFromDocValues",
             "type": "boolean",
             "label": "readFromDocValues",
@@ -806,6 +830,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.searchable",
             "type": "boolean",
             "label": "searchable",
@@ -817,6 +842,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.type",
             "type": "string",
             "label": "type",
@@ -828,6 +854,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.esTypes",
             "type": "Array",
             "label": "esTypes",
@@ -842,6 +869,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.subType",
             "type": "Object",
             "label": "subType",
@@ -868,8 +896,10 @@
         "type": "Interface",
         "label": "FieldDescriptor",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.aggregatable",
             "type": "boolean",
             "label": "aggregatable",
@@ -881,6 +911,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.name",
             "type": "string",
             "label": "name",
@@ -892,6 +923,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.readFromDocValues",
             "type": "boolean",
             "label": "readFromDocValues",
@@ -903,6 +935,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.searchable",
             "type": "boolean",
             "label": "searchable",
@@ -914,6 +947,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.type",
             "type": "string",
             "label": "type",
@@ -925,6 +959,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.esTypes",
             "type": "Array",
             "label": "esTypes",
@@ -939,6 +974,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.FieldDescriptor.subType",
             "type": "Object",
             "label": "subType",
@@ -970,10 +1006,12 @@
       {
         "id": "def-common.IndexPatternsService",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternsService",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPatternsService.ensureDefaultIndexPattern",
             "type": "Function",
             "label": "ensureDefaultIndexPattern",
@@ -1056,6 +1094,7 @@
               "lineNumber": 108,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L108"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1089,6 +1128,7 @@
               "lineNumber": 122,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L122"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1144,6 +1184,7 @@
               "lineNumber": 138,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L138"
             },
+            "tags": [],
             "returnComment": [
               "IndexPattern[]"
             ]
@@ -1179,6 +1220,7 @@
               "lineNumber": 156,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L156"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1212,6 +1254,7 @@
               "lineNumber": 175,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L175"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1244,6 +1287,7 @@
               "lineNumber": 184,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L184"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1270,6 +1314,7 @@
               "lineNumber": 194,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L194"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1317,6 +1362,7 @@
               "lineNumber": 208,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L208"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1364,6 +1410,7 @@
               "lineNumber": 219,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L219"
             },
+            "tags": [],
             "returnComment": [
               "FieldSpec[]"
             ]
@@ -1458,6 +1505,7 @@
               "lineNumber": 235,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L235"
             },
+            "tags": [],
             "returnComment": [
               "FieldSpec[]"
             ]
@@ -1507,6 +1555,7 @@
               "lineNumber": 250,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L250"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -1592,6 +1641,7 @@
               "lineNumber": 327,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L327"
             },
+            "tags": [],
             "returnComment": [
               "Record<string, FieldSpec>"
             ]
@@ -1665,6 +1715,7 @@
               "lineNumber": 343,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L343"
             },
+            "tags": [],
             "returnComment": [
               "IndexPatternSpec"
             ]
@@ -1708,6 +1759,7 @@
               "lineNumber": 464,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_patterns.ts#L464"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2065,6 +2117,7 @@
       {
         "id": "def-common.IndexPattern",
         "type": "Class",
+        "tags": [],
         "label": "IndexPattern",
         "description": [],
         "signature": [
@@ -2086,6 +2139,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPattern.id",
             "type": "string",
             "label": "id",
@@ -2100,6 +2154,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.title",
             "type": "string",
             "label": "title",
@@ -2111,6 +2166,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.fieldFormatMap",
             "type": "Object",
             "label": "fieldFormatMap",
@@ -2125,6 +2181,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.typeMeta",
             "type": "Object",
             "label": "typeMeta",
@@ -2148,6 +2205,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.fields",
             "type": "CompoundType",
             "label": "fields",
@@ -2177,6 +2235,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.timeFieldName",
             "type": "string",
             "label": "timeFieldName",
@@ -2191,6 +2250,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-common.IndexPattern.intervalName",
             "type": "string",
             "label": "intervalName",
@@ -2205,6 +2267,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.type",
             "type": "string",
             "label": "type",
@@ -2221,6 +2284,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.formatHit",
             "type": "Function",
             "label": "formatHit",
@@ -2235,6 +2299,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.formatField",
             "type": "Function",
             "label": "formatField",
@@ -2249,6 +2314,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.flattenHit",
             "type": "Function",
             "label": "flattenHit",
@@ -2263,6 +2329,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.metaFields",
             "type": "Array",
             "label": "metaFields",
@@ -2277,6 +2344,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.version",
             "type": "string",
             "label": "version",
@@ -2293,6 +2361,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.sourceFilters",
             "type": "Array",
             "label": "sourceFilters",
@@ -2314,6 +2383,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPattern.allowNoIndex",
             "type": "boolean",
             "label": "allowNoIndex",
@@ -2374,6 +2444,7 @@
               "lineNumber": 128,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_pattern.ts#L128"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2392,6 +2463,7 @@
               "lineNumber": 133,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_pattern.ts#L133"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2416,6 +2488,7 @@
               "lineNumber": 137,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_pattern.ts#L137"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3229,6 +3302,7 @@
               "lineNumber": 446,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_pattern.ts#L446"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3260,6 +3334,7 @@
               "lineNumber": 450,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/index_patterns/index_pattern.ts#L450"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3273,6 +3348,7 @@
       {
         "id": "def-common.IndexPatternField",
         "type": "Class",
+        "tags": [],
         "label": "IndexPatternField",
         "description": [],
         "signature": [
@@ -3294,6 +3370,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPatternField.spec",
             "type": "Object",
             "label": "spec",
@@ -3355,6 +3432,7 @@
             "id": "def-common.IndexPatternField.count",
             "type": "number",
             "label": "count",
+            "tags": [],
             "description": [
               "\nCount is used for field popularity"
             ],
@@ -3368,6 +3446,7 @@
             "id": "def-common.IndexPatternField.count",
             "type": "number",
             "label": "count",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3379,6 +3458,7 @@
             "id": "def-common.IndexPatternField.runtimeField",
             "type": "Object",
             "label": "runtimeField",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3400,6 +3480,7 @@
             "id": "def-common.IndexPatternField.runtimeField",
             "type": "Object",
             "label": "runtimeField",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3421,6 +3502,7 @@
             "id": "def-common.IndexPatternField.script",
             "type": "string",
             "label": "script",
+            "tags": [],
             "description": [
               "\nScript field code"
             ],
@@ -3437,6 +3519,7 @@
             "id": "def-common.IndexPatternField.script",
             "type": "string",
             "label": "script",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3451,6 +3534,7 @@
             "id": "def-common.IndexPatternField.lang",
             "type": "string",
             "label": "lang",
+            "tags": [],
             "description": [
               "\nScript field language"
             ],
@@ -3467,6 +3551,7 @@
             "id": "def-common.IndexPatternField.lang",
             "type": "string",
             "label": "lang",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3481,6 +3566,7 @@
             "id": "def-common.IndexPatternField.customLabel",
             "type": "string",
             "label": "customLabel",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3495,6 +3581,7 @@
             "id": "def-common.IndexPatternField.customLabel",
             "type": "string",
             "label": "customLabel",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3509,6 +3596,7 @@
             "id": "def-common.IndexPatternField.conflictDescriptions",
             "type": "Object",
             "label": "conflictDescriptions",
+            "tags": [],
             "description": [
               "\nDescription of field type conflicts across different indices in the same index pattern"
             ],
@@ -3525,6 +3613,7 @@
             "id": "def-common.IndexPatternField.conflictDescriptions",
             "type": "Object",
             "label": "conflictDescriptions",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3539,6 +3628,7 @@
             "id": "def-common.IndexPatternField.name",
             "type": "string",
             "label": "name",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3550,6 +3640,7 @@
             "id": "def-common.IndexPatternField.displayName",
             "type": "string",
             "label": "displayName",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3561,6 +3652,7 @@
             "id": "def-common.IndexPatternField.type",
             "type": "string",
             "label": "type",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3572,6 +3664,7 @@
             "id": "def-common.IndexPatternField.esTypes",
             "type": "Array",
             "label": "esTypes",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3586,6 +3679,7 @@
             "id": "def-common.IndexPatternField.scripted",
             "type": "boolean",
             "label": "scripted",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3597,6 +3691,7 @@
             "id": "def-common.IndexPatternField.searchable",
             "type": "boolean",
             "label": "searchable",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3608,6 +3703,7 @@
             "id": "def-common.IndexPatternField.aggregatable",
             "type": "boolean",
             "label": "aggregatable",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3619,6 +3715,7 @@
             "id": "def-common.IndexPatternField.readFromDocValues",
             "type": "boolean",
             "label": "readFromDocValues",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3630,6 +3727,7 @@
             "id": "def-common.IndexPatternField.subType",
             "type": "Object",
             "label": "subType",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3651,6 +3749,7 @@
             "id": "def-common.IndexPatternField.isMapped",
             "type": "CompoundType",
             "label": "isMapped",
+            "tags": [],
             "description": [
               "\nIs the field part of the index mapping?"
             ],
@@ -3667,6 +3766,7 @@
             "id": "def-common.IndexPatternField.sortable",
             "type": "boolean",
             "label": "sortable",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3678,6 +3778,7 @@
             "id": "def-common.IndexPatternField.filterable",
             "type": "boolean",
             "label": "filterable",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3689,6 +3790,7 @@
             "id": "def-common.IndexPatternField.visualizable",
             "type": "boolean",
             "label": "visualizable",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/index_pattern_field.ts",
@@ -3790,9 +3892,11 @@
                 "id": "def-common.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }",
                 "type": "Object",
                 "label": "{\n    getFormatterForField,\n  }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-common.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
@@ -3865,6 +3969,7 @@
       {
         "id": "def-common.DuplicateIndexPatternError",
         "type": "Class",
+        "tags": [],
         "label": "DuplicateIndexPatternError",
         "description": [],
         "signature": [
@@ -4079,6 +4184,7 @@
           "lineNumber": 34,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/fields/field_list.ts#L34"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4104,6 +4210,7 @@
           "lineNumber": 41,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/expressions/load_index_pattern.ts#L41"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -4116,8 +4223,10 @@
         "description": [
           "\nInterface for an index pattern saved object"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.type",
             "type": "string",
             "label": "type",
@@ -4129,6 +4238,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.fields",
             "type": "string",
             "label": "fields",
@@ -4140,6 +4250,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.title",
             "type": "string",
             "label": "title",
@@ -4151,6 +4262,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.typeMeta",
             "type": "string",
             "label": "typeMeta",
@@ -4162,6 +4274,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.timeFieldName",
             "type": "string",
             "label": "timeFieldName",
@@ -4176,6 +4289,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.intervalName",
             "type": "string",
             "label": "intervalName",
@@ -4190,6 +4304,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.sourceFilters",
             "type": "string",
             "label": "sourceFilters",
@@ -4204,6 +4319,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.fieldFormatMap",
             "type": "string",
             "label": "fieldFormatMap",
@@ -4218,6 +4334,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.fieldAttrs",
             "type": "string",
             "label": "fieldAttrs",
@@ -4232,6 +4349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.runtimeFieldMap",
             "type": "string",
             "label": "runtimeFieldMap",
@@ -4246,6 +4364,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternAttributes.allowNoIndex",
             "type": "CompoundType",
             "label": "allowNoIndex",
@@ -4274,8 +4393,10 @@
         "type": "Interface",
         "label": "IFieldType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IFieldType.name",
             "type": "string",
             "label": "name",
@@ -4287,6 +4408,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.type",
             "type": "string",
             "label": "type",
@@ -4298,6 +4420,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.script",
             "type": "string",
             "label": "script",
@@ -4312,6 +4435,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.lang",
             "type": "string",
             "label": "lang",
@@ -4326,6 +4450,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.count",
             "type": "number",
             "label": "count",
@@ -4340,6 +4465,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.esTypes",
             "type": "Array",
             "label": "esTypes",
@@ -4354,6 +4480,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.aggregatable",
             "type": "CompoundType",
             "label": "aggregatable",
@@ -4368,6 +4495,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.filterable",
             "type": "CompoundType",
             "label": "filterable",
@@ -4382,6 +4510,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.searchable",
             "type": "CompoundType",
             "label": "searchable",
@@ -4396,6 +4525,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.sortable",
             "type": "CompoundType",
             "label": "sortable",
@@ -4410,6 +4540,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.visualizable",
             "type": "CompoundType",
             "label": "visualizable",
@@ -4424,6 +4555,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.readFromDocValues",
             "type": "CompoundType",
             "label": "readFromDocValues",
@@ -4438,6 +4570,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.scripted",
             "type": "CompoundType",
             "label": "scripted",
@@ -4452,6 +4585,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.subType",
             "type": "Object",
             "label": "subType",
@@ -4473,6 +4607,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.displayName",
             "type": "string",
             "label": "displayName",
@@ -4487,6 +4622,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.customLabel",
             "type": "string",
             "label": "customLabel",
@@ -4501,6 +4637,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.format",
             "type": "Any",
             "label": "format",
@@ -4515,6 +4652,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldType.toSpec",
             "type": "Function",
             "label": "toSpec",
@@ -4598,6 +4736,7 @@
           "[]"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.IIndexPatternFieldList.add",
@@ -4958,9 +5097,11 @@
                 "id": "def-common.IIndexPatternFieldList.toSpec.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-common.IIndexPatternFieldList.toSpec.options.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
@@ -5035,8 +5176,10 @@
         "type": "Interface",
         "label": "RuntimeField",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.RuntimeField.type",
             "type": "CompoundType",
             "label": "type",
@@ -5051,6 +5194,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.RuntimeField.script",
             "type": "Object",
             "label": "script",
@@ -5079,8 +5223,10 @@
         "description": [
           "\nIIndexPattern allows for an IndexPattern OR an index pattern saved object\ntoo ambiguous, should be avoided"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.fields",
             "type": "Array",
             "label": "fields",
@@ -5102,6 +5248,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.title",
             "type": "string",
             "label": "title",
@@ -5113,6 +5260,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.id",
             "type": "string",
             "label": "id",
@@ -5127,6 +5275,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.type",
             "type": "string",
             "label": "type",
@@ -5143,6 +5292,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.timeFieldName",
             "type": "string",
             "label": "timeFieldName",
@@ -5182,6 +5332,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.fieldFormatMap",
             "type": "Object",
             "label": "fieldFormatMap",
@@ -5204,6 +5355,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPattern.getFormatterForField",
             "type": "Function",
             "label": "getFormatterForField",
@@ -5264,11 +5416,15 @@
         "type": "Interface",
         "label": "FieldAttrs",
         "description": [],
+        "tags": [
+          "intenal"
+        ],
         "children": [
           {
             "id": "def-common.FieldAttrs.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -5292,8 +5448,10 @@
         "type": "Interface",
         "label": "FieldAttrSet",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldAttrSet.customLabel",
             "type": "string",
             "label": "customLabel",
@@ -5308,6 +5466,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldAttrSet.count",
             "type": "number",
             "label": "count",
@@ -5334,8 +5493,10 @@
         "type": "Interface",
         "label": "UiSettingsCommon",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.UiSettingsCommon.get",
             "type": "Function",
             "label": "get",
@@ -5350,6 +5511,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.UiSettingsCommon.getAll",
             "type": "Function",
             "label": "getAll",
@@ -5364,6 +5526,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.UiSettingsCommon.set",
             "type": "Function",
             "label": "set",
@@ -5378,6 +5541,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.UiSettingsCommon.remove",
             "type": "Function",
             "label": "remove",
@@ -5404,8 +5568,10 @@
         "type": "Interface",
         "label": "SavedObjectsClientCommonFindArgs",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommonFindArgs.type",
             "type": "CompoundType",
             "label": "type",
@@ -5420,6 +5586,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommonFindArgs.fields",
             "type": "Array",
             "label": "fields",
@@ -5434,6 +5601,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommonFindArgs.perPage",
             "type": "number",
             "label": "perPage",
@@ -5448,6 +5616,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommonFindArgs.search",
             "type": "string",
             "label": "search",
@@ -5462,6 +5631,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommonFindArgs.searchFields",
             "type": "Array",
             "label": "searchFields",
@@ -5488,8 +5658,10 @@
         "type": "Interface",
         "label": "SavedObjectsClientCommon",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommon.find",
             "type": "Function",
             "label": "find",
@@ -5520,6 +5692,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommon.get",
             "type": "Function",
             "label": "get",
@@ -5542,6 +5715,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommon.update",
             "type": "Function",
             "label": "update",
@@ -5564,6 +5738,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommon.create",
             "type": "Function",
             "label": "create",
@@ -5586,6 +5761,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectsClientCommon.delete",
             "type": "Function",
             "label": "delete",
@@ -5612,8 +5788,10 @@
         "type": "Interface",
         "label": "GetFieldsOptions",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.pattern",
             "type": "string",
             "label": "pattern",
@@ -5625,6 +5803,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.type",
             "type": "string",
             "label": "type",
@@ -5639,6 +5818,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.lookBack",
             "type": "CompoundType",
             "label": "lookBack",
@@ -5653,6 +5833,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.metaFields",
             "type": "Array",
             "label": "metaFields",
@@ -5667,6 +5848,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.rollupIndex",
             "type": "string",
             "label": "rollupIndex",
@@ -5681,6 +5863,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptions.allowNoIndex",
             "type": "CompoundType",
             "label": "allowNoIndex",
@@ -5707,8 +5890,10 @@
         "type": "Interface",
         "label": "GetFieldsOptionsTimePattern",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptionsTimePattern.pattern",
             "type": "string",
             "label": "pattern",
@@ -5720,6 +5905,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptionsTimePattern.metaFields",
             "type": "Array",
             "label": "metaFields",
@@ -5734,6 +5920,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptionsTimePattern.lookBack",
             "type": "number",
             "label": "lookBack",
@@ -5745,6 +5932,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.GetFieldsOptionsTimePattern.interval",
             "type": "string",
             "label": "interval",
@@ -5768,8 +5956,10 @@
         "type": "Interface",
         "label": "IIndexPatternsApiClient",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IIndexPatternsApiClient.getFieldsForTimePattern",
             "type": "Function",
             "label": "getFieldsForTimePattern",
@@ -5792,6 +5982,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IIndexPatternsApiClient.getFieldsForWildcard",
             "type": "Function",
             "label": "getFieldsForWildcard",
@@ -5826,8 +6017,10 @@
         "type": "Interface",
         "label": "IFieldSubType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IFieldSubType.multi",
             "type": "Object",
             "label": "multi",
@@ -5842,6 +6035,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IFieldSubType.nested",
             "type": "Object",
             "label": "nested",
@@ -5868,8 +6062,10 @@
         "type": "Interface",
         "label": "TypeMeta",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TypeMeta.aggs",
             "type": "Object",
             "label": "aggs",
@@ -5887,6 +6083,7 @@
             "id": "def-common.TypeMeta.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -5910,8 +6107,10 @@
         "type": "Interface",
         "label": "FieldSpecExportFmt",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.count",
             "type": "number",
             "label": "count",
@@ -5926,6 +6125,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.script",
             "type": "string",
             "label": "script",
@@ -5940,6 +6140,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.lang",
             "type": "string",
             "label": "lang",
@@ -5954,6 +6155,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.conflictDescriptions",
             "type": "Object",
             "label": "conflictDescriptions",
@@ -5968,6 +6170,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.name",
             "type": "string",
             "label": "name",
@@ -5979,6 +6182,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.type",
             "type": "Enum",
             "label": "type",
@@ -5999,6 +6203,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.esTypes",
             "type": "Array",
             "label": "esTypes",
@@ -6013,6 +6218,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.scripted",
             "type": "boolean",
             "label": "scripted",
@@ -6024,6 +6230,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.searchable",
             "type": "boolean",
             "label": "searchable",
@@ -6035,6 +6242,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.aggregatable",
             "type": "boolean",
             "label": "aggregatable",
@@ -6046,6 +6254,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.readFromDocValues",
             "type": "CompoundType",
             "label": "readFromDocValues",
@@ -6060,6 +6269,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.subType",
             "type": "Object",
             "label": "subType",
@@ -6081,6 +6291,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.format",
             "type": "Object",
             "label": "format",
@@ -6102,6 +6313,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpecExportFmt.indexed",
             "type": "CompoundType",
             "label": "indexed",
@@ -6130,8 +6342,10 @@
         "description": [
           "\nSerialized version of IndexPatternField"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldSpec.count",
             "type": "number",
             "label": "count",
@@ -6148,6 +6362,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.script",
             "type": "string",
             "label": "script",
@@ -6164,6 +6379,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.lang",
             "type": "string",
             "label": "lang",
@@ -6180,6 +6396,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.conflictDescriptions",
             "type": "Object",
             "label": "conflictDescriptions",
@@ -6194,6 +6411,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.format",
             "type": "Object",
             "label": "format",
@@ -6215,6 +6433,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.name",
             "type": "string",
             "label": "name",
@@ -6226,6 +6445,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.type",
             "type": "string",
             "label": "type",
@@ -6237,6 +6457,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.esTypes",
             "type": "Array",
             "label": "esTypes",
@@ -6251,6 +6472,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.scripted",
             "type": "CompoundType",
             "label": "scripted",
@@ -6265,6 +6487,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.searchable",
             "type": "boolean",
             "label": "searchable",
@@ -6276,6 +6499,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.aggregatable",
             "type": "boolean",
             "label": "aggregatable",
@@ -6287,6 +6511,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.readFromDocValues",
             "type": "CompoundType",
             "label": "readFromDocValues",
@@ -6301,6 +6526,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.subType",
             "type": "Object",
             "label": "subType",
@@ -6322,6 +6548,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.indexed",
             "type": "CompoundType",
             "label": "indexed",
@@ -6336,6 +6563,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.customLabel",
             "type": "string",
             "label": "customLabel",
@@ -6350,6 +6578,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.runtimeField",
             "type": "Object",
             "label": "runtimeField",
@@ -6371,6 +6600,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.shortDotsEnable",
             "type": "CompoundType",
             "label": "shortDotsEnable",
@@ -6385,6 +6615,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldSpec.isMapped",
             "type": "CompoundType",
             "label": "isMapped",
@@ -6413,8 +6644,10 @@
         "description": [
           "\nStatic index pattern format\nSerialized data object, representing index pattern attributes and state"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.id",
             "type": "string",
             "label": "id",
@@ -6431,6 +6664,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.version",
             "type": "string",
             "label": "version",
@@ -6447,6 +6681,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.title",
             "type": "string",
             "label": "title",
@@ -6461,6 +6696,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-common.IndexPatternSpec.intervalName",
             "type": "string",
             "label": "intervalName",
@@ -6475,6 +6713,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.timeFieldName",
             "type": "string",
             "label": "timeFieldName",
@@ -6489,6 +6728,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.sourceFilters",
             "type": "Array",
             "label": "sourceFilters",
@@ -6510,6 +6750,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.fields",
             "type": "Object",
             "label": "fields",
@@ -6532,6 +6773,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.typeMeta",
             "type": "Object",
             "label": "typeMeta",
@@ -6553,6 +6795,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.type",
             "type": "string",
             "label": "type",
@@ -6567,6 +6810,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.fieldFormats",
             "type": "Object",
             "label": "fieldFormats",
@@ -6589,6 +6833,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.runtimeFieldMap",
             "type": "Object",
             "label": "runtimeFieldMap",
@@ -6611,6 +6856,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.fieldAttrs",
             "type": "Object",
             "label": "fieldAttrs",
@@ -6632,6 +6878,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternSpec.allowNoIndex",
             "type": "CompoundType",
             "label": "allowNoIndex",
@@ -6658,8 +6905,10 @@
         "type": "Interface",
         "label": "SourceFilter",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SourceFilter.value",
             "type": "string",
             "label": "value",
@@ -6683,8 +6932,10 @@
         "type": "Interface",
         "label": "IndexPatternExpressionType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexPatternExpressionType.type",
             "type": "string",
             "label": "type",
@@ -6699,6 +6950,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexPatternExpressionType.value",
             "type": "Object",
             "label": "value",
@@ -6725,42 +6977,6 @@
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/expressions/load_index_pattern.ts#L17"
         },
         "initialIsOpen": false
-      },
-      {
-        "id": "def-common.IndexPatternLoadStartDependencies",
-        "type": "Interface",
-        "label": "IndexPatternLoadStartDependencies",
-        "description": [],
-        "children": [
-          {
-            "id": "def-common.IndexPatternLoadStartDependencies.indexPatterns",
-            "type": "Object",
-            "label": "indexPatterns",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/expressions/load_index_pattern.ts#L31"
-            },
-            "signature": [
-              "Pick<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternsService",
-                "text": "IndexPatternsService"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/index_patterns/expressions/load_index_pattern.ts#L30"
-        },
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -6769,6 +6985,7 @@
         "id": "def-common.IndexPatternsContract",
         "type": "Type",
         "label": "IndexPatternsContract",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
@@ -6784,6 +7001,7 @@
         "id": "def-common.FieldFormatMap",
         "type": "Type",
         "label": "FieldFormatMap",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6799,6 +7017,7 @@
         "id": "def-common.RuntimeType",
         "type": "Type",
         "label": "RuntimeType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6814,6 +7033,7 @@
         "id": "def-common.OnNotification",
         "type": "Type",
         "label": "OnNotification",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6837,6 +7057,7 @@
         "id": "def-common.OnError",
         "type": "Type",
         "label": "OnError",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6860,6 +7081,7 @@
         "id": "def-common.AggregationRestrictions",
         "type": "Type",
         "label": "AggregationRestrictions",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6875,6 +7097,7 @@
         "id": "def-common.FieldSpecConflictDescriptions",
         "type": "Type",
         "label": "FieldSpecConflictDescriptions",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6890,6 +7113,7 @@
         "id": "def-common.IndexPatternFieldMap",
         "type": "Type",
         "label": "IndexPatternFieldMap",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -6905,6 +7129,7 @@
         "id": "def-common.IndexPatternLoadExpressionFunctionDefinition",
         "type": "Type",
         "label": "IndexPatternLoadExpressionFunctionDefinition",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
@@ -6929,13 +7154,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
+          "SerializableState",
           ">>"
         ],
         "initialIsOpen": false
@@ -6943,6 +7162,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.RUNTIME_FIELD_TYPES",
         "type": "Object",
         "label": "RUNTIME_FIELD_TYPES",

@@ -17,6 +17,7 @@
         "type": "Interface",
         "label": "IEventLogger",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.IEventLogger.logEvent",
@@ -127,6 +128,7 @@
         "type": "Interface",
         "label": "IEventLogClient",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.IEventLogClient.findEventsBySavedObjectIds",
@@ -225,8 +227,10 @@
         "type": "Interface",
         "label": "QueryEventsBySavedObjectResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.QueryEventsBySavedObjectResult.page",
             "type": "number",
             "label": "page",
@@ -238,6 +242,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.QueryEventsBySavedObjectResult.per_page",
             "type": "number",
             "label": "per_page",
@@ -249,6 +254,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.QueryEventsBySavedObjectResult.total",
             "type": "number",
             "label": "total",
@@ -260,6 +266,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.QueryEventsBySavedObjectResult.data",
             "type": "Array",
             "label": "data",
@@ -288,6 +295,7 @@
         "id": "def-server.IEvent",
         "type": "Type",
         "label": "IEvent",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
@@ -303,6 +311,7 @@
         "id": "def-server.IValidatedEvent",
         "type": "Type",
         "label": "IValidatedEvent",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
@@ -315,6 +324,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-server.SAVED_OBJECT_REL_PRIMARY",
         "type": "string",
         "label": "SAVED_OBJECT_REL_PRIMARY",
@@ -336,6 +346,7 @@
       "type": "Interface",
       "label": "IEventLogService",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-server.IEventLogService.isEnabled",
@@ -610,6 +621,7 @@
       "type": "Interface",
       "label": "IEventLogClientService",
       "description": [],
+      "tags": [],
       "children": [
         {
           "id": "def-server.IEventLogClientService.getClient",
@@ -682,6 +694,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.BASE_EVENT_LOG_API_PATH",
         "type": "string",
         "label": "BASE_EVENT_LOG_API_PATH",

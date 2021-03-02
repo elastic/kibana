@@ -64,6 +64,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -74,8 +75,10 @@
         "type": "Interface",
         "label": "SetupDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SetupDependencies.embeddable",
             "type": "Object",
             "label": "embeddable",
@@ -96,6 +99,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SetupDependencies.uiActionsEnhanced",
             "type": "Object",
             "label": "uiActionsEnhanced",
@@ -128,8 +132,10 @@
         "type": "Interface",
         "label": "StartDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.StartDependencies.embeddable",
             "type": "Object",
             "label": "embeddable",
@@ -150,6 +156,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.StartDependencies.uiActionsEnhanced",
             "type": "Object",
             "label": "uiActionsEnhanced",
@@ -182,8 +189,10 @@
         "type": "Interface",
         "label": "EnhancedEmbeddableContext",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EnhancedEmbeddableContext.embeddable",
             "type": "CompoundType",
             "label": "embeddable",
@@ -243,6 +252,7 @@
         "id": "def-public.EnhancedEmbeddable",
         "type": "Type",
         "label": "EnhancedEmbeddable",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
@@ -255,6 +265,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.drilldownGrouping",
         "type": "Array",
         "label": "drilldownGrouping",
@@ -307,6 +318,7 @@
       "type": "Interface",
       "label": "SetupContract",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
@@ -321,6 +333,7 @@
       "type": "Interface",
       "label": "StartContract",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",

@@ -23,6 +23,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.CONFIG_ROLLUPS",
         "type": "string",
         "label": "CONFIG_ROLLUPS",
@@ -38,6 +39,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.API_BASE_PATH",
         "type": "string",
         "label": "API_BASE_PATH",
@@ -53,6 +55,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_APP_NAME",
         "type": "string",
         "label": "UIM_APP_NAME",
@@ -68,6 +71,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_APP_LOAD",
         "type": "string",
         "label": "UIM_APP_LOAD",
@@ -83,6 +87,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_CREATE",
         "type": "string",
         "label": "UIM_JOB_CREATE",
@@ -98,6 +103,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_DELETE",
         "type": "string",
         "label": "UIM_JOB_DELETE",
@@ -113,6 +119,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_DELETE_MANY",
         "type": "string",
         "label": "UIM_JOB_DELETE_MANY",
@@ -128,6 +135,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_START",
         "type": "string",
         "label": "UIM_JOB_START",
@@ -143,6 +151,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_START_MANY",
         "type": "string",
         "label": "UIM_JOB_START_MANY",
@@ -158,6 +167,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_STOP",
         "type": "string",
         "label": "UIM_JOB_STOP",
@@ -173,6 +183,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_JOB_STOP_MANY",
         "type": "string",
         "label": "UIM_JOB_STOP_MANY",
@@ -188,6 +199,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_SHOW_DETAILS_CLICK",
         "type": "string",
         "label": "UIM_SHOW_DETAILS_CLICK",
@@ -203,6 +215,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK",
         "type": "string",
         "label": "UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK",
@@ -218,6 +231,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_DETAIL_PANEL_TERMS_TAB_CLICK",
         "type": "string",
         "label": "UIM_DETAIL_PANEL_TERMS_TAB_CLICK",
@@ -233,6 +247,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK",
         "type": "string",
         "label": "UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK",
@@ -248,6 +263,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_DETAIL_PANEL_METRICS_TAB_CLICK",
         "type": "string",
         "label": "UIM_DETAIL_PANEL_METRICS_TAB_CLICK",
@@ -263,6 +279,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.UIM_DETAIL_PANEL_JSON_TAB_CLICK",
         "type": "string",
         "label": "UIM_DETAIL_PANEL_JSON_TAB_CLICK",
@@ -282,8 +299,10 @@
       {
         "id": "def-common.PLUGIN",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PLUGIN.ID",
             "type": "string",
             "label": "ID",
@@ -295,6 +314,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PLUGIN.minimumLicenseType",
             "type": "string",
             "label": "minimumLicenseType",

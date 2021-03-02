@@ -5,6 +5,7 @@
       {
         "id": "def-public.DevToolsPlugin",
         "type": "Class",
+        "tags": [],
         "label": "DevToolsPlugin",
         "description": [],
         "signature": [
@@ -92,9 +93,11 @@
                 "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }",
                 "type": "Object",
                 "label": "{ urlForwarding }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.urlForwarding",
                     "type": "Object",
                     "label": "urlForwarding",
@@ -177,8 +180,10 @@
       "type": "Interface",
       "label": "DevToolsSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.DevToolsSetup.register",
           "type": "Function",
           "label": "register",

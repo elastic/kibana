@@ -5,6 +5,7 @@
       {
         "id": "def-public.ReportingAPIClient",
         "type": "Class",
+        "tags": [],
         "label": "ReportingAPIClient",
         "description": [],
         "children": [
@@ -193,6 +194,7 @@
               "lineNumber": 73,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -329,6 +331,7 @@
               "lineNumber": 104,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -374,6 +377,7 @@
               "lineNumber": 114,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -419,6 +423,7 @@
               "lineNumber": 122,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -435,6 +440,7 @@
               "lineNumber": 136,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L136"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -466,6 +472,7 @@
               "lineNumber": 139,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -482,6 +489,7 @@
               "lineNumber": 145,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L145"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -506,6 +514,7 @@
               "lineNumber": 150,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L150"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -530,6 +539,7 @@
               "lineNumber": 158,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L158"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -554,6 +564,7 @@
               "lineNumber": 166,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L166"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -567,6 +578,7 @@
       {
         "id": "def-public.ReportingPublicPlugin",
         "type": "Class",
+        "tags": [],
         "label": "ReportingPublicPlugin",
         "description": [],
         "signature": [
@@ -821,6 +833,7 @@
           "lineNumber": 14,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/index.ts#L14"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -833,6 +846,7 @@
       "id": "def-public.ReportingStart",
       "type": "Type",
       "label": "ReportingStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
@@ -851,6 +865,7 @@
       {
         "id": "def-server.ReportingPlugin",
         "type": "Class",
+        "tags": [],
         "label": "ReportingPlugin",
         "description": [],
         "signature": [
@@ -1089,6 +1104,7 @@
       {
         "id": "def-server.ReportingCore",
         "type": "Class",
+        "tags": [],
         "label": "ReportingCore",
         "description": [],
         "children": [
@@ -1846,8 +1862,10 @@
         "type": "Interface",
         "label": "ReportingSetupDeps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.licensing",
             "type": "Object",
             "label": "licensing",
@@ -1868,6 +1886,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.features",
             "type": "Object",
             "label": "features",
@@ -1888,6 +1907,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.security",
             "type": "Object",
             "label": "security",
@@ -1909,6 +1929,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.spaces",
             "type": "Object",
             "label": "spaces",
@@ -1930,6 +1951,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.usageCollection",
             "type": "Object",
             "label": "usageCollection",
@@ -1964,8 +1986,10 @@
         "type": "Interface",
         "label": "ReportingStartDeps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ReportingStartDeps.data",
             "type": "Object",
             "label": "data",
@@ -2010,8 +2034,10 @@
           "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ReportingConfig.kbnConfig",
             "type": "Object",
             "label": "kbnConfig",
@@ -2043,6 +2069,7 @@
       {
         "id": "def-common.CancellationToken",
         "type": "Class",
+        "tags": [],
         "label": "CancellationToken",
         "description": [],
         "children": [
@@ -2092,6 +2119,7 @@
               "lineNumber": 19,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L19"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2108,6 +2136,7 @@
               "lineNumber": 32,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L32"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2138,6 +2167,7 @@
       {
         "id": "def-common.Poller",
         "type": "Class",
+        "tags": [],
         "label": "Poller",
         "description": [],
         "children": [
@@ -2283,6 +2313,7 @@
           "lineNumber": 14,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/index.ts#L14"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2295,6 +2326,7 @@
         "id": "def-common.constants",
         "type": "Object",
         "label": "constants",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",

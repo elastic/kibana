@@ -5,10 +5,12 @@
       {
         "id": "def-public.SavedObjectsManagementAction",
         "type": "Class",
+        "tags": [],
         "label": "SavedObjectsManagementAction",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.render",
             "type": "Function",
             "label": "render",
@@ -23,6 +25,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.id",
             "type": "string",
             "label": "id",
@@ -34,6 +37,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.euiAction",
             "type": "Object",
             "label": "euiAction",
@@ -80,6 +84,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.refreshOnFinish",
             "type": "Function",
             "label": "refreshOnFinish",
@@ -94,6 +99,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.actionContext",
             "type": "CompoundType",
             "label": "actionContext",
@@ -108,6 +114,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementAction.record",
             "type": "CompoundType",
             "label": "record",
@@ -320,8 +327,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementActionServiceSetup",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementActionServiceSetup.register",
             "type": "Function",
             "label": "register",
@@ -358,8 +367,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementActionServiceStart",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementActionServiceStart.has",
             "type": "Function",
             "label": "has",
@@ -376,6 +387,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementActionServiceStart.getAll",
             "type": "Function",
             "label": "getAll",
@@ -412,8 +424,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementColumnServiceSetup",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementColumnServiceSetup.register",
             "type": "Function",
             "label": "register",
@@ -450,8 +464,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementColumnServiceStart",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementColumnServiceStart.getAll",
             "type": "Function",
             "label": "getAll",
@@ -492,8 +508,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementColumn.id",
             "type": "string",
             "label": "id",
@@ -505,6 +523,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementColumn.euiColumn",
             "type": "Object",
             "label": "euiColumn",
@@ -541,8 +560,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementRecord",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementRecord.type",
             "type": "string",
             "label": "type",
@@ -554,6 +575,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementRecord.id",
             "type": "string",
             "label": "id",
@@ -565,6 +587,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementRecord.meta",
             "type": "Object",
             "label": "meta",
@@ -587,6 +610,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementRecord.references",
             "type": "Array",
             "label": "references",
@@ -608,6 +632,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementRecord.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -634,8 +659,10 @@
         "type": "Interface",
         "label": "SavedObjectsManagementServiceRegistryEntry",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementServiceRegistryEntry.id",
             "type": "string",
             "label": "id",
@@ -647,6 +674,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementServiceRegistryEntry.service",
             "type": "Object",
             "label": "service",
@@ -667,6 +695,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsManagementServiceRegistryEntry.title",
             "type": "string",
             "label": "title",
@@ -690,8 +719,10 @@
         "type": "Interface",
         "label": "ProcessedImportResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.failedImports",
             "type": "Array",
             "label": "failedImports",
@@ -713,6 +744,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.successfulImports",
             "type": "Array",
             "label": "successfulImports",
@@ -734,6 +766,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.unmatchedReferences",
             "type": "Array",
             "label": "unmatchedReferences",
@@ -748,6 +781,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.status",
             "type": "CompoundType",
             "label": "status",
@@ -762,6 +796,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.importCount",
             "type": "number",
             "label": "importCount",
@@ -773,6 +808,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.conflictedSavedObjectsLinkedToSavedSearches",
             "type": "Uncategorized",
             "label": "conflictedSavedObjectsLinkedToSavedSearches",
@@ -787,6 +823,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.conflictedSearchDocs",
             "type": "Uncategorized",
             "label": "conflictedSearchDocs",
@@ -801,6 +838,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ProcessedImportResponse.importWarnings",
             "type": "Array",
             "label": "importWarnings",
@@ -834,8 +872,10 @@
         "type": "Interface",
         "label": "FailedImport",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FailedImport.obj",
             "type": "Object",
             "label": "obj",
@@ -858,6 +898,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FailedImport.error",
             "type": "CompoundType",
             "label": "error",
@@ -924,8 +965,10 @@
         "description": [
           "\nRepresents a relation between two {@link SavedObject | saved object}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectRelation.id",
             "type": "string",
             "label": "id",
@@ -937,6 +980,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectRelation.type",
             "type": "string",
             "label": "type",
@@ -948,6 +992,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectRelation.relationship",
             "type": "CompoundType",
             "label": "relationship",
@@ -968,6 +1013,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectRelation.meta",
             "type": "Object",
             "label": "meta",
@@ -1002,8 +1048,10 @@
         "description": [
           "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetadata.icon",
             "type": "string",
             "label": "icon",
@@ -1018,6 +1066,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetadata.title",
             "type": "string",
             "label": "title",
@@ -1032,6 +1081,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetadata.editUrl",
             "type": "string",
             "label": "editUrl",
@@ -1046,6 +1096,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetadata.inAppUrl",
             "type": "Object",
             "label": "inAppUrl",
@@ -1060,6 +1111,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectMetadata.namespaceType",
             "type": "CompoundType",
             "label": "namespaceType",
@@ -1088,6 +1140,7 @@
         "id": "def-public.ISavedObjectsManagementServiceRegistry",
         "type": "Type",
         "label": "ISavedObjectsManagementServiceRegistry",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
@@ -1103,6 +1156,7 @@
         "id": "def-public.SavedObjectWithMetadata",
         "type": "Type",
         "label": "SavedObjectWithMetadata",
+        "tags": [],
         "description": [
           "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
         ],
@@ -1123,8 +1177,10 @@
       "type": "Interface",
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SavedObjectsManagementPluginSetup.actions",
           "type": "Object",
           "label": "actions",
@@ -1145,6 +1201,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.SavedObjectsManagementPluginSetup.columns",
           "type": "Object",
           "label": "columns",
@@ -1165,6 +1222,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.SavedObjectsManagementPluginSetup.serviceRegistry",
           "type": "Object",
           "label": "serviceRegistry",
@@ -1200,8 +1258,10 @@
       "type": "Interface",
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.SavedObjectsManagementPluginStart.actions",
           "type": "Object",
           "label": "actions",
@@ -1222,6 +1282,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.SavedObjectsManagementPluginStart.columns",
           "type": "Object",
           "label": "columns",
@@ -1270,8 +1331,10 @@
         "description": [
           "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectMetadata.icon",
             "type": "string",
             "label": "icon",
@@ -1286,6 +1349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectMetadata.title",
             "type": "string",
             "label": "title",
@@ -1300,6 +1364,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectMetadata.editUrl",
             "type": "string",
             "label": "editUrl",
@@ -1314,6 +1379,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectMetadata.inAppUrl",
             "type": "Object",
             "label": "inAppUrl",
@@ -1328,6 +1394,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectMetadata.namespaceType",
             "type": "CompoundType",
             "label": "namespaceType",
@@ -1356,8 +1423,10 @@
         "description": [
           "\nRepresents a relation between two {@link SavedObject | saved object}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectRelation.id",
             "type": "string",
             "label": "id",
@@ -1369,6 +1438,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectRelation.type",
             "type": "string",
             "label": "type",
@@ -1380,6 +1450,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectRelation.relationship",
             "type": "CompoundType",
             "label": "relationship",
@@ -1400,6 +1471,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectRelation.meta",
             "type": "Object",
             "label": "meta",
@@ -1432,8 +1504,10 @@
         "type": "Interface",
         "label": "SavedObjectInvalidRelation",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectInvalidRelation.id",
             "type": "string",
             "label": "id",
@@ -1445,6 +1519,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectInvalidRelation.type",
             "type": "string",
             "label": "type",
@@ -1456,6 +1531,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectInvalidRelation.relationship",
             "type": "CompoundType",
             "label": "relationship",
@@ -1476,6 +1552,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectInvalidRelation.error",
             "type": "string",
             "label": "error",
@@ -1499,8 +1576,10 @@
         "type": "Interface",
         "label": "SavedObjectGetRelationshipsResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectGetRelationshipsResponse.relations",
             "type": "Array",
             "label": "relations",
@@ -1522,6 +1601,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SavedObjectGetRelationshipsResponse.invalidRelations",
             "type": "Array",
             "label": "invalidRelations",
@@ -1557,6 +1637,7 @@
         "id": "def-common.SavedObjectWithMetadata",
         "type": "Type",
         "label": "SavedObjectWithMetadata",
+        "tags": [],
         "description": [
           "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
         ],
@@ -1574,6 +1655,7 @@
         "id": "def-common.SavedObjectRelationKind",
         "type": "Type",
         "label": "SavedObjectRelationKind",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",

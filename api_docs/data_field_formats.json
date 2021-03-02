@@ -7,6 +7,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.baseFormattersPublic",
         "type": "Array",
         "label": "baseFormattersPublic",
@@ -22,13 +23,7 @@
           " | typeof ",
           "DateNanosFormat",
           " | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
+          "FieldFormatInstanceType",
           ")[]"
         ],
         "initialIsOpen": false
@@ -37,6 +32,9 @@
         "id": "def-public.FieldFormatsStart",
         "type": "Type",
         "label": "FieldFormatsStart",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/data/public/field_formats/field_formats_service.ts",
@@ -64,10 +62,12 @@
       {
         "id": "def-common.FieldFormatsRegistry",
         "type": "Class",
+        "tags": [],
         "label": "FieldFormatsRegistry",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldFormatsRegistry.fieldFormats",
             "type": "Object",
             "label": "fieldFormats",
@@ -92,6 +92,7 @@
           {
             "id": "def-common.FieldFormatsRegistry.defaultMap",
             "type": "Object",
+            "tags": [],
             "children": [],
             "description": [],
             "label": "defaultMap",
@@ -104,6 +105,7 @@
           {
             "id": "def-common.FieldFormatsRegistry.metaParamsOptions",
             "type": "Object",
+            "tags": [],
             "children": [],
             "description": [],
             "label": "metaParamsOptions",
@@ -114,6 +116,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormatsRegistry.getConfig",
             "type": "Function",
             "label": "getConfig",
@@ -185,6 +188,7 @@
               "lineNumber": 34,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L34"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -357,6 +361,9 @@
               "lineNumber": 71,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L71"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
@@ -398,6 +405,9 @@
               "lineNumber": 88,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L88"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
@@ -437,6 +447,7 @@
               "lineNumber": 102,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L102"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -521,6 +532,9 @@
               "lineNumber": 115,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L115"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
@@ -577,6 +591,9 @@
               "lineNumber": 131,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L131"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
@@ -668,9 +685,15 @@
               "lineNumber": 147,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L147"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
+            "tags": [
+              "return"
+            ],
             "id": "def-common.FieldFormatsRegistry.getInstance",
             "type": "Function",
             "label": "getInstance",
@@ -789,6 +812,9 @@
               "lineNumber": 186,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L186"
             },
+            "tags": [
+              "return"
+            ],
             "returnComment": []
           },
           {
@@ -929,6 +955,9 @@
             }
           },
           {
+            "tags": [
+              "return"
+            ],
             "id": "def-common.FieldFormatsRegistry.getDefaultInstance",
             "type": "Function",
             "label": "getDefaultInstance",
@@ -1058,10 +1087,16 @@
       {
         "id": "def-common.FieldFormat",
         "type": "Class",
+        "tags": [],
         "label": "FieldFormat",
         "description": [],
         "children": [
           {
+            "tags": [
+              "property",
+              "static",
+              "public"
+            ],
             "id": "def-common.FieldFormat.id",
             "type": "string",
             "label": "id",
@@ -1073,6 +1108,11 @@
             }
           },
           {
+            "tags": [
+              "property",
+              "static",
+              "public"
+            ],
             "id": "def-common.FieldFormat.title",
             "type": "string",
             "label": "title",
@@ -1084,6 +1124,10 @@
             }
           },
           {
+            "tags": [
+              "property",
+              "private"
+            ],
             "id": "def-common.FieldFormat.fieldType",
             "type": "CompoundType",
             "label": "fieldType",
@@ -1098,6 +1142,10 @@
             ]
           },
           {
+            "tags": [
+              "property",
+              "private"
+            ],
             "id": "def-common.FieldFormat.convertObject",
             "type": "Object",
             "label": "convertObject",
@@ -1119,6 +1167,10 @@
             ]
           },
           {
+            "tags": [
+              "property",
+              "protected"
+            ],
             "id": "def-common.FieldFormat.htmlConvert",
             "type": "Function",
             "label": "htmlConvert",
@@ -1140,6 +1192,10 @@
             ]
           },
           {
+            "tags": [
+              "property",
+              "protected"
+            ],
             "id": "def-common.FieldFormat.textConvert",
             "type": "Function",
             "label": "textConvert",
@@ -1161,6 +1217,10 @@
             ]
           },
           {
+            "tags": [
+              "property",
+              "private"
+            ],
             "id": "def-common.FieldFormat.type",
             "type": "Any",
             "label": "type",
@@ -1175,6 +1235,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormat.allowsNumericalAggregations",
             "type": "CompoundType",
             "label": "allowsNumericalAggregations",
@@ -1189,6 +1250,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormat._params",
             "type": "Any",
             "label": "_params",
@@ -1203,6 +1265,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormat.getConfig",
             "type": "Function",
             "label": "getConfig",
@@ -1669,6 +1732,7 @@
       {
         "id": "def-common.BoolFormat",
         "type": "Class",
+        "tags": [],
         "label": "BoolFormat",
         "description": [],
         "signature": [
@@ -1690,6 +1754,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.BoolFormat.id",
             "type": "Enum",
             "label": "id",
@@ -1710,6 +1775,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BoolFormat.title",
             "type": "string",
             "label": "title",
@@ -1721,6 +1787,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BoolFormat.fieldType",
             "type": "Array",
             "label": "fieldType",
@@ -1770,6 +1837,7 @@
               "lineNumber": 22,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L22"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -1783,6 +1851,7 @@
       {
         "id": "def-common.BytesFormat",
         "type": "Class",
+        "tags": [],
         "label": "BytesFormat",
         "description": [],
         "signature": [
@@ -1798,6 +1867,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.BytesFormat.id",
             "type": "Enum",
             "label": "id",
@@ -1818,6 +1888,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BytesFormat.title",
             "type": "string",
             "label": "title",
@@ -1829,6 +1900,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BytesFormat.id",
             "type": "Enum",
             "label": "id",
@@ -1849,6 +1921,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BytesFormat.title",
             "type": "string",
             "label": "title",
@@ -1860,6 +1933,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BytesFormat.allowsNumericalAggregations",
             "type": "boolean",
             "label": "allowsNumericalAggregations",
@@ -1881,6 +1955,7 @@
       {
         "id": "def-common.ColorFormat",
         "type": "Class",
+        "tags": [],
         "label": "ColorFormat",
         "description": [],
         "signature": [
@@ -1902,6 +1977,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ColorFormat.id",
             "type": "Enum",
             "label": "id",
@@ -1922,6 +1998,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ColorFormat.title",
             "type": "string",
             "label": "title",
@@ -1933,6 +2010,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ColorFormat.fieldType",
             "type": "Array",
             "label": "fieldType",
@@ -2031,6 +2109,7 @@
               "lineNumber": 52,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L52"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2044,6 +2123,7 @@
       {
         "id": "def-common.DurationFormat",
         "type": "Class",
+        "tags": [],
         "label": "DurationFormat",
         "description": [],
         "signature": [
@@ -2065,6 +2145,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DurationFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2085,6 +2166,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DurationFormat.title",
             "type": "string",
             "label": "title",
@@ -2096,6 +2178,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DurationFormat.fieldType",
             "type": "Enum",
             "label": "fieldType",
@@ -2116,6 +2199,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DurationFormat.inputFormats",
             "type": "Array",
             "label": "inputFormats",
@@ -2130,6 +2214,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DurationFormat.outputFormats",
             "type": "Array",
             "label": "outputFormats",
@@ -2144,6 +2229,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DurationFormat.allowsNumericalAggregations",
             "type": "boolean",
             "label": "allowsNumericalAggregations",
@@ -2217,6 +2303,7 @@
               "lineNumber": 178,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L178"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2230,6 +2317,7 @@
       {
         "id": "def-common.IpFormat",
         "type": "Class",
+        "tags": [],
         "label": "IpFormat",
         "description": [],
         "signature": [
@@ -2251,6 +2339,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IpFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2271,6 +2360,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IpFormat.title",
             "type": "string",
             "label": "title",
@@ -2282,6 +2372,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.IpFormat.fieldType",
             "type": "Enum",
             "label": "fieldType",
@@ -2330,6 +2421,7 @@
               "lineNumber": 21,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L21"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2343,6 +2435,7 @@
       {
         "id": "def-common.NumberFormat",
         "type": "Class",
+        "tags": [],
         "label": "NumberFormat",
         "description": [],
         "signature": [
@@ -2358,6 +2451,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.NumberFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2378,6 +2472,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.NumberFormat.title",
             "type": "string",
             "label": "title",
@@ -2389,6 +2484,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.NumberFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2409,6 +2505,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.NumberFormat.title",
             "type": "string",
             "label": "title",
@@ -2420,6 +2517,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.NumberFormat.allowsNumericalAggregations",
             "type": "boolean",
             "label": "allowsNumericalAggregations",
@@ -2441,6 +2539,7 @@
       {
         "id": "def-common.PercentFormat",
         "type": "Class",
+        "tags": [],
         "label": "PercentFormat",
         "description": [],
         "signature": [
@@ -2456,6 +2555,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PercentFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2476,6 +2576,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PercentFormat.title",
             "type": "string",
             "label": "title",
@@ -2487,6 +2588,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PercentFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2507,6 +2609,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PercentFormat.title",
             "type": "string",
             "label": "title",
@@ -2518,6 +2621,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PercentFormat.allowsNumericalAggregations",
             "type": "boolean",
             "label": "allowsNumericalAggregations",
@@ -2542,6 +2646,7 @@
               "lineNumber": 24,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L24"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2573,6 +2678,7 @@
               "lineNumber": 29,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L29"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2586,6 +2692,7 @@
       {
         "id": "def-common.RelativeDateFormat",
         "type": "Class",
+        "tags": [],
         "label": "RelativeDateFormat",
         "description": [],
         "signature": [
@@ -2607,6 +2714,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.RelativeDateFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2627,6 +2735,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.RelativeDateFormat.title",
             "type": "string",
             "label": "title",
@@ -2638,6 +2747,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.RelativeDateFormat.fieldType",
             "type": "Enum",
             "label": "fieldType",
@@ -2686,6 +2796,7 @@
               "lineNumber": 22,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L22"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2699,6 +2810,7 @@
       {
         "id": "def-common.SourceFormat",
         "type": "Class",
+        "tags": [],
         "label": "SourceFormat",
         "description": [],
         "signature": [
@@ -2720,6 +2832,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SourceFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2740,6 +2853,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SourceFormat.title",
             "type": "string",
             "label": "title",
@@ -2751,6 +2865,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SourceFormat.fieldType",
             "type": "Enum",
             "label": "fieldType",
@@ -2799,6 +2914,7 @@
               "lineNumber": 49,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L49"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2859,6 +2975,7 @@
               "lineNumber": 51,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L51"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2872,6 +2989,7 @@
       {
         "id": "def-common.StaticLookupFormat",
         "type": "Class",
+        "tags": [],
         "label": "StaticLookupFormat",
         "description": [],
         "signature": [
@@ -2893,6 +3011,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.StaticLookupFormat.id",
             "type": "Enum",
             "label": "id",
@@ -2913,6 +3032,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.StaticLookupFormat.title",
             "type": "string",
             "label": "title",
@@ -2924,6 +3044,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.StaticLookupFormat.fieldType",
             "type": "Array",
             "label": "fieldType",
@@ -2990,6 +3111,7 @@
               "lineNumber": 43,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L43"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3003,6 +3125,7 @@
       {
         "id": "def-common.UrlFormat",
         "type": "Class",
+        "tags": [],
         "label": "UrlFormat",
         "description": [],
         "signature": [
@@ -3024,6 +3147,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.UrlFormat.id",
             "type": "Enum",
             "label": "id",
@@ -3044,6 +3168,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.UrlFormat.title",
             "type": "string",
             "label": "title",
@@ -3055,6 +3180,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.UrlFormat.fieldType",
             "type": "Array",
             "label": "fieldType",
@@ -3076,6 +3202,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.UrlFormat.urlTypes",
             "type": "Array",
             "label": "urlTypes",
@@ -3173,6 +3300,7 @@
               "lineNumber": 131,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L131"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3233,6 +3361,7 @@
               "lineNumber": 133,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L133"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3246,6 +3375,7 @@
       {
         "id": "def-common.StringFormat",
         "type": "Class",
+        "tags": [],
         "label": "StringFormat",
         "description": [],
         "signature": [
@@ -3267,6 +3397,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.StringFormat.id",
             "type": "Enum",
             "label": "id",
@@ -3287,6 +3418,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.StringFormat.title",
             "type": "string",
             "label": "title",
@@ -3298,6 +3430,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.StringFormat.fieldType",
             "type": "Array",
             "label": "fieldType",
@@ -3319,6 +3452,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.StringFormat.transformOptions",
             "type": "Array",
             "label": "transformOptions",
@@ -3378,6 +3512,7 @@
               "lineNumber": 102,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3391,6 +3526,7 @@
       {
         "id": "def-common.TruncateFormat",
         "type": "Class",
+        "tags": [],
         "label": "TruncateFormat",
         "description": [],
         "signature": [
@@ -3412,6 +3548,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TruncateFormat.id",
             "type": "Enum",
             "label": "id",
@@ -3432,6 +3569,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TruncateFormat.title",
             "type": "string",
             "label": "title",
@@ -3443,6 +3581,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TruncateFormat.fieldType",
             "type": "Enum",
             "label": "fieldType",
@@ -3491,6 +3630,7 @@
               "lineNumber": 24,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L24"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -3504,6 +3644,7 @@
       {
         "id": "def-common.FieldFormatNotFoundError",
         "type": "Class",
+        "tags": [],
         "label": "FieldFormatNotFoundError",
         "description": [],
         "signature": [
@@ -3518,6 +3659,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldFormatNotFoundError.formatId",
             "type": "string",
             "label": "formatId",
@@ -3638,8 +3780,10 @@
         "type": "Interface",
         "label": "FieldFormatConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FieldFormatConfig.id",
             "type": "string",
             "label": "id",
@@ -3651,6 +3795,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormatConfig.params",
             "type": "Object",
             "label": "params",
@@ -3665,6 +3810,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FieldFormatConfig.es",
             "type": "CompoundType",
             "label": "es",
@@ -3692,6 +3838,9 @@
         "id": "def-common.FIELD_FORMAT_IDS",
         "type": "Enum",
         "label": "FIELD_FORMAT_IDS",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3706,6 +3855,7 @@
         "id": "def-common.IFieldFormatsRegistry",
         "type": "Type",
         "label": "IFieldFormatsRegistry",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/index.ts",
@@ -3722,21 +3872,9 @@
             "text": "GetConfigFn"
           },
           ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
+          "FieldFormatInstanceType",
           "[]) => void; register: (fieldFormats: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
+          "FieldFormatInstanceType",
           "[]) => void; deserialize: ",
           "FormatFactory",
           "; getDefaultConfig: (fieldType: ",
@@ -3751,6 +3889,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.baseFormatters",
         "type": "Array",
         "label": "baseFormatters",
@@ -3761,18 +3900,13 @@
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/base_formatters.ts#L27"
         },
         "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
+          "FieldFormatInstanceType",
           "[]"
         ],
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.HTML_CONTEXT_TYPE",
         "type": "CompoundType",
         "label": "HTML_CONTEXT_TYPE",
@@ -3794,6 +3928,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.TEXT_CONTEXT_TYPE",
         "type": "CompoundType",
         "label": "TEXT_CONTEXT_TYPE",
@@ -3818,6 +3953,7 @@
         "id": "def-common.FieldFormatsGetConfigFn",
         "type": "Type",
         "label": "FieldFormatsGetConfigFn",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3833,6 +3969,9 @@
         "id": "def-common.FieldFormatsContentType",
         "type": "Type",
         "label": "FieldFormatsContentType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3848,6 +3987,9 @@
         "id": "def-common.FieldFormatId",
         "type": "Type",
         "label": "FieldFormatId",
+        "tags": [
+          "string"
+        ],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3860,24 +4002,10 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.FieldFormatInstanceType",
-        "type": "Type",
-        "label": "FieldFormatInstanceType",
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 77,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L77"
-        },
-        "signature": [
-          "(new (params?: any, getConfig?: GetConfigFn | undefined) => FieldFormat) & { id: FieldFormatId; title: string; fieldType: string | string[]; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.IFieldFormat",
         "type": "Type",
         "label": "IFieldFormat",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3893,6 +4021,7 @@
         "id": "def-common.FieldFormatsStartCommon",
         "type": "Type",
         "label": "FieldFormatsStartCommon",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
@@ -3942,8 +4071,10 @@
       {
         "id": "def-common.DEFAULT_CONVERTER_COLOR",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DEFAULT_CONVERTER_COLOR.range",
             "type": "string",
             "label": "range",
@@ -3955,6 +4086,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DEFAULT_CONVERTER_COLOR.regex",
             "type": "string",
             "label": "regex",
@@ -3966,6 +4098,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DEFAULT_CONVERTER_COLOR.text",
             "type": "string",
             "label": "text",
@@ -3977,6 +4110,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DEFAULT_CONVERTER_COLOR.background",
             "type": "string",
             "label": "background",

@@ -13,6 +13,7 @@
       {
         "id": "def-server.TaskManagerPlugin",
         "type": "Class",
+        "tags": [],
         "label": "TaskManagerPlugin",
         "description": [],
         "signature": [
@@ -288,8 +289,10 @@
         "type": "Interface",
         "label": "TaskInstance",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.TaskInstance.id",
             "type": "string",
             "label": "id",
@@ -306,6 +309,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.taskType",
             "type": "string",
             "label": "taskType",
@@ -319,6 +323,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.scheduledAt",
             "type": "Object",
             "label": "scheduledAt",
@@ -335,6 +340,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.startedAt",
             "type": "CompoundType",
             "label": "startedAt",
@@ -351,6 +357,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.retryAt",
             "type": "CompoundType",
             "label": "retryAt",
@@ -367,6 +374,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.runAt",
             "type": "Object",
             "label": "runAt",
@@ -383,6 +391,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.schedule",
             "type": "Object",
             "label": "schedule",
@@ -406,6 +415,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.params",
             "type": "Object",
             "label": "params",
@@ -422,6 +432,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.state",
             "type": "Object",
             "label": "state",
@@ -438,6 +449,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.user",
             "type": "string",
             "label": "user",
@@ -454,6 +466,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.scope",
             "type": "Array",
             "label": "scope",
@@ -470,6 +483,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.TaskInstance.ownerId",
             "type": "CompoundType",
             "label": "ownerId",
@@ -517,8 +531,10 @@
         "description": [
           "\nA task instance that has an id and is ready for storage."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.id",
             "type": "string",
             "label": "id",
@@ -532,6 +548,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.version",
             "type": "string",
             "label": "version",
@@ -548,6 +565,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.scheduledAt",
             "type": "Object",
             "label": "scheduledAt",
@@ -564,6 +582,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.attempts",
             "type": "number",
             "label": "attempts",
@@ -577,6 +596,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.status",
             "type": "Enum",
             "label": "status",
@@ -599,6 +619,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.runAt",
             "type": "Object",
             "label": "runAt",
@@ -615,6 +636,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.startedAt",
             "type": "CompoundType",
             "label": "startedAt",
@@ -631,6 +653,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.retryAt",
             "type": "CompoundType",
             "label": "retryAt",
@@ -647,6 +670,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.state",
             "type": "Object",
             "label": "state",
@@ -663,6 +687,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ConcreteTaskInstance.ownerId",
             "type": "CompoundType",
             "label": "ownerId",
@@ -693,8 +718,10 @@
         "description": [
           "\nThe run context is passed into a task's run function as its sole argument."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.RunContext.taskInstance",
             "type": "Object",
             "label": "taskInstance",
@@ -730,6 +757,7 @@
         "id": "def-server.TaskStatus",
         "type": "Enum",
         "label": "TaskStatus",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -744,6 +772,7 @@
         "id": "def-server.TaskRunCreatorFunction",
         "type": "Type",
         "label": "TaskRunCreatorFunction",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -770,6 +799,7 @@
       "id": "def-server.TaskManagerSetupContract",
       "type": "Type",
       "label": "TaskManagerSetupContract",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
@@ -786,6 +816,7 @@
       "id": "def-server.TaskManagerStartContract",
       "type": "Type",
       "label": "TaskManagerStartContract",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",

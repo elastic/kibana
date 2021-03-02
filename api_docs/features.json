@@ -5,10 +5,12 @@
       {
         "id": "def-public.KibanaFeature",
         "type": "Class",
+        "tags": [],
         "label": "KibanaFeature",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.KibanaFeature.subFeatures",
             "type": "Array",
             "label": "subFeatures",
@@ -73,6 +75,7 @@
             "id": "def-public.KibanaFeature.id",
             "type": "string",
             "label": "id",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -84,6 +87,7 @@
             "id": "def-public.KibanaFeature.name",
             "type": "string",
             "label": "name",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -95,6 +99,7 @@
             "id": "def-public.KibanaFeature.order",
             "type": "number",
             "label": "order",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -109,6 +114,7 @@
             "id": "def-public.KibanaFeature.category",
             "type": "Object",
             "label": "category",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -123,6 +129,7 @@
             "id": "def-public.KibanaFeature.app",
             "type": "Object",
             "label": "app",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -137,6 +144,7 @@
             "id": "def-public.KibanaFeature.catalogue",
             "type": "Object",
             "label": "catalogue",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -151,6 +159,7 @@
             "id": "def-public.KibanaFeature.management",
             "type": "Object",
             "label": "management",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -165,6 +174,7 @@
             "id": "def-public.KibanaFeature.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -179,6 +189,7 @@
             "id": "def-public.KibanaFeature.privileges",
             "type": "CompoundType",
             "label": "privileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -193,6 +204,7 @@
             "id": "def-public.KibanaFeature.alerting",
             "type": "Object",
             "label": "alerting",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -207,6 +219,7 @@
             "id": "def-public.KibanaFeature.excludeFromBasePrivileges",
             "type": "boolean",
             "label": "excludeFromBasePrivileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -218,6 +231,7 @@
             "id": "def-public.KibanaFeature.reserved",
             "type": "Object",
             "label": "reserved",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -270,8 +284,12 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "see"
+            ],
             "id": "def-public.KibanaFeatureConfig.id",
             "type": "string",
             "label": "id",
@@ -285,6 +303,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.name",
             "type": "string",
             "label": "name",
@@ -298,6 +317,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.category",
             "type": "Object",
             "label": "category",
@@ -320,6 +340,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.order",
             "type": "number",
             "label": "order",
@@ -336,6 +357,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -352,6 +374,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
@@ -368,6 +391,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.app",
             "type": "Object",
             "label": "app",
@@ -384,6 +408,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -400,6 +427,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -416,6 +444,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.alerting",
             "type": "Object",
             "label": "alerting",
@@ -432,6 +461,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-public.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
             "label": "privileges",
@@ -464,6 +497,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.subFeatures",
             "type": "Object",
             "label": "subFeatures",
@@ -488,6 +522,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.KibanaFeatureConfig.privilegesTooltip",
             "type": "string",
             "label": "privilegesTooltip",
@@ -504,6 +539,9 @@
             ]
           },
           {
+            "tags": [
+              "private"
+            ],
             "id": "def-public.KibanaFeatureConfig.reserved",
             "type": "Object",
             "label": "reserved",
@@ -540,8 +578,10 @@
         "description": [
           "\nFeature privilege definition"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FeatureKibanaPrivileges.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -558,6 +598,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.FeatureKibanaPrivileges.management",
             "type": "Object",
             "label": "management",
@@ -574,6 +617,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureKibanaPrivileges.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -590,6 +634,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.FeatureKibanaPrivileges.api",
             "type": "Object",
             "label": "api",
@@ -606,6 +653,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.FeatureKibanaPrivileges.app",
             "type": "Object",
             "label": "app",
@@ -622,6 +672,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureKibanaPrivileges.alerting",
             "type": "Object",
             "label": "alerting",
@@ -638,6 +689,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FeatureKibanaPrivileges.savedObject",
             "type": "Object",
             "label": "savedObject",
@@ -654,6 +706,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-public.FeatureKibanaPrivileges.ui",
             "type": "Object",
             "label": "ui",
@@ -684,8 +740,10 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SubFeatureConfig.name",
             "type": "string",
             "label": "name",
@@ -699,6 +757,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SubFeatureConfig.privilegeGroups",
             "type": "Object",
             "label": "privilegeGroups",
@@ -755,8 +814,10 @@
         "description": [
           "\nConfiguration for a sub-feature privilege."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SubFeaturePrivilegeConfig.id",
             "type": "string",
             "label": "id",
@@ -770,6 +831,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SubFeaturePrivilegeConfig.name",
             "type": "string",
             "label": "name",
@@ -783,6 +845,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SubFeaturePrivilegeConfig.includeIn",
             "type": "CompoundType",
             "label": "includeIn",
@@ -799,6 +862,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SubFeaturePrivilegeConfig.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
@@ -830,6 +894,7 @@
       "id": "def-public.FeaturesPluginSetup",
       "type": "Type",
       "label": "FeaturesPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/features/public/plugin.ts",
@@ -846,6 +911,7 @@
       "id": "def-public.FeaturesPluginStart",
       "type": "Type",
       "label": "FeaturesPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/features/public/plugin.ts",
@@ -872,10 +938,12 @@
       {
         "id": "def-server.KibanaFeature",
         "type": "Class",
+        "tags": [],
         "label": "KibanaFeature",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.KibanaFeature.subFeatures",
             "type": "Array",
             "label": "subFeatures",
@@ -940,6 +1008,7 @@
             "id": "def-server.KibanaFeature.id",
             "type": "string",
             "label": "id",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -951,6 +1020,7 @@
             "id": "def-server.KibanaFeature.name",
             "type": "string",
             "label": "name",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -962,6 +1032,7 @@
             "id": "def-server.KibanaFeature.order",
             "type": "number",
             "label": "order",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -976,6 +1047,7 @@
             "id": "def-server.KibanaFeature.category",
             "type": "Object",
             "label": "category",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -990,6 +1062,7 @@
             "id": "def-server.KibanaFeature.app",
             "type": "Object",
             "label": "app",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1004,6 +1077,7 @@
             "id": "def-server.KibanaFeature.catalogue",
             "type": "Object",
             "label": "catalogue",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1018,6 +1092,7 @@
             "id": "def-server.KibanaFeature.management",
             "type": "Object",
             "label": "management",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1032,6 +1107,7 @@
             "id": "def-server.KibanaFeature.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1046,6 +1122,7 @@
             "id": "def-server.KibanaFeature.privileges",
             "type": "CompoundType",
             "label": "privileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1060,6 +1137,7 @@
             "id": "def-server.KibanaFeature.alerting",
             "type": "Object",
             "label": "alerting",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1074,6 +1152,7 @@
             "id": "def-server.KibanaFeature.excludeFromBasePrivileges",
             "type": "boolean",
             "label": "excludeFromBasePrivileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1085,6 +1164,7 @@
             "id": "def-server.KibanaFeature.reserved",
             "type": "Object",
             "label": "reserved",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -1130,6 +1210,7 @@
       {
         "id": "def-server.ElasticsearchFeature",
         "type": "Class",
+        "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
         "children": [
@@ -1183,6 +1264,7 @@
             "id": "def-server.ElasticsearchFeature.id",
             "type": "string",
             "label": "id",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1194,6 +1276,7 @@
             "id": "def-server.ElasticsearchFeature.catalogue",
             "type": "Object",
             "label": "catalogue",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1209,6 +1292,7 @@
             "id": "def-server.ElasticsearchFeature.management",
             "type": "Object",
             "label": "management",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1225,6 +1309,7 @@
             "id": "def-server.ElasticsearchFeature.privileges",
             "type": "Object",
             "label": "privileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1286,8 +1371,12 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "see"
+            ],
             "id": "def-server.KibanaFeatureConfig.id",
             "type": "string",
             "label": "id",
@@ -1301,6 +1390,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.name",
             "type": "string",
             "label": "name",
@@ -1314,6 +1404,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.category",
             "type": "Object",
             "label": "category",
@@ -1336,6 +1427,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.order",
             "type": "number",
             "label": "order",
@@ -1352,6 +1444,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -1368,6 +1461,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
@@ -1384,6 +1478,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.app",
             "type": "Object",
             "label": "app",
@@ -1400,6 +1495,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -1416,6 +1514,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -1432,6 +1531,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.alerting",
             "type": "Object",
             "label": "alerting",
@@ -1448,6 +1548,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-server.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
             "label": "privileges",
@@ -1480,6 +1584,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.subFeatures",
             "type": "Object",
             "label": "subFeatures",
@@ -1504,6 +1609,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaFeatureConfig.privilegesTooltip",
             "type": "string",
             "label": "privilegesTooltip",
@@ -1520,6 +1626,9 @@
             ]
           },
           {
+            "tags": [
+              "private"
+            ],
             "id": "def-server.KibanaFeatureConfig.reserved",
             "type": "Object",
             "label": "reserved",
@@ -1556,8 +1665,10 @@
         "description": [
           "\nFeature privilege definition"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.FeatureKibanaPrivileges.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -1574,6 +1685,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.FeatureKibanaPrivileges.management",
             "type": "Object",
             "label": "management",
@@ -1590,6 +1704,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.FeatureKibanaPrivileges.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -1606,6 +1721,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.FeatureKibanaPrivileges.api",
             "type": "Object",
             "label": "api",
@@ -1622,6 +1740,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.FeatureKibanaPrivileges.app",
             "type": "Object",
             "label": "app",
@@ -1638,6 +1759,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.FeatureKibanaPrivileges.alerting",
             "type": "Object",
             "label": "alerting",
@@ -1654,6 +1776,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.FeatureKibanaPrivileges.savedObject",
             "type": "Object",
             "label": "savedObject",
@@ -1670,6 +1793,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-server.FeatureKibanaPrivileges.ui",
             "type": "Object",
             "label": "ui",
@@ -1700,8 +1827,12 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "see"
+            ],
             "id": "def-server.ElasticsearchFeatureConfig.id",
             "type": "string",
             "label": "id",
@@ -1715,6 +1846,9 @@
             }
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.ElasticsearchFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -1731,6 +1865,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ElasticsearchFeatureConfig.catalogue",
             "type": "Array",
             "label": "catalogue",
@@ -1747,6 +1882,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-server.ElasticsearchFeatureConfig.privileges",
             "type": "Array",
             "label": "privileges",
@@ -1784,8 +1923,10 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.FeatureElasticsearchPrivileges.requiredClusterPrivileges",
             "type": "Array",
             "label": "requiredClusterPrivileges",
@@ -1802,6 +1943,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.FeatureElasticsearchPrivileges.requiredIndexPrivileges",
             "type": "Object",
             "label": "requiredIndexPrivileges",
@@ -1818,6 +1962,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.FeatureElasticsearchPrivileges.requiredRoles",
             "type": "Array",
             "label": "requiredRoles",
@@ -1834,6 +1981,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-server.FeatureElasticsearchPrivileges.ui",
             "type": "Array",
             "label": "ui",
@@ -1864,6 +2015,7 @@
         "description": [
           "\nDescribes public Features plugin contract returned at the `setup` stage."
         ],
+        "tags": [],
         "children": [
           {
             "id": "def-server.PluginSetupContract.registerKibanaFeature",
@@ -2044,6 +2196,7 @@
         "type": "Interface",
         "label": "PluginStartContract",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.PluginStartContract.getElasticsearchFeatures",
@@ -2108,6 +2261,7 @@
     "misc": [],
     "objects": [
       {
+        "tags": [],
         "id": "def-server.uiCapabilitiesRegex",
         "type": "Object",
         "label": "uiCapabilitiesRegex",
@@ -2129,6 +2283,7 @@
       {
         "id": "def-common.ElasticsearchFeature",
         "type": "Class",
+        "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
         "children": [
@@ -2182,6 +2337,7 @@
             "id": "def-common.ElasticsearchFeature.id",
             "type": "string",
             "label": "id",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2193,6 +2349,7 @@
             "id": "def-common.ElasticsearchFeature.catalogue",
             "type": "Object",
             "label": "catalogue",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2208,6 +2365,7 @@
             "id": "def-common.ElasticsearchFeature.management",
             "type": "Object",
             "label": "management",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2224,6 +2382,7 @@
             "id": "def-common.ElasticsearchFeature.privileges",
             "type": "Object",
             "label": "privileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2278,10 +2437,12 @@
       {
         "id": "def-common.KibanaFeature",
         "type": "Class",
+        "tags": [],
         "label": "KibanaFeature",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.KibanaFeature.subFeatures",
             "type": "Array",
             "label": "subFeatures",
@@ -2346,6 +2507,7 @@
             "id": "def-common.KibanaFeature.id",
             "type": "string",
             "label": "id",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2357,6 +2519,7 @@
             "id": "def-common.KibanaFeature.name",
             "type": "string",
             "label": "name",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2368,6 +2531,7 @@
             "id": "def-common.KibanaFeature.order",
             "type": "number",
             "label": "order",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2382,6 +2546,7 @@
             "id": "def-common.KibanaFeature.category",
             "type": "Object",
             "label": "category",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2396,6 +2561,7 @@
             "id": "def-common.KibanaFeature.app",
             "type": "Object",
             "label": "app",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2410,6 +2576,7 @@
             "id": "def-common.KibanaFeature.catalogue",
             "type": "Object",
             "label": "catalogue",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2424,6 +2591,7 @@
             "id": "def-common.KibanaFeature.management",
             "type": "Object",
             "label": "management",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2438,6 +2606,7 @@
             "id": "def-common.KibanaFeature.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2452,6 +2621,7 @@
             "id": "def-common.KibanaFeature.privileges",
             "type": "CompoundType",
             "label": "privileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2466,6 +2636,7 @@
             "id": "def-common.KibanaFeature.alerting",
             "type": "Object",
             "label": "alerting",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2480,6 +2651,7 @@
             "id": "def-common.KibanaFeature.excludeFromBasePrivileges",
             "type": "boolean",
             "label": "excludeFromBasePrivileges",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2491,6 +2663,7 @@
             "id": "def-common.KibanaFeature.reserved",
             "type": "Object",
             "label": "reserved",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/kibana_feature.ts",
@@ -2536,6 +2709,7 @@
       {
         "id": "def-common.SubFeature",
         "type": "Class",
+        "tags": [],
         "label": "SubFeature",
         "description": [],
         "children": [
@@ -2583,6 +2757,7 @@
             "id": "def-common.SubFeature.name",
             "type": "string",
             "label": "name",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
@@ -2594,6 +2769,7 @@
             "id": "def-common.SubFeature.privilegeGroups",
             "type": "Object",
             "label": "privilegeGroups",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/features/common/sub_feature.ts",
@@ -2655,8 +2831,10 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FeatureElasticsearchPrivileges.requiredClusterPrivileges",
             "type": "Array",
             "label": "requiredClusterPrivileges",
@@ -2673,6 +2851,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.FeatureElasticsearchPrivileges.requiredIndexPrivileges",
             "type": "Object",
             "label": "requiredIndexPrivileges",
@@ -2689,6 +2870,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-common.FeatureElasticsearchPrivileges.requiredRoles",
             "type": "Array",
             "label": "requiredRoles",
@@ -2705,6 +2889,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-common.FeatureElasticsearchPrivileges.ui",
             "type": "Array",
             "label": "ui",
@@ -2735,8 +2923,10 @@
         "description": [
           "\nFeature privilege definition"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -2753,6 +2943,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.FeatureKibanaPrivileges.management",
             "type": "Object",
             "label": "management",
@@ -2769,6 +2962,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -2785,6 +2979,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.FeatureKibanaPrivileges.api",
             "type": "Object",
             "label": "api",
@@ -2801,6 +2998,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.FeatureKibanaPrivileges.app",
             "type": "Object",
             "label": "app",
@@ -2817,6 +3017,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.alerting",
             "type": "Object",
             "label": "alerting",
@@ -2833,6 +3034,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.FeatureKibanaPrivileges.savedObject",
             "type": "Object",
             "label": "savedObject",
@@ -2849,6 +3051,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-common.FeatureKibanaPrivileges.ui",
             "type": "Object",
             "label": "ui",
@@ -2879,8 +3085,12 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "see"
+            ],
             "id": "def-common.ElasticsearchFeatureConfig.id",
             "type": "string",
             "label": "id",
@@ -2894,6 +3104,9 @@
             }
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.ElasticsearchFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -2910,6 +3123,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ElasticsearchFeatureConfig.catalogue",
             "type": "Array",
             "label": "catalogue",
@@ -2926,6 +3140,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-common.ElasticsearchFeatureConfig.privileges",
             "type": "Array",
             "label": "privileges",
@@ -2963,8 +3181,12 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [
+              "see"
+            ],
             "id": "def-common.KibanaFeatureConfig.id",
             "type": "string",
             "label": "id",
@@ -2978,6 +3200,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.name",
             "type": "string",
             "label": "name",
@@ -2991,6 +3214,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.category",
             "type": "Object",
             "label": "category",
@@ -3013,6 +3237,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.order",
             "type": "number",
             "label": "order",
@@ -3029,6 +3254,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.excludeFromBasePrivileges",
             "type": "CompoundType",
             "label": "excludeFromBasePrivileges",
@@ -3045,6 +3271,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
@@ -3061,6 +3288,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.app",
             "type": "Object",
             "label": "app",
@@ -3077,6 +3305,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-common.KibanaFeatureConfig.management",
             "type": "Object",
             "label": "management",
@@ -3093,6 +3324,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.catalogue",
             "type": "Object",
             "label": "catalogue",
@@ -3109,6 +3341,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.alerting",
             "type": "Object",
             "label": "alerting",
@@ -3125,6 +3358,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "see"
+            ],
             "id": "def-common.KibanaFeatureConfig.privileges",
             "type": "CompoundType",
             "label": "privileges",
@@ -3157,6 +3394,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.subFeatures",
             "type": "Object",
             "label": "subFeatures",
@@ -3181,6 +3419,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.KibanaFeatureConfig.privilegesTooltip",
             "type": "string",
             "label": "privilegesTooltip",
@@ -3197,6 +3436,9 @@
             ]
           },
           {
+            "tags": [
+              "private"
+            ],
             "id": "def-common.KibanaFeatureConfig.reserved",
             "type": "Object",
             "label": "reserved",
@@ -3233,8 +3475,10 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SubFeatureConfig.name",
             "type": "string",
             "label": "name",
@@ -3248,6 +3492,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SubFeatureConfig.privilegeGroups",
             "type": "Object",
             "label": "privilegeGroups",
@@ -3304,8 +3549,10 @@
         "description": [
           "\nConfiguration for a sub-feature privilege."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeConfig.id",
             "type": "string",
             "label": "id",
@@ -3319,6 +3566,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeConfig.name",
             "type": "string",
             "label": "name",
@@ -3332,6 +3580,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeConfig.includeIn",
             "type": "CompoundType",
             "label": "includeIn",
@@ -3348,6 +3597,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeConfig.minimumLicense",
             "type": "CompoundType",
             "label": "minimumLicense",
@@ -3378,8 +3628,10 @@
         "description": [
           "\nConfiguration for a sub-feature privilege group."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeGroupConfig.groupType",
             "type": "CompoundType",
             "label": "groupType",
@@ -3402,6 +3654,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SubFeaturePrivilegeGroupConfig.privileges",
             "type": "Object",
             "label": "privileges",
@@ -3440,6 +3693,7 @@
         "id": "def-common.SubFeaturePrivilegeGroupType",
         "type": "Type",
         "label": "SubFeaturePrivilegeGroupType",
+        "tags": [],
         "description": [
           "\nThe type of privilege group.\n- `mutually_exclusive`::\n    Users will be able to select at most one privilege within this group.\n    Privileges must be specified in descending order of permissiveness (e.g. `All`, `Read`, not `Read`, `All)\n- `independent`::\n    Users will be able to select any combination of privileges within this group."
         ],

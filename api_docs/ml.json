@@ -5,6 +5,7 @@
       {
         "id": "def-public.MlUrlGenerator",
         "type": "Class",
+        "tags": [],
         "label": "MlUrlGenerator",
         "description": [],
         "signature": [
@@ -59,6 +60,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlUrlGenerator.id",
             "type": "string",
             "label": "id",
@@ -115,6 +117,7 @@
               "lineNumber": 49,
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L49"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -318,6 +321,7 @@
           "lineNumber": 16,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts#L16"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -337,6 +341,7 @@
           "lineNumber": 60,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/public/index.ts#L60"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -347,8 +352,10 @@
         "type": "Interface",
         "label": "AnomaliesTableRecord",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.time",
             "type": "number",
             "label": "time",
@@ -360,6 +367,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.source",
             "type": "Object",
             "label": "source",
@@ -380,6 +388,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.rowId",
             "type": "string",
             "label": "rowId",
@@ -391,6 +400,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.jobId",
             "type": "string",
             "label": "jobId",
@@ -402,6 +412,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.detectorIndex",
             "type": "number",
             "label": "detectorIndex",
@@ -413,6 +424,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.severity",
             "type": "number",
             "label": "severity",
@@ -424,6 +436,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.entityName",
             "type": "string",
             "label": "entityName",
@@ -438,6 +451,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.entityValue",
             "type": "Any",
             "label": "entityValue",
@@ -452,6 +466,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.influencers",
             "type": "Array",
             "label": "influencers",
@@ -466,6 +481,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.actual",
             "type": "Array",
             "label": "actual",
@@ -480,6 +496,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.actualSort",
             "type": "Any",
             "label": "actualSort",
@@ -494,6 +511,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.typical",
             "type": "Array",
             "label": "typical",
@@ -508,6 +526,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.typicalSort",
             "type": "Any",
             "label": "typicalSort",
@@ -522,6 +541,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AnomaliesTableRecord.metricDescriptionSort",
             "type": "number",
             "label": "metricDescriptionSort",
@@ -548,8 +568,10 @@
         "type": "Interface",
         "label": "DataRecognizerConfigResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DataRecognizerConfigResponse.datafeeds",
             "type": "Array",
             "label": "datafeeds",
@@ -571,6 +593,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DataRecognizerConfigResponse.jobs",
             "type": "Array",
             "label": "jobs",
@@ -592,6 +615,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DataRecognizerConfigResponse.kibana",
             "type": "Object",
             "label": "kibana",
@@ -642,8 +666,10 @@
         "type": "Interface",
         "label": "Influencer",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Influencer.influencer_field_name",
             "type": "string",
             "label": "influencer_field_name",
@@ -655,6 +681,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Influencer.influencer_field_values",
             "type": "Array",
             "label": "influencer_field_values",
@@ -681,8 +708,10 @@
         "type": "Interface",
         "label": "JobExistResult",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.JobExistResult.jobsExist",
             "type": "boolean",
             "label": "jobsExist",
@@ -694,6 +723,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.JobExistResult.jobs",
             "type": "Array",
             "label": "jobs",
@@ -727,8 +757,10 @@
         "type": "Interface",
         "label": "JobStat",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.JobStat.id",
             "type": "string",
             "label": "id",
@@ -740,6 +772,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.JobStat.earliestTimestampMs",
             "type": "number",
             "label": "earliestTimestampMs",
@@ -751,6 +784,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.JobStat.latestTimestampMs",
             "type": "number",
             "label": "latestTimestampMs",
@@ -762,6 +796,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.JobStat.latestResultsTimestampMs",
             "type": "number",
             "label": "latestResultsTimestampMs",
@@ -788,8 +823,10 @@
         "type": "Interface",
         "label": "MlCapabilitiesResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.MlCapabilitiesResponse.capabilities",
             "type": "CompoundType",
             "label": "capabilities",
@@ -810,6 +847,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlCapabilitiesResponse.upgradeInProgress",
             "type": "boolean",
             "label": "upgradeInProgress",
@@ -821,6 +859,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlCapabilitiesResponse.isPlatinumOrTrialLicense",
             "type": "boolean",
             "label": "isPlatinumOrTrialLicense",
@@ -832,6 +871,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlCapabilitiesResponse.mlFeatureEnabledInSpace",
             "type": "boolean",
             "label": "mlFeatureEnabledInSpace",
@@ -855,8 +895,10 @@
         "type": "Interface",
         "label": "MlSummaryJob",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.id",
             "type": "string",
             "label": "id",
@@ -868,6 +910,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.description",
             "type": "string",
             "label": "description",
@@ -879,6 +922,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.groups",
             "type": "Array",
             "label": "groups",
@@ -893,6 +937,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.processed_record_count",
             "type": "number",
             "label": "processed_record_count",
@@ -907,6 +952,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.memory_status",
             "type": "string",
             "label": "memory_status",
@@ -921,6 +967,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.jobState",
             "type": "string",
             "label": "jobState",
@@ -932,6 +979,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.datafeedIndices",
             "type": "Array",
             "label": "datafeedIndices",
@@ -946,6 +994,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.hasDatafeed",
             "type": "boolean",
             "label": "hasDatafeed",
@@ -957,6 +1006,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.datafeedId",
             "type": "string",
             "label": "datafeedId",
@@ -968,6 +1018,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.datafeedState",
             "type": "string",
             "label": "datafeedState",
@@ -979,6 +1030,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.latestTimestampMs",
             "type": "number",
             "label": "latestTimestampMs",
@@ -993,6 +1045,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.earliestTimestampMs",
             "type": "number",
             "label": "earliestTimestampMs",
@@ -1007,6 +1060,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.latestResultsTimestampMs",
             "type": "number",
             "label": "latestResultsTimestampMs",
@@ -1021,6 +1075,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.fullJob",
             "type": "Object",
             "label": "fullJob",
@@ -1042,6 +1097,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.nodeName",
             "type": "string",
             "label": "nodeName",
@@ -1056,6 +1112,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.auditMessage",
             "type": "Object",
             "label": "auditMessage",
@@ -1078,6 +1135,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.isSingleMetricViewerJob",
             "type": "boolean",
             "label": "isSingleMetricViewerJob",
@@ -1089,6 +1147,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.isNotSingleMetricViewerJobMessage",
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
@@ -1103,6 +1162,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.deleting",
             "type": "CompoundType",
             "label": "deleting",
@@ -1117,6 +1177,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.latestTimestampSortValue",
             "type": "number",
             "label": "latestTimestampSortValue",
@@ -1131,6 +1192,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.earliestStartTimestampMs",
             "type": "number",
             "label": "earliestStartTimestampMs",
@@ -1145,6 +1207,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.MlSummaryJob.awaitingNodeAssignment",
             "type": "boolean",
             "label": "awaitingNodeAssignment",
@@ -1180,8 +1243,10 @@
           ", \"status\" | \"baseline\" | \"pagination\" | \"errorMessage\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCount\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UseIndexDataReturnType.renderCellValue",
             "type": "Function",
             "label": "renderCellValue",
@@ -1215,6 +1280,7 @@
         "id": "def-public.ANOMALY_SEVERITY",
         "type": "Enum",
         "label": "ANOMALY_SEVERITY",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
@@ -1229,6 +1295,7 @@
         "id": "def-public.EsSorting",
         "type": "Type",
         "label": "EsSorting",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
@@ -1244,6 +1311,7 @@
         "id": "def-public.RenderCellValue",
         "type": "Type",
         "label": "RenderCellValue",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
@@ -1259,6 +1327,7 @@
         "id": "def-public.AnomalySwimlaneEmbeddableInput",
         "type": "Type",
         "label": "AnomalySwimlaneEmbeddableInput",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/embeddables/types.ts",
@@ -1271,6 +1340,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
         "type": "string",
         "label": "ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
@@ -1286,6 +1356,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.CONTROLLED_BY_SWIM_LANE_FILTER",
         "type": "string",
         "label": "CONTROLLED_BY_SWIM_LANE_FILTER",
@@ -1304,6 +1375,7 @@
         "id": "def-public.GetMlSharedImportsReturnType",
         "type": "Type",
         "label": "GetMlSharedImportsReturnType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/index.ts",
@@ -1319,6 +1391,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-public.HITS_TOTAL_RELATION",
         "type": "Object",
         "label": "HITS_TOTAL_RELATION",
@@ -1334,6 +1407,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ML_PAGES",
         "type": "Object",
         "label": "ML_PAGES",
@@ -1353,6 +1427,7 @@
       "id": "def-public.MlPluginSetup",
       "type": "Type",
       "label": "MlPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/public/plugin.ts",
@@ -1369,6 +1444,7 @@
       "id": "def-public.MlPluginStart",
       "type": "Type",
       "label": "MlPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/public/plugin.ts",
@@ -1387,6 +1463,7 @@
       {
         "id": "def-server.UnknownMLCapabilitiesError",
         "type": "Class",
+        "tags": [],
         "label": "UnknownMLCapabilitiesError",
         "description": [],
         "signature": [
@@ -1443,6 +1520,7 @@
       {
         "id": "def-server.InsufficientMLCapabilities",
         "type": "Class",
+        "tags": [],
         "label": "InsufficientMLCapabilities",
         "description": [],
         "signature": [
@@ -1499,6 +1577,7 @@
       {
         "id": "def-server.MLPrivilegesUninitialized",
         "type": "Class",
+        "tags": [],
         "label": "MLPrivilegesUninitialized",
         "description": [],
         "signature": [
@@ -1686,6 +1765,7 @@
           "lineNumber": 240,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L240"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1729,8 +1809,10 @@
         "type": "Interface",
         "label": "Influencer",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Influencer.influencer_field_name",
             "type": "string",
             "label": "influencer_field_name",
@@ -1742,6 +1824,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Influencer.influencer_field_values",
             "type": "Array",
             "label": "influencer_field_values",
@@ -1768,11 +1851,13 @@
         "type": "Interface",
         "label": "AnomalyRecordDoc",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.AnomalyRecordDoc.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
@@ -1784,6 +1869,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.job_id",
             "type": "string",
             "label": "job_id",
@@ -1795,6 +1881,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.result_type",
             "type": "string",
             "label": "result_type",
@@ -1806,6 +1893,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.probability",
             "type": "number",
             "label": "probability",
@@ -1817,6 +1905,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.record_score",
             "type": "number",
             "label": "record_score",
@@ -1828,6 +1917,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.initial_record_score",
             "type": "number",
             "label": "initial_record_score",
@@ -1839,6 +1929,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.bucket_span",
             "type": "number",
             "label": "bucket_span",
@@ -1850,6 +1941,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.detector_index",
             "type": "number",
             "label": "detector_index",
@@ -1861,6 +1953,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.is_interim",
             "type": "boolean",
             "label": "is_interim",
@@ -1872,6 +1965,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.timestamp",
             "type": "number",
             "label": "timestamp",
@@ -1883,6 +1977,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.partition_field_name",
             "type": "string",
             "label": "partition_field_name",
@@ -1897,6 +1992,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.partition_field_value",
             "type": "CompoundType",
             "label": "partition_field_value",
@@ -1911,6 +2007,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.function",
             "type": "string",
             "label": "function",
@@ -1922,6 +2019,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.function_description",
             "type": "string",
             "label": "function_description",
@@ -1933,6 +2031,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.typical",
             "type": "Array",
             "label": "typical",
@@ -1947,6 +2046,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.actual",
             "type": "Array",
             "label": "actual",
@@ -1961,6 +2061,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.influencers",
             "type": "Array",
             "label": "influencers",
@@ -1982,6 +2083,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.by_field_name",
             "type": "string",
             "label": "by_field_name",
@@ -1996,6 +2098,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.field_name",
             "type": "string",
             "label": "field_name",
@@ -2010,6 +2113,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.by_field_value",
             "type": "string",
             "label": "by_field_value",
@@ -2024,6 +2128,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.multi_bucket_impact",
             "type": "number",
             "label": "multi_bucket_impact",
@@ -2038,6 +2143,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.over_field_name",
             "type": "string",
             "label": "over_field_name",
@@ -2052,6 +2158,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.over_field_value",
             "type": "string",
             "label": "over_field_value",
@@ -2066,6 +2173,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyRecordDoc.causes",
             "type": "Array",
             "label": "causes",
@@ -2092,8 +2200,10 @@
         "type": "Interface",
         "label": "AnomaliesTableRecord",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.time",
             "type": "number",
             "label": "time",
@@ -2105,6 +2215,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.source",
             "type": "Object",
             "label": "source",
@@ -2125,6 +2236,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.rowId",
             "type": "string",
             "label": "rowId",
@@ -2136,6 +2248,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.jobId",
             "type": "string",
             "label": "jobId",
@@ -2147,6 +2260,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.detectorIndex",
             "type": "number",
             "label": "detectorIndex",
@@ -2158,6 +2272,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.severity",
             "type": "number",
             "label": "severity",
@@ -2169,6 +2284,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.entityName",
             "type": "string",
             "label": "entityName",
@@ -2183,6 +2299,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.entityValue",
             "type": "Any",
             "label": "entityValue",
@@ -2197,6 +2314,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.influencers",
             "type": "Array",
             "label": "influencers",
@@ -2211,6 +2329,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.actual",
             "type": "Array",
             "label": "actual",
@@ -2225,6 +2344,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.actualSort",
             "type": "Any",
             "label": "actualSort",
@@ -2239,6 +2359,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.typical",
             "type": "Array",
             "label": "typical",
@@ -2253,6 +2374,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.typicalSort",
             "type": "Any",
             "label": "typicalSort",
@@ -2267,6 +2389,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomaliesTableRecord.metricDescriptionSort",
             "type": "number",
             "label": "metricDescriptionSort",
@@ -2293,11 +2416,13 @@
         "type": "Interface",
         "label": "AnomalyCategorizerStatsDoc",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-server.AnomalyCategorizerStatsDoc.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/anomalies.ts",
@@ -2309,6 +2434,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.job_id",
             "type": "string",
             "label": "job_id",
@@ -2320,6 +2446,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.result_type",
             "type": "string",
             "label": "result_type",
@@ -2334,6 +2461,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.partition_field_name",
             "type": "string",
             "label": "partition_field_name",
@@ -2348,6 +2476,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.partition_field_value",
             "type": "string",
             "label": "partition_field_value",
@@ -2362,6 +2491,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.categorized_doc_count",
             "type": "number",
             "label": "categorized_doc_count",
@@ -2373,6 +2503,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.total_category_count",
             "type": "number",
             "label": "total_category_count",
@@ -2384,6 +2515,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.frequent_category_count",
             "type": "number",
             "label": "frequent_category_count",
@@ -2395,6 +2527,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.rare_category_count",
             "type": "number",
             "label": "rare_category_count",
@@ -2406,6 +2539,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.dead_category_count",
             "type": "number",
             "label": "dead_category_count",
@@ -2417,6 +2551,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.failed_category_count",
             "type": "number",
             "label": "failed_category_count",
@@ -2428,6 +2563,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.categorization_status",
             "type": "CompoundType",
             "label": "categorization_status",
@@ -2442,6 +2578,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.log_time",
             "type": "number",
             "label": "log_time",
@@ -2453,6 +2590,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnomalyCategorizerStatsDoc.timestamp",
             "type": "number",
             "label": "timestamp",
@@ -2476,8 +2614,10 @@
         "type": "Interface",
         "label": "CustomSettings",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CustomSettings.custom_urls",
             "type": "Array",
             "label": "custom_urls",
@@ -2499,6 +2639,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomSettings.created_by",
             "type": "CompoundType",
             "label": "created_by",
@@ -2520,6 +2661,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomSettings.job_tags",
             "type": "Object",
             "label": "job_tags",
@@ -2546,8 +2688,10 @@
         "type": "Interface",
         "label": "Job",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Job.job_id",
             "type": "string",
             "label": "job_id",
@@ -2559,6 +2703,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Job.analysis_config",
             "type": "Object",
             "label": "analysis_config",
@@ -2579,6 +2724,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.analysis_limits",
             "type": "Object",
             "label": "analysis_limits",
@@ -2600,6 +2746,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.background_persist_interval",
             "type": "string",
             "label": "background_persist_interval",
@@ -2614,6 +2761,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.custom_settings",
             "type": "Object",
             "label": "custom_settings",
@@ -2635,6 +2783,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.data_description",
             "type": "Object",
             "label": "data_description",
@@ -2655,6 +2804,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.description",
             "type": "string",
             "label": "description",
@@ -2666,6 +2816,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Job.groups",
             "type": "Array",
             "label": "groups",
@@ -2680,6 +2831,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.model_plot_config",
             "type": "Object",
             "label": "model_plot_config",
@@ -2701,6 +2853,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.model_snapshot_retention_days",
             "type": "number",
             "label": "model_snapshot_retention_days",
@@ -2715,6 +2868,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.daily_model_snapshot_retention_after_days",
             "type": "number",
             "label": "daily_model_snapshot_retention_after_days",
@@ -2729,6 +2883,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.renormalization_window_days",
             "type": "number",
             "label": "renormalization_window_days",
@@ -2743,6 +2898,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.results_index_name",
             "type": "string",
             "label": "results_index_name",
@@ -2757,6 +2913,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.results_retention_days",
             "type": "number",
             "label": "results_retention_days",
@@ -2771,6 +2928,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.create_time",
             "type": "number",
             "label": "create_time",
@@ -2785,6 +2943,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.finished_time",
             "type": "number",
             "label": "finished_time",
@@ -2799,6 +2958,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.job_type",
             "type": "string",
             "label": "job_type",
@@ -2813,6 +2973,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.job_version",
             "type": "string",
             "label": "job_version",
@@ -2827,6 +2988,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.model_snapshot_id",
             "type": "string",
             "label": "model_snapshot_id",
@@ -2841,6 +3003,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Job.deleting",
             "type": "CompoundType",
             "label": "deleting",
@@ -2867,8 +3030,10 @@
         "type": "Interface",
         "label": "AnalysisConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.bucket_span",
             "type": "string",
             "label": "bucket_span",
@@ -2880,6 +3045,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.categorization_field_name",
             "type": "string",
             "label": "categorization_field_name",
@@ -2894,6 +3060,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.categorization_filters",
             "type": "Array",
             "label": "categorization_filters",
@@ -2908,6 +3075,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.categorization_analyzer",
             "type": "CompoundType",
             "label": "categorization_analyzer",
@@ -2922,6 +3090,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.detectors",
             "type": "Array",
             "label": "detectors",
@@ -2943,6 +3112,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.influencers",
             "type": "Array",
             "label": "influencers",
@@ -2957,6 +3127,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.latency",
             "type": "number",
             "label": "latency",
@@ -2971,6 +3142,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.multivariate_by_fields",
             "type": "CompoundType",
             "label": "multivariate_by_fields",
@@ -2985,6 +3157,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.summary_count_field_name",
             "type": "string",
             "label": "summary_count_field_name",
@@ -2999,6 +3172,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisConfig.per_partition_categorization",
             "type": "Object",
             "label": "per_partition_categorization",
@@ -3032,8 +3206,10 @@
         "type": "Interface",
         "label": "Detector",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Detector.by_field_name",
             "type": "string",
             "label": "by_field_name",
@@ -3048,6 +3224,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.detector_description",
             "type": "string",
             "label": "detector_description",
@@ -3062,6 +3239,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.detector_index",
             "type": "number",
             "label": "detector_index",
@@ -3076,6 +3254,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.exclude_frequent",
             "type": "string",
             "label": "exclude_frequent",
@@ -3090,6 +3269,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.field_name",
             "type": "string",
             "label": "field_name",
@@ -3104,6 +3284,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.function",
             "type": "string",
             "label": "function",
@@ -3115,6 +3296,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Detector.over_field_name",
             "type": "string",
             "label": "over_field_name",
@@ -3129,6 +3311,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.partition_field_name",
             "type": "string",
             "label": "partition_field_name",
@@ -3143,6 +3326,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.use_null",
             "type": "CompoundType",
             "label": "use_null",
@@ -3157,6 +3341,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Detector.custom_rules",
             "type": "Array",
             "label": "custom_rules",
@@ -3190,8 +3375,10 @@
         "type": "Interface",
         "label": "AnalysisLimits",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AnalysisLimits.categorization_examples_limit",
             "type": "number",
             "label": "categorization_examples_limit",
@@ -3206,6 +3393,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AnalysisLimits.model_memory_limit",
             "type": "string",
             "label": "model_memory_limit",
@@ -3229,8 +3417,10 @@
         "type": "Interface",
         "label": "DataDescription",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.DataDescription.format",
             "type": "string",
             "label": "format",
@@ -3245,6 +3435,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DataDescription.time_field",
             "type": "string",
             "label": "time_field",
@@ -3256,6 +3447,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataDescription.time_format",
             "type": "string",
             "label": "time_format",
@@ -3282,8 +3474,10 @@
         "type": "Interface",
         "label": "ModelPlotConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ModelPlotConfig.enabled",
             "type": "CompoundType",
             "label": "enabled",
@@ -3298,6 +3492,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelPlotConfig.annotations_enabled",
             "type": "CompoundType",
             "label": "annotations_enabled",
@@ -3312,6 +3507,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelPlotConfig.terms",
             "type": "string",
             "label": "terms",
@@ -3338,8 +3534,10 @@
         "type": "Interface",
         "label": "CustomRule",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CustomRule.actions",
             "type": "Array",
             "label": "actions",
@@ -3354,6 +3552,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomRule.scope",
             "type": "Uncategorized",
             "label": "scope",
@@ -3368,6 +3567,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomRule.conditions",
             "type": "Array",
             "label": "conditions",
@@ -3394,8 +3594,10 @@
         "type": "Interface",
         "label": "PerPartitionCategorization",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.PerPartitionCategorization.enabled",
             "type": "CompoundType",
             "label": "enabled",
@@ -3410,6 +3612,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.PerPartitionCategorization.stop_on_warn",
             "type": "CompoundType",
             "label": "stop_on_warn",
@@ -3436,8 +3639,10 @@
         "type": "Interface",
         "label": "JobStats",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.JobStats.job_id",
             "type": "string",
             "label": "job_id",
@@ -3449,6 +3654,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.data_counts",
             "type": "Object",
             "label": "data_counts",
@@ -3469,6 +3675,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.model_size_stats",
             "type": "Object",
             "label": "model_size_stats",
@@ -3489,6 +3696,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.forecasts_stats",
             "type": "Object",
             "label": "forecasts_stats",
@@ -3509,6 +3717,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.state",
             "type": "Enum",
             "label": "state",
@@ -3529,6 +3738,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.node",
             "type": "Object",
             "label": "node",
@@ -3549,6 +3759,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.assignment_explanation",
             "type": "string",
             "label": "assignment_explanation",
@@ -3560,6 +3771,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.open_time",
             "type": "string",
             "label": "open_time",
@@ -3571,6 +3783,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.JobStats.timing_stats",
             "type": "Object",
             "label": "timing_stats",
@@ -3597,8 +3810,10 @@
         "type": "Interface",
         "label": "DataCounts",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.DataCounts.job_id",
             "type": "string",
             "label": "job_id",
@@ -3610,6 +3825,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.processed_record_count",
             "type": "number",
             "label": "processed_record_count",
@@ -3621,6 +3837,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.processed_field_count",
             "type": "number",
             "label": "processed_field_count",
@@ -3632,6 +3849,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.input_bytes",
             "type": "number",
             "label": "input_bytes",
@@ -3643,6 +3861,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.input_field_count",
             "type": "number",
             "label": "input_field_count",
@@ -3654,6 +3873,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.invalid_date_count",
             "type": "number",
             "label": "invalid_date_count",
@@ -3665,6 +3885,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.missing_field_count",
             "type": "number",
             "label": "missing_field_count",
@@ -3676,6 +3897,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.out_of_order_timestamp_count",
             "type": "number",
             "label": "out_of_order_timestamp_count",
@@ -3687,6 +3909,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.empty_bucket_count",
             "type": "number",
             "label": "empty_bucket_count",
@@ -3698,6 +3921,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.sparse_bucket_count",
             "type": "number",
             "label": "sparse_bucket_count",
@@ -3709,6 +3933,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.bucket_count",
             "type": "number",
             "label": "bucket_count",
@@ -3720,6 +3945,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.earliest_record_timestamp",
             "type": "number",
             "label": "earliest_record_timestamp",
@@ -3731,6 +3957,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.latest_record_timestamp",
             "type": "number",
             "label": "latest_record_timestamp",
@@ -3742,6 +3969,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.last_data_time",
             "type": "number",
             "label": "last_data_time",
@@ -3753,6 +3981,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.input_record_count",
             "type": "number",
             "label": "input_record_count",
@@ -3764,6 +3993,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.latest_empty_bucket_timestamp",
             "type": "number",
             "label": "latest_empty_bucket_timestamp",
@@ -3775,6 +4005,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.latest_sparse_bucket_timestamp",
             "type": "number",
             "label": "latest_sparse_bucket_timestamp",
@@ -3786,6 +4017,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DataCounts.latest_bucket_timestamp",
             "type": "number",
             "label": "latest_bucket_timestamp",
@@ -3812,8 +4044,10 @@
         "type": "Interface",
         "label": "ModelSizeStats",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.job_id",
             "type": "string",
             "label": "job_id",
@@ -3825,6 +4059,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.result_type",
             "type": "string",
             "label": "result_type",
@@ -3836,6 +4071,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.model_bytes",
             "type": "number",
             "label": "model_bytes",
@@ -3847,6 +4083,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.model_bytes_exceeded",
             "type": "number",
             "label": "model_bytes_exceeded",
@@ -3858,6 +4095,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.model_bytes_memory_limit",
             "type": "number",
             "label": "model_bytes_memory_limit",
@@ -3869,6 +4107,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.peak_model_bytes",
             "type": "number",
             "label": "peak_model_bytes",
@@ -3883,6 +4122,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.total_by_field_count",
             "type": "number",
             "label": "total_by_field_count",
@@ -3894,6 +4134,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.total_over_field_count",
             "type": "number",
             "label": "total_over_field_count",
@@ -3905,6 +4146,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.total_partition_field_count",
             "type": "number",
             "label": "total_partition_field_count",
@@ -3916,6 +4158,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.bucket_allocation_failures_count",
             "type": "number",
             "label": "bucket_allocation_failures_count",
@@ -3927,6 +4170,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.memory_status",
             "type": "CompoundType",
             "label": "memory_status",
@@ -3941,6 +4185,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.categorized_doc_count",
             "type": "number",
             "label": "categorized_doc_count",
@@ -3952,6 +4197,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.total_category_count",
             "type": "number",
             "label": "total_category_count",
@@ -3963,6 +4209,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.frequent_category_count",
             "type": "number",
             "label": "frequent_category_count",
@@ -3974,6 +4221,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.rare_category_count",
             "type": "number",
             "label": "rare_category_count",
@@ -3985,6 +4233,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.dead_category_count",
             "type": "number",
             "label": "dead_category_count",
@@ -3996,6 +4245,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.categorization_status",
             "type": "CompoundType",
             "label": "categorization_status",
@@ -4010,6 +4260,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.log_time",
             "type": "number",
             "label": "log_time",
@@ -4021,6 +4272,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSizeStats.timestamp",
             "type": "number",
             "label": "timestamp",
@@ -4044,8 +4296,10 @@
         "type": "Interface",
         "label": "ForecastsStats",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.total",
             "type": "number",
             "label": "total",
@@ -4057,6 +4311,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.forecasted_jobs",
             "type": "number",
             "label": "forecasted_jobs",
@@ -4068,6 +4323,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.memory_bytes",
             "type": "Any",
             "label": "memory_bytes",
@@ -4082,6 +4338,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.records",
             "type": "Any",
             "label": "records",
@@ -4096,6 +4353,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.processing_time_ms",
             "type": "Any",
             "label": "processing_time_ms",
@@ -4110,6 +4368,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ForecastsStats.status",
             "type": "Any",
             "label": "status",
@@ -4136,8 +4395,10 @@
         "type": "Interface",
         "label": "Node",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Node.id",
             "type": "string",
             "label": "id",
@@ -4149,6 +4410,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Node.name",
             "type": "string",
             "label": "name",
@@ -4160,6 +4422,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Node.ephemeral_id",
             "type": "string",
             "label": "ephemeral_id",
@@ -4171,6 +4434,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Node.transport_address",
             "type": "string",
             "label": "transport_address",
@@ -4182,6 +4446,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Node.attributes",
             "type": "Object",
             "label": "attributes",
@@ -4208,8 +4473,10 @@
         "type": "Interface",
         "label": "Datafeed",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Datafeed.datafeed_id",
             "type": "string",
             "label": "datafeed_id",
@@ -4221,6 +4488,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.aggregations",
             "type": "Object",
             "label": "aggregations",
@@ -4235,6 +4503,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.aggs",
             "type": "Object",
             "label": "aggs",
@@ -4249,6 +4518,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.chunking_config",
             "type": "Object",
             "label": "chunking_config",
@@ -4270,6 +4540,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.frequency",
             "type": "string",
             "label": "frequency",
@@ -4284,6 +4555,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.indices",
             "type": "Array",
             "label": "indices",
@@ -4298,6 +4570,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.indexes",
             "type": "Array",
             "label": "indexes",
@@ -4312,6 +4585,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.job_id",
             "type": "string",
             "label": "job_id",
@@ -4323,6 +4597,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.query",
             "type": "Uncategorized",
             "label": "query",
@@ -4337,6 +4612,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.query_delay",
             "type": "string",
             "label": "query_delay",
@@ -4351,6 +4627,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.script_fields",
             "type": "Object",
             "label": "script_fields",
@@ -4365,6 +4642,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.runtime_mappings",
             "type": "Object",
             "label": "runtime_mappings",
@@ -4387,6 +4665,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.scroll_size",
             "type": "number",
             "label": "scroll_size",
@@ -4401,6 +4680,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.delayed_data_check_config",
             "type": "Uncategorized",
             "label": "delayed_data_check_config",
@@ -4415,6 +4695,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Datafeed.indices_options",
             "type": "Object",
             "label": "indices_options",
@@ -4441,8 +4722,10 @@
         "type": "Interface",
         "label": "ChunkingConfig",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ChunkingConfig.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -4457,6 +4740,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ChunkingConfig.time_span",
             "type": "string",
             "label": "time_span",
@@ -4483,8 +4767,10 @@
         "type": "Interface",
         "label": "DatafeedStats",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.DatafeedStats.datafeed_id",
             "type": "string",
             "label": "datafeed_id",
@@ -4496,6 +4782,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DatafeedStats.state",
             "type": "Enum",
             "label": "state",
@@ -4516,6 +4803,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DatafeedStats.node",
             "type": "Object",
             "label": "node",
@@ -4536,6 +4824,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.DatafeedStats.assignment_explanation",
             "type": "string",
             "label": "assignment_explanation",
@@ -4547,6 +4836,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.DatafeedStats.timing_stats",
             "type": "Object",
             "label": "timing_stats",
@@ -4578,8 +4868,10 @@
           "Job"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CombinedJob.calendars",
             "type": "Array",
             "label": "calendars",
@@ -4594,6 +4886,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CombinedJob.datafeed_config",
             "type": "Object",
             "label": "datafeed_config",
@@ -4631,8 +4924,10 @@
           "JobWithStats"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CombinedJobWithStats.calendars",
             "type": "Array",
             "label": "calendars",
@@ -4647,6 +4942,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CombinedJobWithStats.datafeed_config",
             "type": "CompoundType",
             "label": "datafeed_config",
@@ -4679,8 +4975,10 @@
         "type": "Interface",
         "label": "MlSummaryJob",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.id",
             "type": "string",
             "label": "id",
@@ -4692,6 +4990,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.description",
             "type": "string",
             "label": "description",
@@ -4703,6 +5002,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.groups",
             "type": "Array",
             "label": "groups",
@@ -4717,6 +5017,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.processed_record_count",
             "type": "number",
             "label": "processed_record_count",
@@ -4731,6 +5032,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.memory_status",
             "type": "string",
             "label": "memory_status",
@@ -4745,6 +5047,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.jobState",
             "type": "string",
             "label": "jobState",
@@ -4756,6 +5059,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.datafeedIndices",
             "type": "Array",
             "label": "datafeedIndices",
@@ -4770,6 +5074,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.hasDatafeed",
             "type": "boolean",
             "label": "hasDatafeed",
@@ -4781,6 +5086,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.datafeedId",
             "type": "string",
             "label": "datafeedId",
@@ -4792,6 +5098,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.datafeedState",
             "type": "string",
             "label": "datafeedState",
@@ -4803,6 +5110,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.latestTimestampMs",
             "type": "number",
             "label": "latestTimestampMs",
@@ -4817,6 +5125,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.earliestTimestampMs",
             "type": "number",
             "label": "earliestTimestampMs",
@@ -4831,6 +5140,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.latestResultsTimestampMs",
             "type": "number",
             "label": "latestResultsTimestampMs",
@@ -4845,6 +5155,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.fullJob",
             "type": "Object",
             "label": "fullJob",
@@ -4866,6 +5177,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.nodeName",
             "type": "string",
             "label": "nodeName",
@@ -4880,6 +5192,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.auditMessage",
             "type": "Object",
             "label": "auditMessage",
@@ -4902,6 +5215,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.isSingleMetricViewerJob",
             "type": "boolean",
             "label": "isSingleMetricViewerJob",
@@ -4913,6 +5227,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.isNotSingleMetricViewerJobMessage",
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
@@ -4927,6 +5242,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.deleting",
             "type": "CompoundType",
             "label": "deleting",
@@ -4941,6 +5257,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.latestTimestampSortValue",
             "type": "number",
             "label": "latestTimestampSortValue",
@@ -4955,6 +5272,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.earliestStartTimestampMs",
             "type": "number",
             "label": "earliestStartTimestampMs",
@@ -4969,6 +5287,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlSummaryJob.awaitingNodeAssignment",
             "type": "boolean",
             "label": "awaitingNodeAssignment",
@@ -4992,8 +5311,10 @@
         "type": "Interface",
         "label": "AuditMessage",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuditMessage.job_id",
             "type": "string",
             "label": "job_id",
@@ -5005,6 +5326,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditMessage.msgTime",
             "type": "number",
             "label": "msgTime",
@@ -5016,6 +5338,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditMessage.level",
             "type": "string",
             "label": "level",
@@ -5027,6 +5350,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditMessage.highestLevel",
             "type": "string",
             "label": "highestLevel",
@@ -5038,6 +5362,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditMessage.highestLevelText",
             "type": "string",
             "label": "highestLevelText",
@@ -5049,6 +5374,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.AuditMessage.text",
             "type": "string",
             "label": "text",
@@ -5077,8 +5403,10 @@
           "CombinedJobWithStats"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.MlJobWithTimeRange.id",
             "type": "string",
             "label": "id",
@@ -5090,6 +5418,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.MlJobWithTimeRange.isRunning",
             "type": "CompoundType",
             "label": "isRunning",
@@ -5104,6 +5433,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlJobWithTimeRange.isNotSingleMetricViewerJobMessage",
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
@@ -5118,6 +5448,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MlJobWithTimeRange.timeRange",
             "type": "Object",
             "label": "timeRange",
@@ -5144,8 +5475,10 @@
         "type": "Interface",
         "label": "ModelSnapshot",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.job_id",
             "type": "string",
             "label": "job_id",
@@ -5157,6 +5490,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.min_version",
             "type": "string",
             "label": "min_version",
@@ -5168,6 +5502,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.timestamp",
             "type": "number",
             "label": "timestamp",
@@ -5179,6 +5514,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.description",
             "type": "string",
             "label": "description",
@@ -5190,6 +5526,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.snapshot_id",
             "type": "string",
             "label": "snapshot_id",
@@ -5201,6 +5538,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.snapshot_doc_count",
             "type": "number",
             "label": "snapshot_doc_count",
@@ -5212,6 +5550,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.model_size_stats",
             "type": "Object",
             "label": "model_size_stats",
@@ -5232,6 +5571,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.latest_record_time_stamp",
             "type": "number",
             "label": "latest_record_time_stamp",
@@ -5243,6 +5583,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.latest_result_time_stamp",
             "type": "number",
             "label": "latest_result_time_stamp",
@@ -5254,6 +5595,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.ModelSnapshot.retain",
             "type": "boolean",
             "label": "retain",
@@ -5279,6 +5621,7 @@
         "id": "def-server.ModuleSetupPayload",
         "type": "Type",
         "label": "ModuleSetupPayload",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
@@ -5294,6 +5637,7 @@
         "id": "def-server.PartitionFieldsType",
         "type": "Type",
         "label": "PartitionFieldsType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
@@ -5309,6 +5653,7 @@
         "id": "def-server.EntityFieldType",
         "type": "Type",
         "label": "EntityFieldType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
@@ -5324,6 +5669,7 @@
         "id": "def-server.AnomalyResultType",
         "type": "Type",
         "label": "AnomalyResultType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomalies.ts",
@@ -5339,6 +5685,7 @@
         "id": "def-server.JobId",
         "type": "Type",
         "label": "JobId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -5354,6 +5701,7 @@
         "id": "def-server.BucketSpan",
         "type": "Type",
         "label": "BucketSpan",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
@@ -5369,6 +5717,7 @@
         "id": "def-server.DatafeedId",
         "type": "Type",
         "label": "DatafeedId",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
@@ -5384,6 +5733,7 @@
         "id": "def-server.Aggregation",
         "type": "Type",
         "label": "Aggregation",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
@@ -5399,6 +5749,7 @@
         "id": "def-server.JobWithStats",
         "type": "Type",
         "label": "JobWithStats",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
@@ -5414,6 +5765,7 @@
         "id": "def-server.DatafeedWithStats",
         "type": "Type",
         "label": "DatafeedWithStats",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
@@ -5429,6 +5781,7 @@
         "id": "def-server.MlSummaryJobs",
         "type": "Type",
         "label": "MlSummaryJobs",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
@@ -5446,6 +5799,7 @@
       "id": "def-server.MlPluginSetup",
       "type": "Type",
       "label": "MlPluginSetup",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/server/plugin.ts",
@@ -5470,6 +5824,7 @@
       "id": "def-server.MlPluginStart",
       "type": "Type",
       "label": "MlPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/server/plugin.ts",
@@ -5666,6 +6021,7 @@
           "lineNumber": 97,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ml/common/util/errors/process_errors.ts#L97"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -5686,8 +6042,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SearchResponse7.took",
             "type": "number",
             "label": "took",
@@ -5699,6 +6057,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchResponse7.timed_out",
             "type": "boolean",
             "label": "timed_out",
@@ -5710,6 +6069,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SearchResponse7._scroll_id",
             "type": "string",
             "label": "_scroll_id",
@@ -5724,6 +6084,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchResponse7._shards",
             "type": "Object",
             "label": "_shards",
@@ -5738,6 +6099,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchResponse7.hits",
             "type": "Object",
             "label": "hits",
@@ -5752,6 +6114,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.SearchResponse7.aggregations",
             "type": "Any",
             "label": "aggregations",
@@ -5779,6 +6142,7 @@
         "id": "def-common.ANOMALY_SEVERITY",
         "type": "Enum",
         "label": "ANOMALY_SEVERITY",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
@@ -5791,6 +6155,7 @@
         "id": "def-common.ANOMALY_THRESHOLD",
         "type": "Enum",
         "label": "ANOMALY_THRESHOLD",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
@@ -5805,6 +6170,7 @@
         "id": "def-common.HitsTotalRelation",
         "type": "Type",
         "label": "HitsTotalRelation",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
@@ -5820,6 +6186,7 @@
         "id": "def-common.ChartData",
         "type": "Type",
         "label": "ChartData",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
@@ -5838,6 +6205,7 @@
     ],
     "objects": [
       {
+        "tags": [],
         "id": "def-common.HITS_TOTAL_RELATION",
         "type": "Object",
         "label": "HITS_TOTAL_RELATION",
@@ -5855,8 +6223,10 @@
       {
         "id": "def-common.SEVERITY_COLORS",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.CRITICAL",
             "type": "string",
             "label": "CRITICAL",
@@ -5868,6 +6238,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.MAJOR",
             "type": "string",
             "label": "MAJOR",
@@ -5879,6 +6250,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.MINOR",
             "type": "string",
             "label": "MINOR",
@@ -5890,6 +6262,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.WARNING",
             "type": "string",
             "label": "WARNING",
@@ -5901,6 +6274,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.LOW",
             "type": "string",
             "label": "LOW",
@@ -5912,6 +6286,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.SEVERITY_COLORS.BLANK",
             "type": "string",
             "label": "BLANK",

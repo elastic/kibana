@@ -46,6 +46,7 @@
           "lineNumber": 38,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/application/services/routing.ts#L38"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -56,8 +57,10 @@
         "type": "Interface",
         "label": "IndexManagementPluginSetup",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IndexManagementPluginSetup.extensionsService",
             "type": "Object",
             "label": "extensionsService",
@@ -90,8 +93,10 @@
         "type": "Interface",
         "label": "Index",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Index.health",
             "type": "string",
             "label": "health",
@@ -103,6 +108,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.status",
             "type": "string",
             "label": "status",
@@ -114,6 +120,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.name",
             "type": "string",
             "label": "name",
@@ -125,6 +132,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.uuid",
             "type": "string",
             "label": "uuid",
@@ -136,6 +144,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.primary",
             "type": "string",
             "label": "primary",
@@ -147,6 +156,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.replica",
             "type": "string",
             "label": "replica",
@@ -158,6 +168,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.documents",
             "type": "Any",
             "label": "documents",
@@ -172,6 +183,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Index.size",
             "type": "Any",
             "label": "size",
@@ -186,6 +198,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Index.isFrozen",
             "type": "boolean",
             "label": "isFrozen",
@@ -197,6 +210,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Index.aliases",
             "type": "CompoundType",
             "label": "aliases",
@@ -211,6 +225,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Index.data_stream",
             "type": "string",
             "label": "data_stream",
@@ -228,6 +243,7 @@
             "id": "def-public.Index.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
@@ -260,8 +276,10 @@
         "type": "Interface",
         "label": "Dependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Dependencies.security",
             "type": "Object",
             "label": "security",
@@ -282,6 +300,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Dependencies.licensing",
             "type": "Object",
             "label": "licensing",
@@ -302,6 +321,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Dependencies.features",
             "type": "Object",
             "label": "features",
@@ -334,8 +354,10 @@
         "type": "Interface",
         "label": "Index",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Index.health",
             "type": "string",
             "label": "health",
@@ -347,6 +369,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.status",
             "type": "string",
             "label": "status",
@@ -358,6 +381,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.name",
             "type": "string",
             "label": "name",
@@ -369,6 +393,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.uuid",
             "type": "string",
             "label": "uuid",
@@ -380,6 +405,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.primary",
             "type": "string",
             "label": "primary",
@@ -391,6 +417,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.replica",
             "type": "string",
             "label": "replica",
@@ -402,6 +429,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.documents",
             "type": "Any",
             "label": "documents",
@@ -416,6 +444,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Index.size",
             "type": "Any",
             "label": "size",
@@ -430,6 +459,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Index.isFrozen",
             "type": "boolean",
             "label": "isFrozen",
@@ -441,6 +471,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.Index.aliases",
             "type": "CompoundType",
             "label": "aliases",
@@ -455,6 +486,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.Index.data_stream",
             "type": "string",
             "label": "data_stream",
@@ -472,6 +504,7 @@
             "id": "def-server.Index.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
@@ -497,8 +530,10 @@
         "description": [
           "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.index_patterns",
             "type": "Array",
             "label": "index_patterns",
@@ -513,6 +548,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.version",
             "type": "number",
             "label": "version",
@@ -527,6 +563,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.settings",
             "type": "Object",
             "label": "settings",
@@ -548,6 +585,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.aliases",
             "type": "Object",
             "label": "aliases",
@@ -569,6 +607,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "label": "mappings",
@@ -590,6 +629,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.LegacyTemplateSerialized.order",
             "type": "number",
             "label": "order",
@@ -618,6 +658,7 @@
         "id": "def-server.IndexManagementConfig",
         "type": "Type",
         "label": "IndexManagementConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/index_management/server/config.ts",
@@ -636,8 +677,10 @@
       "type": "Interface",
       "label": "IndexManagementPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.IndexManagementPluginSetup.indexDataEnricher",
           "type": "Object",
           "label": "indexDataEnricher",
@@ -753,6 +796,7 @@
           "lineNumber": 21,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/lib/utils.ts#L21"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -763,8 +807,10 @@
         "type": "Interface",
         "label": "DataStreamFromEs",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.name",
             "type": "string",
             "label": "name",
@@ -776,6 +822,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.timestamp_field",
             "type": "Object",
             "label": "timestamp_field",
@@ -790,6 +837,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.indices",
             "type": "Array",
             "label": "indices",
@@ -811,6 +859,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.generation",
             "type": "number",
             "label": "generation",
@@ -822,6 +871,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs._meta",
             "type": "Object",
             "label": "_meta",
@@ -836,6 +886,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.status",
             "type": "CompoundType",
             "label": "status",
@@ -856,6 +907,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.template",
             "type": "string",
             "label": "template",
@@ -867,6 +919,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.ilm_policy",
             "type": "string",
             "label": "ilm_policy",
@@ -881,6 +934,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.store_size",
             "type": "string",
             "label": "store_size",
@@ -895,6 +949,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.store_size_bytes",
             "type": "number",
             "label": "store_size_bytes",
@@ -909,6 +964,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.maximum_timestamp",
             "type": "number",
             "label": "maximum_timestamp",
@@ -923,6 +979,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.privileges",
             "type": "Object",
             "label": "privileges",
@@ -937,6 +994,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamFromEs.hidden",
             "type": "boolean",
             "label": "hidden",
@@ -960,8 +1018,10 @@
         "type": "Interface",
         "label": "DataStream",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DataStream.name",
             "type": "string",
             "label": "name",
@@ -973,6 +1033,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.timeStampField",
             "type": "Object",
             "label": "timeStampField",
@@ -987,6 +1048,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.indices",
             "type": "Array",
             "label": "indices",
@@ -1008,6 +1070,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.generation",
             "type": "number",
             "label": "generation",
@@ -1019,6 +1082,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.health",
             "type": "CompoundType",
             "label": "health",
@@ -1039,6 +1103,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.indexTemplateName",
             "type": "string",
             "label": "indexTemplateName",
@@ -1050,6 +1115,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.ilmPolicyName",
             "type": "string",
             "label": "ilmPolicyName",
@@ -1064,6 +1130,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.storageSize",
             "type": "string",
             "label": "storageSize",
@@ -1078,6 +1145,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.storageSizeBytes",
             "type": "number",
             "label": "storageSizeBytes",
@@ -1092,6 +1160,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.maxTimeStamp",
             "type": "number",
             "label": "maxTimeStamp",
@@ -1106,6 +1175,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream._meta",
             "type": "Object",
             "label": "_meta",
@@ -1120,6 +1190,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.privileges",
             "type": "Object",
             "label": "privileges",
@@ -1134,6 +1205,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.DataStream.hidden",
             "type": "boolean",
             "label": "hidden",
@@ -1157,8 +1229,10 @@
         "type": "Interface",
         "label": "DataStreamIndex",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.DataStreamIndex.name",
             "type": "string",
             "label": "name",
@@ -1170,6 +1244,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.DataStreamIndex.uuid",
             "type": "string",
             "label": "uuid",
@@ -1193,11 +1268,13 @@
         "type": "Interface",
         "label": "Aliases",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.Aliases.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/aliases.ts",
@@ -1221,8 +1298,10 @@
         "type": "Interface",
         "label": "IndexSettings",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.IndexSettings.index",
             "type": "Object",
             "label": "index",
@@ -1237,6 +1316,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.IndexSettings.analysis",
             "type": "Object",
             "label": "analysis",
@@ -1254,6 +1334,7 @@
             "id": "def-common.IndexSettings.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
@@ -1277,8 +1358,10 @@
         "type": "Interface",
         "label": "Index",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Index.health",
             "type": "string",
             "label": "health",
@@ -1290,6 +1373,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.status",
             "type": "string",
             "label": "status",
@@ -1301,6 +1385,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.name",
             "type": "string",
             "label": "name",
@@ -1312,6 +1397,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.uuid",
             "type": "string",
             "label": "uuid",
@@ -1323,6 +1409,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.primary",
             "type": "string",
             "label": "primary",
@@ -1334,6 +1421,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.replica",
             "type": "string",
             "label": "replica",
@@ -1345,6 +1433,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.documents",
             "type": "Any",
             "label": "documents",
@@ -1359,6 +1448,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Index.size",
             "type": "Any",
             "label": "size",
@@ -1373,6 +1463,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Index.isFrozen",
             "type": "boolean",
             "label": "isFrozen",
@@ -1384,6 +1475,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Index.aliases",
             "type": "CompoundType",
             "label": "aliases",
@@ -1398,6 +1490,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.Index.data_stream",
             "type": "string",
             "label": "data_stream",
@@ -1415,6 +1508,7 @@
             "id": "def-common.Index.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
@@ -1438,11 +1532,13 @@
         "type": "Interface",
         "label": "Mappings",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.Mappings.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/mappings.ts",
@@ -1468,8 +1564,10 @@
         "description": [
           "\nIndex template format from Elasticsearch"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.index_patterns",
             "type": "Array",
             "label": "index_patterns",
@@ -1484,6 +1582,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.template",
             "type": "Object",
             "label": "template",
@@ -1522,6 +1621,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.composed_of",
             "type": "Array",
             "label": "composed_of",
@@ -1536,6 +1636,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.version",
             "type": "number",
             "label": "version",
@@ -1550,6 +1651,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.priority",
             "type": "number",
             "label": "priority",
@@ -1564,6 +1666,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized._meta",
             "type": "Object",
             "label": "_meta",
@@ -1578,6 +1681,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateSerialized.data_stream",
             "type": "Object",
             "label": "data_stream",
@@ -1606,8 +1710,10 @@
         "description": [
           "\nTemplateDeserialized is the format the UI will be working with,\nregardless if we are loading the new format (composable) index template,\nor the legacy one. Serialization is done server side."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.name",
             "type": "string",
             "label": "name",
@@ -1619,6 +1725,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.indexPatterns",
             "type": "Array",
             "label": "indexPatterns",
@@ -1633,6 +1740,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.template",
             "type": "Object",
             "label": "template",
@@ -1671,6 +1779,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.composedOf",
             "type": "Array",
             "label": "composedOf",
@@ -1685,6 +1794,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.version",
             "type": "number",
             "label": "version",
@@ -1699,6 +1809,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.priority",
             "type": "number",
             "label": "priority",
@@ -1713,6 +1824,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.order",
             "type": "number",
             "label": "order",
@@ -1727,6 +1839,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.ilmPolicy",
             "type": "Object",
             "label": "ilmPolicy",
@@ -1741,6 +1854,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized._meta",
             "type": "Object",
             "label": "_meta",
@@ -1755,6 +1869,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized.dataStream",
             "type": "Object",
             "label": "dataStream",
@@ -1769,6 +1884,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateDeserialized._kbnMeta",
             "type": "Object",
             "label": "_kbnMeta",
@@ -1803,8 +1919,10 @@
         "type": "Interface",
         "label": "TemplateFromEs",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TemplateFromEs.name",
             "type": "string",
             "label": "name",
@@ -1816,6 +1934,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateFromEs.index_template",
             "type": "Object",
             "label": "index_template",
@@ -1850,8 +1969,10 @@
         "description": [
           "\nInterface for the template list in our UI table\nwe don't include the mappings, settings and aliases\nto reduce the payload size sent back to the client."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.name",
             "type": "string",
             "label": "name",
@@ -1863,6 +1984,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.indexPatterns",
             "type": "Array",
             "label": "indexPatterns",
@@ -1877,6 +1999,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.version",
             "type": "number",
             "label": "version",
@@ -1891,6 +2014,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.order",
             "type": "number",
             "label": "order",
@@ -1905,6 +2029,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.priority",
             "type": "number",
             "label": "priority",
@@ -1919,6 +2044,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.hasSettings",
             "type": "boolean",
             "label": "hasSettings",
@@ -1930,6 +2056,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.hasAliases",
             "type": "boolean",
             "label": "hasAliases",
@@ -1941,6 +2068,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.hasMappings",
             "type": "boolean",
             "label": "hasMappings",
@@ -1952,6 +2080,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem.ilmPolicy",
             "type": "Object",
             "label": "ilmPolicy",
@@ -1966,6 +2095,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TemplateListItem._kbnMeta",
             "type": "Object",
             "label": "_kbnMeta",
@@ -2002,8 +2132,10 @@
         "description": [
           "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.index_patterns",
             "type": "Array",
             "label": "index_patterns",
@@ -2018,6 +2150,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.version",
             "type": "number",
             "label": "version",
@@ -2032,6 +2165,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.settings",
             "type": "Object",
             "label": "settings",
@@ -2053,6 +2187,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.aliases",
             "type": "Object",
             "label": "aliases",
@@ -2074,6 +2209,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.mappings",
             "type": "Object",
             "label": "mappings",
@@ -2095,6 +2231,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.LegacyTemplateSerialized.order",
             "type": "number",
             "label": "order",
@@ -2121,8 +2258,10 @@
         "type": "Interface",
         "label": "ComponentTemplateSerialized",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateSerialized.template",
             "type": "Object",
             "label": "template",
@@ -2161,6 +2300,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateSerialized.version",
             "type": "number",
             "label": "version",
@@ -2175,6 +2315,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateSerialized._meta",
             "type": "Object",
             "label": "_meta",
@@ -2218,8 +2359,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateDeserialized.name",
             "type": "string",
             "label": "name",
@@ -2231,6 +2374,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
             "type": "Object",
             "label": "_kbnMeta",
@@ -2257,8 +2401,10 @@
         "type": "Interface",
         "label": "ComponentTemplateFromEs",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateFromEs.name",
             "type": "string",
             "label": "name",
@@ -2270,6 +2416,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateFromEs.component_template",
             "type": "Object",
             "label": "component_template",
@@ -2302,8 +2449,10 @@
         "type": "Interface",
         "label": "ComponentTemplateListItem",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.name",
             "type": "string",
             "label": "name",
@@ -2315,6 +2464,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.usedBy",
             "type": "Array",
             "label": "usedBy",
@@ -2329,6 +2479,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.hasMappings",
             "type": "boolean",
             "label": "hasMappings",
@@ -2340,6 +2491,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.hasAliases",
             "type": "boolean",
             "label": "hasAliases",
@@ -2351,6 +2503,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.hasSettings",
             "type": "boolean",
             "label": "hasSettings",
@@ -2362,6 +2515,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.ComponentTemplateListItem.isManaged",
             "type": "boolean",
             "label": "isManaged",
@@ -2384,6 +2538,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.API_BASE_PATH",
         "type": "string",
         "label": "API_BASE_PATH",
@@ -2399,6 +2554,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.BASE_PATH",
         "type": "string",
         "label": "BASE_PATH",
@@ -2417,6 +2573,7 @@
         "id": "def-common.Health",
         "type": "Type",
         "label": "Health",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
@@ -2432,6 +2589,7 @@
         "id": "def-common.TemplateType",
         "type": "Type",
         "label": "TemplateType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",

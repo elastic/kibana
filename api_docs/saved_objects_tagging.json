@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "Tag",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Tag.id",
             "type": "string",
             "label": "id",
@@ -22,6 +24,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Tag.name",
             "type": "string",
             "label": "name",
@@ -33,6 +36,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Tag.description",
             "type": "string",
             "label": "description",
@@ -44,6 +48,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Tag.color",
             "type": "string",
             "label": "color",
@@ -70,6 +75,7 @@
       "id": "def-public.SavedObjectTaggingPluginStart",
       "type": "Type",
       "label": "SavedObjectTaggingPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/saved_objects_tagging/public/types.ts",
@@ -138,6 +144,7 @@
           "lineNumber": 23,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L23"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -170,6 +177,7 @@
           "lineNumber": 27,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L27"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -202,6 +210,7 @@
           "lineNumber": 35,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L35"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -234,6 +243,7 @@
           "lineNumber": 54,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L54"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -246,8 +256,10 @@
         "description": [
           "\nRepresent the UI capabilities for the `savedObjectsTagging` section of `Capabilities`"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.view",
             "type": "boolean",
             "label": "view",
@@ -259,6 +271,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.create",
             "type": "boolean",
             "label": "create",
@@ -270,6 +283,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.edit",
             "type": "boolean",
             "label": "edit",
@@ -281,6 +295,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.delete",
             "type": "boolean",
             "label": "delete",
@@ -292,6 +307,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.assign",
             "type": "boolean",
             "label": "assign",
@@ -303,6 +319,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagsCapabilities.viewConnections",
             "type": "boolean",
             "label": "viewConnections",
@@ -326,8 +343,10 @@
         "type": "Interface",
         "label": "TagAttributes",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TagAttributes.name",
             "type": "string",
             "label": "name",
@@ -339,6 +358,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagAttributes.description",
             "type": "string",
             "label": "description",
@@ -350,6 +370,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagAttributes.color",
             "type": "string",
             "label": "color",
@@ -373,8 +394,10 @@
         "type": "Interface",
         "label": "Tag",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.Tag.id",
             "type": "string",
             "label": "id",
@@ -386,6 +409,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.name",
             "type": "string",
             "label": "name",
@@ -397,6 +421,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.description",
             "type": "string",
             "label": "description",
@@ -408,6 +433,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.Tag.color",
             "type": "string",
             "label": "color",
@@ -431,6 +457,7 @@
         "type": "Interface",
         "label": "ITagsClient",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-common.ITagsClient.create",
@@ -694,8 +721,10 @@
         "type": "Interface",
         "label": "TagValidation",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.TagValidation.valid",
             "type": "boolean",
             "label": "valid",
@@ -707,6 +736,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.TagValidation.warnings",
             "type": "Array",
             "label": "warnings",
@@ -721,6 +751,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.TagValidation.errors",
             "type": "Object",
             "label": "errors",
@@ -746,6 +777,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.tagFeatureId",
         "type": "string",
         "label": "tagFeatureId",
@@ -763,6 +795,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.tagSavedObjectTypeName",
         "type": "string",
         "label": "tagSavedObjectTypeName",
@@ -780,6 +813,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.tagManagementSectionId",
         "type": "string",
         "label": "tagManagementSectionId",
@@ -800,6 +834,7 @@
         "id": "def-common.TagWithRelations",
         "type": "Type",
         "label": "TagWithRelations",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
@@ -815,6 +850,7 @@
         "id": "def-common.TagSavedObject",
         "type": "Type",
         "label": "TagSavedObject",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
@@ -827,6 +863,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.tagNameMinLength",
         "type": "number",
         "label": "tagNameMinLength",
@@ -842,6 +879,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.tagNameMaxLength",
         "type": "number",
         "label": "tagNameMaxLength",
@@ -857,6 +895,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.tagDescriptionMaxLength",
         "type": "number",
         "label": "tagDescriptionMaxLength",

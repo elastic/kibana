@@ -5,6 +5,7 @@
       {
         "id": "def-public.ManagementSection",
         "type": "Class",
+        "tags": [],
         "label": "ManagementSection",
         "description": [],
         "signature": [
@@ -20,6 +21,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ManagementSection.apps",
             "type": "Array",
             "label": "apps",
@@ -211,6 +213,7 @@
       {
         "id": "def-public.ManagementApp",
         "type": "Class",
+        "tags": [],
         "label": "ManagementApp",
         "description": [],
         "signature": [
@@ -226,6 +229,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ManagementApp.mount",
             "type": "Function",
             "label": "mount",
@@ -246,6 +250,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ManagementApp.basePath",
             "type": "string",
             "label": "basePath",
@@ -257,6 +262,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ManagementApp.meta",
             "type": "Object",
             "label": "meta",
@@ -341,8 +347,10 @@
           "CreateManagementItemArgs"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RegisterManagementAppArgs.mount",
             "type": "Function",
             "label": "mount",
@@ -363,6 +371,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RegisterManagementAppArgs.basePath",
             "type": "string",
             "label": "basePath",
@@ -374,6 +383,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.RegisterManagementAppArgs.meta",
             "type": "Object",
             "label": "meta",
@@ -407,8 +417,10 @@
         "type": "Interface",
         "label": "ManagementAppMountParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ManagementAppMountParams.basePath",
             "type": "string",
             "label": "basePath",
@@ -420,6 +432,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ManagementAppMountParams.element",
             "type": "Object",
             "label": "element",
@@ -434,6 +447,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ManagementAppMountParams.setBreadcrumbs",
             "type": "Function",
             "label": "setBreadcrumbs",
@@ -450,6 +464,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ManagementAppMountParams.history",
             "type": "Object",
             "label": "history",
@@ -483,8 +498,10 @@
         "type": "Interface",
         "label": "DefinedSections",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DefinedSections.ingest",
             "type": "Object",
             "label": "ingest",
@@ -505,6 +522,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DefinedSections.data",
             "type": "Object",
             "label": "data",
@@ -525,6 +543,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DefinedSections.insightsAndAlerting",
             "type": "Object",
             "label": "insightsAndAlerting",
@@ -545,6 +564,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DefinedSections.security",
             "type": "Object",
             "label": "security",
@@ -565,6 +585,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DefinedSections.kibana",
             "type": "Object",
             "label": "kibana",
@@ -585,6 +606,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DefinedSections.stack",
             "type": "Object",
             "label": "stack",
@@ -616,6 +638,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.MANAGEMENT_APP_ID",
         "type": "string",
         "label": "MANAGEMENT_APP_ID",
@@ -637,8 +660,10 @@
       "type": "Interface",
       "label": "ManagementSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.ManagementSetup.sections",
           "type": "Object",
           "label": "sections",
@@ -672,6 +697,7 @@
       "type": "Interface",
       "label": "ManagementStart",
       "description": [],
+      "tags": [],
       "children": [],
       "source": {
         "path": "src/plugins/management/public/types.ts",

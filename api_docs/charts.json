@@ -86,6 +86,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.LegendToggle",
         "type": "Function",
         "label": "LegendToggle",
@@ -129,6 +130,7 @@
           "lineNumber": 83,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L83"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -163,6 +165,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/current_time.tsx#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -195,6 +198,7 @@
           "lineNumber": 37,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L37"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -271,6 +275,7 @@
           "lineNumber": 120,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L120"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -361,6 +366,7 @@
           "lineNumber": 159,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L159"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -477,6 +483,7 @@
           "lineNumber": 171,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L171"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -538,6 +545,7 @@
           "lineNumber": 220,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L220"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -612,6 +620,7 @@
           "lineNumber": 254,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L254"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -632,8 +641,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PaletteOutput.type",
             "type": "string",
             "label": "type",
@@ -648,6 +659,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteOutput.name",
             "type": "string",
             "label": "name",
@@ -659,6 +671,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PaletteOutput.params",
             "type": "Uncategorized",
             "label": "params",
@@ -685,8 +698,10 @@
         "type": "Interface",
         "label": "CustomPaletteArguments",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.CustomPaletteArguments.color",
             "type": "Array",
             "label": "color",
@@ -701,6 +716,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CustomPaletteArguments.gradient",
             "type": "boolean",
             "label": "gradient",
@@ -712,6 +728,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.CustomPaletteArguments.reverse",
             "type": "CompoundType",
             "label": "reverse",
@@ -738,8 +755,10 @@
         "type": "Interface",
         "label": "CustomPaletteState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.CustomPaletteState.colors",
             "type": "Array",
             "label": "colors",
@@ -754,6 +773,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CustomPaletteState.gradient",
             "type": "boolean",
             "label": "gradient",
@@ -777,8 +797,10 @@
         "type": "Interface",
         "label": "SystemPaletteArguments",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SystemPaletteArguments.name",
             "type": "string",
             "label": "name",
@@ -802,8 +824,10 @@
         "type": "Interface",
         "label": "ColorSchema",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ColorSchema.value",
             "type": "Enum",
             "label": "value",
@@ -824,6 +848,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ColorSchema.text",
             "type": "string",
             "label": "text",
@@ -847,8 +872,10 @@
         "type": "Interface",
         "label": "RawColorSchema",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RawColorSchema.id",
             "type": "Enum",
             "label": "id",
@@ -869,6 +896,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RawColorSchema.label",
             "type": "string",
             "label": "label",
@@ -880,6 +908,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.RawColorSchema.value",
             "type": "Array",
             "label": "value",
@@ -906,11 +935,13 @@
         "type": "Interface",
         "label": "ColorMap",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.ColorMap.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
@@ -934,8 +965,10 @@
         "type": "Interface",
         "label": "ColorSchemaParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ColorSchemaParams.colorSchema",
             "type": "Enum",
             "label": "colorSchema",
@@ -956,6 +989,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ColorSchemaParams.invertColors",
             "type": "boolean",
             "label": "invertColors",
@@ -979,8 +1013,10 @@
         "type": "Interface",
         "label": "Labels",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Labels.color",
             "type": "string",
             "label": "color",
@@ -995,6 +1031,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Labels.filter",
             "type": "CompoundType",
             "label": "filter",
@@ -1009,6 +1046,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Labels.overwriteColor",
             "type": "CompoundType",
             "label": "overwriteColor",
@@ -1023,6 +1061,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Labels.rotate",
             "type": "number",
             "label": "rotate",
@@ -1037,6 +1076,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Labels.show",
             "type": "CompoundType",
             "label": "show",
@@ -1051,6 +1091,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Labels.truncate",
             "type": "CompoundType",
             "label": "truncate",
@@ -1077,8 +1118,10 @@
         "type": "Interface",
         "label": "Style",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Style.bgFill",
             "type": "string",
             "label": "bgFill",
@@ -1090,6 +1133,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Style.bgColor",
             "type": "boolean",
             "label": "bgColor",
@@ -1101,6 +1145,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Style.labelColor",
             "type": "boolean",
             "label": "labelColor",
@@ -1112,6 +1157,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Style.subText",
             "type": "string",
             "label": "subText",
@@ -1123,6 +1169,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Style.fontSize",
             "type": "number",
             "label": "fontSize",
@@ -1146,8 +1193,10 @@
         "type": "Interface",
         "label": "ClickTriggerEvent",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ClickTriggerEvent.name",
             "type": "string",
             "label": "name",
@@ -1162,6 +1211,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ClickTriggerEvent.data",
             "type": "Object",
             "label": "data",
@@ -1196,8 +1246,10 @@
         "type": "Interface",
         "label": "BrushTriggerEvent",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.BrushTriggerEvent.name",
             "type": "string",
             "label": "name",
@@ -1212,6 +1264,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.BrushTriggerEvent.data",
             "type": "Object",
             "label": "data",
@@ -1248,8 +1301,10 @@
         "description": [
           "\nInformation about a series in a chart used to determine its color.\nSeries layers can be nested, this means each series layer can have an ancestor."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SeriesLayer.name",
             "type": "string",
             "label": "name",
@@ -1263,6 +1318,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SeriesLayer.rankAtDepth",
             "type": "number",
             "label": "rankAtDepth",
@@ -1276,6 +1332,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SeriesLayer.totalSeriesAtDepth",
             "type": "number",
             "label": "totalSeriesAtDepth",
@@ -1303,8 +1360,10 @@
         "description": [
           "\nInformation about the structure of a chart to determine the color of a series within it."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ChartColorConfiguration.totalSeries",
             "type": "number",
             "label": "totalSeries",
@@ -1321,6 +1380,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ChartColorConfiguration.maxDepth",
             "type": "number",
             "label": "maxDepth",
@@ -1337,6 +1397,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ChartColorConfiguration.behindText",
             "type": "CompoundType",
             "label": "behindText",
@@ -1353,6 +1414,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ChartColorConfiguration.syncColors",
             "type": "CompoundType",
             "label": "syncColors",
@@ -1393,8 +1455,10 @@
         "description": [
           "\nDefinition of a global palette.\n\nA palette controls the appearance of Lens charts on an editor level.\nThe palette wont get reset when switching charts.\n\nA palette can hold internal state (e.g. for customizations) and also includes\nan editor component to edit the internal state."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.id",
             "type": "string",
             "label": "id",
@@ -1408,6 +1472,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.title",
             "type": "string",
             "label": "title",
@@ -1421,6 +1486,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.internal",
             "type": "CompoundType",
             "label": "internal",
@@ -1437,6 +1503,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.toExpression",
             "type": "Function",
             "label": "toExpression",
@@ -1454,6 +1521,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.renderEditor",
             "type": "Function",
             "label": "renderEditor",
@@ -1470,6 +1538,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.getColor",
             "type": "Function",
             "label": "getColor",
@@ -1502,6 +1571,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteDefinition.getColors",
             "type": "Function",
             "label": "getColors",
@@ -1530,8 +1600,10 @@
         "type": "Interface",
         "label": "PaletteRegistry",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PaletteRegistry.get",
             "type": "Function",
             "label": "get",
@@ -1554,6 +1626,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.PaletteRegistry.getAll",
             "type": "Function",
             "label": "getAll",
@@ -1589,6 +1662,7 @@
         "id": "def-public.ColorSchemas",
         "type": "Enum",
         "label": "ColorSchemas",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
@@ -1600,6 +1674,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.paletteIds",
         "type": "Array",
         "label": "paletteIds",
@@ -1615,6 +1690,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.colorSchemas",
         "type": "Array",
         "label": "colorSchemas",
@@ -1637,6 +1713,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.truncatedColorSchemas",
         "type": "Array",
         "label": "truncatedColorSchemas",
@@ -1659,6 +1736,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.seedColors",
         "type": "Array",
         "label": "seedColors",
@@ -1679,6 +1757,7 @@
         "id": "def-public.ColorMode",
         "type": "Type",
         "label": "ColorMode",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
@@ -1694,6 +1773,7 @@
         "id": "def-public.LabelRotation",
         "type": "Type",
         "label": "LabelRotation",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
@@ -1706,6 +1786,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.defaultCountLabel",
         "type": "string",
         "label": "defaultCountLabel",
@@ -1722,12 +1803,15 @@
       {
         "id": "def-public.vislibColorMaps",
         "type": "Object",
+        "tags": [],
         "children": [
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Blues]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].id",
                 "type": "string",
                 "label": "id",
@@ -1749,6 +1833,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].label",
                 "type": "string",
                 "label": "label",
@@ -1760,6 +1845,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].value",
                 "type": "Array",
                 "label": "value",
@@ -1787,8 +1873,10 @@
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Greens]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].id",
                 "type": "string",
                 "label": "id",
@@ -1810,6 +1898,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].label",
                 "type": "string",
                 "label": "label",
@@ -1821,6 +1910,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].value",
                 "type": "Array",
                 "label": "value",
@@ -1846,8 +1936,10 @@
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Greys]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].id",
                 "type": "string",
                 "label": "id",
@@ -1869,6 +1961,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].label",
                 "type": "string",
                 "label": "label",
@@ -1880,6 +1973,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].value",
                 "type": "Array",
                 "label": "value",
@@ -1905,8 +1999,10 @@
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Reds]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].id",
                 "type": "string",
                 "label": "id",
@@ -1928,6 +2024,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].label",
                 "type": "string",
                 "label": "label",
@@ -1939,6 +2036,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].value",
                 "type": "Array",
                 "label": "value",
@@ -1964,8 +2062,10 @@
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].id",
                 "type": "string",
                 "label": "id",
@@ -1987,6 +2087,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].label",
                 "type": "string",
                 "label": "label",
@@ -1998,6 +2099,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].value",
                 "type": "Array",
                 "label": "value",
@@ -2023,8 +2125,10 @@
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed]",
             "type": "Object",
+            "tags": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].id",
                 "type": "string",
                 "label": "id",
@@ -2046,6 +2150,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].label",
                 "type": "string",
                 "label": "label",
@@ -2057,6 +2162,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].value",
                 "type": "Array",
                 "label": "value",
@@ -2092,6 +2198,7 @@
       {
         "id": "def-public.truncatedColorMaps",
         "type": "Object",
+        "tags": [],
         "children": [],
         "description": [],
         "label": "truncatedColorMaps",
@@ -2103,6 +2210,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ColorMode",
         "type": "Object",
         "label": "ColorMode",
@@ -2118,6 +2226,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.LabelRotation",
         "type": "Object",
         "label": "LabelRotation",
@@ -2137,6 +2246,9 @@
       "id": "def-public.ChartsPluginStart",
       "type": "Type",
       "label": "ChartsPluginStart",
+      "tags": [
+        "public"
+      ],
       "description": [],
       "source": {
         "path": "src/plugins/charts/public/plugin.ts",
@@ -2282,8 +2394,10 @@
         "type": "Interface",
         "label": "CustomPaletteArguments",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.CustomPaletteArguments.color",
             "type": "Array",
             "label": "color",
@@ -2298,6 +2412,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.CustomPaletteArguments.gradient",
             "type": "boolean",
             "label": "gradient",
@@ -2309,6 +2424,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.CustomPaletteArguments.reverse",
             "type": "CompoundType",
             "label": "reverse",
@@ -2335,8 +2451,10 @@
         "type": "Interface",
         "label": "CustomPaletteState",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.CustomPaletteState.colors",
             "type": "Array",
             "label": "colors",
@@ -2351,6 +2469,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.CustomPaletteState.gradient",
             "type": "boolean",
             "label": "gradient",
@@ -2374,8 +2493,10 @@
         "type": "Interface",
         "label": "SystemPaletteArguments",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SystemPaletteArguments.name",
             "type": "string",
             "label": "name",
@@ -2409,8 +2530,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PaletteOutput.type",
             "type": "string",
             "label": "type",
@@ -2425,6 +2548,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.PaletteOutput.name",
             "type": "string",
             "label": "name",
@@ -2436,6 +2560,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PaletteOutput.params",
             "type": "Uncategorized",
             "label": "params",
@@ -2461,6 +2586,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.COLOR_MAPPING_SETTING",
         "type": "string",
         "label": "COLOR_MAPPING_SETTING",
@@ -2476,6 +2602,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.defaultCustomColors",
         "type": "Array",
         "label": "defaultCustomColors",
@@ -2491,6 +2618,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-common.paletteIds",
         "type": "Array",
         "label": "paletteIds",

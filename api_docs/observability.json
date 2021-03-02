@@ -153,9 +153,11 @@
             "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}",
             "type": "Object",
             "label": "{\n  app: defaultApp,\n}",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.app",
                 "type": "CompoundType",
                 "label": "app",
@@ -290,9 +292,11 @@
             "id": "def-public.useFetcher.options",
             "type": "Object",
             "label": "options",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.useFetcher.options.preservePreviousData",
                 "type": "CompoundType",
                 "label": "preservePreviousData",
@@ -388,9 +392,11 @@
             "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "type": "Object",
             "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
                 "type": "string",
                 "label": "traceId",
@@ -402,6 +408,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
                 "type": "string",
                 "label": "rangeFrom",
@@ -413,6 +420,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
                 "type": "string",
                 "label": "rangeTo",
@@ -453,9 +461,11 @@
             "id": "def-public.SectionTitle.{-children }",
             "type": "Object",
             "label": "{ children }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.SectionTitle.{-children }.children",
                 "type": "CompoundType",
                 "label": "children",
@@ -499,9 +509,11 @@
             "id": "def-public.SectionSubtitle.{-children }",
             "type": "Object",
             "label": "{ children }",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.SectionSubtitle.{-children }.children",
                 "type": "CompoundType",
                 "label": "children",
@@ -678,6 +690,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.Section",
         "type": "Function",
         "label": "Section",
@@ -700,8 +713,10 @@
         "type": "Interface",
         "label": "UXMetrics",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UXMetrics.cls",
             "type": "CompoundType",
             "label": "cls",
@@ -716,6 +731,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.fid",
             "type": "CompoundType",
             "label": "fid",
@@ -730,6 +746,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.lcp",
             "type": "CompoundType",
             "label": "lcp",
@@ -744,6 +761,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.tbt",
             "type": "number",
             "label": "tbt",
@@ -755,6 +773,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.fcp",
             "type": "CompoundType",
             "label": "fcp",
@@ -769,6 +788,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.coreVitalPages",
             "type": "number",
             "label": "coreVitalPages",
@@ -780,6 +800,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.lcpRanks",
             "type": "Array",
             "label": "lcpRanks",
@@ -794,6 +815,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.fidRanks",
             "type": "Array",
             "label": "fidRanks",
@@ -808,6 +830,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UXMetrics.clsRanks",
             "type": "Array",
             "label": "clsRanks",
@@ -834,8 +857,10 @@
         "type": "Interface",
         "label": "Stat",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Stat.type",
             "type": "CompoundType",
             "label": "type",
@@ -850,6 +875,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Stat.value",
             "type": "number",
             "label": "value",
@@ -873,8 +899,10 @@
         "type": "Interface",
         "label": "Coordinates",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Coordinates.x",
             "type": "number",
             "label": "x",
@@ -886,6 +914,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Coordinates.y",
             "type": "number",
             "label": "y",
@@ -912,8 +941,10 @@
         "type": "Interface",
         "label": "Series",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Series.coordinates",
             "type": "Array",
             "label": "coordinates",
@@ -947,8 +978,10 @@
         "type": "Interface",
         "label": "FetchDataParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FetchDataParams.absoluteTime",
             "type": "Object",
             "label": "absoluteTime",
@@ -963,6 +996,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FetchDataParams.relativeTime",
             "type": "Object",
             "label": "relativeTime",
@@ -977,6 +1011,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.FetchDataParams.bucketSize",
             "type": "string",
             "label": "bucketSize",
@@ -988,6 +1023,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.FetchDataParams.serviceName",
             "type": "string",
             "label": "serviceName",
@@ -1014,8 +1050,10 @@
         "type": "Interface",
         "label": "HasDataParams",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HasDataParams.absoluteTime",
             "type": "Object",
             "label": "absoluteTime",
@@ -1042,8 +1080,10 @@
         "type": "Interface",
         "label": "UXHasDataResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UXHasDataResponse.hasData",
             "type": "boolean",
             "label": "hasData",
@@ -1055,6 +1095,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.UXHasDataResponse.serviceName",
             "type": "CompoundType",
             "label": "serviceName",
@@ -1091,8 +1132,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.DataHandler.fetchData",
             "type": "Function",
             "label": "fetchData",
@@ -1122,6 +1165,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.DataHandler.hasData",
             "type": "Function",
             "label": "hasData",
@@ -1155,8 +1199,10 @@
         "type": "Interface",
         "label": "FetchDataResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.FetchDataResponse.appLink",
             "type": "string",
             "label": "appLink",
@@ -1197,8 +1243,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.LogsFetchDataResponse.stats",
             "type": "Object",
             "label": "stats",
@@ -1221,6 +1269,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.LogsFetchDataResponse.series",
             "type": "Object",
             "label": "series",
@@ -1272,8 +1321,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.MetricsFetchDataResponse.stats",
             "type": "Object",
             "label": "stats",
@@ -1341,8 +1392,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UptimeFetchDataResponse.stats",
             "type": "Object",
             "label": "stats",
@@ -1381,6 +1434,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.UptimeFetchDataResponse.series",
             "type": "Object",
             "label": "series",
@@ -1440,8 +1494,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ApmFetchDataResponse.stats",
             "type": "Object",
             "label": "stats",
@@ -1472,6 +1528,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ApmFetchDataResponse.series",
             "type": "Object",
             "label": "series",
@@ -1523,8 +1580,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.UxFetchDataResponse.coreWebVitals",
             "type": "Object",
             "label": "coreWebVitals",
@@ -1557,8 +1616,10 @@
         "type": "Interface",
         "label": "ObservabilityFetchDataResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ObservabilityFetchDataResponse.apm",
             "type": "Object",
             "label": "apm",
@@ -1579,6 +1640,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityFetchDataResponse.infra_metrics",
             "type": "Object",
             "label": "infra_metrics",
@@ -1599,6 +1661,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityFetchDataResponse.infra_logs",
             "type": "Object",
             "label": "infra_logs",
@@ -1619,6 +1682,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityFetchDataResponse.uptime",
             "type": "Object",
             "label": "uptime",
@@ -1639,6 +1703,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityFetchDataResponse.ux",
             "type": "Object",
             "label": "ux",
@@ -1671,8 +1736,10 @@
         "type": "Interface",
         "label": "ObservabilityHasDataResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ObservabilityHasDataResponse.apm",
             "type": "boolean",
             "label": "apm",
@@ -1684,6 +1751,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityHasDataResponse.infra_metrics",
             "type": "boolean",
             "label": "infra_metrics",
@@ -1695,6 +1763,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityHasDataResponse.infra_logs",
             "type": "boolean",
             "label": "infra_logs",
@@ -1706,6 +1775,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityHasDataResponse.uptime",
             "type": "boolean",
             "label": "uptime",
@@ -1717,6 +1787,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ObservabilityHasDataResponse.ux",
             "type": "Object",
             "label": "ux",
@@ -1750,6 +1821,7 @@
         "id": "def-public.METRIC_TYPE",
         "type": "Enum",
         "label": "METRIC_TYPE",
+        "tags": [],
         "description": [],
         "source": {
           "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
@@ -1765,6 +1837,7 @@
         "id": "def-public.FETCH_STATUS",
         "type": "Enum",
         "label": "FETCH_STATUS",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
@@ -1779,6 +1852,7 @@
         "id": "def-public.UiTracker",
         "type": "Type",
         "label": "UiTracker",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
@@ -1802,6 +1876,7 @@
         "id": "def-public.TrackMetricOptions",
         "type": "Type",
         "label": "TrackMetricOptions",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
@@ -1817,6 +1892,7 @@
         "id": "def-public.SectionLinkProps",
         "type": "Type",
         "label": "SectionLinkProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
@@ -1840,6 +1916,7 @@
         "id": "def-public.DragHandleProps",
         "type": "Type",
         "label": "DragHandleProps",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
@@ -1856,6 +1933,7 @@
         "id": "def-public.DropResult",
         "type": "Type",
         "label": "DropResult",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
@@ -1871,6 +1949,7 @@
         "id": "def-public.FetchData",
         "type": "Type",
         "label": "FetchData",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
@@ -1894,6 +1973,7 @@
         "id": "def-public.HasData",
         "type": "Type",
         "label": "HasData",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
@@ -1925,6 +2005,7 @@
         "id": "def-public.ObservabilityFetchDataPlugins",
         "type": "Type",
         "label": "ObservabilityFetchDataPlugins",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
@@ -1943,8 +2024,10 @@
       "type": "Interface",
       "label": "ObservabilityPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.ObservabilityPluginSetup.dashboard",
           "type": "Object",
           "label": "dashboard",
@@ -1979,6 +2062,7 @@
       "id": "def-public.ObservabilityPluginStart",
       "type": "Type",
       "label": "ObservabilityPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -1997,6 +2081,7 @@
       {
         "id": "def-server.WrappedElasticsearchClientError",
         "type": "Class",
+        "tags": [],
         "label": "WrappedElasticsearchClientError",
         "description": [],
         "signature": [
@@ -2011,6 +2096,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.WrappedElasticsearchClientError.originalError",
             "type": "Object",
             "label": "originalError",
@@ -2097,9 +2183,11 @@
             "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}",
             "type": "Object",
             "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.index",
                 "type": "string",
                 "label": "index",
@@ -2111,6 +2199,7 @@
                 }
               },
               {
+                "tags": [],
                 "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.mappings",
                 "type": "Object",
                 "label": "mappings",
@@ -2131,6 +2220,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.client",
                 "type": "CompoundType",
                 "label": "client",
@@ -2151,6 +2241,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.logger",
                 "type": "Object",
                 "label": "logger",
@@ -2223,8 +2314,10 @@
         "type": "Interface",
         "label": "MappingsDefinition",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.MappingsDefinition.dynamic",
             "type": "CompoundType",
             "label": "dynamic",
@@ -2239,6 +2332,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MappingsDefinition.properties",
             "type": "Object",
             "label": "properties",
@@ -2269,6 +2363,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.MappingsDefinition.dynamic_templates",
             "type": "Array",
             "label": "dynamic_templates",
@@ -2297,6 +2392,7 @@
         "id": "def-server.ObservabilityConfig",
         "type": "Type",
         "label": "ObservabilityConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/server/index.ts",
@@ -2312,6 +2408,7 @@
         "id": "def-server.ScopedAnnotationsClient",
         "type": "Type",
         "label": "ScopedAnnotationsClient",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
@@ -2334,8 +2431,10 @@
       "type": "Interface",
       "label": "ObservabilityPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.ObservabilityPluginSetup.getScopedAnnotationsClient",
           "type": "Function",
           "label": "getScopedAnnotationsClient",

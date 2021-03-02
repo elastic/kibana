@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "ConfigSchema",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ConfigSchema.serviceMapEnabled",
             "type": "boolean",
             "label": "serviceMapEnabled",
@@ -22,6 +24,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ConfigSchema.profilingEnabled",
             "type": "boolean",
             "label": "profilingEnabled",
@@ -33,6 +36,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ConfigSchema.ui",
             "type": "Object",
             "label": "ui",
@@ -62,6 +66,7 @@
       "id": "def-public.ApmPluginStart",
       "type": "Type",
       "label": "ApmPluginStart",
+      "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
@@ -80,6 +85,7 @@
       {
         "id": "def-server.APMPlugin",
         "type": "Class",
+        "tags": [],
         "label": "APMPlugin",
         "description": [],
         "signature": [
@@ -221,9 +227,11 @@
                 "id": "def-server.APMPlugin.setup.plugins",
                 "type": "Object",
                 "label": "plugins",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.apmOss",
                     "type": "Object",
                     "label": "apmOss",
@@ -244,6 +252,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.home",
                     "type": "Object",
                     "label": "home",
@@ -264,6 +273,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.licensing",
                     "type": "Object",
                     "label": "licensing",
@@ -284,6 +294,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.cloud",
                     "type": "Object",
                     "label": "cloud",
@@ -305,6 +316,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.usageCollection",
                     "type": "Object",
                     "label": "usageCollection",
@@ -327,6 +339,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.taskManager",
                     "type": "CompoundType",
                     "label": "taskManager",
@@ -348,6 +361,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.alerts",
                     "type": "Object",
                     "label": "alerts",
@@ -369,6 +383,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.actions",
                     "type": "Object",
                     "label": "actions",
@@ -390,6 +405,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.observability",
                     "type": "Object",
                     "label": "observability",
@@ -411,6 +427,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.features",
                     "type": "Object",
                     "label": "features",
@@ -431,6 +448,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.security",
                     "type": "Object",
                     "label": "security",
@@ -452,6 +470,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.APMPlugin.setup.plugins.ml",
                     "type": "CompoundType",
                     "label": "ml",
@@ -627,6 +646,7 @@
         "id": "def-server.ProcessorEvent",
         "type": "Enum",
         "label": "ProcessorEvent",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/common/processor_event.ts",
@@ -641,6 +661,7 @@
         "id": "def-server.APMXPackConfig",
         "type": "Type",
         "label": "APMXPackConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/index.ts",
@@ -656,6 +677,7 @@
         "id": "def-server.APMConfig",
         "type": "Type",
         "label": "APMConfig",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/index.ts",
@@ -674,8 +696,10 @@
       "type": "Interface",
       "label": "APMPluginSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.APMPluginSetup.config$",
           "type": "Object",
           "label": "config$",
@@ -699,6 +723,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.APMPluginSetup.getApmIndices",
           "type": "Function",
           "label": "getApmIndices",
@@ -721,6 +746,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.APMPluginSetup.createApmEventClient",
           "type": "Function",
           "label": "createApmEventClient",

@@ -9,8 +9,10 @@
         "type": "Interface",
         "label": "CloudConfigType",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.CloudConfigType.id",
             "type": "string",
             "label": "id",
@@ -25,6 +27,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CloudConfigType.resetPasswordUrl",
             "type": "string",
             "label": "resetPasswordUrl",
@@ -39,6 +42,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CloudConfigType.deploymentUrl",
             "type": "string",
             "label": "deploymentUrl",
@@ -53,6 +57,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.CloudConfigType.accountUrl",
             "type": "string",
             "label": "accountUrl",
@@ -83,8 +88,10 @@
       "type": "Interface",
       "label": "CloudSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.CloudSetup.cloudId",
           "type": "string",
           "label": "cloudId",
@@ -99,6 +106,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.CloudSetup.cloudDeploymentUrl",
           "type": "string",
           "label": "cloudDeploymentUrl",
@@ -113,6 +121,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.CloudSetup.isCloudEnabled",
           "type": "boolean",
           "label": "isCloudEnabled",
@@ -124,6 +133,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-public.CloudSetup.resetPasswordUrl",
           "type": "string",
           "label": "resetPasswordUrl",
@@ -138,6 +148,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.CloudSetup.accountUrl",
           "type": "string",
           "label": "accountUrl",
@@ -173,8 +184,10 @@
       "type": "Interface",
       "label": "CloudSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.CloudSetup.cloudId",
           "type": "string",
           "label": "cloudId",
@@ -189,6 +202,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.CloudSetup.isCloudEnabled",
           "type": "boolean",
           "label": "isCloudEnabled",
@@ -200,6 +214,7 @@
           }
         },
         {
+          "tags": [],
           "id": "def-server.CloudSetup.apm",
           "type": "Object",
           "label": "apm",

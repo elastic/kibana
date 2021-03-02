@@ -25,8 +25,10 @@
         "type": "Interface",
         "label": "BannerInfoResponse",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.BannerInfoResponse.allowed",
             "type": "boolean",
             "label": "allowed",
@@ -38,6 +40,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BannerInfoResponse.banner",
             "type": "Object",
             "label": "banner",
@@ -70,8 +73,10 @@
         "type": "Interface",
         "label": "BannerConfiguration",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.BannerConfiguration.placement",
             "type": "CompoundType",
             "label": "placement",
@@ -92,6 +97,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.BannerConfiguration.textContent",
             "type": "string",
             "label": "textContent",
@@ -103,6 +109,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BannerConfiguration.textColor",
             "type": "string",
             "label": "textColor",
@@ -114,6 +121,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.BannerConfiguration.backgroundColor",
             "type": "string",
             "label": "backgroundColor",
@@ -139,6 +147,7 @@
         "id": "def-common.BannerPlacement",
         "type": "Type",
         "label": "BannerPlacement",
+        "tags": [],
         "description": [],
         "source": {
           "path": "x-pack/plugins/banners/common/types.ts",

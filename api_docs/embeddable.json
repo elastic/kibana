@@ -5,6 +5,7 @@
       {
         "id": "def-public.AddPanelAction",
         "type": "Class",
+        "tags": [],
         "label": "AddPanelAction",
         "description": [],
         "signature": [
@@ -27,6 +28,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AddPanelAction.type",
             "type": "string",
             "label": "type",
@@ -41,6 +43,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AddPanelAction.id",
             "type": "string",
             "label": "id",
@@ -371,6 +374,7 @@
       {
         "id": "def-public.Container",
         "type": "Class",
+        "tags": [],
         "label": "Container",
         "description": [],
         "signature": [
@@ -401,6 +405,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Container.isContainer",
             "type": "boolean",
             "label": "isContainer",
@@ -414,6 +419,7 @@
           {
             "id": "def-public.Container.children",
             "type": "Object",
+            "tags": [],
             "children": [],
             "description": [],
             "label": "children",
@@ -1158,6 +1164,7 @@
       {
         "id": "def-public.EditPanelAction",
         "type": "Class",
+        "tags": [],
         "label": "EditPanelAction",
         "description": [],
         "signature": [
@@ -1180,6 +1187,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EditPanelAction.type",
             "type": "string",
             "label": "type",
@@ -1194,6 +1202,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EditPanelAction.id",
             "type": "string",
             "label": "id",
@@ -1208,6 +1217,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EditPanelAction.order",
             "type": "number",
             "label": "order",
@@ -1219,6 +1229,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EditPanelAction.currentAppId",
             "type": "string",
             "label": "currentAppId",
@@ -1532,6 +1543,7 @@
       {
         "id": "def-public.Embeddable",
         "type": "Class",
+        "tags": [],
         "label": "Embeddable",
         "description": [],
         "signature": [
@@ -1554,6 +1566,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Embeddable.runtimeId",
             "type": "number",
             "label": "runtimeId",
@@ -1565,6 +1578,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.runtimeId",
             "type": "number",
             "label": "runtimeId",
@@ -1576,6 +1590,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.parent",
             "type": "Object",
             "label": "parent",
@@ -1613,6 +1628,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.isContainer",
             "type": "boolean",
             "label": "isContainer",
@@ -1624,6 +1640,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.type",
             "type": "string",
             "label": "type",
@@ -1635,6 +1652,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.id",
             "type": "string",
             "label": "id",
@@ -1646,6 +1664,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.fatalError",
             "type": "Object",
             "label": "fatalError",
@@ -1660,6 +1679,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.output",
             "type": "Uncategorized",
             "label": "output",
@@ -1674,6 +1694,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.input",
             "type": "Uncategorized",
             "label": "input",
@@ -1688,6 +1709,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.Embeddable.renderComplete",
             "type": "Object",
             "label": "renderComplete",
@@ -2224,6 +2246,7 @@
       {
         "id": "def-public.EmbeddableChildPanel",
         "type": "Class",
+        "tags": [],
         "label": "EmbeddableChildPanel",
         "description": [
           "\nThis component can be used by embeddable containers using react to easily render children. It waits\nfor the child to be initialized, showing a loading indicator until that is complete."
@@ -2248,6 +2271,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanel.mounted",
             "type": "boolean",
             "label": "mounted",
@@ -2259,6 +2283,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanel.embeddable",
             "type": "CompoundType",
             "label": "embeddable",
@@ -2402,6 +2427,7 @@
       {
         "id": "def-public.EmbeddableFactoryNotFoundError",
         "type": "Class",
+        "tags": [],
         "label": "EmbeddableFactoryNotFoundError",
         "description": [],
         "signature": [
@@ -2416,6 +2442,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableFactoryNotFoundError.code",
             "type": "string",
             "label": "code",
@@ -2469,6 +2496,7 @@
       {
         "id": "def-public.EmbeddablePanel",
         "type": "Class",
+        "tags": [],
         "label": "EmbeddablePanel",
         "description": [],
         "signature": [
@@ -2577,6 +2605,7 @@
               "lineNumber": 199,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L199"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2608,6 +2637,7 @@
               "lineNumber": 203,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L203"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2658,6 +2688,7 @@
               "lineNumber": 274,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L274"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2671,6 +2702,7 @@
       {
         "id": "def-public.EmbeddableRoot",
         "type": "Class",
+        "tags": [],
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
@@ -2825,6 +2857,7 @@
       {
         "id": "def-public.ErrorEmbeddable",
         "type": "Class",
+        "tags": [],
         "label": "ErrorEmbeddable",
         "description": [],
         "signature": [
@@ -2863,6 +2896,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ErrorEmbeddable.type",
             "type": "string",
             "label": "type",
@@ -2877,6 +2911,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ErrorEmbeddable.error",
             "type": "CompoundType",
             "label": "error",
@@ -3056,6 +3091,7 @@
       {
         "id": "def-public.PanelNotFoundError",
         "type": "Class",
+        "tags": [],
         "label": "PanelNotFoundError",
         "description": [],
         "signature": [
@@ -3070,6 +3106,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PanelNotFoundError.code",
             "type": "string",
             "label": "code",
@@ -3108,12 +3145,16 @@
       {
         "id": "def-public.EmbeddableStateTransfer",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "EmbeddableStateTransfer",
         "description": [
           "\nA wrapper around the session storage which provides strongly typed helper methods\nfor common incoming and outgoing states used by the embeddable infrastructure.\n"
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableStateTransfer.isTransferInProgress",
             "type": "boolean",
             "label": "isTransferInProgress",
@@ -3253,6 +3294,7 @@
               "lineNumber": 50,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts#L50"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -3448,9 +3490,11 @@
                 "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.path",
                     "type": "string",
                     "label": "path",
@@ -3465,6 +3509,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.state",
                     "type": "Object",
                     "label": "state",
@@ -3537,9 +3582,11 @@
                 "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.path",
                     "type": "string",
                     "label": "path",
@@ -3554,6 +3601,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.state",
                     "type": "Object",
                     "label": "state",
@@ -3600,6 +3648,7 @@
       {
         "id": "def-public.AttributeService",
         "type": "Class",
+        "tags": [],
         "label": "AttributeService",
         "description": [],
         "signature": [
@@ -3890,6 +3939,7 @@
               "lineNumber": 116,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx#L116"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -4000,6 +4050,7 @@
               "lineNumber": 125,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx#L125"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -4045,6 +4096,7 @@
               "lineNumber": 137,
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx#L137"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -4165,6 +4217,7 @@
           "lineNumber": 16,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts#L16"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4221,6 +4274,7 @@
           "lineNumber": 11,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/embeddables/is_embeddable.ts#L11"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4324,9 +4378,11 @@
             "id": "def-public.openAddPanelFlyout.options",
             "type": "Object",
             "label": "options",
+            "tags": [],
             "description": [],
             "children": [
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.embeddable",
                 "type": "Object",
                 "label": "embeddable",
@@ -4364,6 +4420,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.getFactory",
                 "type": "Function",
                 "label": "getFactory",
@@ -4417,6 +4474,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.getAllFactories",
                 "type": "Function",
                 "label": "getAllFactories",
@@ -4470,6 +4528,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.overlays",
                 "type": "Object",
                 "label": "overlays",
@@ -4490,6 +4549,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.notifications",
                 "type": "Object",
                 "label": "notifications",
@@ -4510,6 +4570,7 @@
                 ]
               },
               {
+                "tags": [],
                 "id": "def-public.openAddPanelFlyout.options.SavedObjectFinder",
                 "type": "CompoundType",
                 "label": "SavedObjectFinder",
@@ -4601,6 +4662,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/embeddables/with_subscription.tsx#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4766,6 +4828,7 @@
           "lineNumber": 106,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/triggers/triggers.ts#L106"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4868,6 +4931,7 @@
           "lineNumber": 102,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/triggers/triggers.ts#L102"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4970,6 +5034,7 @@
           "lineNumber": 110,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/triggers/triggers.ts#L110"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -5034,6 +5099,7 @@
           "lineNumber": 115,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/triggers/triggers.ts#L115"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -5091,6 +5157,10 @@
           "lineNumber": 82,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx#L82"
         },
+        "tags": [
+          "remarks",
+          "public"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -5103,8 +5173,10 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.Adapters.requests",
             "type": "Object",
             "label": "requests",
@@ -5129,6 +5201,7 @@
             "id": "def-public.Adapters.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/inspector/common/adapters/types.ts",
@@ -5164,8 +5237,12 @@
         "description": [
           "\nAny embeddable that implements this interface will be able to use input that is\neither by reference (backed by a saved object) OR by value, (provided\nby the container)."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ReferenceOrValueEmbeddable.inputIsRefType",
             "type": "Function",
             "label": "inputIsRefType",
@@ -5182,6 +5259,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReferenceOrValueEmbeddable.getInputAsValueType",
             "type": "Function",
             "label": "getInputAsValueType",
@@ -5198,6 +5276,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ReferenceOrValueEmbeddable.getInputAsRefType",
             "type": "Function",
             "label": "getInputAsRefType",
@@ -5243,8 +5322,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ContainerInput.hidePanelTitles",
             "type": "CompoundType",
             "label": "hidePanelTitles",
@@ -5259,6 +5340,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ContainerInput.panels",
             "type": "Object",
             "label": "panels",
@@ -5318,8 +5400,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ContainerOutput.embeddableLoaded",
             "type": "Object",
             "label": "embeddableLoaded",
@@ -5346,8 +5430,10 @@
         "type": "Interface",
         "label": "EmbeddableChildPanelProps",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanelProps.embeddableId",
             "type": "string",
             "label": "embeddableId",
@@ -5359,6 +5445,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanelProps.className",
             "type": "string",
             "label": "className",
@@ -5373,6 +5460,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanelProps.container",
             "type": "Object",
             "label": "container",
@@ -5410,6 +5498,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableChildPanelProps.PanelComponent",
             "type": "Function",
             "label": "PanelComponent",
@@ -5470,8 +5559,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableContext.embeddable",
             "type": "Uncategorized",
             "label": "embeddable",
@@ -5526,8 +5617,10 @@
         "description": [
           "\nEmbeddableFactories create and initialize an embeddable instance"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableFactory.type",
             "type": "string",
             "label": "type",
@@ -5539,6 +5632,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableFactory.isEditable",
             "type": "Function",
             "label": "isEditable",
@@ -5555,6 +5649,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableFactory.savedObjectMetaData",
             "type": "Object",
             "label": "savedObjectMetaData",
@@ -5576,6 +5671,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableFactory.isContainerType",
             "type": "boolean",
             "label": "isContainerType",
@@ -5914,8 +6010,10 @@
         "type": "Interface",
         "label": "EmbeddableInstanceConfiguration",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableInstanceConfiguration.id",
             "type": "string",
             "label": "id",
@@ -5927,6 +6025,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableInstanceConfiguration.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -5953,8 +6052,10 @@
         "type": "Interface",
         "label": "EmbeddableOutput",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.loading",
             "type": "CompoundType",
             "label": "loading",
@@ -5969,6 +6070,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.error",
             "type": "Object",
             "label": "error",
@@ -5990,6 +6092,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.editUrl",
             "type": "string",
             "label": "editUrl",
@@ -6004,6 +6107,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.editApp",
             "type": "string",
             "label": "editApp",
@@ -6018,6 +6122,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.editPath",
             "type": "string",
             "label": "editPath",
@@ -6032,6 +6137,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.defaultTitle",
             "type": "string",
             "label": "defaultTitle",
@@ -6046,6 +6152,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.title",
             "type": "string",
             "label": "title",
@@ -6060,6 +6167,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.editable",
             "type": "CompoundType",
             "label": "editable",
@@ -6074,6 +6182,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableOutput.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -6110,8 +6219,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ValueClickContext.embeddable",
             "type": "Uncategorized",
             "label": "embeddable",
@@ -6126,6 +6237,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.ValueClickContext.data",
             "type": "Object",
             "label": "data",
@@ -6170,8 +6282,10 @@
           "<T>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.RangeSelectContext.embeddable",
             "type": "Uncategorized",
             "label": "embeddable",
@@ -6186,6 +6300,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.RangeSelectContext.data",
             "type": "Object",
             "label": "data",
@@ -6238,6 +6353,7 @@
           "<I, O>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.IContainer.untilEmbeddableLoaded",
@@ -6620,8 +6736,10 @@
           "<I, O>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.isContainer",
             "type": "boolean",
             "label": "isContainer",
@@ -6635,6 +6753,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.parent",
             "type": "Object",
             "label": "parent",
@@ -6674,6 +6793,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.type",
             "type": "string",
             "label": "type",
@@ -6687,6 +6807,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.id",
             "type": "string",
             "label": "id",
@@ -6700,6 +6821,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.runtimeId",
             "type": "number",
             "label": "runtimeId",
@@ -6716,6 +6838,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.enhancements",
             "type": "Uncategorized",
             "label": "enhancements",
@@ -6732,6 +6855,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IEmbeddable.fatalError",
             "type": "Object",
             "label": "fatalError",
@@ -7116,11 +7240,13 @@
         "type": "Interface",
         "label": "OutputSpec",
         "description": [],
+        "tags": [],
         "children": [
           {
             "id": "def-public.OutputSpec.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
@@ -7154,8 +7280,10 @@
           "<E>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PanelState.type",
             "type": "string",
             "label": "type",
@@ -7167,6 +7295,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PanelState.explicitInput",
             "type": "CompoundType",
             "label": "explicitInput",
@@ -7193,8 +7322,10 @@
         "type": "Interface",
         "label": "PropertySpec",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.PropertySpec.displayName",
             "type": "string",
             "label": "displayName",
@@ -7206,6 +7337,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PropertySpec.accessPath",
             "type": "string",
             "label": "accessPath",
@@ -7217,6 +7349,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PropertySpec.id",
             "type": "string",
             "label": "id",
@@ -7228,6 +7361,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PropertySpec.description",
             "type": "string",
             "label": "description",
@@ -7239,6 +7373,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.PropertySpec.value",
             "type": "string",
             "label": "value",
@@ -7282,8 +7417,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectEmbeddableInput.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -7309,8 +7446,12 @@
         "description": [
           "\nA state package that contains information an editor will need to create or edit an embeddable then redirect back."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableEditorState.originatingApp",
             "type": "string",
             "label": "originatingApp",
@@ -7322,6 +7463,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableEditorState.embeddableId",
             "type": "string",
             "label": "embeddableId",
@@ -7336,6 +7478,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableEditorState.valueInput",
             "type": "Object",
             "label": "valueInput",
@@ -7371,8 +7514,12 @@
         "description": [
           "\nA state package that contains all fields necessary to create or update an embeddable by reference or by value in a container."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddablePackageState.type",
             "type": "string",
             "label": "type",
@@ -7384,6 +7531,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddablePackageState.input",
             "type": "CompoundType",
             "label": "input",
@@ -7417,6 +7565,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddablePackageState.embeddableId",
             "type": "string",
             "label": "embeddableId",
@@ -7461,8 +7610,10 @@
           "<P>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EnhancementRegistryDefinition.id",
             "type": "string",
             "label": "id",
@@ -7486,8 +7637,10 @@
         "type": "Interface",
         "label": "EmbeddableSetupDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableSetupDependencies.uiActions",
             "type": "Object",
             "label": "uiActions",
@@ -7522,8 +7675,10 @@
         "type": "Interface",
         "label": "EmbeddableStartDependencies",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.EmbeddableStartDependencies.uiActions",
             "type": "Object",
             "label": "uiActions",
@@ -7556,6 +7711,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.EmbeddableStartDependencies.inspector",
             "type": "Object",
             "label": "inspector",
@@ -7589,6 +7745,7 @@
         "id": "def-public.ViewMode",
         "type": "Enum",
         "label": "ViewMode",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -7600,6 +7757,7 @@
     ],
     "misc": [
       {
+        "tags": [],
         "id": "def-public.ACTION_ADD_PANEL",
         "type": "string",
         "label": "ACTION_ADD_PANEL",
@@ -7615,6 +7773,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ACTION_EDIT_PANEL",
         "type": "string",
         "label": "ACTION_EDIT_PANEL",
@@ -7633,6 +7792,7 @@
         "id": "def-public.ChartActionContext",
         "type": "Type",
         "label": "ChartActionContext",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
@@ -7667,6 +7827,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.CONTEXT_MENU_TRIGGER",
         "type": "string",
         "label": "CONTEXT_MENU_TRIGGER",
@@ -7685,6 +7846,7 @@
         "id": "def-public.EmbeddableFactoryDefinition",
         "type": "Type",
         "label": "EmbeddableFactoryDefinition",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
@@ -7700,6 +7862,7 @@
         "id": "def-public.EmbeddableInput",
         "type": "Type",
         "label": "EmbeddableInput",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -7712,6 +7875,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.PANEL_BADGE_TRIGGER",
         "type": "string",
         "label": "PANEL_BADGE_TRIGGER",
@@ -7727,6 +7891,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.PANEL_NOTIFICATION_TRIGGER",
         "type": "string",
         "label": "PANEL_NOTIFICATION_TRIGGER",
@@ -7742,6 +7907,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.SELECT_RANGE_TRIGGER",
         "type": "string",
         "label": "SELECT_RANGE_TRIGGER",
@@ -7757,6 +7923,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.VALUE_CLICK_TRIGGER",
         "type": "string",
         "label": "VALUE_CLICK_TRIGGER",
@@ -7775,6 +7942,7 @@
         "id": "def-public.EmbeddableRendererProps",
         "type": "Type",
         "label": "EmbeddableRendererProps",
+        "tags": [],
         "description": [
           "\nThis type is a publicly exposed props of {@link EmbeddableRenderer}\nUnion is used to validate that or factory or embeddable is passed in, but it can't be both simultaneously\nIn case when embeddable is passed in, input is optional, because there is already an input inside of embeddable object\nIn case when factory is used, then input is required, because it will be used as initial input to create an embeddable object"
         ],
@@ -7789,6 +7957,7 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
         "id": "def-public.ATTRIBUTE_SERVICE_KEY",
         "type": "string",
         "label": "ATTRIBUTE_SERVICE_KEY",
@@ -7809,6 +7978,7 @@
         "id": "def-public.EmbeddablePanelHOC",
         "type": "Type",
         "label": "EmbeddablePanelHOC",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -7849,8 +8019,10 @@
       {
         "id": "def-public.contextMenuTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.contextMenuTrigger.id",
             "type": "string",
             "label": "id",
@@ -7862,6 +8034,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.contextMenuTrigger.title",
             "type": "string",
             "label": "title",
@@ -7873,6 +8046,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.contextMenuTrigger.description",
             "type": "string",
             "label": "description",
@@ -7896,8 +8070,10 @@
       {
         "id": "def-public.panelBadgeTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.panelBadgeTrigger.id",
             "type": "string",
             "label": "id",
@@ -7909,6 +8085,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.panelBadgeTrigger.title",
             "type": "string",
             "label": "title",
@@ -7920,6 +8097,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.panelBadgeTrigger.description",
             "type": "string",
             "label": "description",
@@ -7943,8 +8121,10 @@
       {
         "id": "def-public.panelNotificationTrigger",
         "type": "Object",
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.panelNotificationTrigger.id",
             "type": "string",
             "label": "id",
@@ -7956,6 +8136,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.panelNotificationTrigger.title",
             "type": "string",
             "label": "title",
@@ -7967,6 +8148,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.panelNotificationTrigger.description",
             "type": "string",
             "label": "description",
@@ -7993,8 +8175,10 @@
       "type": "Interface",
       "label": "EmbeddableSetup",
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.EmbeddableSetup.registerEmbeddableFactory",
           "type": "Function",
           "label": "registerEmbeddableFactory",
@@ -8048,6 +8232,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableSetup.registerEnhancement",
           "type": "Function",
           "label": "registerEnhancement",
@@ -8078,6 +8263,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableSetup.setCustomEmbeddableFactoryProvider",
           "type": "Function",
           "label": "setCustomEmbeddableFactoryProvider",
@@ -8139,8 +8325,10 @@
         ">"
       ],
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-public.EmbeddableStart.getEmbeddableFactory",
           "type": "Function",
           "label": "getEmbeddableFactory",
@@ -8194,6 +8382,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableStart.getEmbeddableFactories",
           "type": "Function",
           "label": "getEmbeddableFactories",
@@ -8247,6 +8436,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableStart.EmbeddablePanel",
           "type": "Function",
           "label": "EmbeddablePanel",
@@ -8285,6 +8475,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableStart.getStateTransfer",
           "type": "Function",
           "label": "getStateTransfer",
@@ -8314,6 +8505,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-public.EmbeddableStart.getAttributeService",
           "type": "Function",
           "label": "getAttributeService",
@@ -8403,8 +8595,10 @@
           "<P>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.EnhancementRegistryDefinition.id",
             "type": "string",
             "label": "id",
@@ -8446,8 +8640,10 @@
           "<P>>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.EmbeddableRegistryDefinition.id",
             "type": "string",
             "label": "id",
@@ -8501,8 +8697,10 @@
         ">"
       ],
       "description": [],
+      "tags": [],
       "children": [
         {
+          "tags": [],
           "id": "def-server.EmbeddableSetup.registerEmbeddableFactory",
           "type": "Function",
           "label": "registerEmbeddableFactory",
@@ -8533,6 +8731,7 @@
           ]
         },
         {
+          "tags": [],
           "id": "def-server.EmbeddableSetup.registerEnhancement",
           "type": "Function",
           "label": "registerEnhancement",
@@ -8636,6 +8835,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/extract.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8699,6 +8899,7 @@
           "lineNumber": 14,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/inject.ts#L14"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8760,6 +8961,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/migrate.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8820,6 +9022,7 @@
           "lineNumber": 13,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/migrate_base_input.ts#L13"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8876,6 +9079,7 @@
           "lineNumber": 20,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/migrate_base_input.ts#L20"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8952,6 +9156,7 @@
           "lineNumber": 24,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/migrate_base_input.ts#L24"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -9006,6 +9211,7 @@
           "lineNumber": 12,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/common/lib/telemetry.ts#L12"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -9089,8 +9295,10 @@
           "<E>"
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.PanelState.type",
             "type": "string",
             "label": "type",
@@ -9102,6 +9310,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-common.PanelState.explicitInput",
             "type": "CompoundType",
             "label": "explicitInput",
@@ -9128,8 +9337,10 @@
         "type": "Interface",
         "label": "CommonEmbeddableStartContract",
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.CommonEmbeddableStartContract.getEmbeddableFactory",
             "type": "Function",
             "label": "getEmbeddableFactory",
@@ -9144,6 +9355,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-common.CommonEmbeddableStartContract.getEnhancement",
             "type": "Function",
             "label": "getEnhancement",
@@ -9187,8 +9399,10 @@
           }
         ],
         "description": [],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-common.SavedObjectEmbeddableInput.savedObjectId",
             "type": "string",
             "label": "savedObjectId",
@@ -9213,6 +9427,7 @@
         "id": "def-common.ViewMode",
         "type": "Enum",
         "label": "ViewMode",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -9227,6 +9442,7 @@
         "id": "def-common.EmbeddableInput",
         "type": "Type",
         "label": "EmbeddableInput",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -9242,6 +9458,7 @@
         "id": "def-common.EmbeddableStateWithType",
         "type": "Type",
         "label": "EmbeddableStateWithType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -9257,6 +9474,7 @@
         "id": "def-common.EmbeddablePersistableStateService",
         "type": "Type",
         "label": "EmbeddablePersistableStateService",
+        "tags": [],
         "description": [],
         "source": {
           "path": "src/plugins/embeddable/common/types.ts",
@@ -9273,6 +9491,7 @@
       {
         "id": "def-common.baseEmbeddableMigrations",
         "type": "Object",
+        "tags": [],
         "children": [],
         "description": [],
         "label": "baseEmbeddableMigrations",
