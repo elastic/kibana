@@ -24,7 +24,6 @@ import { Storage } from '../../../../../plugins/kibana_utils/public';
 
 // @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
-// @ts-expect-error
 import { PanelConfig } from './panel_config';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { VisPicker } from './vis_picker';
@@ -55,8 +54,8 @@ interface TimeseriesEditorState {
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
   private abortControllerFetchFields?: AbortController;
   private localStorage: Storage;
-  private visDataSubject: Rx.BehaviorSubject<any>;
-  private visData$: Rx.Observable<any>;
+  private visDataSubject: Rx.BehaviorSubject<TimeseriesVisParams>;
+  private visData$: Rx.Observable<TimeseriesVisParams>;
 
   constructor(props: TimeseriesEditorProps) {
     super(props);
