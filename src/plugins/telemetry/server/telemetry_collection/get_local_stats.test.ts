@@ -24,19 +24,17 @@ function mockUsageCollection(kibanaUsage = {}) {
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
+  esClient.info.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
+    {
+      body: { ...clusterInfo },
+    }
+  );
   esClient.cluster.stats
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
   esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: {
         cluster_name: 'testCluster',
@@ -64,9 +62,9 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
       },
     }
   );
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
 }
