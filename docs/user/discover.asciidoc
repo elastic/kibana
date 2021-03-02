@@ -199,7 +199,6 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 [float]
 === What’s next?
 
-
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
@@ -210,6 +209,8 @@ the table columns that display by default, and more.
 
 * <<reporting-getting-started, Present your findings in a report>>.
 
+* <<discover-search-for-relevance, Search for relevance>>.
+
 --
 
 include::{kib-repo-dir}/management/index-patterns.asciidoc[]
@@ -219,5 +220,9 @@ include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 include::{kib-repo-dir}/discover/search.asciidoc[]
 
 include::{kib-repo-dir}/discover/context.asciidoc[]
+
+include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
+
+
 
 

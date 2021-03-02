@@ -45,7 +45,7 @@ export const OverviewDatastreamSection: React.FC = () => {
   }
 
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-datastream-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTitle', {
           defaultMessage: 'Data streams',

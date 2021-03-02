@@ -55,7 +55,7 @@ export interface UpdateAlertStatusActionProps {
 export interface SendAlertToTimelineActionProps {
   apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
-  ecsData: Ecs;
+  ecsData: Ecs | Ecs[];
   nonEcsData: TimelineNonEcsData[];
   updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;

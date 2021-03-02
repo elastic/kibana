@@ -33,7 +33,8 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
      apiKeySecret: tokenkeystorevalue
 --
 
-`config` defines the action type specific to the configuration and contains the following properties:
+[[resilient-connector-config-properties]]
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -46,7 +47,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -64,11 +65,30 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 IBM Resilient actions have the following configuration properties:
 
-Incident types::              The incident types of the incident.
-Severity code::              The severity of the incident.
-Name::    A name for the issue, used for searching the contents of the knowledge base. 
-Description::          The details about the incident.
-Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+Subaction::        The subaction to perform: `pushToService`, `getFields`, `incidentTypes`, or `severity`.
+Subaction params:: The parameters of the subaction.
+
+==== `pushToService` subaction configuration
+
+Incident:: The IBM resilient incident has the following properties:
+* `name` - A name for the issue, used for searching the contents of the knowledge base.
+* `description` - The details about the incident.
+* `externalId` - The ID of the incident in IBM Resilient. If present, the incident is updated. Otherwise, a new incident is created.
+* `incidentTypes` - An array with the IDs of IBM Resilient incident types.
+* `severityCode` - The IBM Resilient ID of the severity code.
+Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
+
+===== `getFields` subaction configuration
+
+The `getFields` subaction has not parameters. Provide an empty object `{}`.
+
+===== `incidentTypes` subaction configuration
+
+The `incidentTypes` subaction has no parameters. Provide an empty object `{}`.
+
+===== `severity` subaction configuration
+
+The `severity` subaction has no parameters. Provide an empty object `{}`.
 
 [[configuring-resilient]]
 ==== Configuring and testing IBM Resilient

@@ -9,7 +9,7 @@ import { ThreatMapping } from '../../../../../common/detection_engine/schemas/ty
 import { Filter } from 'src/plugins/data/common';
 
 import { SearchResponse } from 'elasticsearch';
-import { ThreatListItem } from './types';
+import { ThreatListDoc, ThreatListItem } from './types';
 
 export const getThreatMappingMock = (): ThreatMapping => {
   return [
@@ -62,7 +62,7 @@ export const getThreatMappingMock = (): ThreatMapping => {
   ];
 };
 
-export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListItem> => ({
+export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListDoc> => ({
   took: 0,
   timed_out: false,
   _shards: {
@@ -74,33 +74,32 @@ export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListItem
   hits: {
     total: 1,
     max_score: 0,
-    hits: [
-      {
-        _index: 'index',
-        _type: 'type',
-        _id: '123',
-        _score: 0,
-        _source: getThreatListItemMock(),
-        fields: getThreatListItemFieldsMock(),
-      },
-    ],
+    hits: [getThreatListItemMock()],
   },
 });
 
-export const getThreatListItemMock = (): ThreatListItem => ({
-  '@timestamp': '2020-09-09T21:59:13Z',
-  host: {
-    name: 'host-1',
-    ip: '192.168.0.0.1',
+export const getThreatListItemMock = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
+  _id: '123',
+  _index: 'threat_index',
+  _type: '_doc',
+  _score: 0,
+  _source: {
+    '@timestamp': '2020-09-09T21:59:13Z',
+    host: {
+      name: 'host-1',
+      ip: '192.168.0.0.1',
+    },
+    source: {
+      ip: '127.0.0.1',
+      port: 1,
+    },
+    destination: {
+      ip: '127.0.0.1',
+      port: 1,
+    },
   },
-  source: {
-    ip: '127.0.0.1',
-    port: 1,
-  },
-  destination: {
-    ip: '127.0.0.1',
-    port: 1,
-  },
+  fields: getThreatListItemFieldsMock(),
+  ...overrides,
 });
 
 export const getThreatListItemFieldsMock = () => ({
@@ -188,31 +187,17 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'host.name': 'host-1' } }],
+                should: [
+                  { match: { 'host.name': { query: 'host-1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
             {
               bool: {
-                should: [{ match: { 'host.ip': '192.168.0.0.1' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ match: { 'destination.ip': '127.0.0.1' } }],
-                minimum_should_match: 1,
-              },
-            },
-            {
-              bool: {
-                should: [{ match: { 'destination.port': port } }],
+                should: [
+                  { match: { 'host.ip': { query: '192.168.0.0.1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -224,7 +209,19 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'source.port': port } }],
+                should: [
+                  {
+                    match: { 'destination.ip': { query: '127.0.0.1', _name: expect.any(String) } },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { match: { 'destination.port': { query: port, _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -236,7 +233,21 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'source.ip': '127.0.0.1' } }],
+                should: [{ match: { 'source.port': { query: port, _name: expect.any(String) } } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { match: { 'source.ip': { query: '127.0.0.1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },

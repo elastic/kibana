@@ -114,7 +114,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(0);
 
@@ -214,7 +214,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(2000);
 
@@ -282,7 +282,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {

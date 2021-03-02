@@ -8,9 +8,11 @@
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { LogRetentionOptions } from '../../log_retention';
+
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
 

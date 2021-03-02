@@ -7,13 +7,9 @@
 
 import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
 import dedent from 'dedent';
 
-jest.mock('./utils', () => ({
-  readUploadedFileAsText: jest.fn(),
-}));
-import { readUploadedFileAsText } from './utils';
+import { nextTick } from '@kbn/test/jest';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -21,6 +17,12 @@ jest.mock('../engine', () => ({
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { DocumentCreationStep } from './types';
+
+jest.mock('./utils', () => ({
+  readUploadedFileAsText: jest.fn(),
+}));
+import { readUploadedFileAsText } from './utils';
+
 import { DocumentCreationLogic } from './';
 
 describe('DocumentCreationLogic', () => {

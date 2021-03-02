@@ -16,7 +16,6 @@ import {
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
 } from '../../../constants';
-
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 

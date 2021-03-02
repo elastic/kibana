@@ -35,7 +35,7 @@ import {
   getTopClasses,
 } from './common';
 import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 import {
   FeatureImportanceBaseline,
   FeatureImportance,
@@ -312,15 +312,16 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-pressed={chartsVisible}
+                          aria-pressed={chartsVisible === true}
                           className={`euiDataGrid__controlBtn${
-                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                            chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
                           }`}
                           data-test-subj={`${dataTestSubj}HistogramButton`}
                           size="xs"
                           iconType="visBarVertical"
                           color="text"
                           onClick={toggleChartVisibility}
+                          disabled={chartsVisible === undefined}
                         >
                           {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
                             defaultMessage: 'Histogram charts',

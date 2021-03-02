@@ -6,11 +6,12 @@
  */
 
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { EuiSelectProps } from '@elastic/eui';
 
-import { SERVER_DATE_FORMAT } from './constants';
+import { EuiSelectProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { ChartData } from './components/analytics_chart';
+import { SERVER_DATE_FORMAT } from './constants';
 
 interface ConvertToChartData {
   data: number[];

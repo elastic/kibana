@@ -53,7 +53,7 @@ type Counter = Map<string, number>;
  * @param {Map} map Map to update the counter for the {@code key}.
  * @param {String} key The key to increment a counter for.
  */
-function incrementByKey(map: Counter, key?: string) {
+export function incrementByKey(map: Counter, key?: string) {
   if (!key) {
     return;
   }
@@ -207,7 +207,7 @@ function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
  *   { [keyName]: key2, count: value2 }
  * ]
  */
-function mapToList<T>(map: Map<string, number>, keyName: string): T[] {
+export function mapToList<T>(map: Map<string, number>, keyName: string): T[] {
   const list: T[] = [];
 
   for (const [key, count] of map) {

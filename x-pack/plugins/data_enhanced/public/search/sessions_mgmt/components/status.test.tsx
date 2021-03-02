@@ -31,6 +31,8 @@ describe('Background Search Session management status labels', () => {
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
+      initialState: {},
+      restoreState: {},
     };
   });
 

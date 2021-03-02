@@ -7,11 +7,13 @@
 
 import '../../__mocks__/kea.mock';
 
-import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { EuiLink, EuiButton, EuiButtonEmpty, EuiPanel, EuiCard } from '@elastic/eui';
-
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
+
+import React from 'react';
+
+import { shallow, mount } from 'enzyme';
+
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiPanel, EuiCard } from '@elastic/eui';
 
 import { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
 

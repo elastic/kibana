@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import SemVer from 'semver/classes/semver';
 import { mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from 'src/core/public/mocks';
+import { mockKibanaSemverVersion } from '../../../common/constants';
 import { UpgradeAssistantTabs } from './tabs';
 import { LoadingState } from './types';
 
@@ -18,7 +18,6 @@ import { OverviewTab } from './tabs/overview';
 const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const mockHttp = httpServiceMock.createSetupContract();
-const mockKibanaVersion = new SemVer('8.0.0');
 
 jest.mock('../app_context', () => {
   return {
@@ -29,9 +28,9 @@ jest.mock('../app_context', () => {
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
         kibanaVersionInfo: {
-          currentMajor: mockKibanaVersion.major,
-          prevMajor: mockKibanaVersion.major - 1,
-          nextMajor: mockKibanaVersion.major + 1,
+          currentMajor: mockKibanaSemverVersion.major,
+          prevMajor: mockKibanaSemverVersion.major - 1,
+          nextMajor: mockKibanaSemverVersion.major + 1,
         },
       };
     },

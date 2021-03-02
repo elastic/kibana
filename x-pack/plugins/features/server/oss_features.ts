@@ -21,6 +21,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
       }),
+      management: {
+        kibana: ['search_sessions'],
+      },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
@@ -95,6 +98,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
+                  api: ['store_search_session'],
                 },
               ],
             },
@@ -105,7 +112,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
     {
       id: 'visualize',
       name: i18n.translate('xpack.features.visualizeFeatureName', {
-        defaultMessage: 'Visualize',
+        defaultMessage: 'Visualize Library',
       }),
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -166,6 +173,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
+      management: {
+        kibana: ['search_sessions'],
+      },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['dashboards', 'kibana'],
@@ -260,6 +270,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
+                  api: ['store_search_session'],
                 },
               ],
             },

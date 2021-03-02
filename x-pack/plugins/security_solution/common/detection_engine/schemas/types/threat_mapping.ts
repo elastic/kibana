@@ -18,6 +18,11 @@ export type ThreatQuery = t.TypeOf<typeof threat_query>;
 export const threatQueryOrUndefined = t.union([threat_query, t.undefined]);
 export type ThreatQueryOrUndefined = t.TypeOf<typeof threatQueryOrUndefined>;
 
+export const threat_indicator_path = t.string;
+export type ThreatIndicatorPath = t.TypeOf<typeof threat_indicator_path>;
+export const threatIndicatorPathOrUndefined = t.union([threat_indicator_path, t.undefined]);
+export type ThreatIndicatorPathOrUndefined = t.TypeOf<typeof threatIndicatorPathOrUndefined>;
+
 export const threat_filters = t.array(t.unknown); // Filters are not easily type-able yet
 export type ThreatFilters = t.TypeOf<typeof threat_filters>;
 export const threatFiltersOrUndefined = t.union([threat_filters, t.undefined]);

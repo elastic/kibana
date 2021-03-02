@@ -5,40 +5,95 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import React, { useEffect } from 'react';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { FlashMessages } from '../../../shared/flash_messages';
+import { useActions, useValues } from 'kea';
 
-import { RELEVANCE_TUNING_TITLE } from './constants';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { DOCS_PREFIX } from '../../routes';
+
+import { RelevanceTuningForm } from './relevance_tuning_form';
+import { RelevanceTuningLayout } from './relevance_tuning_layout';
+
+import { RelevanceTuningLogic } from '.';
 
 interface Props {
   engineBreadcrumb: string[];
 }
 
-export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
+const EmptyCallout: React.FC = () => {
   return (
-    <>
-      <SetPageChrome trail={[...engineBreadcrumb, RELEVANCE_TUNING_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{RELEVANCE_TUNING_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <FlashMessages />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </>
+    <EuiEmptyPrompt
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessageTitle',
+            {
+              defaultMessage: 'Tuning requires schema fields',
+            }
+          )}
+        </h2>
+      }
+      body={i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyErrorMessage',
+        {
+          defaultMessage: 'Index documents to tune relevance.',
+        }
+      )}
+      actions={
+        <EuiButton
+          size="s"
+          color="primary"
+          href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
+          fill
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.emptyButtonLabel',
+            {
+              defaultMessage: 'Read the relevance tuning guide',
+            }
+          )}
+        </EuiButton>
+      }
+    />
+  );
+};
+
+export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
+  const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
+
+  useEffect(() => {
+    initializeRelevanceTuning();
+  }, []);
+
+  const body = () => {
+    if (dataLoading) {
+      return <Loading />;
+    }
+
+    if (!engineHasSchemaFields) {
+      return <EmptyCallout />;
+    }
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <RelevanceTuningForm />
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
+    );
+  };
+
+  return (
+    <RelevanceTuningLayout engineBreadcrumb={engineBreadcrumb}>
+      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
+      {body()}
+    </RelevanceTuningLayout>
   );
 };

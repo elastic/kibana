@@ -66,7 +66,12 @@ export const useInitSourcerer = (
           selectedPatterns: [...ConfigIndexPatterns, signalIndexName],
         })
       );
-    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+    } else if (
+      signalIndexNameSelector != null &&
+      (activeTimeline == null ||
+        (activeTimeline != null && activeTimeline.savedObjectId == null)) &&
+      initialTimelineSourcerer.current
+    ) {
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({

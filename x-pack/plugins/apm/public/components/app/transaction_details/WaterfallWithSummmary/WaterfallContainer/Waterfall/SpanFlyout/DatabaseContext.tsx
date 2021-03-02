@@ -12,7 +12,7 @@ import React, { Fragment } from 'react';
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import {
   borderRadius,
@@ -26,7 +26,7 @@ import { TruncateHeightSection } from './TruncateHeightSection';
 
 SyntaxHighlighter.registerLanguage('sql', sql);
 
-const DatabaseStatement = styled.div`
+const DatabaseStatement = euiStyled.div`
   padding: ${px(units.half)} ${px(unit)};
   background: ${({ theme }) => tint(0.1, theme.eui.euiColorWarning)};
   border-radius: ${borderRadius};

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '../util/object_utils';
+
 export type FeatureImportanceClassName = string | number | boolean;
 
 export interface ClassFeatureImportance {
@@ -87,7 +89,7 @@ export function isClassificationFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is ClassificationFeatureImportanceBaseline {
   return (
-    typeof baselineData === 'object' &&
+    isPopulatedObject(baselineData) &&
     baselineData.hasOwnProperty('classes') &&
     Array.isArray(baselineData.classes)
   );
@@ -96,5 +98,5 @@ export function isClassificationFeatureImportanceBaseline(
 export function isRegressionFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is RegressionFeatureImportanceBaseline {
-  return typeof baselineData === 'object' && baselineData.hasOwnProperty('baseline');
+  return isPopulatedObject(baselineData) && baselineData.hasOwnProperty('baseline');
 }

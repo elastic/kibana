@@ -8,6 +8,7 @@
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
+// We're not wrapping this function with a span as it is not blocking the request
 export async function markAppliedByAgent({
   id,
   body,

@@ -664,4 +664,85 @@ describe('data state', () => {
       `);
     });
   });
+  describe('when the resolver tree response is complete, still use non-default indices', () => {
+    beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID: 'a',
+        firstChildID: 'b',
+        secondChildID: 'c',
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['someNonDefaultIndex'],
+              filters: {},
+            },
+          },
+        },
+      ];
+    });
+    it('should have an empty array for tree parameter indices, and a non empty array for event indices', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(1);
+    });
+  });
+  describe('when the resolver tree response is pending use the same indices the user is currently looking at data from', () => {
+    beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID: 'a',
+        firstChildID: 'b',
+        secondChildID: 'c',
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['defaultIndex'],
+              filters: {},
+            },
+          },
+        },
+        {
+          type: 'appReceivedNewExternalProperties',
+          payload: {
+            databaseDocumentID: '',
+            resolverComponentInstanceID: '',
+            locationSearch: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            shouldUpdate: false,
+            filters: {},
+          },
+        },
+        {
+          type: 'appRequestedResolverData',
+          payload: {
+            databaseDocumentID: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            filters: {},
+          },
+        },
+      ];
+    });
+    it('should have an empty array for tree parameter indices, and the same set of indices as the last tree response', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(1);
+    });
+  });
 });

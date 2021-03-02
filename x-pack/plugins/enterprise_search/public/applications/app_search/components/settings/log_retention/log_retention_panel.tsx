@@ -6,10 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+
+import { useActions, useValues } from 'kea';
 
 import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
-import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import { DOCS_PREFIX } from '../../../routes';
 

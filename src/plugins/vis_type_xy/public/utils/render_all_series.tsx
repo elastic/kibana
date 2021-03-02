@@ -17,8 +17,8 @@ import {
   SeriesName,
   Accessor,
   AccessorFn,
+  ColorVariant,
 } from '@elastic/charts';
-import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
 

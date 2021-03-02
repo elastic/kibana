@@ -42,6 +42,12 @@ jest.mock('mapbox-gl', () => ({
     getZoom: () => 3,
     addControl: jest.fn(),
     addLayer: jest.fn(),
+    dragRotate: {
+      disable: jest.fn(),
+    },
+    touchZoomRotate: {
+      disableRotation: jest.fn(),
+    },
   })),
   MapboxOptions: jest.fn(),
   NavigationControl: jest.fn(),
@@ -100,13 +106,18 @@ describe('vega_map_view/view', () => {
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
-      return new VegaMapView({
+      return new VegaMapView(({
         vegaParser,
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
         fireEvent: (event: any) => {},
         parentEl: document.createElement('div'),
-      } as VegaViewParams);
+        vegaStateRestorer: {
+          save: jest.fn(),
+          restore: jest.fn(),
+          clear: jest.fn(),
+        },
+      } as unknown) as VegaViewParams);
     }
 
     beforeEach(() => {

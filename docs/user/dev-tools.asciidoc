@@ -15,7 +15,7 @@ a| <<console-kibana, Console>>
 | Interact with the REST API of Elasticsearch, including sending requests
 and viewing API documentation.
 
-a| <<xpack-profiler, Search&nbsp;Profiler>>
+a| <<xpack-profiler, {searchprofiler}>>
 
 | Inspect and analyze your search queries.
 

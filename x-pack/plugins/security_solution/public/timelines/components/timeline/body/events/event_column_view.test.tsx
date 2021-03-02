@@ -51,7 +51,7 @@ describe('EventColumnView', () => {
     loading: false,
     loadingEventIds: [],
     notesCount: 0,
-    onEventToggled: jest.fn(),
+    onEventDetailsPanelOpened: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onUnPinEvent: jest.fn(),

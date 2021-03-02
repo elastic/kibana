@@ -59,6 +59,9 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
 
+  // Save the initial value
+  const initialValue = useRef(value);
+
   const onChangeDebounced = useMemo(() => {
     const callback = _.debounce((val: string) => {
       onChange(val);
@@ -79,7 +82,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);
     setInputValue(val);
-    onChangeDebounced(val);
+    onChangeDebounced(val || initialValue.current);
   };
 
   return (
@@ -96,6 +99,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
         data-test-subj="indexPattern-label-edit"
         value={inputValue}
         onChange={handleInputChange}
+        placeholder={initialValue.current}
       />
     </EuiFormRow>
   );

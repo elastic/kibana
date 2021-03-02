@@ -92,6 +92,6 @@ export const fillIbmResilientConnectorOptions = (
   ibmResilientConnector.incidentTypes.forEach((incidentType) => {
     cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`, { force: true });
   });
-  cy.get(CONNECTOR_RESILIENT).click();
+  cy.get(CONNECTOR_RESILIENT).click({ force: true });
   cy.get(SELECT_SEVERITY).select(ibmResilientConnector.severity);
 };

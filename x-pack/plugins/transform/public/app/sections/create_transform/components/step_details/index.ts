@@ -8,6 +8,7 @@
 export {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,
-  StepDetailsForm,
-} from './step_details_form';
+  StepDetailsExposedState,
+} from './common';
+export { StepDetailsForm } from './step_details_form';
 export { StepDetailsSummary } from './step_details_summary';

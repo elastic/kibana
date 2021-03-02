@@ -45,8 +45,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
       ]
     `);
@@ -92,8 +100,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -147,8 +163,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -205,8 +229,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "fooC-description",
@@ -281,8 +313,16 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
           "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "fooC-description",

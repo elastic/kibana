@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { ContentSource } from '../../../types';
 

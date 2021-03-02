@@ -9,7 +9,6 @@ import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiFlexGroup,
@@ -118,95 +117,93 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     const isSingle = snapshotIds.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
-                defaultMessage="Delete snapshot '{name}'?"
-                values={{ name: snapshotIds[0].snapshot }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleTitle"
-                defaultMessage="Delete {count} snapshots?"
-                values={{ count: snapshotIds.length }}
-              />
-            )
-          }
-          onCancel={closeModal}
-          onConfirm={deleteSnapshot}
-          cancelButtonText={
+      <EuiConfirmModal
+        title={
+          isSingle ? (
             <FormattedMessage
-              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
+              defaultMessage="Delete snapshot '{name}'?"
+              values={{ name: snapshotIds[0].snapshot }}
             />
-          }
-          confirmButtonText={
+          ) : (
             <FormattedMessage
-              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmButtonLabel"
-              defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleTitle"
+              defaultMessage="Delete {count} snapshots?"
               values={{ count: snapshotIds.length }}
             />
-          }
-          confirmButtonDisabled={isDeleting}
-          buttonColor="danger"
-          data-test-subj="srdeleteSnapshotConfirmationModal"
-        >
-          {!isSingle ? (
-            <Fragment>
+          )
+        }
+        onCancel={closeModal}
+        onConfirm={deleteSnapshot}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.confirmButtonLabel"
+            defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+            values={{ count: snapshotIds.length }}
+          />
+        }
+        confirmButtonDisabled={isDeleting}
+        buttonColor="danger"
+        data-test-subj="srdeleteSnapshotConfirmationModal"
+      >
+        {!isSingle ? (
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleListDescription"
+                defaultMessage="You are about to delete these snapshots:"
+              />
+            </p>
+            <ul>
+              {snapshotIds.map(({ snapshot, repository }) => (
+                <li key={`${repository}/${snapshot}`}>{snapshot}</li>
+              ))}
+            </ul>
+          </Fragment>
+        ) : null}
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
+            defaultMessage="Restore operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
+            values={{ count: snapshotIds.length }}
+          />
+        </p>
+        {!isSingle && isDeleting ? (
+          <Fragment>
+            <EuiCallOut
+              color="warning"
+              title={
+                <Fragment>
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutTitle"
+                        defaultMessage="Deleting snapshots"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Fragment>
+              }
+            >
               <p>
                 <FormattedMessage
-                  id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleListDescription"
-                  defaultMessage="You are about to delete these snapshots:"
+                  id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
+                  defaultMessage="This may take a few minutes."
                 />
               </p>
-              <ul>
-                {snapshotIds.map(({ snapshot, repository }) => (
-                  <li key={`${repository}/${snapshot}`}>{snapshot}</li>
-                ))}
-              </ul>
-            </Fragment>
-          ) : null}
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteMultipleDescription"
-              defaultMessage="Restore operations associated with {count, plural, one {this snapshot} other {these snapshots}} will stop."
-              values={{ count: snapshotIds.length }}
-            />
-          </p>
-          {!isSingle && isDeleting ? (
-            <Fragment>
-              <EuiCallOut
-                color="warning"
-                title={
-                  <Fragment>
-                    <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutTitle"
-                          defaultMessage="Deleting snapshots"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </Fragment>
-                }
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
-                    defaultMessage="This may take a few minutes."
-                  />
-                </p>
-              </EuiCallOut>
-            </Fragment>
-          ) : null}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            </EuiCallOut>
+          </Fragment>
+        ) : null}
+      </EuiConfirmModal>
     );
   };
 

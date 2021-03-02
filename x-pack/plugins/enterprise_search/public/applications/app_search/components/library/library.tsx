@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiSpacer,
   EuiPageHeader,
@@ -13,7 +15,6 @@ import {
   EuiPageContentBody,
   EuiPageContent,
 } from '@elastic/eui';
-import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema } from '../../../shared/types';

@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 
 import { UserIcon } from '../../../components/shared/user_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
-
 import { User } from '../../../types';
 
 import { GroupRowUsersDropdown } from './group_row_users_dropdown';

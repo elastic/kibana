@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
+import { FieldsConfig, from } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
@@ -31,6 +31,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   regex_file: {
     type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
     deserializer: String,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.userAgentForm.regexFileFieldLabel',
@@ -66,7 +67,7 @@ export const UserAgent: FunctionComponent = () => {
             id="xpack.ingestPipelines.pipelineEditor.userAgentForm.targetFieldHelpText"
             defaultMessage="Output field. Defaults to {defaultField}."
             values={{
-              defaultField: <EuiCode inline>{'user_agent'}</EuiCode>,
+              defaultField: <EuiCode>{'user_agent'}</EuiCode>,
             }}
           />
         }

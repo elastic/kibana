@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { GroupLogic } from '../group_logic';
-import { NAV } from '../../../constants';
-
 import { SideNavLink } from '../../../../shared/layout';
-
+import { NAV } from '../../../constants';
 import { getGroupPath, getGroupSourcePrioritizationPath } from '../../../routes';
+import { GroupLogic } from '../group_logic';
 
 export const GroupSubNav: React.FC = () => {
   const {

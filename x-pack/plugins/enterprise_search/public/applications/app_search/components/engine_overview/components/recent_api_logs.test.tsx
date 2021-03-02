@@ -8,6 +8,7 @@
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';

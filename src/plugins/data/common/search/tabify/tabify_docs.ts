@@ -11,6 +11,12 @@ import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
+export interface TabifyDocsOptions {
+  shallow?: boolean;
+  source?: boolean;
+  meta?: boolean;
+}
+
 export function flattenHit(
   hit: SearchResponse<unknown>['hits']['hits'][0],
   indexPattern?: IndexPattern,
@@ -56,12 +62,13 @@ export function flattenHit(
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
   }
-  return flat;
-}
+  if (params?.meta !== false) {
+    // combine the fields that Discover allows to add as columns
+    const { _id, _index, _type, _score } = hit;
+    flatten({ _id, _index, _score, _type });
+  }
 
-export interface TabifyDocsOptions {
-  shallow?: boolean;
-  source?: boolean;
+  return flat;
 }
 
 export const tabifyDocs = (

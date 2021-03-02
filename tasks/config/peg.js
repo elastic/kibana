@@ -15,7 +15,7 @@ module.exports = {
     },
   },
   timelion_chain: {
-    src: 'src/plugins/vis_type_timelion/public/chain.peg',
-    dest: 'src/plugins/vis_type_timelion/public/_generated_/chain.js',
+    src: 'src/plugins/vis_type_timelion/common/chain.peg',
+    dest: 'src/plugins/vis_type_timelion/common/_generated_/chain.js',
   },
 };

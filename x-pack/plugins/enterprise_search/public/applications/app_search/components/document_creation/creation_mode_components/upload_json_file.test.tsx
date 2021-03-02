@@ -8,10 +8,13 @@
 import { setMockValues, setMockActions, rerender } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFilePicker, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { Errors } from '../creation_response_components';
+
 import { UploadJsonFile, FlyoutHeader, FlyoutBody, FlyoutFooter } from './upload_json_file';
 
 describe('UploadJsonFile', () => {

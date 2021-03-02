@@ -185,8 +185,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     [http.basePath, state.start, state.end, logStreamQuery]
   );
 
-  const [logsPanelRef, { height: logPanelHeight }] = useMeasure<HTMLDivElement>();
-
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
   const isLogFeatureAvailable = useMemo(() => {
     if (!agentVersion) {
@@ -198,6 +196,13 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     }
     return semverGte(agentVersionWithPrerelease, '7.11.0');
   }, [agentVersion]);
+
+  // Set absolute height on logs component (needed to render correctly in Safari)
+  // based on available height, or 600px, whichever is greater
+  const [logsPanelRef, { height: measuredlogPanelHeight }] = useMeasure<HTMLDivElement>();
+  const logPanelHeight = useMemo(() => Math.max(measuredlogPanelHeight, 600), [
+    measuredlogPanelHeight,
+  ]);
 
   if (!isLogFeatureAvailable) {
     return (

@@ -1,5 +1,5 @@
 {
-  "id": "alerting_fixture",
+  "id": "alertingFixture",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

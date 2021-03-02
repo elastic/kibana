@@ -6,19 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { last, omit, pick, sortBy } from 'lodash';
 import url from 'url';
-import { sortBy, pick, last, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { registry } from '../../../common/registry';
-import { Maybe } from '../../../../../plugins/apm/typings/common';
-import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { roundNumber } from '../../../utils';
 import { ENVIRONMENT_ALL } from '../../../../../plugins/apm/common/environment_filter_values';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
-
-const round = (num: Maybe<number>): string => (isFiniteNumber(num) ? num.toPrecision(4) : '');
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -235,9 +232,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: round(opbeansNode?.latency.value),
-          throughput: round(opbeansNode?.throughput.value),
-          errorRate: round(opbeansNode?.errorRate.value),
+          latency: roundNumber(opbeansNode?.latency.value),
+          throughput: roundNumber(opbeansNode?.throughput.value),
+          errorRate: roundNumber(opbeansNode?.errorRate.value),
           ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment', 'impact'),
         };
 
@@ -250,16 +247,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: '',
           serviceName: 'opbeans-node',
           type: 'service',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 100,
         });
 
-        const firstValue = round(opbeansNode?.latency.timeseries[0].y);
-        const lastValue = round(last(opbeansNode?.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.latency.timeseries)?.y);
 
-        expect(firstValue).to.be(round(20 / 3));
+        expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
       });
 
@@ -271,9 +268,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: round(postgres?.latency.value),
-          throughput: round(postgres?.throughput.value),
-          errorRate: round(postgres?.errorRate.value),
+          latency: roundNumber(postgres?.latency.value),
+          throughput: roundNumber(postgres?.throughput.value),
+          errorRate: roundNumber(postgres?.errorRate.value),
           ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'impact', 'type'),
         };
 
@@ -286,9 +283,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           spanSubtype: 'http',
           name: 'postgres',
           type: 'external',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 0,
         });
       });

@@ -8,7 +8,9 @@
 import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiSwitch } from '@elastic/eui';
 
 import { PrivateSourcesTable } from './private_sources_table';

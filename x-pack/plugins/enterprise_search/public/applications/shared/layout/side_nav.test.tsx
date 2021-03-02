@@ -9,11 +9,13 @@ import '../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { EuiLink } from '@elastic/eui';
-import { EuiLinkTo } from '../react_router_helpers';
+
 import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { SideNav, SideNavLink, SideNavItem } from './';
 

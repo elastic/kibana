@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
+
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+
 import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (

@@ -7,12 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { Route, Switch, Redirect, useParams } from 'react-router-dom';
+
 import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
 // TODO: Uncomment and add more routes as we migrate them
@@ -26,18 +28,17 @@ import {
   // META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
   // ENGINE_SYNONYMS_PATH,
-  // ENGINE_CURATIONS_PATH,
+  ENGINE_CURATIONS_PATH,
   // ENGINE_RESULT_SETTINGS_PATH,
   // ENGINE_SEARCH_UI_PATH,
   // ENGINE_API_LOGS_PATH,
 } from '../../routes';
-import { ENGINES_TITLE } from '../engines';
-import { OVERVIEW_TITLE } from '../engine_overview';
-
-import { Loading } from '../../../shared/loading';
-import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
+import { OVERVIEW_TITLE } from '../engine_overview';
+import { EngineOverview } from '../engine_overview';
+import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineLogic } from './';
@@ -46,13 +47,13 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
-      canManageEngineRelevanceTuning,
       // canViewEngineDocuments,
       // canViewEngineSchema,
       // canViewEngineCrawler,
       // canViewMetaEngineSourceEngines,
+      canManageEngineRelevanceTuning,
       // canManageEngineSynonyms,
-      // canManageEngineCurations,
+      canManageEngineCurations,
       // canManageEngineResultSettings,
       // canManageEngineSearchUi,
       // canViewEngineApiLogs,
@@ -97,6 +98,11 @@ export const EngineRouter: React.FC = () => {
       <Route path={ENGINE_DOCUMENTS_PATH}>
         <Documents engineBreadcrumb={engineBreadcrumb} />
       </Route>
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter engineBreadcrumb={engineBreadcrumb} />
+        </Route>
+      )}
       {canManageEngineRelevanceTuning && (
         <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
           <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />

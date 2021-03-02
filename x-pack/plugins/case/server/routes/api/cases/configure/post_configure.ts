@@ -24,7 +24,12 @@ import {
   transformESConnectorToCaseConnector,
 } from '../helpers';
 
-export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPostCaseConfigure({
+  caseConfigureService,
+  caseService,
+  router,
+  logger,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_URL,
@@ -39,9 +44,9 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
         const caseClient = context.case.getCaseClient();
-        const actionsClient = await context.actions?.getActionsClient();
+        const actionsClient = context.actions?.getActionsClient();
         if (actionsClient == null) {
-          throw Boom.notFound('Action client have not been found');
+          throw Boom.notFound('Action client not found');
         }
         const client = context.core.savedObjects.client;
         const query = pipe(
@@ -58,14 +63,13 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           );
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { email, full_name, username } = await caseService.getUser({ request, response });
+        const { email, full_name, username } = await caseService.getUser({ request });
 
         const creationDate = new Date().toISOString();
         let mappings: ConnectorMappingsAttributes[] = [];
         try {
           mappings = await caseClient.getMappings({
             actionsClient,
-            caseClient,
             connectorId: query.connector.id,
             connectorType: query.connector.type,
           });
@@ -97,6 +101,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           }),
         });
       } catch (error) {
+        logger.error(`Failed to post case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

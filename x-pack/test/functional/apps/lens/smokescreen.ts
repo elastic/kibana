@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { range } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -439,6 +440,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
+    it('should allow formatting on references', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_column > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.editDimensionFormat('Number');
+      await PageObjects.lens.closeDimensionEditor();
+
+      const values = await Promise.all(
+        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+      );
+      expect(values).to.eql([
+        '-',
+        '222,420.00',
+        '702,050.00',
+        '1,879,613.33',
+        '3,482,256.25',
+        '4,359,953.00',
+      ]);
+    });
+
     /**
      * The edge cases are:
      *
@@ -571,15 +608,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       // Sort by number
-      await PageObjects.lens.changeTableSortingBy(2, 'asc');
+      await PageObjects.lens.changeTableSortingBy(2, 'ascending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
       // Now sort by IP
-      await PageObjects.lens.changeTableSortingBy(0, 'asc');
+      await PageObjects.lens.changeTableSortingBy(0, 'ascending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
       // Change the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'desc');
+      await PageObjects.lens.changeTableSortingBy(0, 'descending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
       // Remove the sorting

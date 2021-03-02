@@ -336,7 +336,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                       <EuiIconTip
                         color="subdued"
                         content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `Gaps in the data are not shown by default, but can be represented as dotted lines with different modes.`,
+                          defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
                         })}
                         iconProps={{
                           className: 'eui-alignTop',
@@ -508,7 +508,7 @@ export function DimensionEditor(
     return (
       <>
         <PalettePicker
-          palettes={props.frame.availablePalettes}
+          palettes={props.paletteService}
           activePalette={layer.palette}
           setPalette={(newPalette) => {
             setState(updateLayer(state, { ...layer, palette: newPalette }, index));

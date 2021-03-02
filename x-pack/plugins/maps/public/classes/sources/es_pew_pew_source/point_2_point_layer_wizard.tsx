@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 // @ts-ignore
 import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 import { VectorStyle } from '../../styles/vector/vector_style';

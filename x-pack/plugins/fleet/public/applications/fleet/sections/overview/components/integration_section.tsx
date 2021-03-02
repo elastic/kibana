@@ -31,7 +31,7 @@ export const OverviewIntegrationSection: React.FC = () => {
       (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
     )?.length ?? 0;
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-integrations-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTitle', {
           defaultMessage: 'Integrations',

@@ -22,7 +22,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
 } from '@elastic/eui';
 
@@ -190,23 +189,21 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
       </EuiFlyout>
 
       {deleteModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteTitle', {
-              defaultMessage: 'Delete snapshot?',
-            })}
-            onCancel={hideDeleteModal}
-            onConfirm={deleteSnapshot}
-            cancelButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.cancelButton', {
-              defaultMessage: 'Cancel',
-            })}
-            confirmButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteButton', {
-              defaultMessage: 'Delete',
-            })}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteTitle', {
+            defaultMessage: 'Delete snapshot?',
+          })}
+          onCancel={hideDeleteModal}
+          onConfirm={deleteSnapshot}
+          cancelButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.cancelButton', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteButton', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        />
       )}
     </>
   );

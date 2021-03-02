@@ -8,12 +8,14 @@
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { UserOptionItem } from './user_option_item';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { UserIcon } from '../../../components/shared/user_icon';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { UserOptionItem } from './user_option_item';
 
 const user = users[0];
 

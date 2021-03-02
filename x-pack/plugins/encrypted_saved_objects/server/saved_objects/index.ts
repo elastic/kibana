@@ -17,7 +17,9 @@ import {
 import { SecurityPluginSetup } from '../../../security/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
-import { getDescriptorNamespace } from './get_descriptor_namespace';
+import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
+
+export { normalizeNamespace };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;

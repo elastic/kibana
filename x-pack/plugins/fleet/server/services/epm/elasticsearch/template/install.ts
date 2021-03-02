@@ -311,6 +311,45 @@ export async function installTemplate({
     });
   }
 
+  // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
+  const getTemplateRes = await callCluster('transport.request', {
+    method: 'GET',
+    path: `/_index_template/${templateName}`,
+    ignore: [404],
+  });
+
+  const existingIndexTemplate = getTemplateRes?.index_templates?.[0];
+  if (
+    existingIndexTemplate &&
+    existingIndexTemplate.name === templateName &&
+    existingIndexTemplate?.index_template?.template?.aliases
+  ) {
+    const updateIndexTemplateParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_index_template/${templateName}`,
+      ignore: [404],
+      body: {
+        ...existingIndexTemplate.index_template,
+        template: {
+          ...existingIndexTemplate.index_template.template,
+          // Remove the aliases field
+          aliases: undefined,
+        },
+      },
+    };
+    // This uses the catch-all endpoint 'transport.request' because there is no
+    // convenience endpoint using the new _index_template API yet.
+    // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+    // which does not support v2 templates.
+    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+    await callCluster('transport.request', updateIndexTemplateParams);
+  }
+
   const composedOfTemplates = await installDataStreamComponentTemplates(
     templateName,
     dataStream.elasticsearch,

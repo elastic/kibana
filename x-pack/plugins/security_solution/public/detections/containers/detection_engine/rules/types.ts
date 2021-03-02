@@ -24,6 +24,7 @@ import {
   listArray,
   threat_query,
   threat_index,
+  threat_indicator_path,
   threat_mapping,
   threat_language,
   threat_filters,
@@ -77,6 +78,7 @@ const StatusTypes = t.union([
   t.literal('failed'),
   t.literal('going to run'),
   t.literal('partial failure'),
+  t.literal('warning'),
 ]);
 
 // TODO: make a ticket
@@ -132,6 +134,7 @@ export const RuleSchema = t.intersection([
     threat_query,
     threat_filters,
     threat_index,
+    threat_indicator_path,
     threat_mapping,
     threat_language,
     timeline_id: t.string,
@@ -252,7 +255,13 @@ export interface RuleStatus {
   failures: RuleInfoStatus[];
 }
 
-export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export type RuleStatusType =
+  | 'executing'
+  | 'failed'
+  | 'going to run'
+  | 'succeeded'
+  | 'partial failure'
+  | 'warning';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;

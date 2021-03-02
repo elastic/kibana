@@ -55,7 +55,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
             return response.forbidden(e.message);
           }
 
-          return response.internalError({ body: e });
+          throw e;
         }
       }
     )

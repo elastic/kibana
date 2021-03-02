@@ -61,6 +61,8 @@ const createStartContractMock = () => {
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
+    setHeaderBanner: jest.fn(),
+    getBodyClasses$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
@@ -72,6 +74,7 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   return startContract;
 };
 

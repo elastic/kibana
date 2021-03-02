@@ -28,6 +28,10 @@ export class TaskTypeDictionary {
     return [...this.definitions.keys()];
   }
 
+  public getAllDefinitions() {
+    return [...this.definitions.values()];
+  }
+
   public has(type: string) {
     return this.definitions.has(type);
   }

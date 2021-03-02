@@ -34,7 +34,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -57,7 +57,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], version: undefined }],
         caseMappingsSavedObject: mockCaseMappings,
@@ -98,7 +98,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [],
       })
@@ -116,7 +116,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], id: 'throw-error-find' }],
       })
@@ -133,7 +133,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: [],

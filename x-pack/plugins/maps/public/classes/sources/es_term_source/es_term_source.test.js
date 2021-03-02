@@ -7,7 +7,7 @@
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-jest.mock('../../layers/vector_layer/vector_layer', () => {});
+jest.mock('../../layers/vector_layer', () => {});
 
 const indexPatternTitle = 'myIndex';
 const termFieldName = 'myTermField';

@@ -22,8 +22,8 @@ const PERCENT_SIGN_NAME = 'test%';
 const PERCENT_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
 const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
-const createPolicyTitle = 'Create Policy';
-const editPolicyTitle = 'Edit Policy';
+const createPolicyTitle = 'Create policy';
+const editPolicyTitle = 'Edit policy';
 
 window.scrollTo = jest.fn();
 

@@ -10,23 +10,27 @@ import {
   EuiDescriptionList,
   EuiHealth,
   EuiHorizontalRule,
-  EuiLink,
   EuiListGroup,
   EuiListGroupItem,
   EuiIcon,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isPolicyOutOfDate } from '../../utils';
-import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
+import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
-import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
+import {
+  POLICY_STATUS_TO_HEALTH_COLOR,
+  POLICY_STATUS_TO_BADGE_COLOR,
+  HOST_STATUS_TO_HEALTH_COLOR,
+} from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
@@ -48,6 +52,7 @@ const LinkToExternalApp = styled.div`
   margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
   .linkToAppIcon {
     margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+    vertical-align: top;
   }
   .linkToAppPopoutIcon {
     margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
@@ -57,7 +62,15 @@ const LinkToExternalApp = styled.div`
 const openReassignFlyoutSearch = '?openReassignFlyout=true';
 
 export const EndpointDetails = memo(
-  ({ details, policyInfo }: { details: HostMetadata; policyInfo?: HostInfo['policy_info'] }) => {
+  ({
+    details,
+    policyInfo,
+    hostStatus,
+  }: {
+    details: HostMetadata;
+    policyInfo?: HostInfo['policy_info'];
+    hostStatus: HostStatus;
+  }) => {
     const agentId = details.elastic.agent.id;
     const {
       url: agentDetailsUrl,
@@ -79,13 +92,32 @@ export const EndpointDetails = memo(
           description: details.host.os.full,
         },
         {
+          title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
+            defaultMessage: 'Agent Status',
+          }),
+          description: (
+            <EuiHealth
+              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+              data-test-subj="agentStatusHealth"
+            >
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.hostStatusValue"
+                  defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                  values={{ hostStatus }}
+                />
+              </EuiText>
+            </EuiHealth>
+          ),
+        },
+        {
           title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
             defaultMessage: 'Last Seen',
           }),
           description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
         },
       ];
-    }, [details]);
+    }, [details, hostStatus]);
 
     const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -135,13 +167,15 @@ export const EndpointDetails = memo(
             defaultMessage: 'Integration Policy',
           }),
           description: (
-            <>
-              <EndpointPolicyLink
-                policyId={details.Endpoint.policy.applied.id}
-                data-test-subj="policyDetailsValue"
-              >
-                {details.Endpoint.policy.applied.name}
-              </EndpointPolicyLink>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EndpointPolicyLink
+                  policyId={details.Endpoint.policy.applied.id}
+                  data-test-subj="policyDetailsValue"
+                >
+                  {details.Endpoint.policy.applied.name}
+                </EndpointPolicyLink>
+              </EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="baseline">
                 {details.Endpoint.policy.applied.endpoint_policy_version && (
                   <EuiFlexItem grow={false}>
@@ -167,7 +201,7 @@ export const EndpointDetails = memo(
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </>
+            </EuiFlexGroup>
           ),
         },
         {
@@ -175,25 +209,26 @@ export const EndpointDetails = memo(
             defaultMessage: 'Policy Response',
           }),
           description: (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}
-              data-test-subj="policyStatusHealth"
+            // https://github.com/elastic/eui/issues/4530
+            // @ts-ignore
+            <EuiBadge
+              color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
+              data-test-subj="policyStatusValue"
+              href={policyResponseUri}
+              onClick={policyStatusClickHandler}
+              onClickAriaLabel={i18n.translate(
+                'xpack.securitySolution.endpoint.details.policyStatus',
+                { defaultMessage: 'Policy Response' }
+              )}
             >
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiLink
-                data-test-subj="policyStatusValue"
-                href={policyResponseUri}
-                onClick={policyStatusClickHandler}
-              >
-                <EuiText size="m">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.details.policyStatusValue"
-                    defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                    values={{ policyStatus }}
-                  />
-                </EuiText>
-              </EuiLink>
-            </EuiHealth>
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.details.policyStatusValue"
+                  defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                  values={{ policyStatus }}
+                />
+              </EuiText>
+            </EuiBadge>
           ),
         },
       ];
@@ -248,7 +283,7 @@ export const EndpointDetails = memo(
             onClick={handleReassignEndpointsClick}
             data-test-subj="endpointDetailsLinkToIngest"
           >
-            <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
+            <EuiIcon type="managementApp" className="linkToAppIcon" />
             <FormattedMessage
               id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
               defaultMessage="Reassign Policy"

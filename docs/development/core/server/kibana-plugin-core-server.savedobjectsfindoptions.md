@@ -23,9 +23,11 @@ export interface SavedObjectsFindOptions
 |  [namespaces](./kibana-plugin-core-server.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-server.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-server.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |
+|  [pit](./kibana-plugin-core-server.savedobjectsfindoptions.pit.md) | <code>SavedObjectsPitParams</code> | Search against a specific Point In Time (PIT) that you've opened with [SavedObjectsClient.openPointInTimeForType()](./kibana-plugin-core-server.savedobjectsclient.openpointintimefortype.md)<!-- -->. |
 |  [preference](./kibana-plugin-core-server.savedobjectsfindoptions.preference.md) | <code>string</code> | An optional ES preference value to be used for the query \* |
 |  [rootSearchFields](./kibana-plugin-core-server.savedobjectsfindoptions.rootsearchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. Unlike the <code>searchFields</code> argument, these are expected to be root fields and will not be modified. If used in conjunction with <code>searchFields</code>, both are concatenated together. |
 |  [search](./kibana-plugin-core-server.savedobjectsfindoptions.search.md) | <code>string</code> | Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String <code>query</code> argument for more information |
+|  [searchAfter](./kibana-plugin-core-server.savedobjectsfindoptions.searchafter.md) | <code>unknown[]</code> | Use the sort values from the previous page to retrieve the next page of results. |
 |  [searchFields](./kibana-plugin-core-server.savedobjectsfindoptions.searchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. See Elasticsearch Simple Query String <code>fields</code> argument for more information |
 |  [sortField](./kibana-plugin-core-server.savedobjectsfindoptions.sortfield.md) | <code>string</code> |  |
 |  [sortOrder](./kibana-plugin-core-server.savedobjectsfindoptions.sortorder.md) | <code>string</code> |  |

@@ -8,7 +8,7 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   asMillisecondDuration,
   asTransactionRate,
@@ -23,7 +23,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 
-const StyledTransactionLink = styled(TransactionDetailLink)`
+const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;

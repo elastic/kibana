@@ -413,11 +413,9 @@ describe('Common authentication routes', () => {
         body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
       });
 
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrow(
+        unhandledException
+      );
     });
 
     it('returns 401 if login fails.', async () => {
@@ -683,11 +681,9 @@ describe('Common authentication routes', () => {
       authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
-      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        payload: 'Internal Error',
-        options: {},
-      });
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).rejects.toThrowError(
+        unhandledException
+      );
     });
 
     it('returns 204 if successfully acknowledged.', async () => {

@@ -8,19 +8,21 @@
 import React from 'react';
 import { LineSeries, CurveType, Fit } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/types';
-import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
+import { microToMilli, microToSec } from '../../../lib/formatting';
+import { MS_LABEL, SEC_LABEL } from '../translations';
 
 interface Props {
+  monitorType: string;
   lines: LocationDurationLine[];
 }
 
-export const DurationLineSeriesList = ({ lines }: Props) => (
+export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
   <>
     {lines.map(({ name, line }) => (
       <LineSeries
         curve={CurveType.CURVE_MONOTONE_X}
         // this id is used for the line chart representing the average duration length
-        data={line.map(({ x, y }) => [x, microsToMillis(y || null)])}
+        data={line.map(({ x, y }) => [x, y || null])}
         id={`loc-avg-${name}`}
         key={`loc-line-${name}`}
         name={name}
@@ -30,6 +32,11 @@ export const DurationLineSeriesList = ({ lines }: Props) => (
         yScaleToDataExtent={false}
         yScaleType="linear"
         fit={Fit.Linear}
+        tickFormat={(d) =>
+          monitorType === 'browser'
+            ? `${microToSec(d)} ${SEC_LABEL}`
+            : `${microToMilli(d)} ${MS_LABEL}`
+        }
       />
     ))}
   </>

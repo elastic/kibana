@@ -8,14 +8,13 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues } from '../../../../../__mocks__';
-import { shallow } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { shallow } from 'enzyme';
 
 import { CustomSourceIcon } from './custom_source_icon';
-
 import { ExampleSearchResultGroup } from './example_search_result_group';
 
 describe('ExampleSearchResultGroup', () => {

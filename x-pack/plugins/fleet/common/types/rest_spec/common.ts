@@ -14,3 +14,10 @@ export interface ListWithKuery extends HttpFetchQuery {
   sortOrder?: 'desc' | 'asc';
   kuery?: string;
 }
+
+export interface ListResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  perPage: number;
+}

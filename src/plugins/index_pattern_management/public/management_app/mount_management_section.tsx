@@ -41,8 +41,8 @@ export async function mountManagementSection(
   getMlCardState: () => MlCardState
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { chrome, application, uiSettings, notifications, overlays, http, docLinks },
+    { data, indexPatternFieldEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -54,16 +54,17 @@ export async function mountManagementSection(
   const deps: IndexPatternManagmentContext = {
     chrome,
     application,
-    savedObjects,
     uiSettings,
     notifications,
     overlays,
     http,
     docLinks,
     data,
+    indexPatternFieldEditor,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 
   ReactDOM.render(

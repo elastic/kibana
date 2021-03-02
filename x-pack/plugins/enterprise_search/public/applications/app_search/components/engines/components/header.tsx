@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -17,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../../shared/telemetry';
 
 export const EnginesOverviewHeader: React.FC = () => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);

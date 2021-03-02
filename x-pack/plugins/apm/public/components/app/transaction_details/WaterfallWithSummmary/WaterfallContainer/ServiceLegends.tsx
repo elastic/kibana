@@ -8,12 +8,12 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { px, unit } from '../../../../../style/variables';
 import { Legend } from '../../../../shared/charts/Legend';
 import { IServiceColors } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
-const Legends = styled.div`
+const Legends = euiStyled.div`
   display: flex;
 
   > * {

@@ -107,6 +107,7 @@ const fieldsConfig: FieldsConfig = {
   prefix: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.prefixFieldLabel', {
       defaultMessage: 'Prefix',
     }),
@@ -118,6 +119,7 @@ const fieldsConfig: FieldsConfig = {
   trim_key: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.trimKeyFieldLabel', {
       defaultMessage: 'Trim key',
     }),
@@ -129,6 +131,7 @@ const fieldsConfig: FieldsConfig = {
   trim_value: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.trimValueFieldLabel', {
       defaultMessage: 'Trim value',
     }),

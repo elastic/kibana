@@ -143,31 +143,37 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           '@timestamp'
         );
+        await PageObjects.lens.assertFocusedField('@timestamp');
       });
       it('should drop a field to empty dimension', async () => {
         await PageObjects.lens.dragFieldWithKeyboard('bytes', 4);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Average of bytes',
+          'Median of bytes',
         ]);
         await PageObjects.lens.dragFieldWithKeyboard('@message.raw', 1, true);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql(['Top values of @message.raw']);
+        await PageObjects.lens.assertFocusedField('@message.raw');
       });
       it('should drop a field to an existing dimension replacing the old one', async () => {
         await PageObjects.lens.dragFieldWithKeyboard('clientip', 1, true);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql(['Top values of clientip']);
+
+        await PageObjects.lens.assertFocusedField('clientip');
       });
       it('should duplicate an element in a group', async () => {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Average of bytes',
+          'Median of bytes',
           'Count of records [1]',
         ]);
+
+        await PageObjects.lens.assertFocusedDimension('Count of records [1]');
       });
 
       it('should move dimension to compatible dimension', async () => {
@@ -186,6 +192,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql([]);
+        await PageObjects.lens.assertFocusedDimension('@timestamp');
       });
       it('should move dimension to incompatible dimension', async () => {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
@@ -198,6 +205,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Count of records',
           'Unique count of @timestamp',
         ]);
+        await PageObjects.lens.assertFocusedDimension('Unique count of @timestamp');
       });
       it('should reorder elements with keyboard', async () => {
         await PageObjects.lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
@@ -205,6 +213,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Unique count of @timestamp',
           'Count of records',
         ]);
+        await PageObjects.lens.assertFocusedDimension('Count of records');
       });
     });
 

@@ -7,13 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import {
@@ -74,85 +68,83 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              {isSingleAgent ? (
-                <FormattedMessage
-                  id="xpack.fleet.upgradeAgents.deleteSingleTitle"
-                  defaultMessage="Upgrade agent?"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.upgradeAgents.deleteMultipleTitle"
-                  defaultMessage="Upgrade {count} agents?"
-                  values={{ count: agentCount }}
-                />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.upgradeAgents.experimentalLabel"
-                    defaultMessage="Experimental"
-                  />
-                }
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.fleet.upgradeAgents.experimentalLabelTooltip"
-                    defaultMessage="Upgrade agent might change or be removed in a future release and is not subject to the support SLA."
-                  />
-                }
+    <EuiConfirmModal
+      title={
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {isSingleAgent ? (
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.deleteSingleTitle"
+                defaultMessage="Upgrade agent?"
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        onCancel={onClose}
-        onConfirm={onSubmit}
-        cancelButtonText={
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.deleteMultipleTitle"
+                defaultMessage="Upgrade {count} agents?"
+                values={{ count: agentCount }}
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.upgradeAgents.experimentalLabel"
+                  defaultMessage="Experimental"
+                />
+              }
+              tooltipContent={
+                <FormattedMessage
+                  id="xpack.fleet.upgradeAgents.experimentalLabelTooltip"
+                  defaultMessage="Upgrade agent might change or be removed in a future release and is not subject to the support SLA."
+                />
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      onCancel={onClose}
+      onConfirm={onSubmit}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.fleet.upgradeAgents.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonDisabled={isSubmitting}
+      confirmButtonText={
+        isSingleAgent ? (
           <FormattedMessage
-            id="xpack.fleet.upgradeAgents.cancelButtonLabel"
-            defaultMessage="Cancel"
+            id="xpack.fleet.upgradeAgents.confirmSingleButtonLabel"
+            defaultMessage="Upgrade agent"
           />
-        }
-        confirmButtonDisabled={isSubmitting}
-        confirmButtonText={
-          isSingleAgent ? (
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.confirmSingleButtonLabel"
-              defaultMessage="Upgrade agent"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
-              defaultMessage="Upgrade {count} agents"
-              values={{ count: agentCount }}
-            />
-          )
-        }
-      >
-        <p>
-          {isSingleAgent ? (
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-              defaultMessage="This action upgrades the agent running on '{hostName}' to version {version}. You can't undo this upgrade."
-              values={{
-                hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-                version,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
-              defaultMessage="This action upgrades multiple agents to version {version}. You can't undo this upgrade."
-              values={{ version }}
-            />
-          )}
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
+            defaultMessage="Upgrade {count} agents"
+            values={{ count: agentCount }}
+          />
+        )
+      }
+    >
+      <p>
+        {isSingleAgent ? (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
+            defaultMessage="This action upgrades the agent running on '{hostName}' to version {version}. You can't undo this upgrade."
+            values={{
+              hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
+              version,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
+            defaultMessage="This action upgrades multiple agents to version {version}. You can't undo this upgrade."
+            values={{ version }}
+          />
+        )}
+      </p>
+    </EuiConfirmModal>
   );
 };

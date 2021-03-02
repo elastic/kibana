@@ -14,11 +14,16 @@ import {
   CaseStatuses,
   CaseAttributes,
   CasePatchRequest,
+  CaseType,
+  AssociationType,
 } from '../../../../case/common/api';
 
-export { CaseConnector, ActionConnector } from '../../../../case/common/api';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
+
+export type AllCaseType = AssociationType & CaseType;
 
 export type Comment = CommentRequest & {
+  associationType: AssociationType;
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
@@ -49,24 +54,37 @@ export interface CaseExternalService {
   externalTitle: string;
   externalUrl: string;
 }
-export interface Case {
+
+interface BasicCase {
   id: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
-  connector: CaseConnector;
   createdAt: string;
   createdBy: ElasticUser;
-  description: string;
-  externalService: CaseExternalService | null;
   status: CaseStatuses;
-  tags: string[];
   title: string;
+  totalAlerts: number;
   totalComment: number;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
+}
+
+export interface SubCase extends BasicCase {
+  associationType: AssociationType;
+  caseParentId: string;
+}
+
+export interface Case extends BasicCase {
+  connector: CaseConnector;
+  description: string;
+  externalService: CaseExternalService | null;
+  subCases?: SubCase[] | null;
+  subCaseIds: string[];
   settings: CaseAttributes['settings'];
+  tags: string[];
+  type: CaseType;
 }
 
 export interface QueryParams {
@@ -81,6 +99,7 @@ export interface FilterOptions {
   status: CaseStatuses;
   tags: string[];
   reporters: User[];
+  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -133,6 +152,7 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   title?: string;
+  type?: CaseType;
 }
 
 export interface FieldMappings {
@@ -148,7 +168,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string) => void;
+  fetchCaseUserActions?: (caseId: string, subCaseId?: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;

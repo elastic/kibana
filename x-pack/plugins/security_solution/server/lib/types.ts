@@ -75,8 +75,8 @@ export interface SearchHits<T> {
   max_score: number;
   hits: Array<
     BaseHit<T> & {
-      _type: string;
-      _score: number;
+      _type?: string;
+      _score?: number;
       _version?: number;
       _explanation?: Explanation;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +107,14 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface TermAggregationBucket {
   key: string;
   doc_count: number;
+  top_threshold_hits?: {
+    hits: {
+      hits: SearchHit[];
+    };
+  };
+  cardinality_count?: {
+    value: number;
+  };
 }
 
 export interface TermAggregation {

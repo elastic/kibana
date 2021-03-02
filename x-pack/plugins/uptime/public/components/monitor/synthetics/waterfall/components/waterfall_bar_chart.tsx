@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   Axis,
   BarSeries,
@@ -67,6 +67,10 @@ export const WaterfallBarChart = ({
   index,
 }: Props) => {
   const theme = useChartTheme();
+  const { onElementClick, onProjectionClick } = useWaterfallContext();
+  const handleElementClick = useMemo(() => onElementClick, [onElementClick]);
+  const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
+  const memoizedTickFormat = useCallback(tickFormat, [tickFormat]);
 
   return (
     <WaterfallChartChartContainer
@@ -80,13 +84,15 @@ export const WaterfallBarChart = ({
           rotation={90}
           tooltip={{ customTooltip: Tooltip }}
           theme={theme}
+          onProjectionClick={handleProjectionClick}
+          onElementClick={handleElementClick}
         />
 
         <Axis
           aria-hidden={true}
           id="time"
           position={Position.Top}
-          tickFormat={tickFormat}
+          tickFormat={memoizedTickFormat}
           domain={domain}
           showGridLines={true}
           style={{

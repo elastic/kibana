@@ -1,68 +1,52 @@
 [[discover-document-context]]
 == View surrounding documents
 
-Once you've narrowed your search to a specific event,
-you might want to inspect the documents that occurred
-immediately before and after the event. 
+Once you've narrowed your search to a specific event in *Discover*,
+you can inspect the documents that occurred
+immediately before and after the event.
 To view the surrounding documents, your index pattern must contain time-based events.
 
 . In the document table, click the expand icon (>).
 . Click *View surrounding documents.*
-
-This opens the Context view of *Discover*.
-The documents are sorted by the time field specified in the index pattern 
-and displayed using the same set of columns as the *Discover* view from which 
++
+In the context view, documents are sorted by the time field specified in the index pattern
+and displayed using the same set of columns as the *Discover* view from which
 the context was opened. The anchor document is highlighted in blue.
-
-
++
 [role="screenshot"]
 image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
-
-[float]
-[[filter-context]]
-=== Filter the context
-
-The filters you applied in *Discover* are carried over to the Context view.
-
++
+The filters you applied in *Discover* are carried over to the context view.
++
 [role="screenshot"]
-image::images/discover-context-filters-1.png[Image showing pinned and unpinned filter in Discover]
-
-
+image::images/discover-context-filters-active.png[Disabled filter in main view]
++
 Pinned filters remain active, while normal filters are copied in a disabled state.
-
++
 [role="screenshot"]
-image::images/discover-context-filters-2.png[Image showing pinned and disabled unpinned filter in Discover Context]
+image::images/discover-context-filters-inactive.png[Filter in context view]
 
+. To find the documents of interest, add filters.
 
-You can re-enable these filters to refine your context view.
-
-If the Context view contains a large number of documents not related to the event under
-investigation, you can use filters to restrict the documents to display.
-
-[float]
-[[change-context-size]]
-=== Change the number of surrounding documents
-
-By default, the five newest and oldest
-documents are listed. To increase the number of documents that surround the anchor document,
-click *Load*.
-
+. To increase the number of documents that surround the anchor document, click *Load*.
+By default, five documents are added with each click.
++
 [role="screenshot"]
-image::images/discover-context-load-newer-documents.png[Image the Load button and the number of documents to load]
+image::images/discover-context-load-newer-documents.png[Load button and the number of documents to load]
 
-By default, five documents are added with each click. You can change the number of documents that
-should be added by changing the number in the input displayed next to the *Load* button.
 
 [float]
 [[configure-context-ContextView]]
 === Configure the context view
 
-To configure the Context view, go to <<advanced-options,
-Advanced Settings>> and search for Context.
+Configure the appearance and behavior in *Advanced Settings*.
 
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Search for context, then edit the settings.
++
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
-`context:step`:: The default number of documents to load with each button click.
+`context:step`:: The default number of documents to load with each button click. The default is 5.
 `context:tieBreakerFields`:: The field to use for tiebreaking in case of equal time field values.
 The default is the `_doc` field.
 +

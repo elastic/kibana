@@ -12,7 +12,7 @@ import { appContextService, licenseService } from '../../';
 // chose to comment them out vs @ts-ignore or @ts-expect-error on each line
 
 const PRODUCTION_REGISTRY_URL_CDN = 'https://epr.elastic.co';
-// const STAGING_REGISTRY_URL_CDN = 'https://epr-staging.elastic.co';
+const STAGING_REGISTRY_URL_CDN = 'https://epr-staging.elastic.co';
 const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 
 // const PRODUCTION_REGISTRY_URL_NO_CDN = 'https://epr.ea-web.elastic.dev';
@@ -23,6 +23,8 @@ const getDefaultRegistryUrl = (): string => {
   const branch = appContextService.getKibanaBranch();
   if (branch === 'master') {
     return SNAPSHOT_REGISTRY_URL_CDN;
+  } else if (appContextService.getKibanaVersion().includes('-SNAPSHOT')) {
+    return STAGING_REGISTRY_URL_CDN;
   } else {
     return PRODUCTION_REGISTRY_URL_CDN;
   }

@@ -12,10 +12,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
-
 import { NAV } from '../../constants';
-
 import {
+  ALPHA_PATH,
   SOURCES_PATH,
   SECURITY_PATH,
   ROLE_MAPPINGS_PATH,
@@ -35,7 +34,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
   settingsSubNav,
 }) => (
   <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-    <SideNavLink to="/" isRoot>
+    <SideNavLink to={ALPHA_PATH} isRoot>
       {NAV.OVERVIEW}
     </SideNavLink>
     <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>

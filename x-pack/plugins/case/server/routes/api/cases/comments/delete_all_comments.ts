@@ -11,8 +11,14 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { AssociationType } from '../../../../../common/api';
 
-export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
+export function initDeleteAllCommentsApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: CASE_COMMENTS_URL,
@@ -20,19 +26,29 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        const comments = await caseService.getAllCaseComments({
+        const id = request.query?.subCaseId ?? request.params.case_id;
+        const comments = await caseService.getCommentsByAssociation({
           client,
-          caseId: request.params.case_id,
+          id,
+          associationType: request.query?.subCaseId
+            ? AssociationType.subCase
+            : AssociationType.case,
         });
+
         await Promise.all(
           comments.saved_objects.map((comment) =>
             caseService.deleteComment({
@@ -50,6 +66,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
+              subCaseId: request.query?.subCaseId,
               commentId: comment.id,
               fields: ['comment'],
             })
@@ -58,6 +75,9 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
 
         return response.noContent();
       } catch (error) {
+        logger.error(
+          `Failed to delete all comments in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

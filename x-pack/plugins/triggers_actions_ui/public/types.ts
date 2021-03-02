@@ -63,6 +63,11 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   consumer?: string;
 }
 
+export enum AlertFlyoutCloseReason {
+  SAVED,
+  CANCELED,
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -198,6 +203,7 @@ export interface AlertTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,

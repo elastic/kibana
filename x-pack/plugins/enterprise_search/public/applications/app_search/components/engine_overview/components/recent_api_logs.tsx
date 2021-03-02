@@ -17,9 +17,9 @@ import {
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_API_LOGS_PATH } from '../../../routes';
+import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { generateEnginePath } from '../../engine';
 
-import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { VIEW_API_LOGS } from '../constants';
 
 export const RecentApiLogs: React.FC = () => {

@@ -96,7 +96,7 @@ describe('PinnedTabContent', () => {
       itemsPerPageOptions: [5, 10, 20],
       sort,
       pinnedEventIds: {},
-      showEventDetails: false,
+      showExpandedDetails: false,
       onEventClosed: jest.fn(),
     };
   });

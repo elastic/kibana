@@ -108,10 +108,23 @@ export const getEventIdToDataMapping = (
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
   !isEmpty(event.signal?.rule?.building_block_type);
 
-/** Return eventType raw or signal */
+export const isEvenEqlSequence = (event: Ecs): boolean => {
+  if (!isEmpty(event.eql?.sequenceNumber)) {
+    try {
+      const sequenceNumber = (event.eql?.sequenceNumber ?? '').split('-')[0];
+      return parseInt(sequenceNumber, 10) % 2 === 0;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+};
+/** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   if (!isEmpty(event.signal?.rule?.id)) {
     return 'signal';
+  } else if (!isEmpty(event.eql?.parentId)) {
+    return 'eql';
   }
   return 'raw';
 };
@@ -138,7 +151,7 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const handleClick = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-    if (TimelineId.active) {
+    if (timelineId === TimelineId.active) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
     }
   }, [dispatch, ecsData._id, timelineId]);
