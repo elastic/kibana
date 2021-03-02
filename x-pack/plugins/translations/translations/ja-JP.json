@@ -17208,7 +17208,6 @@
     "xpack.securitySolution.case.common.noConnector": "コネクターを選択していません",
     "xpack.securitySolution.case.components.connectors.case.actionTypeTitle": "ケース",
     "xpack.securitySolution.case.components.connectors.case.addNewCaseOption": "新規ケースの追加",
-    "xpack.securitySolution.case.components.connectors.case.callOutInfo": "ルールを作成した後のすべてのアラートは、選択したケースの最後に追加されます。",
     "xpack.securitySolution.case.components.connectors.case.caseRequired": "ケースの選択が必要です。",
     "xpack.securitySolution.case.components.connectors.case.casesDropdownPlaceholder": "ケースを選択",
     "xpack.securitySolution.case.components.connectors.case.casesDropdownRowLabel": "ケース",
