@@ -126,19 +126,7 @@ async function deleteTemplate(esClient: ElasticsearchClient, name: string): Prom
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      const esClientParams: {
-        method: string;
-        path: string;
-      } = {
-        method: 'DELETE',
-        path: `/_index_template/${name}`,
-      };
-      // This uses the catch-all endpoint 'transport.request' because there is no
-      // convenience endpoint using the new _index_template API yet.
-      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
-      // which does not support v2 templates.
-      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-      await esClient.transport.request(esClientParams, { ignore: [404] });
+      await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch {
       throw new Error(`error deleting template ${name}`);
     }

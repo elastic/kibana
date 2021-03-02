@@ -284,10 +284,9 @@ export async function installTemplate({
   }
 
   // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
-  const { body: getTemplateRes } = await esClient.transport.request(
+  const { body: getTemplateRes } = await esClient.indices.getIndexTemplate(
     {
-      method: 'GET',
-      path: `/_index_template/${templateName}`,
+      name: templateName,
     },
     {
       ignore: [404],
@@ -300,13 +299,8 @@ export async function installTemplate({
     existingIndexTemplate.name === templateName &&
     existingIndexTemplate?.index_template?.template?.aliases
   ) {
-    const updateIndexTemplateParams: {
-      method: string;
-      path: string;
-      body: any;
-    } = {
-      method: 'PUT',
-      path: `/_index_template/${templateName}`,
+    const updateIndexTemplateParams = {
+      name: templateName,
       body: {
         ...existingIndexTemplate.index_template,
         template: {
@@ -316,12 +310,8 @@ export async function installTemplate({
         },
       },
     };
-    // This uses the catch-all endpoint 'transport.request' because there is no
-    // convenience endpoint using the new _index_template API yet.
-    // The existing convenience endpoint `indices.putTemplate` only sends to _template,
-    // which does not support v2 templates.
-    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await esClient.transport.request(updateIndexTemplateParams, { ignore: [404] });
+
+    await esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] });
   }
 
   const composedOfTemplates = await installDataStreamComponentTemplates(
@@ -343,21 +333,12 @@ export async function installTemplate({
   });
 
   // TODO: Check return values for errors
-  const esClientParams: {
-    method: string;
-    path: string;
-    body: any;
-  } = {
-    method: 'PUT',
-    path: `/_index_template/${templateName}`,
+  const esClientParams = {
+    name: templateName,
     body: template,
   };
-  // This uses the catch-all endpoint 'transport.request' because there is no
-  // convenience endpoint using the new _index_template API yet.
-  // The existing convenience endpoint `indices.putTemplate` only sends to _template,
-  // which does not support v2 templates.
-  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-  await esClient.transport.request(esClientParams, { ignore: [404] });
+
+  await esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] });
 
   return {
     templateName,
