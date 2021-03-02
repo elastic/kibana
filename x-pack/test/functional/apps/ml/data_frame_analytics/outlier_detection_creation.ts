@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
 
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(

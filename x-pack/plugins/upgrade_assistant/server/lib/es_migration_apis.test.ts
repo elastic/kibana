@@ -24,6 +24,7 @@ describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
     indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
   };
+
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
 

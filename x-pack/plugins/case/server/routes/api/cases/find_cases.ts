@@ -22,7 +22,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
-export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
+export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,
@@ -37,7 +37,6 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           CasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
-
         const queryArgs = {
           tags: queryParams.tags,
           reporters: queryParams.reporters,
@@ -47,7 +46,6 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
         };
 
         const caseQueries = constructQueryOptions(queryArgs);
-
         const cases = await caseService.findCasesGroupedByID({
           client,
           caseOptions: { ...queryParams, ...caseQueries.case },
@@ -77,6 +75,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           ),
         });
       } catch (error) {
+        logger.error(`Failed to find cases in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

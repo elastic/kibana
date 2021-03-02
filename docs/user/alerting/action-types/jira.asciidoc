@@ -34,7 +34,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 --
 
 [[jira-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -47,7 +47,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -65,14 +65,13 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 Jira actions have the following configuration properties:
 
-Issue type::              The type of the issue.
-Priority::              The priority of the incident.
-Labels::              The labels of the incident.
-Title::    A title for the issue, used for searching the contents of the knowledge base. 
-Description::          The details about the incident.
-Parent::              The parent issue id or key. Only for `Sub-task` issue types.
-Priority::              The priority of the incident.
-Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+Issue type:: The type of the issue.
+Priority:: The priority of the incident.
+Labels:: The labels for the incident.
+Title:: A title for the issue, used for searching the contents of the knowledge base.
+Description:: The details about the incident.
+Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
+Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-jira]]
 ==== Configuring and testing Jira

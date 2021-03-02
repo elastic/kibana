@@ -23,6 +23,7 @@ export interface GetPingHistogramParams {
   filters?: string;
   monitorId?: string;
   bucketSize?: string;
+  query?: string;
 }
 
 export interface HistogramResult {

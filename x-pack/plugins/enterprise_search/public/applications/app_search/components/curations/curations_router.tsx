@@ -19,7 +19,8 @@ import {
   ENGINE_CURATION_ADD_RESULT_PATH,
 } from '../../routes';
 
-import { CURATIONS_TITLE } from './constants';
+import { CURATIONS_TITLE, CREATE_NEW_CURATION_TITLE } from './constants';
+import { Curations, CurationCreation } from './views';
 
 interface Props {
   engineBreadcrumb: BreadcrumbTrail;
@@ -31,11 +32,11 @@ export const CurationsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
     <Switch>
       <Route exact path={ENGINE_CURATIONS_PATH}>
         <SetPageChrome trail={CURATIONS_BREADCRUMB} />
-        TODO: Curations overview
+        <Curations />
       </Route>
       <Route exact path={ENGINE_CURATIONS_NEW_PATH}>
-        <SetPageChrome trail={[...CURATIONS_BREADCRUMB, 'Create a curation']} />
-        TODO: Curation creation view
+        <SetPageChrome trail={[...CURATIONS_BREADCRUMB, CREATE_NEW_CURATION_TITLE]} />
+        <CurationCreation />
       </Route>
       <Route exact path={ENGINE_CURATION_PATH}>
         <SetPageChrome trail={[...CURATIONS_BREADCRUMB, 'curation queries']} />

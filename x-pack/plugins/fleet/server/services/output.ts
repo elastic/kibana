@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { NewOutput, Output, OutputSOAttributes } from '../types';
+import type { SavedObjectsClientContract } from 'src/core/server';
+import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
 import { decodeCloudId } from '../../common';
