@@ -50,7 +50,7 @@ import {
   renderAllSeries,
   getSeriesNameFn,
   getLegendActions,
-  useColorPicker,
+  getColorPicker,
   getXAccessor,
   getAllSeries,
 } from './utils';
@@ -337,6 +337,18 @@ const VisComponent = (props: VisComponentProps) => {
       xAccessor,
     ]
   );
+
+  const legendColorPicker = useMemo(
+    () =>
+      getColorPicker(
+        legendPosition,
+        setColor,
+        getSeriesName,
+        visParams.palette.name,
+        props.uiState
+      ),
+    [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
+  );
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -355,13 +367,7 @@ const VisComponent = (props: VisComponentProps) => {
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={useColorPicker(
-            legendPosition,
-            setColor,
-            getSeriesName,
-            visParams.palette.name,
-            props.uiState
-          )}
+          legendColorPicker={legendColorPicker}
           onElementClick={handleFilterClick(
             visData,
             xAccessor,

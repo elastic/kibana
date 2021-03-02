@@ -11,7 +11,7 @@ import { LegendColorPickerProps, XYChartSeriesIdentifier } from '@elastic/charts
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import { useColorPicker } from './use_color_picker';
+import { getColorPicker } from './get_color_picker';
 import { ColorPicker } from '../../../charts/public';
 import type { PersistedState } from '../../../visualizations/public';
 
@@ -24,7 +24,7 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-describe('useColorPicker', function () {
+describe('getColorPicker', function () {
   const mockState = new Map();
   const uiState = ({
     get: jest
@@ -36,7 +36,7 @@ describe('useColorPicker', function () {
   } as unknown) as PersistedState;
 
   let wrapperProps: LegendColorPickerProps;
-  const Component: ComponentType<LegendColorPickerProps> = useColorPicker(
+  const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
     'left',
     jest.fn(),
     jest.fn().mockImplementation((seriesIdentifier) => seriesIdentifier.seriesKeys[0]),
@@ -86,7 +86,7 @@ describe('useColorPicker', function () {
   });
 
   it('renders the picker for kibana palette with useLegacyColors set to true', () => {
-    const LegacyPaletteComponent: ComponentType<LegendColorPickerProps> = useColorPicker(
+    const LegacyPaletteComponent: ComponentType<LegendColorPickerProps> = getColorPicker(
       'left',
       jest.fn(),
       jest.fn(),

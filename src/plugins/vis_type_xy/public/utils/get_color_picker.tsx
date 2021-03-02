@@ -26,7 +26,7 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
-export const useColorPicker = (
+export const getColorPicker = (
   legendPosition: Position,
   setColor: (
     newColor: string | null,
@@ -59,8 +59,6 @@ export const useColorPicker = (
     onClose();
   };
 
-  // rule doesn't know this is inside a functional component
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const handleOutsideClick = useCallback(() => {
     onClose?.();
   }, [onClose]);
