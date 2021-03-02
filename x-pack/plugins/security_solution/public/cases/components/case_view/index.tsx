@@ -236,7 +236,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       connector: {
         ...caseData.connector,
-        name: isEmpty(caseData.connector.name) ? connectorName : caseData.connector.name,
+        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
       },
       caseServices,
       caseId: caseData.id,
@@ -447,6 +447,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
