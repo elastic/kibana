@@ -27,7 +27,6 @@ import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { NavigationMenu } from '../components/navigation_menu';
 import { HelpMenu } from '../components/help_menu';
-import { getFileUpload } from '../util/dependency_cache';
 
 function startTrialDescription() {
   return (
@@ -57,8 +56,10 @@ export const DatavisualizerSelector: FC = () => {
       licenseManagement,
       http: { basePath },
       docLinks,
+      fileUpload,
     },
   } = useMlKibana();
+
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
@@ -67,7 +68,7 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getFileUpload().getMaxBytesFormatted();
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
     <Fragment>

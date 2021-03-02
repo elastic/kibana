@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { ExperimentalBadge } from '../experimental_badge';
-import { getFileUpload } from '../../../../util/dependency_cache';
+
+import { useMlKibana } from '../../../../contexts/kibana';
 
 export const WelcomeContent: FC = () => {
   const toolTipContent = i18n.translate(
@@ -30,7 +31,11 @@ export const WelcomeContent: FC = () => {
     }
   );
 
-  const maxFileSize = getFileUpload().getMaxBytesFormatted();
+  const {
+    services: { fileUpload },
+  } = useMlKibana();
+
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
