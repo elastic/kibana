@@ -24,7 +24,7 @@ async function startRunner(
   getService: FtrProviderContext['getService'],
   runnerExecution: typeof run
 ) {
-  await runnerExecution({ journeyName: 'uptime', headless: false });
+  await runnerExecution({ journeyName: 'uptime', headless: true });
 }
 async function waitForKibana() {
   log('Waiting for kibana server to start');
@@ -36,7 +36,7 @@ async function waitForKibana() {
   let kbnStatus = false;
 
   while (!kbnStatus) {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     try {
       const { data } = await axios.get('http://kibana_system:changeme@localhost:5620/api/status');
