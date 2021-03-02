@@ -15,6 +15,8 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;
 
+  console.log(nextMajor);
+
   return (
     <EuiPageContent>
       <EuiEmptyPrompt
@@ -24,7 +26,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
           <h2>
             <FormattedMessage
               id="xpack.upgradeAssistant.emptyPrompt.title"
-              defaultMessage="Coming soon: {uaVersion} Upgrade Assistant"
+              defaultMessage="{uaVersion} Upgrade Assistant coming soon"
               values={{ uaVersion: `${nextMajor}.0` }}
             />
           </h2>
@@ -34,31 +36,29 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.emptyPrompt.upgradeAssistantDescription"
-                defaultMessage="The Upgrade Assistant helps prepare for your upgrade to the next major Elasticsearch version.
-                It identifies deprecated settings in your cluster and guides you through the process of resolving issues, such as reindexing.
-                Check back here when Elasticsearch {nextMajorVersion} is released."
-                values={{ nextMajorVersion: `${nextMajor}.0` }}
+                defaultMessage="The Upgrade Assistant identifies deprecated settings in your cluster and
+                guides you through the process of resolving issues. Check back here when Elasticsearch {nextMajor} is released."
+                values={{ nextMajor: `${nextMajor}.0` }}
               />
+              {currentMajor === 7 && (
+                <>
+                  {' '}
+                  <EuiLink
+                    external
+                    target="_blank"
+                    href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/master/migrating-8.0.html`}
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.emptyPrompt.learnMoreDescription"
+                      defaultMessage="Learn more about migrating to {nextMajor}."
+                      values={{
+                        nextMajor: `${nextMajor}.0`,
+                      }}
+                    />
+                  </EuiLink>
+                </>
+              )}
             </p>
-            {currentMajor === 7 && (
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.emptyPrompt.learnMoreDescription"
-                  defaultMessage="To learn more about the upcoming changes, see {learnMoreLink}."
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink
-                        external
-                        target="_blank"
-                        href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/master/migrating-8.0.html`}
-                      >
-                        Migrating to 8.0
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            )}
           </>
         }
       />
