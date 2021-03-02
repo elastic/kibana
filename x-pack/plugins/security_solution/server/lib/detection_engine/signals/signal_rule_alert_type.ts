@@ -54,10 +54,13 @@ import {
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
-import { findThresholdSignals } from './find_threshold_signals';
+import {
+  bulkCreateThresholdSignals,
+  getThresholdBucketFilters,
+  getThresholdSignalHistory,
+  findThresholdSignals,
+} from './threshold';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
-import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -376,9 +379,9 @@ export const signalRulesAlertType = ({
           const inputIndex = await getInputIndex(services, version, index);
 
           const {
-            filters: bucketFilters,
+            thresholdSignalHistory,
             searchErrors: previousSearchErrors,
-          } = await getThresholdBucketFilters({
+          } = await getThresholdSignalHistory({
             indexPattern: [outputIndex],
             from,
             to,
@@ -390,6 +393,10 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
+          const bucketFilters = await getThresholdBucketFilters({
+            thresholdSignalHistory,
+            timestampOverride,
+          });
           const esFilter = await getFilter({
             type,
             filters: filters ? filters.concat(bucketFilters) : bucketFilters,
@@ -441,6 +448,7 @@ export const signalRulesAlertType = ({
             enabled,
             refresh,
             tags,
+            thresholdSignalHistory,
             buildRuleMessage,
           });
 

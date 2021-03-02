@@ -40,4 +40,7 @@ export interface RuleEcs {
   version?: string[];
   note?: string[];
   building_block_type?: string[];
+  meta?: {
+    from: string[];
+  };
 }

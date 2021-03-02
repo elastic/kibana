@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
-import { singleSearchAfter } from './single_search_after';
-
+import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { SignalSearchResponse } from './types';
-import { BuildRuleMessage } from './rule_messages';
+} from '../../../../../../alerts/server';
+import { Logger } from '../../../../../../../../src/core/server';
+import { BuildRuleMessage } from '../rule_messages';
+import { singleSearchAfter } from '../single_search_after';
+import { SignalSearchResponse } from '../types';
 
 interface FindPreviousThresholdSignalsParams {
   from: string;

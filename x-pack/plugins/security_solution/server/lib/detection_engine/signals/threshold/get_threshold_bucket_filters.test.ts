@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../../alerts/server/mocks';
 import {
   mockLogger,
   sampleWrappedThresholdSignalHit,
   sampleWrappedLegacyThresholdSignalHit,
-} from './__mocks__/es_results';
-import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
-import { buildRuleMessageFactory } from './rule_messages';
+} from '../__mocks__/es_results';
+import { buildRuleMessageFactory } from '../rule_messages';
+import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',

@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import { isEmpty } from 'lodash';
 
-import { Filter } from 'src/plugins/data/common';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
-
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from './types';
-import { BuildRuleMessage } from './rule_messages';
-import { findPreviousThresholdSignals } from './threshold_find_previous_signals';
+} from '../../../../../../alerts/server';
+import { Logger } from '../../../../../../../../src/core/server';
+import { ThresholdSignalHistory } from '../types';
+import { BuildRuleMessage } from '../rule_messages';
+import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
+import { getThresholdTermsHash } from '../utils';
 
-interface GetThresholdBucketFiltersParams {
+interface GetThresholdSignalHistoryParams {
   from: string;
   to: string;
   indexPattern: string[];
@@ -35,7 +32,7 @@ interface GetThresholdBucketFiltersParams {
   buildRuleMessage: BuildRuleMessage;
 }
 
-export const getThresholdBucketFilters = async ({
+export const getThresholdSignalHistory = async ({
   from,
   to,
   indexPattern,
@@ -45,8 +42,8 @@ export const getThresholdBucketFilters = async ({
   bucketByFields,
   timestampOverride,
   buildRuleMessage,
-}: GetThresholdBucketFiltersParams): Promise<{
-  filters: Filter[];
+}: GetThresholdSignalHistoryParams): Promise<{
+  thresholdSignalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
   const { searchResult, searchErrors } = await findPreviousThresholdSignals({
@@ -94,18 +91,7 @@ export const getThresholdBucketFilters = async ({
         };
       });
 
-      const hash = crypto
-        .createHash('sha256')
-        .update(
-          terms
-            .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
-            .map((field) => {
-              return field.value;
-            })
-            .join(',')
-        )
-        .digest('hex');
-
+      const hash = getThresholdTermsHash(terms);
       const existing = acc[hash];
       const originalTime =
         hit._source.signal?.original_time != null
@@ -127,47 +113,8 @@ export const getThresholdBucketFilters = async ({
     {}
   );
 
-  const filters = Object.values(thresholdSignalHistory).reduce(
-    (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
-      const filter = {
-        bool: {
-          filter: [
-            {
-              range: {
-                [timestampOverride ?? '@timestamp']: {
-                  lte: new Date(bucket.lastSignalTimestamp).toISOString(),
-                },
-              },
-            },
-          ],
-        },
-      } as ESFilter;
-
-      if (!isEmpty(bucketByFields)) {
-        bucket.terms.forEach((term) => {
-          if (term.field != null) {
-            (filter.bool.filter as ESFilter[]).push({
-              term: {
-                [term.field]: `${term.value}`,
-              },
-            });
-          }
-        });
-      }
-
-      return [...acc, filter];
-    },
-    [] as ESFilter[]
-  );
-
   return {
-    filters: [
-      ({
-        bool: {
-          must_not: filters,
-        },
-      } as unknown) as Filter,
-    ],
+    thresholdSignalHistory,
     searchErrors,
   };
 };

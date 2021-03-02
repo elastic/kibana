@@ -123,13 +123,13 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
     };
   }
   const ecsData = ecs as Ecs;
-  const ellapsedTimeRule = moment.duration(
+  const elapsedTimeRule = moment.duration(
     moment().diff(
       dateMath.parse(ecsData?.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
     )
   );
   const from = moment(ecsData?.timestamp ?? new Date())
-    .subtract(ellapsedTimeRule)
+    .subtract(elapsedTimeRule)
     .toISOString();
   const to = moment(ecsData?.timestamp ?? new Date()).toISOString();
 
@@ -146,10 +146,14 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationDataProvider = (
+export const getThresholdAggregationData = (
   ecsData: Ecs | Ecs[],
   nonEcsData: TimelineNonEcsData[]
-): DataProvider[] => {
+): {
+  thresholdFrom: string;
+  thresholdTo: string;
+  dataProviders: DataProvider[];
+} => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<DataProvider[]>((outerAcc, thresholdData) => {
     const threshold = thresholdData.signal?.rule?.threshold as string[];
@@ -446,19 +450,51 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
+    const originalTime = moment(ecsData.signal?.original_time![0]);
+
+    /*
+    console.log(originalTime);
+    console.log(JSON.stringify(ecsData.signal?.rule));
+    const int = ecsData.signal?.rule?.interval![0];
+    console.log(int);
+    const inte = `now-${int}`;
+    console.log(inte);
+    const inter = dateMath.parse(inte);
+    console.log(inter);
+    const interval = moment().diff(inter);
+    console.log(interval);
+    const ruleInterval = moment.duration(interval);
+    console.log(ruleInterval.humanize());
+    console.log(ruleInterval);
+
+    // const ruleLookback = moment.duration(5, 'm');
+    const ruleLookback = moment.duration(dateMath.parse('now-0s')!.diff(dateMath.parse(`now-${ecsData.signal?.rule?.meta?.from![0]}`)));
+    console.log(ruleLookback.humanize());
+    const ruleLookback = moment(ecsData.signal?.rule?.meta?.from![0]);
+    console.log(ruleLookback);
+    */
+    const ruleInterval = moment.duration(1, 'm');
+    const ruleLookback = moment.duration(5, 'm');
+    const fromOriginalTime = originalTime.clone().subtract(ruleInterval).subtract(ruleLookback);
+
+    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
+      ecsData,
+      nonEcsData
+    );
+
     return createTimeline({
-      from,
+      from: thresholdFrom, // TODO: use `from` value from signal if available... otherwise, use thresholdFrom
       notes: null,
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: getThresholdAggregationDataProvider(ecsData, nonEcsData),
+        dataProviders,
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
-          start: from,
-          end: to,
+          start: fromOriginalTime.toISOString(),
+          end: originalTime.toISOString(),
         },
         eventType: 'all',
         kqlQuery: {
@@ -475,7 +511,7 @@ export const sendAlertToTimelineAction = async ({
           },
         },
       },
-      to,
+      to: thresholdTo,
       ruleNote: noteContent,
     });
   } else {
