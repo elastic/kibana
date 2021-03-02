@@ -16,8 +16,8 @@ import {
   CasePatchRequest,
   CaseType,
   AssociationType,
-  CaseStatusFilter,
 } from '../../../../case/common/api';
+import { CaseStatusWithAllStatus } from '../components/status';
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
 
@@ -95,7 +95,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatusFilter;
+  status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
   onlyCollectionType?: boolean;

@@ -8,12 +8,12 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
-import { statuses } from '../status';
+import { CaseStatuses } from '../../../../../case/common/api';
+import { statuses, CaseStatusWithAllStatus } from '../status';
 import * as i18n from './translations';
 
 interface GetBulkItems {
-  caseStatus: CaseStatusFilter;
+  caseStatus: CaseStatusWithAllStatus;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
   selectedCaseIds: string[];

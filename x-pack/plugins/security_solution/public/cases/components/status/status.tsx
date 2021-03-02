@@ -9,12 +9,12 @@ import React, { memo, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
-import { StatusAll, CaseStatusFilter } from '../../../../../case/common/api';
 import { allCaseStatus, statuses } from './config';
+import { CaseStatusWithAllStatus, StatusAll } from './types';
 import * as i18n from './translations';
 
 interface Props {
-  type: CaseStatusFilter;
+  type: CaseStatusWithAllStatus;
   withArrow?: boolean;
   onClick?: () => void;
 }

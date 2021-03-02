@@ -10,11 +10,12 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { StatusAll, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
+import { CaseStatusWithAllStatus, StatusAll } from '../status';
 import { StatusFilter } from './status_filter';
 
 import * as i18n from './translations';
@@ -131,7 +132,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const onStatusChanged = useCallback(
-    (status: CaseStatusFilter) => {
+    (status: CaseStatusWithAllStatus) => {
       onFilterChanged({ status });
     },
     [onFilterChanged]
