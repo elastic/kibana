@@ -35,6 +35,11 @@ export const WelcomeContent: FC = () => {
     services: { fileUpload },
   } = useMlKibana();
 
+  if (fileUpload === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File upload plugin not available');
+    return null;
+  }
   const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (

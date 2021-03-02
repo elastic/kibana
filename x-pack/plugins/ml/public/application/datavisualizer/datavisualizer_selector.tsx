@@ -68,6 +68,11 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
+  if (fileUpload === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File upload plugin not available');
+    return null;
+  }
   const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
