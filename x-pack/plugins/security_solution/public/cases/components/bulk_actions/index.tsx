@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { get } from 'lodash';
 import { CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
 import { statuses } from '../status';
 import * as i18n from './translations';
@@ -43,7 +42,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses.open);
       }}
     >
-      {get(statuses, `${CaseStatuses.open}.actions.bulk.title`)}
+      {statuses[CaseStatuses.open].actions.bulk.title}
     </EuiContextMenuItem>
   );
 
@@ -58,7 +57,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses['in-progress']);
       }}
     >
-      {get(statuses, `${CaseStatuses['in-progress']}.actions.bulk.title`)}
+      {statuses[CaseStatuses['in-progress']].actions.bulk.title}
     </EuiContextMenuItem>
   );
 
@@ -73,7 +72,7 @@ export const getBulkItems = ({
         updateCaseStatus(CaseStatuses.closed);
       }}
     >
-      {get(statuses, `${CaseStatuses.closed}.actions.bulk.title`)}
+      {statuses[CaseStatuses.closed].actions.bulk.title}
     </EuiContextMenuItem>
   );
 

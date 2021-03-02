@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { get } from 'lodash';
 import { CaseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 
@@ -22,7 +21,7 @@ const StatsComponent: React.FC<Props> = ({ caseCount, caseStatus, isLoading, dat
   const statusStats = useMemo(
     () => [
       {
-        title: get(statuses, `${caseStatus}.stats.title`),
+        title: statuses[caseStatus].stats.title,
         description: isLoading ? (
           <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />
         ) : (

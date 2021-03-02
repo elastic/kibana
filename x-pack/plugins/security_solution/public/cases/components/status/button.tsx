@@ -46,7 +46,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
       isLoading={isLoading}
       onClick={onClick}
     >
-      {get(statuses, `${caseStatuses[nextStatusIndex]}.button.label`)}
+      {statuses[caseStatuses[nextStatusIndex]].button.label}
     </EuiButton>
   );
 };
