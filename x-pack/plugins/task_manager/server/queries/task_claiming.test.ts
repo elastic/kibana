@@ -15,7 +15,7 @@ import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } fro
 import { asTaskClaimEvent, ClaimTaskErr, TaskClaimErrorType, TaskEvent } from '../task_events';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { BoolClauseWithAnyCondition, TermFilter } from '../queries/query_clauses';
+import { MustNotCondition } from '../queries/query_clauses';
 import { mockLogger } from '../test_utils';
 import { TaskClaiming, OwnershipClaimingOpts, TaskClaimingOpts } from './task_claiming';
 import { Observable } from 'rxjs';
@@ -177,7 +177,7 @@ describe('TaskClaiming', () => {
         result,
         args: {
           search: store.fetch.mock.calls[index][0] as SearchOpts & {
-            query: BoolClauseWithAnyCondition<TermFilter>;
+            query: MustNotCondition;
           },
           updateByQuery: store.updateByQuery.mock.calls[index] as [
             UpdateByQuerySearchOpts,
@@ -766,8 +766,8 @@ if (doc['task.runAt'].size()!=0) {
           )
         ).map(
           (result, index) =>
-            (store.updateByQuery.mock.calls[index][0] as {
-              query: BoolClauseWithAnyCondition<TermFilter>;
+            ((store.updateByQuery.mock.calls[index][0] as unknown) as {
+              query: MustNotCondition;
               size: number;
               sort: string | string[];
               script: {
