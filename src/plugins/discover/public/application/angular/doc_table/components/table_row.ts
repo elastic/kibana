@@ -11,6 +11,7 @@ import $ from 'jquery';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
+import { UI_SETTINGS } from '../../../../../../data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
