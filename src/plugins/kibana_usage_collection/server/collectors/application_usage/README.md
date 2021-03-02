@@ -70,17 +70,6 @@ Application Usage will automatically track the active minutes on screen and clic
 
 The prop `viewId` is used as a unique identifier for your plugin. The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via `core.application.register`.
 
-#### Advanced Usage
-
-If you have a custom use case not provided by the Application Usage helpers you can use the `usageCollection.applicationUsageTracker` public api directly.
-
-To start tracking a view: `applicationUsageTracker.trackApplicationViewUsage(viewId)`
-Calling this method will marks the specified `viewId` as active. applicationUsageTracker will start tracking clicks and screen minutes for the view.
-
-To stop tracking a view: `applicationUsageTracker.flushTrackedView(viewId)`
-Calling this method will stop tracking the clicks and screen minutes for that view. Usually once the view is no longer active.
-
-
 ## Application Usage Telemetry Data
 
 This collector reports the number of general clicks and minutes on screen for each registered application in Kibana.
