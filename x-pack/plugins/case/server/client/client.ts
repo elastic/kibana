@@ -218,7 +218,7 @@ export class CaseClientHandler implements CaseClient {
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to get alerts using client ids: ${JSON.stringify(
+        message: `Failed to get alerts using client requested alerts: ${JSON.stringify(
           args.alertsInfo
         )}: ${error}`,
         error,
