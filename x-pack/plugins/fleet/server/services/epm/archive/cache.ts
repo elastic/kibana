@@ -6,6 +6,7 @@
  */
 
 import { ArchivePackage, RegistryPackage } from '../../../../common';
+
 import { ArchiveEntry } from './index';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();

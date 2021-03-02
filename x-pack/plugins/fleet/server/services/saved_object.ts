@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+
 import { SO_SEARCH_LIMIT } from '../constants';
 import { ListWithKuery } from '../types';
 

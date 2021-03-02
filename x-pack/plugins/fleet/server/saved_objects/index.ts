@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -19,6 +20,7 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
+
 import {
   migratePackagePolicyToV7110,
   migratePackagePolicyToV7120,

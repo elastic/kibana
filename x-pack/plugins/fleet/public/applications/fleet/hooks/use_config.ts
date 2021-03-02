@@ -6,6 +6,7 @@
  */
 
 import React, { useContext } from 'react';
+
 import { FleetConfigType } from '../../../plugin';
 
 export const ConfigContext = React.createContext<FleetConfigType | null>(null);

@@ -6,6 +6,7 @@
  */
 
 import { ComponentType, LazyExoticComponent } from 'react';
+
 import { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
 
 /** Register a Fleet UI extension */

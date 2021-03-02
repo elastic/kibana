@@ -6,6 +6,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
+
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { FleetAdminUserInvalidError, isESClientError } from '../../errors';
 import { CallESAsCurrentUser } from '../../types';

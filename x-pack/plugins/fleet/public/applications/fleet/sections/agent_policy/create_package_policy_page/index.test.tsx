@@ -8,9 +8,11 @@
 import { Route } from 'react-router-dom';
 import React from 'react';
 import { act } from 'react-test-renderer';
+
 import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../mock';
 import { PAGE_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
 import { CreatePackagePolicyRouteState } from '../../../types';
+
 import { CreatePackagePolicyPage } from './index';
 
 describe('when on the package policy create page', () => {

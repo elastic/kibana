@@ -6,8 +6,10 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+
 import { CallESAsCurrentUser } from '../../../types';
 import * as Registry from '../registry';
+
 import { getInstallationObject } from './index';
 import { BulkInstallResponse, IBulkInstallPackageError, upgradePackage } from './install';
 

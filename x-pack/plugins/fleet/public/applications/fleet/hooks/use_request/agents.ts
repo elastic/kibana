@@ -29,6 +29,7 @@ import {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../types';
+
 import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;

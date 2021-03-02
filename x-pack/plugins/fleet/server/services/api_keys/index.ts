@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+
 import { createAPIKey } from './security';
 
 export { invalidateAPIKeys } from './security';

@@ -6,7 +6,9 @@
  */
 
 import { SavedObject } from 'src/core/server';
+
 import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
+
 import { getInstallType } from './install';
 
 const mockInstallation: SavedObject<Installation> = {

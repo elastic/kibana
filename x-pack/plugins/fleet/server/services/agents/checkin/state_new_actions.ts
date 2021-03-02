@@ -7,7 +7,6 @@
 
 import semverParse from 'semver/functions/parse';
 import semverLt from 'semver/functions/lt';
-
 import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
@@ -23,6 +22,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+
 import {
   Agent,
   AgentAction,
@@ -45,6 +45,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { getAgent, updateAgent } from '../crud';
+
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
 function getInternalUserSOClient() {

@@ -11,6 +11,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
 } from 'src/core/server';
+
 import {
   Agent,
   NewAgentEvent,
@@ -18,10 +19,10 @@ import {
   AgentSOAttributes,
   AgentEventSOAttributes,
 } from '../../../types';
-
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { getAgentActionsForCheckin } from '../actions';
 import { updateAgent } from '../crud';
+
 import { agentCheckinState } from './state';
 
 export async function agentCheckin(

@@ -7,6 +7,7 @@
 
 import { UIExtensionsStorage } from '../types';
 import { createExtensionRegistrationCallback } from '../services/ui_extensions';
+
 import { MockedFleetStart } from './types';
 
 export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): MockedFleetStart => {

@@ -6,6 +6,7 @@
  */
 
 import { AgentPolicy } from '../types';
+
 import { defaultPackages } from './epm';
 export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
 export const AGENT_POLICY_INDEX = '.fleet-policies';

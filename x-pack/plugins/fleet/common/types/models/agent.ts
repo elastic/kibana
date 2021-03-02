@@ -6,6 +6,7 @@
  */
 
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
+
 import { FullAgentPolicy } from './agent_policy';
 
 export type AgentType =

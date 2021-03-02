@@ -6,6 +6,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
@@ -16,6 +17,7 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
+
 import {
   getAgentPoliciesHandler,
   getOneAgentPolicyHandler,

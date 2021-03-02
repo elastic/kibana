@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import { CallESAsCurrentUser } from '../types';
 import {
   packageToPackagePolicy,
@@ -18,6 +19,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common';
 import { SO_SEARCH_LIMIT } from '../constants';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {

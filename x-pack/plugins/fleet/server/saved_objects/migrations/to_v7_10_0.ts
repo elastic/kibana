@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import {
   Agent,

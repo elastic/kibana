@@ -799,6 +799,7 @@ module.exports = {
           'warn',
           {
             groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
           },
         ],
       },

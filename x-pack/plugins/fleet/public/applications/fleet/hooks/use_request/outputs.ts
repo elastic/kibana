@@ -7,6 +7,7 @@
 
 import { outputRoutesService } from '../../services';
 import { PutOutputRequest, GetOutputsResponse } from '../../types';
+
 import { sendRequest, useRequest } from './use_request';
 
 export function useGetOutputs() {

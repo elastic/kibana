@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { SavedObject } from 'src/core/server';
+
 import {
   Agent,
   AgentSOAttributes,

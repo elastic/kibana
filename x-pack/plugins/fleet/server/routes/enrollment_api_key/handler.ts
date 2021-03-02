@@ -7,6 +7,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+
 import {
   GetEnrollmentAPIKeysRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,

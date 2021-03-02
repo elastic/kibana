@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'src/core/server';
+
 import {
   RegistryDataStream,
   ElasticsearchAssetType,
@@ -19,6 +20,7 @@ import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
+
 import {
   generateMappings,
   generateTemplateName,

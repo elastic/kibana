@@ -10,11 +10,13 @@ import Boom from '@hapi/boom';
 import { GetResponse } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
 import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
+
 import { createAPIKey, invalidateAPIKeys } from './security';
 
 export async function listEnrollmentApiKeys(

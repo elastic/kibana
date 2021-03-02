@@ -6,8 +6,10 @@
  */
 
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
+
 import * as crudServiceSO from './crud_so';
 import * as crudServiceFleetServer from './crud_fleet_server';
 

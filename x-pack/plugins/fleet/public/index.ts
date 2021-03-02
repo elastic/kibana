@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
+
 import { FleetPlugin } from './plugin';
 
 export { FleetSetup, FleetStart } from './plugin';

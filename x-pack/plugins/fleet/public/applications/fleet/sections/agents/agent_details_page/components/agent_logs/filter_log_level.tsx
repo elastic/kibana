@@ -8,7 +8,9 @@
 import React, { memo, useState, useEffect } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../../../../../hooks';
+
 import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
 
 function sortLogLevels(levels: string[]): string[] {

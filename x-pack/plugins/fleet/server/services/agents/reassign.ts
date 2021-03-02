@@ -7,8 +7,10 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
+
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError } from '../../errors';
+
 import {
   getAgents,
   getAgentPolicyForAgent,
@@ -16,7 +18,6 @@ import {
   updateAgent,
   bulkUpdateAgents,
 } from './crud';
-
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(

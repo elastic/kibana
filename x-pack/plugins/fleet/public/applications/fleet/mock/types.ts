@@ -6,6 +6,7 @@
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
+
 import { FleetSetupDeps, FleetStart, FleetStartDeps, FleetStartServices } from '../../../plugin';
 
 export type MockedFleetStartServices = MockedKeys<FleetStartServices>;

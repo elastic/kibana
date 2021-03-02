@@ -8,6 +8,7 @@
 // handlers that handle events from agents in response to actions received
 
 import { RequestHandler } from 'kibana/server';
+
 import { AcksService } from '../../services/agents';
 import { AgentEvent } from '../../../common/types/models';
 import { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';

@@ -10,6 +10,7 @@ import HttpsProxyAgent, {
   HttpsProxyAgent as IHttpsProxyAgent,
   HttpsProxyAgentOptions,
 } from 'https-proxy-agent';
+
 import { appContextService } from '../../index';
 export interface RegistryProxySettings {
   proxyUrl: string;

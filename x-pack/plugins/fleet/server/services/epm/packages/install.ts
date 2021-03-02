@@ -10,6 +10,7 @@ import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import {
   BulkInstallPackageInfo,
@@ -36,6 +37,7 @@ import {
   PackageOutdatedError,
 } from '../../../errors';
 import { appContextService } from '../../app_context';
+
 import {
   getInstallation,
   getInstallationObject,

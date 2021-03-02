@@ -18,10 +18,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
 import { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
 import { packageToPackagePolicyInputs } from '../../../services';
 import { Loading } from '../../../components';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
 import { PackagePolicyValidationResults } from './services';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{

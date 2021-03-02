@@ -16,6 +16,7 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
+
 import { NewAgentActionSchema } from '../../types/models';
 import { ActionsService } from '../../services/agents';
 import { AgentAction } from '../../../common/types/models';
@@ -23,6 +24,7 @@ import {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../../common/types/rest_spec';
+
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 describe('test actions handlers schema', () => {

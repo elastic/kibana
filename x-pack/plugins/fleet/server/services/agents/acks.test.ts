@@ -16,6 +16,7 @@ import {
   AgentEvent,
 } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
+
 import { acknowledgeAgentActions } from './acks';
 
 describe('test agent acks services', () => {

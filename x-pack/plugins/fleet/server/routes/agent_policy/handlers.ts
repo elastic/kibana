@@ -8,6 +8,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { listAgents } from '../../services/agents';

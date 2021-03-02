@@ -6,6 +6,7 @@
  */
 
 import React, { useContext } from 'react';
+
 import { UIExtensionPoint, UIExtensionsStorage } from '../types';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});

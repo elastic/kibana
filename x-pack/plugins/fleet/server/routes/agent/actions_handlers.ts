@@ -9,6 +9,7 @@
 
 import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+
 import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 import { ActionsService } from '../../services/agents';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';

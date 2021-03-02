@@ -6,7 +6,9 @@
  */
 
 import React, { useState, useContext, useEffect } from 'react';
+
 import { GetFleetStatusResponse } from '../types';
+
 import { useConfig } from './use_config';
 import { sendGetFleetStatus } from './use_request';
 

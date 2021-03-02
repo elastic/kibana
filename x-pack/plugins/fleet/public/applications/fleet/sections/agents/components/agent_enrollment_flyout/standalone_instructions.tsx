@@ -21,9 +21,11 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { AgentPolicy } from '../../../../types';
 import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
+
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
 interface Props {

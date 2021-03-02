@@ -7,7 +7,9 @@
 
 import { SavedObject } from 'kibana/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { AgentAction } from '../../../common/types/models';
+
 import { createAgentAction } from './actions';
 
 describe('test agent actions services', () => {

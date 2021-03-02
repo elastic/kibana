@@ -6,6 +6,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
+
 import { InstallablePackage } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 

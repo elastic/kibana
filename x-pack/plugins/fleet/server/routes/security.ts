@@ -6,6 +6,7 @@
  */
 
 import { IRouter, RequestHandler } from 'src/core/server';
+
 import { appContextService } from '../services';
 
 export function enforceSuperUser<T1, T2, T3>(

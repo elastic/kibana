@@ -14,8 +14,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
+
 import { useLink, useGetDataStreams, useStartServices } from '../../../hooks';
 import { Loading } from '../../agents/components';
+
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 

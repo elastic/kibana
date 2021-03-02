@@ -6,6 +6,7 @@
  */
 
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+
 import { fetchUrl } from './requests';
 jest.mock('node-fetch');
 

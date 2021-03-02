@@ -7,6 +7,7 @@
 
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
+
 import {
   ArchivePackage,
   RegistryPolicyTemplate,
@@ -18,6 +19,7 @@ import {
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
+
 import { unpackBufferEntries } from './index';
 
 const MANIFESTS: Record<string, Buffer> = {};

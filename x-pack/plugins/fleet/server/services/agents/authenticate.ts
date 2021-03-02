@@ -7,8 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest, SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import { Agent } from '../../types';
 import * as APIKeyService from '../api_keys';
+
 import { getAgentByAccessAPIKeyId } from './crud';
 
 export async function authenticateAgentWithAccessToken(

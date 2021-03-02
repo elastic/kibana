@@ -7,9 +7,12 @@
 
 import path from 'path';
 import { readFileSync } from 'fs';
+
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
+
 import { Fields, Field } from '../../fields/field';
+
 import {
   flattenFields,
   dedupeFields,

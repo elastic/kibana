@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { RegistryDataStream } from '../../../../types';
 import { Field } from '../../fields/field';
 

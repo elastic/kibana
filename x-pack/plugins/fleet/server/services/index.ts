@@ -6,7 +6,9 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+
 import { AgentStatus, Agent, EsAssetReference } from '../types';
+
 import * as settingsService from './settings';
 import { getAgent, listAgents } from './agents';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';

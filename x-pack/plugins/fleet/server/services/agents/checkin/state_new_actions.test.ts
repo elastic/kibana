@@ -8,9 +8,11 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { take } from 'rxjs/operators';
+
 import { getNewActionsSince } from '../actions';
 import { Agent, AgentAction, AgentPolicyAction } from '../../../types';
 import { outputType } from '../../../../common/constants';
+
 import {
   createAgentActionFromPolicyAction,
   createNewActionsSharedObservable,

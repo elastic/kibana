@@ -16,6 +16,7 @@ import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { appContextService } from '../../services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';

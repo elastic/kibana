@@ -12,6 +12,7 @@ import {
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
 } from '../types';
+
 import { createExtensionRegistrationCallback } from './ui_extensions';
 
 describe('UI Extension services', () => {

@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
+
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -25,6 +26,7 @@ import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
+
 import { getInstallation, savedObjectTypes } from './index';
 
 export async function removeInstallation(options: {

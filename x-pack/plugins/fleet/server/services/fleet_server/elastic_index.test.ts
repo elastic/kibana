@@ -7,7 +7,9 @@
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import hash from 'object-hash';
+
 import { FLEET_SERVER_INDICES } from '../../../common';
+
 import { setupFleetServerIndexes } from './elastic_index';
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';

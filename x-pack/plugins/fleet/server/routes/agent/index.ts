@@ -7,6 +7,7 @@
 
 import { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
+
 import {
   PLUGIN_ID,
   AGENT_API_ROUTES,
@@ -37,6 +38,7 @@ import {
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { FleetConfigType } from '../..';
+
 import {
   getAgentsHandler,
   getAgentHandler,

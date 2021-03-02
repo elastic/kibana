@@ -6,8 +6,10 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import * as APIKeyService from '../api_keys';
 import { AgentUnenrollmentError } from '../../errors';
+
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import {
   getAgent,

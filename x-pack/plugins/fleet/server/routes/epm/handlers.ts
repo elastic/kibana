@@ -6,9 +6,11 @@
  */
 
 import path from 'path';
+
 import { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+
 import {
   GetInfoResponse,
   InstallPackageResponse,

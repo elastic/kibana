@@ -14,6 +14,7 @@ import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { appContextService } from '../../services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+
 import { savedObjectToAgent } from './saved_objects';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;

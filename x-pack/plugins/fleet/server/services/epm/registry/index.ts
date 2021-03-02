@@ -6,9 +6,11 @@
  */
 
 import { URL } from 'url';
+
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
+
 import {
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -29,6 +31,7 @@ import {
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
+
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 

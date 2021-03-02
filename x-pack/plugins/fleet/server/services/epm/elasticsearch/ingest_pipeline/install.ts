@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+
 import {
   EsAssetReference,
   RegistryDataStream,
@@ -16,6 +17,7 @@ import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
+
 import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {

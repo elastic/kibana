@@ -8,6 +8,7 @@
 import React, { lazy, memo } from 'react';
 import { Route } from 'react-router-dom';
 import { act, cleanup } from '@testing-library/react';
+
 import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import {
   GetAgentPoliciesResponse,
@@ -24,6 +25,7 @@ import {
   packagePolicyRouteService,
 } from '../../../../../../../common/services';
 import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
+
 import { Detail } from './index';
 
 describe('when on integration detail', () => {

@@ -8,7 +8,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
-
 import {
   ElasticsearchClient,
   SavedObjectsServiceStart,
@@ -16,6 +15,7 @@ import {
   Logger,
   KibanaRequest,
 } from 'src/core/server';
+
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,

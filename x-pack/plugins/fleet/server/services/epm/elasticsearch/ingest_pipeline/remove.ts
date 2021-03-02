@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+
 import { appContextService } from '../../../';
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';

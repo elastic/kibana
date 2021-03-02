@@ -6,6 +6,7 @@
  */
 
 import { Agent } from '../types/models/agent';
+
 import { isAgentUpgradeable } from './is_agent_upgradeable';
 
 const getAgent = ({

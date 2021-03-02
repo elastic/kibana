@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/server';
+
 import { ElasticsearchClient, SavedObjectsClient } from '../../../../../src/core/server';
 
 export async function getInternalClients(

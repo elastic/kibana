@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ApplicationStart } from 'kibana/public';
+
 import {
   AgentPolicy,
   PackageInfo,
@@ -43,6 +44,7 @@ import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
 import { CreatePackagePolicyPageLayout } from './components';
 import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import {

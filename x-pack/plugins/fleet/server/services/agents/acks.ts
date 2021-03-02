@@ -14,6 +14,7 @@ import {
 } from 'src/core/server';
 import Boom from '@hapi/boom';
 import LRU from 'lru-cache';
+
 import {
   Agent,
   AgentAction,
@@ -25,6 +26,7 @@ import {
   AgentActionSOAttributes,
 } from '../../types';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
+
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
 import { ackAgentUpgraded } from './upgrade';

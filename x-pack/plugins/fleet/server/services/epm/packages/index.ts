@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from 'src/core/server';
+
 import {
   RequiredPackage,
   requiredPackages,

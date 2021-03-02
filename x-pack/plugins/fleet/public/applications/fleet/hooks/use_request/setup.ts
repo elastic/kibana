@@ -7,6 +7,7 @@
 
 import { setupRouteService, fleetSetupRouteService } from '../../services';
 import { GetFleetStatusResponse } from '../../types';
+
 import { sendRequest } from './use_request';
 
 export const sendSetup = () => {
