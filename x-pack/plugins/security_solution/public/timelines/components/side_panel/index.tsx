@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -69,9 +69,10 @@ export const DetailsPanel = React.memo(
     if (!currentTabDetail?.panelView) return null;
 
     let visiblePanel = null; // store in variable to make return statement more readable
+    let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
-
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
+      panelSize = 'm';
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
@@ -108,7 +109,11 @@ export const DetailsPanel = React.memo(
     }
 
     return isFlyoutView ? (
-      <StyledEuiFlyout data-test-subj="timeline:details-panel:flyout" size="s" onClose={closePanel}>
+      <StyledEuiFlyout
+        data-test-subj="timeline:details-panel:flyout"
+        size={panelSize}
+        onClose={closePanel}
+      >
         {visiblePanel}
       </StyledEuiFlyout>
     ) : (
