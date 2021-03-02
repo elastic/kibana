@@ -191,11 +191,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
         },
       },

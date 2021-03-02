@@ -11,7 +11,11 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { environmentQuery, rangeQuery } from '../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../server/utils/queries';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
@@ -19,6 +23,7 @@ import {
 
 export function getTransactionsProjection({
   environment,
+  kuery,
   setup,
   serviceName,
   transactionName,
@@ -26,13 +31,14 @@ export function getTransactionsProjection({
   searchAggregatedTransactions,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, esFilter } = setup;
+  const { start, end } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -54,7 +60,7 @@ export function getTransactionsProjection({
       ),
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...esFilter,
+      ...kqlQuery(kuery),
     ],
   };
 

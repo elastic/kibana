@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { esKuery } from '../../../../../src/plugins/data/server';
 import { ESFilter } from '../../../../typings/elasticsearch';
+import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 import {
-  ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
-} from '../environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../common/environment_filter_values';
 
 type QueryContainer = ESFilter;
 
@@ -42,4 +43,13 @@ export function rangeQuery(
       },
     },
   ];
+}
+
+export function kqlQuery(kql?: string) {
+  if (!kql) {
+    return [];
+  }
+
+  const ast = esKuery.fromKueryExpression(kql);
+  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }
