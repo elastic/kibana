@@ -27,11 +27,11 @@ export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, c
   <section>
     <header>
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
-        {iconType ? (
+        {iconType && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={iconType} size="l" />
           </EuiFlexItem>
-        ) : null}
+        )}
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>{title}</h2>

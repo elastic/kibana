@@ -37,11 +37,11 @@ export const DataPanel: React.FC<Props> = ({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup>
-          {iconType ? (
+          {iconType && (
             <EuiFlexItem>
               <EuiIcon data-test-subj="dataPanelIcon" type={iconType} />
             </EuiFlexItem>
-          ) : null}
+          )}
           <EuiFlexItem>
             <EuiTitle data-test-subj="dataPanelTitle" size="xs">
               <h4>{title}</h4>
@@ -49,17 +49,17 @@ export const DataPanel: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {action ? (
+      {action && (
         <EuiFlexItem data-test-subj="dataPanelAction" grow={false}>
           {action}
         </EuiFlexItem>
-      ) : null}
+      )}
     </EuiFlexGroup>
-    {subtitle ? (
+    {subtitle && (
       <EuiText data-test-subj="dataPanelSubtitle" size="s" color="subdued">
         <p>{subtitle}</p>
       </EuiText>
-    ) : null}
+    )}
     <EuiSpacer />
     {children}
   </EuiPanel>
