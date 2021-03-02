@@ -19,6 +19,7 @@ export interface DimensionsVisParam {
 
 export interface MetricVisParam {
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   useRanges: boolean;
   colorSchema: ColorSchemas;
   metricColorMode: ColorMode;

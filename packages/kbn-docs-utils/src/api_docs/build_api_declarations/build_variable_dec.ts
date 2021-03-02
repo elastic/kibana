@@ -45,7 +45,6 @@ export function buildVariableDec(
   anchorLink: AnchorLink,
   log: ToolingLog
 ): ApiDeclaration {
-  log.debug('buildVariableDec for ' + node.getName());
   const initializer = node.getInitializer();
   // Recusively list object properties as children.
   if (initializer && Node.isObjectLiteralExpression(initializer)) {

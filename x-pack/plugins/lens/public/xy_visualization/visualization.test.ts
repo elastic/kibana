@@ -62,7 +62,7 @@ describe('xy_visualization', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(LensIconChartBar);
-      expect(desc.label).toEqual('Bar');
+      expect(desc.label).toEqual('Bar vertical');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -70,23 +70,23 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed H. bar');
+      expect(desc.label).toEqual('Mixed bar horizontal');
     });
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('H. Bar');
+      expect(desc.label).toEqual('Bar horizontal');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Stacked area'
+        'Area stacked'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'H. Stacked bar'
+        'Bar horizontal stacked'
       );
     });
   });
