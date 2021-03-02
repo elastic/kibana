@@ -56,6 +56,9 @@ describe('config schema', () => {
             "enabled": true,
           },
           "container": Object {
+            "apm": Object {
+              "enabled": false,
+            },
             "elasticsearch": Object {
               "enabled": false,
             },

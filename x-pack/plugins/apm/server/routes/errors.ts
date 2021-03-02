@@ -11,7 +11,7 @@ import { getErrorDistribution } from '../lib/errors/distribution/get_distributio
 import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { environmentRt, uiFiltersRt, rangeRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 export const errorsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/errors',
@@ -25,7 +25,7 @@ export const errorsRoute = createRoute({
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
@@ -34,10 +34,11 @@ export const errorsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { environment, sortField, sortDirection } = params.query;
+    const { environment, kuery, sortField, sortDirection } = params.query;
 
     return getErrorGroups({
       environment,
+      kuery,
       serviceName,
       sortField,
       sortDirection,
@@ -53,15 +54,21 @@ export const errorGroupsRoute = createRoute({
       serviceName: t.string,
       groupId: t.string,
     }),
-    query: t.intersection([environmentRt, uiFiltersRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, groupId } = context.params.path;
-    const { environment } = context.params.query;
+    const { environment, kuery } = context.params.query;
 
-    return getErrorGroupSample({ environment, serviceName, groupId, setup });
+    return getErrorGroupSample({
+      environment,
+      groupId,
+      kuery,
+      serviceName,
+      setup,
+    });
   },
 });
 
@@ -76,7 +83,7 @@ export const errorDistributionRoute = createRoute({
         groupId: t.string,
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
@@ -85,7 +92,13 @@ export const errorDistributionRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { environment, groupId } = params.query;
-    return getErrorDistribution({ environment, serviceName, groupId, setup });
+    const { environment, kuery, groupId } = params.query;
+    return getErrorDistribution({
+      environment,
+      kuery,
+      serviceName,
+      groupId,
+      setup,
+    });
   },
 });

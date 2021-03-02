@@ -21,6 +21,7 @@ export class QueryContext {
   size: number;
   statusFilter?: string;
   hasTimespanCache?: boolean;
+  query?: string;
 
   constructor(
     database: UptimeESClient,
@@ -29,7 +30,8 @@ export class QueryContext {
     pagination: CursorPagination,
     filterClause: any | null,
     size: number,
-    statusFilter?: string
+    statusFilter?: string,
+    query?: string
   ) {
     this.callES = database;
     this.dateRangeStart = dateRangeStart;
@@ -38,6 +40,7 @@ export class QueryContext {
     this.filterClause = filterClause;
     this.size = size;
     this.statusFilter = statusFilter;
+    this.query = query;
   }
 
   async search<TParams>(params: TParams) {

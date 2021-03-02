@@ -56,11 +56,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
           "must_not": Array [
             Object {
@@ -123,11 +118,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
           "must_not": Array [
             Object {
@@ -188,11 +178,6 @@ Array [
                   "gte": 1528113600000,
                   "lte": 1528977600000,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
               },
             },
           ],
@@ -262,11 +247,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
         },
       },
@@ -317,11 +297,6 @@ Array [
                 },
               },
             },
-            Object {
-              "term": Object {
-                "service.environment": "test",
-              },
-            },
           ],
         },
       },
@@ -370,11 +345,6 @@ Array [
                   "gte": 1528113600000,
                   "lte": 1528977600000,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
               },
             },
           ],
@@ -431,11 +401,6 @@ Array [
                   "gte": 1528113600000,
                   "lte": 1528977600000,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "service.environment": "test",
               },
             },
           ],

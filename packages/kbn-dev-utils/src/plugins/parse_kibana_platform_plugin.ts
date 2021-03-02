@@ -29,6 +29,7 @@ interface Manifest {
   server: boolean;
   kibanaVersion: string;
   version: string;
+  serviceFolders: readonly string[];
   requiredPlugins: readonly string[];
   optionalPlugins: readonly string[];
   requiredBundles: readonly string[];
@@ -64,6 +65,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       id: manifest.id,
       version: manifest.version,
       kibanaVersion: manifest.kibanaVersion || manifest.version,
+      serviceFolders: manifest.serviceFolders || [],
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),

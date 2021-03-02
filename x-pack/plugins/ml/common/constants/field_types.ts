@@ -9,6 +9,7 @@ export const ML_JOB_FIELD_TYPES = {
   BOOLEAN: 'boolean',
   DATE: 'date',
   GEO_POINT: 'geo_point',
+  GEO_SHAPE: 'geo_shape',
   IP: 'ip',
   KEYWORD: 'keyword',
   NUMBER: 'number',

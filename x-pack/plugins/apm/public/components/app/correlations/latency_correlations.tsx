@@ -47,9 +47,10 @@ export function LatencyCorrelations({ onClose }: Props) {
   ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const {
     environment,
+    kuery,
     transactionName,
     transactionType,
     start,
@@ -76,12 +77,12 @@ export function LatencyCorrelations({ onClose }: Props) {
           params: {
             query: {
               environment,
+              kuery,
               serviceName,
               transactionName,
               transactionType,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               durationPercentile: durationPercentile.toString(10),
               fieldNames: fieldNames.join(','),
             },
@@ -91,12 +92,12 @@ export function LatencyCorrelations({ onClose }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       durationPercentile,
       fieldNames,
     ]
@@ -109,7 +110,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.latency.description', {
                 defaultMessage:
@@ -249,6 +250,7 @@ function LatencyDistributionChart({
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
           yAccessors={['y']}
+          color={theme.eui.euiColorVis1}
           data={data?.overall?.distribution || []}
           minBarHeight={5}
           tickFormat={(d) => `${roundFloat(d)}%`}
@@ -270,7 +272,7 @@ function LatencyDistributionChart({
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color={theme.eui.euiColorAccent}
+            color={theme.eui.euiColorVis2}
             data={getSelectedDistribution(data, selectedSignificantTerm)}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
