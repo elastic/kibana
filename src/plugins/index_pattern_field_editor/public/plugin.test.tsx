@@ -25,7 +25,7 @@ import { registerTestBed } from './test_utils';
 
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/delete_field_modal/delete_field_modal';
+import { DeleteFieldModal } from './components/delete_field_modal';
 import { IndexPattern } from './shared_imports';
 
 const noop = () => {};

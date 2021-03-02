@@ -15,6 +15,7 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
+import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import { DeleteProviderProps } from './components/delete_field_provider';
 
@@ -24,6 +25,7 @@ export interface PluginSetup {
 
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): () => void;
+  openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   userPermissions: {
     editIndexPattern: () => boolean;
