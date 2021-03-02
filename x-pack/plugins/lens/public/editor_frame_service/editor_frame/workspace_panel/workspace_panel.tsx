@@ -515,7 +515,7 @@ export const InnerVisualizationWrapper = ({
                       </p>
 
                       {localState.expandError ? (
-                        <p className="eui-textBreakAll">visibleErrorMessage</p>
+                        <p className="eui-textBreakAll">{visibleErrorMessage}</p>
                       ) : null}
                     </>
                   }
