@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AllCaseType, CaseStatusFilter } from '../../../../../case/common/api';
+import { StatusAll, CaseStatusFilter } from '../../../../../case/common/api';
 import { Status, statuses } from '../status';
 
 interface Props {
@@ -24,7 +24,7 @@ const StatusFilterComponent: React.FC<Props> = ({
   disabledStatuses = [],
 }) => {
   const caseStatuses = Object.keys(statuses) as CaseStatusFilter[];
-  const options: Array<EuiSuperSelectOption<CaseStatusFilter>> = [AllCaseType, ...caseStatuses].map(
+  const options: Array<EuiSuperSelectOption<CaseStatusFilter>> = [StatusAll, ...caseStatuses].map(
     (status) => ({
       value: status,
       inputDisplay: (
@@ -32,9 +32,7 @@ const StatusFilterComponent: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <Status type={status} />
           </EuiFlexItem>
-          {status !== AllCaseType && (
-            <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>
-          )}
+          {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
         </EuiFlexGroup>
       ),
       disabled: disabledStatuses.includes(status),

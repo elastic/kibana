@@ -9,11 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AllCaseType, CaseStatuses } from '../../../../../case/common/api';
+import { StatusAll, CaseStatuses } from '../../../../../case/common/api';
 import { StatusFilter } from './status_filter';
 
 const stats = {
-  [AllCaseType]: 0,
+  [StatusAll]: 0,
   [CaseStatuses.open]: 2,
   [CaseStatuses['in-progress']]: 5,
   [CaseStatuses.closed]: 7,

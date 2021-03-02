@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { AllCaseType, CaseStatuses } from '../../../../../case/common/api';
+import { StatusAll, CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from './translations';
 
-type AllCaseStatus = Record<typeof AllCaseType, { color: string; label: string }>;
+type AllCaseStatus = Record<typeof StatusAll, { color: string; label: string }>;
 
 type Statuses = Record<
   CaseStatuses,
@@ -38,7 +38,7 @@ type Statuses = Record<
 >;
 
 export const allCaseStatus: AllCaseStatus = {
-  [AllCaseType]: { color: 'hollow', label: i18n.ALL },
+  [StatusAll]: { color: 'hollow', label: i18n.ALL },
 };
 
 export const statuses: Statuses = {

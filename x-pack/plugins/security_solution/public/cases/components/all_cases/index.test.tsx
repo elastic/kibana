@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { casesStatus, useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { AllCaseType, CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { StatusAll, CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -473,7 +473,7 @@ describe('AllCases', () => {
   it('Renders only bulk delete on status all', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: AllCaseType },
+      filterOptions: { ...defaultGetCases.filterOptions, status: StatusAll },
       selectedCases: [...useGetCasesMockState.data.cases],
     });
 

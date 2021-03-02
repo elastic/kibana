@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { AllCaseType } from '../../../../case/common/api';
+import { StatusAll } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -95,7 +95,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   reporters: [],
-  status: AllCaseType,
+  status: StatusAll,
   tags: [],
 };
 

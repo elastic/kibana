@@ -10,7 +10,7 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { AllCaseType, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
+import { StatusAll, CaseStatuses, CaseStatusFilter } from '../../../../../case/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -45,7 +45,7 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
 const defaultInitial = {
   search: '',
   reporters: [],
-  status: AllCaseType,
+  status: StatusAll,
   tags: [],
 };
 
@@ -139,7 +139,7 @@ const CasesTableFiltersComponent = ({
 
   const stats = useMemo(
     () => ({
-      [AllCaseType]: null,
+      [StatusAll]: null,
       [CaseStatuses.open]: countOpenCases ?? 0,
       [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
       [CaseStatuses.closed]: countClosedCases ?? 0,

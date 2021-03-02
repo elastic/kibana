@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { get } from 'lodash';
 import { CaseStatuses, caseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 

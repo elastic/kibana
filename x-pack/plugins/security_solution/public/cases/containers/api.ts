@@ -8,7 +8,7 @@
 import { assign } from 'lodash';
 
 import {
-  AllCaseType,
+  StatusAll,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
@@ -167,7 +167,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: AllCaseType,
+    status: StatusAll,
     tags: [],
   },
   queryParams = {

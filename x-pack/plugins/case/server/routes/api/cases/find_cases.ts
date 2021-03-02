@@ -16,7 +16,7 @@ import {
   CasesFindRequestRt,
   throwErrors,
   caseStatuses,
-  AllCaseType,
+  StatusAll,
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
@@ -42,7 +42,7 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
           tags: queryParams.tags,
           reporters: queryParams.reporters,
           sortByField: queryParams.sortField,
-          status: queryParams.status === AllCaseType ? undefined : queryParams.status,
+          status: queryParams.status === StatusAll ? undefined : queryParams.status,
           caseType: queryParams.type,
         };
         const caseQueries = constructQueryOptions(queryArgs);

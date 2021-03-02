@@ -21,8 +21,6 @@ import {
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
 
-export type AllCaseType = AssociationType & CaseType;
-
 export type Comment = CommentRequest & {
   associationType: AssociationType;
   id: string;
