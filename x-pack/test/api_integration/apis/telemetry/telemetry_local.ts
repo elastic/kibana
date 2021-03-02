@@ -6,22 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
-
-/*
- * Create a single-level array with strings for all the paths to values in the
- * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
- * in the tests.
- */
-function flatKeys(source) {
-  const recursivelyFlatKeys = (obj, path = [], depth = 0) => {
-    return depth < 3 && _.isObject(obj)
-      ? _.map(obj, (v, k) => recursivelyFlatKeys(v, [...path, k], depth + 1))
-      : path.join('.');
-  };
-
-  return _.uniq(_.flattenDeep(recursivelyFlatKeys(source))).sort((a, b) => a.localeCompare(b));
-}
+import deepmerge from 'deepmerge';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  assertTelemetryPayload,
+  flatKeys,
+} from '../../../../../test/api_integration/apis/telemetry/utils';
+import ossRootTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
+import xpackRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_root.json';
+import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
 
 const disableCollection = {
   persistent: {
@@ -35,17 +29,17 @@ const disableCollection = {
   },
 };
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esSupertest = getService('esSupertest');
+  const es = getService('es');
 
   describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
-    before('', async () => {
-      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await new Promise((r) => setTimeout(r, 1000));
-    });
+    let stats: Record<string, any>;
 
-    it('should pull local stats and validate data types', async () => {
+    before('disable monitoring and pull local stats', async () => {
+      await es.cluster.put_settings({ body: disableCollection });
+      await new Promise((r) => setTimeout(r, 1000));
+
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
@@ -53,8 +47,21 @@ export default function ({ getService }) {
         .expect(200);
 
       expect(body.length).to.be(1);
-      const stats = body[0];
+      stats = body[0];
+    });
 
+    it('should pass the schema validation', () => {
+      const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
+      const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+      try {
+        assertTelemetryPayload({ root, plugins }, stats);
+      } catch (err) {
+        err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+        throw err;
+      }
+    });
+
+    it('should pass ad-hoc enforced validations', () => {
       expect(stats.collection).to.be('local');
       expect(stats.collectionSource).to.be('local_xpack');
 
@@ -103,14 +110,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.xpack.rollup).to.be.an('object');
     });
 
-    it('should pull local stats and validate fields', async () => {
-      const { body } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
-        .set('kbn-xsrf', 'xxx')
-        .send({ unencrypted: true })
-        .expect(200);
-
-      const stats = body[0];
+    it('should validate mandatory fields exist', () => {
       const actual = flatKeys(stats);
 
       const expected = [
