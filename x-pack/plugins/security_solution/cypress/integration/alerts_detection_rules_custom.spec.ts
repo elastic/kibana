@@ -322,7 +322,6 @@ describe.skip('Custom detection rules deletion and edition', () => {
       });
     });
 
-
     it('Allows a rule to be edited', () => {
       editFirstRule();
       waitForKibana();
