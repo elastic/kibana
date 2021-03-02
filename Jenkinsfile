@@ -33,13 +33,10 @@ kibanaPipeline(timeoutMinutes: 210) {
 
               kibanaPipeline.withCiTaskQueue([parallel: 2]) {
                 catchErrors {
-                  task {
-                    kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
-                  }
-
-                  task {
-                    kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh')()
-                  }
+                  tasks([
+                    kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh'),
+                    kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh'),
+                  ])
                 }
               }
             }
