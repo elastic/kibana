@@ -92,7 +92,7 @@ describe('Phrase filter builder', () => {
     });
   });
 
-  it('should convert numeric values', () => {
+  it('should return a script filter when passed a scripted field with numeric conversion', () => {
     const field = getField('script number');
 
     expect(buildPhraseFilter(field, '5', indexPattern)).toEqual({
