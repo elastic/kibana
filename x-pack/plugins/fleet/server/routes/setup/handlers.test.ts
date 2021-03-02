@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from 'src/core/server/mocks';
-import { PostIngestSetupResponse } from '../../../common';
+import type { PostIngestSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { FleetSetupHandler } from './handlers';

@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import type { ILicense } from '../../../licensing/common/types';
 
 // Generic license service class that works with the license observable
 // Both server and client plugins instancates a singleton version of this class
