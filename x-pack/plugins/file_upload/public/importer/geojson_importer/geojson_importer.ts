@@ -92,7 +92,7 @@ export class GeoJsonImporter extends Importer {
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
 
-    while (this._features.length > 0 || (this._hasNext && this._isActive)) {
+    while ((this._features.length > 0 || this._hasNext) && this._isActive) {
       await this._readUntil(undefined, IMPORT_CHUNK_SIZE_MB);
       if (!this._isActive) {
         return {

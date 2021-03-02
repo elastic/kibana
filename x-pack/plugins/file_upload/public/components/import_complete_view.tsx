@@ -103,7 +103,7 @@ export class ImportCompleteView extends Component<Props, {}> {
       },
     });
 
-    const failuredFeaturesMsg = this.props.importResp.failures.length
+    const failedFeaturesMsg = this.props.importResp.failures.length
       ? i18n.translate('xpack.fileUpload.failedFeaturesMsg', {
           defaultMessage: 'Unable to index {numFailures} features.',
           values: {
@@ -112,7 +112,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         })
       : '';
 
-    return `${successMsg} ${failuredFeaturesMsg}`;
+    return `${successMsg} ${failedFeaturesMsg}`;
   }
 
   render() {
