@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../../alerting/server';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerting/server';
 import {
   createMetricAnomalyExecutor,
   FIRED_ACTIONS,
