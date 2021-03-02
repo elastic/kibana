@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses, StatusAll } from '../../../../case/common/api';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../case/common/api';
 import { CASES_URL } from '../../../../case/common/constants';
 
 import {
@@ -47,6 +47,7 @@ import {
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { StatusAll } from '../components/status';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
