@@ -28,7 +28,7 @@ start
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
   / left:AndQuery Or right:OrQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+    const cursor = parseCursor && [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
   }
@@ -36,7 +36,7 @@ OrQuery
 
 AndQuery
   = left:NotQuery And right:AndQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+    const cursor = parseCursor && [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('and', [left, right]);
   }
@@ -140,7 +140,7 @@ ListOfValues
 
 OrListOfValues
   = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    const cursor = parseCursor && [partialLeft, partialRight].find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
@@ -153,7 +153,7 @@ OrListOfValues
 
 AndListOfValues
   = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    const cursor = parseCursor && [partialLeft, partialRight].find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
@@ -209,7 +209,7 @@ Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
-  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+  = &{ return parseCursor; } '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -230,7 +230,7 @@ QuotedCharacter
   / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
-  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = &{ return parseCursor; } prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -262,7 +262,7 @@ Wildcard
   = '*' { return wildcardSymbol; }
 
 OptionalSpace
-  = prefix:Space* cursor:Cursor suffix:Space* {
+  = &{ return parseCursor; } prefix:Space* cursor:Cursor suffix:Space* {
     const { start, end } = location();
     return {
       type: 'cursor',
