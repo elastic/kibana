@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { SearchResponse } from 'elasticsearch';
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
-
 import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';

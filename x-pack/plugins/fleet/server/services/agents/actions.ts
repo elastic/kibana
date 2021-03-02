@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import {
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type {
   Agent,
   AgentAction,
   AgentPolicyAction,

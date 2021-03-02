@@ -22,8 +22,9 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
+import { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,

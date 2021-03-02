@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { take } from 'rxjs/operators';
 import {
@@ -13,7 +13,7 @@ import {
   createNewActionsSharedObservable,
 } from './state_new_actions';
 import { getNewActionsSince } from '../actions';
-import { Agent, AgentAction, AgentPolicyAction } from '../../../types';
+import type { Agent, AgentAction, AgentPolicyAction } from '../../../types';
 import { outputType } from '../../../../common/constants';
 
 jest.mock('../../app_context', () => ({
