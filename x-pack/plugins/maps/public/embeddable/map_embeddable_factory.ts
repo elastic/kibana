@@ -16,7 +16,6 @@ import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { MapByReferenceInput, MapEmbeddableInput, MapByValueInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
-// @ts-expect-error
 import { extractReferences } from '../../common/migrations/references';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -69,7 +68,9 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const maybeMapByValueInput = state as EmbeddableStateWithType | MapByValueInput;
 
     if ((maybeMapByValueInput as MapByValueInput).attributes !== undefined) {
-      const { references } = extractReferences(maybeMapByValueInput);
+      const { references } = extractReferences({
+        attributes: (maybeMapByValueInput as MapByValueInput).attributes,
+      });
 
       return { state, references };
     }

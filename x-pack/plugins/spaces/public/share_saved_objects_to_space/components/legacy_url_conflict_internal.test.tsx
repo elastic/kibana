@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { EuiCallOut } from '@elastic/eui';
+import { act } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { EuiCallOut } from '@elastic/eui';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
-import { act } from '@testing-library/react';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { LegacyUrlConflictInternal } from './legacy_url_conflict_internal';
 
 const APP_ID = 'testAppId';

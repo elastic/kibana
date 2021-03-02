@@ -76,6 +76,20 @@ describe('DragDrop', () => {
     expect(preventDefault).not.toBeCalled();
   });
 
+  test('removes selection on mouse down before dragging', async () => {
+    const removeAllRanges = jest.fn();
+    global.getSelection = jest.fn(() => (({ removeAllRanges } as unknown) as Selection));
+    const component = mount(
+      <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]}>
+        <button>Hi!</button>
+      </DragDrop>
+    );
+
+    component.find('[data-test-subj="lnsDragDrop"]').simulate('mousedown');
+    expect(global.getSelection).toBeCalled();
+    expect(removeAllRanges).toBeCalled();
+  });
+
   test('dragstart sets dragging in the context and calls it with proper params', async () => {
     const setDragging = jest.fn();
 
