@@ -14,20 +14,8 @@ import {
 import { toStringArray } from '../../../../helpers/to_array';
 import { getDataSafety, getDataFromFieldsHits } from '../details/helpers';
 
-<<<<<<< HEAD
-export const formatTimelineData = (
-=======
-const getTimestamp = (hit: EventHit): string => {
-  if (hit.fields && hit.fields['@timestamp']) {
-    return `${hit.fields['@timestamp'][0] ?? ''}`;
-  } else if (hit._source && hit._source['@timestamp']) {
-    return hit._source['@timestamp'];
-  }
-  return '';
-};
 
 export const formatTimelineData = async (
->>>>>>> 90976ee1198... [Security Solution] [Timeline] Bugfix to include unmapped fields in the timeline event details JSON (#92025)
   dataFields: readonly string[],
   ecsFields: readonly string[],
   hit: EventHit
