@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
-import { getSeriesColor } from '../../../components/lib/get_series_color';
+import { ColorsService } from '../../../lib';
 
 import {
   Axis,
@@ -64,7 +64,9 @@ export const TimeSeries = ({
   uiState,
 }) => {
   const chartRef = useRef();
-  const [overwrittenColors, setOverwrittenColors] = useState(uiState.get('vis.colors', []));
+  const [overwrittenColorsService, setOverwrittenColorsService] = useState(
+    new ColorsService(uiState)
+  );
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -105,14 +107,13 @@ export const TimeSeries = ({
   };
 
   useEffect(() => {
-    const updateColor = () => {
-      const overwriteColors = uiState.get('vis.colors', []);
-      setOverwrittenColors(overwriteColors);
+    const updateOverwrittenColorsService = () => {
+      setOverwrittenColorsService(new ColorsService(uiState));
     };
-    uiState?.on('change', updateColor);
+    uiState?.on('change', updateOverwrittenColorsService);
 
     return () => {
-      uiState?.off('change', updateColor);
+      uiState?.off('change', updateOverwrittenColorsService);
     };
   }, [uiState]);
 
@@ -200,11 +201,14 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const overwriteColors = overwrittenColors.filter((color) => color.id === id);
-          const overwriteColor = getSeriesColor(overwriteColors, label, labelFormatted);
-          const finalColor = overwriteColor
-            ? overwriteColor
+
+          const overwrittenColor = overwrittenColorsService.getSeriesColor(
+            id,
+            label,
+            labelFormatted
+          );
+          const finalColor = overwrittenColor
+            ? overwrittenColor
             : color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {

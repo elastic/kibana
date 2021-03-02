@@ -13,8 +13,9 @@ import Color from 'color';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
 import type { PersistedState } from '../../../../../../../visualizations/public';
 import { PanelData } from '../../../../../../common/types';
-import { ColorPicker, ColorProps, OverwriteColors } from '../../../../components/color_picker';
+import { ColorPicker, ColorProps } from '../../../../components/color_picker';
 import { labelDateFormatter } from '../../../../components/lib/label_date_formatter';
+import { ColorsService } from '../../../../lib';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   switch (legendPosition) {
@@ -51,29 +52,9 @@ export const getColorPicker = (
     if (newColor?.color) {
       const hexColor = new Color(newColor.color).hex();
       onChange(hexColor);
-      const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
-      const colors: OverwriteColors | undefined = seriesColors.find(
-        ({ id }) => id === seriesIdentifier.specId
-      );
-
-      if (!colors) {
-        seriesColors.push({
-          id: seriesIdentifier.specId,
-          overwrite: { [seriesName]: hexColor },
-        });
-      } else {
-        if ((colors && colors.overwrite[seriesName] === hexColor) || !hexColor) {
-          delete colors?.overwrite[seriesName];
-        } else {
-          colors.overwrite[seriesName] = hexColor;
-        }
-      }
-
-      if (uiState?.set) {
-        uiState.setSilent('vis.colors', null);
-        uiState.set('vis.colors', seriesColors);
-        uiState.emit('colorChanged');
-      }
+      // add the series overwritten color to the uiState
+      const colorsService = new ColorsService(uiState);
+      colorsService.addToUiState(seriesName, seriesIdentifier.specId, hexColor);
     }
   };
 
@@ -92,7 +73,10 @@ export const getColorPicker = (
           onChange={handleChange}
           name="color"
           value={color}
-          hideButton={true}
+          isOnLegend={true}
+          uiState={uiState}
+          seriesName={seriesName}
+          seriesId={seriesIdentifier.specId}
         />
       </EuiWrappingPopover>
     </I18nProvider>

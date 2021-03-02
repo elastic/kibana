@@ -9,17 +9,20 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 // The color picker is not yet accessible.
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { EuiIconTip, EuiColorPicker, EuiColorPickerSwatch } from '@elastic/eui';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  EuiIconTip,
+  EuiColorPicker,
+  EuiColorPickerSwatch,
+  EuiButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { PersistedState } from '../../../../visualizations/public';
+import { ColorsService } from '../lib';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
-
-export interface OverwriteColors {
-  id: string;
-  overwrite: { [key: string]: string };
-}
 
 export interface ColorProps {
   [key: string]: string | null;
@@ -33,15 +36,8 @@ export interface ColorPickerProps {
   seriesName?: string;
   uiState?: PersistedState;
   seriesId?: string;
-  hideButton?: boolean;
+  isOnLegend?: boolean;
 }
-
-const getOverwrittenColor = (uiState: PersistedState, seriesId: string, seriesName?: string) => {
-  const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
-  const colors: OverwriteColors | undefined = seriesColors.find(({ id }) => id === seriesId);
-  const seriesHasOverwrittenColors = colors && Object.keys(colors).length !== 0;
-  return seriesName && seriesHasOverwrittenColors && colors?.overwrite?.[seriesName];
-};
 
 export function ColorPicker({
   name,
@@ -51,42 +47,47 @@ export function ColorPicker({
   seriesName,
   uiState,
   seriesId,
-  hideButton = false,
+  isOnLegend = false,
 }: ColorPickerProps) {
   const initialColorValue = value?.includes('rgb') ? value.replace(COMMAS_NUMS_ONLY_RE, '') : value;
+  const overwrittenColorsService = useMemo(
+    () => (uiState ? new ColorsService(uiState) : undefined),
+    [uiState]
+  );
+
   const initialOverwrittenColor =
-    uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
-  const [color, setColor] = useState(initialOverwrittenColor || initialColorValue || '');
+    seriesId && seriesName && overwrittenColorsService?.getSeriesColor(seriesId, seriesName, '');
+
+  const [color, setColor] = useState(initialColorValue || '');
+  const [overwrittenColor, setOverwrittenColor] = useState(initialOverwrittenColor || '');
+
+  const clearOverwriteColor = useCallback(() => {
+    if (overwrittenColor && seriesName && seriesId) {
+      // remove the overwrittenColor from the uiState
+      overwrittenColorsService?.deleteFromUiState(seriesName, seriesId);
+    }
+  }, [overwrittenColor, overwrittenColorsService, seriesId, seriesName]);
 
   const handleColorChange = useCallback(
     (text: string, { rgba, hex }) => {
-      setColor(text);
       const part: ColorProps = {};
       part[name] = hex ? `rgba(${rgba.join(',')})` : '';
       onChange(part);
-      const overwrittenColor =
-        uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
-      if (overwrittenColor && seriesName) {
-        const seriesColors: OverwriteColors[] = uiState?.get('vis.colors', []);
-        const colors: OverwriteColors | undefined = seriesColors.find(({ id }) => id === seriesId);
-        delete colors?.overwrite[seriesName];
-        uiState?.setSilent('vis.colors', null);
-        uiState?.set('vis.colors', seriesColors);
-        uiState?.emit('colorChanged');
-      }
+      setColor(text);
+
+      clearOverwriteColor();
     },
-    [name, onChange, seriesId, seriesName, uiState]
+    [name, onChange, clearOverwriteColor]
   );
 
   useEffect(() => {
     const updateColor = () => {
-      const overwrittenColor =
-        uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
-      if (seriesName && overwrittenColor) {
-        setColor(overwrittenColor);
-      } else if (initialColorValue) {
-        setColor(initialColorValue);
-      }
+      const newOverwrittenColor =
+        uiState &&
+        seriesId &&
+        seriesName &&
+        new ColorsService(uiState).getSeriesColor(seriesId, seriesName, '');
+      setOverwrittenColor(newOverwrittenColor ?? '');
     };
     uiState?.on('change', updateColor);
 
@@ -95,12 +96,12 @@ export function ColorPicker({
     };
   }, [initialColorValue, seriesId, seriesName, uiState]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setColor('');
     const part: ColorProps = {};
     part[name] = null;
     onChange(part);
-  };
+  }, [name, onChange]);
 
   const label = value
     ? i18n.translate('visTypeTimeseries.colorPicker.notAccessibleWithValueAriaLabel', {
@@ -112,15 +113,36 @@ export function ColorPicker({
       });
 
   return (
-    <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
+    <div
+      className={classNames('tvbColorPicker', isOnLegend && 'tvbColorPicker__legend')}
+      data-test-subj="tvbColorPicker"
+    >
       <EuiColorPicker
         onChange={handleColorChange}
-        display={hideButton ? 'inline' : 'default'}
-        color={color}
+        display={isOnLegend ? 'inline' : 'default'}
+        color={overwrittenColor || color}
         secondaryInputDisplay="top"
         showAlpha
-        button={!hideButton ? <EuiColorPickerSwatch color={color} aria-label={label} /> : undefined}
+        button={
+          !isOnLegend ? (
+            <EuiColorPickerSwatch color={overwrittenColor || color} aria-label={label} />
+          ) : undefined
+        }
       />
+      {isOnLegend && overwrittenColor && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiButtonEmpty
+            size="s"
+            onClick={() => clearOverwriteColor()}
+            data-test-subj="tvbColorPickerClearColor"
+          >
+            {i18n.translate('visTypeTimeseries.colorPicker.clearColorLabel', {
+              defaultMessage: 'Clear Color',
+            })}
+          </EuiButtonEmpty>
+        </>
+      )}
       {!disableTrash && (
         <div className="tvbColorPicker__clear" onClick={handleClear}>
           <EuiIconTip

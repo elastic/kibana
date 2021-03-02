@@ -8,6 +8,10 @@
   position: relative;
 }
 
+.tvbColorPicker__legend {
+  flex-direction: column;
+}
+
 .tvbColorPicker__clear {
   margin-left: $euiSizeXS;
 }

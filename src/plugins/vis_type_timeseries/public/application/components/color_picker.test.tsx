@@ -22,6 +22,17 @@ describe('ColorPicker', () => {
     disableTrash: true,
   };
   let component: ReactWrapper<ColorPickerProps>;
+  const mockState = new Map();
+  const uiState = ({
+    get: jest
+      .fn()
+      .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+    set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+    emit: jest.fn(),
+    setSilent: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+  } as unknown) as PersistedState;
 
   it('should render the EuiColorPicker', () => {
     component = mount(<ColorPicker {...defaultProps} />);
@@ -66,27 +77,14 @@ describe('ColorPicker', () => {
     expect(defaultProps.onChange).toHaveBeenCalled();
   });
 
-  it('renders correctly the color picker if the hideButton prop is true', () => {
-    const props = { ...defaultProps, hideButton: true, value: 'rgba(85,66,177,1)' };
+  it('renders correctly the color picker if the isOnLegend prop is true', () => {
+    const props = { ...defaultProps, isOnLegend: true, value: 'rgba(85,66,177,1)' };
     component = mount(<ColorPicker {...props} />);
     expect(component.find(EuiColorPicker).prop('display')).toBe('inline');
     expect(component.find(EuiColorPicker).prop('button')).toBeUndefined();
   });
 
   it('renders the correct color if is overwritten by the user', () => {
-    const mockState = new Map();
-    const uiState = ({
-      get: jest
-        .fn()
-        .mockImplementation((key, fallback) =>
-          mockState.has(key) ? mockState.get(key) : fallback
-        ),
-      set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-      emit: jest.fn(),
-      setSilent: jest.fn(),
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown) as PersistedState;
     uiState.set('vis.colors', [
       {
         id: '61ca57f1-469d-11e7-af02-69e470af7417',
@@ -113,5 +111,18 @@ describe('ColorPicker', () => {
     component.find('.tvbColorPicker button').simulate('click');
     const input = findTestSubject(component, 'topColorPickerInput');
     expect(input.props().value).toBe('#6092C0');
+  });
+
+  it('renders the clear color button if isOnLegend prop is true and user has overwritten the series color', () => {
+    const props = {
+      ...defaultProps,
+      uiState,
+      value: 'rgba(85,66,177,1)',
+      seriesName: 'JetBeats',
+      seriesId: '61ca57f1-469d-11e7-af02-69e470af7417:JetBeats',
+      isOnLegend: true,
+    };
+    component = mount(<ColorPicker {...props} />);
+    expect(findTestSubject(component, 'tvbColorPickerClearColor').length).toBe(1);
   });
 });
