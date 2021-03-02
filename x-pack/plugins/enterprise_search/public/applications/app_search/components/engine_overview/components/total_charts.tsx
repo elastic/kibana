@@ -48,6 +48,7 @@ export const TotalCharts: React.FC = () => {
                 data: convertToChartData({ startDate, data: queriesPerDay }),
               },
             ]}
+            height={240}
           />
         </DataPanel>
       </EuiFlexItem>
@@ -69,6 +70,7 @@ export const TotalCharts: React.FC = () => {
                 data: convertToChartData({ startDate, data: operationsPerDay }),
               },
             ]}
+            height={240}
           />
         </DataPanel>
       </EuiFlexItem>
