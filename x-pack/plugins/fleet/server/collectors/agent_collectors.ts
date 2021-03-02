@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClient } from 'kibana/server';
+import { SavedObjectsClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
 import { isFleetServerSetup } from '../services/fleet_server';

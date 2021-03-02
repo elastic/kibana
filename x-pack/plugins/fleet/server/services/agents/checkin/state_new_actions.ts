@@ -22,8 +22,9 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import {
+import { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type {
   Agent,
   AgentAction,
   AgentPolicyAction,
