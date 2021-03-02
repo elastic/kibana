@@ -117,8 +117,9 @@ export const findValueListExceptionListItems = async ({
   sortField,
   sortOrder,
 }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+  const escapedValueListId = valueListId.replace(/"/g, '\\"');
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:"${escapedValueListId}") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:"${escapedValueListId}") `,
     page,
     perPage,
     sortField,
