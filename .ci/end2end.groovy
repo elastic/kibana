@@ -116,6 +116,14 @@ pipeline {
           options { skipDefaultCheckout() }
           when { expression { return env.RUN_UPTIME_E2E != "false" } }
           stages {
+            stage('Checkout') {
+              options { skipDefaultCheckout() }
+              steps {
+                deleteDir()
+                gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
+                            shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
+              }
+            }
             stage('Prepare Kibana') {
               options { skipDefaultCheckout() }
               environment {
