@@ -530,7 +530,7 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     },
                     "environments": {
                       "properties": {
-                        "services_without_environments": {
+                        "services_without_environment": {
                           "type": "long"
                         },
                         "services_with_multiple_environments": {
@@ -999,6 +999,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "cardinality": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "environments": {
                           "properties": {
                             "took": {
                               "properties": {
