@@ -24476,9 +24476,716 @@
               }
             },
             "state": {
+              "cluster_uuid": "Pawu2etQQ9uPwl22Vm_Tug",
               "master_node": "rFjThHZdRvyhpF0aMT7fTw",
+              "nodes": {
+                "-T_cq0TLQjqlvpX0iVCBNg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "21-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "1Xu_F6X5SqWZ9PN1pR_M3g",
+                  "name": "esw1-21-az10-dc-ent",
+                  "transport_address": "172.16.1.44:9300"
+                },
+                "-hZOu0UJTHSbkZVSFPUYVw": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "34-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "NEvORXOkTjaWQ8rzMTHXTg",
+                  "name": "esh2-34-az10-dc-ent",
+                  "transport_address": "172.16.1.249:9300"
+                },
+                "08NXHjcqQQaenDpdQugS4w": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "35-az10-dc-ent",
+                    "ml.machine_memory": "63158697984",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "58uCCWvGQCOMQMT9hkPXAA",
+                  "name": "esh3-35-az10-dc-ent",
+                  "transport_address": "172.16.1.47:9300"
+                },
+                "1B2TfiFoSCCBO_h2zoYbaQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "30-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "vhXug9fMQleu3vxWgiaG0Q",
+                  "name": "esw3-30-az10-dc-ent",
+                  "transport_address": "172.16.1.115:9300"
+                },
+                "2-cKgQ3uRxqku-4pJxya9g": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "23-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "rIP6dTtcQnucdPwl1yS2RA",
+                  "name": "esw3-23-az10-dc-ent",
+                  "transport_address": "172.16.1.194:9300"
+                },
+                "2B-6sKqQR8y9L52cChtT-A": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "24-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "SrxbP560T_6fwA853PLd8g",
+                  "name": "esw2-24-az10-dc-ent",
+                  "transport_address": "172.16.1.81:9300"
+                },
+                "3VXPo0aBTgqBWoZyG7VeDQ": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "32-az10-dc-ent",
+                    "ml.machine_memory": "63158665216",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "82ec_pYbQqGqX20MWnEsDQ",
+                  "name": "esh3-32-az10-dc-ent",
+                  "transport_address": "172.16.0.117:9300"
+                },
+                "4EgMjLR8S0G9aJs7AB-Z0g": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "36-az10-dc-ent",
+                    "ml.machine_memory": "63157981184",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "NxvUGkg5Sc6uNZ7bMhndBw",
+                  "name": "esh3-36-az10-dc-ent",
+                  "transport_address": "172.16.1.218:9300"
+                },
+                "4zqr4ku4RrSZJtrZSN5Mlg": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "32-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "vIPamYHsTNOFsGPgyCjBJg",
+                  "name": "esh1-32-az10-dc-ent",
+                  "transport_address": "172.16.0.11:9300"
+                },
+                "8FwJYnAMT0afpHOfKlA0Sg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "21-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "OitNzgxPSium3wqL9kT2Fg",
+                  "name": "esw3-21-az10-dc-ent",
+                  "transport_address": "172.16.1.122:9300"
+                },
+                "8c-ntk3fQ4yuDO4SolrmgQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "22-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "U60seLhMQBu5QE3MxSFVSw",
+                  "name": "esw3-22-az10-dc-ent",
+                  "transport_address": "172.16.1.70:9300"
+                },
+                "98npGP6HRPu5OOG4hRYbiA": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "33-az10-dc-ent",
+                    "ml.machine_memory": "63158697984",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "YETTn4YlTOuVLuVNaLzP6w",
+                  "name": "esh3-33-az10-dc-ent",
+                  "transport_address": "172.16.1.185:9300"
+                },
+                "9uYu0U-tSjifvO6YLvNY5Q": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "26-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "8vFfI9o6SuGh7IMSPvQ8Ig",
+                  "name": "esw2-26-az10-dc-ent",
+                  "transport_address": "172.16.1.9:9300"
+                },
+                "AgMbpH0STqKRLxslxMXtIw": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "19-az10-dc-ent",
+                    "ml.machine_memory": "63159828480",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "B_KAo6ZwQaqr6RBb4-wX0Q",
+                  "name": "esw3-19-az10-dc-ent",
+                  "transport_address": "172.16.1.116:9300"
+                },
+                "B-eD78fVS1G5st41XrrsQQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "29-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "5Hs1p4yIQfahHaKzx-p0aA",
+                  "name": "esw3-29-az10-dc-ent",
+                  "transport_address": "172.16.1.238:9300"
+                },
+                "B3CAleM0QtCMcc9OgRH79g": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "31-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "5cxzhgMvRCu0e7qq2ydkqA",
+                  "name": "esh2-31-az10-dc-ent",
+                  "transport_address": "172.16.0.51:9300"
+                },
+                "BtNzO_LsQpqkgRgGHAhQxg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "29-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "gPZexEG_Tiud8Bd3mCO1JA",
+                  "name": "esw1-29-az10-dc-ent",
+                  "transport_address": "172.16.1.178:9300"
+                },
+                "Elc3XlQ6S22vnPjQw-V2Fg": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "31-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "zFh7Fe7eQgOOn2fTzdxtMg",
+                  "name": "esh1-31-az10-dc-ent",
+                  "transport_address": "172.16.1.156:9300"
+                },
+                "F3SDHWgTTSSCRpFLRuTd7A": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "28-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "c8ffntCrRyGo_tj73Ln2IQ",
+                  "name": "esw3-28-az10-dc-ent",
+                  "transport_address": "172.16.1.26:9300"
+                },
+                "IbXa_L0vS0mePhKF9Uu-IA": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "27-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "VckvdquEQRSZeU4VIGvaWw",
+                  "name": "esw1-27-az10-dc-ent",
+                  "transport_address": "172.16.1.0:9300"
+                },
+                "IfVshWgoTqWkfmehFnarzQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "23-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "9dsgRlp3SV641FE_49KJug",
+                  "name": "esw2-23-az10-dc-ent",
+                  "transport_address": "172.16.1.245:9300"
+                },
+                "JCvzxsoFQ5KMUCNycmdzig": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "21-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "jP1pvDrfRx2yWMfmLMUmRA",
+                  "name": "esw2-21-az10-dc-ent",
+                  "transport_address": "172.16.1.139:9300"
+                },
+                "JT834ic5St6HS3oLbKcfVQ": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "31-az10-dc-ent",
+                    "ml.machine_memory": "63158665216",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "lp9O1j4CTC-pQbnW18URqw",
+                  "name": "esh3-31-az10-dc-ent",
+                  "transport_address": "172.16.0.187:9300"
+                },
+                "KmYYNfYtTlKatZljOJheqQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "30-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "RzayygY1R420wvMOh664uQ",
+                  "name": "esw2-30-az10-dc-ent",
+                  "transport_address": "172.16.1.201:9300"
+                },
+                "Le2_4P3sQryTDAMKA8BLFQ": {
+                  "attributes": {
+                    "host_id": "41-az10-dc-ent",
+                    "ml.machine_memory": "67387686912",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "mb403imcT1eex3Xbz7K8lw",
+                  "name": "cli1-41-az10-dc-ent",
+                  "transport_address": "172.16.1.72:9300"
+                },
+                "LtCntqP6QjSpGIWEDnBaGQ": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "36-az10-dc-ent",
+                    "ml.machine_memory": "63158276096",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "G8MfybXbSO-iwwKjTF0gOw",
+                  "name": "esh2-36-az10-dc-ent",
+                  "transport_address": "172.16.1.78:9300"
+                },
+                "O78sh8HUSkaInv_VIQ0vQw": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "34-az10-dc-ent",
+                    "ml.machine_memory": "63158665216",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "xixyMiY8Sk6ol4kN68GnPg",
+                  "name": "esh3-34-az10-dc-ent",
+                  "transport_address": "172.16.0.70:9300"
+                },
+                "OVW5WfABQ_GG_SYE3HrJzw": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "29-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "9JU-8PvMQzSiXA-o9l2lyw",
+                  "name": "esw2-29-az10-dc-ent",
+                  "transport_address": "172.16.1.4:9300"
+                },
+                "PaCUGq4USRGkj6KDg995XA": {
+                  "attributes": {
+                    "host_id": "42-az10-dc-ent",
+                    "ml.machine_memory": "67387686912",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "jFvqueWqTgS-6JXcfeK3NQ",
+                  "name": "cli1-42-az10-dc-ent",
+                  "transport_address": "172.16.1.232:9300"
+                },
+                "QDlGTG9SRiatpVkMC42xGA": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "36-az10-dc-ent",
+                    "ml.machine_memory": "63158276096",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "5RUn8q7jTfi_32j7jEnuBQ",
+                  "name": "esh1-36-az10-dc-ent",
+                  "transport_address": "172.16.0.114:9300"
+                },
+                "T5YTkUVTQIeK_uxA2QHQ9A": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "27-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "PlkMFyU0T9CrYeuOMZ_m0w",
+                  "name": "esw3-27-az10-dc-ent",
+                  "transport_address": "172.16.1.177:9300"
+                },
+                "VEO2NkvRRCaMPmF6ogMTRg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "30-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "dtwW98quRCSh4UcDd7dhJw",
+                  "name": "esw1-30-az10-dc-ent",
+                  "transport_address": "172.16.1.182:9300"
+                },
+                "VXzx30rRR1GjnRBYLIi5gQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "20-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "J8JsZbofQ5iZyDRqz5tQxQ",
+                  "name": "esw2-20-az10-dc-ent",
+                  "transport_address": "172.16.1.205:9300"
+                },
+                "VmhwK5_HQFyAiiI5TDcWUg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "19-az10-dc-ent",
+                    "ml.machine_memory": "63159828480",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "7DCkDUemRzG2HrktY4eOuQ",
+                  "name": "esw2-19-az10-dc-ent",
+                  "transport_address": "172.16.1.242:9300"
+                },
+                "WnMyIlYBQqWW45a-TwpwqQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "22-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "zSkWhOq5SiWqQ-bI2h6nXQ",
+                  "name": "esw1-22-az10-dc-ent",
+                  "transport_address": "172.16.1.195:9300"
+                },
+                "Zy_SYWxzSxy4lYkPVjcOlA": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "20-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "TOvyRqRFS56yuindOcbdzA",
+                  "name": "esw1-20-az10-dc-ent",
+                  "transport_address": "172.16.1.216:9300"
+                },
+                "bFCSCT_UT_eM8eoTXP65RA": {
+                  "attributes": {
+                    "host_id": "42-az10-dc-ent",
+                    "ml.machine_memory": "33567633408",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "4W7tD4k3SsGBmwXfSSd16Q",
+                  "name": "mas1-42-az10-dc-ent",
+                  "transport_address": "172.16.1.91:9300"
+                },
+                "bY-cxyR0RSuMiRYlV6Sj7g": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "23-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "0epr83l9Samn4F-cGq0l8A",
+                  "name": "esw1-23-az10-dc-ent",
+                  "transport_address": "172.16.1.220:9300"
+                },
+                "bjttLXSrThG1vNJFq6JtDg": {
+                  "attributes": {
+                    "host_id": "41-az10-dc-ent",
+                    "ml.machine_memory": "33567633408",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "HxXdfxyeRNOKunoKoliVDQ",
+                  "name": "mas1-41-az10-dc-ent",
+                  "transport_address": "172.16.1.46:9300"
+                },
+                "flL9OS4TR8Kjmm-rTVHU5g": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "20-az10-dc-ent",
+                    "ml.machine_memory": "63092707328",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "o8-BDoi5TI6tUQlb2qcWxg",
+                  "name": "esw3-20-az10-dc-ent",
+                  "transport_address": "172.16.1.76:9300"
+                },
+                "hRf9HsyRTZ-LGzhDBTZM3w": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "33-az10-dc-ent",
+                    "ml.machine_memory": "63158984704",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "VFuxn54DQO6NV2zO3lReXQ",
+                  "name": "esh2-33-az10-dc-ent",
+                  "transport_address": "172.16.1.138:9300"
+                },
+                "i8xzV9jfRDmiKDVOkpiH1w": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "25-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "A09zi6ixRFaL6p3JXv0lMQ",
+                  "name": "esw3-25-az10-dc-ent",
+                  "transport_address": "172.16.1.65:9300"
+                },
+                "iAgoIxwKQAqddyXJJlHlCg": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "26-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "QnxC3iXhQ6uNs8m-JH7YPw",
+                  "name": "esw3-26-az10-dc-ent",
+                  "transport_address": "172.16.1.100:9300"
+                },
+                "iKB0877lSR6ocEzyKq9BRQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "25-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "cjWuW8kcRh61MtVYFRgneA",
+                  "name": "esw2-25-az10-dc-ent",
+                  "transport_address": "172.16.1.243:9300"
+                },
+                "jVAJY9H3RdqBQeJoQrxcnA": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "34-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "zcBmgKThQfidRs-wmoj-Mw",
+                  "name": "esh1-34-az10-dc-ent",
+                  "transport_address": "172.16.0.251:9300"
+                },
+                "l01mdpHKTIycD8YpHgstOQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "26-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "OkVGW2QCQbuCFTsObb13ZQ",
+                  "name": "esw1-26-az10-dc-ent",
+                  "transport_address": "172.16.1.215:9300"
+                },
+                "lo4CBuVcRnylVW7aOLRxsA": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "25-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "5nZjsbeIQlGlM60Cr_oXlA",
+                  "name": "esw1-25-az10-dc-ent",
+                  "transport_address": "172.16.1.45:9300"
+                },
+                "nntzfh-vQpWHs0j_BZ-wWQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "19-az10-dc-ent",
+                    "ml.machine_memory": "63159828480",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "uqt_rGMwRRiK7ML7fINVKg",
+                  "name": "esw1-19-az10-dc-ent",
+                  "transport_address": "172.16.1.253:9300"
+                },
+                "nsqq83wGTkGsNqslvlybiA": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "32-az10-dc-ent",
+                    "ml.machine_memory": "63158951936",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "kyEHqm1OQSiMcy_289_fuA",
+                  "name": "esh2-32-az10-dc-ent",
+                  "transport_address": "172.16.0.71:9300"
+                },
+                "qdDv_MrWRPqL-9t_fjSk1A": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "33-az10-dc-ent",
+                    "ml.machine_memory": "63158984704",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "h5pEuvq0QBO5pEkaO63dcQ",
+                  "name": "esh1-33-az10-dc-ent",
+                  "transport_address": "172.16.1.204:9300"
+                },
+                "quRSeXloStCNZe-DZ5ec7g": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "24-az10-dc-ent",
+                    "ml.machine_memory": "63092711424",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "0vS6YAIVTh2Gs_K1SOYE8A",
+                  "name": "esw1-24-az10-dc-ent",
+                  "transport_address": "172.16.1.57:9300"
+                },
+                "rFjThHZdRvyhpF0aMT7fTw": {
+                  "attributes": {
+                    "host_id": "40-az10-dc-ent",
+                    "ml.machine_memory": "33567633408",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "RlsaN8OXQ_eX1JxSr07xQA",
+                  "name": "mas1-40-az10-dc-ent",
+                  "transport_address": "172.16.1.38:9300"
+                },
+                "sZG2ItuSQHOOhGuVlbbgGQ": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "28-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "bTC2tpmGSLiDAf540qJ3Ag",
+                  "name": "esw1-28-az10-dc-ent",
+                  "transport_address": "172.16.1.190:9300"
+                },
+                "t1HJSnHUT22LT5RFSeow8A": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "35-az10-dc-ent",
+                    "ml.machine_memory": "63158996992",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "aKNMO8jvTvCwTeJ9UBkEMA",
+                  "name": "esh2-35-az10-dc-ent",
+                  "transport_address": "172.16.1.136:9300"
+                },
+                "tdFhsZDUS3OMXKKSgB31iA": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "24-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "vcRncEyBSM-ghT8zVobtGQ",
+                  "name": "esw3-24-az10-dc-ent",
+                  "transport_address": "172.16.1.21:9300"
+                },
+                "u5zemFgXTC6TattN4B6gbw": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "28-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "CnFT64q8SiuxPkoV02AuHg",
+                  "name": "esw2-28-az10-dc-ent",
+                  "transport_address": "172.16.1.111:9300"
+                },
+                "wgF8TsDeTVyBurL3xct0DQ": {
+                  "attributes": {
+                    "box_type": "hot",
+                    "host_id": "35-az10-dc-ent",
+                    "ml.machine_memory": "63159001088",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "ZI7sqVSDRTyoJR1EYe6PoQ",
+                  "name": "esh1-35-az10-dc-ent",
+                  "transport_address": "172.16.1.112:9300"
+                },
+                "z29jmIBjT0atD5RMcz07Bw": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "27-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "4HCDqShbTJ2my7wkV9Bwfw",
+                  "name": "esw2-27-az10-dc-ent",
+                  "transport_address": "172.16.1.84:9300"
+                },
+                "z8Ei5tIfSmq-y8ieUeAKiw": {
+                  "attributes": {
+                    "box_type": "warm",
+                    "host_id": "22-az10-dc-ent",
+                    "ml.machine_memory": "63092695040",
+                    "ml.max_open_jobs": "20",
+                    "xpack.installed": "true"
+                  },
+                  "ephemeral_id": "o8z8ZNa8RCGzPSdVnT4DPA",
+                  "name": "esw2-22-az10-dc-ent",
+                  "transport_address": "172.16.1.107:9300"
+                }
+              },
               "nodes_hash": 716476759,
               "state_uuid": "rejLjtrVSE2Gx_upxUJ59w",
+              "status": "green",
               "version": 202190
             },
             "status": "green"

@@ -62,6 +62,7 @@ function applyCustomRules(legacyDoc: any, mbDoc: any) {
       'elasticsearch.cluster.stats.indices.store.size.bytes',
       legacyDoc.cluster_stats.indices.store.size_in_bytes
     );
+    set(mbDoc, 'elasticsearch.cluster.stats.state', legacyDoc.cluster_state);
   }
 }
 
@@ -119,7 +120,7 @@ export async function rebuildAllAction({
                 name: convertLegacyTypeToMetricsetName(legacyDoc.type),
               },
             };
-            // const debug = legacyDoc.type === 'shards';
+            const debug = legacyDoc.type === 'indices_stats';
             for (const alias of aliases) {
               let value = _.get(legacyDoc, alias.key, null);
               if (value === null && alias.key.includes('.shards.')) {
