@@ -66,6 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.api.deleteDataFrameAnalyticsJobES(jobIdSpace1);
+      await ml.api.deleteDataFrameAnalyticsJobES(jobIdSpace2);
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();

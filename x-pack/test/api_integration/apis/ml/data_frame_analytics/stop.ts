@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.api.deleteDataFrameAnalyticsJobES(analyticsId);
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices(destinationIndex);
     });

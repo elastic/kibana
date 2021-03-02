@@ -296,13 +296,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async waitForAnalyticsState(
       analyticsId: string,
       expectedAnalyticsState: DataFrameTaskStateType,
-      timeoutInMs?: number
+      timeoutInMs: number = 2 * 60 * 1000
     ) {
-      const defaultTimeout = 2 * 60 * 1000;
-
       await retry.waitForWithTimeout(
         `analytics state to be ${expectedAnalyticsState}`,
-        timeoutInMs ? timeoutInMs : defaultTimeout,
+        timeoutInMs,
         async () => {
           const state = await this.getAnalyticsState(analyticsId);
           if (state === expectedAnalyticsState) {
@@ -721,6 +719,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
       log.debug('> DFA job created.');
+    },
+
+    async deleteDataFrameAnalyticsJobES(analyticsId: string) {
+      log.debug(`Deleting data frame analytics job with id '${analyticsId}' ...`);
+
+      await esSupertest
+        .delete(`/_ml/data_frame/analytics/${analyticsId}`)
+        .query({ force: true })
+        .expect(200);
+
+      await this.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
+      log.debug('> DFA job deleted.');
     },
 
     async getADJobRecordCount(jobId: string): Promise<number> {

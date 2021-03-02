@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
+import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -59,12 +60,18 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createDataFrameAnalyticsJob(jobConfigSpace4, idSpace4);
       // start jobs
       await runRequest(jobIdSpace3, idSpace3, '_start', 200);
+      await ml.api.waitForAnalyticsState(jobIdSpace3, DATA_FRAME_TASK_STATE.STARTED);
+      await ml.api.assertIndicesExist(`user-${jobIdSpace3}`);
       await runRequest(jobIdSpace4, idSpace4, '_start', 200);
+      await ml.api.waitForAnalyticsState(jobIdSpace4, DATA_FRAME_TASK_STATE.STARTED);
+      await ml.api.assertIndicesExist(`user-${jobIdSpace4}`);
 
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     after(async () => {
+      await ml.api.deleteDataFrameAnalyticsJobES(jobIdSpace3);
+      await ml.api.deleteDataFrameAnalyticsJobES(jobIdSpace4);
       await spacesService.delete(idSpace3);
       await spacesService.delete(idSpace4);
       await ml.api.deleteIndices(`user-${jobIdSpace3}`);
@@ -76,11 +83,13 @@ export default ({ getService }: FtrProviderContext) => {
     it('should stop job from same space', async () => {
       const body = await runRequest(jobIdSpace3, idSpace3, '_stop', 200);
       expect(body).to.have.property('stopped', true);
+      await ml.api.waitForAnalyticsState(jobIdSpace3, DATA_FRAME_TASK_STATE.STOPPED, 5000);
     });
 
     it('should fail to stop job from different space', async () => {
       const body = await runRequest(jobIdSpace4, idSpace3, '_stop', 404);
       expect(body.error).to.eql('Not Found');
+      await ml.api.waitForAnalyticsState(jobIdSpace4, DATA_FRAME_TASK_STATE.STARTED, 5000);
     });
   });
 };
