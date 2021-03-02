@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,12 +19,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import './data_panel.scss';
+
 interface Props {
-  title: string;
+  title: React.ReactElement; // e.g., h2 tag
   subtitle?: string;
   iconType?: string;
   action?: React.ReactNode;
   filled?: boolean;
+  className?: string;
 }
 
 export const DataPanel: React.FC<Props> = ({
@@ -31,36 +36,38 @@ export const DataPanel: React.FC<Props> = ({
   iconType,
   action,
   filled,
+  className,
   children,
-}) => (
-  <EuiPanel color={filled ? 'subdued' : 'plain'} hasShadow={false}>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          {iconType && (
+  ...props // e.g., data-test-subj
+}) => {
+  const classes = classNames('dataPanel', className, {
+    'dataPanel--filled': filled,
+  });
+
+  return (
+    <EuiPanel {...props} color={filled ? 'subdued' : 'plain'} className={classes} hasShadow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            {iconType && (
+              <EuiFlexItem>
+                <EuiIcon type={iconType} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
-              <EuiIcon data-test-subj="dataPanelIcon" type={iconType} />
+              <EuiTitle size="xs">{title}</EuiTitle>
+              {subtitle && (
+                <EuiText size="s" color="subdued">
+                  <p>{subtitle}</p>
+                </EuiText>
+              )}
             </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiTitle data-test-subj="dataPanelTitle" size="xs">
-              <h4>{title}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {action && (
-        <EuiFlexItem data-test-subj="dataPanelAction" grow={false}>
-          {action}
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-    {subtitle && (
-      <EuiText data-test-subj="dataPanelSubtitle" size="s" color="subdued">
-        <p>{subtitle}</p>
-      </EuiText>
-    )}
-    <EuiSpacer />
-    {children}
-  </EuiPanel>
-);
+        {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
+      </EuiFlexGroup>
+      <EuiSpacer />
+      {children}
+    </EuiPanel>
+  );
+};

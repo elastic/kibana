@@ -22,7 +22,7 @@ import {
   ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
   ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
 } from '../../../routes';
-import { DataPanel } from '../../data_panel/data_panel';
+import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { AnalyticsLayout } from '../analytics_layout';
@@ -125,7 +125,7 @@ export const Analytics: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <DataPanel
-              title={TOP_QUERIES}
+              title={<h3>{TOP_QUERIES}</h3>}
               filled
               action={<ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_PATH)} />}
             >
@@ -134,7 +134,7 @@ export const Analytics: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <DataPanel
-              title={TOP_QUERIES_NO_RESULTS}
+              title={<h3>{TOP_QUERIES_NO_RESULTS}</h3>}
               filled
               action={
                 <ViewAllButton
@@ -165,7 +165,7 @@ export const Analytics: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <DataPanel
-              title={TOP_QUERIES_WITH_CLICKS}
+              title={<h3>{TOP_QUERIES_WITH_CLICKS}</h3>}
               filled
               action={
                 <ViewAllButton
@@ -178,7 +178,7 @@ export const Analytics: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <DataPanel
-              title={TOP_QUERIES_NO_CLICKS}
+              title={<h3>{TOP_QUERIES_NO_CLICKS}</h3>}
               filled
               action={
                 <ViewAllButton
@@ -193,16 +193,16 @@ export const Analytics: React.FC = () => {
       </AnalyticsSection>
       <EuiSpacer size="xl" />
 
-      <AnalyticsSection
-        title={RECENT_QUERIES}
+      <DataPanel
+        title={<h2>{RECENT_QUERIES}</h2>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription',
           { defaultMessage: 'A view into queries happening right now.' }
         )}
+        action={<ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_RECENT_QUERIES_PATH)} />}
       >
         <RecentQueriesTable items={recentQueries.slice(0, 10)} />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_RECENT_QUERIES_PATH)} />
-      </AnalyticsSection>
+      </DataPanel>
     </AnalyticsLayout>
   );
 };

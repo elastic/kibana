@@ -9,65 +9,87 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiIcon, EuiButton } from '@elastic/eui';
 
 import { DataPanel } from './data_panel';
 
 describe('DataPanel', () => {
-  it('Renders without an icon or a subtitle', () => {
-    const wrapper = shallow(<DataPanel title="Tabula Rasa">Look at this graph</DataPanel>);
-
-    expect(wrapper.find('[data-test-subj="dataPanelTitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelIcon"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelSubtitle"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelAction"]')).toHaveLength(0);
-  });
-
-  it('Renders with an icon, without a subtitle', () => {
+  it('renders with a title and children', () => {
     const wrapper = shallow(
-      <DataPanel title="The Smoke Monster" iconType="eye">
-        Look at this graph
+      <DataPanel title={<h1 data-test-subj="title">Tabula Rasa</h1>}>
+        <div data-test-subj="children">Look at this graph</div>
       </DataPanel>
     );
 
-    expect(wrapper.find('[data-test-subj="dataPanelTitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelIcon"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelSubtitle"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelAction"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="title"]').text()).toEqual('Tabula Rasa');
+    expect(wrapper.find('[data-test-subj="children"]').text()).toEqual('Look at this graph');
   });
 
-  it('Renders with an icon and a subtitle', () => {
-    const wrapper = shallow(
-      <DataPanel
-        title="Flight 815"
-        iconType="package"
-        subtitle="Oceanic Airlines Flight 815 was a scheduled flight from Sydney, Australia to Los Angeles, California"
-      />
-    );
+  describe('components', () => {
+    it('renders with an icon', () => {
+      const wrapper = shallow(<DataPanel title={<h1>The Smoke Monster</h1>} iconType="eye" />);
 
-    expect(wrapper.find('[data-test-subj="dataPanelTitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelSubtitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelIcon"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelAction"]')).toHaveLength(0);
+      expect(wrapper.find(EuiIcon).prop('type')).toEqual('eye');
+    });
+
+    it('renders with a subtitle', () => {
+      const wrapper = shallow(
+        <DataPanel title={<h1>Hugo Reyes</h1>} subtitle="Hurley was typically happy-go-lucky" />
+      );
+
+      expect(wrapper.find('p').text()).toEqual('Hurley was typically happy-go-lucky');
+    });
+
+    it('renders with an icon and a subtitle', () => {
+      const wrapper = shallow(
+        <DataPanel
+          title={<h1>Flight 815</h1>}
+          iconType="package"
+          subtitle="Oceanic Airlines Flight 815 was a scheduled flight from Sydney, Australia to Los Angeles, California"
+        />
+      );
+
+      expect(wrapper.find(EuiIcon).prop('type')).toEqual('package');
+      expect(wrapper.find('p').text()).toEqual(
+        'Oceanic Airlines Flight 815 was a scheduled flight from Sydney, Australia to Los Angeles, California'
+      );
+    });
+
+    it('renders with a button', () => {
+      const wrapper = shallow(
+        <DataPanel
+          title={<h1>Board Flight 815</h1>}
+          action={<EuiButton data-test-subj="action">Book flight</EuiButton>}
+        />
+      );
+
+      expect(wrapper.find('[data-test-subj="action"]')).toHaveLength(1);
+    });
   });
 
-  it('Renders without an icon, with a subtitle', () => {
-    const wrapper = shallow(
-      <DataPanel title="Hugo Reyes" subtitle="Hurley was typically happy-go-lucky" />
-    );
-    expect(wrapper.find('[data-test-subj="dataPanelTitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelIcon"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelSubtitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelAction"]')).toHaveLength(0);
-  });
+  describe('props', () => {
+    it('renders panel color based on filled flag', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
-  it('Renders with a button', () => {
-    const wrapper = shallow(
-      <DataPanel title="Board Flight 815" action={<EuiButton>Book flight</EuiButton>} />
-    );
-    expect(wrapper.find('[data-test-subj="dataPanelTitle"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="dataPanelIcon"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelSubtitle"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="dataPanelAction"]')).toHaveLength(1);
+      expect(wrapper.prop('color')).toEqual('plain');
+      expect(wrapper.prop('className')).toEqual('dataPanel');
+
+      wrapper.setProps({ filled: true });
+
+      expect(wrapper.prop('color')).toEqual('subdued');
+      expect(wrapper.prop('className')).toEqual('dataPanel dataPanel--filled');
+    });
+
+    it('passes class names', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} className="testing" />);
+
+      expect(wrapper.prop('className')).toEqual('dataPanel testing');
+    });
+
+    it('passes arbitrary props', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} data-test-subj="testing" />);
+
+      expect(wrapper.find('[data-test-subj="testing"]')).toHaveLength(1);
+    });
   });
 });

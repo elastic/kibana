@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_API_LOGS_PATH } from '../../../routes';
 import { RECENT_API_EVENTS } from '../../api_logs/constants';
-import { DataPanel } from '../../data_panel/data_panel';
+import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { VIEW_API_LOGS } from '../constants';
@@ -18,7 +18,7 @@ import { VIEW_API_LOGS } from '../constants';
 export const RecentApiLogs: React.FC = () => {
   return (
     <DataPanel
-      title={RECENT_API_EVENTS}
+      title={<h2>{RECENT_API_EVENTS}</h2>}
       action={
         <EuiButtonEmptyTo iconType="eye" to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
           {VIEW_API_LOGS}

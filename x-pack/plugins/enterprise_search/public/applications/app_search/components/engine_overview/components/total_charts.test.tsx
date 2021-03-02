@@ -32,14 +32,14 @@ describe('TotalCharts', () => {
   it('renders the total queries chart', () => {
     const panel = wrapper.find('[data-test-subj="TotalQueriesChart"]');
 
-    expect(panel.prop('title')).toEqual('Total queries');
+    expect(panel.prop('title')).toEqual(<h2>Total queries</h2>);
     expect(panel.find(AnalyticsChart)).toHaveLength(1);
   });
 
   it('renders the total API operations chart', () => {
     const panel = wrapper.find('[data-test-subj="TotalApiOperationsChart"]');
 
-    expect(panel.prop('title')).toEqual('Total API operations');
+    expect(panel.prop('title')).toEqual(<h2>Total API operations</h2>);
     expect(panel.find(AnalyticsChart)).toHaveLength(1);
   });
 });
