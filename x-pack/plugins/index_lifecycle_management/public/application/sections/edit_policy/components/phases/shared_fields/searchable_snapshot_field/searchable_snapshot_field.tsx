@@ -20,22 +20,16 @@ import {
 import {
   ComboBoxField,
   useKibana,
-  fieldValidators,
   useFormData,
+  SelectField,
 } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfigurationIssues, UseField } from '../../../../form';
-
-import { i18nTexts } from '../../../../i18n_texts';
-
+import { useConfigurationIssues, UseField, searchableSnapshotFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
-
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
 import './_searchable_snapshot_field.scss';
-
-const { emptyField } = fieldValidators;
 
 export interface Props {
   phase: 'hot' | 'cold' | 'frozen';
@@ -47,6 +41,27 @@ export interface Props {
  */
 const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
+const storageOptions = [
+  {
+    value: 'full_copy',
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorage.fullCopyLabel',
+      {
+        defaultMessage: 'Full copy',
+      }
+    ),
+  },
+  {
+    value: 'shared_cache',
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorage.sharedCacheLabel',
+      {
+        defaultMessage: 'Shared cache',
+      }
+    ),
+  },
+];
+
 export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
   const {
     services: { cloud },
@@ -54,11 +69,13 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
-  const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotStoragePath = `phases.${phase}.actions.searchable_snapshot.storage`;
 
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
+  const [formData] = useFormData({ watch: searchableSnapshotRepoPath });
+  const searchableSnapshotRepo = get(formData, searchableSnapshotRepoPath);
 
+  const isHotPhase = phase === 'hot';
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
@@ -182,17 +199,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <div className="ilmSearchableSnapshotField">
             <UseField<string>
               config={{
-                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+                ...searchableSnapshotFields.snapshot_repository,
                 defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-                validations: [
-                  {
-                    validator: emptyField(
-                      i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired
-                    ),
-                  },
-                ],
               }}
-              path={searchableSnapshotPath}
+              path={searchableSnapshotRepoPath}
             >
               {(field) => {
                 const singleSelectionArray: [selectedSnapshot?: string] = field.value
@@ -236,6 +246,25 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                 {calloutContent}
               </>
             )}
+
+            <EuiSpacer />
+            <UseField
+              key={searchableSnapshotStoragePath}
+              path={searchableSnapshotStoragePath}
+              config={{
+                ...searchableSnapshotFields.storage,
+                defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
+              }}
+              component={SelectField}
+              componentProps={{
+                'data-test-subj': `searchableSnapshotStorage`,
+                hasEmptyLabelSpace: true,
+                euiFieldProps: {
+                  options: storageOptions,
+                  'aria-label': searchableSnapshotFields.storage.label,
+                },
+              }}
+            />
           </div>
         );
       }}

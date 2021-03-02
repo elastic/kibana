@@ -77,10 +77,16 @@ export const i18nTexts = {
         defaultMessage: 'Select a node attribute',
       }
     ),
-    searchableSnapshotsFieldLabel: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+    searchableSnapshotsRepoFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel',
       {
         defaultMessage: 'Searchable snapshot repository',
+      }
+    ),
+    searchableSnapshotsStorageFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorageFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot storage',
       }
     ),
     errors: {
