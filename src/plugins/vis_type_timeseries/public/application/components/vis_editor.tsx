@@ -22,7 +22,9 @@ import {
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
+// @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
+// @ts-expect-error
 import { PanelConfig } from './panel_config';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { VisPicker } from './vis_picker';
@@ -66,7 +68,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       extractedIndexPatterns: [''],
     };
 
-    this.visDataSubject = new Rx.BehaviorSubject({});
+    this.visDataSubject = new Rx.BehaviorSubject<TimeseriesVisParams>(this.props.vis.params);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
@@ -102,7 +104,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
   };
 
-  handleChange = (partialModel) => {
+  handleChange = (partialModel: Partial<TimeseriesVisParams>) => {
     if (isEmpty(partialModel)) {
       return;
     }
@@ -137,11 +139,11 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ autoApply: event.target.checked });
   };
 
-  onDataChange = ({ visData }) => {
+  onDataChange = ({ visData }: { visData: TimeseriesVisParams }) => {
     this.visDataSubject.next(visData);
   };
 
@@ -159,7 +161,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       >
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange} />
+            <VisPicker currentVisType={model.type} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}

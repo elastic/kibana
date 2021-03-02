@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PANEL_TYPES } from '../../../common/panel_types';
+import { TimeseriesVisParams } from '../../types';
 
 const tabs = [
   {
@@ -45,37 +46,25 @@ const tabs = [
   },
 ];
 
-function VisPickerItem(props) {
-  const { label, type, selected } = props;
-  const itemClassName = 'tvbVisPickerItem';
-
-  return (
-    <EuiTab
-      className={itemClassName}
-      isSelected={selected}
-      onClick={() => props.onClick(type)}
-      data-test-subj={`${type}TsvbTypeBtn`}
-    >
-      {label}
-    </EuiTab>
-  );
+interface VisPickerProps {
+  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
+  currentVisType: TimeseriesVisParams['type'];
 }
 
-export const VisPicker = ({ onChange, model }) => {
-  const handleChange = (type) => {
-    onChange({ type });
-  };
-
-  tabs.map((item) => {
-    return (
-      <VisPickerItem
-        key={item.type}
-        onClick={handleChange}
-        selected={item.type === model.type}
-        {...item}
-      />
-    );
-  });
-
-  return <EuiTabs>{tabs}</EuiTabs>;
+export const VisPicker = ({ onChange, currentVisType }: VisPickerProps) => {
+  return (
+    <EuiTabs>
+      {tabs.map(({ label, type }) => (
+        <EuiTab
+          key={type}
+          className="tvbVisPickerItem"
+          isSelected={type === currentVisType}
+          onClick={() => onChange({ type })}
+          data-test-subj={`${type}TsvbTypeBtn`}
+        >
+          {label}
+        </EuiTab>
+      ))}
+    </EuiTabs>
+  );
 };
