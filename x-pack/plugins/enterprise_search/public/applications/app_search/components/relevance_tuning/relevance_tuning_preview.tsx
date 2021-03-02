@@ -34,7 +34,7 @@ const noResultsCallout = (
   <EuiEmptyPrompt
     data-test-subj="NoResultsPrompt"
     body={i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.enterQueryMessage',
+      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.noResultsMessage',
       {
         defaultMessage: 'No matching content found',
       }
