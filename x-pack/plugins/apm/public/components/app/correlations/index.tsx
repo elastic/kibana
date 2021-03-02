@@ -66,7 +66,6 @@ export function Correlations() {
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
-        iconType="visTagCloud"
       >
         {i18n.translate('xpack.apm.correlations.buttonLabel', {
           defaultMessage: 'View correlations',
@@ -100,12 +99,25 @@ export function Correlations() {
                   />
                 </h2>
               </EuiTitle>
+              <EuiTabs style={{ marginBottom: '-25px' }}>
+                {tabs.map(({ key, label }) => (
+                  <EuiTab
+                    key={key}
+                    isSelected={key === currentTab}
+                    onClick={() => {
+                      setCurrentTab(key);
+                    }}
+                  >
+                    {label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               <CorrelationsMetricsLicenseCheck>
                 {urlParams.kuery ? (
                   <>
-                    <EuiCallOut size="m">
+                    <EuiCallOut size="s">
                       <span>
                         {i18n.translate(
                           'xpack.apm.correlations.filteringByLabel',
@@ -116,7 +128,7 @@ export function Correlations() {
                       <EuiLink
                         href={createHref(history, { query: { kuery: '' } })}
                       >
-                        <EuiButtonEmpty iconType="cross">
+                        <EuiButtonEmpty size="xs" iconType="cross">
                           {i18n.translate(
                             'xpack.apm.correlations.clearFiltersLabel',
                             { defaultMessage: 'Clear' }
@@ -128,21 +140,6 @@ export function Correlations() {
                   </>
                 ) : null}
 
-                <EuiSpacer />
-                <EuiTabs>
-                  {tabs.map(({ key, label }) => (
-                    <EuiTab
-                      key={key}
-                      isSelected={key === currentTab}
-                      onClick={() => {
-                        setCurrentTab(key);
-                      }}
-                    >
-                      {label}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-                <EuiSpacer />
                 <TabContent onClose={() => setIsFlyoutVisible(false)} />
               </CorrelationsMetricsLicenseCheck>
             </EuiFlyoutBody>

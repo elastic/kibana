@@ -78,7 +78,6 @@ test('correctly fills in custom `appenders` config.', () => {
     type: 'console',
     layout: { type: 'pattern', highlight: true },
   });
-
   expect(configValue.appenders.get('console')).toEqual({
     type: 'console',
     layout: { type: 'pattern' },

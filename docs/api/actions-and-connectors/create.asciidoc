@@ -11,6 +11,14 @@ Creates an action.
 
 `POST <kibana host>:<port>/api/actions/action`
 
+`POST <kibana host>:<port>/s/<space_id>/api/actions/action`
+
+[[actions-and-connectors-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[actions-and-connectors-api-create-request-body]]
 ==== Request body
 
@@ -27,6 +35,8 @@ Creates an action.
 `secrets`::
   (Required, object) The secrets configuration for the action. Secrets configuration properties vary
   depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
++
+WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-api-update, update>> API.
 
 [[actions-and-connectors-api-create-request-codes]]
 ==== Response code

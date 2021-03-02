@@ -175,7 +175,7 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/create-panels-with-timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,

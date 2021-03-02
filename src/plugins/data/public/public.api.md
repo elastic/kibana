@@ -10,7 +10,6 @@ import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
-import { ApplicationUsageTracker } from '@kbn/analytics';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
@@ -60,7 +59,6 @@ import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { Moment } from 'moment';
 import moment from 'moment';
 import { NameList } from 'elasticsearch';
@@ -1532,6 +1530,7 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
+    maxIndexPatterns?: number;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

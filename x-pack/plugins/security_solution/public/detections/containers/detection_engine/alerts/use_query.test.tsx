@@ -25,7 +25,7 @@ describe('useQueryAlerts', () => {
       >(() => useQueryAlerts<unknown, unknown>(mockAlertsQuery, indexName));
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        loading: true,
+        loading: false,
         data: null,
         response: '',
         request: '',

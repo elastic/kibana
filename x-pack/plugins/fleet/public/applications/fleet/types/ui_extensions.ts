@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ComponentType, LazyExoticComponent } from 'react';
-import { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
+import type { ComponentType, LazyExoticComponent } from 'react';
+import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
