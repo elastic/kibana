@@ -86,10 +86,16 @@ const installPreBuiltTemplates = async (paths: string[], esClient: Elasticsearch
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(getAsset(path).toString('utf8'));
 
-    return esClient.indices.putIndexTemplate(
-      { name: templateName, body: content },
-      { ignore: [404] }
-    );
+    const esClientParams = { name: templateName, body: content };
+    const esClientRequestOptions = { ignore: [404] };
+
+    if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
+      // Template is v2
+      return esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions);
+    } else {
+      // template is V1
+      return esClient.indices.putTemplate(esClientParams, esClientRequestOptions);
+    }
   });
   try {
     return await Promise.all(templateInstallPromises);
