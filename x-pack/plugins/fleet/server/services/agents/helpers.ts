@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
+import type { ESSearchHit } from '../../../../../typings/elasticsearch';
+import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 export function searchHitToAgent(hit: ESSearchHit<FleetServerAgent>): Agent {
   return {

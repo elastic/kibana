@@ -6,28 +6,30 @@
  */
 
 import Boom from '@hapi/boom';
-import {
+
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
-  SavedObjectsFindOptions,
   SavedObjectsClosePointInTimeOptions,
-  SavedObjectsOpenPointInTimeOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsCreateOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsUtils,
-  ISavedObjectTypeRegistry,
-} from '../../../../../src/core/server';
+  SavedObjectsUpdateOptions,
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
-import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { ISpacesClient } from '../spaces_client';
+import type { ISpacesClient } from '../spaces_client';
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
