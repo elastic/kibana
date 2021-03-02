@@ -50,7 +50,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
-    _meta: { description: 'Non-default value of visualivisualization:heatmapng' },
+    _meta: { description: 'Non-default value of visualization:heatmap:maxBuckets' },
   },
   'visualization:colorMapping': {
     type: 'text',
