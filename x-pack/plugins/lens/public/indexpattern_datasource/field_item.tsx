@@ -108,9 +108,27 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     itemIndex,
     groupIndex,
     dropOntoWorkspace,
+    editField,
+    deleteField,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
+
+  const closeAndEdit = useCallback(
+    (name: string) => {
+      editField(name);
+      setOpen(false);
+    },
+    [editField, setOpen]
+  );
+
+  const closeAndDelete = useCallback(
+    (name: string) => {
+      deleteField(name);
+      setOpen(false);
+    },
+    [deleteField, setOpen]
+  );
 
   const dropOntoWorkspaceAndClose = useCallback(
     (droppedField: DragDropIdentifier) => {
@@ -258,6 +276,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         <FieldItemPopoverContents
           {...state}
           {...props}
+          editField={closeAndEdit}
+          deleteField={closeAndDelete}
           dropOntoWorkspace={dropOntoWorkspaceAndClose}
         />
       </EuiPopover>
@@ -317,6 +337,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     data: { fieldFormats },
     dropOntoWorkspace,
     editField,
+    deleteField,
     hasSuggestionForField,
     hideDetails,
   } = props;
@@ -328,6 +349,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   const totalValuesCount =
     topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
   const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
+
+  const runtimeFieldControls = (
+    <>
+      <EuiButtonEmpty onClick={() => editField(field.name)}>
+        {i18n.translate('xpack.lens.indexPattern.editFieldLabel', { defaultMessage: 'Edit field' })}
+      </EuiButtonEmpty>
+      {field.runtime && (
+        <EuiButtonEmpty onClick={() => deleteField(field.name)} color="danger">
+          {i18n.translate('xpack.lens.indexPattern.deleteFieldLabel', {
+            defaultMessage: 'Delete field',
+          })}
+        </EuiButtonEmpty>
+      )}
+    </>
+  );
 
   if (
     totalValuesCount &&
@@ -352,7 +388,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   );
 
   if (hideDetails) {
-    return panelHeader;
+    return (
+      <>
+        {panelHeader}
+        {runtimeFieldControls}
+      </>
+    );
   }
 
   let formatter: { convert: (data: unknown) => string };
@@ -395,11 +436,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           })}
         </EuiText>
 
-        {field.runtime && (
-          <>
-            <EuiButtonEmpty onClick={() => editField(field.name)}>Edit</EuiButtonEmpty>
-          </>
-        )}
+        {runtimeFieldControls}
       </>
     );
   }
@@ -493,11 +530,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <></>
         )}
 
-        {field.runtime && (
-          <>
-            <EuiButtonEmpty onClick={() => editField(field.name)}>Edit</EuiButtonEmpty>
-          </>
-        )}
+        {runtimeFieldControls}
       </>
     );
   }

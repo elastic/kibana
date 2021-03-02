@@ -179,6 +179,7 @@ export function IndexPatternDataPanel({
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
+          state.indexPatterns,
         ]}
       />
 
@@ -696,6 +697,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
+            deleteField={deleteField}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
