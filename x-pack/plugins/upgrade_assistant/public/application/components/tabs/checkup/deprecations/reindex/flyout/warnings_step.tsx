@@ -10,59 +10,35 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCode,
   EuiCallOut,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../app_context';
-import { ReindexWarning } from '../../../../../../../../common/types';
+import {
+  CustomTypeNameWarningCheckbox,
+  DeprecatedSettingWarningCheckbox,
+  WarningCheckboxProps,
+} from './warning_step_checkbox';
 
 interface CheckedIds {
   [id: string]: boolean;
 }
 
-export const idForWarning = (warning: ReindexWarning) => `reindexWarning-${warning}`;
+const mapWarningToComponent: {
+  [key in ReindexWarningTypes]: React.FunctionComponent<WarningCheckboxProps>;
+} = {
+  customTypeName: CustomTypeNameWarningCheckbox,
+  indexSetting: DeprecatedSettingWarningCheckbox,
+};
 
-const WarningCheckbox: React.FunctionComponent<{
-  checkedIds: CheckedIds;
-  warning: ReindexWarning;
-  label: React.ReactNode;
-  description: React.ReactNode;
-  documentationUrl: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ checkedIds, warning, label, onChange, description, documentationUrl }) => (
-  <>
-    <EuiText>
-      <EuiCheckbox
-        id={idForWarning(warning)}
-        label={<strong>{label}</strong>}
-        checked={checkedIds[idForWarning(warning)]}
-        onChange={onChange}
-      />
-      <p className="upgWarningsStep__warningDescription">
-        {description}
-        <br />
-        <EuiLink href={documentationUrl} target="_blank" external>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
-            defaultMessage="Documentation"
-          />
-        </EuiLink>
-      </p>
-    </EuiText>
-
-    <EuiSpacer />
-  </>
-);
-
+export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
   renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
@@ -80,9 +56,12 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   closeFlyout,
   advanceNextStep,
 }) => {
+  const { docLinks, kibanaVersionInfo } = useAppContext();
+  const { links } = docLinks;
+
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(
-    warnings.reduce((initialCheckedIds, warning) => {
-      initialCheckedIds[idForWarning(warning)] = false;
+    warnings.reduce((initialCheckedIds, warning, index) => {
+      initialCheckedIds[idForWarning(index)] = false;
       return initialCheckedIds;
     }, {} as { [id: string]: boolean })
   );
@@ -101,14 +80,11 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
     }));
   };
 
-  const { docLinks, kibanaVersionInfo } = useAppContext();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
-
   return (
     <>
       <EuiFlyoutBody>
         {renderGlobalCallouts()}
+
         <EuiCallOut
           title={
             <FormattedMessage
@@ -129,33 +105,20 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {kibanaVersionInfo.currentMajor === 7 && warnings.includes(ReindexWarning.customTypeName) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.customTypeName}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
-                defaultMessage="Mapping type will be changed to {defaultType}"
-                values={{
-                  defaultType: <EuiCode>_doc</EuiCode>,
-                }}
+        {kibanaVersionInfo.currentMajor === 7 &&
+          warnings.map((warning, index) => {
+            const WarningCheckbox = mapWarningToComponent[warning.warningType];
+            return (
+              <WarningCheckbox
+                key={idForWarning(index)}
+                isChecked={checkedIds[idForWarning(index)]}
+                onChange={onChange}
+                docLinks={links}
+                id={idForWarning(index)}
+                meta={warning.meta}
               />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-                defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the
-                    default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
-                values={{
-                  defaultType: <EuiCode>_doc</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/${DOC_LINK_VERSION}/removal-of-types.html`}
-          />
-        )}
+            );
+          })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

@@ -92,11 +92,13 @@ export interface ReindexOperation extends SavedObjectAttributes {
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
-export enum ReindexWarning {
-  // 7.0 -> 8.0 warnings
-  customTypeName,
-
-  // 8.0 -> 9.0 warnings
+// 7.0 -> 8.0 warnings
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export interface ReindexWarning {
+  warningType: ReindexWarningTypes;
+  meta?: {
+    [key: string]: string | string[];
+  };
 }
 
 export enum IndexGroup {

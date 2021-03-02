@@ -20,7 +20,7 @@ interface MetaProperties {
 
 export interface FlatSettings {
   settings: {
-    [key: string]: string;
+    [key: string]: string | boolean;
   };
   mappings: {
     properties?: MappingProperties;
@@ -31,7 +31,7 @@ export interface FlatSettings {
 // Specific to 7.x-8 upgrade
 export interface FlatSettingsWithTypeName {
   settings: {
-    [key: string]: string;
+    [key: string]: string | boolean;
   };
   mappings: {
     [typeName: string]: {
