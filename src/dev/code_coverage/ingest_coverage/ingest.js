@@ -51,7 +51,7 @@ function dontSendButLog(log) {
 async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
   try {
     await client.index(requestBody);
-    logF(requestBody);
+    // logF(requestBody); // A simple way to speed things up, just log less output.
   } catch (e) {
     const { body } = requestBody;
     const parsed = parse(body);

@@ -51,7 +51,6 @@ interface RelevanceTuningActions {
   setResultsLoading(resultsLoading: boolean): boolean;
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
-  dismissSchemaConflictCallout(): void;
   initializeRelevanceTuning(): void;
   getSearchResults(): void;
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
@@ -107,7 +106,6 @@ interface RelevanceTuningValues {
   filteredSchemaFields: string[];
   filteredSchemaFieldsWithConflicts: string[];
   schemaConflicts: SchemaConflicts;
-  showSchemaConflictCallout: boolean;
   engineHasSchemaFields: boolean;
   filterInputValue: string;
   query: string;
@@ -130,7 +128,6 @@ export const RelevanceTuningLogic = kea<
     setResultsLoading: (resultsLoading) => resultsLoading,
     clearSearchResults: true,
     resetSearchSettingsState: true,
-    dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
     getSearchResults: true,
     setSearchSettingsResponse: (searchSettings) => ({
@@ -184,12 +181,6 @@ export const RelevanceTuningLogic = kea<
       {},
       {
         onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts || {},
-      },
-    ],
-    showSchemaConflictCallout: [
-      true,
-      {
-        dismissSchemaConflictCallout: () => false,
       },
     ],
     filterInputValue: [
@@ -330,6 +321,12 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
         actions.onSearchSettingsError();
+      } finally {
+        const { invalidBoosts, unsearchedUnconfirmedFields } = EngineLogic.values.engine;
+        if (invalidBoosts || unsearchedUnconfirmedFields) {
+          // Re-fetch engine data so that any navigation flags are updated dynamically
+          EngineLogic.actions.initializeEngine();
+        }
       }
     },
     resetSearchSettings: async () => {

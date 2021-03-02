@@ -32,7 +32,7 @@ Password::  Password for HTTP Basic authentication.
 --
 
 [[servicenow-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -42,7 +42,7 @@ Password::  Password for HTTP Basic authentication.
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -63,7 +63,7 @@ ServiceNow actions have the following configuration properties:
 Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
 Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
-Short description::    A short description for the incident, used for searching the contents of the knowledge base. 
+Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 

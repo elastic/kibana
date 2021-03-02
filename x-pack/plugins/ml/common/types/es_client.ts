@@ -7,13 +7,19 @@
 
 import { SearchResponse, ShardsResponse } from 'elasticsearch';
 
+export const HITS_TOTAL_RELATION = {
+  EQ: 'eq',
+  GTE: 'gte',
+} as const;
+export type HitsTotalRelation = typeof HITS_TOTAL_RELATION[keyof typeof HITS_TOTAL_RELATION];
+
 // The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
 interface SearchResponse7Hits<T> {
   hits: SearchResponse<T>['hits']['hits'];
   max_score: number;
   total: {
     value: number;
-    relation: string;
+    relation: HitsTotalRelation;
   };
 }
 export interface SearchResponse7<T = any> {

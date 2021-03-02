@@ -10,7 +10,12 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../plugins/security_solution/common/constants';
-import { CaseType, CommentType } from '../../../../../plugins/case/common/api';
+import {
+  CasesResponse,
+  CaseStatuses,
+  CaseType,
+  CommentType,
+} from '../../../../../plugins/case/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -20,7 +25,7 @@ import {
   postCommentUserReq,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../common/lib/mock';
-import { deleteAllCaseItems } from '../../../common/lib/utils';
+import { deleteAllCaseItems, getSignalsWithES, setStatus } from '../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -367,265 +372,399 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
-        await createSignalsIndex(supertest);
-      });
+      describe('esArchiver', () => {
+        const defaultSignalsIndex = '.siem-signals-default-000001';
 
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
-      });
+        beforeEach(async () => {
+          await esArchiver.load('cases/signals/default');
+        });
+        afterEach(async () => {
+          await esArchiver.unload('cases/signals/default');
+          await deleteAllCaseItems(es);
+        });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/87988
-      it.skip('updates alert status when the status is updated and syncAlerts=true', async () => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
+        it('should update the status of multiple alerts attached to multiple cases', async () => {
+          const signalID = '5f2b9ec41f8febb1c06b5d1045aeabb9874733b7617e88a370510f2fb3a41a5d';
+          const signalID2 = '4d0f4b1533e46b66b43bdd0330d23f39f2cf42a7253153270e38d30cce9ff0c6';
 
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+          const { body: individualCase1 } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...postCaseReq,
+              settings: {
+                syncAlerts: false,
+              },
+            });
 
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signals = await getSignalsByIds(supertest, [id]);
+          const { body: updatedInd1WithComment } = await supertest
+            .post(`${CASES_URL}/${individualCase1.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: signalID,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+            })
+            .expect(200);
 
-        const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
+          const { body: individualCase2 } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...postCaseReq,
+              settings: {
+                syncAlerts: false,
+              },
+            });
 
-        const { body: caseUpdated } = await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-            type: CommentType.alert,
-          })
-          .expect(200);
+          const { body: updatedInd2WithComment } = await supertest
+            .post(`${CASES_URL}/${individualCase2.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: signalID2,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+            })
+            .expect(200);
 
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
+          let signals = await getSignalsWithES({
+            es,
+            indices: defaultSignalsIndex,
+            ids: [signalID, signalID2],
+          });
+
+          // There should be no change in their status since syncing is disabled
+          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.open);
+          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses.open);
+
+          const updatedIndWithStatus: CasesResponse = (await setStatus({
+            supertest,
             cases: [
               {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: 'in-progress',
+                id: updatedInd1WithComment.id,
+                version: updatedInd1WithComment.version,
+                status: CaseStatuses.closed,
+              },
+              {
+                id: updatedInd2WithComment.id,
+                version: updatedInd2WithComment.version,
+                status: CaseStatuses['in-progress'],
               },
             ],
-          })
-          .expect(200);
+            type: 'case',
+          })) as CasesResponse;
 
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
+          await es.indices.refresh({ index: defaultSignalsIndex });
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
-      });
+          signals = await getSignalsWithES({
+            es,
+            indices: defaultSignalsIndex,
+            ids: [signalID, signalID2],
+          });
 
-      it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
+          // There should still be no change in their status since syncing is disabled
+          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.open);
+          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses.open);
 
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, settings: { syncAlerts: false } })
-          .expect(200);
-
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signals = await getSignalsByIds(supertest, [id]);
-
-        const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
-
-        const { body: caseUpdated } = await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            type: CommentType.alert,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-          })
-          .expect(200);
-
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: 'in-progress',
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
-
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
-      });
-
-      // Failing: See https://github.com/elastic/kibana/issues/88130
-      it.skip('it updates alert status when syncAlerts is turned on', async () => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
-
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, settings: { syncAlerts: false } })
-          .expect(200);
-
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signals = await getSignalsByIds(supertest, [id]);
-
-        const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
-
-        const { body: caseUpdated } = await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-            type: CommentType.alert,
-          })
-          .expect(200);
-
-        // Update the status of the case with sync alerts off
-        const { body: caseStatusUpdated } = await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                status: 'in-progress',
-              },
-            ],
-          })
-          .expect(200);
-
-        // Turn sync alerts on
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: caseStatusUpdated[0].id,
-                version: caseStatusUpdated[0].version,
+          // turn on the sync settings
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: updatedIndWithStatus.map((caseInfo) => ({
+                id: caseInfo.id,
+                version: caseInfo.version,
                 settings: { syncAlerts: true },
-              },
-            ],
-          })
-          .expect(200);
+              })),
+            })
+            .expect(200);
 
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
+          await es.indices.refresh({ index: defaultSignalsIndex });
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+          signals = await getSignalsWithES({
+            es,
+            indices: defaultSignalsIndex,
+            ids: [signalID, signalID2],
+          });
+
+          // alerts should be updated now that the
+          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.closed);
+          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses['in-progress']);
+        });
       });
 
-      it('it does NOT updates alert status when syncAlerts is turned off', async () => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
+      describe('detections rule', () => {
+        beforeEach(async () => {
+          await esArchiver.load('auditbeat/hosts');
+          await createSignalsIndex(supertest);
+        });
 
-        const { body: postedCase } = await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
-          .expect(200);
+        afterEach(async () => {
+          await deleteSignalsIndex(supertest);
+          await deleteAllAlerts(supertest);
+          await esArchiver.unload('auditbeat/hosts');
+        });
 
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signals = await getSignalsByIds(supertest, [id]);
+        it('updates alert status when the status is updated and syncAlerts=true', async () => {
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
 
-        const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
+          const { body: postedCase } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(postCaseReq)
+            .expect(200);
 
-        const { body: caseUpdated } = await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            alertId: alert._id,
-            index: alert._index,
-            type: CommentType.alert,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-          })
-          .expect(200);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByIds(supertest, [id]);
 
-        // Turn sync alerts off
-        const { body: caseSettingsUpdated } = await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: caseUpdated.id,
-                version: caseUpdated.version,
-                settings: { syncAlerts: false },
+          const alert = signals.hits.hits[0];
+          expect(alert._source.signal.status).eql('open');
+
+          const { body: caseUpdated } = await supertest
+            .post(`${CASES_URL}/${postedCase.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: alert._id,
+              index: alert._index,
+              rule: {
+                id: 'id',
+                name: 'name',
               },
-            ],
-          })
-          .expect(200);
+              type: CommentType.alert,
+            })
+            .expect(200);
 
-        // Update the status of the case with sync alerts off
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: caseSettingsUpdated[0].id,
-                version: caseSettingsUpdated[0].version,
-                status: 'in-progress',
+          await es.indices.refresh({ index: alert._index });
+
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: 'in-progress',
+                },
+              ],
+            })
+            .expect(200);
+
+          // force a refresh on the index that the signal is stored in so that we can search for it and get the correct
+          // status
+          await es.indices.refresh({ index: alert._index });
+
+          const { body: updatedAlert } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds([alert._id]))
+            .expect(200);
+
+          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+        });
+
+        it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+
+          const { body: postedCase } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...postCaseReq, settings: { syncAlerts: false } })
+            .expect(200);
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByIds(supertest, [id]);
+
+          const alert = signals.hits.hits[0];
+          expect(alert._source.signal.status).eql('open');
+
+          const { body: caseUpdated } = await supertest
+            .post(`${CASES_URL}/${postedCase.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: alert._id,
+              index: alert._index,
+              type: CommentType.alert,
+              rule: {
+                id: 'id',
+                name: 'name',
               },
-            ],
-          })
-          .expect(200);
+            })
+            .expect(200);
 
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: 'in-progress',
+                },
+              ],
+            })
+            .expect(200);
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+          const { body: updatedAlert } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds([alert._id]))
+            .expect(200);
+
+          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+        });
+
+        it('it updates alert status when syncAlerts is turned on', async () => {
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+
+          const { body: postedCase } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...postCaseReq, settings: { syncAlerts: false } })
+            .expect(200);
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByIds(supertest, [id]);
+
+          const alert = signals.hits.hits[0];
+          expect(alert._source.signal.status).eql('open');
+
+          const { body: caseUpdated } = await supertest
+            .post(`${CASES_URL}/${postedCase.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: alert._id,
+              index: alert._index,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              type: CommentType.alert,
+            })
+            .expect(200);
+
+          // Update the status of the case with sync alerts off
+          const { body: caseStatusUpdated } = await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  status: 'in-progress',
+                },
+              ],
+            })
+            .expect(200);
+
+          // Turn sync alerts on
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseStatusUpdated[0].id,
+                  version: caseStatusUpdated[0].version,
+                  settings: { syncAlerts: true },
+                },
+              ],
+            })
+            .expect(200);
+
+          // refresh the index because syncAlerts was set to true so the alert's status should have been updated
+          await es.indices.refresh({ index: alert._index });
+
+          const { body: updatedAlert } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds([alert._id]))
+            .expect(200);
+
+          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+        });
+
+        it('it does NOT updates alert status when syncAlerts is turned off', async () => {
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+
+          const { body: postedCase } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(postCaseReq)
+            .expect(200);
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByIds(supertest, [id]);
+
+          const alert = signals.hits.hits[0];
+          expect(alert._source.signal.status).eql('open');
+
+          const { body: caseUpdated } = await supertest
+            .post(`${CASES_URL}/${postedCase.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: alert._id,
+              index: alert._index,
+              type: CommentType.alert,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+            })
+            .expect(200);
+
+          // Turn sync alerts off
+          const { body: caseSettingsUpdated } = await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseUpdated.id,
+                  version: caseUpdated.version,
+                  settings: { syncAlerts: false },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Update the status of the case with sync alerts off
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: caseSettingsUpdated[0].id,
+                  version: caseSettingsUpdated[0].version,
+                  status: 'in-progress',
+                },
+              ],
+            })
+            .expect(200);
+
+          const { body: updatedAlert } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds([alert._id]))
+            .expect(200);
+
+          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+        });
       });
     });
   });

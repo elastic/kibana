@@ -44,11 +44,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },

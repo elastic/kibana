@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
+import { AllRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';
-import { mountWithIntl } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
-import { FieldRule, AllRule } from '../../model';
 
 describe('AddRuleButton', () => {
   it('allows a field rule to be created', () => {

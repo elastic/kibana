@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import type { KibanaFeature } from '../../../../../features/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { featuresPluginMock } from '../../../../../features/server/mocks';
+import type { SecurityLicenseFeatures } from '../../../../common/licensing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../server/authorization/privileges';
-import { KibanaFeature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
-import { SecurityLicenseFeatures } from '../../..';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { featuresPluginMock } from '../../../../../features/server/mocks';
 
 export const createRawKibanaPrivileges = (
   features: KibanaFeature[],

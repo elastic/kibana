@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { licenseMock } from '../../../../../../common/licensing/index.mock';
+import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
 import { IndexPrivileges } from './index_privileges';
-
-import { licenseMock } from '../../../../../../common/licensing/index.mock';
-import { indicesAPIClientMock } from '../../../index.mock';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 
 function getProps() {
   const license = licenseMock.create();

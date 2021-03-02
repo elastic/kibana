@@ -34,7 +34,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 --
 
 [[resilient-connector-config-properties]]
-`config` defines the action type specific to the configuration and contains the following properties:
+**`config`** defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -47,7 +47,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 |===
 
-`secrets` defines sensitive information for the action type:
+**`secrets`** defines sensitive information for the action type and contains the following properties:
 
 [cols="2*<"]
 |===
@@ -65,11 +65,11 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 IBM Resilient actions have the following configuration properties:
 
-Incident types::              The incident types of the incident.
-Severity code::              The severity of the incident.
-Name::    A name for the issue, used for searching the contents of the knowledge base. 
-Description::          The details about the incident.
-Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+Incident types:: The type of the incident.
+Severity code:: The severity of the incident.
+Name:: A name for the issue, used for searching the contents of the knowledge base.
+Description:: The details about the incident.
+Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-resilient]]
 ==== Configuring and testing IBM Resilient
