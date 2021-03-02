@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
+import { StatusAll } from '../components/status';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -95,7 +95,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   reporters: [],
-  status: CaseStatuses.open,
+  status: StatusAll,
   tags: [],
 };
 
