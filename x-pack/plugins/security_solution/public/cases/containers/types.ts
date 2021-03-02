@@ -98,6 +98,7 @@ export interface FilterOptions {
   status: CaseStatusFilter;
   tags: string[];
   reporters: User[];
+  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
