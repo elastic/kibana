@@ -459,7 +459,7 @@ function getPatternFiringAlertType() {
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
+  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
 ) {
   const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
@@ -536,17 +536,17 @@ export function defineAlertTypes(
     },
   };
 
-  alerts.registerType(getAlwaysFiringAlertType());
-  alerts.registerType(getCumulativeFiringAlertType());
-  alerts.registerType(getNeverFiringAlertType());
-  alerts.registerType(getFailingAlertType());
-  alerts.registerType(getValidationAlertType());
-  alerts.registerType(getAuthorizationAlertType(core));
-  alerts.registerType(noopAlertType);
-  alerts.registerType(onlyContextVariablesAlertType);
-  alerts.registerType(onlyStateVariablesAlertType);
-  alerts.registerType(getPatternFiringAlertType());
-  alerts.registerType(throwAlertType);
-  alerts.registerType(longRunningAlertType);
-  alerts.registerType(goldNoopAlertType);
+  alerting.registerType(getAlwaysFiringAlertType());
+  alerting.registerType(getCumulativeFiringAlertType());
+  alerting.registerType(getNeverFiringAlertType());
+  alerting.registerType(getFailingAlertType());
+  alerting.registerType(getValidationAlertType());
+  alerting.registerType(getAuthorizationAlertType(core));
+  alerting.registerType(noopAlertType);
+  alerting.registerType(onlyContextVariablesAlertType);
+  alerting.registerType(onlyStateVariablesAlertType);
+  alerting.registerType(getPatternFiringAlertType());
+  alerting.registerType(throwAlertType);
+  alerting.registerType(longRunningAlertType);
+  alerting.registerType(goldNoopAlertType);
 }
