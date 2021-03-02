@@ -24,7 +24,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
           <h2>
             <FormattedMessage
               id="xpack.upgradeAssistant.emptyPrompt.title"
-              defaultMessage="{uaVersion} Upgrade Assistant coming soon"
+              defaultMessage="{uaVersion} Upgrade Assistant"
               values={{ uaVersion: `${nextMajor}.0` }}
             />
           </h2>
@@ -34,29 +34,29 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.emptyPrompt.upgradeAssistantDescription"
-                defaultMessage="The Upgrade Assistant identifies deprecated settings in your cluster and
-                guides you through the process of resolving issues. Check back here when Elasticsearch {nextMajor} is released."
+                defaultMessage="The Upgrade Assistant identifies deprecated settings in your cluster and helps you
+                resolve issues before you upgrade. Check back here when it's time to upgrade to Elasticsearch {nextMajor}."
                 values={{ nextMajor: `${nextMajor}.0` }}
               />
-              {currentMajor === 7 && (
-                <>
-                  {' '}
-                  <EuiLink
-                    external
-                    target="_blank"
-                    href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/master/migrating-8.0.html`}
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.emptyPrompt.learnMoreDescription"
-                      defaultMessage="Learn more about migrating to {nextMajor}."
-                      values={{
-                        nextMajor: `${nextMajor}.0`,
-                      }}
-                    />
-                  </EuiLink>
-                </>
-              )}
             </p>
+
+            {currentMajor === 7 && (
+              <p>
+                <EuiLink
+                  external
+                  target="_blank"
+                  href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/master/migrating-8.0.html`}
+                >
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.emptyPrompt.learnMoreDescription"
+                    defaultMessage="Learn more about migrating to {nextMajor}."
+                    values={{
+                      nextMajor: `${nextMajor}.0`,
+                    }}
+                  />
+                </EuiLink>
+              </p>
+            )}
           </>
         }
       />
