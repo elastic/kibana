@@ -27,8 +27,8 @@ import {
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
 } from '../../../../../common/runtime_types';
-import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
 import { useUpdateKueryString } from '../../../../hooks';
+import { useIndexPattern } from '../../query_bar/use_index_pattern';
 
 interface Props {
   alertParams: { [key: string]: any };

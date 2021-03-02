@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -9,7 +10,7 @@ import { useDebounce } from 'react-use';
 import { useDispatch } from 'react-redux';
 import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { useIndexPattern } from '../kuery_bar/use_index_pattern';
+import { useIndexPattern } from './use_index_pattern';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../../apps/plugin';
 
@@ -49,12 +50,12 @@ export const useQueryBar = () => {
 
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
-    query.language === SyntaxType.kuery ? query.query : undefined,
+    query.language === SyntaxType.kuery ? (query.query as string) : undefined,
     paramFilters
   );
 
   const setEsKueryFilters = useCallback(
-    (esFilters: string) => dispatch(setEsKueryString(esFilters)),
+    (esFiltersN: string) => dispatch(setEsKueryString(esFiltersN)),
     [dispatch]
   );
 
@@ -65,7 +66,7 @@ export const useQueryBar = () => {
   useDebounce(
     () => {
       if (query.language === SyntaxType.text) {
-        updateUrlParams({ query: query.query });
+        updateUrlParams({ query: query.query as string });
       }
     },
     250,
@@ -74,17 +75,17 @@ export const useQueryBar = () => {
 
   useEffect(() => {
     storage.set(SYNTAX_STORAGE, query.language);
-  }, [query.language]);
+  }, [query.language, storage]);
 
   useDebounce(
     () => {
       if (query.language === SyntaxType.kuery && !error && esFilters) {
-        updateUrlParams({ search: query.query });
+        updateUrlParams({ search: query.query as string });
       }
     },
     250,
     [esFilters, error]
   );
 
-  return [query, setQuery];
+  return { query, setQuery };
 };

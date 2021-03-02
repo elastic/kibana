@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ComponentType, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UptimeStartupPluginsContext } from '../../../contexts';
-import { StatefulSearchBarProps } from '../../../../../../../src/plugins/data/public/ui/search_bar';
-import { DataPublicPluginStartUi } from '../../../../../../../src/plugins/data/public';
-import { useIndexPattern } from './../kuery_bar/use_index_pattern';
-import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { EuiFlexItem } from '@elastic/eui';
+import {
+  StatefulSearchBarProps,
+  DataPublicPluginStartUi,
+} from '../../../../../../../src/plugins/data/public/';
+import { useIndexPattern } from './use_index_pattern';
 import { useQueryBar } from './use_query_bar';
-
-interface Props {}
+import { UptimeStartupPluginsContext } from '../../../contexts';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -24,16 +25,14 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const QueryBar = (props: Props) => {
+export const QueryBar = () => {
   const { index_pattern: indexPattern, loading } = useIndexPattern();
 
-  const [query, setQuery] = useQueryBar();
+  const { query, setQuery } = useQueryBar();
 
-  const {
-    data: { ui },
-  } = useContext(UptimeStartupPluginsContext);
+  const { data } = useContext(UptimeStartupPluginsContext);
 
-  const SearchBar: ComponentType<StatefulSearchBarProps> = (ui as DataPublicPluginStartUi)
+  const SearchBar: ComponentType<StatefulSearchBarProps> = (data?.ui as DataPublicPluginStartUi)
     .SearchBar;
 
   return (
@@ -45,7 +44,7 @@ export const QueryBar = (props: Props) => {
         showFilterBar={false}
         showDatePicker={false}
         showQueryInput={true}
-        customSubmitButton={<div></div>}
+        customSubmitButton={<div />}
         nonKqlMode="text"
         iconType="search"
         isLoading={loading}
@@ -56,7 +55,7 @@ export const QueryBar = (props: Props) => {
           }
         }}
         onQuerySubmit={(queryN) => {
-          setQuery(queryN.query);
+          if (queryN.query) setQuery(queryN.query);
         }}
         query={query}
         aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
