@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt, CaseStatusFilterRt, CaseStatusRt } from './status';
+import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
@@ -102,7 +102,7 @@ export const CasePostRequestRt = rt.intersection([
 export const CasesFindRequestRt = rt.partial({
   type: CaseTypeRt,
   tags: rt.union([rt.array(rt.string), rt.string]),
-  status: CaseStatusFilterRt,
+  status: CaseStatusRt,
   reporters: rt.union([rt.array(rt.string), rt.string]),
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   fields: rt.array(rt.string),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assign } from 'lodash';
+import { assign, omit } from 'lodash';
 
 import {
   StatusAll,
@@ -187,7 +187,7 @@ export const getCases = async ({
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
-    query,
+    query: query.status === StatusAll ? omit(query, ['status']) : query,
     signal,
   });
   return convertAllCasesToCamel(decodeCasesFindResponse(response));

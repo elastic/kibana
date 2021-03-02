@@ -16,7 +16,6 @@ import {
   CasesFindRequestRt,
   throwErrors,
   caseStatuses,
-  StatusAll,
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
@@ -38,21 +37,14 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
           CasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const queryArgs =
-          queryParams.status === StatusAll
-            ? {
-                tags: queryParams.tags,
-                reporters: queryParams.reporters,
-                sortByField: queryParams.sortField,
-                caseType: queryParams.type,
-              }
-            : {
-                tags: queryParams.tags,
-                reporters: queryParams.reporters,
-                sortByField: queryParams.sortField,
-                status: queryParams.status,
-                caseType: queryParams.type,
-              };
+        const queryArgs = {
+          tags: queryParams.tags,
+          reporters: queryParams.reporters,
+          sortByField: queryParams.sortField,
+          status: queryParams.status,
+          caseType: queryParams.type,
+        };
+
         const caseQueries = constructQueryOptions(queryArgs);
         const cases = await caseService.findCasesGroupedByID({
           client,
