@@ -95,8 +95,6 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
         });
       },
     });
-
-    // return flattened;
   };
 }
 
