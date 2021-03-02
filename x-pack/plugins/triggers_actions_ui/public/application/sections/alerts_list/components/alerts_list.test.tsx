@@ -115,17 +115,17 @@ describe('alerts_list component empty', () => {
 
   it('renders empty list', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="createFirstAlertEmptyPrompt"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
 
   it('renders Create alert button', async () => {
     await setup();
-    expect(
-      wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
-    ).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="createFirstRuleButton"]').find('EuiButton')).toHaveLength(
+      1
+    );
     expect(wrapper.find('AlertAdd').exists()).toBeFalsy();
 
-    wrapper.find('button[data-test-subj="createFirstAlertButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="createFirstRuleButton"]').simulate('click');
 
     await act(async () => {
       // When the AlertAdd component is rendered, it waits for the healthcheck to resolve

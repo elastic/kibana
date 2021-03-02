@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Loads the Alerts page', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Actions');
       });
     });
 
@@ -48,7 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await log.debug('Checking for section heading to say Triggers and Actions.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Actions');
       });
 
       describe('Connectors tab', () => {

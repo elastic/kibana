@@ -153,7 +153,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickCreateAlertButton() {
       const createBtn = await find.byCssSelector(
-        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
+        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstRuleButton"]'
       );
       await createBtn.click();
     },

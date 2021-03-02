@@ -12,12 +12,12 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
-    data-test-subj="createFirstAlertEmptyPrompt"
+    data-test-subj="createFirstRuleEmptyPrompt"
     title={
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-          defaultMessage="Create your first alert"
+          defaultMessage="Create your first rule"
         />
       </h2>
     }
@@ -31,14 +31,14 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
     }
     actions={
       <EuiButton
-        data-test-subj="createFirstAlertButton"
+        data-test-subj="createFirstRuleButton"
         key="create-action"
         fill
         onClick={onCTAClicked}
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiButton>
     }
