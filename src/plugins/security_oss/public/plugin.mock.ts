@@ -7,9 +7,10 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { InsecureClusterServiceStart } from './insecure_cluster_service';
+
+import type { InsecureClusterServiceStart } from './insecure_cluster_service';
 import { mockInsecureClusterService } from './insecure_cluster_service/insecure_cluster_service.mock';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
+import type { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
 
 export const mockSecurityOssPlugin = {
   createSetup: () => {

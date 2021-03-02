@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('create_threat_matching', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/93152
+  describe.skip('create_threat_matching', () => {
     describe('validation errors', () => {
       it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
         const { body } = await supertest
