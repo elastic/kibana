@@ -1316,7 +1316,7 @@ module.exports = {
 
     {
       files: [
-        // platform-team owned code
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
