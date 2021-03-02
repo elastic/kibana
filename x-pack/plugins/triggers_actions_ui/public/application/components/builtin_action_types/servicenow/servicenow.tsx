@@ -24,13 +24,15 @@ import { isValidUrl } from '../../../lib/value_validators';
 
 const validateConnector = (
   action: ServiceNowActionConnector
-): ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets> => {
+): ConnectorValidationResult<Pick<ServiceNowConfig, 'apiUrl'>, ServiceNowSecrets> => {
   const configErrors = {
     apiUrl: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),
     password: new Array<string>(),
+    clientId: new Array<string>(),
+    clientSecret: new Array<string>(),
   };
 
   const validationResult = {
@@ -56,6 +58,14 @@ const validateConnector = (
 
   if (!action.secrets.password) {
     secretsErrors.password = [...secretsErrors.password, i18n.PASSWORD_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.clientId) {
+    secretsErrors.clientId = [...secretsErrors.clientId, i18n.CLIENTID_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.clientSecret) {
+    secretsErrors.clientSecret = [...secretsErrors.clientSecret, i18n.CLIENTSECRET_REQUIRED];
   }
 
   return validationResult;

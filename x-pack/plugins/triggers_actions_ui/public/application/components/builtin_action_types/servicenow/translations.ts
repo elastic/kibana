@@ -85,6 +85,14 @@ export const REENTER_VALUES_LABEL = i18n.translate(
   }
 );
 
+export const REENTER_OAUTH_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterOAuthValuesLabel',
+  {
+    defaultMessage:
+      'Username, password, client ID and client secret are encrypted. Please reenter values for these fields.',
+  }
+);
+
 export const USERNAME_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.usernameTextFieldLabel',
   {
@@ -92,10 +100,38 @@ export const USERNAME_LABEL = i18n.translate(
   }
 );
 
+export const CLIENTID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENTSECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
 export const USERNAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField',
   {
     defaultMessage: 'Username is required.',
+  }
+);
+
+export const CLIENTID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientIdTextField',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+
+export const CLIENTSECRET_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientSecretTextField',
+  {
+    defaultMessage: 'Client Secret is required.',
   }
 );
 
@@ -222,5 +258,12 @@ export const PRIORITY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
+  }
+);
+
+export const IS_OAUTH = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.useOAuth',
+  {
+    defaultMessage: 'Use OAuth',
   }
 );

@@ -29,11 +29,14 @@ export interface ServiceNowSIRActionParams {
 
 export interface ServiceNowConfig {
   apiUrl: string;
+  isOAuth: boolean;
 }
 
 export interface ServiceNowSecrets {
   username: string;
   password: string;
+  clientId?: string;
+  clientSecret?: string;
 }
 
 export interface Choice {

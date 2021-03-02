@@ -125,6 +125,7 @@ async function executor(
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
+    actionId,
     table,
     {
       config,

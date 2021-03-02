@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiText,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,16 +30,19 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
-  const { apiUrl } = action.config;
+  const { apiUrl, isOAuth } = action.config;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
-  const { username, password } = action.secrets;
+  const { username, password, clientId, clientSecret } = action.secrets;
 
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
+  const isClientIdInvalid: boolean = errors.clientId.length > 0 && clientId !== undefined;
+  const isClientSecretInvalid: boolean =
+    errors.clientSecret.length > 0 && clientSecret !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -96,10 +100,26 @@ const ServiceNowConnectorFields: React.FC<
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiSwitch
+            label={i18n.IS_OAUTH}
+            disabled={readOnly}
+            checked={isOAuth || false}
+            onChange={(e) => {
+              editActionConfig('isOAuth', e.target.checked);
+              if (!e.target.checked) {
+                editActionSecrets('clientId', null);
+                editActionSecrets('clientSecret', null);
+              }
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id, isOAuth)}</EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -156,11 +176,69 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isOAuth ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-client-id"
+                fullWidth
+                error={errors.clientId}
+                isInvalid={isClientIdInvalid}
+                label={i18n.CLIENTID_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={isClientIdInvalid}
+                  readOnly={readOnly}
+                  name="connector-servicenow-client-id"
+                  value={clientId || ''}
+                  data-test-subj="connector-servicenow-clientid-form-input"
+                  onChange={(evt) => handleOnChangeSecretConfig('clientId', evt.target.value)}
+                  onBlur={() => {
+                    if (!clientId) {
+                      editActionSecrets('clientId', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-client-secret"
+                fullWidth
+                error={errors.clientSecret}
+                isInvalid={isClientSecretInvalid}
+                label={i18n.CLIENTSECRET_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={isClientSecretInvalid}
+                  readOnly={readOnly}
+                  name="connector-servicenow-client-secret"
+                  value={clientSecret || ''}
+                  data-test-subj="connector-servicenow-clientsecret-form-input"
+                  onChange={(evt) => handleOnChangeSecretConfig('clientSecret', evt.target.value)}
+                  onBlur={() => {
+                    if (!clientSecret) {
+                      editActionSecrets('clientSecret', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
     </>
   );
 };
 
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+function getEncryptedFieldNotifyLabel(isCreate: boolean, isOAuth: boolean) {
   if (isCreate) {
     return (
       <EuiText size="s" data-test-subj="rememberValuesMessage">
@@ -172,7 +250,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
     <EuiCallOut
       size="s"
       iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
+      title={isOAuth ? i18n.REENTER_OAUTH_VALUES_LABEL : i18n.REENTER_VALUES_LABEL}
       data-test-subj="reenterValuesMessage"
     />
   );

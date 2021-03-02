@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
@@ -14,30 +14,59 @@ import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getAccessToken } from './get_access_token';
 
 const API_VERSION = 'v2';
 const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
 
 export const createExternalService = (
+  actionId: string,
   table: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
-  const { username, password } = secrets as ServiceNowSecretConfigurationType;
+  const { apiUrl: url, isOAuth } = config as ServiceNowPublicConfigurationType;
+  const {
+    username,
+    password,
+    clientId,
+    clientSecret,
+  } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
     throw Error(`[Action]${i18n.SERVICENOW}: Wrong configuration.`);
+  }
+
+  if (isOAuth && (!clientId || !clientSecret)) {
+    throw Error(`[Action]${i18n.SERVICENOW}: Wrong OAuth configuration.`);
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const incidentUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/sys_choice`;
-  const axiosInstance = axios.create({
-    auth: { username, password },
-  });
+  const axiosInstance = isOAuth
+    ? axios.create()
+    : axios.create({
+        auth: { username, password },
+      });
+
+  if (isOAuth) {
+    axiosInstance.interceptors.request.use(
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      (config: AxiosRequestConfig) => {
+        const token = getAccessToken(actionId, urlWithoutTrailingSlash);
+        if (token) {
+          config.headers.Authorization = 'Bearer ' + token;
+        }
+        return config;
+      },
+      (error) => {
+        Promise.reject(error);
+      }
+    );
+  }
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
