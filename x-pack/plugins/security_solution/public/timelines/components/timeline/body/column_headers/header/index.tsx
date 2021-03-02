@@ -82,6 +82,7 @@ export const HeaderComponent: React.FC<Props> = ({
     getManageTimelineById,
     timelineId,
   ]);
+  const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
 
   return (
     <>
@@ -90,6 +91,10 @@ export const HeaderComponent: React.FC<Props> = ({
         isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
+<<<<<<< HEAD
+=======
+        showSortingCapability={showSortingCapability}
+>>>>>>> 90976ee1198... [Security Solution] [Timeline] Bugfix to include unmapped fields in the timeline event details JSON (#92025)
         sort={sort}
       >
         <Actions
