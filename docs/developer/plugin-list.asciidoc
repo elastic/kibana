@@ -28,7 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.md[apmOss]
+|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.mdx[apmOss]
 |OSS plugin for APM. Includes index configuration and tutorial resources.
 
 
