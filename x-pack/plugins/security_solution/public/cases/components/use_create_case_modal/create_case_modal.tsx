@@ -21,6 +21,7 @@ export interface CreateCaseModalProps {
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   caseType?: CaseType;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const Container = styled.div`
@@ -35,6 +36,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   onCloseCaseModal,
   onSuccess,
   caseType = CaseType.individual,
+  hideConnectorServiceNowSir = false,
 }) => {
   return isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
@@ -42,8 +44,15 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FormContext caseType={caseType} onSuccess={onSuccess}>
-          <CreateCaseForm withSteps={false} />
+        <FormContext
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          caseType={caseType}
+          onSuccess={onSuccess}
+        >
+          <CreateCaseForm
+            withSteps={false}
+            hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          />
           <Container>
             <SubmitCaseButton />
           </Container>
