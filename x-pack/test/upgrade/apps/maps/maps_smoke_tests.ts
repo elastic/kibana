@@ -99,7 +99,6 @@ export default function ({
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('ecommerce');
           await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
           await PageObjects.maps.toggleLayerVisibility('Road map');
