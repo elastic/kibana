@@ -10,12 +10,12 @@ import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import { SanitizedAlert } from '../../../../plugins/alerting/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/public';
 
-export function registerNavigation(alerts: AlertingSetup) {
+export function registerNavigation(alerting: AlertingSetup) {
   // register default navigation
-  alerts.registerDefaultNavigation(
+  alerting.registerDefaultNavigation(
     ALERTING_EXAMPLE_APP_ID,
     (alert: SanitizedAlert) => `/alert/${alert.id}`
   );
 
-  registerPeopleInSpaceNavigation(alerts);
+  registerPeopleInSpaceNavigation(alerting);
 }
