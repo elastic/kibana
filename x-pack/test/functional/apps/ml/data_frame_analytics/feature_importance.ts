@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/93152
-  describe.skip('total feature importance panel and decision path popover', function () {
+  describe('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
