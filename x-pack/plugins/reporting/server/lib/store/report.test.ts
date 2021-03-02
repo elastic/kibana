@@ -18,7 +18,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'cool report' },
       meta: { objectType: 'test' },
       timeout: 30000,
-      priority: 1,
     });
 
     expect(report.toEsDocsJSON()).toMatchObject({
@@ -32,7 +31,6 @@ describe('Class Report', () => {
         max_attempts: 50,
         meta: { objectType: 'test' },
         payload: { headers: 'payload_test_field', objectType: 'testOt' },
-        priority: 1,
         started_at: undefined,
         status: 'pending',
         timeout: 30000,
@@ -47,7 +45,6 @@ describe('Class Report', () => {
       max_attempts: 50,
       payload: { headers: 'payload_test_field', objectType: 'testOt' },
       meta: { objectType: 'test' },
-      priority: 1,
       status: 'pending',
       timeout: 30000,
     });
@@ -65,7 +62,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt', title: 'hot report' },
       meta: { objectType: 'stange' },
       timeout: 30000,
-      priority: 1,
     });
 
     const metadata = {
@@ -88,7 +84,6 @@ describe('Class Report', () => {
         max_attempts: 50,
         meta: { objectType: 'stange' },
         payload: { objectType: 'testOt' },
-        priority: 1,
         started_at: undefined,
         status: 'pending',
         timeout: 30000,
@@ -105,7 +100,6 @@ describe('Class Report', () => {
       max_attempts: 50,
       meta: { objectType: 'stange' },
       payload: { headers: 'payload_test_field', objectType: 'testOt' },
-      priority: 1,
       started_at: undefined,
       status: 'pending',
       timeout: 30000,
