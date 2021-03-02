@@ -205,8 +205,8 @@ function getExpressionForLayer(
             idMap: [JSON.stringify(idMap)],
           },
         },
-        ...formatterOverrides,
         ...expressions,
+        ...formatterOverrides,
         ...timeScaleFunctions,
       ],
     };

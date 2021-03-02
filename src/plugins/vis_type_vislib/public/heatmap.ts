@@ -29,6 +29,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   valueAxes: ValueAxis[];
   setColorRange: boolean;
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   times: TimeMarker[];
 }
 

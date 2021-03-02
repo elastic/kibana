@@ -9,7 +9,7 @@ import { FunctionComponent } from 'react';
 import { StyledComponent } from 'styled-components';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
 import { rgba } from 'polished';
-import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
+import { FIXED_AXIS_HEIGHT } from './constants';
 import { euiStyled, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface WaterfallChartOuterContainerProps {
@@ -49,7 +49,7 @@ export const WaterfallChartFixedTopContainer = euiStyled(StyledScrollDiv)`
 `;
 
 export const WaterfallChartAxisOnlyContainer = euiStyled(EuiFlexItem)`
-  margin-left: -22px;
+  margin-left: -16px;
 `;
 
 export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
@@ -83,9 +83,9 @@ interface WaterfallChartSidebarContainer {
 }
 
 export const WaterfallChartSidebarWrapper = euiStyled(EuiFlexItem)`
-  max-width: ${SIDEBAR_GROW_SIZE * 10}%;
   z-index: ${(props) => props.theme.eui.euiZLevel5};
-`;
+  min-width: 0;
+`; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
   height: ${(props) => `${props.height}px`};

@@ -17,6 +17,7 @@ import {
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
 import { FileAppender, FileAppenderConfig } from './file/file_appender';
+import { RewriteAppender, RewriteAppenderConfig } from './rewrite/rewrite_appender';
 import {
   RollingFileAppender,
   RollingFileAppenderConfig,
@@ -32,6 +33,7 @@ export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
   LegacyAppender.configSchema,
+  RewriteAppender.configSchema,
   RollingFileAppender.configSchema,
 ]);
 
@@ -40,6 +42,7 @@ export type AppenderConfigType =
   | ConsoleAppenderConfig
   | FileAppenderConfig
   | LegacyAppenderConfig
+  | RewriteAppenderConfig
   | RollingFileAppenderConfig;
 
 /** @internal */
@@ -57,6 +60,8 @@ export class Appenders {
         return new ConsoleAppender(Layouts.create(config.layout));
       case 'file':
         return new FileAppender(Layouts.create(config.layout), config.fileName);
+      case 'rewrite':
+        return new RewriteAppender(config);
       case 'rolling-file':
         return new RollingFileAppender(config);
       case 'legacy-appender':

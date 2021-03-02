@@ -39,7 +39,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
@@ -63,7 +62,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
@@ -94,7 +92,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start,
               end,
-              uiFilters: '{}',
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(['foo']),

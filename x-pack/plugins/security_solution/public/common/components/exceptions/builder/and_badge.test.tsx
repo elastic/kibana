@@ -8,14 +8,15 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { BuilderAndBadgeComponent } from './and_badge';
+
+const mockTheme = { eui: { euiColorLightShade: '#ece' } };
 
 describe('BuilderAndBadgeComponent', () => {
   test('it renders exceptionItemEntryFirstRowAndBadge for very first exception item in builder', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={0} />
       </ThemeProvider>
     );
@@ -27,7 +28,7 @@ describe('BuilderAndBadgeComponent', () => {
 
   test('it renders exceptionItemEntryInvisibleAndBadge if "entriesLength" is 1 or less', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <BuilderAndBadgeComponent entriesLength={1} exceptionItemIndex={0} />
       </ThemeProvider>
     );
@@ -39,7 +40,7 @@ describe('BuilderAndBadgeComponent', () => {
 
   test('it renders regular "and" badge if exception item is not the first one and includes more than one entry', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={1} />
       </ThemeProvider>
     );

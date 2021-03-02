@@ -15,11 +15,13 @@ import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 export async function getServices({
   environment,
+  kuery,
   setup,
   searchAggregatedTransactions,
   logger,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -28,6 +30,7 @@ export async function getServices({
     const [items, hasLegacyData] = await Promise.all([
       getServicesItems({
         environment,
+        kuery,
         setup,
         searchAggregatedTransactions,
         logger,

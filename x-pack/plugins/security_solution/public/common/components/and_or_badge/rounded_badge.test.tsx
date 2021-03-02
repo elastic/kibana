@@ -6,29 +6,19 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { RoundedBadge } from './rounded_badge';
 
 describe('RoundedBadge', () => {
   test('it renders "and" when "type" is "and"', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <RoundedBadge type="and" />
-      </ThemeProvider>
-    );
+    const wrapper = mount(<RoundedBadge type="and" />);
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
   });
 
   test('it renders "or" when "type" is "or"', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <RoundedBadge type="or" />
-      </ThemeProvider>
-    );
+    const wrapper = mount(<RoundedBadge type="or" />);
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');
   });

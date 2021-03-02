@@ -833,7 +833,7 @@ interface AlertAddProps {
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
-  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 ```
@@ -845,7 +845,7 @@ interface AlertAddProps {
 |setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |initialValues|Default values for Alert properties.|
 |metadata|Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component.|
 
@@ -1149,7 +1149,7 @@ triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#action-types) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -1470,7 +1470,7 @@ interface ActionAccordionFormProps {
 
 |Property|Description|
 |---|---|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
