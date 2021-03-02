@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
-import { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
+import type { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
 
