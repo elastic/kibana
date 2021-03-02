@@ -18,11 +18,11 @@ export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const {
-    body: deprecations,
-  } = await dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>();
+  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
+  // @ts-expect-error DeprecationInfoResponse doesn't contain ml_settings
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
+  // @ts-expect-error DeprecationInfoResponse doesn't contain ml_settings
   const indices = getCombinedIndexInfos(deprecations);
 
   const indexNames = indices.map(({ index }) => index!);
