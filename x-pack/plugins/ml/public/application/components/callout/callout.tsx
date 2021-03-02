@@ -20,7 +20,7 @@ export interface CalloutMessage {
   url?: string;
 }
 
-export const statusToEuiColor = (status: VALIDATION_STATUS) => {
+const statusToEuiColor = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'primary';
