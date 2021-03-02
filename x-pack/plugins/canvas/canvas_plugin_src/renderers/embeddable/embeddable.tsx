@@ -27,6 +27,8 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable;
 } = {};
 
+const embeddablesLoading = {};
+
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
@@ -57,7 +59,10 @@ export const embeddableRendererFactory = (
     render: async (domNode, { input, embeddableType }, handlers) => {
       const uniqueId = handlers.getElementId();
 
-      if (!embeddablesRegistry[uniqueId]) {
+      const isLoaded = embeddablesRegistry[uniqueId] !== undefined;
+      const isLoading = embeddablesLoading[uniqueId] !== undefined;
+
+      if (!isLoaded && !isLoading) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
@@ -67,6 +72,50 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
+        const createPromise = factory
+          .createFromSavedObject(input.id, input)
+          .then(async (embeddableObject) => {
+            const palettes = await plugins.charts.palettes.getPalettes();
+
+            embeddablesRegistry[uniqueId] = embeddableObject;
+            ReactDOM.unmountComponentAtNode(domNode);
+
+            const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
+              const updatedExpression = embeddableInputToExpression(
+                updatedInput,
+                embeddableType,
+                palettes
+              );
+
+              if (updatedExpression) {
+                handlers.onEmbeddableInputChange(updatedExpression);
+              }
+            });
+
+            ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
+              handlers.done()
+            );
+
+            handlers.onResize(() => {
+              ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
+                handlers.done()
+              );
+            });
+
+            handlers.onDestroy(() => {
+              subscription.unsubscribe();
+              handlers.onEmbeddableDestroyed();
+
+              delete embeddablesRegistry[uniqueId];
+
+              return ReactDOM.unmountComponentAtNode(domNode);
+            });
+
+            delete embeddablesLoading[uniqueId];
+          });
+
+        embeddablesLoading[uniqueId] = createPromise;
+        /*
         const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
         const palettes = await plugins.charts.palettes.getPalettes();
@@ -104,6 +153,9 @@ export const embeddableRendererFactory = (
 
           return ReactDOM.unmountComponentAtNode(domNode);
         });
+        */
+      } else if (isLoading) {
+        // Just ignore this input for now
       } else {
         embeddablesRegistry[uniqueId].updateInput(input);
         embeddablesRegistry[uniqueId].reload();
