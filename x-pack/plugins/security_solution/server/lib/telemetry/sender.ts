@@ -431,7 +431,7 @@ const allowlistEventFields: AllowlistFields = {
                   status: true,
                   subject_name: true,
                   trusted: true,
-                  },
+                },
                 legal_copyright: true,
                 product_version: true,
               },
