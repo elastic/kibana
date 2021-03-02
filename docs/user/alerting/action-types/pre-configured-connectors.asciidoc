@@ -95,7 +95,7 @@ This example shows a preconfigured action type with one out-of-the box connector
       name: 'Server log #xyz'
 ```
 
-<1> `enabledActionTypes` excludes the preconfigured action type to prevent creating and deleting connectors. For more details check <<action-settings, alerting and action settings>>.
+<1> `enabledActionTypes` prevents the preconfigured action type from creating and deleting connectors. For more details, check <<action-settings, Action settings>>.
 <2> `preconfigured` is the setting for defining the list of available connectors for the preconfigured action type.
 
 [[managing-pre-configured-action-types]]
