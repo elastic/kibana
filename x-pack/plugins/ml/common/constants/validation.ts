@@ -17,3 +17,10 @@ export const SKIP_BUCKET_SPAN_ESTIMATION = true;
 export const ALLOWED_DATA_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
 export const JOB_ID_MAX_LENGTH = 64;
+
+// Data Frame Analytics
+export const TRAINING_DOCS_UPPER = 200000;
+export const TRAINING_DOCS_LOWER = 200;
+export const INCLUDED_FIELDS_THRESHOLD = 100;
+export const MINIMUM_NUM_FIELD_FOR_CHECK = 25;
+export const PERCENT_EMPTY_LIMIT = 0.3;

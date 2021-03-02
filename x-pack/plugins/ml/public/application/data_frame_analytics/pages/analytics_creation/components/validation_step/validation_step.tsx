@@ -6,85 +6,18 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
 import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+import { Callout, CalloutMessage } from '../../../../../components/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
-
-interface CalloutMessage {
-  id?: string;
-  heading?: string;
-  status?: VALIDATION_STATUS;
-  text: string;
-  url?: string;
-}
-
-const statusToEuiColor = (status: VALIDATION_STATUS) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'primary';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'danger';
-      break;
-    default:
-      return status;
-  }
-};
-
-const statusToEuiIconType = (status: VALIDATION_STATUS) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'iInCircle';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'cross';
-      break;
-    case VALIDATION_STATUS.SUCCESS:
-      return 'check';
-      break;
-    case VALIDATION_STATUS.WARNING:
-      return 'alert';
-      break;
-    default:
-      return status;
-  }
-};
-
-const defaultIconType = 'questionInCircle';
-
-const Link: FC<{ url: string }> = ({ url }) => (
-  <EuiLink href={url} target="_BLANK">
-    <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
-  </EuiLink>
-);
-
-const Message: FC<CalloutMessage> = ({ text, url }) => (
-  <>
-    {text} {url && <Link url={url} />}
-  </>
-);
-// TODO: if possible, move this to a shared component so it can be shared here and in validate_job_view (AD)
-const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
-  <>
-    <EuiCallOut
-      // @ts-ignore
-      color={statusToEuiColor(status)}
-      size="s"
-      title={heading || <Message text={text} url={url} />}
-      iconType={status ? statusToEuiIconType(status) : defaultIconType}
-    >
-      {heading && <Message text={text} url={url} />}
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </>
-);
 
 interface Props extends CreateAnalyticsStepProps {
   setValidationSummary: any;
@@ -93,6 +26,7 @@ interface Props extends CreateAnalyticsStepProps {
 export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidationSummary }) => {
   const [checksInProgress, setChecksInProgress] = useState<boolean>(false);
   const [validationMessages, setValidationMessages] = useState<CalloutMessage[]>([]);
+  const [errorMessage, setErrorMessage] = useState<CalloutMessage | undefined>();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
 
@@ -117,8 +51,18 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
       setValidationMessages(validationResults);
       setValidationSummary(validationSummary);
       setChecksInProgress(false);
-    } catch (e) {
-      // TODO: toast or error message?
+    } catch (err) {
+      setErrorMessage({
+        heading: i18n.translate(
+          'xpack.ml.dataframe.analytics.validation.validationFetchErrorMessage',
+          {
+            defaultMessage: 'Error validating job',
+          }
+        ),
+        id: 'error',
+        status: VALIDATION_STATUS.ERROR,
+        text: extractErrorMessage(err),
+      });
       setChecksInProgress(false);
     }
   };
@@ -127,6 +71,10 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
     setChecksInProgress(true);
     runValidationChecks();
   }, []);
+
+  if (errorMessage !== undefined) {
+    validationMessages.push(errorMessage);
+  }
 
   const callouts = validationMessages.map((m, i) => <Callout key={`${m.id}_${i}`} {...m} />);
 

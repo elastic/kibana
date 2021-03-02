@@ -8,7 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
-import { VALIDATION_STATUS } from '../../../common/constants/validation';
+import {
+  INCLUDED_FIELDS_THRESHOLD,
+  MINIMUM_NUM_FIELD_FOR_CHECK,
+  PERCENT_EMPTY_LIMIT,
+  TRAINING_DOCS_LOWER,
+  TRAINING_DOCS_UPPER,
+  VALIDATION_STATUS,
+} from '../../../common/constants/validation';
 import { getDependentVar } from '../../../common/util/analytics_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
 import { SearchResponse7 } from '../../../common';
@@ -29,11 +36,6 @@ type ValidationSearchResult = Omit<SearchResponse7, 'aggregations'> & {
   aggregations: MissingAgg | CardinalityAgg;
 };
 
-export const TRAINING_DOCS_UPPER = 200000;
-export const TRAINING_DOCS_LOWER = 200;
-export const INCLUDED_FIELDS_THRESHOLD = 100;
-export const MINIMUM_NUM_FIELD_FOR_CHECK = 25;
-export const PERCENT_EMPTY_LIMIT = 0.3;
 const defaultQuery = { match_all: {} };
 
 const trainingPercentHeading = i18n.translate(
@@ -112,7 +114,7 @@ function getTrainingPercentAndNumFieldsMessages(trainingDocs: number, numInclude
   return [trainingPercentMessage, fieldsMessage];
 }
 
-async function analyzedFieldsCheck(
+async function getValidationCheckMessages(
   asCurrentUser: IScopedClusterClient['asCurrentUser'],
   analyzedFields: string[],
   index: string | string[],
@@ -204,7 +206,11 @@ async function analyzedFieldsCheck(
     if (emptyFields.length) {
       messages.push({
         id: 'empty_fields',
-        text: 'Some fields have a high number of empty values.',
+        text: i18n.translate('xpack.ml.models.dfaValidation.messages.validationErrorText', {
+          defaultMessage:
+            'Some fields included for analysis have at least {percentEmpty}% empty values.',
+          values: { percentEmpty: PERCENT_EMPTY_LIMIT * 100 },
+        }),
         status: VALIDATION_STATUS.WARNING,
         heading: 'Empty fields',
       });
@@ -235,16 +241,14 @@ export async function validateAnalyticsJob(
   const analysis = job.analysis[analysisType];
   const depVar = getDependentVar(job.analysis);
 
-  const messages = await Promise.all([
-    analyzedFieldsCheck(
-      client.asCurrentUser,
-      job.analyzed_fields.includes,
-      job.source.index,
-      job.source.query,
-      depVar,
-      // @ts-ignore
-      analysis.training_percent
-    ),
-  ]);
-  return messages.flat();
+  const messages = await getValidationCheckMessages(
+    client.asCurrentUser,
+    job.analyzed_fields.includes,
+    job.source.index,
+    job.source.query,
+    depVar,
+    // @ts-ignore
+    analysis.training_percent
+  );
+  return messages;
 }
