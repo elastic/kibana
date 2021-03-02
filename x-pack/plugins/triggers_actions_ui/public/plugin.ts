@@ -67,7 +67,7 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
 }
@@ -141,7 +141,7 @@ export class Plugin
           ...coreStart,
           data: pluginsStart.data,
           charts: pluginsStart.charts,
-          alerts: pluginsStart.alerts,
+          alerting: pluginsStart.alerting,
           element: params.element,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
