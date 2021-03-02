@@ -1149,7 +1149,7 @@ triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#action-types) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 

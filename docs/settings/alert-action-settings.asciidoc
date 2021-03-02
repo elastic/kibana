@@ -37,6 +37,8 @@ You can configure the following settings in the `kibana.yml` file.
 
 [cols="2*<"]
 |===
+| `xpack.actions.enabled`
+  | Feature toggle that enables Actions in {kib}. Defaults to `true`.
 
 | `xpack.actions.allowedHosts` {ess-icon}
   | A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections. +
@@ -47,6 +49,24 @@ You can configure the following settings in the `kibana.yml` file.
   | A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types. +
   +
   Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
+
+| `xpack.actions.preconfigured`
+  | Specifies preconfigured action IDs and configs. Defaults to {}.
+
+| `xpack.actions.proxyUrl` {ess-icon}
+  | Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
+
+| `xpack.actions.proxyHeaders` {ess-icon}
+  | Specifies HTTP headers for the proxy, if using a proxy for actions. Defaults to {}.
+
+a|`xpack.actions.`
+`proxyRejectUnauthorizedCertificates` {ess-icon}
+  | Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Defaults to `true`.
+
+| `xpack.actions.rejectUnauthorized` {ess-icon}
+  | Set to `false` to bypass certificate validation for actions. Defaults to `true`. +
+  +
+  As an alternative to setting both `xpack.actions.proxyRejectUnauthorizedCertificates` and `xpack.actions.rejectUnauthorized`, you can point the OS level environment variable `NODE_EXTRA_CA_CERTS` to a file that contains the root CAs needed to trust certificates.
 
 |===
 
