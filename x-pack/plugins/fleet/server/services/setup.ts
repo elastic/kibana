@@ -157,10 +157,7 @@ async function createSetupSideEffects(
 
 async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
   try {
-    await esClient.transport.request({
-      method: 'GET',
-      path: `/_security/role/${FLEET_ENROLL_ROLE}`,
-    });
+    await esClient.security.getRole({ name: FLEET_ENROLL_ROLE });
   } catch (e) {
     if (e.statusCode === 404) {
       return;
@@ -173,9 +170,8 @@ async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
 }
 
 async function putFleetRole(esClient: ElasticsearchClient) {
-  return await esClient.transport.request({
-    method: 'PUT',
-    path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+  return await esClient.security.putRole({
+    name: FLEET_ENROLL_ROLE,
     body: {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
@@ -203,9 +199,8 @@ export async function setupFleet(
   }
   const password = generateRandomPassword();
   // Create fleet enroll user
-  await esClient.transport.request({
-    method: 'PUT',
-    path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
+  await esClient.security.putUser({
+    username: FLEET_ENROLL_USERNAME,
     body: {
       password,
       roles: [FLEET_ENROLL_ROLE],
