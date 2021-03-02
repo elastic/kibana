@@ -14,21 +14,21 @@ import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './WaterfallItem';
 import {
   IWaterfall,
-  IWaterfallSpanItem,
+  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  item: IWaterfallSpanItem;
+  item: IWaterfallSpanOrTransaction;
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
   location: Location;
   errorsPerTransaction: IWaterfall['errorsPerTransaction'];
-  childrenByParentId: Record<string, IWaterfallSpanItem[]>;
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>;
   onToggleEntryTransaction?: () => void;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanItem) => void;
+  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({

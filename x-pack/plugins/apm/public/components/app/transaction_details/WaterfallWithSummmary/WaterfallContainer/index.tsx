@@ -56,6 +56,7 @@ export function WaterfallContainer({
 
   const legendsByValue = keyBy(displayedLegends, 'value');
 
+  // mutate items rather than rebuilding both items and childrenByParentId
   items.forEach((item) => {
     let color = '';
     if ('legendValues' in item) {

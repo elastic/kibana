@@ -5,27 +5,16 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
-import { px, unit } from '../../../../../style/variables';
 import { Legend } from '../../../../shared/charts/Legend';
 import {
   IWaterfallLegend,
   WaterfallLegendType,
 } from './Waterfall/waterfall_helpers/waterfall_helpers';
-
-const Legends = styled.div`
-  display: flex;
-
-  > * {
-    margin-right: ${px(unit)};
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-`;
 
 interface Props {
   legends: IWaterfallLegend[];
@@ -56,17 +45,24 @@ const TRANSACTION_LABEL = i18n.translate(
 
 export function WaterfallLegends({ legends, type }: Props) {
   return (
-    <Legends>
-      <EuiTitle size="xxxs">
-        <span>{LEGEND_LABELS[type]}</span>
-      </EuiTitle>
-      {legends.map((legend) => (
-        <Legend
-          key={legend.value}
-          color={legend.color}
-          text={legend.value || TRANSACTION_LABEL}
-        />
-      ))}
-    </Legends>
+    <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxxs">
+          <span>{LEGEND_LABELS[type]}</span>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          {legends.map((legend) => (
+            <EuiFlexItem grow={false} key={legend.value}>
+              <Legend
+                color={legend.color}
+                text={legend.value || TRANSACTION_LABEL}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

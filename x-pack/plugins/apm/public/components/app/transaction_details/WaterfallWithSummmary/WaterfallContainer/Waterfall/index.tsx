@@ -21,7 +21,7 @@ import { WaterfallFlyout } from './WaterfallFlyout';
 import {
   IWaterfall,
   IWaterfallItem,
-  IWaterfallSpanItem,
+  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
@@ -83,7 +83,7 @@ export function Waterfall({
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   function renderItems(
-    childrenByParentId: Record<string | number, IWaterfallSpanItem[]>
+    childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>
   ) {
     const { entryWaterfallTransaction } = waterfall;
     if (!entryWaterfallTransaction) {
