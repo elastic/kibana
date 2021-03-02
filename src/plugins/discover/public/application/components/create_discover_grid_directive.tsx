@@ -6,19 +6,27 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 import { getServices } from '../../kibana_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 
 export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
   <DiscoverGrid {...props} />
 ));
 
 export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+
   return (
     <I18nProvider>
-      <DataGridMemoized {...props} services={getServices()} />
+      <DataGridMemoized
+        {...props}
+        setExpandedDoc={setExpandedDoc}
+        expandedDoc={expandedDoc}
+        services={getServices()}
+      />
     </I18nProvider>
   );
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   migratePackagePolicyToV7110,
   migratePackagePolicyToV7120,
