@@ -51,6 +51,13 @@ const EXPECTED_DATA = [
     isObjectArray: false,
   },
   {
+    category: '_type',
+    field: '_type',
+    values: ['_doc'],
+    originalValue: ['_doc'],
+    isObjectArray: false,
+  },
+  {
     category: 'agent',
     field: 'agent.ephemeral_id',
     values: ['909cd6a1-527d-41a5-9585-a7fb5386f851'],
@@ -658,34 +665,6 @@ const EXPECTED_DATA = [
     ],
     isObjectArray: false,
   },
-  {
-    category: '_index',
-    field: '_index',
-    values: ['filebeat-7.0.0-iot-2019.06'],
-    originalValue: ['filebeat-7.0.0-iot-2019.06'],
-    isObjectArray: false,
-  },
-  {
-    category: '_type',
-    field: '_type',
-    values: ['_doc'],
-    originalValue: ['_doc'],
-    isObjectArray: false,
-  },
-  {
-    category: '_id',
-    field: '_id',
-    values: ['QRhG1WgBqd-n62SwZYDT'],
-    originalValue: ['QRhG1WgBqd-n62SwZYDT'],
-    isObjectArray: false,
-  },
-  {
-    category: '_score',
-    field: '_score',
-    values: ['1'],
-    originalValue: ['1'],
-    isObjectArray: false,
-  },
 ];
 
 export default function ({ getService }: FtrProviderContext) {
@@ -710,6 +689,7 @@ export default function ({ getService }: FtrProviderContext) {
           eventId: ID,
         })
         .expect(200);
+      // console.log('VALUE:', JSON.stringify(sortBy(detailsData, 'field')));
       expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
     });
   });
