@@ -434,7 +434,9 @@ Actions that take URLs or hostnames should check that those values are allowed. 
 
 ## documentation
 
-You should also create some asciidoc for the new action type. An entry should be made in the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc) which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+You should create asciidoc for the new action type. Add an entry to the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc), which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+
+We suggest following the template provided in `docs/action-type-template.asciidoc`. The [Email action type](https://www.elastic.co/guide/en/kibana/master/email-action-type.html) is an example of documentation created following the template.
 
 ## tests
 
