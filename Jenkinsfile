@@ -3,48 +3,19 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 210) {
-  githubCommitStatus.trackBuild(params.commit, 'kibana-ci-baseline') {
-    ciStats.trackBuild {
-      catchErrors {
-        slackNotifications.onFailure(
-          title: "*<${env.BUILD_URL}|[${params.branch}] Baseline Capture Failure>*",
-          message: "[${params.branch}/${params.commit}] Baseline Capture Failure",
-        ) {
-          retryable.enable(2)
-
-          catchErrors {
-            workers.ci(
-              name: 'baseline-worker',
-              size: 'xl',
-              ramDisk: true,
-              runErrorReporter: false,
-              bootstrapped: false
-            ) {
-              withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-                withEnv([
-                  'BUILD_TS_REFS_CACHE_ENABLE=true',
-                  'BUILD_TS_REFS_CACHE_CAPTURE=true',
-                  'DISABLE_BOOTSTRAP_VALIDATIONS=true',
-                ]) {
-                  kibanaPipeline.doSetup()
-                }
-              }
-
-              kibanaPipeline.withCiTaskQueue([parallel: 2]) {
-                catchErrors {
-                  tasks([
-                    kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh'),
-                    kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh'),
-                  ])
-                }
-              }
-            }
-          }
+kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
+  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
+    githubPr.withDefaultPrComments {
+      ciStats.trackBuild {
+        catchError {
+          retryable.enable()
+          kibanaPipeline.allCiTasks()
         }
       }
     }
+  }
 
+  if (params.NOTIFY_ON_FAILURE) {
     kibanaPipeline.sendMail()
   }
 }
