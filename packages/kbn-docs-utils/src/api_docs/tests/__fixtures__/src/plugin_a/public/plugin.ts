@@ -172,6 +172,6 @@ export class PluginA implements PluginMock<Setup, Start> {
   }
 
   start() {
-    return { getSearchLanguage: () => SearchLanguage.EQL };
+    return { getSearchLanguage: () => SearchLanguage.EQL, anInternalStartFn: () => 'ho' };
   }
 }
