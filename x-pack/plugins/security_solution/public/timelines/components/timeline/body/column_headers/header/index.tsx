@@ -90,6 +90,7 @@ export const HeaderComponent: React.FC<Props> = ({
         isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
+        showSortingCapability={!(header.subType && header.subType.nested)}
         sort={sort}
       >
         <Actions

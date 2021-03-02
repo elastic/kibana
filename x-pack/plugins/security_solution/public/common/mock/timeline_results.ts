@@ -2275,11 +2275,13 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     field: 'host.name',
     values: ['apache'],
     originalValue: 'apache',
+    isObjectArray: false,
   },
   {
     field: 'user.id',
     values: ['1'],
     originalValue: 1,
+    isObjectArray: false,
   },
 ];
 
