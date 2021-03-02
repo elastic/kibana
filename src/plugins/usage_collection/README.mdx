@@ -1,3 +1,12 @@
+---
+id: kibUsageCollectionPlugin
+slug: /kibana-dev-docs/services/usage-collection-plugin
+title: Usage collection service
+summary: The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features.
+date: 2021-02-24
+tags: ['kibana','dev', 'contributor', 'api docs']
+---
+
 # Kibana Usage Collection Service
 
 The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
@@ -43,7 +52,7 @@ import { Plugin, CoreStart } from '../../../core/public';
 
 export class MyPlugin implements Plugin {
   public start(
-    core: CoreStart, 
+    core: CoreStart,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
     // Call the following method as many times as you want to report an increase in the count for this event
@@ -109,9 +118,9 @@ In many cases, plugins need to report the custom usage of a feature. In this cas
 
 ##### Creating and Registering Usage Collector
 
-1. To create the usage collector, the API `usageCollection.makeUsageCollector` expects: 
-    - `type`: the key under which to nest all the usage reported by the `fetch` method.  
-    - `schema`: field to define the expected output of the `fetch` method. 
+1. To create the usage collector, the API `usageCollection.makeUsageCollector` expects:
+    - `type`: the key under which to nest all the usage reported by the `fetch` method.
+    - `schema`: field to define the expected output of the `fetch` method.
    - `isReady`: async method (that returns true or false) for letting the usage collection consumers know if they need to wait for any asynchronous action (initialization of clients or other services) before calling the `fetch` method.
     - `fetch`: async method for returning the usage collector's data.
 
@@ -161,7 +170,7 @@ In many cases, plugins need to report the custom usage of a feature. In this cas
           },
         },
         isReady: () => isCollectorFetchReady, // Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
-        
+
         fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
         // query ES or saved objects and get some data
@@ -181,13 +190,13 @@ In many cases, plugins need to report the custom usage of a feature. In this cas
     }
     ```
 
-Some background: 
+Some background:
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
 
 - `isReady` (added in v7.2.0 and v6.8.4) is a way for a usage collector to announce that some async process must finish first before it can return data in the `fetch` method (e.g. a client needs to ne initialized, or the task manager needs to run a task first). If any collector reports that it is not ready when we call its `fetch` method, we reset a flag to try again and, after a set amount of time, collect data from those collectors that are ready and skip any that are not. This means that if a collector returns `true` for `isReady` and it actually isn't ready to return data, there won't be telemetry data from that collector in that telemetry report (usually once per day). You should consider what it means if your collector doesn't return data in the first few documents when Kibana starts or, if we should wait for any other reason (e.g. the task manager needs to run your task first). If you need to tell telemetry collection to wait, you should implement this function with custom logic. If your `fetch` method can run without the need of any previous dependencies, then you can return true for `isReady` as shown in the example below.
 
-- The `fetch` method needs to support multiple contexts in which it is called. For example, when a user requests the example of what we collect in the **Kibana>Advanced Settings>Usage data** section, the clients provided in the context of the function (`CollectorFetchContext`) are scoped to that user's privileges. The reason is to avoid exposing via telemetry any data that user should not have access to (i.e.: if the user does not have access to certain indices, they shouldn't be allowed to see the number of documents that exists in it). In this case, the `fetch` method receives the clients `esClient` and `soClient` scoped to the user who performed the HTTP API request. Alternatively, when requesting the usage data to be reported to the Remote Telemetry Service, the clients are scoped to the internal Kibana user (`kibana_system`). Please, mind it might have lower-level access than the default super-admin `elastic` test user.   
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when a user requests the example of what we collect in the **Kibana>Advanced Settings>Usage data** section, the clients provided in the context of the function (`CollectorFetchContext`) are scoped to that user's privileges. The reason is to avoid exposing via telemetry any data that user should not have access to (i.e.: if the user does not have access to certain indices, they shouldn't be allowed to see the number of documents that exists in it). In this case, the `fetch` method receives the clients `esClient` and `soClient` scoped to the user who performed the HTTP API request. Alternatively, when requesting the usage data to be reported to the Remote Telemetry Service, the clients are scoped to the internal Kibana user (`kibana_system`). Please, mind it might have lower-level access than the default super-admin `elastic` test user.  
 In some scenarios, your collector might need to maintain its own client. An example of that is the `monitoring` plugin, that maintains a connection to the Remote Monitoring Cluster to push its monitoring data. If that's the case, your plugin can opt-in to receive the additional `kibanaRequest` parameter by adding `extendFetchContext.kibanaRequest: true` to the collector's config: it will be appended to the context of the `fetch` method only if the request needs to be scoped to a user other than Kibana Internal, so beware that your collector will need to work for both scenarios (especially for the scenario when `kibanaRequest` is missing).
 
 Note: there will be many cases where you won't need to use the `esClient` or `soClient` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS.
@@ -253,15 +262,15 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     some_array: {
       type: 'array',
-      items: { type: 'keyword' }    
+      items: { type: 'keyword' }
     },
     some_array_of_obj: {
       type: 'array',
-      items: { 
+      items: {
         total: {
           type: 'long',
         },
-      },   
+      },
     },
   },
 });
@@ -275,7 +284,7 @@ use your plugin or specific features. For tracking user interactions the
 method which can be used to increment one or more counter fields in a
 document. Examples of interactions include tracking:
  - the number of API calls
- - the number of times users installed and uninstalled the sample datasets 
+ - the number of times users installed and uninstalled the sample datasets
 
 When using `incrementCounter` for collecting usage data, you need to ensure
 that usage collection happens on a best-effort basis and doesn't
@@ -353,7 +362,7 @@ export class DashboardPlugin implements Plugin {
             counter
           ], {refresh: false})
           .catch((e) => (this.isDevEnvironement ? this.logger.error(e) : e));
-    
+
         return response.ok();
       }
     );

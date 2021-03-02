@@ -6,10 +6,9 @@
  */
 
 import { KibanaFeature } from '../../../../features/server';
+import { featuresPluginMock } from '../../../../features/server/mocks';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
-
-import { featuresPluginMock } from '../../../../features/server/mocks';
 
 const actions = new Actions('1.0.0-zeta1');
 
