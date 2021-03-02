@@ -58,10 +58,17 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
 }
 
 const maybeEscapeString = (value: string) => {
-  // List of special chars that may lead to YAML parsing errors when not quoted.
-  // See YAML specification section 5.3 Indicator characters
+  // This regular expression catches only the special character '*', and
+  // only when it appears on its own in a string. In this case, the YAML parser
+  // assumes it are the first character of an alias and throws an error if it
+  // stands alone.
+  // This creates a problem when we want to use '*' as a wildcard.
+  // There are more special characters in YAML, but trying to create a comprehensive
+  // solution for all of them before we know they appear in packages may introduce
+  // new bugs, so let's start small.
+  // For reference, the full list of special characters can be found at
   // https://yaml.org/spec/1.2/spec.html#id2772075
-  const yamlSpecialCharsRegex = /[{}\[\],&*?|\-<>=!%@:]/;
+  const yamlSpecialCharsRegex = /^\*$/;
 
   // In addition, numeric strings need to be quoted to stay strings.
   if ((value.length && !isNaN(+value)) || yamlSpecialCharsRegex.test(value)) {
