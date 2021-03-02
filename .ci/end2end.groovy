@@ -116,6 +116,14 @@ pipeline {
           options { skipDefaultCheckout() }
           when { expression { return env.RUN_UPTIME_E2E != "false" } }
           stages {
+            stage('Checkout') {
+              options { skipDefaultCheckout() }
+              steps {
+                deleteDir()
+                gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
+                            shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
+              }
+            }
             stage('Prepare Kibana') {
               options { skipDefaultCheckout() }
               environment {
@@ -124,7 +132,7 @@ pipeline {
               steps {
                 notifyStatus(env.GITHUB_CHECK_UPTIME_UI, 'Preparing kibana', 'PENDING')
                 dir("${BASE_DIR}"){
-                  sh "${UPTIME_E2E_DIR}/ci/prepare-kibana.sh"
+                  sh "${UPTIME_E2E_DIR}/ci/prepare_kibana.sh"
                 }
               }
               post {
@@ -138,7 +146,7 @@ pipeline {
               steps{
                 notifyTestStatus(env.GITHUB_CHECK_UPTIME_UI, 'Running smoke tests', 'PENDING')
                 dir("${BASE_DIR}"){
-                  sh "${UPTIME_E2E_DIR}/ci/run-e2e.sh"
+                  sh "${UPTIME_E2E_DIR}/ci/run_e2e.sh"
                 }
               }
               post {
