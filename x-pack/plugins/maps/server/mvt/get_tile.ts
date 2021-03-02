@@ -28,7 +28,7 @@ import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 
-export function isAbortError(error: Error) {
+function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
 
