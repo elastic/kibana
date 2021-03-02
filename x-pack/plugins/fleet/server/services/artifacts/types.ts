@@ -7,28 +7,36 @@
 
 export interface Artifact {
   id: string;
-  /**
-   * An identifier for the Artifact download. Value is used in download URL route, thus it should
-   * not include spaces and it should be all lowercase
-   */
-  identifier: string;
   compressionAlgorithm: 'none' | 'zlib';
   encryptionAlgorithm: 'none';
   decodedSha256: string;
   decodedSize: number;
   encodedSha256: string;
   encodedSize: number;
+  /**
+   * An identifier for the Artifact download. Value is used in download URL route, thus it should
+   * not include spaces and it should be all lowercase
+   */
+  identifier: string;
+  /** The integration name that owns the artifact */
   packageName: string;
   /** The relative URL to download this artifact from fleet-server */
   relative_url: string;
+  /** The encoded binary content of the artifact as BASE64 string  */
+  body: string;
   created: string;
   type?: string;
 }
 
 type ArtifactUserDefinedMetadata = Pick<Artifact, 'identifier' | 'type'>;
 
+export type ArtifactCreateOptions = ArtifactUserDefinedMetadata & {
+  /** the artifact content. This value will be compressed and then stored as the `body` of the artifact */
+  content: string;
+};
+
 export interface ArtifactsInterface {
   getArtifact(id: string): Promise<Artifact | undefined>;
-  createArtifact(body: string, meta?: ArtifactUserDefinedMetadata): Promise<Artifact>;
+  createArtifact(options: ArtifactCreateOptions): Promise<Artifact>;
   deleteArtifact(id: string): Promise<void>;
 }

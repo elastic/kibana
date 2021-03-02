@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export class ArtifactAccessDeniedError extends Error {}
+export class ArtifactAccessDeniedError extends Error {
+  constructor(deniedPackageName: string, allowedPackageName: string) {
+    super(
+      `Access denied. Artifact package name (${deniedPackageName}) does not match ${allowedPackageName}`
+    );
+  }
+}

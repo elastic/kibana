@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ElasticsearchClient } from 'kibana/server';
-import { Artifact, ArtifactsInterface } from './types';
+import { Artifact, ArtifactCreateOptions, ArtifactsInterface } from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { esSearchHitToArtifact } from './mappings';
@@ -16,9 +16,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
 
   private validate(artifact: Artifact): Artifact {
     if (artifact.packageName !== this.packageName) {
-      throw new ArtifactAccessDeniedError(
-        `Access denied. Artifact package name (${artifact.packageName}) does not match ${this.packageName}`
-      );
+      throw new ArtifactAccessDeniedError(artifact.packageName, this.packageName);
     }
 
     return artifact;
@@ -35,9 +33,8 @@ export class FleetArtifactsClient implements ArtifactsInterface {
 
   /**
    * Creates a new artifact. Content will be compress and stored in binary form.
-   * @param content
    */
-  async createArtifact(content: string): Promise<Artifact> {
+  async createArtifact(options: ArtifactCreateOptions): Promise<Artifact> {
     // REMINDER: catch failures
   }
 
