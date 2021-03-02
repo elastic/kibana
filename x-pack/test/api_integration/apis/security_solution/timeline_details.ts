@@ -689,7 +689,6 @@ export default function ({ getService }: FtrProviderContext) {
           eventId: ID,
         })
         .expect(200);
-      // console.log('VALUE:', JSON.stringify(sortBy(detailsData, 'field')));
       expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
     });
   });
