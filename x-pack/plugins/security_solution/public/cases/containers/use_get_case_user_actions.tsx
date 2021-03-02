@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -244,64 +244,67 @@ export const useGetCaseUserActions = (
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
-  const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    (thisCaseId: string, thisSubCaseId?: string) => {
-      const fetchData = async () => {
-        try {
+    async (thisCaseId: string, thisSubCaseId?: string) => {
+      try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
+        setCaseUserActionsState({
+          ...caseUserActionsState,
+          isLoading: true,
+        });
+
+        const response = await (thisSubCaseId
+          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
+          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
+
+        if (!isCancelledRef.current) {
+          // Attention Future developer
+          // We are removing the first item because it will always be the creation of the case
+          // and we do not want it to simplify our life
+          const participants = !isEmpty(response)
+            ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
+            : [];
+
+          const caseUserActions = !isEmpty(response)
+            ? thisSubCaseId
+              ? response
+              : response.slice(1)
+            : [];
+
           setCaseUserActionsState({
-            ...caseUserActionsState,
-            isLoading: true,
+            caseUserActions,
+            ...getPushedInfo(caseUserActions, caseConnectorId),
+            isLoading: false,
+            isError: false,
+            participants,
           });
-
-          const response = await (thisSubCaseId
-            ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrl.current.signal)
-            : getCaseUserActions(thisCaseId, abortCtrl.current.signal));
-          if (!didCancel.current) {
-            // Attention Future developer
-            // We are removing the first item because it will always be the creation of the case
-            // and we do not want it to simplify our life
-            const participants = !isEmpty(response)
-              ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
-              : [];
-
-            const caseUserActions = !isEmpty(response)
-              ? thisSubCaseId
-                ? response
-                : response.slice(1)
-              : [];
-            setCaseUserActionsState({
-              caseUserActions,
-              ...getPushedInfo(caseUserActions, caseConnectorId),
-              isLoading: false,
-              isError: false,
-              participants,
-            });
-          }
-        } catch (error) {
-          if (!didCancel.current) {
+        }
+      } catch (error) {
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
               dispatchToaster,
             });
-            setCaseUserActionsState({
-              caseServices: {},
-              caseUserActions: [],
-              hasDataToPush: false,
-              isError: true,
-              isLoading: false,
-              participants: [],
-            });
           }
+
+          setCaseUserActionsState({
+            caseServices: {},
+            caseUserActions: [],
+            hasDataToPush: false,
+            isError: true,
+            isLoading: false,
+            participants: [],
+          });
         }
-      };
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
-      fetchData();
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [caseConnectorId]
@@ -313,8 +316,8 @@ export const useGetCaseUserActions = (
     }
 
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId, subCaseId]);
