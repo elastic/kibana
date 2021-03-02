@@ -25,7 +25,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -40,7 +40,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         id: response.body.id,
         is_preconfigured: false,
         name: 'My action',
-        action_type_id: 'test.index-record',
+        connector_type_id: 'test.index-record',
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },

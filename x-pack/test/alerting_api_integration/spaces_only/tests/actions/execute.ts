@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'failing action',
-          action_type_id: 'test.failing',
+          connector_type_id: 'test.failing',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.authorization',
+          connector_type_id: 'test.authorization',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Noop action type',
-          action_type_id: 'test.noop',
+          connector_type_id: 'test.noop',
           secrets: {},
           config: {},
         })

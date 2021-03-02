@@ -16,22 +16,24 @@ import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
   name: schema.string(),
-  action_type_id: schema.string(),
+  connector_type_id: schema.string(),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
 const rewriteBodyReq: RewriteRequestCase<CreateOptions['action']> = ({
-  action_type_id: actionTypeId,
-  ...res
-}) => ({ actionTypeId, ...res });
+  connector_type_id: actionTypeId,
+  name,
+  config,
+  secrets,
+}) => ({ actionTypeId, name, config, secrets });
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
   ...res
 }) => ({
   ...res,
-  action_type_id: actionTypeId,
+  connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
 });
 

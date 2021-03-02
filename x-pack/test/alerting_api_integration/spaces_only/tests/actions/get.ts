@@ -24,7 +24,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -40,7 +40,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           name: 'My action',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -54,7 +54,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -80,7 +80,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: 'my-slack1',
           is_preconfigured: true,
-          action_type_id: '.slack',
+          connector_type_id: '.slack',
           name: 'Slack#xyz',
         });
     });

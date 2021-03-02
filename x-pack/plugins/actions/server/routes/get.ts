@@ -23,7 +23,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   ...res
 }) => ({
   ...res,
-  action_type_id: actionTypeId,
+  connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
 });
 

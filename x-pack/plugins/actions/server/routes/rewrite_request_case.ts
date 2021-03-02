@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+type RenameActionToConnector<K extends string> = K extends `actionTypeId` ? `connectorTypeId` : K;
 export type AsApiContract<T> = {
-  [K in keyof T as CamelToSnake<Extract<K, string>>]: T[K];
+  [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K];
 };
 
 type CamelToSnake<T extends string> = string extends T
@@ -22,4 +23,4 @@ type CamelToSnake<T extends string> = string extends T
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;
 export type RewriteResponseCase<T> = (
   responded: T
-) => T extends Array<infer I> ? Array<AsApiContract<I>> : AsApiContract<T>;
+) => T extends Array<infer Item> ? Array<AsApiContract<Item>> : AsApiContract<T>;

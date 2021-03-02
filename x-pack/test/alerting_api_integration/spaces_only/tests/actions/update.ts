@@ -25,7 +25,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -51,7 +51,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           name: 'My action updated',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -73,7 +73,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          action_type_id: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -129,7 +129,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Noop action type',
-          action_type_id: 'test.noop',
+          connector_type_id: 'test.noop',
           secrets: {},
           config: {},
         })

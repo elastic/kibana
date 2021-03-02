@@ -15,7 +15,7 @@ import { RewriteResponseCase } from './rewrite_request_case';
 const rewriteBodyRes: RewriteResponseCase<FindActionResult[]> = (results) => {
   return results.map(({ actionTypeId, isPreconfigured, referencedByCount, ...res }) => ({
     ...res,
-    action_type_id: actionTypeId,
+    connector_type_id: actionTypeId,
     is_preconfigured: isPreconfigured,
     referenced_by_count: referencedByCount,
   }));
