@@ -16,6 +16,7 @@ import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './t
 import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
 import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
+import { getTimefilter } from './services';
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -32,6 +33,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
   if (dimensions.x) {
+    getTimefilter().disableTimeRangeSelector();
+
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
@@ -42,6 +45,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         .duration(esValue, esUnit)
         .asMilliseconds();
       (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
+      getTimefilter().enableTimeRangeSelector();
     } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
