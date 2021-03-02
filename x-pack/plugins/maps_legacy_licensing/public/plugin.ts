@@ -34,10 +34,10 @@ export class MapsLegacyLicensing
         const serviceSettings: IServiceSettings = await mapsEms.getServiceSettings();
         const { uid, isActive } = license;
         if (isActive && license.hasAtLeast('basic')) {
-          serviceSettings.setQueryParams({ license: uid });
+          serviceSettings.setQueryParams({ license: uid || '' });
           serviceSettings.disableZoomMessage();
         } else {
-          serviceSettings.setQueryParams({ license: undefined });
+          serviceSettings.setQueryParams({ license: '' });
           serviceSettings.enableZoomMessage();
         }
       });

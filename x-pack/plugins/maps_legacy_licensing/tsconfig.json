@@ -10,6 +10,6 @@
   "include": ["public/**/*"],
   "references": [
      { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/maps_ems/tsconfig.json" }
+     { "path": "../../../src/plugins/maps_ems/tsconfig.json" }
   ]
 }
