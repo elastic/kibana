@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
-import { initAppAuthorization } from './app_authorization';
-
 import {
-  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {

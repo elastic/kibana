@@ -47,9 +47,10 @@ export function LatencyCorrelations({ onClose }: Props) {
   ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
   const {
     environment,
+    kuery,
     transactionName,
     transactionType,
     start,
@@ -76,12 +77,12 @@ export function LatencyCorrelations({ onClose }: Props) {
           params: {
             query: {
               environment,
+              kuery,
               serviceName,
               transactionName,
               transactionType,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
               durationPercentile: durationPercentile.toString(10),
               fieldNames: fieldNames.join(','),
             },
@@ -91,12 +92,12 @@ export function LatencyCorrelations({ onClose }: Props) {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       durationPercentile,
       fieldNames,
     ]
