@@ -9,14 +9,16 @@ import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
 import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatusWithAllStatus } from '../status';
 import * as i18n from './translations';
 
 interface GetBulkItems {
-  caseStatus: string;
+  caseStatus: CaseStatusWithAllStatus;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
   selectedCaseIds: string[];
   updateCaseStatus: (status: string) => void;
+  includeCollections: boolean;
 }
 
 export const getBulkItems = ({
@@ -25,12 +27,13 @@ export const getBulkItems = ({
   deleteCasesAction,
   selectedCaseIds,
   updateCaseStatus,
+  includeCollections,
 }: GetBulkItems) => {
   return [
     caseStatus === CaseStatuses.open ? (
       <EuiContextMenuItem
         data-test-subj="cases-bulk-close-button"
-        disabled={selectedCaseIds.length === 0}
+        disabled={selectedCaseIds.length === 0 || includeCollections}
         key={i18n.BULK_ACTION_CLOSE_SELECTED}
         icon="folderCheck"
         onClick={() => {
@@ -43,9 +46,9 @@ export const getBulkItems = ({
     ) : (
       <EuiContextMenuItem
         data-test-subj="cases-bulk-open-button"
-        disabled={selectedCaseIds.length === 0}
+        disabled={selectedCaseIds.length === 0 || includeCollections}
         key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="folderExclamation"
+        icon="folderOpen"
         onClick={() => {
           closePopover();
           updateCaseStatus(CaseStatuses.open);

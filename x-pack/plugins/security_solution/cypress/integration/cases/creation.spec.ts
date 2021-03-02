@@ -47,6 +47,7 @@ import {
   backToCases,
   createCase,
   fillCasesMandatoryfields,
+  filterStatusOpen,
 } from '../../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
@@ -75,6 +76,7 @@ describe('Cases', () => {
     attachTimeline(this.mycase);
     createCase();
     backToCases();
+    filterStatusOpen();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
