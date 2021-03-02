@@ -36,13 +36,14 @@ export function usageProvider(core: CoreSetup): SearchUsage {
   const updateSearchUsage = debounce(
     async () => {
       const repository = await getRepository();
+      const { successCount, errorCount, totalDuration } = collectedUsage;
       const counterFields = Object.entries(collectedUsage)
         .map(([fieldName, incrementBy]) => ({ fieldName, incrementBy }))
         // Filter out any zero values because `incrementCounter` will still increment them
         .filter(({ incrementBy }) => incrementBy > 0);
 
       try {
-        const { attributes } = await repository.incrementCounter<CollectedUsage>(
+        await repository.incrementCounter<CollectedUsage>(
           SAVED_OBJECT_ID,
           SAVED_OBJECT_ID,
           counterFields
@@ -50,9 +51,9 @@ export function usageProvider(core: CoreSetup): SearchUsage {
 
         // Since search requests may have completed while the saved object was being updated, we minus
         // what was just updated in the saved object rather than resetting the values to 0
-        collectedUsage.successCount -= attributes.successCount ?? 0;
-        collectedUsage.errorCount -= attributes.errorCount ?? 0;
-        collectedUsage.totalDuration -= attributes.totalDuration ?? 0;
+        collectedUsage.successCount -= successCount;
+        collectedUsage.errorCount -= errorCount;
+        collectedUsage.totalDuration -= totalDuration;
       } catch (e) {
         // We didn't reset the counters so we'll retry when the next search request completes
       }
