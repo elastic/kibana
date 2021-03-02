@@ -70,6 +70,19 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
       });
 
+      it('should abide by max_signals > 100', async () => {
+        const maxSignals = 500;
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          max_signals: maxSignals,
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, maxSignals, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id], maxSignals);
+        expect(signalsOpen.hits.hits.length).equal(maxSignals);
+      });
+
       it('should have recorded the rule_id within the signal', async () => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),

@@ -124,7 +124,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading) {
+    if (state.isLoading || field.type === 'document') {
       return;
     }
 

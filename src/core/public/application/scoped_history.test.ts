@@ -7,7 +7,8 @@
  */
 
 import { ScopedHistory } from './scoped_history';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, History } from 'history';
+import type { ConfirmHandler } from './navigation_confirm';
 
 describe('ScopedHistory', () => {
   describe('construction', () => {
@@ -334,6 +335,155 @@ describe('ScopedHistory', () => {
       expect(h2.length).toBe(2);
       expect(h1.length).toBe(3);
       expect(gh.length).toBe(4);
+    });
+  });
+
+  describe('block', () => {
+    let gh: History;
+    let h: ScopedHistory;
+
+    const initHistory = ({
+      initialPath = '/app/wow',
+      scopedHistoryPath = '/app/wow',
+      confirmHandler,
+    }: {
+      initialPath?: string;
+      scopedHistoryPath?: string;
+      confirmHandler?: ConfirmHandler;
+    } = {}) => {
+      gh = createMemoryHistory({
+        getUserConfirmation: confirmHandler,
+      });
+      gh.push(initialPath);
+      h = new ScopedHistory(gh, scopedHistoryPath);
+    };
+
+    it('calls block on the global history', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      h.block('confirm');
+
+      expect(blockSpy).toHaveBeenCalledTimes(1);
+      expect(blockSpy).toHaveBeenCalledWith('confirm');
+    });
+
+    it('returns a wrapped unregister function', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      const unregister = jest.fn();
+      blockSpy.mockReturnValue(unregister);
+
+      const wrapperUnregister = h.block('confirm');
+
+      expect(unregister).not.toHaveBeenCalled();
+
+      wrapperUnregister();
+
+      expect(unregister).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the block handler when navigating to another app', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(true);
+
+      h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/other');
+    });
+
+    it('calls the block handler when navigating inside the current app', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(true);
+
+      h.block(blockHandler);
+
+      gh.push('/app/wow/another-page');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/wow/another-page');
+    });
+
+    it('can block the navigation', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(false);
+
+      h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(blockHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/wow');
+    });
+
+    it('no longer blocks the navigation when unregistered', () => {
+      initHistory();
+
+      const blockHandler = jest.fn().mockReturnValue(false);
+
+      const unregister = h.block(blockHandler);
+
+      gh.push('/app/other');
+
+      expect(gh.location.pathname).toEqual('/app/wow');
+
+      unregister();
+
+      gh.push('/app/other');
+
+      expect(gh.location.pathname).toEqual('/app/other');
+    });
+
+    it('throws if the history is no longer active', () => {
+      initHistory();
+
+      gh.push('/app/other');
+
+      expect(() => h.block()).toThrowErrorMatchingInlineSnapshot(
+        `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
+      );
+    });
+
+    it('unregisters the block handler when the history is no longer active', () => {
+      initHistory();
+
+      const blockSpy = jest.spyOn(gh, 'block');
+      const unregister = jest.fn();
+      blockSpy.mockReturnValue(unregister);
+
+      h.block('confirm');
+
+      expect(unregister).not.toHaveBeenCalled();
+
+      gh.push('/app/other');
+
+      expect(unregister).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the defined global history confirm handler', () => {
+      const confirmHandler: jest.MockedFunction<ConfirmHandler> = jest
+        .fn()
+        .mockImplementation((message, callback) => {
+          callback(true);
+        });
+
+      initHistory({
+        confirmHandler,
+      });
+
+      h.block('are you sure');
+
+      gh.push('/app/other');
+
+      expect(confirmHandler).toHaveBeenCalledTimes(1);
+      expect(gh.location.pathname).toEqual('/app/other');
     });
   });
 });

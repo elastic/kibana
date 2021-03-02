@@ -52,6 +52,13 @@ const fields = [
     scripted: true,
     filterable: false,
   },
+  {
+    name: 'object.value',
+    type: 'number',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as IIndexPatternFieldList;
 
 fields.getByName = (name: string) => {
@@ -64,13 +71,14 @@ const indexPattern = ({
   metaFields: ['_index', '_score'],
   formatField: jest.fn(),
   flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
+  formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
+  getFormatterForField: () => ({ convert: () => 'formatted' }),
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);

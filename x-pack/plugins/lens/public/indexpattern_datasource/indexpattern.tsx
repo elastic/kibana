@@ -85,7 +85,6 @@ export function getIndexPatternDatasource({
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }) {
-  const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -95,6 +94,21 @@ export function getIndexPatternDatasource({
     });
 
   const indexPatternsService = data.indexPatterns;
+
+  const handleChangeIndexPattern = (
+    id: string,
+    state: IndexPatternPrivateState,
+    setState: StateSetter<IndexPatternPrivateState>
+  ) => {
+    changeIndexPattern({
+      id,
+      state,
+      setState,
+      onError: onIndexPatternLoadError,
+      storage,
+      indexPatternsService,
+    });
+  };
 
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -109,7 +123,6 @@ export function getIndexPatternDatasource({
       return loadInitialState({
         persistedState,
         references,
-        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
@@ -174,20 +187,7 @@ export function getIndexPatternDatasource({
       render(
         <I18nProvider>
           <IndexPatternDataPanel
-            changeIndexPattern={(
-              id: string,
-              state: IndexPatternPrivateState,
-              setState: StateSetter<IndexPatternPrivateState>
-            ) => {
-              changeIndexPattern({
-                id,
-                state,
-                setState,
-                onError: onIndexPatternLoadError,
-                storage,
-                indexPatternsService,
-              });
-            }}
+            changeIndexPattern={handleChangeIndexPattern}
             data={data}
             charts={charts}
             indexPatternFieldEditor={indexPatternFieldEditor}
