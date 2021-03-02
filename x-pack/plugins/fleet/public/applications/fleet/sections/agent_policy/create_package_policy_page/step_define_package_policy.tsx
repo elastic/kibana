@@ -47,7 +47,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort();
+        .sort((a, b) => a - b);
 
       updatePackagePolicy({
         // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
