@@ -12,7 +12,7 @@ Fill in the <<defining-alerts-general-details, alert details>>, then select *ES 
 [float]
 ==== Define the conditions
 
-Define the following properties to detect the condition.
+Define properties to detect the condition.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-es-query-conditions.png[Five clauses define the condition to detect]

@@ -12,7 +12,7 @@ Fill in the <<defining-alerts-general-details, alert details>>, then select *Ind
 [float]
 ==== Define the conditions
 
-Define the following properties to detect the condition.
+Define properties to detect the condition.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-conditions.png[Five clauses define the condition to detect]
@@ -53,11 +53,11 @@ In this example, you will use the {kib} <<add-sample-data, sample weblog dataset
 .  Open the main menu, then click **Stack Management > Alerts and Actions**.
 
 .  Create a new alert that is checked every four hours and executes actions when the alert status changes.
-
-.  Select the **Index threshold** alert type.
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-select.png[Choosing an index threshold alert type]
+
+.  Select the **Index threshold** alert type.
 
 . Click *Index*, and set *Indices to query* to *kibana_sample_data_logs*.
 +
@@ -93,8 +93,8 @@ image::user/alerting/images/alert-types-index-threshold-example-window.png[Setti
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-preview.png[Setting the time window]
-+
-Comparing time windows:: You can interactively change the time window and observe the effect it has on the chart. Compare a 24 window to a 12 hour window. Notice the variability in the sum of bytes, due to different traffic levels during the day compared to at night. This variability would result in noisy alerts, so the 24 hour window is better. The preview chart can help you find the right values for your alert. 
+
+. Change the time window and observe the effect it has on the chart. Compare a 24 window to a 12 hour window. Notice the variability in the sum of bytes, due to different traffic levels during the day compared to at night. This variability would result in noisy alerts, so the 24 hour window is better. The preview chart can help you find the right values for your alert. 
 +
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-comparison.png[Comparing two time windows]

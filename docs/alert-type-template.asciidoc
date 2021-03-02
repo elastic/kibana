@@ -11,7 +11,7 @@ Fill in the <<defining-alerts-general-details, alert details>>, then select *<AL
 [float]
 ==== Define the conditions
 
-Define the following properties to detect the condition.
+Define properties to detect the condition.
 
 ////
 Optional, include a screenshot
