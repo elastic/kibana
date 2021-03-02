@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ReactElement } from 'react';
-import { Space } from '../common';
+
+import type { Space } from '../common';
 
 /**
  * @public

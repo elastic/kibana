@@ -52,44 +52,13 @@ Secrets defines sensitive information for the action type.
 
 Jira actions have the following configuration properties.
 
-Subaction::        The subaction to perform: `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, or `getFields`.
-Subaction params:: The parameters of the subaction.
-
-==== `pushToService` subaction configuration
-
-Incident:: A Jira incident has the following properties:
-* `summary` - The title of the issue.
-* `description` - A description of the issue.
-* `externalId` - The ID of the issue in Jira. If present, the issue is updated. Otherwise, a new issue is created.
-* `issueType` - The ID of the issue type in Jira.
-* `priority` - The priority level in Jira. Example: `Medium`.
-* `labels` - An array of labels. Labels cannot contain spaces.
-* `parent` - The parent issue ID or key. Only for subtask issue types.
-Comments:: A comment in the form of `{ commentId: string, version: string, comment: string }`.
-
-==== `getIncident` subaction configuration
-
-External ID:: The ID of the issue in Jira.
-
-==== `issueTypes` subaction configuration
-
-The `issueTypes` subaction has no parameters. Provide an empty object `{}`.
-
-==== `fieldsByIssueType` subaction configuration
-
-ID:: The ID of the issue in Jira.
-
-==== `issues` subaction configuration
-
-Title:: The title to search for.
-
-==== `issue` subaction configuration
-
-ID:: The ID of the issue in Jira.
-
-==== `getFields` subaction configuration
-
-The `getFields` subaction has no parameters. Provide an empty object `{}`.
+Issue type:: The type of the issue.
+Priority:: The priority of the incident.
+Labels:: The labels for the incident.
+Title:: A title for the issue, used for searching the contents of the knowledge base.
+Description:: The details about the incident.
+Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
+Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-jira]]
 ==== Configure Jira
