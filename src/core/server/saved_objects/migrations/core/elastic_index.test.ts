@@ -52,6 +52,7 @@ describe('ElasticIndex', () => {
         mappings: { dynamic: 'strict', properties: { a: 'b' } },
         exists: true,
         indexName: '.baz',
+        settings: {},
       });
     });
   });

@@ -2774,18 +2774,20 @@ describe('SavedObjectsRepository', () => {
         await findSuccess({ type, fields: ['title'] });
         expect(client.search).toHaveBeenCalledWith(
           expect.objectContaining({
-            _source: [
-              `${type}.title`,
-              'namespace',
-              'namespaces',
-              'type',
-              'references',
-              'migrationVersion',
-              'coreMigrationVersion',
-              'updated_at',
-              'originId',
-              'title',
-            ],
+            body: expect.objectContaining({
+              _source: [
+                `${type}.title`,
+                'namespace',
+                'namespaces',
+                'type',
+                'references',
+                'migrationVersion',
+                'coreMigrationVersion',
+                'updated_at',
+                'originId',
+                'title',
+              ],
+            })
           }),
           expect.anything()
         );
@@ -3829,6 +3831,7 @@ describe('SavedObjectsRepository', () => {
           id: '6.0.0-alpha1',
           ...mockTimestampFields,
           version: mockVersion,
+          references: [],
           attributes: {
             buildNum: 8468,
             apiCallsCount: 100,

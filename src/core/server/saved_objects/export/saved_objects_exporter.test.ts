@@ -117,6 +117,7 @@ describe('getSortedObjectsForExport()', () => {
                   "keepAlive": "2m",
                 },
                 "search": undefined,
+                "searchAfter": undefined,
                 "sortField": "updated_at",
                 "sortOrder": "desc",
                 "type": Array [
@@ -461,6 +462,7 @@ describe('getSortedObjectsForExport()', () => {
                   "keepAlive": "2m",
                 },
                 "search": undefined,
+                "searchAfter": undefined,
                 "sortField": "updated_at",
                 "sortOrder": "desc",
                 "type": Array [
@@ -617,6 +619,7 @@ describe('getSortedObjectsForExport()', () => {
                   "keepAlive": "2m",
                 },
                 "search": "foo",
+                "searchAfter": undefined,
                 "sortField": "updated_at",
                 "sortOrder": "desc",
                 "type": Array [
@@ -710,6 +713,7 @@ describe('getSortedObjectsForExport()', () => {
                   "keepAlive": "2m",
                 },
                 "search": undefined,
+                "searchAfter": undefined,
                 "sortField": "updated_at",
                 "sortOrder": "desc",
                 "type": Array [
@@ -808,6 +812,7 @@ describe('getSortedObjectsForExport()', () => {
                   "keepAlive": "2m",
                 },
                 "search": undefined,
+                "searchAfter": undefined,
                 "sortField": "updated_at",
                 "sortOrder": "desc",
                 "type": Array [
