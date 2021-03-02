@@ -19,9 +19,9 @@ import {
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
+import { pkgToPkgKey } from '../registry';
 import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
-import { pkgToPkgKey } from '../registry';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;

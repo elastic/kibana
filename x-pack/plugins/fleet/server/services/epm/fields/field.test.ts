@@ -6,9 +6,9 @@
  */
 
 import { readFileSync } from 'fs';
+import path from 'path';
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
-import path from 'path';
 import { Field, Fields, getField, processFields } from './field';
 
 // Add our own serialiser to just do JSON.stringify

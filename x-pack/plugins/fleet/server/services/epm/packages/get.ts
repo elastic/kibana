@@ -18,10 +18,10 @@ import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../.
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import { IngestManagerError } from '../../../errors';
 import * as Registry from '../registry';
-import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+import { createInstallableFrom, isRequiredPackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 

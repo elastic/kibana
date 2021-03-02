@@ -22,10 +22,10 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './applications/fleet/constants';
 
 import { FleetConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
+import { BASE_PATH } from './applications/fleet/constants';
 import { licenseService } from './applications/fleet/hooks/use_license';
 import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
 import {

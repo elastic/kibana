@@ -14,10 +14,10 @@ import {
   EuiDescriptionListDescription,
   EuiFlexItem,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
 import { useLink, useGetAgentStatus } from '../../../hooks';
 import { Loading } from '../../agents/components';
+import { OverviewPanel } from './overview_panel';
+import { OverviewStats } from './overview_stats';
 
 export const OverviewAgentSection = () => {
   const { getHref } = useLink();

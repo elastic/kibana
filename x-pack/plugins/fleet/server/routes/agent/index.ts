@@ -34,6 +34,9 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
+import * as AgentService from '../../services/agents';
+import { appContextService } from '../../services';
+import { FleetConfigType } from '../..';
 import {
   getAgentsHandler,
   getAgentHandler,
@@ -47,11 +50,8 @@ import {
   postBulkAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
-import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({

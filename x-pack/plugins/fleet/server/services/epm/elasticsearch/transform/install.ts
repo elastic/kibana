@@ -16,10 +16,10 @@ import {
 } from '../../../../../common/types/models';
 import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
-import { deleteTransforms, deleteTransformRefs } from './remove';
-import { getAsset } from './common';
 import { appContextService } from '../../../app_context';
 import { isLegacyESClientError } from '../../../../errors';
+import { deleteTransforms, deleteTransformRefs } from './remove';
+import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;

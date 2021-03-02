@@ -30,6 +30,13 @@ import {
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
+import { CloudSetup } from '../../cloud/server';
+import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -56,12 +63,6 @@ import {
   registerAppRoutes,
 } from './routes';
 import {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
-import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
@@ -78,7 +79,6 @@ import {
   listAgents,
   getAgent,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { URL } from 'url';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
-import { URL } from 'url';
 import {
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -26,11 +26,11 @@ import {
   getPackageInfo,
   setPackageInfo,
 } from '../archive';
-import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
-import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
+import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;

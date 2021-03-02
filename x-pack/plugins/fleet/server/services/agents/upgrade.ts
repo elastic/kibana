@@ -10,6 +10,8 @@ import { AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { agentPolicyService } from '../../services';
 import { IngestManagerError } from '../../errors';
+import { isAgentUpgradeable } from '../../../common/services';
+import { appContextService } from '../app_context';
 import { bulkCreateAgentActions, createAgentAction } from './actions';
 import {
   getAgents,
@@ -18,8 +20,6 @@ import {
   bulkUpdateAgents,
   getAgentPolicyForAgent,
 } from './crud';
-import { isAgentUpgradeable } from '../../../common/services';
-import { appContextService } from '../app_context';
 
 export async function sendUpgradeAgentAction({
   soClient,

@@ -17,6 +17,8 @@ import {
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
+import { getAsset, getPathParts } from '../../archive';
+import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 import {
   generateMappings,
   generateTemplateName,
@@ -24,8 +26,6 @@ import {
   getTemplate,
   getTemplatePriority,
 } from './template';
-import { getAsset, getPathParts } from '../../archive';
-import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,

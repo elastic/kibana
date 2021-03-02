@@ -9,6 +9,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
+import { Fields, Field } from '../../fields/field';
 import {
   flattenFields,
   dedupeFields,
@@ -19,7 +20,6 @@ import {
   createIndexPatternFields,
   createIndexPattern,
 } from './install';
-import { Fields, Field } from '../../fields/field';
 import { dupeFields } from './tests/test_data';
 
 // Add our own serialiser to just do JSON.stringify

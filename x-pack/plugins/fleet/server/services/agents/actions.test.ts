@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createAgentAction } from './actions';
 import { SavedObject } from 'kibana/server';
-import { AgentAction } from '../../../common/types/models';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { AgentAction } from '../../../common/types/models';
+import { createAgentAction } from './actions';
 
 describe('test agent actions services', () => {
   it('should create a new action', async () => {

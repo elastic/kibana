@@ -16,13 +16,13 @@ import {
   FleetServerAgentAction,
 } from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_ACTIONS_INDEX } from '../../../common/constants';
+import { appContextService } from '../app_context';
+import { nodeTypes } from '../../../../../../src/plugins/data/common';
 import {
   isAgentActionSavedObject,
   isPolicyActionSavedObject,
   savedObjectToAgentAction,
 } from './saved_objects';
-import { appContextService } from '../app_context';
-import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 const ONE_MONTH_IN_MS = 2592000000;
 

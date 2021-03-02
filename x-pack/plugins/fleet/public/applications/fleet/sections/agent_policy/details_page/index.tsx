@@ -33,10 +33,10 @@ import {
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
-import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
-import { PackagePoliciesView, SettingsView } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { PackagePoliciesView, SettingsView } from './components';
 
 const Divider = styled.div`
   width: 0;

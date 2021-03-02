@@ -7,7 +7,6 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
-import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus } from '../../types';
 
@@ -15,6 +14,7 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 import { normalizeKuery } from '../saved_object';
 import { appContextService } from '../app_context';
+import { getAgent, listAgents } from './crud';
 import { removeSOAttributes } from './crud_fleet_server';
 
 export async function getAgentStatusById(

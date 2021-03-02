@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import path from 'path';
 import { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import path from 'path';
 import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 import {
   GetInfoResponse,

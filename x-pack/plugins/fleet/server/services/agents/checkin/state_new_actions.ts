@@ -44,8 +44,8 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
-import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 import { getAgent, updateAgent } from '../crud';
+import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({

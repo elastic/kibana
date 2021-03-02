@@ -8,6 +8,17 @@
 import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
+  GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  GetStatsRequestSchema,
+} from '../../types';
+import {
   getCategoriesHandler,
   getListHandler,
   getLimitedListHandler,
@@ -19,17 +30,6 @@ import {
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
 } from './handlers';
-import {
-  GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageFromRegistryRequestSchema,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
-  GetStatsRequestSchema,
-} from '../../types';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 

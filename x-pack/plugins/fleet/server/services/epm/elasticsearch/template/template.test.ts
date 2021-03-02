@@ -6,8 +6,8 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
 import path from 'path';
+import { safeLoad } from 'js-yaml';
 import { RegistryDataStream } from '../../../../types';
 import { Field, processFields } from '../../fields/field';
 import {

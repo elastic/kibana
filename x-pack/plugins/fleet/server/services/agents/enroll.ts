@@ -13,12 +13,12 @@ import semverLte from 'semver/functions/lte';
 
 import type { SavedObjectsClientContract } from 'src/core/server';
 import type { AgentType, Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
-import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { IngestManagerError } from '../../errors';
 import * as APIKeyService from '../api_keys';
 import { agentPolicyService } from '../../services';
 import { appContextService } from '../app_context';
+import { savedObjectToAgent } from './saved_objects';
 
 export async function enroll(
   soClient: SavedObjectsClientContract,

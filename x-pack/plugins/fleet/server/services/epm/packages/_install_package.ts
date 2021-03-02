@@ -27,12 +27,12 @@ import { installPipelines, deletePreviousPipelines } from '../elasticsearch/inge
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
-import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
+import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
+import { deleteKibanaSavedObjectsAssets } from './remove';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

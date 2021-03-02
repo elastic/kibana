@@ -34,10 +34,10 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
+import { AgentRefreshContext } from './hooks';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {

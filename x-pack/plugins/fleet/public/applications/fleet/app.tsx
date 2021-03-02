@@ -14,6 +14,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+import { FleetConfigType, FleetStartServices } from '../../plugin';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
   ConfigContext,
   FleetStatusProvider,
@@ -34,10 +37,7 @@ import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
-import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { UIExtensionsStorage } from './types';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (

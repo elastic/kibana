@@ -6,8 +6,8 @@
  */
 
 import { InstallablePackage } from '../../../types';
-import { getAssets } from './assets';
 import { getArchiveFilelist } from '../archive/cache';
+import { getAssets } from './assets';
 
 jest.mock('../archive/cache', () => {
   return {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import url from 'url';
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import url from 'url';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import {

@@ -11,8 +11,8 @@ import { render as reactRender, RenderOptions, RenderResult, act } from '@testin
 import { ScopedHistory } from '../../../../../../../src/core/public';
 import { FleetAppContext } from '../app';
 import { FleetConfigType } from '../../../plugin';
-import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
+import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
 import { MockedFleetStart, MockedFleetStartServices } from './types';

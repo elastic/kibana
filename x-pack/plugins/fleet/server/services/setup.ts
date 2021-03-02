@@ -8,13 +8,6 @@
 import uuid from 'uuid';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
-import { agentPolicyService } from './agent_policy';
-import { outputService } from './output';
-import {
-  ensureInstalledDefaultPackages,
-  ensureInstalledPackage,
-  ensurePackagesCompletedInstall,
-} from './epm/packages/install';
 import {
   packageToPackagePolicy,
   PackagePolicy,
@@ -25,6 +18,13 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common';
 import { SO_SEARCH_LIMIT } from '../constants';
+import { agentPolicyService } from './agent_policy';
+import { outputService } from './output';
+import {
+  ensureInstalledDefaultPackages,
+  ensureInstalledPackage,
+  ensurePackagesCompletedInstall,
+} from './epm/packages/install';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';

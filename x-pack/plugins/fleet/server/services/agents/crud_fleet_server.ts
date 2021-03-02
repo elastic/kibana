@@ -14,9 +14,9 @@ import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { appContextService } from '../../services';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;

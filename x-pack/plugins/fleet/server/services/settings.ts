@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import url from 'url';
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'kibana/server';
-import url from 'url';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   SettingsSOAttributes,

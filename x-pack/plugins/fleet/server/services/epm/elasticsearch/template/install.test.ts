@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { RegistryDataStream } from '../../../../types';
 import { Field } from '../../fields/field';
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { installTemplate } from './install';
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {

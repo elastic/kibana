@@ -20,9 +20,9 @@ import {
 } from '../../../types';
 
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { agentCheckinState } from './state';
 import { getAgentActionsForCheckin } from '../actions';
 import { updateAgent } from '../crud';
+import { agentCheckinState } from './state';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,

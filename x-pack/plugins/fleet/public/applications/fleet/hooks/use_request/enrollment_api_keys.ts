@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { enrollmentAPIKeyRouteService } from '../../services';
+import {
+  GetOneEnrollmentAPIKeyResponse,
+  GetEnrollmentAPIKeysResponse,
+  GetEnrollmentAPIKeysRequest,
+} from '../../types';
 import {
   useRequest,
   UseRequestConfig,
@@ -12,12 +18,6 @@ import {
   useConditionalRequest,
   SendConditionalRequestConfig,
 } from './use_request';
-import { enrollmentAPIKeyRouteService } from '../../services';
-import {
-  GetOneEnrollmentAPIKeyResponse,
-  GetEnrollmentAPIKeysResponse,
-  GetEnrollmentAPIKeysRequest,
-} from '../../types';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
