@@ -47,7 +47,7 @@ describe('executeActionRoute', () => {
     );
 
     const executeResult = {
-      actionId: '1',
+      action_id: '1',
       status: 'ok',
     };
 

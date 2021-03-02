@@ -8,10 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
-
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
 import { BASE_ACTION_API_PATH } from '../../common';
-import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
+import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { RewriteResponseCase } from './rewrite_request_case';
 
@@ -20,26 +18,28 @@ const paramSchema = schema.object({
 });
 
 const bodySchema = schema.object({
-  params: schema.recordOf(schema.string(), schema.any()),
+  name: schema.string(),
+  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = ({
-  actionId,
-  serviceMessage,
+const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
+  actionTypeId,
+  isPreconfigured,
   ...res
 }) => ({
   ...res,
-  action_id: actionId,
-  ...(serviceMessage ? { service_message: serviceMessage } : {}),
+  action_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
 });
 
-export const executeActionRoute = (
+export const updateActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.put(
     {
-      path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -48,18 +48,17 @@ export const executeActionRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = context.actions.getActionsClient();
-        const { params } = req.body;
         const { id } = req.params;
-        const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
-          params,
-          actionId: id,
-          source: asHttpRequestExecutionSource(req),
-        });
-        return body
-          ? res.ok({
-              body: rewriteBodyRes(body),
+        const { name, config, secrets } = req.body;
+
+        return res.ok({
+          body: rewriteBodyRes(
+            await actionsClient.update({
+              id,
+              action: { name, config, secrets },
             })
-          : res.noContent();
+          ),
+        });
       })
     )
   );

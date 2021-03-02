@@ -5,37 +5,45 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext, FindActionResult } from '../types';
+import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { RewriteResponseCase } from './rewrite_request_case';
 
-const rewriteBodyRes: RewriteResponseCase<FindActionResult[]> = (results) => {
-  return results.map(({ actionTypeId, isPreconfigured, referencedByCount, ...res }) => ({
-    ...res,
-    action_type_id: actionTypeId,
-    is_preconfigured: isPreconfigured,
-    referenced_by_count: referencedByCount,
-  }));
-};
+const paramSchema = schema.object({
+  id: schema.string(),
+});
 
-export const getAllActionRoute = (
+const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
+  actionTypeId,
+  isPreconfigured,
+  ...res
+}) => ({
+  ...res,
+  action_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+});
+
+export const getActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/connectors`,
-      validate: {},
+      path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      validate: {
+        params: paramSchema,
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = context.actions.getActionsClient();
-        const result = await actionsClient.getAll();
+        const { id } = req.params;
         return res.ok({
-          body: rewriteBodyRes(result),
+          body: rewriteBodyRes(await actionsClient.get({ id })),
         });
       })
     )

@@ -7,35 +7,34 @@
 
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext, FindActionResult } from '../types';
+import { ActionType, BASE_ACTION_API_PATH } from '../../common';
+import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { RewriteResponseCase } from './rewrite_request_case';
 
-const rewriteBodyRes: RewriteResponseCase<FindActionResult[]> = (results) => {
-  return results.map(({ actionTypeId, isPreconfigured, referencedByCount, ...res }) => ({
+const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
+  return results.map(({ enabledInConfig, enabledInLicense, minimumLicenseRequired, ...res }) => ({
     ...res,
-    action_type_id: actionTypeId,
-    is_preconfigured: isPreconfigured,
-    referenced_by_count: referencedByCount,
+    enabled_in_config: enabledInConfig,
+    enabled_in_license: enabledInLicense,
+    minimum_license_required: minimumLicenseRequired,
   }));
 };
 
-export const getAllActionRoute = (
+export const listActionTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/connectors`,
+      path: `${BASE_ACTION_API_PATH}/list_connector_types`,
       validate: {},
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = context.actions.getActionsClient();
-        const result = await actionsClient.getAll();
         return res.ok({
-          body: rewriteBodyRes(result),
+          body: rewriteBodyRes(await actionsClient.listTypes()),
         });
       })
     )
