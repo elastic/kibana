@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
+import { datafeedConfigSchema } from './datafeeds_schema';
 
 export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
@@ -96,8 +98,8 @@ export const revertModelSnapshotSchema = schema.object({
 
 export const datafeedPreviewSchema = schema.oneOf([
   schema.object({
-    job: schema.maybe(schema.any()),
-    datafeed: schema.maybe(schema.any()),
+    job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
+    datafeed: schema.maybe(datafeedConfigSchema),
   }),
   schema.object({
     datafeedId: schema.maybe(schema.string()),
