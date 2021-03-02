@@ -110,19 +110,12 @@ const installPreBuiltComponentTemplates = async (
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(getAsset(path).toString('utf8'));
 
-    const esClientParams: {
-      method: string;
-      path: string;
-      body: any;
-    } = {
-      method: 'PUT',
-      path: `/_component_template/${templateName}`,
+    const esClientParams = {
+      name: templateName,
       body: content,
     };
-    // This uses the catch-all endpoint 'transport.request' because there is no
-    // convenience endpoint for component templates yet.
-    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    return esClient.transport.request(esClientParams, { ignore: [404] });
+
+    return esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] });
   });
 
   try {
@@ -175,18 +168,13 @@ function putComponentTemplate(
   esClient: ElasticsearchClient
 ): { clusterPromise: Promise<any>; name: string } | undefined {
   if (body) {
-    const esClientParams: {
-      method: string;
-      path: string;
-      body: any;
-    } = {
-      method: 'PUT',
-      path: `/_component_template/${name}`,
+    const esClientParams = {
+      name,
       body,
     };
 
     return {
-      clusterPromise: esClient.transport.request(esClientParams, { ignore: [404] }),
+      clusterPromise: esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
       name,
     };
   }
