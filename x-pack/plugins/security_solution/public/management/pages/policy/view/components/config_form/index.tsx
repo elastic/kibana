@@ -57,19 +57,25 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => (
     <EuiPanel data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
-          <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {osRestriction ? <EuiTextColor color="subdued">{osRestriction}</EuiTextColor> : <></>}
+          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+            <EuiFlexItem>
+              <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
+            </EuiFlexItem>
+            {osRestriction && (
+              <EuiFlexItem>
+                <EuiTextColor color="subdued">{osRestriction}</EuiTextColor>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
             </EuiFlexGroup>
