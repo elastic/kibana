@@ -32,6 +32,7 @@ import {
   CaseType,
   CaseResponse,
   caseTypeField,
+  CasesFindRequest,
 } from '../../common/api';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
@@ -194,6 +195,8 @@ interface CasesMapWithPageInfo {
   perPage: number;
 }
 
+type FindCaseOptions = CasesFindRequest & SavedObjectFindOptions;
+
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
@@ -271,7 +274,7 @@ export class CaseService implements CaseServiceSetup {
     subCaseOptions,
   }: {
     client: SavedObjectsClientContract;
-    caseOptions: SavedObjectFindOptions;
+    caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptions;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
@@ -291,10 +294,20 @@ export class CaseService implements CaseServiceSetup {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
 
       /**
-       * This will include empty collections unless the query explicitly requested type === CaseType.individual, in which
-       * case we'd not have any collections anyway.
+       * If this case is an individual add it to the return map
+       * If it is a collection and it has sub cases add it to the return map
+       * If it is a collection and it does not have sub cases, check and see if we're filtering on a status,
+       *  if we're filtering on a status then exclude the empty collection from the results
+       *  if we're not filtering on a status then include the empty collection (that way we can display all the collections
+       *  when the UI isn't doing any filtering)
        */
-      accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
+      if (
+        caseInfo.attributes.type === CaseType.individual ||
+        subCasesForCase !== undefined ||
+        !caseOptions.status
+      ) {
+        accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
+      }
       return accMap;
     }, new Map<string, Collection>());
 
