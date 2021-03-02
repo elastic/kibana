@@ -81,4 +81,23 @@ describe('getOverallStatusChanges', () => {
       });
     });
   });
+
+  it('stops emitting once `stop$` emits', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const overall$ = hot<ServiceStatus>('--a--b', {
+        a: createStatus({
+          level: ServiceStatusLevels.degraded,
+        }),
+        b: createStatus({
+          level: ServiceStatusLevels.available,
+        }),
+      });
+      const stop$ = hot<void>('----(s|)');
+      const expected = '--a-|';
+
+      expectObservable(getOverallStatusChanges(overall$, stop$)).toBe(expected, {
+        a: 'Kibana is now degraded',
+      });
+    });
+  });
 });
