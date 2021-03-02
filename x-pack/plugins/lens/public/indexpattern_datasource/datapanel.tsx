@@ -129,11 +129,11 @@ export function IndexPatternDataPanel({
         ...prevState,
         indexPatterns: {
           ...prevState.indexPatterns,
-          [indexPattern.id]: indexPattern
-        }
-      }))
+          [indexPattern.id]: indexPattern,
+        },
+      }));
     },
-    [setState, changeIndexPattern]
+    [setState]
   );
 
   const indexPatternList = uniq(
@@ -487,21 +487,42 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
   }, []);
 
-  const editField = useCallback(async (fieldName?: string) => {
-    const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
-    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
-      // the only required option is the context in which the editor is being used
-      ctx: {
-        indexPattern: indexPatternInstance,
-      },
-      fieldName,
-      onSave: async () => {
-        const newlyMappedIndexPattern = await loadIndexPatterns({ indexPatternsService: data.indexPatterns, cache: {}, patterns: [currentIndexPattern.id]});
-        onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
-      },
+  const reloadIndexPattern = useCallback(async () => {
+    const newlyMappedIndexPattern = await loadIndexPatterns({
+      indexPatternsService: data.indexPatterns,
+      cache: {},
+      patterns: [currentIndexPattern.id],
     });
-  }, [data, indexPatternFieldEditor, onUpdateIndexPattern]);
+    onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+  }, [currentIndexPattern.id, data.indexPatterns, onUpdateIndexPattern]);
 
+  const editField = useCallback(
+    async (fieldName?: string) => {
+      const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+      closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+        ctx: {
+          indexPattern: indexPatternInstance,
+        },
+        fieldName,
+        onSave: reloadIndexPattern,
+      });
+    },
+    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern]
+  );
+
+  const deleteField = useCallback(
+    async (fieldName: string) => {
+      const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+      closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+        ctx: {
+          indexPattern: indexPatternInstance,
+        },
+        fieldNames: [fieldName],
+        onDelete: reloadIndexPattern,
+      });
+    },
+    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern]
+  );
   const addField = useCallback(() => editField(), [editField]);
 
   const fieldProps = useMemo(

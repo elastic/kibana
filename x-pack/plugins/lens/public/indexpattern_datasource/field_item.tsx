@@ -74,6 +74,7 @@ export interface FieldItemProps {
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   editField: (name: string) => void;
+  deleteField: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
