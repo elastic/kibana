@@ -167,6 +167,7 @@ export const AllCases = React.memo<AllCasesProps>(
     const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
+      type: null,
     });
     const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
     const filterRefetch = useRef<() => void>();
@@ -242,7 +243,10 @@ export const AllCases = React.memo<AllCasesProps>(
             });
           }
         }
-        const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
+        const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({
+          id,
+          type: CaseType.individual,
+        }));
         setDeleteBulk(convertToDeleteCases);
       },
       [selectedCases, setDeleteBulk, handleToggleModal]
