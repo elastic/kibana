@@ -66,7 +66,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:tileMap:maxPrecision': {
     type: 'long',
-    _meta: { description: 'Non-default value of visualization:tileMap' },
+    _meta: { description: 'Non-default value of visualization:tileMap:maxPrecision' },
   },
   'csv:separator': {
     type: 'keyword',
