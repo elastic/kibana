@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
+import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { PrivilegeSummary } from '.';
-import { findTestSubject } from '@kbn/test/jest';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+import { PrivilegeSummary } from './privilege_summary';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
@@ -31,6 +36,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 describe('PrivilegeSummary', () => {
   it('initially renders a button', () => {
@@ -50,6 +58,7 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 
@@ -57,7 +66,7 @@ describe('PrivilegeSummary', () => {
     expect(wrapper.find(PrivilegeSummaryTable)).toHaveLength(0);
   });
 
-  it('clicking the button renders the privilege summary table', () => {
+  it('clicking the button renders the privilege summary table', async () => {
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
     const role = createRole([
@@ -74,10 +83,14 @@ describe('PrivilegeSummary', () => {
         kibanaPrivileges={kibanaPrivileges}
         role={role}
         canCustomizeSubFeaturePrivileges={true}
+        spacesApiUi={spacesApiUi}
       />
     );
 
-    findTestSubject(wrapper, 'viewPrivilegeSummaryButton').simulate('click');
+    await act(async () => {
+      findTestSubject(wrapper, 'viewPrivilegeSummaryButton').simulate('click');
+    });
+    wrapper.update();
     expect(wrapper.find(PrivilegeSummaryTable)).toHaveLength(1);
   });
 });

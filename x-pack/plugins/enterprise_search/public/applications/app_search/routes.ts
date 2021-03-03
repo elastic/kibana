@@ -40,6 +40,7 @@ export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_PATH}/reindex-job/:activeReinde
 export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
 // TODO: Crawler sub-pages
 
+export const META_ENGINE_CREATION_PATH = '/meta_engine_creation';
 export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;
 
 export const ENGINE_RELEVANCE_TUNING_PATH = `${ENGINE_PATH}/relevance_tuning`;
