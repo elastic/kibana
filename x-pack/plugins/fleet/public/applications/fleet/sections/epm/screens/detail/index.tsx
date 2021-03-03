@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverLt from 'semver/functions/lt';
 
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
@@ -80,7 +81,7 @@ export function Detail() {
     packageInfo &&
     'savedObject' in packageInfo &&
     packageInfo.savedObject &&
-    packageInfo.savedObject.attributes.version < packageInfo.latestVersion;
+    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
   // Fetch package info
   const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
