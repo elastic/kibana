@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
@@ -99,8 +100,16 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    field: normalizeThresholdField(rule.threshold?.field),
     value: `${rule.threshold?.value || 100}`,
+    ...(rule.threshold?.cardinality?.length
+      ? {
+          cardinality: {
+            field: [`${rule.threshold.cardinality[0].field}`],
+            value: `${rule.threshold.cardinality[0].value}`,
+          },
+        }
+      : {}),
   },
 });
 
@@ -180,7 +189,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     },
     falsePositives,
     threat: threat as Threats,
-    threatIndicatorPath: threatIndicatorPath ?? '',
+    threatIndicatorPath,
   };
 };
 

@@ -12,7 +12,7 @@
   "license": "Elastic License",
   "max_signals": 33,
   "name": "Timestomping using Touch Command",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.name == \"touch\" and wildcard(process.args, \"-r\", \"-t\", \"-a*\",\"-m*\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.name : \"touch\" and process.args : (\"-r\", \"-t\", \"-a*\",\"-m*\")\n",
   "risk_score": 47,
   "rule_id": "b0046934-486e-462f-9487-0d4cf9e429c6",
   "severity": "medium",
@@ -50,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

@@ -109,7 +109,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
@@ -169,7 +169,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getBoundsForFilters(boundsFilters, registerCancelCallback) {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destFitToBounds: {
         geo_bounds: {

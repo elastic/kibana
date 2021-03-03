@@ -6,6 +6,7 @@
  */
 
 import { Location } from 'history';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -66,6 +67,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     refreshInterval: refreshInterval ? toNumber(refreshInterval) : undefined,
 
     // query params
+    environment: toString(environment) || ENVIRONMENT_ALL.value,
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
@@ -87,7 +89,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
       : undefined,
     comparisonType: comparisonType as TimeRangeComparisonType | undefined,
     // ui filters
-    environment,
     ...localUIFilters,
   });
 }

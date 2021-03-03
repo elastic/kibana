@@ -211,6 +211,7 @@ export class MlServerPlugin
     if (plugins.alerts) {
       registerMlAlerts({
         alerts: plugins.alerts,
+        logger: this.log,
         mlSharedServices: sharedServices,
         publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
       });

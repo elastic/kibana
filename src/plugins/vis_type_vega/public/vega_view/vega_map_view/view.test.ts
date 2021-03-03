@@ -42,6 +42,12 @@ jest.mock('mapbox-gl', () => ({
     getZoom: () => 3,
     addControl: jest.fn(),
     addLayer: jest.fn(),
+    dragRotate: {
+      disable: jest.fn(),
+    },
+    touchZoomRotate: {
+      disableRotation: jest.fn(),
+    },
   })),
   MapboxOptions: jest.fn(),
   NavigationControl: jest.fn(),

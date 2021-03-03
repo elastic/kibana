@@ -27,11 +27,13 @@ import {
   getSimpleMlRuleOutput,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
+  waitForAlertToComplete,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -136,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(statusBody[body.id].current_status.status).to.eql('warning');
           expect(statusBody[body.id].current_status.last_success_message).to.eql(
-            'The following index patterns did not match any indices: ["does-not-exist-*"]'
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
           );
         });
 
@@ -287,6 +289,36 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest);
         await esArchiver.unload('security_solution/timestamp_override');
       });
+
+      it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a warning status', async () => {
+        // defaults to event.ingested timestamp override.
+        // event.ingested is one of the timestamp fields set on the es archive data
+        // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
+        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfakeindex-1']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+        const bodyId = body.id;
+
+        await waitForAlertToComplete(supertest, bodyId);
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [bodyId] })
+          .expect(200);
+
+        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql('warning');
+        expect(
+          (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
+        ).to.eql(
+          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
+        );
+      });
+
       it('should create a single rule which has a timestamp override and generates two signals with a "warning" status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data

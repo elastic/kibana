@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set';
 
 import {
   Threshold,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { singleSearchAfter } from './single_search_after';
 
 import {
@@ -49,39 +50,98 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  const aggregations =
-    threshold && !isEmpty(threshold.field)
-      ? {
-          threshold: {
-            terms: {
-              field: threshold.field,
-              min_doc_count: threshold.value,
-              size: 10000, // max 10k buckets
-            },
-            aggs: {
-              // Get the most recent hit per bucket
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      [timestampOverride ?? '@timestamp']: {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+  const topHitsAgg = {
+    top_hits: {
+      sort: [
+        {
+          [timestampOverride ?? '@timestamp']: {
+            order: 'desc',
+          },
+        },
+      ],
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
+      size: 1,
+    },
+  };
+
+  const thresholdFields = normalizeThresholdField(threshold.field);
+
+  const aggregations = thresholdFields.length
+    ? thresholdFields.reduce((acc, field, i) => {
+        const aggPath = [...Array(i + 1).keys()]
+          .map((j) => {
+            return `['threshold_${j}:${thresholdFields[j]}']`;
+          })
+          .join(`['aggs']`);
+        set(acc, aggPath, {
+          terms: {
+            field,
+            min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
+            size: 10000, // max 10k buckets
+          },
+        });
+        if (i === (thresholdFields.length ?? 0) - 1) {
+          if (threshold.cardinality?.length) {
+            set(acc, `${aggPath}['aggs']`, {
+              top_threshold_hits: topHitsAgg,
+              cardinality_count: {
+                cardinality: {
+                  field: threshold.cardinality[0].field,
                 },
               },
-            },
-          },
+              cardinality_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    cardinalityCount: 'cardinality_count',
+                  },
+                  script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
+                },
+              },
+            });
+          } else {
+            set(acc, `${aggPath}['aggs']`, {
+              top_threshold_hits: topHitsAgg,
+            });
+          }
         }
-      : {};
+        return acc;
+      }, {})
+    : {
+        threshold_0: {
+          terms: {
+            script: {
+              source: '""',
+              lang: 'painless',
+            },
+            min_doc_count: threshold.value,
+          },
+          aggs: {
+            top_threshold_hits: topHitsAgg,
+            ...(threshold.cardinality?.length
+              ? {
+                  cardinality_count: {
+                    cardinality: {
+                      field: threshold.cardinality[0].field,
+                    },
+                  },
+                  cardinality_check: {
+                    bucket_selector: {
+                      buckets_path: {
+                        cardinalityCount: 'cardinality_count',
+                      },
+                      script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
+                    },
+                  },
+                }
+              : {}),
+          },
+        },
+      };
 
   return singleSearchAfter({
     aggregations,

@@ -24,7 +24,7 @@ import { SUB_CASES_URL } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 
-export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
+export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: `${SUB_CASES_URL}/_find`,
@@ -88,6 +88,9 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
           ),
         });
       } catch (error) {
+        logger.error(
+          `Failed to find sub cases in route case id: ${request.params.case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

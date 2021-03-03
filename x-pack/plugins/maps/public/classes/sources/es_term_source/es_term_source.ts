@@ -127,7 +127,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const indexPattern = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
       size: this._descriptor.size !== undefined ? this._descriptor.size : DEFAULT_MAX_BUCKETS_LIMIT,

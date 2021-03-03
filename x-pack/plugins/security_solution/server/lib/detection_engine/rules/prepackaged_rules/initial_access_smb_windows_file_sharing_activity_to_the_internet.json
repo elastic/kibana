@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "This rule detects network events that may indicate the use of Windows file sharing (also called SMB or CIFS) traffic to the Internet. SMB is commonly used within networks to share files, printers, and other system resources amongst trusted systems. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector or for data exfiltration.",
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
@@ -56,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

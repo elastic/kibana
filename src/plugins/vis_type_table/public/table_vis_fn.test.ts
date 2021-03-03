@@ -27,7 +27,12 @@ describe('interpreter/functions#table', () => {
   const visConfig = {
     title: 'My Chart title',
     perPage: 10,
+    percentageCol: '',
+    row: false,
+    showToolbar: false,
     showPartialRows: false,
+    splitColumn: undefined,
+    splitRow: undefined,
     showMetricsAtAllLevels: false,
     sort: {
       columnIndex: null,
@@ -35,19 +40,17 @@ describe('interpreter/functions#table', () => {
     },
     showTotal: false,
     totalFunc: 'sum',
-    dimensions: {
-      metrics: [
-        {
-          accessor: 0,
-          format: {
-            id: 'number',
-          },
+    metrics: [
+      {
+        accessor: 0,
+        format: {
+          id: 'number',
           params: {},
-          aggType: 'count',
         },
-      ],
-      buckets: [],
-    },
+        params: {},
+      },
+    ],
+    buckets: [],
   };
 
   beforeEach(() => {
@@ -55,12 +58,12 @@ describe('interpreter/functions#table', () => {
   });
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
+    const actual = await fn(context, visConfig, undefined);
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', async () => {
-    await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
+    await fn(context, visConfig, undefined);
     expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
     expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig);
   });

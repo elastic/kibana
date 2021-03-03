@@ -95,164 +95,6 @@ describe('SearchSource', () => {
         }
       `);
     });
-
-    test('recurses parents to get the entire filters: plain object filter', () => {
-      const RECURSE = true;
-
-      const parent = new SearchSource({}, searchSourceDependencies);
-      parent.setField('filter', [
-        {
-          meta: {
-            index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
-            params: {},
-            alias: null,
-            disabled: false,
-            negate: false,
-          },
-          query: {
-            range: {
-              '@date': {
-                gte: '2016-01-27T18:11:05.010Z',
-                lte: '2021-01-27T18:11:05.010Z',
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        },
-      ]);
-      searchSource.setParent(parent);
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
-        Object {
-          "aggs": 5,
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": null,
-                "disabled": false,
-                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
-                "negate": false,
-                "params": Object {},
-              },
-              "query": Object {
-                "range": Object {
-                  "@date": Object {
-                    "format": "strict_date_optional_time",
-                    "gte": "2016-01-27T18:11:05.010Z",
-                    "lte": "2021-01-27T18:11:05.010Z",
-                  },
-                },
-              },
-            },
-          ],
-        }
-      `);
-
-      // calling twice gives the same result: no searchSources in the hierarchy were modified
-      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
-        Object {
-          "aggs": 5,
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": null,
-                "disabled": false,
-                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
-                "negate": false,
-                "params": Object {},
-              },
-              "query": Object {
-                "range": Object {
-                  "@date": Object {
-                    "format": "strict_date_optional_time",
-                    "gte": "2016-01-27T18:11:05.010Z",
-                    "lte": "2021-01-27T18:11:05.010Z",
-                  },
-                },
-              },
-            },
-          ],
-        }
-      `);
-    });
-
-    test('recurses parents to get the entire filters: function filter', () => {
-      const RECURSE = true;
-
-      const parent = new SearchSource({}, searchSourceDependencies);
-      parent.setField('filter', () => ({
-        meta: {
-          index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
-          params: {},
-          alias: null,
-          disabled: false,
-          negate: false,
-        },
-        query: {
-          range: {
-            '@date': {
-              gte: '2016-01-27T18:11:05.010Z',
-              lte: '2021-01-27T18:11:05.010Z',
-              format: 'strict_date_optional_time',
-            },
-          },
-        },
-      }));
-      searchSource.setParent(parent);
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
-        Object {
-          "aggs": 5,
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": null,
-                "disabled": false,
-                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
-                "negate": false,
-                "params": Object {},
-              },
-              "query": Object {
-                "range": Object {
-                  "@date": Object {
-                    "format": "strict_date_optional_time",
-                    "gte": "2016-01-27T18:11:05.010Z",
-                    "lte": "2021-01-27T18:11:05.010Z",
-                  },
-                },
-              },
-            },
-          ],
-        }
-      `);
-
-      // calling twice gives the same result: no double-added filters
-      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
-        Object {
-          "aggs": 5,
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": null,
-                "disabled": false,
-                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
-                "negate": false,
-                "params": Object {},
-              },
-              "query": Object {
-                "range": Object {
-                  "@date": Object {
-                    "format": "strict_date_optional_time",
-                    "gte": "2016-01-27T18:11:05.010Z",
-                    "lte": "2021-01-27T18:11:05.010Z",
-                  },
-                },
-              },
-            },
-          ],
-        }
-      `);
-    });
   });
 
   describe('#removeField()', () => {
@@ -576,10 +418,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = await searchSource.getSearchRequestBody();
-        expect(request.fields).toEqual([
-          { field: 'field1', include_unmapped: 'true' },
-          { field: 'field2', include_unmapped: 'true' },
-        ]);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
       test('returns all scripted fields when one fields entry is *', async () => {
@@ -973,6 +812,76 @@ describe('SearchSource', () => {
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
       expect(request._source).toEqual(['geometry']);
+    });
+  });
+
+  describe('getSerializedFields', () => {
+    const filter = [
+      {
+        query: 'query',
+        meta: {
+          alias: 'alias',
+          disabled: false,
+          negate: false,
+          index: '456',
+        },
+      },
+    ];
+
+    test('should return serialized fields', () => {
+      const indexPattern123 = { id: '123' } as IndexPattern;
+      searchSource.setField('index', indexPattern123);
+      searchSource.setField('filter', () => {
+        return filter;
+      });
+      const serializedFields = searchSource.getSerializedFields();
+      expect(serializedFields).toMatchInlineSnapshot(
+        { index: '123', filter },
+        `
+        Object {
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": "alias",
+                "disabled": false,
+                "index": "456",
+                "negate": false,
+              },
+              "query": "query",
+            },
+          ],
+          "index": "123",
+        }
+      `
+      );
+    });
+
+    test('should support nested search sources', () => {
+      const indexPattern123 = { id: '123' } as IndexPattern;
+      searchSource.setField('index', indexPattern123);
+      searchSource.setField('from', 123);
+      const childSearchSource = searchSource.createChild();
+      childSearchSource.setField('timeout', '100');
+      const serializedFields = childSearchSource.getSerializedFields(true);
+      expect(serializedFields).toMatchInlineSnapshot(
+        {
+          timeout: '100',
+          parent: {
+            index: '123',
+            from: 123,
+          },
+        },
+        `
+        Object {
+          "index": undefined,
+          "parent": Object {
+            "from": 123,
+            "index": "123",
+          },
+          "timeout": "100",
+        }
+      `
+      );
     });
   });
 });

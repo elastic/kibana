@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { CommentType } from '../../../../case/common/api';
 import { usePostComment, UsePostComment } from './use_post_comment';
-import { basicCaseId } from './mock';
+import { basicCaseId, basicSubCaseId } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -40,7 +40,7 @@ describe('usePostComment', () => {
     });
   });
 
-  it('calls postComment with correct arguments', async () => {
+  it('calls postComment with correct arguments - case', async () => {
     const spyOnPostCase = jest.spyOn(api, 'postComment');
 
     await act(async () => {
@@ -49,9 +49,38 @@ describe('usePostComment', () => {
       );
       await waitForNextUpdate();
 
-      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal, undefined);
+    });
+  });
+
+  it('calls postComment with correct arguments - sub case', async () => {
+    const spyOnPostCase = jest.spyOn(api, 'postComment');
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
+        usePostComment()
+      );
+      await waitForNextUpdate();
+
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+        subCaseId: basicSubCaseId,
+      });
+      await waitForNextUpdate();
+      expect(spyOnPostCase).toBeCalledWith(
+        samplePost,
+        basicCaseId,
+        abortCtrl.signal,
+        basicSubCaseId
+      );
     });
   });
 
@@ -61,7 +90,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -77,7 +110,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -94,7 +131,11 @@ describe('usePostComment', () => {
         usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
+      result.current.postComment({
+        caseId: basicCaseId,
+        data: samplePost,
+        updateCase: updateCaseCallback,
+      });
 
       expect(result.current).toEqual({
         isLoading: false,

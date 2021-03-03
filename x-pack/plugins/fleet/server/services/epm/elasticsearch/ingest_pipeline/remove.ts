@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { appContextService } from '../../../';
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { CallESAsCurrentUser } from '../../../../types';
+import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import type { EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
   callCluster: CallESAsCurrentUser,
@@ -61,7 +65,11 @@ export async function deletePipeline(callCluster: CallESAsCurrentUser, id: strin
     try {
       await callCluster('ingest.deletePipeline', { id });
     } catch (err) {
-      throw new Error(`error deleting pipeline ${id}`);
+      // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
+      // duplicate references to them, see https://github.com/elastic/kibana/issues/91192
+      if (err.statusCode !== 404) {
+        throw new IngestManagerError(`error deleting pipeline ${id}: ${err}`);
+      }
     }
   }
 }

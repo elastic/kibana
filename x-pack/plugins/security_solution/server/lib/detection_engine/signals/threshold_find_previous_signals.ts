@@ -24,7 +24,7 @@ interface FindPreviousThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
-  bucketByField: string;
+  bucketByFields: string[];
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -36,7 +36,7 @@ export const findPreviousThresholdSignals = async ({
   services,
   logger,
   ruleId,
-  bucketByField,
+  bucketByFields,
   timestampOverride,
   buildRuleMessage,
 }: FindPreviousThresholdSignalsParams): Promise<{
@@ -44,22 +44,6 @@ export const findPreviousThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  const aggregations = {
-    threshold: {
-      terms: {
-        field: 'signal.threshold_result.value',
-        size: 10000,
-      },
-      aggs: {
-        lastSignalTimestamp: {
-          max: {
-            field: 'signal.original_time', // timestamp of last event captured by bucket
-          },
-        },
-      },
-    },
-  };
-
   const filter = {
     bool: {
       must: [
@@ -68,17 +52,18 @@ export const findPreviousThresholdSignals = async ({
             'signal.rule.rule_id': ruleId,
           },
         },
-        {
-          term: {
-            'signal.rule.threshold.field': bucketByField,
-          },
-        },
+        ...bucketByFields.map((field) => {
+          return {
+            term: {
+              'signal.rule.threshold.field': field,
+            },
+          };
+        }),
       ],
     },
   };
 
   return singleSearchAfter({
-    aggregations,
     searchAfterSortId: undefined,
     timestampOverride,
     index: indexPattern,
@@ -87,7 +72,7 @@ export const findPreviousThresholdSignals = async ({
     services,
     logger,
     filter,
-    pageSize: 0,
+    pageSize: 10000, // TODO: multiple pages?
     buildRuleMessage,
     excludeDocsWithTimestampOverride: false,
   });

@@ -16,7 +16,7 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { copyPersistentState } from '../../../reducers/util';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
@@ -34,7 +34,7 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
+import { FieldFormatter } from '../../../../common/constants';
 import {
   Adapters,
   RequestResponder,
@@ -237,11 +237,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = createExtentFilter(
-        buffer,
-        geoField.name,
-        geoField.type as ES_GEO_FIELD_TYPE
-      );
+      const extentFilter = createExtentFilter(buffer, geoField.name);
 
       // @ts-expect-error
       allFilters.push(extentFilter);
@@ -279,7 +275,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {

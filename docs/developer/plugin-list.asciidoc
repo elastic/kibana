@@ -29,6 +29,8 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
+|undefined
+
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
@@ -91,6 +93,10 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
+
+
+|{kib-repo}blob/{branch}/src/plugins/index_pattern_field_editor/README.md[indexPatternFieldEditor]
+|The reusable field editor across Kibana!
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_management[indexPatternManagement]
@@ -220,7 +226,7 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]
+|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 

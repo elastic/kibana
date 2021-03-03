@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Enumeration or discovery of the Windows registry using reg.exe. This information can be used to perform follow-on activities.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -40,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

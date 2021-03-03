@@ -29,12 +29,12 @@ import { ListArray } from '../../../../common/detection_engine/schemas/types/lis
 import {
   BulkResponse,
   BulkResponseErrorAggregation,
-  isValidUnit,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
   Signal,
   WrappedSignalHit,
+  RuleRangeTuple,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -105,6 +105,7 @@ export const hasReadIndexPrivileges = async (
 export const hasTimestampFields = async (
   wroteStatus: boolean,
   timestampField: string,
+  ruleName: string,
   // any is derived from here
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,11 +116,15 @@ export const hasTimestampFields = async (
   buildRuleMessage: BuildRuleMessage
 ): Promise<boolean> => {
   if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `The following index patterns did not match any indices: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+      ruleName === 'Endpoint Security'
+        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
+        : ''
+    }`;
+    logger.error(buildRuleMessage(errorString.trimEnd()));
+    await ruleStatusService.warning(errorString.trimEnd());
     return true;
   } else if (
     !wroteStatus &&
@@ -134,9 +139,10 @@ export const hasTimestampFields = async (
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
     }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields)
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
         ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusService.warning(errorString);
@@ -162,82 +168,21 @@ export const checkPrivileges = async (
     },
   });
 
-export const getGapMaxCatchupRatio = ({
-  logger,
-  previousStartedAt,
-  unit,
-  buildRuleMessage,
-  ruleParamsFrom,
-  interval,
+export const getNumCatchupIntervals = ({
+  gap,
+  intervalDuration,
 }: {
-  logger: Logger;
-  ruleParamsFrom: string;
-  previousStartedAt: Date | null | undefined;
-  interval: string;
-  buildRuleMessage: BuildRuleMessage;
-  unit: string;
-}): {
-  maxCatchup: number | null;
-  ratio: number | null;
-  gapDiffInUnits: number | null;
-} => {
-  if (previousStartedAt == null) {
-    return {
-      maxCatchup: null,
-      ratio: null,
-      gapDiffInUnits: null,
-    };
+  gap: moment.Duration;
+  intervalDuration: moment.Duration;
+}): number => {
+  if (gap.asMilliseconds() <= 0 || intervalDuration.asMilliseconds() <= 0) {
+    return 0;
   }
-  if (!isValidUnit(unit)) {
-    logger.error(buildRuleMessage(`unit: ${unit} failed isValidUnit check`));
-    return {
-      maxCatchup: null,
-      ratio: null,
-      gapDiffInUnits: null,
-    };
-  }
-  /*
-      we need the total duration from now until the last time the rule ran.
-      the next few lines can be summed up as calculating
-      "how many second | minutes | hours have passed since the last time this ran?"
-      */
-  const nowToGapDiff = moment.duration(moment().diff(previousStartedAt));
-  // rule ran early, no gap
-  if (shorthandMap[unit].asFn(nowToGapDiff) < 0) {
-    // rule ran early, no gap
-    return {
-      maxCatchup: null,
-      ratio: null,
-      gapDiffInUnits: null,
-    };
-  }
-  const calculatedFrom = `now-${
-    parseInt(shorthandMap[unit].asFn(nowToGapDiff).toString(), 10) + unit
-  }`;
-  logger.debug(buildRuleMessage(`calculatedFrom: ${calculatedFrom}`));
-
-  const intervalMoment = moment.duration(parseInt(interval, 10), unit);
-  logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
-  const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
-  const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
-  if (dateMathRuleParamsFrom != null && intervalMoment != null) {
-    const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-    const gapDiffInUnits = dateMathRuleParamsFrom.diff(calculatedFromAsMoment, momentUnit);
-
-    const ratio = gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment);
-
-    // maxCatchup is to ensure we are not trying to catch up too far back.
-    // This allows for a maximum of 4 consecutive rule execution misses
-    // to be included in the number of signals generated.
-    const maxCatchup = ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
-    return { maxCatchup, ratio, gapDiffInUnits };
-  }
-  logger.error(buildRuleMessage('failed to parse calculatedFrom and intervalMoment'));
-  return {
-    maxCatchup: null,
-    ratio: null,
-    gapDiffInUnits: null,
-  };
+  const ratio = Math.ceil(gap.asMilliseconds() / intervalDuration.asMilliseconds());
+  // maxCatchup is to ensure we are not trying to catch up too far back.
+  // This allows for a maximum of 4 consecutive rule execution misses
+  // to be included in the number of signals generated.
+  return ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
 };
 
 export const getListsClient = ({
@@ -395,50 +340,40 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
 export const getDriftTolerance = ({
   from,
   to,
-  interval,
+  intervalDuration,
   now = moment(),
 }: {
   from: string;
   to: string;
-  interval: moment.Duration;
+  intervalDuration: moment.Duration;
   now?: moment.Moment;
-}): moment.Duration | null => {
+}): moment.Duration => {
   const toDate = parseScheduleDates(to) ?? now;
   const fromDate = parseScheduleDates(from) ?? dateMath.parse('now-6m');
   const timeSegment = toDate.diff(fromDate);
   const duration = moment.duration(timeSegment);
 
-  if (duration !== null) {
-    return duration.subtract(interval);
-  } else {
-    return null;
-  }
+  return duration.subtract(intervalDuration);
 };
 
 export const getGapBetweenRuns = ({
   previousStartedAt,
-  interval,
+  intervalDuration,
   from,
   to,
   now = moment(),
 }: {
   previousStartedAt: Date | undefined | null;
-  interval: string;
+  intervalDuration: moment.Duration;
   from: string;
   to: string;
   now?: moment.Moment;
-}): moment.Duration | null => {
+}): moment.Duration => {
   if (previousStartedAt == null) {
-    return null;
+    return moment.duration(0);
   }
-  const intervalDuration = parseInterval(interval);
-  if (intervalDuration == null) {
-    return null;
-  }
-  const driftTolerance = getDriftTolerance({ from, to, interval: intervalDuration });
-  if (driftTolerance == null) {
-    return null;
-  }
+  const driftTolerance = getDriftTolerance({ from, to, intervalDuration });
+
   const diff = moment.duration(now.diff(previousStartedAt));
   const drift = diff.subtract(intervalDuration);
   return drift.subtract(driftTolerance);
@@ -488,135 +423,103 @@ export const errorAggregator = (
   }, Object.create(null));
 };
 
-/**
- * Determines the number of time intervals to search if gap is present
- * along with new maxSignals per time interval.
- * @param logger Logger
- * @param ruleParamsFrom string representing the rules 'from' property
- * @param ruleParamsTo string representing the rules 'to' property
- * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
- * @param gap moment.Duration representing a gap in since the last time the rule ran
- * @param previousStartedAt Date at which the rule last ran
- * @param interval string the interval which the rule runs
- * @param buildRuleMessage function provides meta information for logged event
- */
-export const getSignalTimeTuples = ({
+export const getRuleRangeTuples = ({
   logger,
-  ruleParamsFrom,
-  ruleParamsTo,
-  ruleParamsMaxSignals,
-  gap,
   previousStartedAt,
+  from,
+  to,
   interval,
+  maxSignals,
   buildRuleMessage,
 }: {
   logger: Logger;
-  ruleParamsFrom: string;
-  ruleParamsTo: string;
-  ruleParamsMaxSignals: number;
-  gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
+  from: string;
+  to: string;
   interval: string;
-  buildRuleMessage: BuildRuleMessage;
-}): Array<{
-  to: moment.Moment | undefined;
-  from: moment.Moment | undefined;
   maxSignals: number;
-}> => {
-  let totalToFromTuples: Array<{
-    to: moment.Moment | undefined;
-    from: moment.Moment | undefined;
-    maxSignals: number;
-  }> = [];
-  if (gap != null && gap.valueOf() > 0 && previousStartedAt != null) {
-    const fromUnit = ruleParamsFrom[ruleParamsFrom.length - 1];
-    if (isValidUnit(fromUnit)) {
-      const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
-
-      /*
-      we need the total duration from now until the last time the rule ran.
-      the next few lines can be summed up as calculating
-      "how many second | minutes | hours have passed since the last time this ran?"
-      */
-      const nowToGapDiff = moment.duration(moment().diff(previousStartedAt));
-      const calculatedFrom = `now-${
-        parseInt(shorthandMap[unit].asFn(nowToGapDiff).toString(), 10) + unit
-      }`;
-      logger.debug(buildRuleMessage(`calculatedFrom: ${calculatedFrom}`));
-
-      const intervalMoment = moment.duration(parseInt(interval, 10), unit);
-      logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
-      const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-      // maxCatchup is to ensure we are not trying to catch up too far back.
-      // This allows for a maximum of 4 consecutive rule execution misses
-      // to be included in the number of signals generated.
-      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
-        logger,
-        buildRuleMessage,
-        previousStartedAt,
-        unit,
-        ruleParamsFrom,
-        interval,
-      });
-      logger.debug(buildRuleMessage(`maxCatchup: ${maxCatchup}, ratio: ${ratio}`));
-      if (maxCatchup == null || ratio == null || gapDiffInUnits == null) {
-        throw new Error(
-          buildRuleMessage('failed to calculate maxCatchup, ratio, or gapDiffInUnits')
-        );
-      }
-      let tempTo = dateMath.parse(ruleParamsFrom);
-      if (tempTo == null) {
-        // return an error
-        throw new Error(buildRuleMessage('dateMath parse failed'));
-      }
-
-      let beforeMutatedFrom: moment.Moment | undefined;
-      while (totalToFromTuples.length < maxCatchup) {
-        // if maxCatchup is less than 1, we calculate the 'from' differently
-        // and maxSignals becomes some less amount of maxSignals
-        // in order to maintain maxSignals per full rule interval.
-        if (maxCatchup > 0 && maxCatchup < 1) {
-          totalToFromTuples.push({
-            to: tempTo.clone(),
-            from: tempTo.clone().subtract(gapDiffInUnits, momentUnit),
-            maxSignals: ruleParamsMaxSignals * maxCatchup,
-          });
-          break;
-        }
-        const beforeMutatedTo = tempTo.clone();
-
-        // moment.subtract mutates the moment so we need to clone again..
-        beforeMutatedFrom = tempTo.clone().subtract(intervalMoment, momentUnit);
-        const tuple = {
-          to: beforeMutatedTo,
-          from: beforeMutatedFrom,
-          maxSignals: ruleParamsMaxSignals,
-        };
-        totalToFromTuples = [...totalToFromTuples, tuple];
-        tempTo = beforeMutatedFrom;
-      }
-      totalToFromTuples = [
-        {
-          to: dateMath.parse(ruleParamsTo),
-          from: dateMath.parse(ruleParamsFrom),
-          maxSignals: ruleParamsMaxSignals,
-        },
-        ...totalToFromTuples,
-      ];
-    }
-  } else {
-    totalToFromTuples = [
-      {
-        to: dateMath.parse(ruleParamsTo),
-        from: dateMath.parse(ruleParamsFrom),
-        maxSignals: ruleParamsMaxSignals,
-      },
-    ];
+  buildRuleMessage: BuildRuleMessage;
+}) => {
+  const originalTo = dateMath.parse(to);
+  const originalFrom = dateMath.parse(from);
+  if (originalTo == null || originalFrom == null) {
+    throw new Error(buildRuleMessage('dateMath parse failed'));
   }
-  logger.debug(
-    buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
+  const tuples = [
+    {
+      to: originalTo,
+      from: originalFrom,
+      maxSignals,
+    },
+  ];
+  const intervalDuration = parseInterval(interval);
+  if (intervalDuration == null) {
+    logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
+    return { tuples, remainingGap: moment.duration(0) };
+  }
+  const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
+  const catchup = getNumCatchupIntervals({
+    gap,
+    intervalDuration,
+  });
+  const catchupTuples = getCatchupTuples({
+    to: originalTo,
+    from: originalFrom,
+    ruleParamsMaxSignals: maxSignals,
+    catchup,
+    intervalDuration,
+  });
+  tuples.push(...catchupTuples);
+  // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
+  const remainingGapMilliseconds = Math.max(
+    gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
+    0
   );
-  return totalToFromTuples;
+  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
+};
+
+/**
+ * Creates rule range tuples needed to cover gaps since the last rule run.
+ * @param to moment.Moment representing the rules 'to' property
+ * @param from moment.Moment representing the rules 'from' property
+ * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
+ * @param catchup number the number of additional rule run intervals to add
+ * @param intervalDuration moment.Duration the interval which the rule runs
+ */
+export const getCatchupTuples = ({
+  to,
+  from,
+  ruleParamsMaxSignals,
+  catchup,
+  intervalDuration,
+}: {
+  to: moment.Moment;
+  from: moment.Moment;
+  ruleParamsMaxSignals: number;
+  catchup: number;
+  intervalDuration: moment.Duration;
+}): RuleRangeTuple[] => {
+  const catchupTuples: RuleRangeTuple[] = [];
+  const intervalInMilliseconds = intervalDuration.asMilliseconds();
+  let currentTo = to;
+  let currentFrom = from;
+  // This loop will create tuples with overlapping time ranges, the same way rule runs have overlapping time
+  // ranges due to the additional lookback. We could choose to create tuples that don't overlap here by using the
+  // "from" value from one tuple as "to" in the next one, however, the overlap matters for rule types like EQL and
+  // threshold rules that look for sets of documents within the query. Thus we keep the overlap so that these
+  // extra tuples behave as similarly to the regular rule runs as possible.
+  while (catchupTuples.length < catchup) {
+    const nextTo = currentTo.clone().subtract(intervalInMilliseconds);
+    const nextFrom = currentFrom.clone().subtract(intervalInMilliseconds);
+    catchupTuples.push({
+      to: nextTo,
+      from: nextFrom,
+      maxSignals: ruleParamsMaxSignals,
+    });
+    currentTo = nextTo;
+    currentFrom = nextFrom;
+  }
+  return catchupTuples;
 };
 
 /**
@@ -698,9 +601,12 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
-          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
-          failure.reason?.reason ===
+          failure.reason?.reason?.includes(
+            'No mapping found for [@timestamp] in order to sort on'
+          ) ||
+          failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
+          )
         );
       }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
@@ -851,7 +757,7 @@ export const createTotalHitsFromSearchResult = ({
 export const calculateThresholdSignalUuid = (
   ruleId: string,
   startedAt: Date,
-  thresholdField: string,
+  thresholdFields: string[],
   key?: string
 ): string => {
   // used to generate constant Threshold Signals ID when run with the same params
@@ -859,7 +765,31 @@ export const calculateThresholdSignalUuid = (
 
   const startedAtString = startedAt.toISOString();
   const keyString = key ?? '';
-  const baseString = `${ruleId}${startedAtString}${thresholdField}${keyString}`;
+  const baseString = `${ruleId}${startedAtString}${thresholdFields.join(',')}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
+};
+
+export const getThresholdAggregationParts = (
+  data: object,
+  index?: number
+):
+  | {
+      field: string;
+      index: number;
+      name: string;
+    }
+  | undefined => {
+  const idx = index != null ? index.toString() : '\\d';
+  const pattern = `threshold_(?<index>${idx}):(?<name>.*)`;
+  for (const key of Object.keys(data)) {
+    const matches = key.match(pattern);
+    if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
+      return {
+        field: matches.groups.name,
+        index: parseInt(matches.groups.index, 10),
+        name: key,
+      };
+    }
+  }
 };

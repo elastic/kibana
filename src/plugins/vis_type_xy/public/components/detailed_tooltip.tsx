@@ -27,9 +27,6 @@ interface TooltipData {
   value: string;
 }
 
-// TODO: replace when exported from elastic/charts
-const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
-
 export const getTooltipData = (
   aspects: Aspects,
   header: TooltipValue | null,
@@ -81,7 +78,7 @@ export const getTooltipData = (
   if (
     aspects.splitColumn &&
     valueSeries.smHorizontalAccessorValue !== undefined &&
-    valueSeries.smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+    valueSeries.smHorizontalAccessorValue !== undefined
   ) {
     data.push({
       label: aspects.splitColumn.title,
@@ -92,7 +89,7 @@ export const getTooltipData = (
   if (
     aspects.splitRow &&
     valueSeries.smVerticalAccessorValue !== undefined &&
-    valueSeries.smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+    valueSeries.smVerticalAccessorValue !== undefined
   ) {
     data.push({
       label: aspects.splitRow.title,

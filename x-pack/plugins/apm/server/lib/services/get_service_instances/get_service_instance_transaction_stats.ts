@@ -6,7 +6,11 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -22,8 +26,15 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../helpers/latency_aggregation_type';
 
 export async function getServiceInstanceTransactionStats({
+  environment,
+  kuery,
+  latencyAggregationType,
   setup,
   transactionType,
   serviceName,
@@ -32,7 +43,7 @@ export async function getServiceInstanceTransactionStats({
   numBuckets,
 }: ServiceInstanceParams) {
   return withApmSpan('get_service_instance_transaction_stats', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const { intervalString, bucketSize } = getBucketSize({
       start,
@@ -45,11 +56,7 @@ export async function getServiceInstanceTransactionStats({
     );
 
     const subAggs = {
-      avg_transaction_duration: {
-        avg: {
-          field,
-        },
-      },
+      ...getLatencyAggregation(latencyAggregationType, field),
       failures: {
         filter: {
           term: {
@@ -72,10 +79,11 @@ export async function getServiceInstanceTransactionStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...esFilter,
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
             ],
           },
         },
@@ -115,7 +123,7 @@ export async function getServiceInstanceTransactionStats({
         (serviceNodeBucket) => {
           const {
             doc_count: count,
-            avg_transaction_duration: avgTransactionDuration,
+            latency,
             key,
             failures,
             timeseries,
@@ -138,10 +146,16 @@ export async function getServiceInstanceTransactionStats({
               })),
             },
             latency: {
-              value: avgTransactionDuration.value,
+              value: getLatencyValue({
+                aggregation: latency,
+                latencyAggregationType,
+              }),
               timeseries: timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key,
-                y: dateBucket.avg_transaction_duration.value,
+                y: getLatencyValue({
+                  aggregation: dateBucket.latency,
+                  latencyAggregationType,
+                }),
               })),
             },
           };

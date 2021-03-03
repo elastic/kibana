@@ -6,13 +6,16 @@
  */
 
 import {
+  EuiMarkdownEditorUiPlugin,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 
 import * as timelineMarkdownPlugin from './timeline';
-
-export const uiPlugins = [timelineMarkdownPlugin.plugin];
+const uiPlugins: EuiMarkdownEditorUiPlugin[] = getDefaultEuiMarkdownUiPlugins();
+uiPlugins.push(timelineMarkdownPlugin.plugin);
+export { uiPlugins };
 export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 

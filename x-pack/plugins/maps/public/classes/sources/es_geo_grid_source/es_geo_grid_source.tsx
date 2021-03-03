@@ -368,7 +368,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   ): Promise<GeoJsonWithMeta> {
     const indexPattern: IndexPattern = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach((metricField) => {

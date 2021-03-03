@@ -69,9 +69,13 @@ export function getCounts({ request, setup }: MetricParams) {
   return withApmSpan('get_transaction_group_transaction_count', async () => {
     const params = mergeRequestWithAggs(request, {
       transaction_type: {
-        top_hits: {
-          size: 1,
-          _source: [TRANSACTION_TYPE],
+        top_metrics: {
+          sort: {
+            '@timestamp': 'desc',
+          },
+          metrics: {
+            field: TRANSACTION_TYPE,
+          } as const,
         },
       },
     });
@@ -81,14 +85,12 @@ export function getCounts({ request, setup }: MetricParams) {
     return arrayUnionToCallable(
       response.aggregations?.transaction_groups.buckets ?? []
     ).map((bucket) => {
-      // type is Transaction | APMBaseDoc because it could be a metric document
-      const source = (bucket.transaction_type.hits.hits[0]
-        ._source as unknown) as { transaction: { type: string } };
-
       return {
         key: bucket.key as BucketKey,
         count: bucket.doc_count,
-        transactionType: source.transaction.type,
+        transactionType: bucket.transaction_type.top[0].metrics[
+          TRANSACTION_TYPE
+        ] as string,
       };
     });
   });

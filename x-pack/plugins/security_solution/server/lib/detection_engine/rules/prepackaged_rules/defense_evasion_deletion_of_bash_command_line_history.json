@@ -2,16 +2,16 @@
   "author": [
     "Elastic"
   ],
-  "description": "Adversaries may attempt to clear the bash command line history in an attempt to evade detection or forensic investigations.",
+  "description": "Adversaries may attempt to clear or disable the Bash command-line history in an attempt to evade detection or forensic investigations.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "lucene",
+  "language": "eql",
   "license": "Elastic License",
-  "name": "Deletion of Bash Command Line History",
-  "query": "event.category:process AND event.type:(start or process_started) AND process.name:rm AND process.args:/\\/(home\\/.{1,255}|root)\\/\\.bash_history/",
+  "name": "Tampering of Bash Command-Line History",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n (\n  (process.args : (\"rm\", \"echo\") and process.args : (\".bash_history\", \"/root/.bash_history\", \"/home/*/.bash_history\")) or\n  (process.name : \"history\" and process.args : \"-c\") or\n  (process.args : \"export\" and process.args : (\"HISTFILE=/dev/null\", \"HISTFILESIZE=0\")) or\n  (process.args : \"unset\" and process.args : \"HISTFILE\") or\n  (process.args : \"set\" and process.args : \"history\" and process.args : \"+o\")\n )\n",
   "risk_score": 47,
   "rule_id": "7bcbb3ac-e533-41ad-a612-d6c3bf666aba",
   "severity": "medium",
@@ -47,6 +47,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 5
+  "type": "eql",
+  "version": 6
 }

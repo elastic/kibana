@@ -26,6 +26,7 @@ import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
+export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
@@ -63,6 +64,10 @@ export const alertComment: Comment = {
   createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
@@ -95,6 +100,38 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  subCaseIds: [],
+};
+
+export const collectionCase: Case = {
+  type: CaseType.collection,
+  closedAt: null,
+  closedBy: null,
+  id: 'collection-id',
+  comments: [basicComment],
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  description: 'Security banana Issue',
+  externalService: null,
+  status: CaseStatuses.open,
+  tags,
+  title: 'Another horrible breach in a collection!!',
+  totalComment: 1,
+  totalAlerts: 0,
+  updatedAt: basicUpdatedAt,
+  updatedBy: elasticUser,
+  version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
+  subCases: [],
+  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {
@@ -217,7 +254,7 @@ export const basicCaseSnake: CaseResponse = {
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
-};
+} as CaseResponse;
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,

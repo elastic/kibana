@@ -6,9 +6,11 @@
   "false_positives": [
     "Werfault.exe will legitimately spawn when dns.exe crashes, but the DNS service is very stable and so this is a low occurring event. Denial of Service (DoS) attempts by intentionally crashing the service will also cause werfault.exe to spawn."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -49,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

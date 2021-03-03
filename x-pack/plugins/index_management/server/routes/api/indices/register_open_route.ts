@@ -38,7 +38,7 @@ export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

@@ -18,16 +18,18 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const getServiceNodes = ({
+  kuery,
   setup,
   serviceName,
 }: {
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) => {
   return withApmSpan('get_service_nodes', async () => {
     const { apmEventClient } = setup;
 
-    const projection = getServiceNodesProjection({ setup, serviceName });
+    const projection = getServiceNodesProjection({ kuery, setup, serviceName });
 
     const params = mergeProjection(projection, {
       body: {

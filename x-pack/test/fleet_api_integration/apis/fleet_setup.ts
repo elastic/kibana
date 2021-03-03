@@ -105,5 +105,19 @@ export default function (providerContext: FtrProviderContext) {
         transient_metadata: { enabled: true },
       });
     });
+
+    it('should install default packages', async () => {
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/epm/packages?experimental=true`)
+        .expect(200);
+      const installedPackages = apiResponse.response
+        .filter((p: any) => p.status === 'installed')
+        .map((p: any) => p.name)
+        .sort();
+
+      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'system']);
+    });
   });
 }

@@ -123,13 +123,19 @@ export function registerAnomalyDetectionAlertType({
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
-    async executor({ services, params }) {
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(params, publicBaseUrl);
+      const executionResult = await execute(
+        params,
+        publicBaseUrl,
+        alertId,
+        startedAt,
+        previousStartedAt
+      );
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;

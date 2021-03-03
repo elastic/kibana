@@ -15,7 +15,11 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -32,18 +36,22 @@ import { ServicesItemsSetup } from './get_services_items';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface AggregationParams {
+  environment?: string;
+  kuery?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  maxNumServices: number;
 }
 
-const MAX_NUMBER_OF_SERVICES = 500;
-
 export async function getServiceTransactionStats({
+  environment,
+  kuery,
   setup,
   searchAggregatedTransactions,
+  maxNumServices,
 }: AggregationParams) {
   return withApmSpan('get_service_transaction_stats', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const outcomes = getOutcomeAggregation();
 
@@ -71,11 +79,12 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              { range: rangeFilter(start, end) },
-              ...esFilter,
               ...getDocumentTypeFilterForAggregatedTransactions(
                 searchAggregatedTransactions
               ),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
             ],
           },
         },
@@ -83,7 +92,7 @@ export async function getServiceTransactionStats({
           services: {
             terms: {
               field: SERVICE_NAME,
-              size: MAX_NUMBER_OF_SERVICES,
+              size: maxNumServices,
             },
             aggs: {
               transactionType: {
@@ -95,13 +104,14 @@ export async function getServiceTransactionStats({
                   environments: {
                     terms: {
                       field: SERVICE_ENVIRONMENT,
-                      missing: '',
                     },
                   },
-                  agentName: {
-                    top_hits: {
-                      docvalue_fields: [AGENT_NAME] as const,
-                      size: 1,
+                  sample: {
+                    top_metrics: {
+                      metrics: { field: AGENT_NAME } as const,
+                      sort: {
+                        '@timestamp': 'desc',
+                      },
                     },
                   },
                   timeseries: {
@@ -136,12 +146,12 @@ export async function getServiceTransactionStats({
         return {
           serviceName: bucket.key as string,
           transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets
-            .map((environmentBucket) => environmentBucket.key as string)
-            .filter(Boolean),
-          agentName: topTransactionTypeBucket.agentName.hits.hits[0].fields[
-            'agent.name'
-          ]?.[0] as AgentName,
+          environments: topTransactionTypeBucket.environments.buckets.map(
+            (environmentBucket) => environmentBucket.key as string
+          ),
+          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName,
           avgResponseTime: {
             value: topTransactionTypeBucket.avg_duration.value,
             timeseries: topTransactionTypeBucket.timeseries.buckets.map(

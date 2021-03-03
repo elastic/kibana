@@ -64,13 +64,15 @@ export interface DashboardTopNavProps {
   timefilter: TimefilterContract;
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
-  unsavedChanges?: boolean;
+  unsavedChanges: boolean;
+  clearUnsavedChanges: () => void;
   lastDashboardId?: string;
   viewMode: ViewMode;
 }
 
 export function DashboardTopNav({
   dashboardStateManager,
+  clearUnsavedChanges,
   dashboardContainer,
   lastDashboardId,
   unsavedChanges,
@@ -98,6 +100,7 @@ export function DashboardTopNav({
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
+  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -163,7 +166,6 @@ export function DashboardTopNav({
 
       function switchViewMode() {
         dashboardStateManager.switchViewMode(newMode);
-        dashboardStateManager.restorePanels();
 
         if (savedDashboard?.id && allowByValueEmbeddables) {
           const { getFullEditPath, title, id } = savedDashboard;
@@ -223,6 +225,7 @@ export function DashboardTopNav({
    */
   const save = useCallback(
     async (saveOptions: SavedObjectSaveOpts) => {
+      setIsSaveInProgress(true);
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function (id) {
           if (id) {
@@ -236,10 +239,16 @@ export function DashboardTopNav({
 
             dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
-              redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
+              redirectTo({
+                id,
+                // editMode: true,
+                destination: 'dashboard',
+                useReplace: true,
+              });
             } else {
+              setIsSaveInProgress(false);
+              dashboardStateManager.resetState();
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
-              dashboardStateManager.switchViewMode(ViewMode.VIEW);
             }
           }
           return { id };
@@ -355,6 +364,7 @@ export function DashboardTopNav({
       }
     }
 
+    setIsSaveInProgress(true);
     save({}).then((response: SaveResult) => {
       // If the save wasn't successful, put the original values back.
       if (!(response as { id: string }).id) {
@@ -364,10 +374,13 @@ export function DashboardTopNav({
         if (savedObjectsTagging) {
           dashboardStateManager.setTags(currentTags);
         }
+      } else {
+        clearUnsavedChanges();
       }
+      setIsSaveInProgress(false);
       return response;
     });
-  }, [save, savedObjectsTagging, dashboardStateManager]);
+  }, [save, savedObjectsTagging, dashboardStateManager, clearUnsavedChanges]);
 
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
@@ -466,7 +479,8 @@ export function DashboardTopNav({
     const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
       hideWriteControls: dashboardCapabilities.hideWriteControls,
       isNewDashboard: !savedDashboard.id,
-      isDirty: dashboardStateManager.isDirty,
+      isDirty: dashboardStateManager.getIsDirty(timefilter),
+      isSaveInProgress,
     });
 
     const badges = unsavedChanges

@@ -158,8 +158,12 @@ export interface DefineStepRuleJson {
   query?: string;
   language?: string;
   threshold?: {
-    field: string;
+    field: string[];
     value: number;
+    cardinality: Array<{
+      field: string;
+      value: number;
+    }>;
   };
   threat_query?: string;
   threat_mapping?: ThreatMapping;

@@ -11,7 +11,7 @@ import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
 import {
@@ -311,7 +311,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
 
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
@@ -382,7 +382,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('track_total_hits', maxResultWindow + 1);
+    searchSource.setField('trackTotalHits', maxResultWindow + 1);
     searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
@@ -405,6 +405,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
+        resultsCount: resp.hits.hits.length,
         areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
       },
     };
@@ -504,7 +505,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create(initialSearchContext as object);
-    searchSource.setField('track_total_hits', false);
+    searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
@@ -596,11 +597,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    const featureCollection: FeatureCollection | null = sourceDataRequest
-      ? (sourceDataRequest.getData() as FeatureCollection)
-      : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
-    if (!featureCollection || !meta) {
+    if (!meta) {
       // no tooltip content needed when there is no feature collection or meta
       return {
         tooltipContent: null,
@@ -638,7 +636,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: featureCollection.features.length },
+          values: { count: meta.resultsCount },
         }),
         areResultsTrimmed: true,
       };
@@ -647,7 +645,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: featureCollection.features.length },
+        values: { count: meta.resultsCount },
       }),
       areResultsTrimmed: false,
     };

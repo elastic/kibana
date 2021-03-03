@@ -9,17 +9,18 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Persistence via Microsoft Outlook VBA",
-  "query": "file where event.type != \"deletion\" and\n wildcard(file.path, \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Outlook\\\\VbaProject.OTM\")\n",
+  "query": "file where event.type != \"deletion\" and\n file.path : \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Outlook\\\\VbaProject.OTM\"\n",
   "references": [
     "https://www.mdsec.co.uk/2020/11/a-fresh-outlook-on-mail-based-persistence/",
     "https://www.linkedin.com/pulse/outlook-backdoor-using-vba-samir-b-/"
   ],
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "397945f3-d39a-4e6f-8bcb-9656c2031438",
   "severity": "medium",
   "tags": [
@@ -48,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

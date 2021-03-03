@@ -69,6 +69,10 @@ describe('PATCH comment', () => {
         type: CommentType.alert,
         alertId: 'new-id',
         index: 'test-index',
+        rule: {
+          id: 'rule-id',
+          name: 'rule',
+        },
         id: commentID,
         version: 'WzYsMV0=',
       },
@@ -218,6 +222,10 @@ describe('PATCH comment', () => {
         type: CommentType.alert,
         alertId: 'test-id',
         index: 'test-index',
+        rule: {
+          id: 'rule-id',
+          name: 'rule',
+        },
         id: 'mock-comment-1',
         version: 'WzEsMV0=',
       },
@@ -287,5 +295,84 @@ describe('PATCH comment', () => {
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
+  });
+
+  describe('alert format', () => {
+    it.each([
+      ['1', ['index1', 'index2'], CommentType.alert, 'mock-comment-4'],
+      [['1', '2'], 'index', CommentType.alert, 'mock-comment-4'],
+      ['1', ['index1', 'index2'], CommentType.generatedAlert, 'mock-comment-6'],
+      [['1', '2'], 'index', CommentType.generatedAlert, 'mock-comment-6'],
+    ])(
+      'returns an error with an alert comment with contents id: %p indices: %p type: %s comment id: %s',
+      async (alertId, index, type, commentID) => {
+        const request = httpServerMock.createKibanaRequest({
+          path: CASE_COMMENTS_URL,
+          method: 'patch',
+          params: {
+            case_id: 'mock-id-4',
+          },
+          body: {
+            type,
+            alertId,
+            index,
+            rule: {
+              id: 'rule-id',
+              name: 'rule',
+            },
+            id: commentID,
+            version: 'WzYsMV0=',
+          },
+        });
+
+        const { context } = await createRouteContext(
+          createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          })
+        );
+
+        const response = await routeHandler(context, request, kibanaResponseFactory);
+        expect(response.status).toEqual(400);
+      }
+    );
+
+    it.each([
+      ['1', ['index1'], CommentType.alert],
+      [['1', '2'], ['index', 'other-index'], CommentType.alert],
+    ])(
+      'does not return an error with an alert comment with contents id: %p indices: %p type: %s',
+      async (alertId, index, type) => {
+        const request = httpServerMock.createKibanaRequest({
+          path: CASE_COMMENTS_URL,
+          method: 'patch',
+          params: {
+            case_id: 'mock-id-4',
+          },
+          body: {
+            type,
+            alertId,
+            index,
+            rule: {
+              id: 'rule-id',
+              name: 'rule',
+            },
+            id: 'mock-comment-4',
+            // this version is different than the one in mockCaseComments because it gets updated in place
+            version: 'WzE3LDFd',
+          },
+        });
+
+        const { context } = await createRouteContext(
+          createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          })
+        );
+
+        const response = await routeHandler(context, request, kibanaResponseFactory);
+        expect(response.status).toEqual(200);
+      }
+    );
   });
 });

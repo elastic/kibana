@@ -190,7 +190,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     // Fetch entities
     //
     const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
-    entitySearchSource.setField('track_total_hits', false);
+    entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = { size: MAX_TRACKS };
@@ -251,7 +251,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksSearchFilters = { ...searchFilters };
     delete tracksSearchFilters.buffer;
     const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
-    tracksSearchSource.setField('track_total_hits', false);
+    tracksSearchSource.setField('trackTotalHits', false);
     tracksSearchSource.setField('aggs', {
       tracks: {
         filters: {

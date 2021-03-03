@@ -110,7 +110,7 @@ app.config(($routeProvider) => {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
-          const { appStateContainer } = getState({ history });
+          const { appStateContainer } = getState({ history, uiSettings: config });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: loadIndexPattern(index, data.indexPatterns, config),
@@ -195,6 +195,7 @@ function discoverController($route, $scope, Promise) {
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
+    uiSettings: config,
   });
 
   const {
@@ -238,7 +239,8 @@ function discoverController($route, $scope, Promise) {
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
-        if (oldStatePartial.index !== newStatePartial.index) {
+        // NOTE: this is also called when navigating from discover app to context app
+        if (newStatePartial.index && oldStatePartial.index !== newStatePartial.index) {
           //in case of index pattern switch the route has currently to be reloaded, legacy
           isChangingIndexPattern = true;
           $route.reload();
@@ -674,19 +676,10 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
-  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
-  let showUnmappedFields = showUnmappedFieldsDefaultValue;
-
-  const onChangeUnmappedFields = (value) => {
-    showUnmappedFields = value;
-    $scope.unmappedFieldsConfig.showUnmappedFields = value;
-    $scope.fetch();
-  };
+  const showUnmappedFields = $scope.useNewFieldsApi;
 
   $scope.unmappedFieldsConfig = {
-    showUnmappedFieldsDefaultValue,
     showUnmappedFields,
-    onChangeUnmappedFields,
   };
 
   $scope.updateDataSource = () => {

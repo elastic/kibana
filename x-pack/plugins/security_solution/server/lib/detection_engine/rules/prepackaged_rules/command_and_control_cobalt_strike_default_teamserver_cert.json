@@ -19,7 +19,7 @@
     "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-suricata.html",
     "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-zeek.html"
   ],
-  "risk_score": 100,
+  "risk_score": 99,
   "rule_id": "e7075e8d-a966-458e-a183-85cd331af255",
   "severity": "critical",
   "tags": [
@@ -55,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

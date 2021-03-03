@@ -324,7 +324,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         syncContext.registerCancelCallback(requestToken, () => abortController.abort());
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        searchSource.setField('track_total_hits', maxResultWindow + 1);
+        searchSource.setField('trackTotalHits', maxResultWindow + 1);
         const resp = await searchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: syncContext.dataFilters.searchSessionId,
