@@ -116,10 +116,7 @@ export class VisualizePlugin
       ],
       getHistory: () => this.currentHistory!,
       onBeforeNavLinkSaved: (urlToSave: string) => {
-        if (
-          !urlToSave.includes(`${VisualizeConstants.EDIT_PATH}/`) &&
-          this.isLinkedToOriginatingApp?.()
-        ) {
+        if (this.isLinkedToOriginatingApp?.()) {
           return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
         }
         return urlToSave;

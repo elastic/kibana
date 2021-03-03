@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HasPrivilegesResponse } from './types';
+
+import type { HasPrivilegesResponse } from './types';
 
 /**
  * Validates an Elasticsearch "Has privileges" response against the expected application, actions, and resources.
