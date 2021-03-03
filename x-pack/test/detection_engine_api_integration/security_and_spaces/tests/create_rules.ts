@@ -120,6 +120,34 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
+        it('should create a single rule with a deeply nested query and validate it failed', async () => {
+          const simpleRule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query:
+              'not observer.egress:* and not observer.egress.zone:* and not observer.hostname:* and not observer.ingress:* and not observer.ingress.zone:* and not observer.ip:* and not observer.mac:* and not observer.name:* and not observer.product:* and not observer.serial_number:* and not observer.type:* and not observer.vendor:* and not observer.version:* and not agent.ephemeral_id:* and not agent.id:* and not agent.name:* and not agent.type:* and not agent.version:*',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(simpleRule)
+            .expect(200);
+
+          await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+
+          const { body: statusBody } = await supertest
+            .post(DETECTION_ENGINE_RULES_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ids: [body.id] })
+            .expect(200);
+
+          expect(statusBody[body.id].current_status.status).to.eql('failed');
+          expect(
+            statusBody[body.id].current_status.last_failure_message.includes(
+              'Bulk Indexing of signals failed: Error: The nested depth of the query exceeds the maximum nested depth for bool queries set in [indices.query.bool.max_nested_depth] Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)'
+            )
+          );
+        });
+
         it('should create a single rule with a rule_id and an index pattern that does not match anything available and warning for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
