@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import uuid from 'uuid';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   packageToPackagePolicy,
@@ -38,6 +39,8 @@ import type {
   RegistryPackage,
   CallESAsCurrentUser,
 } from '../types';
+import { ExternalCallback } from '..';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -46,7 +49,6 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
-import type { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
