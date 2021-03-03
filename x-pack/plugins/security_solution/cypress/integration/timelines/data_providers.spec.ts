@@ -56,7 +56,7 @@ describe('timeline data providers', () => {
       });
   });
 
-  it.only('displays the data provider action menu when Enter is pressed', () => {
+  it('displays the data provider action menu when Enter is pressed', () => {
     dragAndDropFirstHostToTimeline();
     openTimelineUsingToggle();
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
