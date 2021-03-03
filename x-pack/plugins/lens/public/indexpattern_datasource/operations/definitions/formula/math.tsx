@@ -57,6 +57,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
                   function: 'math',
                   arguments: {
                     expression: [astToString(column.params.tinymathAst)],
+                    onError: ['null'],
                   },
                 },
               ],
