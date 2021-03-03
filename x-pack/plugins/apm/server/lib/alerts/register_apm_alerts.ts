@@ -6,6 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { Logger } from 'kibana/server';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { ActionsPlugin } from '../../../../actions/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
@@ -20,6 +21,7 @@ interface Params {
   actions: ActionsPlugin['setup'];
   ml?: MlPluginSetup;
   config$: Observable<APMConfig>;
+  logger: Logger;
 }
 
 export function registerApmAlerts(params: Params) {
@@ -30,7 +32,7 @@ export function registerApmAlerts(params: Params) {
   registerTransactionDurationAnomalyAlertType({
     alerts: params.alerts,
     ml: params.ml,
-    config$: params.config$,
+    logger: params.logger,
   });
   registerErrorCountAlertType({
     alerts: params.alerts,

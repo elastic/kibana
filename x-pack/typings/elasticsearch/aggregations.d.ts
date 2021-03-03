@@ -46,7 +46,7 @@ type GetCompositeKeys<
 > = TAggregationOptionsMap extends {
   composite: { sources: Array<infer Source> };
 }
-  ? keyof Source
+  ? keyof UnionToIntersection<Source>
   : never;
 
 type CompositeOptionsSource = Record<
@@ -339,11 +339,11 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     | undefined;
   composite: {
     after_key: {
-      [key in GetCompositeKeys<TAggregationOptionsMap>]: TAggregationOptionsMap;
+      [key in GetCompositeKeys<TAggregationOptionsMap>]: string | number | null;
     };
     buckets: Array<
       {
-        key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
+        key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number | null>;
         doc_count: number;
       } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;

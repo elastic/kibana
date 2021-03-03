@@ -96,6 +96,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         actions: plugins.actions,
         ml: plugins.ml,
         config$: mergedConfig$,
+        logger: this.logger.get('alerts'),
       });
     }
 
