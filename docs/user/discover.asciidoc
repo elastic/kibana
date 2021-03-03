@@ -24,7 +24,7 @@ data-type="inline"
 ++++
 
 [float]
-=== Getting started
+=== Select, explore, and present your data
 
 You’ve added your data, and now you’re ready to dig in. You have questions about your data.
 What pages on your website contain a
