@@ -25,7 +25,6 @@ const INDEX_NAME = 'my-index';
 const EXISTS_FIELD_NAME = '_exists_';
 const FIELD = {
   name: 'my-field',
-  type: 'number',
 } as IFieldType;
 const PHRASE_VALUE = 'my-value';
 
