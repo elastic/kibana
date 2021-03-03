@@ -102,9 +102,6 @@ export const fieldMappings = {
   bytes: {
     type: 'long',
   },
-  bytes_range: {
-    type: 'long_range',
-  },
   bytes_histogram: {
     type: 'histogram',
   },
