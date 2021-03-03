@@ -37,7 +37,7 @@ function help() {
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
-        --force-install    Forces yarn install to run on bootstrap
+        --force-install         Forces yarn install to run on bootstrap
         --offline               Run in offline mode
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
