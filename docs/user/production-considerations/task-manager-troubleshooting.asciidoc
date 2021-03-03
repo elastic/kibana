@@ -459,7 +459,7 @@ You can infer from these stats that this {kib} is using most of its capacity, bu
 This assessment is based on the following:
 
 * The `p90` of `load` is at 100%, and `p50` is also quite high at 80%. This means that there is little to no room for maneuvering, and a spike of work might cause Task Manager to exceed its capacity. 
-* That said, tasks run soon after their scheduled time, which is to be expected. A `poll_interval` of `3000` milliseconds would often experience a consistent _drift_ of somewhere between `0` and `3000` milliseconds. A `p50 drift` of `2999` suggests that there is room for improvmenet, and we could benefit from a higher throughput.
+* Tasks run soon after their scheduled time, which is to be expected. A `poll_interval` of `3000` milliseconds would often experience a consistent drift of somewhere between `0` and `3000` milliseconds. A `p50 drift` of `2999` suggests that there is room for improvement, and you could benefit from a higher throughput.
 
 For details on achieving higher throughput by adjusting your scaling strategy, see <<task-manager-scaling-guidance>>.
 
