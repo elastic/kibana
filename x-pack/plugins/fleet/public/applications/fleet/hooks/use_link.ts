@@ -7,6 +7,7 @@
 
 import { BASE_PATH, pagePathGetters } from '../constants';
 import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
+
 import { useStartServices } from './';
 
 const getPath = (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
