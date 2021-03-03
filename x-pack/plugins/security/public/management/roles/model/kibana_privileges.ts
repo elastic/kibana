@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
+import type { KibanaFeature } from '../../../../../features/common';
+import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
+import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';
 import { SecuredFeature } from './secured_feature';
-import { KibanaFeature } from '../../../../../features/common';
-import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 
 function toBasePrivilege(entry: [string, string[]]): [string, KibanaPrivilege] {
   const [privilegeId, actions] = entry;

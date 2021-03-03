@@ -142,46 +142,73 @@ to set the `event.duration` field to be a duration in nanoseconds.  You'll
 probably want it displayed as milliseconds.
 
 
-## HTTP APIs for querying
+## Experimental RESTful API for querying
 
-As this plugin is space-aware, prefix any URL below
-with the usual `/s/{space}` to target a space other
-than the default space.
+As this plugin is space-aware, prefix any URL below with the usual `/s/{space}`
+to target a space other than the default space.
 
-#### `GET /api/event_log/{type}/{id}/_find?{query}`
+Usage of the event log allows you to retrieve the events for a given saved object type by the specified set of IDs.
+The following API is experimental and can change or be removed in a future release.
 
-- `type`: saved object type
-- `id`: saved object id
-- `query`: 
-  - `per_page`: for scrolling
-  - `page`: for scrolling
-  - `start`: earliest ISO timestamp to search for
-  - `end`: latest ISO timestmap to search for
-  - `sort_field`: field to sort by
-  - `sort_order`: 'asc' | 'desc'
-  - `filter`: KQL filter
+### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
 
-The response is `QueryEventsBySavedObjectResult` described below.
- 
-#### `POST /api/event_log/{type}/_find`
+Collects event information from the event log for the selected saved object by type and ID.
 
-- `type`: saved object type
-- `query`: 
-  - `per_page`: for scrolling
-  - `page`: for scrolling
-  - `start`: earliest ISO timestamp to search for
-  - `end`: latest ISO timestmap to search for
-  - `sort_field`: field to sort by
-  - `sort_order`: 'asc' | 'desc'
-  - `filter`: KQL filter
+Params:
 
-The body is:
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+|id|The id of the saved object.|string|
 
-```js
-{ ids: ["saved-object-id-1", ...] }
-```
+Query:
 
-The response is `QueryEventsBySavedObjectResult` described below.
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+Response body:
+
+See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
+
+### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
+
+Collects event information from the event log for the selected saved object by type and by IDs.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|type|The type of the saved object whose events you're trying to get.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|page|The page number.|number|
+|per_page|The number of events to return per page.|number|
+|sort_field|Sorts the response. Could be an event field returned in the response.|string|
+|sort_order|Sort direction, either `asc` or `desc`.|string|
+|filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
+|start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+|end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
+
+Request Body:
+
+|Property|Description|Type|
+|---|---|---|
+|ids|The array ids of the saved object.|string array|
+
+Response body:
+
+See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
+
 
 ## Plugin Client APIs for querying
 
@@ -299,6 +326,24 @@ event.  For example:
 It's anticipated that more "helper" methods like this will be provided in the
 future.
 
+### Start
+```typescript
+
+export interface IEventLogClientService {
+  getClient(request: KibanaRequest): IEventLogClient;
+}
+
+export interface IEventLogClient {
+  findEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
+}
+```
+
+The plugin exposes an `IEventLogClientService` object to plugins that request it.
+These plugins must call `getClient(request)` to get the event log client.
 
 ## Testing
 
