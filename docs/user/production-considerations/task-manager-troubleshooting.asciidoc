@@ -37,32 +37,32 @@ You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> 
 *Symptoms*:
 
 The most common symptom of an underlying problem in Task Manager is that tasks appear to run late.
-For instance, recurring Tasks might run at an inconsistent cadence, or long after their scheduled time.
+For instance, recurring tasks might run at an inconsistent cadence, or long after their scheduled time.
 
 *Resolution*:
 
-By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
+By default, {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
 
-This means that if many tasks have been scheduled to run at the same time, pending tasks will queue in {es}. Each {kib} instance then polls for pending tasks at a rate of up to 10 tasks at a time, at 3 second intervals. It is possible for pending tasks in the queue to exceed this capacity and run late as a result.
+If many tasks are scheduled to run at the same time, pending tasks will queue in {es}. Each {kib} instance then polls for pending tasks at a rate of up to 10 tasks at a time, at 3 second intervals. It is possible for pending tasks in the queue to exceed this capacity and run late as a result.
 
-We refer to this sort of delay as _drift_. As the root cause for _drift_ depend on the specific usage, there are no hard and fast rules to addressing them.
+This type of delay is known as _drift_.The root cause for drift depends on the specific usage, and there are no hard and fast rules for addressing drift.  
 
-For example, among other things, _drift_:
+For example:
 
-* Is caused by *an excess of concurrent tasks* relative to the available capacity of {kib} instances in the cluster, which can be addressed by expanding the throughput of the cluster.
-* Is caused by *long running tasks* overruning their scheduled cadence, which can be addressed by reconfiguring the tasks in question.
+* If drift is caused by *an excess of concurrent tasks* relative to the available capacity of {kib} instances in the cluster, expand the throughput of the cluster.
+* If drift is caused by *long running tasks* that overrun their scheduled cadence,  reconfigure the tasks in question.
 
-Following the <<task-manager-diagnosing-root-cause>> step-by-step guide should aid in identifying the correct resolution.
+Refer to <<task-manager-diagnosing-root-cause>> for step-by-step instructions on identifying the correct resolution.
 
 _Drift_ is often addressed by adjusting the scaling the deployment to better suit your usage.
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
-==== Diagnosing a root cause for drift
+==== Diagnose a root cause for drift
 
-The following is a step-by-step guide to identifying a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
+The following guide helps you identify a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
 
-The guide evaluates the output in order to validate the following theories:
+By analyzing the different sections of the output, you can evaluate different theories that explain the drift in a deployment.
 
 . <<task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
 .. <<task-manager-theory-reduced-polling-rate,Perhaps {kib} is configured to poll for tasks at a reduced rate?>>
@@ -242,17 +242,16 @@ The API returns the following:
 }
 --------------------------------------------------
 
-By analyzing the different sections of the output we can evaluate the variety of different theories that might explain the _drift_ identified in a deplyment.
 
 [[task-manager-health-evaluate-the-configuration]]
 ===== Evaluate the Configuration
 
 [[task-manager-theory-reduced-polling-rate]]
 *Theory*:
-Perhaps {kib} is configured to poll for tasks at a reduced rate?
+{kib} is configured to poll for tasks at a reduced rate.
 
 *Diagnosis*:
-Evaluating the health stats above, we can see the following output under `stats.configuration.value`:
+Evaluating the health stats, you can see the following output under `stats.configuration.value`:
 
 [source,json]
 --------------------------------------------------
@@ -272,12 +271,12 @@ Evaluating the health stats above, we can see the following output under `stats.
   "max_workers": 10 # <2>
 }
 --------------------------------------------------
-<1> the `poll_interval` setting is configured to the default value of 3000 milliseconds
-<2> the `max_workers` setting is configured to the default value of 10 workers
+<1> `poll_interval` is set to the default value of 3000 milliseconds
+<2> `max_workers` is set to the default value of 10 workers
 
-We can infer from this output that the {kib} instance is polling for work every 3 seconds and has the capacity to run 10 concurrent tasks.
+You can infer from this output that the {kib} instance polls for work every 3 seconds and can run 10 concurrent tasks.
 
-Hypothetically, lets suppose the output under `stats.configuration.value` was the following:
+Now suppose the output under `stats.configuration.value` is the following:
 
 [source,json]
 --------------------------------------------------
@@ -297,15 +296,15 @@ Hypothetically, lets suppose the output under `stats.configuration.value` was th
   "max_workers": 1 # <2>
 }
 --------------------------------------------------
-<1> the `poll_interval` setting is configured to a value of 60000 milliseconds, far higher than the default
-<2> the `max_workers` setting is configured to a value of 1 worker, far lower than the default
+<1> `poll_interval` is set to 60000 milliseconds, far higher than the default
+<2> `max_workers` is set to 1 worker, far lower than the default
 
-We can infer from this output that the {kib} instance is only polling for work once a minute and even then, it will only pick up one task at a time. This throughput is unlikely to support mission critical services such as Alerting or Reporting, as it means tasks will usually run late.
+You can infer from this output that the {kib} instance only polls for work once a minute and only picks up one task at a time. This throughput is unlikely to support mission critical services, such as Alerting or Reporting, and tasks will usually run late.
 
 There are two possible reasons for such a configuration:
 
 The first, is that these settings have been configured manually, which can be resolved by reconfiguring these settings.
-For details on reconfiguring these settings, see <<task-manager-settings-kb, Task Manager Settings>>.
+For details, see <<task-manager-settings-kb, Task Manager Settings>>.
 
 The second, is that {kib} has reduced its own throughput in reaction to excessive load on the {es} cluster.
 Task Manager is equipped with a reactive self-healing mechanism in response to an increase in load related errors in {es}. This mechanism will increase the `poll_interval` setting (reducing the rate at which it queries {es}), and decrease the `max_workers` (reducing the amount of operations it executes against {es}). Once the error rate reduces, these settings are incrementally dialed up again, returning them to the configured settings.
@@ -317,17 +316,17 @@ This scenario can be identified by searching the {kib} Server Log for messages s
 Max workers configuration is temporarily reduced after Elasticsearch returned 25 "too many request" error(s).
 --------------------------------------------------
 
-In such a case a deeper investigation into the high error rate experienced by the {es} cluster is required.
+Deeper investigation into the high error rate experienced by the {es} cluster is required.
 
 [[task-manager-health-evaluate-the-runtime]]
 ===== Evaluate the Runtime
 
 [[task-manager-theory-actual-polling-frequently]]
 *Theory*:
-Perhaps {kib} is not actually polling as frequently as it should?
+{kib} is not polling as frequently as it should
 
 *Diagnosis*:
-Evaluating the health stats above, we can see the following output under `stats.runtime.value.polling`:
+Evaluating the health stats, you see the following output under `stats.runtime.value.polling`:
 
 [source,json]
 --------------------------------------------------
@@ -362,25 +361,25 @@ Evaluating the health stats above, we can see the following output under `stats.
   }
 }
 --------------------------------------------------
-<1> ensure the last successful polling cycle was completed recently, no more than a couple of multiples of `poll_interval` in the past
-<2> ensure the duration of polling cycles is usually below 100ms or so, longer durations are possible, but unexpected
-<3> ensure {kib} instances in the cluster are not encountering a high rate of version conflicts
-<4> ensure the majority of polling cycles result in positive outcomes, such as `RunningAtCapacity` or `PoolFilled`
+<1> Ensure the last successful polling cycle was completed no more than a couple of multiples of `poll_interval` in the past.
+<2> Ensure the duration of polling cycles is usually below 100ms. Longer durations are possible, but unexpected.
+<3> Ensure {kib} instances in the cluster are not encountering a high rate of version conflicts.
+<4> Ensure the majority of polling cycles result in positive outcomes, such as `RunningAtCapacity` or `PoolFilled`.
 
-We can infer from this output that the {kib} instance is polling regularly.
+You can infer from this output that the {kib} instance is polling regularly.
 This assessment is based on the following:
 
-* By comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where we can see the last polling cycle took place 1 second before the monitoring stats were exposed by the health monitoring API.
-* By comparing the `last_polling_delay` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where we can see the last polling cycle delay took place 2 days ago, suggesting {kib} instances are not conflicting often.
-* The `p50` of the `duration`, shows us that at least 50% of polling cycles take, at most, 13 millisconds to complete.
-* Evaluating the `result_frequency_percent_as_number`, we can tell that:
-** 80% of the polling cycles completed without claiming any tasks (suggesting that there aren't any overdue tasks)
-** 20% completed with Task manager claiming tasks which were then executed.
-** None of the polling cycles have ended up occupying all of the available workers, as `RunningAtCapacity` has a frequency of 0%, suggesting there is enough capacity in Task Manager to handle the workload.
+* Comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where you can see the last polling cycle took place 1 second before the monitoring stats were exposed by the health monitoring API.
+* Comparing the `last_polling_delay` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where you can see the last polling cycle delay took place 2 days ago, suggesting {kib} instances are not conflicting often.
+* The `p50` of the `duration` shows that at least 50% of polling cycles take, at most, 13 millisconds to complete.
+* Evaluating the `result_frequency_percent_as_number`:
+** 80% of the polling cycles completed without claiming any tasks (suggesting that there aren't any overdue tasks).
+** 20% completed with Task Manager claiming tasks that were then executed.
+** None of the polling cycles ended up occupying all of the available workers, as `RunningAtCapacity` has a frequency of 0%, suggesting there is enough capacity in Task Manager to handle the workload.
 
-It is worth noting that all of these stats are tracked as a running average, which means that they give us a snapshot of a period of time (by default we track up to 50 cycles), rather than giving us a complete history.
+All of these stats are tracked as a running average, which means that they give a snapshot of a period of time (by default {kib} tracks up to 50 cycles), rather than giving a complete history.
 
-Hypothetically, suppose the output under `stats.runtime.value.polling.result_frequency_percent_as_number` was the following:
+Suppose the output under `stats.runtime.value.polling.result_frequency_percent_as_number` was the following:
 
 [source,json]
 --------------------------------------------------
@@ -393,12 +392,12 @@ Hypothetically, suppose the output under `stats.runtime.value.polling.result_fre
   "PoolFilled": 20
 }
 --------------------------------------------------
-<1> 30% of polling cycles failed, which is a high rate
-<2> 20% of polling cycles are skipped as Task Manager has no capacity left to run tasks
-<3> 10% of polling cycles result in Task Manager claiming more tasks than it has capacity to run
-<4> 10% of polling cycles result in Task Manager claming precisely as many tasks as it has capacity to run
+<1> 30% of polling cycles failed, which is a high rate.
+<2> 20% of polling cycles are skipped as Task Manager has no capacity left to run tasks.
+<3> 10% of polling cycles result in Task Manager claiming more tasks than it has capacity to run.
+<4> 10% of polling cycles result in Task Manager claiming precisely as many tasks as it has capacity to run.
 
-We can infer from this output that {kib} Task Manager is not healthy, as the failure rate is high, and Task Manager is fetching tasks it has no capacity to run.
+You can infer from this output that Task Manager is not healthy, as the failure rate is high, and Task Manager is fetching tasks it has no capacity to run.
 Analyzing the {kib} Server Log should reveal the underlying issue causing the high error rate and capacity issues.
 
 The high `NoAvailableWorkers` rate of 20% suggests that there are many tasks running for durations longer than the `poll_interval`.
@@ -406,10 +405,10 @@ For details on analyzing long task execution durations, see the <<task-manager-t
 
 [[task-manager-theory-insufficient-throughput]]
 *Theory*:
-Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?
+{kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload
 
 *Diagnosis*:
-Evaluating the health stats above, we can see the following output of `drift` and `load` under `stats.runtime.value`:
+Evaluating the health stats, you can see the following output of `drift` and `load` under `stats.runtime.value`:
 
 [source,json]
 --------------------------------------------------
@@ -428,12 +427,12 @@ Evaluating the health stats above, we can see the following output of `drift` an
   },
 }
 --------------------------------------------------
-<1> drift shows us that at least 95% of tasks are running within 2 seconds of their scheduled time
-<2> load shows us that Task Manager is idle at least 90% of the time, and never uses more than 20% of it's available workers
+<1> `drift` shows us that at least 95% of tasks are running within 2 seconds of their scheduled time.
+<2> `load` shows us that Task Manager is idle at least 90% of the time, and never uses more than 20% of its available workers.
 
-We can infer from these stats that this {kib} has plenty of capacity, and hence any delays we might be experiencing are unlikely to be addressed by expanding the throughput.
+You can infer from these stats that this {kib} has plenty of capacity, and any delays you might be experiencing are unlikely to be addressed by expanding the throughput.
 
-Hypothetically, suppose the output of `drift` and `load` was the following:
+Suppose the output of `drift` and `load` was the following:
 
 [source,json]
 --------------------------------------------------
@@ -452,7 +451,7 @@ Hypothetically, suppose the output of `drift` and `load` was the following:
   }
 }
 --------------------------------------------------
-<1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
+<1> `drift` shows us that all tasks are running 3 to 4 seconds after their scheduled time.
 <2> `load` shows us that at least half of the time Task Manager is running at a load of 80%.
 
 You can infer from these stats that this {kib} is using most of its capacity, but seems to keep up with the work most of the time.
