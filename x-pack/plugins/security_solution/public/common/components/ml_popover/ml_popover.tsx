@@ -27,8 +27,10 @@ import { useSecurityJobs } from './hooks/use_security_jobs';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
-  max-height: 800px;
-  overflow: scroll;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 15px;
 `;
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';
