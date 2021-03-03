@@ -2529,8 +2529,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 96,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L96"
+                  "lineNumber": 97,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L97"
                 }
               }
             ],
@@ -2538,8 +2538,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L96"
+              "lineNumber": 97,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L97"
             }
           },
           {
@@ -2555,8 +2555,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L153"
+              "lineNumber": 154,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L154"
             }
           },
           {
@@ -2572,8 +2572,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 187,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L187"
+              "lineNumber": 188,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L188"
             }
           },
           {
@@ -2590,8 +2590,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L199"
+                  "lineNumber": 200,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L200"
                 }
               }
             ],
@@ -2602,8 +2602,8 @@
             "label": "onFocus",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L199"
+              "lineNumber": 200,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L200"
             },
             "tags": [],
             "returnComment": []
@@ -2622,8 +2622,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 203,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L203"
+                  "lineNumber": 204,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L204"
                 }
               }
             ],
@@ -2634,8 +2634,8 @@
             "label": "onBlur",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 203,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L203"
+              "lineNumber": 204,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L204"
             },
             "tags": [],
             "returnComment": []
@@ -2653,8 +2653,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 209,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L209"
+              "lineNumber": 210,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L210"
             }
           },
           {
@@ -2670,8 +2670,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 251,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L251"
+              "lineNumber": 252,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L252"
             }
           },
           {
@@ -2685,8 +2685,8 @@
             "label": "closeMyContextMenuPanel",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 274,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L274"
+              "lineNumber": 289,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L289"
             },
             "tags": [],
             "returnComment": []
@@ -2694,8 +2694,8 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-          "lineNumber": 89,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L89"
+          "lineNumber": 90,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/embeddable/public/lib/panel/embeddable_panel.tsx#L90"
         },
         "initialIsOpen": false
       },
