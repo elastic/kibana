@@ -20,7 +20,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L10"
             }
           },
           {
@@ -32,7 +32,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L11"
             }
           },
           {
@@ -44,7 +44,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L12"
             }
           },
           {
@@ -56,14 +56,14 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L13"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L9"
         },
         "initialIsOpen": false
       }
@@ -80,7 +80,7 @@
       "source": {
         "path": "x-pack/plugins/saved_objects_tagging/public/types.ts",
         "lineNumber": 10,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/public/types.ts#L10"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/public/types.ts#L10"
       },
       "signature": [
         "SavedObjectsTaggingApi"
@@ -121,7 +121,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L23"
             }
           }
         ],
@@ -142,7 +142,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L23"
         },
         "tags": [],
         "returnComment": [],
@@ -163,7 +163,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L27"
             }
           }
         ],
@@ -175,7 +175,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L27"
         },
         "tags": [],
         "returnComment": [],
@@ -196,7 +196,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L35"
             }
           }
         ],
@@ -208,7 +208,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L35"
         },
         "tags": [],
         "returnComment": [],
@@ -229,7 +229,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L54"
             }
           }
         ],
@@ -241,7 +241,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L54"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L54"
         },
         "tags": [],
         "returnComment": [],
@@ -267,7 +267,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L15"
             }
           },
           {
@@ -279,7 +279,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L16"
             }
           },
           {
@@ -291,7 +291,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L17"
             }
           },
           {
@@ -303,7 +303,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L18"
             }
           },
           {
@@ -315,7 +315,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L19"
             }
           },
           {
@@ -327,14 +327,14 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L20"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/capabilities.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/capabilities.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -354,7 +354,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L17"
             }
           },
           {
@@ -366,7 +366,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L18"
             }
           },
           {
@@ -378,14 +378,14 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L19"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
           "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L16"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L16"
         },
         "initialIsOpen": false
       },
@@ -405,7 +405,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L10"
             }
           },
           {
@@ -417,7 +417,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L11"
             }
           },
           {
@@ -429,7 +429,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L12"
             }
           },
           {
@@ -441,14 +441,14 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L13"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L9"
         },
         "initialIsOpen": false
       },
@@ -501,7 +501,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 27,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L27"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L27"
                 }
               }
             ],
@@ -510,7 +510,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L27"
             }
           },
           {
@@ -541,7 +541,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 28,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L28"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L28"
                 }
               }
             ],
@@ -550,7 +550,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L28"
             }
           },
           {
@@ -596,7 +596,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 29,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L29"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L29"
                 }
               }
             ],
@@ -605,7 +605,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L29"
             }
           },
           {
@@ -628,7 +628,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L30"
                 }
               }
             ],
@@ -637,7 +637,7 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L30"
             }
           },
           {
@@ -676,7 +676,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
                 }
               },
               {
@@ -696,7 +696,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                   "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
                 }
               }
             ],
@@ -705,14 +705,14 @@
             "source": {
               "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_tagging_oss/common/types.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -732,7 +732,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L18"
             }
           },
           {
@@ -744,7 +744,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L19"
             },
             "signature": [
               "string[]"
@@ -759,7 +759,7 @@
             "source": {
               "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L20"
             },
             "signature": [
               "Partial<Record<\"color\" | \"id\" | \"description\" | \"name\", string | undefined>>"
@@ -769,7 +769,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -787,7 +787,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/constants.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/constants.ts#L11"
         },
         "signature": [
           "\"savedObjectsTagging\""
@@ -805,7 +805,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/constants.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/constants.ts#L15"
         },
         "signature": [
           "\"tag\""
@@ -823,7 +823,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/constants.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/constants.ts#L19"
         },
         "signature": [
           "\"tags\""
@@ -839,7 +839,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/types.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/types.ts#L13"
         },
         "signature": [
           "Tag & { relationCount: number; }"
@@ -855,7 +855,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/types.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/types.ts#L11"
         },
         "signature": [
           "SavedObject<TagAttributes>"
@@ -871,7 +871,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L11"
         },
         "signature": [
           "2"
@@ -887,7 +887,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L12"
         },
         "signature": [
           "50"
@@ -903,7 +903,7 @@
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/saved_objects_tagging/common/validation.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/saved_objects_tagging/common/validation.ts#L13"
         },
         "signature": [
           "100"

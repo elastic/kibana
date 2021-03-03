@@ -86,7 +86,7 @@
                 "source": {
                   "path": "src/plugins/dev_tools/public/plugin.ts",
                   "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L43"
                 }
               },
               {
@@ -105,7 +105,7 @@
                     "source": {
                       "path": "src/plugins/dev_tools/public/plugin.ts",
                       "lineNumber": 43,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L43"
                     },
                     "signature": [
                       "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
@@ -115,7 +115,7 @@
                 "source": {
                   "path": "src/plugins/dev_tools/public/plugin.ts",
                   "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L43"
                 }
               }
             ],
@@ -124,7 +124,7 @@
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L43"
             }
           },
           {
@@ -141,7 +141,7 @@
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L84"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L84"
             }
           },
           {
@@ -158,14 +158,14 @@
             "source": {
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L90"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L90"
             }
           }
         ],
         "source": {
           "path": "src/plugins/dev_tools/public/plugin.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L35"
         },
         "initialIsOpen": false
       }
@@ -193,7 +193,7 @@
           "source": {
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L32"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L32"
           },
           "signature": [
             "(devTool: ",
@@ -218,7 +218,7 @@
       "source": {
         "path": "src/plugins/dev_tools/public/plugin.ts",
         "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dev_tools/public/plugin.ts#L21"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dev_tools/public/plugin.ts#L21"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

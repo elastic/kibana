@@ -23,14 +23,14 @@
           "source": {
             "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
             "lineNumber": 21,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/remote_clusters/public/plugin.ts#L21"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/remote_clusters/public/plugin.ts#L21"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
         "lineNumber": 20,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/remote_clusters/public/plugin.ts#L20"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/remote_clusters/public/plugin.ts#L20"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -59,14 +59,14 @@
           "source": {
             "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
             "lineNumber": 23,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/remote_clusters/server/plugin.ts#L23"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/remote_clusters/server/plugin.ts#L23"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
         "lineNumber": 22,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/remote_clusters/server/plugin.ts#L22"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/remote_clusters/server/plugin.ts#L22"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

@@ -62,7 +62,7 @@
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L30"
                 }
               }
             ],
@@ -71,7 +71,7 @@
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L30"
             }
           },
           {
@@ -109,7 +109,7 @@
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
                   "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
                 }
               },
               {
@@ -123,7 +123,7 @@
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
                   "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
                 }
               }
             ],
@@ -132,7 +132,7 @@
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
             }
           },
           {
@@ -169,7 +169,7 @@
                 "source": {
                   "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
                   "lineNumber": 60,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L60"
                 }
               }
             ],
@@ -178,7 +178,7 @@
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L60"
             }
           },
           {
@@ -195,14 +195,14 @@
             "source": {
               "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L62"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/server/plugin.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L26"
         },
         "initialIsOpen": false
       }
@@ -234,7 +234,7 @@
             "source": {
               "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
               "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/common/constants.ts#L9"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/common/constants.ts#L9"
             }
           }
         ],
@@ -243,7 +243,7 @@
         "source": {
           "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/dashboard_mode/common/constants.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/common/constants.ts#L8"
         },
         "initialIsOpen": false
       }

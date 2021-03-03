@@ -53,7 +53,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L65"
             },
             "signature": [
               "BehaviorSubject",
@@ -95,7 +95,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
                   "lineNumber": 77,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
                 }
               }
             ],
@@ -104,7 +104,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
             }
           },
           {
@@ -165,7 +165,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
                   "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L80"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L80"
                 }
               },
               {
@@ -179,7 +179,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
                   "lineNumber": 81,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L81"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L81"
                 }
               }
             ],
@@ -188,7 +188,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L79"
             }
           },
           {
@@ -240,7 +240,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
                   "lineNumber": 96,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
                 }
               },
               {
@@ -260,7 +260,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
                   "lineNumber": 96,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
                 }
               }
             ],
@@ -269,7 +269,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
               "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
             }
           },
           {
@@ -286,14 +286,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L132"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
           "lineNumber": 63,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L63"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L63"
         },
         "initialIsOpen": false
       },
@@ -372,7 +372,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L37"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L37"
                 }
               },
               {
@@ -392,7 +392,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 38,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L38"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L38"
                 }
               }
             ],
@@ -401,7 +401,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L36"
             }
           },
           {
@@ -413,7 +413,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L47"
             }
           },
           {
@@ -425,7 +425,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L48"
             }
           },
           {
@@ -437,7 +437,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L49"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -452,7 +452,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L50"
             },
             "signature": [
               "string | undefined"
@@ -467,7 +467,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L51"
             }
           },
           {
@@ -479,7 +479,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L52"
             },
             "signature": [
               {
@@ -501,7 +501,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L53"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L53"
             },
             "signature": [
               "React.FC<{ context: FactoryContext; }> | undefined"
@@ -516,7 +516,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L55"
             },
             "signature": [
               {
@@ -546,7 +546,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L56"
             },
             "signature": [
               "React.FC<",
@@ -569,7 +569,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L57"
             },
             "signature": [
               "(context: FactoryContext) => Config"
@@ -584,7 +584,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L58"
             },
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
@@ -599,7 +599,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L59"
             },
             "signature": [
               {
@@ -631,7 +631,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
                 }
               }
             ],
@@ -640,7 +640,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
             }
           },
           {
@@ -663,7 +663,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
                 }
               }
             ],
@@ -672,7 +672,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
             }
           },
           {
@@ -695,7 +695,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 71,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
                 }
               }
             ],
@@ -704,7 +704,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
             }
           },
           {
@@ -727,7 +727,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 75,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
                 }
               }
             ],
@@ -736,7 +736,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
             }
           },
           {
@@ -755,7 +755,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L84"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L84"
             }
           },
           {
@@ -802,7 +802,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 91,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L91"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L91"
                 }
               }
             ],
@@ -811,7 +811,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L90"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L90"
             }
           },
           {
@@ -828,7 +828,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L108"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L108"
             }
           },
           {
@@ -865,7 +865,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 125,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
                 }
               },
               {
@@ -879,7 +879,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 125,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
                 }
               }
             ],
@@ -888,7 +888,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 125,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
             }
           },
           {
@@ -941,7 +941,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 129,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
                 }
               }
             ],
@@ -950,7 +950,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 129,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
             }
           },
           {
@@ -1002,7 +1002,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 133,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
                 }
               },
               {
@@ -1023,7 +1023,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                   "lineNumber": 133,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
                 }
               }
             ],
@@ -1032,14 +1032,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L28"
         },
         "initialIsOpen": false
       },
@@ -1070,7 +1070,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L34"
             },
             "signature": [
               "Observable",
@@ -1093,7 +1093,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L36"
             }
           },
           {
@@ -1124,7 +1124,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
                 }
               }
             ],
@@ -1133,7 +1133,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
             }
           },
           {
@@ -1170,7 +1170,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
                 }
               }
             ],
@@ -1179,7 +1179,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
             }
           },
           {
@@ -1216,7 +1216,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
                 }
               }
             ],
@@ -1225,7 +1225,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
             }
           },
           {
@@ -1248,7 +1248,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 49,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
                 }
               }
             ],
@@ -1257,7 +1257,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
             }
           },
           {
@@ -1282,14 +1282,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L50"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L33"
         },
         "initialIsOpen": false
       },
@@ -1309,7 +1309,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L48"
             }
           },
           {
@@ -1323,7 +1323,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L57"
             },
             "signature": [
               {
@@ -1386,7 +1386,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
                 }
               }
             ],
@@ -1395,7 +1395,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
             }
           },
           {
@@ -1425,7 +1425,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
                 }
               }
             ],
@@ -1434,7 +1434,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
             }
           },
           {
@@ -1459,7 +1459,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 71,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
                 }
               }
             ],
@@ -1468,7 +1468,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
             }
           },
           {
@@ -1505,7 +1505,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 75,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
                 }
               }
             ],
@@ -1514,7 +1514,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
             }
           },
           {
@@ -1551,7 +1551,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 115,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
                 }
               }
             ],
@@ -1560,7 +1560,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
             }
           },
           {
@@ -1574,7 +1574,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 159,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L159"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L159"
             },
             "signature": [
               {
@@ -1611,7 +1611,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L168"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L168"
             }
           },
           {
@@ -1630,7 +1630,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 192,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L192"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L192"
             }
           },
           {
@@ -1688,7 +1688,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 215,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
                 }
               },
               {
@@ -1704,7 +1704,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 215,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
                 }
               }
             ],
@@ -1713,7 +1713,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 215,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
             }
           },
           {
@@ -1756,7 +1756,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 246,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
                 }
               },
               {
@@ -1787,7 +1787,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 246,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
                 }
               },
               {
@@ -1803,7 +1803,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 246,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
                 }
               }
             ],
@@ -1812,7 +1812,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 246,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
             }
           },
           {
@@ -1839,7 +1839,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 277,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
                 }
               }
             ],
@@ -1848,7 +1848,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 277,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
             }
           },
           {
@@ -1875,7 +1875,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                   "lineNumber": 297,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
                 }
               }
             ],
@@ -1884,14 +1884,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 297,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
           "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L47"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L47"
         },
         "initialIsOpen": false
       },
@@ -1949,7 +1949,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 58,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
                 }
               }
             ],
@@ -1958,7 +1958,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
             }
           },
           {
@@ -1991,7 +1991,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L62"
             }
           },
           {
@@ -2028,7 +2028,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
                 }
               }
             ],
@@ -2037,7 +2037,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
             }
           },
           {
@@ -2074,7 +2074,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 70,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
                 }
               }
             ],
@@ -2083,7 +2083,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
             }
           },
           {
@@ -2106,7 +2106,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                   "lineNumber": 76,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
                 }
               }
             ],
@@ -2115,14 +2115,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
           "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L57"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L57"
         },
         "initialIsOpen": false
       }
@@ -2159,7 +2159,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
             }
           }
         ],
@@ -2181,7 +2181,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
           "lineNumber": 89,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
         },
         "tags": [],
         "returnComment": [],
@@ -2210,7 +2210,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
             }
           }
         ],
@@ -2224,7 +2224,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
         },
         "tags": [],
         "returnComment": [],
@@ -2258,7 +2258,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L54"
             }
           },
           {
@@ -2279,7 +2279,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L55"
             }
           }
         ],
@@ -2288,7 +2288,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
           "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L53"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L53"
         },
         "initialIsOpen": false
       },
@@ -2312,7 +2312,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34"
             }
           }
         ],
@@ -2321,7 +2321,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34"
         },
         "initialIsOpen": false
       },
@@ -2345,7 +2345,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
               "lineNumber": 130,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
             }
           },
           {
@@ -2359,7 +2359,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
               "lineNumber": 130,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
             }
           },
           {
@@ -2373,7 +2373,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
               "lineNumber": 130,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
             }
           }
         ],
@@ -2382,7 +2382,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
           "lineNumber": 130,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
         },
         "initialIsOpen": false
       },
@@ -2413,7 +2413,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15"
             }
           }
         ],
@@ -2422,7 +2422,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15"
         },
         "initialIsOpen": false
       }
@@ -2489,7 +2489,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L37"
             }
           },
           {
@@ -2503,7 +2503,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L43"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -2520,7 +2520,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L50"
             },
             "signature": [
               "string | undefined"
@@ -2537,7 +2537,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L56"
             },
             "signature": [
               "boolean | undefined"
@@ -2589,7 +2589,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
                   "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L63"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L63"
                 }
               }
             ],
@@ -2598,7 +2598,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L62"
             }
           },
           {
@@ -2615,14 +2615,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L66"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L25"
         },
         "initialIsOpen": false
       },
@@ -2642,7 +2642,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L33"
             },
             "signature": [
               {
@@ -2663,7 +2663,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L34"
             },
             "signature": [
               "Pick<",
@@ -2686,7 +2686,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L44"
             },
             "signature": [
               "<C = unknown>(context: C) => Promise<boolean>"
@@ -2696,7 +2696,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
           "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L32"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L32"
         },
         "initialIsOpen": false
       },
@@ -2718,7 +2718,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L16"
             },
             "signature": [
               "string[]"
@@ -2728,7 +2728,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -2778,7 +2778,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L40"
             }
           },
           {
@@ -2792,7 +2792,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L46"
             },
             "signature": [
               "boolean | undefined"
@@ -2809,7 +2809,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L52"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -2826,7 +2826,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L59"
             },
             "signature": [
               "string | undefined"
@@ -2843,7 +2843,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L65"
             },
             "signature": [
               "number | undefined"
@@ -2860,7 +2860,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L70"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L70"
             },
             "signature": [
               "(context: FactoryContext) => Config"
@@ -2877,7 +2877,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L91"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L91"
             },
             "signature": [
               {
@@ -2909,7 +2909,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L97"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L97"
             },
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
@@ -2926,7 +2926,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L102"
             },
             "signature": [
               "string | undefined"
@@ -2943,7 +2943,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L108"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L108"
             },
             "signature": [
               "() => string"
@@ -2979,7 +2979,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 115,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L115"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L115"
                 }
               },
               {
@@ -3001,7 +3001,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L116"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L116"
                 }
               }
             ],
@@ -3010,7 +3010,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 114,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L114"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L114"
             }
           },
           {
@@ -3045,7 +3045,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 129,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L129"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L129"
                 }
               },
               {
@@ -3069,7 +3069,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 130,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L130"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L130"
                 }
               }
             ],
@@ -3078,7 +3078,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 128,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L128"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L128"
             }
           },
           {
@@ -3111,7 +3111,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 137,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L137"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L137"
                 }
               },
               {
@@ -3133,7 +3133,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                   "lineNumber": 138,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L138"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L138"
                 }
               }
             ],
@@ -3142,7 +3142,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 136,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L136"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L136"
             }
           },
           {
@@ -3161,14 +3161,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L145"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L145"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
           "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L32"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L32"
         },
         "initialIsOpen": false
       },
@@ -3190,14 +3190,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L38"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
           "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L37"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L37"
         },
         "initialIsOpen": false
       },
@@ -3238,7 +3238,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L25"
             },
             "signature": [
               "ContextScope | undefined"
@@ -3255,7 +3255,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L30"
             },
             "signature": [
               "EventScope | undefined"
@@ -3265,7 +3265,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -3281,7 +3281,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
         },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
@@ -3299,7 +3299,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
         },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
@@ -3315,7 +3315,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L30"
         },
         "signature": [
           "State"
@@ -3331,7 +3331,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
         },
         "signature": [
           "{ [key: string]: ",
@@ -3355,7 +3355,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
         },
         "signature": [
           "{ events: SerializedEvent[]; }"
@@ -3371,7 +3371,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L8"
         },
         "signature": [
           "{ url: {    format?: 'handlebars_v1';    template: string;}; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
@@ -3410,7 +3410,7 @@
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
         "lineNumber": 45,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L45"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L45"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3460,7 +3460,7 @@
           "source": {
             "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
             "lineNumber": 60,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L60"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L60"
           },
           "signature": [
             "React.FC<ConnectedFlyoutManageDrilldownsProps<",
@@ -3478,7 +3478,7 @@
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
         "lineNumber": 49,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/public/plugin.ts#L49"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L49"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -3528,7 +3528,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L26"
             },
             "signature": [
               {
@@ -3554,7 +3554,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L28"
             }
           },
           {
@@ -3608,7 +3608,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
                 }
               },
               {
@@ -3622,7 +3622,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
                 }
               }
             ],
@@ -3631,7 +3631,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
             }
           },
           {
@@ -3648,7 +3648,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L40"
             }
           },
           {
@@ -3665,7 +3665,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L42"
             }
           },
           {
@@ -3698,7 +3698,7 @@
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
                   "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
                 }
               }
             ],
@@ -3728,7 +3728,7 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
             },
             "tags": [],
             "returnComment": []
@@ -3737,7 +3737,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L24"
         },
         "initialIsOpen": false
       }
@@ -3778,14 +3778,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L19"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -3823,14 +3823,14 @@
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/types.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L24"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/types.ts#L22"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L22"
         },
         "initialIsOpen": false
       }
@@ -3846,7 +3846,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
         },
         "signature": [
           "{ events: SerializedEvent[]; }"
@@ -3862,7 +3862,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
         },
         "signature": [
           "{ [key: string]: ",
@@ -3886,7 +3886,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
         },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
@@ -3904,7 +3904,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
         },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
@@ -3929,7 +3929,7 @@
           "source": {
             "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
             "lineNumber": 15,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L15"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L15"
           },
           "signature": [
             "(definition: ",
@@ -3955,7 +3955,7 @@
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
         "lineNumber": 14,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L14"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L14"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3969,7 +3969,7 @@
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
         "lineNumber": 18,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/server/plugin.ts#L18"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L18"
       },
       "signature": [
         "void"
@@ -3993,7 +3993,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10"
         },
         "signature": [
           "{ [key: string]: ",
@@ -4017,7 +4017,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12"
         },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
@@ -4035,7 +4035,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21"
         },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
@@ -4051,7 +4051,7 @@
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27"
         },
         "signature": [
           "{ events: SerializedEvent[]; }"

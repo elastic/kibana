@@ -35,7 +35,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 50,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
                 }
               }
             ],
@@ -44,7 +44,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
             }
           },
           {
@@ -67,7 +67,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
                 }
               }
             ],
@@ -76,7 +76,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
             }
           },
           {
@@ -99,7 +99,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
                 }
               }
             ],
@@ -108,7 +108,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
             }
           },
           {
@@ -131,7 +131,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 67,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
                 }
               }
             ],
@@ -140,7 +140,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
             }
           },
           {
@@ -158,7 +158,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 73,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
                 }
               },
               {
@@ -172,7 +172,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 73,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
                 }
               }
             ],
@@ -192,7 +192,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
             },
             "tags": [],
             "returnComment": []
@@ -211,7 +211,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L86"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L86"
             }
           },
           {
@@ -242,7 +242,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 92,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
                 }
               }
             ],
@@ -251,7 +251,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
             }
           },
           {
@@ -282,7 +282,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 98,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
                 }
               }
             ],
@@ -291,7 +291,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 98,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
             }
           },
           {
@@ -309,7 +309,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
                 }
               }
             ],
@@ -329,7 +329,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
             },
             "tags": [],
             "returnComment": []
@@ -349,7 +349,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 114,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
                 }
               },
               {
@@ -363,7 +363,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 114,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
                 }
               }
             ],
@@ -375,7 +375,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 114,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
             },
             "tags": [],
             "returnComment": []
@@ -395,7 +395,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 122,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
                 }
               },
               {
@@ -409,7 +409,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 122,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
                 }
               }
             ],
@@ -421,7 +421,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 122,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
             },
             "tags": [],
             "returnComment": []
@@ -438,7 +438,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 136,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L136"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L136"
             },
             "tags": [],
             "returnComment": []
@@ -458,7 +458,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
                   "lineNumber": 139,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
                 }
               }
             ],
@@ -470,7 +470,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 139,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
             },
             "tags": [],
             "returnComment": []
@@ -487,7 +487,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L145"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L145"
             },
             "tags": [],
             "returnComment": []
@@ -512,7 +512,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L150"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L150"
             },
             "tags": [],
             "returnComment": []
@@ -537,7 +537,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L158"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L158"
             },
             "tags": [],
             "returnComment": []
@@ -562,7 +562,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
               "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L166"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L166"
             },
             "tags": [],
             "returnComment": []
@@ -571,7 +571,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
           "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/lib/reporting_api_client.ts#L47"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L47"
         },
         "initialIsOpen": false
       },
@@ -644,7 +644,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
                   "lineNumber": 107,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L107"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
                 }
               }
             ],
@@ -653,7 +653,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
               "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L107"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
             }
           },
           {
@@ -706,7 +706,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
                   "lineNumber": 112,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L112"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L112"
                 }
               },
               {
@@ -726,7 +726,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
                   "lineNumber": 113,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L113"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L113"
                 }
               }
             ],
@@ -735,7 +735,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
               "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L111"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L111"
             }
           },
           {
@@ -779,7 +779,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
                   "lineNumber": 175,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L175"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
                 }
               }
             ],
@@ -788,7 +788,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
               "lineNumber": 175,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L175"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
             }
           },
           {
@@ -805,14 +805,14 @@
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
               "lineNumber": 194,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L194"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L194"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/plugin.ts",
           "lineNumber": 85,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/plugin.ts#L85"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L85"
         },
         "initialIsOpen": false
       }
@@ -831,7 +831,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/index.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14"
         },
         "tags": [],
         "returnComment": [],
@@ -851,7 +851,7 @@
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
         "lineNumber": 23,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/public/index.ts#L23"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/index.ts#L23"
       },
       "signature": [
         "ReportingSetup"
@@ -932,7 +932,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
                 }
               }
             ],
@@ -941,7 +941,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
             }
           },
           {
@@ -987,7 +987,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L36"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
                 }
               },
               {
@@ -1007,7 +1007,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L36"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
                 }
               }
             ],
@@ -1016,7 +1016,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
             }
           },
           {
@@ -1061,7 +1061,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
                 }
               },
               {
@@ -1081,7 +1081,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
                   "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
                 }
               }
             ],
@@ -1090,14 +1090,14 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
               "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/plugin.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L24"
         },
         "initialIsOpen": false
       },
@@ -1134,7 +1134,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 58,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L58"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
                 }
               }
             ],
@@ -1143,7 +1143,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
             }
           },
           {
@@ -1180,7 +1180,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L63"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
                 }
               }
             ],
@@ -1189,7 +1189,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
             }
           },
           {
@@ -1226,7 +1226,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 71,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L71"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
                 }
               }
             ],
@@ -1235,7 +1235,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
             }
           },
           {
@@ -1252,7 +1252,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L79"
             }
           },
           {
@@ -1269,7 +1269,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L90"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L90"
             }
           },
           {
@@ -1286,7 +1286,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L97"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L97"
             }
           },
           {
@@ -1323,7 +1323,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L104"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
                 }
               }
             ],
@@ -1332,7 +1332,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L104"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
             }
           },
           {
@@ -1351,7 +1351,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L112"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L112"
             }
           },
           {
@@ -1375,7 +1375,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L132"
             }
           },
           {
@@ -1400,7 +1400,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L142"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L142"
             }
           },
           {
@@ -1424,7 +1424,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L150"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L150"
             }
           },
           {
@@ -1449,7 +1449,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L154"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L154"
             }
           },
           {
@@ -1474,7 +1474,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L158"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L158"
             }
           },
           {
@@ -1499,7 +1499,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L168"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L168"
             }
           },
           {
@@ -1523,7 +1523,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 177,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L177"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L177"
             }
           },
           {
@@ -1547,7 +1547,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 184,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L184"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L184"
             }
           },
           {
@@ -1594,7 +1594,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 193,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L193"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
                 }
               }
             ],
@@ -1603,7 +1603,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 193,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L193"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
             }
           },
           {
@@ -1649,7 +1649,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
                 }
               },
               {
@@ -1669,7 +1669,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
                 }
               }
             ],
@@ -1678,7 +1678,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
             }
           },
           {
@@ -1717,7 +1717,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
                 }
               },
               {
@@ -1731,7 +1731,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
                 }
               },
               {
@@ -1751,7 +1751,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
                 }
               }
             ],
@@ -1760,7 +1760,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
             }
           },
           {
@@ -1814,7 +1814,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
                 }
               },
               {
@@ -1834,7 +1834,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
                   "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
                 }
               }
             ],
@@ -1843,14 +1843,14 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 233,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/core.ts",
           "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L50"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L50"
         },
         "initialIsOpen": false
       }
@@ -1873,7 +1873,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L28"
             },
             "signature": [
               {
@@ -1894,7 +1894,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L29"
             },
             "signature": [
               {
@@ -1915,7 +1915,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L30"
             },
             "signature": [
               {
@@ -1937,7 +1937,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L31"
             },
             "signature": [
               {
@@ -1959,7 +1959,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L32"
             },
             "signature": [
               "Pick<",
@@ -1977,7 +1977,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L27"
         },
         "initialIsOpen": false
       },
@@ -1997,7 +1997,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L36"
             },
             "signature": [
               {
@@ -2013,7 +2013,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L35"
         },
         "initialIsOpen": false
       },
@@ -2045,7 +2045,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/server/config/config.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/config/config.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L58"
             },
             "signature": [
               "Config<KbnServerConfigType>"
@@ -2055,7 +2055,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/server/config/config.ts",
           "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/config/config.ts#L57"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L57"
         },
         "initialIsOpen": false
       }
@@ -2087,7 +2087,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L14"
             }
           },
           {
@@ -2105,7 +2105,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
                   "lineNumber": 19,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L19"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19"
                 }
               }
             ],
@@ -2117,7 +2117,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19"
             },
             "tags": [],
             "returnComment": []
@@ -2134,7 +2134,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L32"
             },
             "tags": [],
             "returnComment": []
@@ -2153,14 +2153,14 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L37"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/cancellation_token.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L10"
         },
         "initialIsOpen": false
       },
@@ -2191,7 +2191,7 @@
                 "source": {
                   "path": "x-pack/plugins/reporting/common/poller.ts",
                   "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L32"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
                 }
               }
             ],
@@ -2200,7 +2200,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
             }
           },
           {
@@ -2217,7 +2217,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L45"
             }
           },
           {
@@ -2234,7 +2234,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L49"
             }
           },
           {
@@ -2251,7 +2251,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L76"
             }
           },
           {
@@ -2268,7 +2268,7 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L89"
             }
           },
           {
@@ -2285,14 +2285,14 @@
             "source": {
               "path": "x-pack/plugins/reporting/common/poller.ts",
               "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L103"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L103"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/common/poller.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/poller.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L21"
         },
         "initialIsOpen": false
       }
@@ -2311,7 +2311,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/index.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14"
         },
         "tags": [],
         "returnComment": [],
@@ -2331,7 +2331,7 @@
         "source": {
           "path": "x-pack/plugins/reporting/common/index.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/common/index.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L10"
         },
         "signature": [
           "typeof ",

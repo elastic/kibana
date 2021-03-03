@@ -32,7 +32,7 @@
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
             }
           },
           {
@@ -52,7 +52,7 @@
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
             }
           }
         ],
@@ -68,7 +68,7 @@
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
         },
         "tags": [],
         "returnComment": [],
@@ -103,7 +103,7 @@
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L25"
             },
             "signature": [
               "(options: ",
@@ -121,7 +121,7 @@
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/uptime/server/kibana.index.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L24"
         },
         "initialIsOpen": false
       }

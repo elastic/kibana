@@ -37,7 +37,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L12"
             },
             "signature": [
               "true"
@@ -47,7 +47,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/types.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -67,7 +67,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/types.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L16"
             },
             "signature": [
               "false"
@@ -77,7 +77,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/types.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -99,7 +99,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L18"
             },
             "signature": [
               "Observable",
@@ -136,7 +136,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L19"
             }
           },
           {
@@ -150,7 +150,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L23"
             },
             "signature": [
               {
@@ -166,7 +166,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -190,7 +190,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L40"
             },
             "signature": [
               {
@@ -213,7 +213,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L61"
             },
             "signature": [
               "(path: string, objectNoun?: string | undefined) => Promise<void>"
@@ -223,7 +223,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L36"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -249,7 +249,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L73"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L73"
             },
             "signature": [
               {
@@ -281,7 +281,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L79"
             },
             "signature": [
               {
@@ -313,7 +313,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L88"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L88"
             },
             "signature": [
               {
@@ -345,7 +345,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L106"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L106"
             },
             "signature": [
               {
@@ -377,7 +377,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L110"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L110"
             },
             "signature": [
               {
@@ -402,7 +402,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L69"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L69"
         },
         "initialIsOpen": false
       },
@@ -426,7 +426,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 120,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L120"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L120"
             },
             "signature": [
               "string | undefined"
@@ -436,7 +436,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 116,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L116"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L116"
         },
         "initialIsOpen": false
       },
@@ -460,7 +460,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 130,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L130"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L130"
             },
             "signature": [
               {
@@ -483,7 +483,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 136,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L136"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L136"
             },
             "signature": [
               "string | undefined"
@@ -500,7 +500,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L142"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L142"
             },
             "signature": [
               "string | undefined"
@@ -517,7 +517,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 149,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L149"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L149"
             },
             "signature": [
               "boolean | undefined"
@@ -534,7 +534,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 156,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L156"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L156"
             },
             "signature": [
               "boolean | undefined"
@@ -551,7 +551,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 164,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L164"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L164"
             },
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
@@ -568,7 +568,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L170"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L170"
             },
             "signature": [
               "((spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
@@ -585,7 +585,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L174"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L174"
             },
             "signature": [
               "(() => void) | undefined"
@@ -602,7 +602,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L178"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L178"
             },
             "signature": [
               "(() => void) | undefined"
@@ -612,7 +612,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 126,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L126"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L126"
         },
         "initialIsOpen": false
       },
@@ -636,7 +636,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 188,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L188"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L188"
             }
           },
           {
@@ -650,7 +650,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 192,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L192"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L192"
             }
           },
           {
@@ -664,7 +664,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 196,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L196"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L196"
             },
             "signature": [
               "string[]"
@@ -681,7 +681,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 202,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L202"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L202"
             },
             "signature": [
               "string | undefined"
@@ -698,7 +698,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 208,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L208"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L208"
             },
             "signature": [
               "string | undefined"
@@ -715,7 +715,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 214,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L214"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L214"
             },
             "signature": [
               "string | undefined"
@@ -725,7 +725,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 184,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L184"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L184"
         },
         "initialIsOpen": false
       },
@@ -749,7 +749,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 224,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L224"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L224"
             },
             "signature": [
               "string[]"
@@ -766,7 +766,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 231,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L231"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L231"
             },
             "signature": [
               "number | undefined"
@@ -783,7 +783,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L239"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L239"
             },
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
@@ -793,7 +793,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 220,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L220"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L220"
         },
         "initialIsOpen": false
       },
@@ -817,7 +817,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 252,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L252"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L252"
             },
             "signature": [
               "string | undefined"
@@ -834,7 +834,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 256,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L256"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L256"
             }
           },
           {
@@ -848,7 +848,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 260,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L260"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L260"
             }
           },
           {
@@ -862,14 +862,14 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 264,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L264"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L264"
             }
           }
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 245,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L245"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L245"
         },
         "initialIsOpen": false
       },
@@ -891,7 +891,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 271,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L271"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L271"
             },
             "signature": [
               "Partial<",
@@ -914,7 +914,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 272,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L272"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L272"
             },
             "signature": [
               "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
@@ -929,7 +929,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 273,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L273"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L273"
             },
             "signature": [
               "string | undefined"
@@ -946,7 +946,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 279,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L279"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L279"
             },
             "signature": [
               "boolean | undefined"
@@ -956,7 +956,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 270,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L270"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L270"
         },
         "initialIsOpen": false
       }
@@ -976,7 +976,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/public/api.ts",
           "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/api.ts#L31"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/api.ts#L31"
         },
         "signature": [
           "(props: T) => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
@@ -1028,7 +1028,7 @@
               "source": {
                 "path": "src/plugins/spaces_oss/public/types.ts",
                 "lineNumber": 25,
-                "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L25"
+                "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L25"
               }
             }
           ],
@@ -1037,14 +1037,14 @@
           "source": {
             "path": "src/plugins/spaces_oss/public/types.ts",
             "lineNumber": 25,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L25"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L25"
           }
         }
       ],
       "source": {
         "path": "src/plugins/spaces_oss/public/types.ts",
         "lineNumber": 19,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L19"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L19"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1058,7 +1058,7 @@
       "source": {
         "path": "src/plugins/spaces_oss/public/types.ts",
         "lineNumber": 28,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/public/types.ts#L28"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/public/types.ts#L28"
       },
       "signature": [
         {
@@ -1109,7 +1109,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L10"
             }
           },
           {
@@ -1121,7 +1121,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L11"
             }
           },
           {
@@ -1133,7 +1133,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L12"
             },
             "signature": [
               "string | undefined"
@@ -1148,7 +1148,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L13"
             },
             "signature": [
               "string | undefined"
@@ -1163,7 +1163,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L14"
             },
             "signature": [
               "string | undefined"
@@ -1178,7 +1178,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L15"
             },
             "signature": [
               "string[]"
@@ -1193,7 +1193,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L16"
             },
             "signature": [
               "boolean | undefined"
@@ -1208,7 +1208,7 @@
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L17"
             },
             "signature": [
               "string | undefined"
@@ -1218,7 +1218,7 @@
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/spaces_oss/common/types.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L9"
         },
         "initialIsOpen": false
       }

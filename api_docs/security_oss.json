@@ -23,7 +23,7 @@
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
             "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L26"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L26"
           },
           "signature": [
             {
@@ -39,7 +39,7 @@
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
         "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L25"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L25"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -60,7 +60,7 @@
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
             "lineNumber": 30,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L30"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L30"
           },
           "signature": [
             {
@@ -81,7 +81,7 @@
           "source": {
             "path": "src/plugins/security_oss/public/plugin.ts",
             "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L31"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L31"
           },
           "signature": [
             "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
@@ -99,7 +99,7 @@
       "source": {
         "path": "src/plugins/security_oss/public/plugin.ts",
         "lineNumber": 29,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/public/plugin.ts#L29"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L29"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -130,7 +130,7 @@
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
             "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L29"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L29"
           },
           "signature": [
             "BehaviorSubject",
@@ -148,7 +148,7 @@
           "source": {
             "path": "src/plugins/security_oss/server/plugin.ts",
             "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L35"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L35"
           },
           "signature": [
             "(provider: () => ",
@@ -166,7 +166,7 @@
       "source": {
         "path": "src/plugins/security_oss/server/plugin.ts",
         "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/server/plugin.ts#L25"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L25"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -194,7 +194,7 @@
             "source": {
               "path": "src/plugins/security_oss/common/app_state.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L13"
             },
             "signature": [
               "{ displayAlert: boolean; }"
@@ -209,7 +209,7 @@
             "source": {
               "path": "src/plugins/security_oss/common/app_state.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L14"
             },
             "signature": [
               "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
@@ -219,7 +219,7 @@
         "source": {
           "path": "src/plugins/security_oss/common/app_state.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/security_oss/common/app_state.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L12"
         },
         "initialIsOpen": false
       }

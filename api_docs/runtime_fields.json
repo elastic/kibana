@@ -24,7 +24,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
             }
           }
         ],
@@ -44,7 +44,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
           "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
         },
         "tags": [],
         "returnComment": [],
@@ -71,7 +71,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
             }
           }
         ],
@@ -91,7 +91,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
         },
         "tags": [],
         "returnComment": [],
@@ -117,7 +117,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L59"
             },
             "signature": [
               "(field: ",
@@ -142,7 +142,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L63"
             },
             "signature": [
               "() => void"
@@ -159,7 +159,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L67"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L67"
             },
             "signature": [
               {
@@ -182,7 +182,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L71"
             },
             "signature": [
               {
@@ -206,7 +206,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L75"
             },
             "signature": [
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
@@ -216,7 +216,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
           "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L55"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L55"
         },
         "initialIsOpen": false
       },
@@ -236,7 +236,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L40"
             },
             "signature": [
               "boolean | undefined"
@@ -251,7 +251,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L41"
             }
           },
           {
@@ -263,7 +263,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L42"
             },
             "signature": [
               "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
@@ -281,7 +281,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
           "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L39"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L39"
         },
         "initialIsOpen": false
       },
@@ -301,7 +301,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L34"
             }
           },
           {
@@ -313,7 +313,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L35"
             },
             "signature": [
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
@@ -328,7 +328,7 @@
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L36"
             },
             "signature": [
               "{ source: string; }"
@@ -338,7 +338,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L33"
         },
         "initialIsOpen": false
       }
@@ -354,7 +354,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/constants.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/constants.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/constants.ts#L14"
         },
         "signature": [
           "ComboBoxOption",
@@ -371,7 +371,7 @@
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
           "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L31"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L31"
         },
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
@@ -409,14 +409,14 @@
           "source": {
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
             "lineNumber": 18,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L18"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L18"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "lineNumber": 17,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L17"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L17"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

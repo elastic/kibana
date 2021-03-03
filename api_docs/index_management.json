@@ -18,7 +18,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/application/services/routing.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
             }
           },
           {
@@ -32,7 +32,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/application/services/routing.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
             }
           }
         ],
@@ -44,7 +44,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
           "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/application/services/routing.ts#L38"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
         },
         "tags": [],
         "returnComment": [],
@@ -68,7 +68,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/public/types.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/types.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L14"
             },
             "signature": [
               {
@@ -84,7 +84,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/public/types.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/public/types.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -104,7 +104,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
             }
           },
           {
@@ -116,7 +116,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
             }
           },
           {
@@ -128,7 +128,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
             }
           },
           {
@@ -140,7 +140,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
             }
           },
           {
@@ -152,7 +152,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
             }
           },
           {
@@ -164,7 +164,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
             }
           },
           {
@@ -176,7 +176,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
             },
             "signature": [
               "any"
@@ -191,7 +191,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
             },
             "signature": [
               "any"
@@ -206,7 +206,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
             }
           },
           {
@@ -218,7 +218,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
             },
             "signature": [
               "string | string[]"
@@ -233,7 +233,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
             },
             "signature": [
               "string | undefined"
@@ -248,7 +248,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
             },
             "signature": [
               "any"
@@ -258,7 +258,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/indices.ts",
           "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L54"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
         },
         "initialIsOpen": false
       }
@@ -287,7 +287,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/server/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L21"
             },
             "signature": [
               {
@@ -308,7 +308,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/server/types.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/types.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L22"
             },
             "signature": [
               {
@@ -329,7 +329,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/server/types.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/types.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L23"
             },
             "signature": [
               {
@@ -345,7 +345,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/server/types.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/types.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L20"
         },
         "initialIsOpen": false
       },
@@ -365,7 +365,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
             }
           },
           {
@@ -377,7 +377,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
             }
           },
           {
@@ -389,7 +389,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
             }
           },
           {
@@ -401,7 +401,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
             }
           },
           {
@@ -413,7 +413,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
             }
           },
           {
@@ -425,7 +425,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
             }
           },
           {
@@ -437,7 +437,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
             },
             "signature": [
               "any"
@@ -452,7 +452,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
             },
             "signature": [
               "any"
@@ -467,7 +467,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
             }
           },
           {
@@ -479,7 +479,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
             },
             "signature": [
               "string | string[]"
@@ -494,7 +494,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
             },
             "signature": [
               "string | undefined"
@@ -509,7 +509,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
             },
             "signature": [
               "any"
@@ -519,7 +519,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/indices.ts",
           "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L54"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
         },
         "initialIsOpen": false
       },
@@ -541,7 +541,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L100"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100"
             },
             "signature": [
               "string[]"
@@ -556,7 +556,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101"
             },
             "signature": [
               "number | undefined"
@@ -571,7 +571,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102"
             },
             "signature": [
               {
@@ -593,7 +593,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L103"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103"
             },
             "signature": [
               {
@@ -615,7 +615,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L104"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104"
             },
             "signature": [
               {
@@ -637,7 +637,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L105"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105"
             },
             "signature": [
               "number | undefined"
@@ -647,7 +647,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L99"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99"
         },
         "initialIsOpen": false
       }
@@ -663,7 +663,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/server/config.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/config.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/config.ts#L14"
         },
         "signature": [
           "{ readonly enabled: boolean; }"
@@ -688,7 +688,7 @@
           "source": {
             "path": "x-pack/plugins/index_management/server/plugin.ts",
             "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/plugin.ts#L26"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L26"
           },
           "signature": [
             "{ add: (enricher: ",
@@ -706,7 +706,7 @@
       "source": {
         "path": "x-pack/plugins/index_management/server/plugin.ts",
         "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/server/plugin.ts#L25"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L25"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -744,7 +744,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/lib/utils.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/lib/utils.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L22"
             }
           },
           {
@@ -758,7 +758,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/lib/utils.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/lib/utils.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L23"
             }
           }
         ],
@@ -794,7 +794,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/lib/utils.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/lib/utils.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L21"
         },
         "tags": [],
         "returnComment": [],
@@ -818,7 +818,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L31"
             }
           },
           {
@@ -830,7 +830,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L32"
             },
             "signature": [
               "TimestampFieldFromEs"
@@ -845,7 +845,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L33"
             },
             "signature": [
               {
@@ -867,7 +867,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L34"
             }
           },
           {
@@ -879,7 +879,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L35"
             },
             "signature": [
               "MetaFromEs | undefined"
@@ -894,7 +894,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L36"
             },
             "signature": [
               {
@@ -915,7 +915,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L37"
             }
           },
           {
@@ -927,7 +927,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L38"
             },
             "signature": [
               "string | undefined"
@@ -942,7 +942,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L39"
             },
             "signature": [
               "string | undefined"
@@ -957,7 +957,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L40"
             },
             "signature": [
               "number | undefined"
@@ -972,7 +972,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L41"
             },
             "signature": [
               "number | undefined"
@@ -987,7 +987,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L42"
             },
             "signature": [
               "PrivilegesFromEs"
@@ -1002,14 +1002,14 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L43"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L30"
         },
         "initialIsOpen": false
       },
@@ -1029,7 +1029,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L54"
             }
           },
           {
@@ -1041,7 +1041,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L55"
             },
             "signature": [
               "TimestampFieldFromEs"
@@ -1056,7 +1056,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L56"
             },
             "signature": [
               {
@@ -1078,7 +1078,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L57"
             }
           },
           {
@@ -1090,7 +1090,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L58"
             },
             "signature": [
               {
@@ -1111,7 +1111,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L59"
             }
           },
           {
@@ -1123,7 +1123,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L60"
             },
             "signature": [
               "string | undefined"
@@ -1138,7 +1138,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L61"
             },
             "signature": [
               "string | undefined"
@@ -1153,7 +1153,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L62"
             },
             "signature": [
               "number | undefined"
@@ -1168,7 +1168,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L63"
             },
             "signature": [
               "number | undefined"
@@ -1183,7 +1183,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L64"
             },
             "signature": [
               "MetaFromEs | undefined"
@@ -1198,7 +1198,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L65"
             },
             "signature": [
               "PrivilegesFromEs"
@@ -1213,14 +1213,14 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L66"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
           "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L53"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L53"
         },
         "initialIsOpen": false
       },
@@ -1240,7 +1240,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L70"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L70"
             }
           },
           {
@@ -1252,14 +1252,14 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L71"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
           "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L69"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L69"
         },
         "initialIsOpen": false
       },
@@ -1279,7 +1279,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/aliases.ts",
               "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/aliases.ts#L9"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L9"
             },
             "signature": [
               "any"
@@ -1289,7 +1289,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/aliases.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/aliases.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L8"
         },
         "initialIsOpen": false
       },
@@ -1309,7 +1309,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L49"
             },
             "signature": [
               "Partial<IndexModule> | undefined"
@@ -1324,7 +1324,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L50"
             },
             "signature": [
               "AnalysisModule | undefined"
@@ -1339,7 +1339,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L51"
             },
             "signature": [
               "any"
@@ -1349,7 +1349,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/indices.ts",
           "lineNumber": 48,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L48"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L48"
         },
         "initialIsOpen": false
       },
@@ -1369,7 +1369,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
             }
           },
           {
@@ -1381,7 +1381,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
             }
           },
           {
@@ -1393,7 +1393,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
             }
           },
           {
@@ -1405,7 +1405,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
             }
           },
           {
@@ -1417,7 +1417,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
             }
           },
           {
@@ -1429,7 +1429,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
             }
           },
           {
@@ -1441,7 +1441,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
             },
             "signature": [
               "any"
@@ -1456,7 +1456,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
             },
             "signature": [
               "any"
@@ -1471,7 +1471,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
             }
           },
           {
@@ -1483,7 +1483,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
             },
             "signature": [
               "string | string[]"
@@ -1498,7 +1498,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
             },
             "signature": [
               "string | undefined"
@@ -1513,7 +1513,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/indices.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
             },
             "signature": [
               "any"
@@ -1523,7 +1523,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/indices.ts",
           "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/indices.ts#L54"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
         },
         "initialIsOpen": false
       },
@@ -1543,7 +1543,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/mappings.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/mappings.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L11"
             },
             "signature": [
               "any"
@@ -1553,7 +1553,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/mappings.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/mappings.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L10"
         },
         "initialIsOpen": false
       },
@@ -1575,7 +1575,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L16"
             },
             "signature": [
               "string[]"
@@ -1590,7 +1590,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L17"
             },
             "signature": [
               "{ settings?: ",
@@ -1629,7 +1629,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L22"
             },
             "signature": [
               "string[] | undefined"
@@ -1644,7 +1644,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L23"
             },
             "signature": [
               "number | undefined"
@@ -1659,7 +1659,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L24"
             },
             "signature": [
               "number | undefined"
@@ -1674,7 +1674,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L25"
             },
             "signature": [
               "{ [key: string]: any; } | undefined"
@@ -1689,7 +1689,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L26"
             },
             "signature": [
               "{} | undefined"
@@ -1699,7 +1699,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -1721,7 +1721,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L35"
             }
           },
           {
@@ -1733,7 +1733,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L36"
             },
             "signature": [
               "string[]"
@@ -1748,7 +1748,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L37"
             },
             "signature": [
               "{ settings?: ",
@@ -1787,7 +1787,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L42"
             },
             "signature": [
               "string[] | undefined"
@@ -1802,7 +1802,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L43"
             },
             "signature": [
               "number | undefined"
@@ -1817,7 +1817,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L44"
             },
             "signature": [
               "number | undefined"
@@ -1832,7 +1832,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L45"
             },
             "signature": [
               "number | undefined"
@@ -1847,7 +1847,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L46"
             },
             "signature": [
               "{ name: string; } | undefined"
@@ -1862,7 +1862,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L49"
             },
             "signature": [
               "{ [key: string]: any; } | undefined"
@@ -1877,7 +1877,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L51"
             },
             "signature": [
               "{ [key: string]: any; hidden?: boolean | undefined; } | undefined"
@@ -1892,7 +1892,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L55"
             },
             "signature": [
               "{ type: ",
@@ -1910,7 +1910,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L34"
         },
         "initialIsOpen": false
       },
@@ -1930,7 +1930,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L65"
             }
           },
           {
@@ -1942,7 +1942,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L66"
             },
             "signature": [
               {
@@ -1958,7 +1958,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L64"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L64"
         },
         "initialIsOpen": false
       },
@@ -1980,7 +1980,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L75"
             }
           },
           {
@@ -1992,7 +1992,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L76"
             },
             "signature": [
               "string[]"
@@ -2007,7 +2007,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L77"
             },
             "signature": [
               "number | undefined"
@@ -2022,7 +2022,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L78"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L78"
             },
             "signature": [
               "number | undefined"
@@ -2037,7 +2037,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L79"
             },
             "signature": [
               "number | undefined"
@@ -2052,7 +2052,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L80"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L80"
             }
           },
           {
@@ -2064,7 +2064,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L81"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L81"
             }
           },
           {
@@ -2076,7 +2076,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L82"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L82"
             }
           },
           {
@@ -2088,7 +2088,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L83"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L83"
             },
             "signature": [
               "{ name: string; } | undefined"
@@ -2103,7 +2103,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L86"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L86"
             },
             "signature": [
               "{ type: ",
@@ -2121,7 +2121,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L74"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L74"
         },
         "initialIsOpen": false
       },
@@ -2143,7 +2143,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L100"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100"
             },
             "signature": [
               "string[]"
@@ -2158,7 +2158,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101"
             },
             "signature": [
               "number | undefined"
@@ -2173,7 +2173,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102"
             },
             "signature": [
               {
@@ -2195,7 +2195,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L103"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103"
             },
             "signature": [
               {
@@ -2217,7 +2217,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L104"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104"
             },
             "signature": [
               {
@@ -2239,7 +2239,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/templates.ts",
               "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L105"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105"
             },
             "signature": [
               "number | undefined"
@@ -2249,7 +2249,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L99"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99"
         },
         "initialIsOpen": false
       },
@@ -2269,7 +2269,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L13"
             },
             "signature": [
               "{ settings?: ",
@@ -2308,7 +2308,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L18"
             },
             "signature": [
               "number | undefined"
@@ -2323,7 +2323,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L19"
             },
             "signature": [
               "{ [key: string]: any; } | undefined"
@@ -2333,7 +2333,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -2370,7 +2370,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L23"
             }
           },
           {
@@ -2382,7 +2382,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L24"
             },
             "signature": [
               "{ usedBy: string[]; isManaged: boolean; }"
@@ -2392,7 +2392,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L22"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L22"
         },
         "initialIsOpen": false
       },
@@ -2412,7 +2412,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L31"
             }
           },
           {
@@ -2424,7 +2424,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L32"
             },
             "signature": [
               {
@@ -2440,7 +2440,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L30"
         },
         "initialIsOpen": false
       },
@@ -2460,7 +2460,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L36"
             }
           },
           {
@@ -2472,7 +2472,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L37"
             },
             "signature": [
               "string[]"
@@ -2487,7 +2487,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L38"
             }
           },
           {
@@ -2499,7 +2499,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L39"
             }
           },
           {
@@ -2511,7 +2511,7 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L40"
             }
           },
           {
@@ -2523,14 +2523,14 @@
             "source": {
               "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L41"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/component_templates.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L35"
         },
         "initialIsOpen": false
       }
@@ -2546,7 +2546,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/constants/api_base_path.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/api_base_path.ts#L8"
         },
         "signature": [
           "\"/api/index_management\""
@@ -2562,7 +2562,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/constants/base_path.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/constants/base_path.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/base_path.ts#L8"
         },
         "signature": [
           "\"/management/data/index_management/\""
@@ -2578,7 +2578,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
           "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/data_streams.ts#L51"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L51"
         },
         "signature": [
           "\"green\" | \"yellow\" | \"red\""
@@ -2594,7 +2594,7 @@
         "source": {
           "path": "x-pack/plugins/index_management/common/types/templates.ts",
           "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_management/common/types/templates.ts#L62"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L62"
         },
         "signature": [
           "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""

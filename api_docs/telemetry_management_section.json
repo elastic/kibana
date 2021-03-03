@@ -24,7 +24,7 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L41"
             }
           },
           {
@@ -41,7 +41,7 @@
                 "source": {
                   "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                   "lineNumber": 44,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L44"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L44"
                 },
                 "signature": [
                   "null"
@@ -56,7 +56,7 @@
                 "source": {
                   "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                   "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L45"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L45"
                 },
                 "signature": [
                   "true"
@@ -71,7 +71,7 @@
                 "source": {
                   "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                   "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L46"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L46"
                 },
                 "signature": [
                   "false"
@@ -83,7 +83,7 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L43"
             }
           },
           {
@@ -100,7 +100,7 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L49"
             }
           },
           {
@@ -117,7 +117,7 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L70"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L70"
             }
           },
           {
@@ -140,7 +140,7 @@
                 "source": {
                   "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                   "lineNumber": 74,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
                 }
               }
             ],
@@ -149,7 +149,7 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L74"
             }
           },
           {
@@ -166,14 +166,14 @@
             "source": {
               "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
               "lineNumber": 124,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L124"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L124"
             }
           }
         ],
         "source": {
           "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
           "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L40"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx#L40"
         },
         "initialIsOpen": false
       }
@@ -199,7 +199,7 @@
           "source": {
             "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
             "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L35"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/plugin.tsx#L35"
           },
           "signature": [
             "(enabled: boolean) => void"
@@ -209,7 +209,7 @@
       "source": {
         "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
         "lineNumber": 34,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_management_section/public/plugin.tsx#L34"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_management_section/public/plugin.tsx#L34"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

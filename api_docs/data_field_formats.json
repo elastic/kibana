@@ -15,7 +15,7 @@
         "source": {
           "path": "src/plugins/data/public/field_formats/constants.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/field_formats/constants.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/field_formats/constants.ts#L12"
         },
         "signature": [
           "(typeof ",
@@ -39,7 +39,7 @@
         "source": {
           "path": "src/plugins/data/public/field_formats/field_formats_service.ts",
           "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/field_formats/field_formats_service.ts#L55"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/field_formats/field_formats_service.ts#L55"
         },
         "signature": [
           "Pick<FieldFormatsRegistry, \"init\" | \"register\" | \"deserialize\" | \"getDefaultConfig\" | \"getType\" | \"getTypeWithoutMetaParams\" | \"getDefaultType\" | \"getTypeNameByEsTypes\" | \"getDefaultTypeName\" | \"getInstance\" | \"getDefaultInstancePlain\" | \"getDefaultInstanceCacheResolver\" | \"getByFieldType\" | \"getDefaultInstance\" | \"parseDefaultTypeMap\"> & { deserialize: FormatFactory; }"
@@ -75,7 +75,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L29"
             },
             "signature": [
               "Map<string, ",
@@ -99,7 +99,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L30"
             }
           },
           {
@@ -112,7 +112,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L31"
             }
           },
           {
@@ -124,7 +124,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L32"
             },
             "signature": [
               {
@@ -159,7 +159,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L34"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L34"
                 }
               }
             ],
@@ -186,7 +186,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L34"
             },
             "tags": [],
             "returnComment": []
@@ -233,7 +233,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 52,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L52"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L52"
                 }
               },
               {
@@ -247,7 +247,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L53"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L53"
                 }
               },
               {
@@ -268,7 +268,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L54"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L54"
                 }
               }
             ],
@@ -277,7 +277,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L51"
             }
           },
           {
@@ -301,7 +301,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 72,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L72"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L72"
                 }
               },
               {
@@ -322,7 +322,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 73,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L73"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L73"
                 }
               }
             ],
@@ -359,7 +359,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L71"
             },
             "tags": [
               "return"
@@ -381,7 +381,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 88,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L88"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L88"
                 }
               }
             ],
@@ -403,7 +403,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L88"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L88"
             },
             "tags": [
               "return"
@@ -425,7 +425,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 102,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L102"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L102"
                 }
               }
             ],
@@ -445,7 +445,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L102"
             },
             "tags": [],
             "returnComment": []
@@ -471,7 +471,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L116"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L116"
                 }
               },
               {
@@ -492,7 +492,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 117,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L117"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L117"
                 }
               }
             ],
@@ -530,7 +530,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L115"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L115"
             },
             "tags": [
               "return"
@@ -559,7 +559,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 131,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L131"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L131"
                 }
               }
             ],
@@ -589,7 +589,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L131"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L131"
             },
             "tags": [
               "return"
@@ -617,7 +617,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 148,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L148"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L148"
                 }
               },
               {
@@ -638,7 +638,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 149,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L149"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L149"
                 }
               }
             ],
@@ -683,7 +683,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L147"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L147"
             },
             "tags": [
               "return"
@@ -703,7 +703,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L162"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L162"
             },
             "signature": [
               "((formatId: string, params?: Record<string, any>) => ",
@@ -738,7 +738,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 187,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L187"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L187"
                 }
               },
               {
@@ -759,7 +759,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L188"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L188"
                 }
               },
               {
@@ -773,7 +773,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 189,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L189"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L189"
                 }
               }
             ],
@@ -810,7 +810,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 186,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L186"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L186"
             },
             "tags": [
               "return"
@@ -861,7 +861,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 210,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L210"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L210"
                 }
               },
               {
@@ -882,7 +882,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 210,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L210"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L210"
                 }
               }
             ],
@@ -893,7 +893,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 210,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L210"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L210"
             }
           },
           {
@@ -940,7 +940,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 223,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L223"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L223"
                 }
               }
             ],
@@ -951,7 +951,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 223,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L223"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L223"
             }
           },
           {
@@ -967,7 +967,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 242,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L242"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L242"
             },
             "signature": [
               "((fieldType: ",
@@ -1017,7 +1017,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 244,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L244"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L244"
                 }
               }
             ],
@@ -1026,7 +1026,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 244,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L244"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L244"
             }
           },
           {
@@ -1064,7 +1064,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
                   "lineNumber": 255,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L255"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L255"
                 }
               }
             ],
@@ -1073,14 +1073,14 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
               "lineNumber": 255,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L255"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L255"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/field_formats_registry.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_formats_registry.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_formats_registry.ts#L28"
         },
         "initialIsOpen": false
       },
@@ -1104,7 +1104,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L32"
             }
           },
           {
@@ -1120,7 +1120,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L38"
             }
           },
           {
@@ -1135,7 +1135,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L44"
             },
             "signature": [
               "string | string[]"
@@ -1153,7 +1153,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L52"
             },
             "signature": [
               {
@@ -1178,7 +1178,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L60"
             },
             "signature": [
               {
@@ -1203,7 +1203,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L68"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L68"
             },
             "signature": [
               {
@@ -1228,7 +1228,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L74"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L74"
             },
             "signature": [
               "any"
@@ -1243,7 +1243,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L75"
             },
             "signature": [
               "boolean | undefined"
@@ -1258,7 +1258,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L77"
             },
             "signature": [
               "any"
@@ -1273,7 +1273,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L78"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L78"
             },
             "signature": [
               {
@@ -1312,7 +1312,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L80"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L80"
                 }
               },
               {
@@ -1333,7 +1333,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L80"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L80"
                 }
               }
             ],
@@ -1342,7 +1342,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L80"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L80"
             }
           },
           {
@@ -1383,7 +1383,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 99,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L99"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L99"
                 }
               },
               {
@@ -1405,7 +1405,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 100,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L100"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L100"
                 }
               },
               {
@@ -1427,7 +1427,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 101,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L101"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L101"
                 }
               }
             ],
@@ -1441,7 +1441,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 98,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L98"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L98"
             }
           },
           {
@@ -1487,7 +1487,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 119,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L119"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L119"
                 }
               }
             ],
@@ -1501,7 +1501,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 118,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L118"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L118"
             }
           },
           {
@@ -1525,7 +1525,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L133"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L133"
             }
           },
           {
@@ -1552,7 +1552,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 144,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L144"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L144"
                 }
               }
             ],
@@ -1564,7 +1564,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 144,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L144"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L144"
             }
           },
           {
@@ -1586,7 +1586,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 161,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L161"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L161"
             }
           },
           {
@@ -1608,7 +1608,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 172,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L172"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L172"
             }
           },
           {
@@ -1645,7 +1645,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 193,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L193"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L193"
                 }
               }
             ],
@@ -1654,7 +1654,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 193,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L193"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L193"
             }
           },
           {
@@ -1678,7 +1678,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 197,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L197"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L197"
             }
           },
           {
@@ -1709,7 +1709,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/field_format.ts",
                   "lineNumber": 204,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L204"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L204"
                 }
               }
             ],
@@ -1718,14 +1718,14 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/field_format.ts",
               "lineNumber": 204,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L204"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L204"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/field_format.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/field_format.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/field_format.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1762,7 +1762,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L16"
             },
             "signature": [
               {
@@ -1783,7 +1783,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L17"
             }
           },
           {
@@ -1795,7 +1795,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L20"
             },
             "signature": [
               {
@@ -1823,7 +1823,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
                   "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L22"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L22"
                 }
               }
             ],
@@ -1835,7 +1835,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L22"
             },
             "tags": [],
             "returnComment": []
@@ -1844,7 +1844,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/boolean.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/boolean.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/boolean.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -1875,7 +1875,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L14"
             },
             "signature": [
               {
@@ -1896,7 +1896,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L15"
             }
           },
           {
@@ -1908,7 +1908,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L19"
             },
             "signature": [
               {
@@ -1929,7 +1929,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L20"
             }
           },
           {
@@ -1941,14 +1941,14 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L21"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/bytes.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/bytes.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/bytes.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -1985,7 +1985,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L20"
             },
             "signature": [
               {
@@ -2006,7 +2006,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L21"
             }
           },
           {
@@ -2018,7 +2018,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L24"
             },
             "signature": [
               {
@@ -2045,7 +2045,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L26"
             }
           },
           {
@@ -2068,7 +2068,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/color.ts",
                   "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L33"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L33"
                 }
               }
             ],
@@ -2077,7 +2077,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L33"
             }
           },
           {
@@ -2095,7 +2095,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/color.ts",
                   "lineNumber": 52,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L52"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L52"
                 }
               }
             ],
@@ -2107,7 +2107,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/color.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L52"
             },
             "tags": [],
             "returnComment": []
@@ -2116,7 +2116,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/color.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/color.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/color.ts#L19"
         },
         "initialIsOpen": false
       },
@@ -2153,7 +2153,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L158"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L158"
             },
             "signature": [
               {
@@ -2174,7 +2174,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 159,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L159"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L159"
             }
           },
           {
@@ -2186,7 +2186,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L162"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L162"
             },
             "signature": [
               {
@@ -2207,7 +2207,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 163,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L163"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L163"
             },
             "signature": [
               "{ text: string; kind: string; }[]"
@@ -2222,7 +2222,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 164,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L164"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L164"
             },
             "signature": [
               "{ text: string; method: string; }[]"
@@ -2237,7 +2237,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 165,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L165"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L165"
             }
           },
           {
@@ -2254,7 +2254,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 167,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L167"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L167"
             }
           },
           {
@@ -2271,7 +2271,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L170"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L170"
             }
           },
           {
@@ -2289,7 +2289,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/duration.ts",
                   "lineNumber": 178,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L178"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L178"
                 }
               }
             ],
@@ -2301,7 +2301,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/duration.ts",
               "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L178"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L178"
             },
             "tags": [],
             "returnComment": []
@@ -2310,7 +2310,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/duration.ts",
           "lineNumber": 157,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/duration.ts#L157"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/duration.ts#L157"
         },
         "initialIsOpen": false
       },
@@ -2347,7 +2347,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/ip.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L15"
             },
             "signature": [
               {
@@ -2368,7 +2368,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/ip.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L16"
             }
           },
           {
@@ -2380,7 +2380,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/ip.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L19"
             },
             "signature": [
               {
@@ -2407,7 +2407,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/ip.ts",
                   "lineNumber": 21,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L21"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L21"
                 }
               }
             ],
@@ -2419,7 +2419,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/ip.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L21"
             },
             "tags": [],
             "returnComment": []
@@ -2428,7 +2428,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/ip.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/ip.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/ip.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -2459,7 +2459,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/number.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L14"
             },
             "signature": [
               {
@@ -2480,7 +2480,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/number.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L15"
             }
           },
           {
@@ -2492,7 +2492,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/number.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L19"
             },
             "signature": [
               {
@@ -2513,7 +2513,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/number.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L20"
             }
           },
           {
@@ -2525,14 +2525,14 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/number.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L21"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/number.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/number.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/number.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -2563,7 +2563,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L15"
             },
             "signature": [
               {
@@ -2584,7 +2584,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L16"
             }
           },
           {
@@ -2596,7 +2596,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L20"
             },
             "signature": [
               {
@@ -2617,7 +2617,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L21"
             }
           },
           {
@@ -2629,7 +2629,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L22"
             }
           },
           {
@@ -2644,7 +2644,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L24"
             },
             "tags": [],
             "returnComment": []
@@ -2664,7 +2664,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/percent.ts",
                   "lineNumber": 29,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L29"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L29"
                 }
               }
             ],
@@ -2676,7 +2676,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/percent.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L29"
             },
             "tags": [],
             "returnComment": []
@@ -2685,7 +2685,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/percent.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/percent.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/percent.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -2722,7 +2722,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L16"
             },
             "signature": [
               {
@@ -2743,7 +2743,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L17"
             }
           },
           {
@@ -2755,7 +2755,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L20"
             },
             "signature": [
               {
@@ -2782,7 +2782,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
                   "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L22"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L22"
                 }
               }
             ],
@@ -2794,7 +2794,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L22"
             },
             "tags": [],
             "returnComment": []
@@ -2803,7 +2803,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/relative_date.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/relative_date.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/relative_date.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -2840,7 +2840,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/source.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L45"
             },
             "signature": [
               {
@@ -2861,7 +2861,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/source.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L46"
             }
           },
           {
@@ -2873,7 +2873,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/source.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L47"
             },
             "signature": [
               {
@@ -2900,7 +2900,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/source.ts",
                   "lineNumber": 49,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L49"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L49"
                 }
               }
             ],
@@ -2912,7 +2912,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/source.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L49"
             },
             "tags": [],
             "returnComment": []
@@ -2932,7 +2932,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/source.ts",
                   "lineNumber": 51,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L51"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L51"
                 }
               },
               {
@@ -2953,7 +2953,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/source.ts",
                   "lineNumber": 51,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L51"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L51"
                 }
               }
             ],
@@ -2973,7 +2973,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/source.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L51"
             },
             "tags": [],
             "returnComment": []
@@ -2982,7 +2982,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/source.ts",
           "lineNumber": 44,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/source.ts#L44"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/source.ts#L44"
         },
         "initialIsOpen": false
       },
@@ -3019,7 +3019,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L25"
             },
             "signature": [
               {
@@ -3040,7 +3040,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L26"
             }
           },
           {
@@ -3052,7 +3052,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L29"
             },
             "signature": [
               {
@@ -3079,7 +3079,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L36"
             }
           },
           {
@@ -3097,7 +3097,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
                   "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L43"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L43"
                 }
               }
             ],
@@ -3109,7 +3109,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L43"
             },
             "tags": [],
             "returnComment": []
@@ -3118,7 +3118,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/static_lookup.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/static_lookup.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/static_lookup.ts#L24"
         },
         "initialIsOpen": false
       },
@@ -3155,7 +3155,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L47"
             },
             "signature": [
               {
@@ -3176,7 +3176,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L48"
             }
           },
           {
@@ -3188,7 +3188,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L51"
             },
             "signature": [
               {
@@ -3210,7 +3210,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L61"
             },
             "signature": [
               "{ kind: string; text: string; }[]"
@@ -3242,7 +3242,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/url.ts",
                   "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L63"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L63"
                 }
               }
             ],
@@ -3251,7 +3251,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L63"
             }
           },
           {
@@ -3268,7 +3268,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L68"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L68"
             }
           },
           {
@@ -3286,7 +3286,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/url.ts",
                   "lineNumber": 131,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L131"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L131"
                 }
               }
             ],
@@ -3298,7 +3298,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L131"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L131"
             },
             "tags": [],
             "returnComment": []
@@ -3318,7 +3318,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/url.ts",
                   "lineNumber": 133,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L133"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L133"
                 }
               },
               {
@@ -3339,7 +3339,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/url.ts",
                   "lineNumber": 133,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L133"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L133"
                 }
               }
             ],
@@ -3359,7 +3359,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/url.ts",
               "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L133"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L133"
             },
             "tags": [],
             "returnComment": []
@@ -3368,7 +3368,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/url.ts",
           "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/url.ts#L46"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/url.ts#L46"
         },
         "initialIsOpen": false
       },
@@ -3405,7 +3405,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L63"
             },
             "signature": [
               {
@@ -3426,7 +3426,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L64"
             }
           },
           {
@@ -3438,7 +3438,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L67"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L67"
             },
             "signature": [
               {
@@ -3460,7 +3460,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L80"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L80"
             },
             "signature": [
               "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
@@ -3480,7 +3480,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L82"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L82"
             }
           },
           {
@@ -3498,7 +3498,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/string.ts",
                   "lineNumber": 102,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L102"
                 }
               }
             ],
@@ -3510,7 +3510,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L102"
             },
             "tags": [],
             "returnComment": []
@@ -3519,7 +3519,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/string.ts",
           "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L62"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/string.ts#L62"
         },
         "initialIsOpen": false
       },
@@ -3556,7 +3556,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L18"
             },
             "signature": [
               {
@@ -3577,7 +3577,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L19"
             }
           },
           {
@@ -3589,7 +3589,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L22"
             },
             "signature": [
               {
@@ -3616,7 +3616,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
                   "lineNumber": 24,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L24"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L24"
                 }
               }
             ],
@@ -3628,7 +3628,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L24"
             },
             "tags": [],
             "returnComment": []
@@ -3637,7 +3637,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/truncate.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -3674,7 +3674,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L18"
             },
             "signature": [
               {
@@ -3695,7 +3695,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L19"
             },
             "signature": [
               {
@@ -3716,7 +3716,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L20"
             }
           },
           {
@@ -3728,7 +3728,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L24"
             },
             "signature": [
               {
@@ -3749,7 +3749,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L25"
             }
           },
           {
@@ -3761,7 +3761,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L26"
             }
           },
           {
@@ -3778,7 +3778,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L29"
             }
           },
           {
@@ -3796,7 +3796,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
                   "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L36"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L36"
                 }
               }
             ],
@@ -3808,7 +3808,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L36"
             },
             "tags": [],
             "returnComment": []
@@ -3817,7 +3817,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/converters/histogram.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -3847,7 +3847,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/errors.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/errors.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/errors.ts#L10"
             }
           },
           {
@@ -3870,7 +3870,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/errors.ts",
                   "lineNumber": 11,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/errors.ts#L11"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/errors.ts#L11"
                 }
               },
               {
@@ -3884,7 +3884,7 @@
                 "source": {
                   "path": "src/plugins/data/common/field_formats/errors.ts",
                   "lineNumber": 11,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/errors.ts#L11"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/errors.ts#L11"
                 }
               }
             ],
@@ -3893,14 +3893,14 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/errors.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/errors.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/errors.ts#L11"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/errors.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/errors.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/errors.ts#L9"
         },
         "initialIsOpen": false
       }
@@ -3926,7 +3926,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
             }
           },
           {
@@ -3940,7 +3940,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
             }
           }
         ],
@@ -3949,7 +3949,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/utils/highlight/highlight_request.ts#L13"
         },
         "initialIsOpen": false
       }
@@ -3971,7 +3971,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L63"
             }
           },
           {
@@ -3983,7 +3983,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L64"
             },
             "signature": [
               "Record<string, any>"
@@ -3998,7 +3998,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L65"
             },
             "signature": [
               "boolean | undefined"
@@ -4008,7 +4008,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L62"
         },
         "initialIsOpen": false
       }
@@ -4025,7 +4025,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L42"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L42"
         },
         "initialIsOpen": false
       }
@@ -4040,7 +4040,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/index.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/index.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/index.ts#L11"
         },
         "signature": [
           "{ init: (getConfig: ",
@@ -4077,7 +4077,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/constants/base_formatters.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/base_formatters.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/base_formatters.ts#L28"
         },
         "signature": [
           "FieldFormatInstanceType",
@@ -4094,7 +4094,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/content_types/html_content_type.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/content_types/html_content_type.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/content_types/html_content_type.ts#L13"
         },
         "signature": [
           {
@@ -4116,7 +4116,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/content_types/text_content_type.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/content_types/text_content_type.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/content_types/text_content_type.ts#L13"
         },
         "signature": [
           {
@@ -4138,7 +4138,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 68,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L68"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L68"
         },
         "signature": [
           "(key: string, defaultOverride: T | undefined) => T"
@@ -4156,7 +4156,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L14"
         },
         "signature": [
           "\"html\" | \"text\""
@@ -4174,7 +4174,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 75,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L75"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L75"
         },
         "signature": [
           "string"
@@ -4190,7 +4190,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 70,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L70"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L70"
         },
         "signature": [
           "FieldFormat"
@@ -4206,7 +4206,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
           "lineNumber": 97,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L97"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/types.ts#L97"
         },
         "signature": [
           "{ init: (getConfig: GetConfigFn, metaParamsOptions?: Record<string, any>, defaultFieldConverters?: FieldFormatInstanceType[]) => void; register: (fieldFormats: FieldFormatInstanceType[]) => void; deserialize: ",
@@ -4262,7 +4262,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/color_default.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/color_default.ts#L10"
             }
           },
           {
@@ -4274,7 +4274,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/color_default.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/color_default.ts#L11"
             }
           },
           {
@@ -4286,7 +4286,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/color_default.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/color_default.ts#L12"
             }
           },
           {
@@ -4298,7 +4298,7 @@
             "source": {
               "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/color_default.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/color_default.ts#L13"
             }
           }
         ],
@@ -4307,7 +4307,7 @@
         "source": {
           "path": "src/plugins/data/common/field_formats/constants/color_default.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/color_default.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/common/field_formats/constants/color_default.ts#L9"
         },
         "initialIsOpen": false
       }

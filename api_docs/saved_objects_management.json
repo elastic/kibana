@@ -18,7 +18,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L18"
             },
             "signature": [
               "() => React.ReactNode"
@@ -33,7 +33,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L19"
             }
           },
           {
@@ -45,7 +45,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L20"
             },
             "signature": [
               "{ name: string; description: string; icon: string; type: string; available?: ((item: ",
@@ -92,7 +92,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L30"
             },
             "signature": [
               "(() => boolean) | undefined"
@@ -107,7 +107,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L34"
             },
             "signature": [
               "ActionContext | null"
@@ -122,7 +122,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L35"
             },
             "signature": [
               {
@@ -155,7 +155,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                   "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L37"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L37"
                 }
               }
             ],
@@ -164,7 +164,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L37"
             }
           },
           {
@@ -187,7 +187,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                   "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L41"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L41"
                 }
               }
             ],
@@ -196,7 +196,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L41"
             }
           },
           {
@@ -233,7 +233,7 @@
                 "source": {
                   "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                   "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L45"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L45"
                 }
               }
             ],
@@ -242,7 +242,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L45"
             }
           },
           {
@@ -259,14 +259,14 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L49"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/action.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/action.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -307,7 +307,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L52"
             }
           }
         ],
@@ -316,7 +316,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
           "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L51"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L51"
         },
         "initialIsOpen": false
       }
@@ -340,7 +340,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/action_service.ts#L15"
             },
             "signature": [
               "(action: ",
@@ -358,7 +358,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/action_service.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -380,7 +380,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/action_service.ts#L22"
             },
             "signature": [
               "(actionId: string) => boolean"
@@ -397,7 +397,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/action_service.ts#L26"
             },
             "signature": [
               "() => ",
@@ -415,7 +415,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/action_service.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/action_service.ts#L18"
         },
         "initialIsOpen": false
       },
@@ -437,7 +437,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/column_service.ts#L15"
             },
             "signature": [
               "(column: ",
@@ -455,7 +455,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/column_service.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -477,7 +477,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/column_service.ts#L22"
             },
             "signature": [
               "() => ",
@@ -495,7 +495,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/column_service.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/column_service.ts#L18"
         },
         "initialIsOpen": false
       },
@@ -519,7 +519,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/column.ts#L13"
             }
           },
           {
@@ -531,7 +531,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/column.ts#L14"
             },
             "signature": [
               "Pick<",
@@ -551,7 +551,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/column.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/column.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -571,7 +571,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L12"
             }
           },
           {
@@ -583,7 +583,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L13"
             }
           },
           {
@@ -595,7 +595,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L14"
             },
             "signature": [
               "{ icon: string; title: string; namespaceType: ",
@@ -618,7 +618,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L19"
             },
             "signature": [
               {
@@ -640,7 +640,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L20"
             },
             "signature": [
               "string[] | undefined"
@@ -650,7 +650,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/types/record.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/types/record.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -670,7 +670,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/service_registry.ts#L13"
             }
           },
           {
@@ -682,7 +682,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/service_registry.ts#L14"
             },
             "signature": [
               {
@@ -703,14 +703,14 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/service_registry.ts#L15"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/service_registry.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -730,7 +730,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L38"
             },
             "signature": [
               {
@@ -752,7 +752,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L39"
             },
             "signature": [
               {
@@ -774,7 +774,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L40"
             },
             "signature": [
               "UnmatchedReference[]"
@@ -789,7 +789,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L41"
             },
             "signature": [
               "\"success\" | \"idle\""
@@ -804,7 +804,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L42"
             }
           },
           {
@@ -816,7 +816,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L43"
             },
             "signature": [
               "undefined"
@@ -831,7 +831,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L44"
             },
             "signature": [
               "undefined"
@@ -846,7 +846,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L45"
             },
             "signature": [
               {
@@ -863,7 +863,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
           "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L37"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L37"
         },
         "initialIsOpen": false
       },
@@ -883,7 +883,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L22"
             },
             "signature": [
               "Pick<",
@@ -906,7 +906,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L23"
             },
             "signature": [
               {
@@ -954,7 +954,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/lib/process_import_response.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/lib/process_import_response.ts#L21"
         },
         "initialIsOpen": false
       },
@@ -976,7 +976,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L37"
             }
           },
           {
@@ -988,7 +988,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L38"
             }
           },
           {
@@ -1000,7 +1000,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L39"
             },
             "signature": [
               {
@@ -1021,7 +1021,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L40"
             },
             "signature": [
               {
@@ -1037,7 +1037,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L36"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -1059,7 +1059,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L17"
             },
             "signature": [
               "string | undefined"
@@ -1074,7 +1074,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L18"
             },
             "signature": [
               "string | undefined"
@@ -1089,7 +1089,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L19"
             },
             "signature": [
               "string | undefined"
@@ -1104,7 +1104,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L20"
             },
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
@@ -1119,7 +1119,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L21"
             },
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
@@ -1129,7 +1129,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L16"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L16"
         },
         "initialIsOpen": false
       }
@@ -1145,7 +1145,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/services/service_registry.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/services/service_registry.ts#L18"
         },
         "signature": [
           "{ get: (id: string) => SavedObjectsManagementServiceRegistryEntry | undefined; register: (entry: SavedObjectsManagementServiceRegistryEntry) => void; all: () => SavedObjectsManagementServiceRegistryEntry[]; }"
@@ -1163,7 +1163,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L27"
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
@@ -1188,7 +1188,7 @@
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
             "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L32"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L32"
           },
           "signature": [
             {
@@ -1209,7 +1209,7 @@
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
             "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L33"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L33"
           },
           "signature": [
             {
@@ -1230,7 +1230,7 @@
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
             "lineNumber": 34,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L34"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L34"
           },
           "signature": [
             "Pick<",
@@ -1248,7 +1248,7 @@
       "source": {
         "path": "src/plugins/saved_objects_management/public/plugin.ts",
         "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L31"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L31"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1269,7 +1269,7 @@
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
             "lineNumber": 38,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L38"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L38"
           },
           "signature": [
             {
@@ -1290,7 +1290,7 @@
           "source": {
             "path": "src/plugins/saved_objects_management/public/plugin.ts",
             "lineNumber": 39,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L39"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L39"
           },
           "signature": [
             {
@@ -1306,7 +1306,7 @@
       "source": {
         "path": "src/plugins/saved_objects_management/public/plugin.ts",
         "lineNumber": 37,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/public/plugin.ts#L37"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/public/plugin.ts#L37"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1342,7 +1342,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L17"
             },
             "signature": [
               "string | undefined"
@@ -1357,7 +1357,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L18"
             },
             "signature": [
               "string | undefined"
@@ -1372,7 +1372,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L19"
             },
             "signature": [
               "string | undefined"
@@ -1387,7 +1387,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L20"
             },
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
@@ -1402,7 +1402,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L21"
             },
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
@@ -1412,7 +1412,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L16"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L16"
         },
         "initialIsOpen": false
       },
@@ -1434,7 +1434,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L37"
             }
           },
           {
@@ -1446,7 +1446,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L38"
             }
           },
           {
@@ -1458,7 +1458,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L39"
             },
             "signature": [
               {
@@ -1479,7 +1479,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L40"
             },
             "signature": [
               {
@@ -1495,7 +1495,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L36"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -1515,7 +1515,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L44"
             }
           },
           {
@@ -1527,7 +1527,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L45"
             }
           },
           {
@@ -1539,7 +1539,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L46"
             },
             "signature": [
               {
@@ -1560,14 +1560,14 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L47"
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L43"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L43"
         },
         "initialIsOpen": false
       },
@@ -1587,7 +1587,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L51"
             },
             "signature": [
               {
@@ -1609,7 +1609,7 @@
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L52"
             },
             "signature": [
               {
@@ -1626,7 +1626,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L50"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L50"
         },
         "initialIsOpen": false
       }
@@ -1644,7 +1644,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L27"
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
@@ -1660,7 +1660,7 @@
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
           "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/saved_objects_management/common/types.ts#L31"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_management/common/types.ts#L31"
         },
         "signature": [
           "\"parent\" | \"child\""

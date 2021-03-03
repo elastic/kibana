@@ -28,7 +28,7 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L58"
             },
             "signature": [
               "Pick<",
@@ -51,7 +51,7 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L59"
             },
             "signature": [
               {
@@ -72,7 +72,7 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L60"
             },
             "signature": [
               "Pick<",
@@ -103,7 +103,7 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L61"
             },
             "signature": [
               {
@@ -120,7 +120,7 @@
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L57"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L57"
         },
         "initialIsOpen": false
       },
@@ -140,7 +140,7 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L79"
             },
             "signature": [
               "Logger",
@@ -156,14 +156,14 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L80"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L80"
             }
           }
         ],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L78"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L78"
         },
         "initialIsOpen": false
       },
@@ -183,14 +183,14 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L54"
             }
           }
         ],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L53"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L53"
         },
         "initialIsOpen": false
       },
@@ -215,14 +215,14 @@
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L75"
             }
           }
         ],
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L74"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L74"
         },
         "initialIsOpen": false
       }
@@ -238,7 +238,7 @@
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 88,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L88"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L88"
         },
         "signature": [
           "(clustersDetails: ",
@@ -260,7 +260,7 @@
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 83,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L83"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L83"
         },
         "signature": [
           "UnencryptedStatsGetterConfig",
@@ -278,7 +278,7 @@
         "source": {
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "lineNumber": 84,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L84"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L84"
         },
         "signature": [
           "(config: ",
@@ -309,7 +309,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 20,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L20"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L20"
           },
           "signature": [
             "<T extends ",
@@ -340,7 +340,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 23,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L23"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L23"
           },
           "signature": [
             "(optInStatus: boolean, config: ",
@@ -363,7 +363,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 24,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L24"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L24"
           },
           "signature": [
             "(config: ",
@@ -394,7 +394,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 25,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L25"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L25"
           },
           "signature": [
             "() => Promise<boolean | undefined>"
@@ -404,7 +404,7 @@
       "source": {
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "lineNumber": 19,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L19"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L19"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -425,7 +425,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L29"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L29"
           },
           "signature": [
             "(optInStatus: boolean, config: ",
@@ -448,7 +448,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 30,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L30"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L30"
           },
           "signature": [
             "(config: ",
@@ -479,7 +479,7 @@
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L31"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L31"
           },
           "signature": [
             "() => Promise<boolean | undefined>"
@@ -489,7 +489,7 @@
       "source": {
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "lineNumber": 28,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/telemetry_collection_manager/server/types.ts#L28"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L28"
       },
       "lifecycle": "start",
       "initialIsOpen": true

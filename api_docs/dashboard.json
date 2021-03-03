@@ -53,7 +53,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L104"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L104"
             },
             "signature": [
               "\"dashboard\""
@@ -68,7 +68,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L105"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L105"
             },
             "signature": [
               "((newViewMode: ",
@@ -94,7 +94,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L107"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L107"
             },
             "tags": [],
             "returnComment": []
@@ -125,7 +125,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 112,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L112"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L112"
                 }
               },
               {
@@ -145,7 +145,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 113,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L113"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L113"
                 }
               },
               {
@@ -182,7 +182,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 114,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L114"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L114"
                 }
               }
             ],
@@ -191,7 +191,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L111"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L111"
             }
           },
           {
@@ -268,7 +268,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 131,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L131"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L131"
                 }
               },
               {
@@ -282,7 +282,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 132,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L132"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L132"
                 }
               }
             ],
@@ -291,7 +291,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 127,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L127"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L127"
             }
           },
           {
@@ -346,7 +346,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 139,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L139"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L139"
                 }
               },
               {
@@ -367,7 +367,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 140,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L140"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L140"
                 }
               },
               {
@@ -381,7 +381,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 141,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L141"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L141"
                 }
               }
             ],
@@ -390,7 +390,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L138"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L138"
             }
           },
           {
@@ -452,7 +452,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 180,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L180"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L180"
                 }
               },
               {
@@ -474,7 +474,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 181,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L181"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L181"
                 }
               },
               {
@@ -488,7 +488,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 182,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L182"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L182"
                 }
               }
             ],
@@ -497,7 +497,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 179,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L179"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L179"
             }
           },
           {
@@ -559,7 +559,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 230,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
                 }
               },
               {
@@ -573,7 +573,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 230,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
                 }
               },
               {
@@ -587,7 +587,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 230,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L230"
                 }
               }
             ],
@@ -596,7 +596,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 226,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L226"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L226"
             }
           },
           {
@@ -619,7 +619,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 244,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L244"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L244"
                 }
               }
             ],
@@ -628,7 +628,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 244,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L244"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L244"
             }
           },
           {
@@ -658,7 +658,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                   "lineNumber": 255,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L255"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L255"
                 }
               }
             ],
@@ -667,14 +667,14 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 255,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L255"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L255"
             }
           }
         ],
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
           "lineNumber": 103,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L103"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L103"
         },
         "initialIsOpen": false
       },
@@ -735,7 +735,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L32"
             },
             "signature": [
               "true"
@@ -750,7 +750,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L33"
             },
             "signature": [
               "\"dashboard\""
@@ -784,7 +784,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                   "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L35"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L35"
                 }
               }
             ],
@@ -793,7 +793,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L35"
             }
           },
           {
@@ -808,7 +808,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L37"
             },
             "tags": [],
             "returnComment": []
@@ -825,7 +825,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L42"
             },
             "tags": [],
             "returnComment": []
@@ -852,7 +852,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L48"
             }
           },
           {
@@ -876,7 +876,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                   "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L59"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L59"
                 }
               },
               {
@@ -913,7 +913,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
                   "lineNumber": 60,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L60"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L60"
                 }
               }
             ],
@@ -964,7 +964,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L58"
             },
             "tags": [],
             "returnComment": []
@@ -973,7 +973,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
           "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L29"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx#L29"
         },
         "initialIsOpen": false
       }
@@ -999,7 +999,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L22"
             }
           },
           {
@@ -1013,7 +1013,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L22"
             }
           }
         ],
@@ -1022,7 +1022,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/dashboard_constants.ts",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L22"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L22"
         },
         "initialIsOpen": false
       },
@@ -1049,7 +1049,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L92"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L92"
             }
           }
         ],
@@ -1077,7 +1077,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/url_generator.ts",
           "lineNumber": 91,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L91"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L91"
         },
         "tags": [],
         "returnComment": [],
@@ -1119,7 +1119,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L43"
             },
             "signature": [
               {
@@ -1141,7 +1141,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L44"
             },
             "signature": [
               {
@@ -1163,7 +1163,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L45"
             },
             "signature": [
               "boolean | undefined"
@@ -1178,7 +1178,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L46"
             }
           },
           {
@@ -1190,7 +1190,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L47"
             },
             "signature": [
               "string | undefined"
@@ -1205,7 +1205,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L48"
             },
             "signature": [
               {
@@ -1226,7 +1226,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L49"
             },
             "signature": [
               "string | undefined"
@@ -1241,7 +1241,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L50"
             }
           },
           {
@@ -1253,7 +1253,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L51"
             },
             "signature": [
               "boolean | undefined"
@@ -1268,7 +1268,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L52"
             },
             "signature": [
               {
@@ -1289,7 +1289,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L53"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L53"
             },
             "signature": [
               {
@@ -1311,7 +1311,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L54"
             }
           },
           {
@@ -1323,7 +1323,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L55"
             },
             "signature": [
               {
@@ -1344,7 +1344,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L56"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L56"
             },
             "signature": [
               "{ [panelId: string]: ",
@@ -1370,7 +1370,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
           "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L42"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx#L42"
         },
         "initialIsOpen": false
       },
@@ -1390,14 +1390,14 @@
             "source": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L89"
             }
           }
         ],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "lineNumber": 88,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L88"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L88"
         },
         "initialIsOpen": false
       },
@@ -1419,7 +1419,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L34"
             },
             "signature": [
               "string | undefined"
@@ -1436,7 +1436,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L38"
             },
             "signature": [
               {
@@ -1460,7 +1460,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L43"
             },
             "signature": [
               {
@@ -1484,7 +1484,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L49"
             },
             "signature": [
               {
@@ -1508,7 +1508,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L54"
             },
             "signature": [
               {
@@ -1532,7 +1532,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L59"
             },
             "signature": [
               "boolean | undefined"
@@ -1549,7 +1549,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L67"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L67"
             },
             "signature": [
               "boolean | undefined"
@@ -1566,7 +1566,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L72"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L72"
             },
             "signature": [
               {
@@ -1590,7 +1590,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L78"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L78"
             },
             "signature": [
               "string | undefined"
@@ -1607,7 +1607,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L83"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L83"
             },
             "signature": [
               {
@@ -1631,7 +1631,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
               "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L88"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L88"
             },
             "signature": [
               "string | undefined"
@@ -1641,7 +1641,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/url_generator.ts",
           "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L29"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L29"
         },
         "initialIsOpen": false
       },
@@ -1678,7 +1678,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L19"
             },
             "signature": [
               "string | undefined"
@@ -1693,7 +1693,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L20"
             }
           },
           {
@@ -1705,7 +1705,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L21"
             },
             "signature": [
               "string | undefined"
@@ -1720,7 +1720,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L22"
             },
             "signature": [
               "string | undefined"
@@ -1735,7 +1735,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L23"
             },
             "signature": [
               "string | undefined"
@@ -1750,7 +1750,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L24"
             }
           },
           {
@@ -1762,7 +1762,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L25"
             },
             "signature": [
               "string | undefined"
@@ -1777,7 +1777,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L27"
             },
             "signature": [
               "string | undefined"
@@ -1792,7 +1792,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L28"
             }
           },
           {
@@ -1804,7 +1804,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L29"
             },
             "signature": [
               {
@@ -1826,7 +1826,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L30"
             },
             "signature": [
               "Pick<",
@@ -1861,7 +1861,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L31"
             }
           },
           {
@@ -1886,7 +1886,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L32"
             }
           },
           {
@@ -1898,7 +1898,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L33"
             },
             "signature": [
               "(editMode?: boolean | undefined) => string"
@@ -1908,7 +1908,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts#L18"
         },
         "initialIsOpen": false
       }
@@ -1924,7 +1924,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_constants.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/application/embeddable/dashboard_constants.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/application/embeddable/dashboard_constants.ts#L13"
         },
         "signature": [
           "\"dashboard\""
@@ -1940,7 +1940,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "lineNumber": 86,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L86"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L86"
         },
         "signature": [
           "UrlGeneratorContract<\"DASHBOARD_APP_URL_GENERATOR\">"
@@ -1956,7 +1956,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/url_generator.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/url_generator.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/url_generator.ts#L27"
         },
         "signature": [
           "\"DASHBOARD_APP_URL_GENERATOR\""
@@ -1974,7 +1974,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L33"
         },
         "signature": [
           "Pick<RawSavedDashboardPanel730ToLatest, \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id?: string | undefined; readonly type: string; }"
@@ -1997,7 +1997,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L12"
             }
           },
           {
@@ -2009,7 +2009,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L13"
             }
           },
           {
@@ -2021,7 +2021,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L14"
             }
           },
           {
@@ -2033,7 +2033,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L15"
             }
           },
           {
@@ -2045,7 +2045,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L16"
             }
           },
           {
@@ -2057,7 +2057,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L17"
             }
           },
           {
@@ -2069,7 +2069,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L18"
             }
           },
           {
@@ -2081,7 +2081,7 @@
             "source": {
               "path": "src/plugins/dashboard/public/dashboard_constants.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L19"
             }
           }
         ],
@@ -2090,7 +2090,7 @@
         "source": {
           "path": "src/plugins/dashboard/public/dashboard_constants.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/dashboard_constants.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/dashboard_constants.ts#L11"
         },
         "initialIsOpen": false
       }
@@ -2104,7 +2104,7 @@
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
         "lineNumber": 118,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L118"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L118"
       },
       "signature": [
         "void"
@@ -2128,7 +2128,7 @@
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
             "lineNumber": 121,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L121"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L121"
           },
           "signature": [
             "() => ",
@@ -2150,7 +2150,7 @@
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
             "lineNumber": 122,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L122"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L122"
           },
           "signature": [
             {
@@ -2172,7 +2172,7 @@
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
             "lineNumber": 123,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L123"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L123"
           },
           "signature": [
             {
@@ -2193,7 +2193,7 @@
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
             "lineNumber": 124,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L124"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L124"
           },
           "signature": [
             "React.FC<Props>"
@@ -2203,7 +2203,7 @@
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
         "lineNumber": 120,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L120"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/public/plugin.tsx#L120"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -2294,7 +2294,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
               "lineNumber": 262,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L262"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L262"
             }
           },
           {
@@ -2308,7 +2308,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
               "lineNumber": 274,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L274"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L274"
             }
           },
           {
@@ -2322,7 +2322,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
               "lineNumber": 275,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L275"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L275"
             }
           },
           {
@@ -2341,7 +2341,7 @@
                 "source": {
                   "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
                   "lineNumber": 276,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L276"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L276"
                 },
                 "signature": [
                   "any"
@@ -2351,7 +2351,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
               "lineNumber": 276,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L276"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L276"
             }
           }
         ],
@@ -2360,7 +2360,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
           "lineNumber": 261,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/migrate_to_730_panels.ts#L261"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/migrate_to_730_panels.ts#L261"
         },
         "initialIsOpen": false
       }
@@ -2382,7 +2382,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/embeddable/types.ts",
               "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L10"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L10"
             }
           },
           {
@@ -2394,7 +2394,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/embeddable/types.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L11"
             }
           },
           {
@@ -2406,7 +2406,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/embeddable/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L12"
             }
           },
           {
@@ -2418,7 +2418,7 @@
             "source": {
               "path": "src/plugins/dashboard/common/embeddable/types.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L13"
             }
           },
           {
@@ -2430,14 +2430,14 @@
             "source": {
               "path": "src/plugins/dashboard/common/embeddable/types.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L14"
             }
           }
         ],
         "source": {
           "path": "src/plugins/dashboard/common/embeddable/types.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/embeddable/types.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/embeddable/types.ts#L9"
         },
         "initialIsOpen": false
       }
@@ -2453,7 +2453,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/bwc/types.ts",
           "lineNumber": 70,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/bwc/types.ts#L70"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/bwc/types.ts#L70"
         },
         "signature": [
           "Pick<Pick<RawSavedDashboardPanel620, \"title\" | \"panelIndex\" | \"name\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; }"
@@ -2469,7 +2469,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/bwc/types.ts",
           "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/bwc/types.ts#L53"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/bwc/types.ts#L53"
         },
         "signature": [
           "Doc<DashboardAttributes>"
@@ -2485,7 +2485,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/bwc/types.ts",
           "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/bwc/types.ts#L55"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/bwc/types.ts#L55"
         },
         "signature": [
           "Doc<DashboardAttributesTo720>"
@@ -2501,7 +2501,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/bwc/types.ts",
           "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/bwc/types.ts#L57"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/bwc/types.ts#L57"
         },
         "signature": [
           "DocPre700<DashboardAttributesTo720>"
@@ -2517,7 +2517,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L67"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L67"
         },
         "signature": [
           "Pick<RawSavedDashboardPanelTo60, \"columns\" | \"title\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
@@ -2533,7 +2533,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 59,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L59"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L59"
         },
         "signature": [
           "Pick<RawSavedDashboardPanel610, \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
@@ -2549,7 +2549,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L51"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L51"
         },
         "signature": [
           "Pick<RawSavedDashboardPanel620, \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
@@ -2565,7 +2565,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L43"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L43"
         },
         "signature": [
           "Pick<RawSavedDashboardPanel620, \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
@@ -2581,7 +2581,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L35"
         },
         "signature": [
           "Pick<Pick<RawSavedDashboardPanel620, \"title\" | \"panelIndex\" | \"name\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
@@ -2597,7 +2597,7 @@
         "source": {
           "path": "src/plugins/dashboard/common/types.ts",
           "lineNumber": 76,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/common/types.ts#L76"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/dashboard/common/types.ts#L76"
         },
         "signature": [
           "Pick<RawSavedDashboardPanel730ToLatest, \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id?: string | undefined; readonly type: string; }"

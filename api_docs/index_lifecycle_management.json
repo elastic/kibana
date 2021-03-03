@@ -20,7 +20,7 @@
             "source": {
               "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_lifecycle_management/public/url_generator.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_lifecycle_management/public/url_generator.ts#L22"
             },
             "signature": [
               "\"policies_list\" | \"policy_edit\" | \"policy_create\""
@@ -35,7 +35,7 @@
             "source": {
               "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_lifecycle_management/public/url_generator.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_lifecycle_management/public/url_generator.ts#L23"
             },
             "signature": [
               "string | undefined"
@@ -50,7 +50,7 @@
             "source": {
               "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_lifecycle_management/public/url_generator.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_lifecycle_management/public/url_generator.ts#L24"
             },
             "signature": [
               "boolean | undefined"
@@ -60,7 +60,7 @@
         "source": {
           "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_lifecycle_management/public/url_generator.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_lifecycle_management/public/url_generator.ts#L21"
         },
         "initialIsOpen": false
       }
@@ -76,7 +76,7 @@
         "source": {
           "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/index_lifecycle_management/public/url_generator.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_lifecycle_management/public/url_generator.ts#L19"
         },
         "signature": [
           "\"ILM_URL_GENERATOR_ID\""

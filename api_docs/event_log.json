@@ -39,7 +39,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L53"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L53"
                 }
               }
             ],
@@ -48,7 +48,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/types.ts",
               "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L53"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L53"
             }
           },
           {
@@ -71,7 +71,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L54"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L54"
                 }
               }
             ],
@@ -80,7 +80,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/types.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L54"
             }
           },
           {
@@ -103,7 +103,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 55,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L55"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L55"
                 }
               }
             ],
@@ -112,14 +112,14 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/types.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L55"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/event_log/server/types.ts",
           "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L52"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L52"
         },
         "initialIsOpen": false
       },
@@ -166,7 +166,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L46"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L46"
                 }
               },
               {
@@ -180,7 +180,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L47"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L47"
                 }
               },
               {
@@ -202,7 +202,7 @@
                 "source": {
                   "path": "x-pack/plugins/event_log/server/types.ts",
                   "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L48"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L48"
                 }
               }
             ],
@@ -211,14 +211,14 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/types.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L45"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/event_log/server/types.ts",
           "lineNumber": 44,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L44"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L44"
         },
         "initialIsOpen": false
       },
@@ -238,7 +238,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L35"
             }
           },
           {
@@ -250,7 +250,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L36"
             }
           },
           {
@@ -262,7 +262,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L37"
             }
           },
           {
@@ -274,7 +274,7 @@
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L38"
             },
             "signature": [
               "(Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ server_uuid?: string | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ message?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; end?: string | undefined; action?: string | undefined; provider?: string | undefined; duration?: number | undefined; outcome?: string | undefined; reason?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
@@ -284,7 +284,7 @@
         "source": {
           "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/es/cluster_client_adapter.ts#L34"
         },
         "initialIsOpen": false
       }
@@ -300,7 +300,7 @@
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/generated/schemas.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/generated/schemas.ts#L26"
         },
         "signature": [
           "undefined | DeepPartial<DeepWriteable<Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ server_uuid?: string | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ message?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; end?: string | undefined; action?: string | undefined; provider?: string | undefined; duration?: number | undefined; outcome?: string | undefined; reason?: string | undefined; } & {}> | undefined; } & {}>>>"
@@ -316,7 +316,7 @@
         "source": {
           "path": "x-pack/plugins/event_log/generated/schemas.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/generated/schemas.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/generated/schemas.ts#L25"
         },
         "signature": [
           "undefined | Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ server_uuid?: string | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ message?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; end?: string | undefined; action?: string | undefined; provider?: string | undefined; duration?: number | undefined; outcome?: string | undefined; reason?: string | undefined; } & {}> | undefined; } & {}>"
@@ -332,7 +332,7 @@
         "source": {
           "path": "x-pack/plugins/event_log/server/types.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L18"
         },
         "signature": [
           "\"primary\""
@@ -362,7 +362,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 30,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L30"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L30"
           }
         },
         {
@@ -379,7 +379,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L31"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L31"
           }
         },
         {
@@ -396,7 +396,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 32,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L32"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L32"
           }
         },
         {
@@ -419,7 +419,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 33,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L33"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L33"
               }
             },
             {
@@ -433,7 +433,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 33,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L33"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L33"
               }
             }
           ],
@@ -442,7 +442,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L33"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L33"
           }
         },
         {
@@ -465,7 +465,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 34,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L34"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L34"
               }
             },
             {
@@ -479,7 +479,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 34,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L34"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L34"
               }
             }
           ],
@@ -488,7 +488,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 34,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L34"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L34"
           }
         },
         {
@@ -505,7 +505,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L35"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L35"
           }
         },
         {
@@ -536,7 +536,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 36,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L36"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L36"
               }
             },
             {
@@ -556,7 +556,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 36,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L36"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L36"
               }
             }
           ],
@@ -565,7 +565,7 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 36,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L36"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L36"
           }
         },
         {
@@ -595,7 +595,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 37,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L37"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L37"
               }
             }
           ],
@@ -604,14 +604,14 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 37,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L37"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L37"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/event_log/server/types.ts",
         "lineNumber": 29,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L29"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L29"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -665,7 +665,7 @@
               "source": {
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "lineNumber": 41,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L41"
+                "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L41"
               }
             }
           ],
@@ -674,14 +674,14 @@
           "source": {
             "path": "x-pack/plugins/event_log/server/types.ts",
             "lineNumber": 41,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L41"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L41"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/event_log/server/types.ts",
         "lineNumber": 40,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/server/types.ts#L40"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/server/types.ts#L40"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -702,7 +702,7 @@
         "source": {
           "path": "x-pack/plugins/event_log/common/index.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/event_log/common/index.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/event_log/common/index.ts#L8"
         },
         "signature": [
           "\"/api/event_log\""

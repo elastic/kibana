@@ -32,7 +32,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L75"
             }
           },
           {
@@ -44,7 +44,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L76"
             },
             "signature": [
               {
@@ -92,7 +92,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                   "lineNumber": 78,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               },
               {
@@ -112,7 +112,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                   "lineNumber": 78,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               }
             ],
@@ -121,7 +121,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
               "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
             }
           },
           {
@@ -139,7 +139,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                   "lineNumber": 90,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
                 }
               }
             ],
@@ -151,7 +151,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
               "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
             },
             "tags": [],
             "returnComment": []
@@ -170,14 +170,14 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
               "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L99"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L99"
             }
           }
         ],
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
           "lineNumber": 71,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L71"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L71"
         },
         "initialIsOpen": false
       }
@@ -200,7 +200,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/open_editor.tsx#L28"
             },
             "signature": [
               "{ indexPattern: ",
@@ -223,7 +223,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/open_editor.tsx#L31"
             },
             "signature": [
               "((field: ",
@@ -246,7 +246,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/open_editor.tsx#L32"
             },
             "signature": [
               "string | undefined"
@@ -256,7 +256,7 @@
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/open_editor.tsx#L27"
         },
         "initialIsOpen": false
       },
@@ -276,7 +276,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L28"
             },
             "signature": [
               {
@@ -299,7 +299,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L33"
             },
             "signature": [
               {
@@ -322,7 +322,7 @@
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L35"
             },
             "signature": [
               {
@@ -338,7 +338,7 @@
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L27"
         },
         "initialIsOpen": false
       }
@@ -387,7 +387,7 @@
               "source": {
                 "path": "src/plugins/index_pattern_field_editor/public/types.ts",
                 "lineNumber": 26,
-                "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L26"
+                "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L26"
               }
             }
           ],
@@ -396,7 +396,7 @@
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
             "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L26"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L26"
           }
         },
         {
@@ -408,7 +408,7 @@
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
             "lineNumber": 27,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L27"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L27"
           },
           "signature": [
             "{ getAll: () => typeof ",
@@ -439,7 +439,7 @@
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
             "lineNumber": 28,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L28"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L28"
           },
           "signature": [
             "{ editIndexPattern: () => boolean; }"
@@ -454,7 +454,7 @@
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
             "lineNumber": 31,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L31"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L31"
           },
           "signature": [
             "React.FunctionComponent<",
@@ -472,7 +472,7 @@
       "source": {
         "path": "src/plugins/index_pattern_field_editor/public/types.ts",
         "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L25"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_field_editor/public/types.ts#L25"
       },
       "lifecycle": "start",
       "initialIsOpen": true

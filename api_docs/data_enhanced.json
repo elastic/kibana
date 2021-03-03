@@ -15,7 +15,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L17"
         },
         "signature": [
           "\"ese\""
@@ -31,7 +31,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L19"
         },
         "signature": [
           "\"eql\""
@@ -49,7 +49,7 @@
       "source": {
         "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
         "lineNumber": 40,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/public/plugin.ts#L40"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/public/plugin.ts#L40"
       },
       "signature": [
         "void"
@@ -114,7 +114,7 @@
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L48"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L48"
                 }
               }
             ],
@@ -123,7 +123,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L48"
             }
           },
           {
@@ -177,7 +177,7 @@
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L53"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L53"
                 }
               },
               {
@@ -191,7 +191,7 @@
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 53,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L53"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L53"
                 }
               }
             ],
@@ -200,7 +200,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
               "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L53"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L53"
             }
           },
           {
@@ -245,7 +245,7 @@
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 95,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L95"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L95"
                 }
               },
               {
@@ -265,7 +265,7 @@
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 95,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L95"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L95"
                 }
               }
             ],
@@ -274,7 +274,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
               "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L95"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L95"
             }
           },
           {
@@ -291,14 +291,14 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L101"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
           "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/server/plugin.ts#L42"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/server/plugin.ts#L42"
         },
         "initialIsOpen": false
       }
@@ -316,7 +316,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L17"
         },
         "signature": [
           "\"ese\""
@@ -332,7 +332,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L19"
         },
         "signature": [
           "\"eql\""
@@ -360,7 +360,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/poll_search.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/poll_search.ts#L16"
             }
           },
           {
@@ -374,7 +374,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/poll_search.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/poll_search.ts#L17"
             }
           },
           {
@@ -394,7 +394,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/poll_search.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/poll_search.ts#L18"
             }
           }
         ],
@@ -424,7 +424,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/poll_search.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/poll_search.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/poll_search.ts#L15"
         },
         "tags": [],
         "returnComment": [],
@@ -474,7 +474,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L24"
             },
             "signature": [
               "TransportRequestOptions",
@@ -485,7 +485,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L23"
         },
         "initialIsOpen": false
       },
@@ -524,7 +524,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L33"
             },
             "signature": [
               "number | undefined"
@@ -534,7 +534,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L29"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L29"
         },
         "initialIsOpen": false
       },
@@ -554,7 +554,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L12"
             }
           },
           {
@@ -568,7 +568,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L16"
             },
             "signature": [
               "string | undefined"
@@ -585,7 +585,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L20"
             },
             "signature": [
               "string | undefined"
@@ -602,7 +602,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L24"
             }
           },
           {
@@ -616,7 +616,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L28"
             }
           },
           {
@@ -630,7 +630,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L32"
             }
           },
           {
@@ -644,7 +644,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L36"
             },
             "signature": [
               {
@@ -667,7 +667,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L40"
             },
             "signature": [
               "string | undefined"
@@ -684,7 +684,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L45"
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -701,7 +701,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L50"
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -718,7 +718,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L54"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L54"
             },
             "signature": [
               "Record<string, ",
@@ -743,7 +743,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L59"
             }
           },
           {
@@ -757,7 +757,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L63"
             },
             "signature": [
               "string | undefined"
@@ -772,7 +772,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L64"
             },
             "signature": [
               "string | undefined"
@@ -787,7 +787,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L65"
             },
             "signature": [
               "string | undefined"
@@ -797,7 +797,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -819,7 +819,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L72"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L72"
             }
           },
           {
@@ -833,7 +833,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L76"
             }
           },
           {
@@ -847,7 +847,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L80"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L80"
             }
           },
           {
@@ -861,7 +861,7 @@
             "source": {
               "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
               "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L84"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L84"
             },
             "signature": [
               "string | undefined"
@@ -871,7 +871,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
           "lineNumber": 68,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L68"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L68"
         },
         "initialIsOpen": false
       }
@@ -886,7 +886,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/session/status.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/status.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/status.ts#L8"
         },
         "initialIsOpen": false
       }
@@ -901,7 +901,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/session/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/session/types.ts#L10"
         },
         "signature": [
           "\"search-session\""
@@ -917,7 +917,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L17"
         },
         "signature": [
           "\"ese\""
@@ -933,7 +933,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L19"
         },
         "signature": [
           "\"eql\""
@@ -949,7 +949,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L21"
         },
         "signature": [
           "EqlSearch<Record<string, unknown>>"
@@ -965,7 +965,7 @@
         "source": {
           "path": "x-pack/plugins/data_enhanced/common/search/types.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/data_enhanced/common/search/types.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/data_enhanced/common/search/types.ts#L27"
         },
         "signature": [
           "IKibanaSearchResponse<ApiResponse<T, ",

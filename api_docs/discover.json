@@ -30,7 +30,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/saved_searches.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/saved_searches.ts#L18"
             }
           }
         ],
@@ -39,7 +39,7 @@
         "source": {
           "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/saved_searches.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/saved_searches.ts#L18"
         },
         "initialIsOpen": false
       }
@@ -61,7 +61,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L15"
             }
           },
           {
@@ -73,7 +73,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L16"
             }
           },
           {
@@ -85,7 +85,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L17"
             },
             "signature": [
               {
@@ -106,7 +106,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L18"
             },
             "signature": [
               "string | undefined"
@@ -121,7 +121,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L19"
             },
             "signature": [
               "string[]"
@@ -136,7 +136,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L20"
             },
             "signature": [
               {
@@ -158,7 +158,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L21"
             },
             "signature": [
               {
@@ -179,7 +179,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L22"
             },
             "signature": [
               "() => void"
@@ -194,7 +194,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L23"
             },
             "signature": [
               "(saveOptions: ",
@@ -217,7 +217,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L24"
             },
             "signature": [
               "string | undefined"
@@ -232,7 +232,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L25"
             },
             "signature": [
               "boolean | undefined"
@@ -247,7 +247,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L26"
             },
             "signature": [
               "boolean | undefined"
@@ -257,7 +257,7 @@
         "source": {
           "path": "src/plugins/discover/public/saved_searches/types.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -277,7 +277,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L29"
             },
             "signature": [
               "(id: string) => Promise<",
@@ -300,7 +300,7 @@
             "source": {
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L30"
             },
             "signature": [
               "(id: string) => string"
@@ -310,7 +310,7 @@
         "source": {
           "path": "src/plugins/discover/public/saved_searches/types.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/saved_searches/types.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/saved_searches/types.ts#L28"
         },
         "initialIsOpen": false
       },
@@ -370,14 +370,14 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L35"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L35"
             }
           }
         ],
         "source": {
           "path": "src/plugins/discover/public/application/embeddable/types.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L34"
         },
         "initialIsOpen": false
       },
@@ -414,7 +414,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L20"
             },
             "signature": [
               {
@@ -435,7 +435,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L21"
             },
             "signature": [
               {
@@ -457,7 +457,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L22"
             },
             "signature": [
               {
@@ -479,7 +479,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L23"
             },
             "signature": [
               "boolean | undefined"
@@ -494,7 +494,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L24"
             },
             "signature": [
               "string[] | undefined"
@@ -509,7 +509,7 @@
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L25"
             },
             "signature": [
               {
@@ -526,7 +526,7 @@
         "source": {
           "path": "src/plugins/discover/public/application/embeddable/types.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/types.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/types.ts#L19"
         },
         "initialIsOpen": false
       },
@@ -548,7 +548,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L26"
             },
             "signature": [
               "string | undefined"
@@ -565,7 +565,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L31"
             },
             "signature": [
               "string | undefined"
@@ -582,7 +582,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L36"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L36"
             },
             "signature": [
               {
@@ -606,7 +606,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L41"
             },
             "signature": [
               {
@@ -630,7 +630,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L46"
             },
             "signature": [
               {
@@ -654,7 +654,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L52"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L52"
             },
             "signature": [
               {
@@ -678,7 +678,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L58"
             },
             "signature": [
               "boolean | undefined"
@@ -695,7 +695,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L63"
             },
             "signature": [
               "string | undefined"
@@ -712,7 +712,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L68"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L68"
             },
             "signature": [
               "string[] | undefined"
@@ -729,7 +729,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L73"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L73"
             },
             "signature": [
               "string | undefined"
@@ -746,7 +746,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L77"
             },
             "signature": [
               "string[][] | undefined"
@@ -763,7 +763,7 @@
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
               "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L81"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L81"
             },
             "signature": [
               "string | undefined"
@@ -773,7 +773,7 @@
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L22"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L22"
         },
         "initialIsOpen": false
       }
@@ -789,7 +789,7 @@
         "source": {
           "path": "src/plugins/discover/public/application/embeddable/constants.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/application/embeddable/constants.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/application/embeddable/constants.ts#L9"
         },
         "signature": [
           "\"search\""
@@ -805,7 +805,7 @@
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/url_generator.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/url_generator.ts#L20"
         },
         "signature": [
           "\"DISCOVER_APP_URL_GENERATOR\""
@@ -832,7 +832,7 @@
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
             "lineNumber": 75,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/plugin.ts#L75"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/plugin.ts#L75"
           },
           "signature": [
             "{ addDocView(docViewRaw: ",
@@ -858,7 +858,7 @@
       "source": {
         "path": "src/plugins/discover/public/plugin.ts",
         "lineNumber": 74,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/plugin.ts#L74"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/plugin.ts#L74"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -879,7 +879,7 @@
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
             "lineNumber": 86,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/plugin.ts#L86"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/plugin.ts#L86"
           },
           "signature": [
             {
@@ -902,7 +902,7 @@
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
             "lineNumber": 104,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/plugin.ts#L104"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/plugin.ts#L104"
           },
           "signature": [
             {
@@ -919,7 +919,7 @@
       "source": {
         "path": "src/plugins/discover/public/plugin.ts",
         "lineNumber": 85,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/public/plugin.ts#L85"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/public/plugin.ts#L85"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -948,7 +948,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L9"
         },
         "signature": [
           "\"defaultColumns\""
@@ -964,7 +964,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L10"
         },
         "signature": [
           "\"discover:sampleSize\""
@@ -980,7 +980,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L11"
         },
         "signature": [
           "\"discover:aggs:terms:size\""
@@ -996,7 +996,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L12"
         },
         "signature": [
           "\"discover:sort:defaultOrder\""
@@ -1012,7 +1012,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L13"
         },
         "signature": [
           "\"discover:searchOnPageLoad\""
@@ -1028,7 +1028,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L14"
         },
         "signature": [
           "\"doc_table:hideTimeColumn\""
@@ -1044,7 +1044,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L15"
         },
         "signature": [
           "\"fields:popularLimit\""
@@ -1060,7 +1060,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L16"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L16"
         },
         "signature": [
           "\"context:defaultSize\""
@@ -1076,7 +1076,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L17"
         },
         "signature": [
           "\"context:step\""
@@ -1092,7 +1092,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L18"
         },
         "signature": [
           "\"context:tieBreakerFields\""
@@ -1108,7 +1108,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L19"
         },
         "signature": [
           "\"doc_table:legacy\""
@@ -1124,7 +1124,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L20"
         },
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
@@ -1140,7 +1140,7 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/discover/common/index.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/discover/common/index.ts#L21"
         },
         "signature": [
           "\"discover:searchFieldsFromSource\""

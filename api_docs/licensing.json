@@ -22,7 +22,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L27"
             }
           },
           {
@@ -34,14 +34,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L28"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -67,7 +67,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L40"
             }
           },
           {
@@ -81,7 +81,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L45"
             },
             "signature": [
               {
@@ -104,7 +104,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L50"
             }
           },
           {
@@ -118,7 +118,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L55"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -137,7 +137,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L60"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -147,7 +147,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L36"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -171,7 +171,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L75"
             },
             "signature": [
               {
@@ -193,7 +193,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L76"
             },
             "signature": [
               "Record<string, ",
@@ -216,14 +216,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L77"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L74"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L74"
         },
         "initialIsOpen": false
       },
@@ -247,7 +247,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L89"
             },
             "signature": [
               {
@@ -270,7 +270,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L93"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L93"
             },
             "signature": [
               "string | undefined"
@@ -280,7 +280,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 85,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L85"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L85"
         },
         "initialIsOpen": false
       },
@@ -304,7 +304,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L101"
             },
             "signature": [
               "string | undefined"
@@ -321,7 +321,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L106"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L106"
             },
             "signature": [
               "\"active\" | \"invalid\" | \"expired\" | undefined"
@@ -338,7 +338,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L111"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L111"
             }
           },
           {
@@ -352,7 +352,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 116,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L116"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L116"
             },
             "signature": [
               "number | undefined"
@@ -369,7 +369,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L121"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L121"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -388,7 +388,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 127,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L127"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L127"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -405,7 +405,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L132"
             }
           },
           {
@@ -419,7 +419,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 137,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L137"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L137"
             }
           },
           {
@@ -433,7 +433,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L142"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L142"
             },
             "signature": [
               "() => ",
@@ -457,7 +457,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L147"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L147"
             },
             "signature": [
               "string | undefined"
@@ -474,7 +474,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 152,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L152"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L152"
             },
             "signature": [
               "() => string | undefined"
@@ -504,7 +504,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 158,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L158"
                 }
               }
             ],
@@ -513,7 +513,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L158"
             }
           },
           {
@@ -547,7 +547,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 165,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
                 }
               },
               {
@@ -563,7 +563,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 165,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
                 }
               }
             ],
@@ -572,7 +572,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 165,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
             }
           },
           {
@@ -606,7 +606,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 171,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L171"
                 }
               }
             ],
@@ -615,14 +615,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 171,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L171"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 97,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L97"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L97"
         },
         "initialIsOpen": false
       }
@@ -637,7 +637,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L10"
         },
         "initialIsOpen": false
       }
@@ -652,7 +652,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L8"
         },
         "signature": [
           "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
@@ -670,7 +670,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L20"
         },
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -688,7 +688,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L23"
         },
         "signature": [
           "\"active\" | \"invalid\" | \"expired\""
@@ -708,7 +708,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L67"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L67"
         },
         "signature": [
           "{ [x: string]: LicenseFeature; }"
@@ -739,7 +739,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 19,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L19"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L19"
           },
           "signature": [
             "Observable",
@@ -780,7 +780,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 24,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L24"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L24"
           }
         },
         {
@@ -794,7 +794,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 28,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L28"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L28"
           },
           "signature": [
             {
@@ -810,7 +810,7 @@
       "source": {
         "path": "x-pack/plugins/licensing/public/types.ts",
         "lineNumber": 14,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L14"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L14"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -835,7 +835,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 36,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L36"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L36"
           },
           "signature": [
             "Observable",
@@ -874,7 +874,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 40,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L40"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L40"
           }
         },
         {
@@ -888,7 +888,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
             "lineNumber": 44,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L44"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L44"
           },
           "signature": [
             {
@@ -904,7 +904,7 @@
       "source": {
         "path": "x-pack/plugins/licensing/public/types.ts",
         "lineNumber": 32,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L32"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/public/types.ts#L32"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -966,7 +966,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L18"
             }
           },
           {
@@ -1012,7 +1012,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L19"
             }
           }
         ],
@@ -1021,7 +1021,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -1058,7 +1058,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                   "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
                 }
               },
               {
@@ -1072,7 +1072,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                   "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
                 }
               }
             ],
@@ -1081,14 +1081,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -1125,7 +1125,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                   "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
                 }
               },
               {
@@ -1141,7 +1141,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                   "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
                 }
               }
             ],
@@ -1150,7 +1150,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
             }
           },
           {
@@ -1177,14 +1177,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L38"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/services/feature_usage_service.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1206,7 +1206,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L27"
             }
           },
           {
@@ -1218,14 +1218,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L28"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1251,7 +1251,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L40"
             }
           },
           {
@@ -1265,7 +1265,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L45"
             },
             "signature": [
               {
@@ -1288,7 +1288,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L50"
             }
           },
           {
@@ -1302,7 +1302,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L55"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -1321,7 +1321,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L60"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -1331,7 +1331,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L36"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -1355,7 +1355,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L75"
             },
             "signature": [
               {
@@ -1377,7 +1377,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L76"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L76"
             },
             "signature": [
               "Record<string, ",
@@ -1400,14 +1400,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L77"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L74"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L74"
         },
         "initialIsOpen": false
       },
@@ -1431,7 +1431,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L89"
             },
             "signature": [
               {
@@ -1454,7 +1454,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L93"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L93"
             },
             "signature": [
               "string | undefined"
@@ -1464,7 +1464,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 85,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L85"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L85"
         },
         "initialIsOpen": false
       },
@@ -1488,7 +1488,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L101"
             },
             "signature": [
               "string | undefined"
@@ -1505,7 +1505,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L106"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L106"
             },
             "signature": [
               "\"active\" | \"invalid\" | \"expired\" | undefined"
@@ -1522,7 +1522,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L111"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L111"
             }
           },
           {
@@ -1536,7 +1536,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 116,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L116"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L116"
             },
             "signature": [
               "number | undefined"
@@ -1553,7 +1553,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L121"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L121"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -1572,7 +1572,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 127,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L127"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L127"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -1589,7 +1589,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L132"
             }
           },
           {
@@ -1603,7 +1603,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 137,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L137"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L137"
             }
           },
           {
@@ -1617,7 +1617,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L142"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L142"
             },
             "signature": [
               "() => ",
@@ -1641,7 +1641,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L147"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L147"
             },
             "signature": [
               "string | undefined"
@@ -1658,7 +1658,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 152,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L152"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L152"
             },
             "signature": [
               "() => string | undefined"
@@ -1688,7 +1688,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 158,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L158"
                 }
               }
             ],
@@ -1697,7 +1697,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L158"
             }
           },
           {
@@ -1731,7 +1731,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 165,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
                 }
               },
               {
@@ -1747,7 +1747,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 165,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
                 }
               }
             ],
@@ -1756,7 +1756,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 165,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L165"
             }
           },
           {
@@ -1790,7 +1790,7 @@
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
                   "lineNumber": 171,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
+                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L171"
                 }
               }
             ],
@@ -1799,14 +1799,14 @@
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
               "lineNumber": 171,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L171"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 97,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L97"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L97"
         },
         "initialIsOpen": false
       },
@@ -1836,7 +1836,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L14"
             },
             "signature": [
               "number | undefined"
@@ -1846,7 +1846,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/server/types.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -1870,7 +1870,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
               "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L50"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L50"
             },
             "signature": [
               {
@@ -1891,7 +1891,7 @@
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L51"
             },
             "signature": [
               {
@@ -1907,7 +1907,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/server/types.ts",
           "lineNumber": 49,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L49"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L49"
         },
         "initialIsOpen": false
       }
@@ -1922,7 +1922,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L10"
         },
         "initialIsOpen": false
       }
@@ -1937,7 +1937,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L13"
         },
         "signature": [
           "(license: ",
@@ -1955,7 +1955,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L8"
         },
         "signature": [
           "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
@@ -1973,7 +1973,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L20"
         },
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -1991,7 +1991,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L23"
         },
         "signature": [
           "\"active\" | \"invalid\" | \"expired\""
@@ -2011,7 +2011,7 @@
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
           "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L67"
+          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/common/types.ts#L67"
         },
         "signature": [
           "{ [x: string]: LicenseFeature; }"
@@ -2042,7 +2042,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 72,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L72"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L72"
           },
           "signature": [
             "Observable",
@@ -2083,7 +2083,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 77,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L77"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L77"
           }
         },
         {
@@ -2099,7 +2099,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 84,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L84"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L84"
           },
           "signature": [
             "(clusterClient: Pick<",
@@ -2142,7 +2142,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 91,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L91"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L91"
           },
           "signature": [
             {
@@ -2158,7 +2158,7 @@
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
         "lineNumber": 67,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L67"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L67"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -2183,7 +2183,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 99,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L99"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L99"
           },
           "signature": [
             "Observable",
@@ -2222,7 +2222,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 103,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L103"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L103"
           }
         },
         {
@@ -2236,7 +2236,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 109,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L109"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L109"
           },
           "signature": [
             "(clusterClient: Pick<",
@@ -2279,7 +2279,7 @@
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
             "lineNumber": 116,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L116"
+            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L116"
           },
           "signature": [
             {
@@ -2295,7 +2295,7 @@
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
         "lineNumber": 95,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L95"
+        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/licensing/server/types.ts#L95"
       },
       "lifecycle": "start",
       "initialIsOpen": true

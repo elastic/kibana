@@ -23,7 +23,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
             }
           },
           {
@@ -37,7 +37,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
             }
           }
         ],
@@ -46,7 +46,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
           "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
         },
         "initialIsOpen": false
       },
@@ -72,7 +72,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/colors/color_palette.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/colors/color_palette.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/color_palette.ts#L41"
             }
           }
         ],
@@ -81,7 +81,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/colors/color_palette.ts",
           "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/colors/color_palette.ts#L41"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/color_palette.ts#L41"
         },
         "initialIsOpen": false
       },
@@ -94,7 +94,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/legend_toggle.tsx",
           "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/legend_toggle.tsx#L51"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/legend_toggle.tsx#L51"
         },
         "signature": [
           "React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: LegendToggleProps) => JSX.Element>"
@@ -116,7 +116,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
               "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L83"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/color_picker.tsx#L83"
             }
           }
         ],
@@ -128,7 +128,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
           "lineNumber": 83,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L83"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/color_picker.tsx#L83"
         },
         "tags": [],
         "returnComment": [],
@@ -149,7 +149,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/current_time.tsx",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/current_time.tsx#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/current_time.tsx#L24"
             }
           }
         ],
@@ -163,7 +163,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/current_time.tsx",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/current_time.tsx#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/current_time.tsx#L24"
         },
         "tags": [],
         "returnComment": [],
@@ -184,7 +184,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L37"
             }
           }
         ],
@@ -196,7 +196,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/endzones.tsx",
           "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L37"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L37"
         },
         "tags": [],
         "returnComment": [],
@@ -217,7 +217,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 121,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L121"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L121"
             }
           },
           {
@@ -231,7 +231,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 122,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L122"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L122"
             }
           },
           {
@@ -245,7 +245,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 123,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L123"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L123"
             }
           },
           {
@@ -259,7 +259,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 124,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L124"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L124"
             }
           }
         ],
@@ -273,7 +273,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/endzones.tsx",
           "lineNumber": 120,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L120"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L120"
         },
         "tags": [],
         "returnComment": [],
@@ -294,7 +294,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 160,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L160"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L160"
             }
           },
           {
@@ -308,7 +308,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 161,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L161"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L161"
             }
           },
           {
@@ -322,7 +322,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 162,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L162"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L162"
             }
           },
           {
@@ -336,7 +336,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 163,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L163"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L163"
             }
           },
           {
@@ -350,7 +350,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/endzones.tsx",
               "lineNumber": 164,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L164"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L164"
             }
           }
         ],
@@ -364,7 +364,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/endzones.tsx",
           "lineNumber": 159,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/endzones.tsx#L159"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L159"
         },
         "tags": [],
         "returnComment": [],
@@ -391,7 +391,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 172,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L172"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L172"
             }
           },
           {
@@ -406,7 +406,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 173,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L173"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L173"
             }
           },
           {
@@ -422,7 +422,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L174"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L174"
             }
           },
           {
@@ -438,7 +438,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 175,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L175"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L175"
             }
           },
           {
@@ -452,7 +452,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 176,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L176"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L176"
             }
           }
         ],
@@ -481,7 +481,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
           "lineNumber": 171,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L171"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L171"
         },
         "tags": [],
         "returnComment": [],
@@ -508,7 +508,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 220,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L220"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L220"
             }
           }
         ],
@@ -543,7 +543,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
           "lineNumber": 220,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L220"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L220"
         },
         "tags": [],
         "returnComment": [],
@@ -570,7 +570,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 255,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L255"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L255"
             }
           },
           {
@@ -585,7 +585,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 256,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L256"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L256"
             }
           }
         ],
@@ -618,7 +618,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
           "lineNumber": 254,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L254"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L254"
         },
         "tags": [],
         "returnComment": [],
@@ -652,7 +652,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L29"
             },
             "signature": [
               "\"palette\""
@@ -667,7 +667,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L30"
             }
           },
           {
@@ -679,7 +679,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L31"
             },
             "signature": [
               "T | undefined"
@@ -689,7 +689,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L28"
         },
         "initialIsOpen": false
       },
@@ -709,7 +709,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L14"
             },
             "signature": [
               "string[] | undefined"
@@ -724,7 +724,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L15"
             }
           },
           {
@@ -736,7 +736,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L16"
             },
             "signature": [
               "boolean | undefined"
@@ -746,7 +746,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -766,7 +766,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L20"
             },
             "signature": [
               "string[]"
@@ -781,14 +781,14 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L21"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L19"
         },
         "initialIsOpen": false
       },
@@ -808,14 +808,14 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L25"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L24"
         },
         "initialIsOpen": false
       },
@@ -835,7 +835,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L21"
             },
             "signature": [
               {
@@ -856,14 +856,14 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L22"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L20"
         },
         "initialIsOpen": false
       },
@@ -883,7 +883,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L26"
             },
             "signature": [
               {
@@ -904,7 +904,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L27"
             }
           },
           {
@@ -916,7 +916,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L28"
             },
             "signature": [
               "[number, number[]][]"
@@ -926,7 +926,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L25"
         },
         "initialIsOpen": false
       },
@@ -946,7 +946,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L32"
             },
             "signature": [
               "any"
@@ -956,7 +956,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L31"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L31"
         },
         "initialIsOpen": false
       },
@@ -976,7 +976,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L13"
             },
             "signature": [
               {
@@ -997,14 +997,14 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L14"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/types.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -1024,7 +1024,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L18"
             },
             "signature": [
               "string | undefined"
@@ -1039,7 +1039,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L19"
             },
             "signature": [
               "boolean | undefined"
@@ -1054,7 +1054,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L20"
             },
             "signature": [
               "boolean | undefined"
@@ -1069,7 +1069,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L21"
             },
             "signature": [
               "number | undefined"
@@ -1084,7 +1084,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L22"
             },
             "signature": [
               "boolean | undefined"
@@ -1099,7 +1099,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L23"
             },
             "signature": [
               "number | null | undefined"
@@ -1109,7 +1109,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/types.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -1129,7 +1129,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L27"
             }
           },
           {
@@ -1141,7 +1141,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L28"
             }
           },
           {
@@ -1153,7 +1153,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L29"
             }
           },
           {
@@ -1165,7 +1165,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L30"
             }
           },
           {
@@ -1177,14 +1177,14 @@
             "source": {
               "path": "src/plugins/charts/public/static/components/types.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L31"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/public/static/components/types.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/types.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1204,7 +1204,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L22"
             },
             "signature": [
               "\"filterBucket\""
@@ -1219,7 +1219,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L23"
             },
             "signature": [
               "{ data: { table: Pick<",
@@ -1237,7 +1237,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L21"
         },
         "initialIsOpen": false
       },
@@ -1257,7 +1257,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L27"
             },
             "signature": [
               "\"brush\""
@@ -1272,7 +1272,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L28"
             },
             "signature": [
               "{ table: ",
@@ -1290,7 +1290,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/utils/transform_click_event.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1314,7 +1314,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L19"
             }
           },
           {
@@ -1328,7 +1328,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L23"
             }
           },
           {
@@ -1342,14 +1342,14 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L27"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/public/services/palettes/types.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -1373,7 +1373,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L37"
             },
             "signature": [
               "number | undefined"
@@ -1390,7 +1390,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L41"
             },
             "signature": [
               "number | undefined"
@@ -1407,7 +1407,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L46"
             },
             "signature": [
               "boolean | undefined"
@@ -1424,7 +1424,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L51"
             },
             "signature": [
               "boolean | undefined"
@@ -1434,7 +1434,7 @@
         "source": {
           "path": "src/plugins/charts/public/services/palettes/types.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L33"
         },
         "initialIsOpen": false
       },
@@ -1468,7 +1468,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L67"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L67"
             }
           },
           {
@@ -1482,7 +1482,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L71"
             }
           },
           {
@@ -1496,7 +1496,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L75"
             },
             "signature": [
               "boolean | undefined"
@@ -1513,7 +1513,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L81"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L81"
             },
             "signature": [
               "(state?: T | undefined) => ",
@@ -1531,7 +1531,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L88"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L88"
             },
             "signature": [
               "((domElement: Element, props: { state?: T | undefined; setState: (updater: (oldState: T) => T) => void; }) => void) | undefined"
@@ -1548,7 +1548,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L97"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L97"
             },
             "signature": [
               "(series: ",
@@ -1581,7 +1581,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L106"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L106"
             },
             "signature": [
               "(size: number, state?: T | undefined) => string[]"
@@ -1591,7 +1591,7 @@
         "source": {
           "path": "src/plugins/charts/public/services/palettes/types.ts",
           "lineNumber": 63,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L63"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L63"
         },
         "initialIsOpen": false
       },
@@ -1611,7 +1611,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L110"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L110"
             },
             "signature": [
               "(name: string) => ",
@@ -1634,7 +1634,7 @@
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",
               "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L111"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L111"
             },
             "signature": [
               "() => ",
@@ -1652,7 +1652,7 @@
         "source": {
           "path": "src/plugins/charts/public/services/palettes/types.ts",
           "lineNumber": 109,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/services/palettes/types.ts#L109"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L109"
         },
         "initialIsOpen": false
       }
@@ -1667,7 +1667,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L11"
         },
         "initialIsOpen": false
       }
@@ -1682,7 +1682,7 @@
         "source": {
           "path": "src/plugins/charts/common/constants.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/constants.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/constants.ts#L10"
         },
         "signature": [
           "string[]"
@@ -1698,7 +1698,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 3160,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L3160"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L3160"
         },
         "signature": [
           {
@@ -1721,7 +1721,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L26"
         },
         "signature": [
           {
@@ -1746,7 +1746,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/colors/seed_colors.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/colors/seed_colors.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/seed_colors.ts#L14"
         },
         "signature": [
           "string[]"
@@ -1762,7 +1762,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/collections.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L17"
         },
         "signature": [
           "\"Background\" | \"Labels\" | \"None\""
@@ -1778,7 +1778,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/collections.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L24"
         },
         "signature": [
           "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; } number"
@@ -1794,7 +1794,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/collections.ts#L26"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L26"
         },
         "initialIsOpen": false
       }
@@ -1819,7 +1819,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 38,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L38"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L38"
                 },
                 "signature": [
                   {
@@ -1841,7 +1841,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L39"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L39"
                 }
               },
               {
@@ -1853,7 +1853,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L42"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L42"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1867,7 +1867,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L37"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L37"
             }
           },
           {
@@ -1884,7 +1884,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 558,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L558"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L558"
                 },
                 "signature": [
                   {
@@ -1906,7 +1906,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 559,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L559"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L559"
                 }
               },
               {
@@ -1918,7 +1918,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 562,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L562"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L562"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1930,7 +1930,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 557,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L557"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L557"
             }
           },
           {
@@ -1947,7 +1947,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1078,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1078"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1078"
                 },
                 "signature": [
                   {
@@ -1969,7 +1969,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1079,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1079"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1079"
                 }
               },
               {
@@ -1981,7 +1981,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1082,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1082"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1082"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1993,7 +1993,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 1077,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1077"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1077"
             }
           },
           {
@@ -2010,7 +2010,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1598,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1598"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1598"
                 },
                 "signature": [
                   {
@@ -2032,7 +2032,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1599,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1599"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1599"
                 }
               },
               {
@@ -2044,7 +2044,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 1602,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1602"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1602"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -2056,7 +2056,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 1597,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L1597"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1597"
             }
           },
           {
@@ -2073,7 +2073,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2118,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2118"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2118"
                 },
                 "signature": [
                   {
@@ -2095,7 +2095,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2119,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2119"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2119"
                 }
               },
               {
@@ -2107,7 +2107,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2122,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2122"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2122"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -2119,7 +2119,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 2117,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2117"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2117"
             }
           },
           {
@@ -2136,7 +2136,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2639,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2639"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2639"
                 },
                 "signature": [
                   {
@@ -2158,7 +2158,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2640,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2640"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2640"
                 }
               },
               {
@@ -2170,7 +2170,7 @@
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
                   "lineNumber": 2643,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2643"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2643"
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -2182,7 +2182,7 @@
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
               "lineNumber": 2638,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L2638"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2638"
             }
           }
         ],
@@ -2191,7 +2191,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
           "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/color_maps.ts#L35"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L35"
         },
         "initialIsOpen": false
       },
@@ -2205,7 +2205,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -2218,7 +2218,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/collections.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L12"
         },
         "signature": [
           "Readonly<{ Background: \"Background\"; Labels: \"Labels\"; None: \"None\"; }>"
@@ -2234,7 +2234,7 @@
         "source": {
           "path": "src/plugins/charts/public/static/components/collections.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/collections.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L19"
         },
         "signature": [
           "Readonly<{ Horizontal: number; Vertical: number; Angled: number; }>"
@@ -2253,7 +2253,7 @@
       "source": {
         "path": "src/plugins/charts/public/plugin.ts",
         "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/plugin.ts#L31"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/plugin.ts#L31"
       },
       "signature": [
         "ChartsPluginSetup"
@@ -2326,7 +2326,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L53"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L53"
         },
         "initialIsOpen": false
       },
@@ -2383,7 +2383,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 119,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L119"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L119"
         },
         "initialIsOpen": false
       }
@@ -2405,7 +2405,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L14"
             },
             "signature": [
               "string[] | undefined"
@@ -2420,7 +2420,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L15"
             }
           },
           {
@@ -2432,7 +2432,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L16"
             },
             "signature": [
               "boolean | undefined"
@@ -2442,7 +2442,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -2462,7 +2462,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L20"
             },
             "signature": [
               "string[]"
@@ -2477,14 +2477,14 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L21"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L19"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L19"
         },
         "initialIsOpen": false
       },
@@ -2504,14 +2504,14 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L25"
             }
           }
         ],
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L24"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L24"
         },
         "initialIsOpen": false
       },
@@ -2541,7 +2541,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L29"
             },
             "signature": [
               "\"palette\""
@@ -2556,7 +2556,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L30"
             }
           },
           {
@@ -2568,7 +2568,7 @@
             "source": {
               "path": "src/plugins/charts/common/palette.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L31"
             },
             "signature": [
               "T | undefined"
@@ -2578,7 +2578,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L28"
         },
         "initialIsOpen": false
       }
@@ -2594,7 +2594,7 @@
         "source": {
           "path": "src/plugins/charts/common/index.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/index.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/index.ts#L9"
         },
         "signature": [
           "\"visualization:colorMapping\""
@@ -2610,7 +2610,7 @@
         "source": {
           "path": "src/plugins/charts/common/palette.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/palette.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L33"
         },
         "signature": [
           "string[]"
@@ -2626,7 +2626,7 @@
         "source": {
           "path": "src/plugins/charts/common/constants.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/common/constants.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/constants.ts#L10"
         },
         "signature": [
           "string[]"

@@ -26,7 +26,7 @@
             "source": {
               "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
             }
           }
         ],
@@ -42,7 +42,7 @@
         "source": {
           "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
         },
         "tags": [
           "Link",
@@ -63,7 +63,7 @@
         "source": {
           "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masternode_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/master/node_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10"
         },
         "signature": [
           "METRIC_TYPE"
@@ -89,7 +89,7 @@
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
             "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/plugin.tsx#L35"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L35"
           },
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
@@ -104,7 +104,7 @@
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
             "lineNumber": 38,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/plugin.tsx#L38"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L38"
           },
           "signature": [
             "(appName: string, type: ",
@@ -116,7 +116,7 @@
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
         "lineNumber": 34,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/plugin.tsx#L34"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L34"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -137,7 +137,7 @@
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
             "lineNumber": 42,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/plugin.tsx#L42"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L42"
           },
           "signature": [
             "(appName: string, type: ",
@@ -149,7 +149,7 @@
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
         "lineNumber": 41,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/public/plugin.tsx#L41"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L41"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -183,7 +183,7 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L145"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L145"
             },
             "signature": [
               {
@@ -205,7 +205,7 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L146"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L146"
             }
           },
           {
@@ -217,7 +217,7 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L147"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L147"
             },
             "signature": [
               "Function | undefined"
@@ -232,7 +232,7 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 148,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L148"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L148"
             },
             "signature": [
               {
@@ -254,7 +254,7 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 149,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L149"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L149"
             },
             "signature": [
               "() => boolean | Promise<boolean>"
@@ -280,7 +280,7 @@
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
                   "lineNumber": 156,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L156"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L156"
                 }
               },
               {
@@ -301,7 +301,7 @@
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
                   "lineNumber": 157,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L157"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L157"
                 }
               }
             ],
@@ -314,14 +314,14 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L155"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L155"
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 144,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L144"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L144"
         },
         "initialIsOpen": false
       }
@@ -344,14 +344,14 @@
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L34"
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L33"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L33"
         },
         "initialIsOpen": false
       }
@@ -367,7 +367,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L28"
         },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"integer\" | \"byte\" | \"float\""
@@ -383,7 +383,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L51"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L51"
         },
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
@@ -399,7 +399,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 112,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L112"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L112"
         },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
@@ -415,7 +415,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/usage_collector.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/usage_collector.ts#L13"
         },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
@@ -449,7 +449,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
           "lineNumber": 65,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/collector/collector.ts#L65"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L65"
         },
         "signature": [
           "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract | ISavedObjectsRepository; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
@@ -465,7 +465,7 @@
         "source": {
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/usage_collection/server/plugin.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/plugin.ts#L21"
         },
         "signature": [
           "{ makeStatsCollector: <TFetchReturn, WithKibanaRequest, ExtraOptions>(options: ",

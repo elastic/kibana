@@ -70,7 +70,7 @@
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
                   "lineNumber": 21,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L21"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L21"
                 }
               }
             ],
@@ -79,7 +79,7 @@
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L21"
             }
           },
           {
@@ -124,7 +124,7 @@
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
                   "lineNumber": 23,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L23"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L23"
                 }
               }
             ],
@@ -133,7 +133,7 @@
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L23"
             }
           },
           {
@@ -185,7 +185,7 @@
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
                   "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L32"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L32"
                 }
               },
               {
@@ -205,7 +205,7 @@
                 "source": {
                   "path": "src/plugins/navigation/public/plugin.ts",
                   "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L33"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L33"
                 }
               }
             ],
@@ -214,7 +214,7 @@
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L31"
             }
           },
           {
@@ -231,14 +231,14 @@
             "source": {
               "path": "src/plugins/navigation/public/plugin.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L44"
             }
           }
         ],
         "source": {
           "path": "src/plugins/navigation/public/plugin.ts",
           "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/plugin.ts#L17"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/plugin.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -278,7 +278,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
             }
           }
         ],
@@ -287,7 +287,7 @@
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
           "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L64"
         },
         "initialIsOpen": false
       }
@@ -309,7 +309,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L14"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L14"
             },
             "signature": [
               "string | undefined"
@@ -324,7 +324,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L15"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L15"
             }
           },
           {
@@ -336,7 +336,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L16"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L16"
             },
             "signature": [
               {
@@ -357,7 +357,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L17"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L17"
             },
             "signature": [
               "string | undefined"
@@ -372,7 +372,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L18"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L18"
             },
             "signature": [
               "string | undefined"
@@ -387,7 +387,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L19"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L19"
             },
             "signature": [
               "string | undefined"
@@ -402,7 +402,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L20"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L20"
             },
             "signature": [
               "boolean | (() => boolean) | undefined"
@@ -417,7 +417,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L21"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L21"
             },
             "signature": [
               "string | (() => string | undefined) | undefined"
@@ -432,7 +432,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L22"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L22"
             },
             "signature": [
               "boolean | undefined"
@@ -447,7 +447,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L23"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L23"
             },
             "signature": [
               "boolean | undefined"
@@ -462,7 +462,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L24"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L24"
             },
             "signature": [
               "string | undefined"
@@ -477,7 +477,7 @@
             "source": {
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L25"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L25"
             },
             "signature": [
               "\"left\" | \"right\" | undefined"
@@ -487,7 +487,7 @@
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L13"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx#L13"
         },
         "initialIsOpen": false
       }
@@ -503,7 +503,7 @@
         "source": {
           "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L23"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx#L23"
         },
         "signature": [
           "SearchBarOwnProps",
@@ -536,7 +536,7 @@
           "source": {
             "path": "src/plugins/navigation/public/types.ts",
             "lineNumber": 13,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L13"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/types.ts#L13"
           },
           "signature": [
             "(menuItem: ",
@@ -554,7 +554,7 @@
       "source": {
         "path": "src/plugins/navigation/public/types.ts",
         "lineNumber": 12,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L12"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/types.ts#L12"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -575,7 +575,7 @@
           "source": {
             "path": "src/plugins/navigation/public/types.ts",
             "lineNumber": 17,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L17"
+            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/types.ts#L17"
           },
           "signature": [
             "{ TopNavMenu: React.ComponentType<",
@@ -593,7 +593,7 @@
       "source": {
         "path": "src/plugins/navigation/public/types.ts",
         "lineNumber": 16,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/navigation/public/types.ts#L16"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/navigation/public/types.ts#L16"
       },
       "lifecycle": "start",
       "initialIsOpen": true

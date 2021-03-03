@@ -18,7 +18,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L38"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L38"
             },
             "signature": [
               "\"default\""
@@ -33,7 +33,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L40"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L40"
             },
             "signature": [
               "string | undefined"
@@ -48,7 +48,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L41"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L41"
             }
           },
           {
@@ -60,7 +60,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L42"
             }
           },
           {
@@ -72,7 +72,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L43"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L43"
             },
             "signature": [
               "object | null"
@@ -87,7 +87,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L44"
             }
           },
           {
@@ -115,7 +115,7 @@
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 53,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L53"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L53"
                     },
                     "signature": [
                       "string | undefined"
@@ -130,7 +130,7 @@
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 54,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L54"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L54"
                     },
                     "signature": [
                       "string | undefined"
@@ -145,7 +145,7 @@
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 55,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L55"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L55"
                     },
                     "signature": [
                       "boolean | undefined"
@@ -160,7 +160,7 @@
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 56,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L56"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L56"
                     },
                     "signature": [
                       "object | null | undefined"
@@ -175,7 +175,7 @@
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 57,
-                      "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L57"
+                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L57"
                     },
                     "signature": [
                       "boolean | undefined"
@@ -185,7 +185,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                   "lineNumber": 52,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L52"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L52"
                 }
               }
             ],
@@ -194,7 +194,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L46"
             }
           },
           {
@@ -238,7 +238,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                   "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L66"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L66"
                 }
               }
             ],
@@ -247,7 +247,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L66"
             }
           },
           {
@@ -264,7 +264,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L77"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L77"
             }
           },
           {
@@ -281,7 +281,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L81"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L81"
             }
           },
           {
@@ -298,7 +298,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 85,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L85"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L85"
             }
           },
           {
@@ -315,7 +315,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L89"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L89"
             }
           },
           {
@@ -338,7 +338,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                   "lineNumber": 93,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L93"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L93"
                 }
               }
             ],
@@ -347,7 +347,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L93"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L93"
             }
           },
           {
@@ -385,7 +385,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                   "lineNumber": 97,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L97"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L97"
                 }
               }
             ],
@@ -394,7 +394,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L97"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L97"
             }
           },
           {
@@ -411,7 +411,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L101"
             }
           },
           {
@@ -428,7 +428,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L105"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L105"
             }
           },
           {
@@ -445,14 +445,14 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L109"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L109"
             }
           }
         ],
         "source": {
           "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
           "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L37"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L37"
         },
         "initialIsOpen": false
       },
@@ -472,7 +472,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L26"
             },
             "signature": [
               "\"default\""
@@ -553,7 +553,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 29,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L29"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L29"
                 }
               },
               {
@@ -567,7 +567,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L30"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L30"
                 }
               }
             ],
@@ -576,7 +576,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
               "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L28"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L28"
             }
           },
           {
@@ -621,7 +621,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L42"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L42"
                 }
               },
               {
@@ -641,7 +641,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L42"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L42"
                 }
               }
             ],
@@ -650,7 +650,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
               "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L42"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L42"
             }
           },
           {
@@ -687,7 +687,7 @@
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L46"
+                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L46"
                 }
               }
             ],
@@ -696,14 +696,14 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L46"
             }
           }
         ],
         "source": {
           "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/list/config.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/list/config.ts#L25"
         },
         "initialIsOpen": false
       }
@@ -726,7 +726,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L30"
             }
           },
           {
@@ -738,7 +738,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L31"
             }
           },
           {
@@ -750,7 +750,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L32"
             }
           },
           {
@@ -762,7 +762,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L33"
             },
             "signature": [
               "() => void"
@@ -777,7 +777,7 @@
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L34"
             },
             "signature": [
               "boolean | undefined"
@@ -787,7 +787,7 @@
         "source": {
           "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
           "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/service/creation/config.ts#L29"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/service/creation/config.ts#L29"
         },
         "initialIsOpen": false
       }
@@ -802,7 +802,7 @@
         "source": {
           "path": "src/plugins/index_pattern_management/public/types.ts",
           "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/types.ts#L42"
+          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/types.ts#L42"
         },
         "initialIsOpen": false
       }
@@ -818,7 +818,7 @@
       "source": {
         "path": "src/plugins/index_pattern_management/public/plugin.ts",
         "lineNumber": 32,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/plugin.ts#L32"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/plugin.ts#L32"
       },
       "signature": [
         "{ creation: { addCreationConfig: (Config: typeof ",
@@ -853,7 +853,7 @@
       "source": {
         "path": "src/plugins/index_pattern_management/public/plugin.ts",
         "lineNumber": 34,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_management/public/plugin.ts#L34"
+        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/index_pattern_management/public/plugin.ts#L34"
       },
       "signature": [
         "{ creation: { getType: (key: string | undefined) => ",
