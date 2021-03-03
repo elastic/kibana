@@ -64,8 +64,8 @@ function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
         key: tileKey,
       },
     },
-    coord: {
-      key: tileKey,
+    source: {
+      type: 'vector',
     },
   };
 }

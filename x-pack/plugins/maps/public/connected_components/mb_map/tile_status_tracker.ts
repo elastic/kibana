@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Map as MapboxMap, MapDataEvent } from 'mapbox-gl';
+import { Map as MapboxMap, MapSourceDataEvent } from 'mapbox-gl';
 import _ from 'lodash';
 import { ILayer } from '../../classes/layers/layer';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 
 interface MbTile {
   // references internal object from mapbox
-  aborted?: true;
+  aborted?: boolean;
 }
 
 interface Tile {
@@ -26,22 +26,24 @@ export class TileStatusTracker {
   private readonly _mbMap: MapboxMap;
   private readonly _setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
-  private readonly _onSourceDataLoading = (e: MapDataEvent & { sourceId: string }) => {
+  private readonly _onSourceDataLoading = (e: MapSourceDataEvent) => {
     if (
       e.sourceId &&
       e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
       e.dataType === 'source' &&
-      e.tile
+      e.tile &&
+      (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
       const tracked = this._tileCache.find((tile) => {
         return (
-          tile.mbKey === ((e.coord.key as unknown) as string) && tile.mbSourceId === e.sourceId
+          tile.mbKey === ((e.tile.tileID.key as unknown) as string) &&
+          tile.mbSourceId === e.sourceId
         );
       });
 
       if (!tracked) {
         this._tileCache.push({
-          mbKey: (e.coord.key as unknown) as string,
+          mbKey: (e.tile.tileID.key as unknown) as string,
           mbSourceId: e.sourceId,
           mbTile: e.tile,
         });
@@ -50,19 +52,25 @@ export class TileStatusTracker {
     }
   };
 
-  private readonly _onError = (e: MapDataEvent & { sourceId: string; tile: MbTile }) => {
-    if (e.sourceId && e.sourceId !== SPATIAL_FILTERS_LAYER_ID && e.tile) {
-      this._removeTileFromCache(e.sourceId, e.tile.tileID.key);
+  private readonly _onError = (e: MapSourceDataEvent) => {
+    if (
+      e.sourceId &&
+      e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
+      e.tile &&
+      (e.source.type === 'vector' || e.source.type === 'raster')
+    ) {
+      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
     }
   };
-  private readonly _onSourceData = (e: MapDataEvent & { sourceId: string }) => {
+  private readonly _onSourceData = (e: MapSourceDataEvent) => {
     if (
       e.sourceId &&
       e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
       e.dataType === 'source' &&
-      e.tile
+      e.tile &&
+      (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-      this._removeTileFromCache(e.sourceId, (e.coord.key as unknown) as string);
+      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
     }
   };
 

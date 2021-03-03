@@ -208,9 +208,7 @@ export class MBMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => {
-          this.props.setAreTilesLoaded(layerId, areTilesLoaded);
-        },
+        setAreTilesLoaded: this.props.setAreTilesLoaded,
       });
 
       const tooManyFeaturesImageSrc =
