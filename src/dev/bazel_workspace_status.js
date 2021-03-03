@@ -43,25 +43,23 @@
 
   // Commit SHA
   const commitSHACmdResult = await runCmd('git', ['rev-parse', 'HEAD']);
-  if (commitSHACmdResult.exitCode !== 0) {
-    process.exit(1);
-  }
-  console.log(`COMMIT_SHA ${commitSHACmdResult.stdout}`);
+  if (commitSHACmdResult.exitCode === 0) {
+    console.log(`COMMIT_SHA ${commitSHACmdResult.stdout}`);
 
-  // Git branch
-  const gitBranchCmdResult = await runCmd('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
-  if (gitBranchCmdResult.exitCode !== 0) {
-    process.exit(1);
-  }
-  console.log(`GIT_BRANCH ${gitBranchCmdResult.stdout}`);
+    // Branch
+    const gitBranchCmdResult = await runCmd('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+    if (gitBranchCmdResult.exitCode === 0) {
+      console.log(`GIT_BRANCH ${gitBranchCmdResult.stdout}`);
+    }
 
-  // Tree status
-  const treeStatusCmdResult = await runCmd('git', ['diff-index', '--quiet', 'HEAD', '--']);
-  const treeStatusVarStr = 'GIT_TREE_STATUS';
-  if (treeStatusCmdResult.exitCode === 0) {
-    console.log(`${treeStatusVarStr} Clean`);
-  } else {
-    console.log(`${treeStatusVarStr} Modified`);
+    // Tree status
+    const treeStatusCmdResult = await runCmd('git', ['diff-index', '--quiet', 'HEAD', '--']);
+    const treeStatusVarStr = 'GIT_TREE_STATUS';
+    if (treeStatusCmdResult.exitCode === 0) {
+      console.log(`${treeStatusVarStr} Clean`);
+    } else {
+      console.log(`${treeStatusVarStr} Modified`);
+    }
   }
 
   // Host
@@ -72,9 +70,8 @@
       return !cpu.model.includes('Intel') || index % 2 === 1;
     }).length;
 
-    if (hostCmdResult.exitCode !== 0) {
-      process.exit(1);
+    if (hostCmdResult.exitCode === 0) {
+      console.log(`HOST ${hostStr}-${coresStr}`);
     }
-    console.log(`HOST ${hostStr}-${coresStr}`);
   }
 })();
