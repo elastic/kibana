@@ -8,6 +8,7 @@
 import { RouteDependencies } from '../types';
 
 import { registerIndexRoutes } from './api/index';
+import { registerIndicesRoutes } from './api/indices';
 import { registerNodesRoutes } from './api/nodes';
 import { registerPoliciesRoutes } from './api/policies';
 import { registerTemplatesRoutes } from './api/templates';
@@ -16,6 +17,7 @@ import { registerSnapshotRepositoriesRoutes } from './api/snapshot_repositories'
 
 export function registerApiRoutes(dependencies: RouteDependencies) {
   registerIndexRoutes(dependencies);
+  registerIndicesRoutes(dependencies);
   registerNodesRoutes(dependencies);
   registerPoliciesRoutes(dependencies);
   registerTemplatesRoutes(dependencies);
