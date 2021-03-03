@@ -8,7 +8,7 @@
 *Discover* is your window into your data in {es}. *Discover* enables you to 
 quickly search and filter your data, get information about structure of the fields, 
 and navigate to *Visualize* and *Maps* to present your data.
-You can customize and save your searches and place them on a dashboard.
+You can also customize and save your searches and place them on a dashboard.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
@@ -24,9 +24,9 @@ data-type="inline"
 ++++
 
 [float]
-=== Getting started
+=== Select, explore, and present your data
 
-You’ve added your data, and now you’re ready to dig in. You have questions about your data.
+You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
 What processes take longer than 500 milliseconds to respond?
