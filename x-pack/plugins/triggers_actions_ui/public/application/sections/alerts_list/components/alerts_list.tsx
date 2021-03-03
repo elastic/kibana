@@ -46,7 +46,7 @@ import {
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import {
@@ -316,7 +316,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiLink
             title={name}
             onClick={() => {
-              history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+              history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
             }}
           >
             {name}
