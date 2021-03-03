@@ -32,7 +32,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  test('saved rule with existing ruleId', async () => {
+  test('updates ruleId after the rule has been saved', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnCreateRule>(() =>
         useCreateRule()
