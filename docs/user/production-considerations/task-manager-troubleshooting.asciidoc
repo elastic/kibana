@@ -69,8 +69,8 @@ By analyzing the different sections of the output, you can evaluate different th
 * <<task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
 ** <<task-manager-theory-actual-polling-frequently,{kib} is not actually polling as frequently as it should>>
 ** <<task-manager-theory-insufficient-throughput,{kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload>>
-** <<task-manager-theory-long-running-tasks,tasks aren't "running late" so much as "running for too long">>
-** <<task-manager-theory-high-fail-rate,tasks aren't "running late" so much as "take multiple attempts to succeed">>
+** <<task-manager-theory-long-running-tasks,Tasks run for too long, overrunning their schedule>>
+** <<task-manager-theory-high-fail-rate,Tasks take multiple attempts to succeed>>
 * <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
 
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
@@ -465,7 +465,7 @@ For details on achieving higher throughput by adjusting your scaling strategy, s
 
 [[task-manager-theory-long-running-tasks]]
 *Theory*:
-Perhaps tasks aren't "running late" so much as "running for too long"?
+Tasks run for too long, overrunning their schedule
 
 *Diagnosis*:
 
@@ -533,7 +533,7 @@ In the hypothetical example above, most likely, this would be resolved by modify
 
 [[task-manager-theory-high-fail-rate]]
 *Theory*:
-Perhaps tasks aren't "running late" so much as "take multiple attempts to succeed"?
+Tasks take multiple attempts to succeed
 
 *Diagnosis*:
 
