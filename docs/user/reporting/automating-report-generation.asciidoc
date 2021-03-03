@@ -51,7 +51,7 @@ include::script-example.asciidoc[]
 include::response-codes.asciidoc[]
 
 [float]
-== Deprecated report URLs
+=== Deprecated report URLs
 
 The following POST URL paths are deprecated. If there are
 any problems with using these paths after you upgrade {kib}, use
