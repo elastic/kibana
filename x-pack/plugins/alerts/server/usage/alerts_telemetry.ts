@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, LegacyAPICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertsUsage } from './types';
 
 const alertTypeMetric = {

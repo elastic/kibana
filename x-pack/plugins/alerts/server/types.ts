@@ -14,8 +14,6 @@ import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
   ElasticsearchClient,
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
