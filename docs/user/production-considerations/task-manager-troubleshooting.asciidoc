@@ -12,7 +12,7 @@ Unexpected behavior in these services might be a downstream issue originating in
 This page describes how to resolve common problems you might encounter with Task Manager.
 If your problem isn’t described here, please review open issues in the following GitHub repositories:
 
-* https://github.com/elastic/kibana/issues[kibana] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3ATask+Manager%22[Task Manager issues])
+* https://github.com/elastic/kibana/issues[{kib}] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3ATask+Manager%22[Task Manager issues])
 
 Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
