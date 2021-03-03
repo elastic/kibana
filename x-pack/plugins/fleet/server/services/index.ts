@@ -82,3 +82,6 @@ export { settingsService };
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+
+// Artifacts services
+export * from './artifacts';

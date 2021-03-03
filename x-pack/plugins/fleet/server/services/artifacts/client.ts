@@ -15,10 +15,12 @@ import {
   ArtifactEncodedMetadata,
   ArtifactsInterface,
 } from './types';
-import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
+import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { esSearchHitToArtifact, relativeDownloadUrlFromArtifact } from './mappings';
 import { ArtifactAccessDeniedError } from './errors';
+import { ListWithKuery } from '../../types';
+import { esKuery } from '../../../../../../src/plugins/data/server';
 
 const deflateAsync = promisify(deflate);
 
@@ -83,6 +85,39 @@ export class FleetArtifactsClient implements ArtifactsInterface {
         id,
       });
     }
+  }
+
+  async listArtifacts(options: ListWithKuery): Promise<ListResult<Artifact>> {
+    const {
+      perPage = 20,
+      page = 1,
+      kuery = '',
+      sortField = 'created',
+      sortOrder = 'asc',
+    } = options;
+
+    const filters = kuery ? [esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kuery))] : [];
+
+    const searchResult = this.esClient.search({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      body: {
+        query: {
+          bool: {
+            must: {
+              match: {
+                packageName: this.packageName,
+              },
+              filters,
+            },
+          },
+        },
+        sort: [{ [sortField]: sortOrder }],
+      },
+      from: (page - 1) * perPage,
+      size: perPage,
+    });
+
+    return searchResult;
   }
 
   generateHash(content: string): string {

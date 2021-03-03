@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ListResult } from '../../../common';
+import { ListWithKuery } from '../../types';
+
 export interface Artifact {
   id: string;
   compressionAlgorithm: 'none' | 'zlib';
@@ -50,6 +53,7 @@ export interface ArtifactsInterface {
   getArtifact(id: string): Promise<Artifact | undefined>;
   createArtifact(options: ArtifactCreateOptions): Promise<Artifact>;
   deleteArtifact(id: string): Promise<void>;
+  listArtifacts(options?: ListWithKuery): Promise<ListResult<Artifact>>;
   encodeContent(content: ArtifactCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
   generateHash(content: string): string;
 }
