@@ -26,6 +26,28 @@ export const migrations = {
         {}
       ),
     }),
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce((acc, key) => {
+        if (key === 'timepicker:quickRanges' && doc.attributes[key].indexOf('section') > -1) {
+          const ranges = JSON.parse(doc.attributes[key]).map(({ from, to, display }) => {
+            return {
+              from,
+              to,
+              display,
+            };
+          });
+          return {
+            ...acc,
+            'timepicker:quickRanges': JSON.stringify(ranges, null, 2),
+          };
+        } else {
+          return {
+            ...acc,
+            [key]: doc.attributes[key],
+          };
+        }
+      }, {}),
+    }),
     references: doc.references || [],
   }),
   '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
