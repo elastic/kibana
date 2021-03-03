@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticationProvider, User } from '.';
+import type { AuthenticationProvider } from './authentication_provider';
+import type { User } from './user';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 

@@ -9,7 +9,7 @@
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { TypeLiteralNode } from 'ts-morph';
 import { getApiSectionId } from '../utils';
-import { getCommentsFromNode } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { getSourceForNode } from './utils';
@@ -37,6 +37,7 @@ export function buildTypeLiteralDec(
     id: getApiSectionId(anchorLink),
     type: TypeKind.ObjectKind,
     label: name,
+    tags: getJSDocTagNames(node),
     description: getCommentsFromNode(node),
     children: node
       .getMembers()

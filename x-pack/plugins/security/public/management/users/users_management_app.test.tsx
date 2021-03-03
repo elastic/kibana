@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+
 import { securityMock } from '../../mocks';
 import { usersManagementApp } from './users_management_app';
 

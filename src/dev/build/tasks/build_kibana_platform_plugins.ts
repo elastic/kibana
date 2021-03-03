@@ -27,6 +27,7 @@ export const BuildKibanaPlatformPlugins: Task = {
       watch: false,
       dist: true,
       includeCoreBundle: true,
+      limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
     });
 
     await lastValueFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
