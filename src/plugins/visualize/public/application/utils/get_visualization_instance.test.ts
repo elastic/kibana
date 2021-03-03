@@ -117,6 +117,7 @@ describe('getVisualizationInstance', () => {
     expect(mockServices.data.search.showError).toHaveBeenCalled();
   });
 });
+
 describe('getVisualizationInstanceInput', () => {
   const serializedVisMock = {
     type: 'pie',
@@ -135,11 +136,7 @@ describe('getVisualizationInstanceInput', () => {
     };
     savedVisMock = {};
     // @ts-expect-error
-    mockServices.data.search.showError.mockImplementation(() => {});
-    // @ts-expect-error
     mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
-    // @ts-expect-error
-    mockServices.visualizations.convertToSerializedVis.mockImplementation(() => serializedVisMock);
     // @ts-expect-error
     mockServices.visualizations.createVis.mockImplementation(() => visMock);
     // @ts-expect-error
