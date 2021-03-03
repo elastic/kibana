@@ -1652,19 +1652,19 @@
     ],
     "enums": [
       {
-        "id": "def-public.AppLeaveActionType",
+        "id": "def-public.AppNavLinkStatus",
         "type": "Enum",
-        "label": "AppLeaveActionType",
+        "label": "AppNavLinkStatus",
         "tags": [
           "public"
         ],
         "description": [
-          "\nPossible type of actions on application leave.\n"
+          "\nStatus of the application's navLink.\n"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 540,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/application/types.ts#L540"
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/application/types.ts#L40"
         },
         "initialIsOpen": false
       },
@@ -1686,19 +1686,19 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-public.AppNavLinkStatus",
+        "id": "def-public.AppLeaveActionType",
         "type": "Enum",
-        "label": "AppNavLinkStatus",
+        "label": "AppLeaveActionType",
         "tags": [
           "public"
         ],
         "description": [
-          "\nStatus of the application's navLink.\n"
+          "\nPossible type of actions on application leave.\n"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/application/types.ts#L40"
+          "lineNumber": 540,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/application/types.ts#L540"
         },
         "initialIsOpen": false
       }
