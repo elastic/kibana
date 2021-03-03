@@ -12,6 +12,7 @@ import {
   SerializedPolicy,
   ListNodesRouteResponse,
   ListSnapshotReposResponse,
+  CheckIndexPatternResponse,
 } from '../../../common/types';
 
 import {
@@ -84,6 +85,12 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_DETACH_INDEX);
   return response;
+};
+
+export const checkIndexPatternResults = async ({ indexPattern }: { indexPattern: string }) => {
+  return await sendGet<CheckIndexPatternResponse>(
+    `index_pattern_validity/${encodeURIComponent(indexPattern)}`
+  );
 };
 
 export const addLifecyclePolicyToIndex = async (body: {

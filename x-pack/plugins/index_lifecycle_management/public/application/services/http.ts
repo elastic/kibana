@@ -41,8 +41,8 @@ export function sendPost(path: string, payload: GenericObject, query?: GenericOb
   return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload), query });
 }
 
-export function sendGet(path: string, query?: GenericObject): any {
-  return _httpClient.get(getFullPath(path), { query });
+export function sendGet<ResponseBody = any>(path: string, query?: GenericObject) {
+  return _httpClient.get<ResponseBody>(getFullPath(path), { query });
 }
 
 export function sendDelete(path: string) {

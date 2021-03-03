@@ -25,12 +25,6 @@ import { RollupAction } from '../../../../../../common/types';
 import { serializeRollup, deserializeRollup } from './serialize_and_deserialize_rollup';
 import { InternalRollup } from './types';
 
-// const createBreadcrumb = {
-//   text: i18n.translate('xpack.indexLifecycleMgmt.rollup.createBreadcrumbTitle', {
-//     defaultMessage: 'Create',
-//   }),
-// };
-
 // @ts-ignore
 import { Navigation } from './navigation';
 
@@ -40,6 +34,7 @@ import {
   StepTerms,
   StepHistogram,
   StepMetrics,
+  StepReview,
   // @ts-ignore
 } from './steps';
 
@@ -49,9 +44,9 @@ import {
   STEP_TERMS,
   STEP_HISTOGRAM,
   STEP_METRICS,
+  STEP_REVIEW,
   stepIds,
   stepIdToStepConfigMap,
-  getAffectedStepsFields,
   hasErrors,
   // @ts-ignore
 } from './steps_config';
@@ -83,6 +78,20 @@ const stepIdToTitleMap = {
   [STEP_METRICS]: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.steps.stepMetricsTitle', {
     defaultMessage: 'Metrics',
   }),
+  [STEP_REVIEW]: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.steps.stepReviewTitle', {
+    defaultMessage: 'Review and save',
+  }),
+};
+
+const i18nTexts = {
+  title: {
+    hot: i18n.translate('xpack.indexLifecycleMgmt.rollup.hot.phaseTitle', {
+      defaultMessage: 'hot',
+    }),
+    cold: i18n.translate('xpack.indexLifecycleMgmt.rollup.cold.phaseTitle', {
+      defaultMessage: 'cold',
+    }),
+  },
 };
 
 interface Props {
@@ -90,11 +99,12 @@ interface Props {
    * The rollup action to configure, otherwise default to empty rollup action.
    */
   value?: RollupAction;
+  phase: 'hot' | 'cold';
   onCancel: () => void;
   onDone: (value: RollupAction) => void;
 }
 
-interface StepFields {
+export interface StepFields {
   STEP_LOGISTICS: { rollupIndexIlmPolicy?: string };
   STEP_DATE_HISTOGRAM: {
     dateHistogramInterval: string;
@@ -104,6 +114,7 @@ interface StepFields {
   STEP_TERMS: { terms: Array<{ name: string }> };
   STEP_HISTOGRAM: { histogram: Array<{ name: string }>; histogramInterval: string };
   STEP_METRICS: { metrics: Array<{ name: string; types: string[] }> };
+  STEP_REVIEW: {};
 }
 
 interface State {
@@ -111,6 +122,11 @@ interface State {
   currentStepId: keyof StepFields;
   nextStepId: keyof StepFields;
   previousStepId?: keyof StepFields;
+  /**
+   * This index pattern is stored in the wizard and used to enable users to more easily add fields
+   * to terms, histogram and metrics. It is not stored in the rollup configuration.
+   */
+  indexPattern: string;
   stepsFieldErrors: Record<string, Record<string, string | undefined>>;
   areStepErrorsVisible: boolean;
   stepsFields: StepFields;
@@ -131,6 +147,7 @@ export class RollupWizard extends Component<Props, State> {
       cloneDeep(step.getDefaultFields(deserializedRollup))
     );
     this.state = {
+      indexPattern: '',
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
@@ -169,6 +186,10 @@ export class RollupWizard extends Component<Props, State> {
           : `createRollupStep${index + 1}`,
     }));
   }
+
+  updateIndexPattern = (value: string) => {
+    this.setState({ indexPattern: value });
+  };
 
   goToNextStep = () => {
     this.goToStep(this.state.nextStepId);
@@ -236,15 +257,13 @@ export class RollupWizard extends Component<Props, State> {
     const { stepsFields } = this.state;
     const prevFields = stepsFields[currentStepId];
 
-    const affectedStepsFields = getAffectedStepsFields(fields, stepsFields);
-
     const newFields = {
       ...prevFields,
       ...fields,
     };
 
     const newStepsFields = {
-      ...affectedStepsFields,
+      ...stepsFields,
       [currentStepId]: newFields,
     };
 
@@ -262,6 +281,7 @@ export class RollupWizard extends Component<Props, State> {
         STEP_TERMS: { terms },
         STEP_HISTOGRAM: { histogram, histogramInterval },
         STEP_METRICS: { metrics },
+        STEP_REVIEW: {},
       },
     } = this.state;
 
@@ -286,6 +306,7 @@ export class RollupWizard extends Component<Props, State> {
   };
 
   render() {
+    const { phase } = this.props;
     return (
       <EuiPage>
         <EuiPageContent>
@@ -294,7 +315,10 @@ export class RollupWizard extends Component<Props, State> {
               <h1>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.createTitle"
-                  defaultMessage="Configure rollup action"
+                  defaultMessage="Configure {phase} phase rollup action"
+                  values={{
+                    phase: i18nTexts[phase],
+                  }}
                 />
               </h1>
             </EuiTitle>
@@ -315,7 +339,14 @@ export class RollupWizard extends Component<Props, State> {
   }
 
   renderCurrentStep() {
-    const { currentStepId, stepsFields, stepsFieldErrors, areStepErrorsVisible } = this.state;
+    const { phase } = this.props;
+    const {
+      currentStepId,
+      stepsFields,
+      stepsFieldErrors,
+      areStepErrorsVisible,
+      indexPattern,
+    } = this.state;
 
     const currentStepFields = stepsFields[currentStepId];
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
@@ -336,6 +367,8 @@ export class RollupWizard extends Component<Props, State> {
         return (
           <StepDateHistogram
             fields={currentStepFields}
+            indexPattern={indexPattern}
+            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
@@ -344,12 +377,21 @@ export class RollupWizard extends Component<Props, State> {
         );
 
       case STEP_TERMS:
-        return <StepTerms fields={currentStepFields} onFieldsChange={this.onFieldsChange} />;
+        return (
+          <StepTerms
+            indexPattern={indexPattern}
+            onIndexPatternChange={this.updateIndexPattern}
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
+          />
+        );
 
       case STEP_HISTOGRAM:
         return (
           <StepHistogram
             fields={currentStepFields}
+            indexPattern={indexPattern}
+            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
@@ -361,12 +403,15 @@ export class RollupWizard extends Component<Props, State> {
         return (
           <StepMetrics
             fields={currentStepFields}
+            indexPattern={indexPattern}
+            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}
           />
         );
-
+      case STEP_REVIEW:
+        return <StepReview phase={phase} rollupAction={this.getAllFields()} />;
       default:
         return null;
     }

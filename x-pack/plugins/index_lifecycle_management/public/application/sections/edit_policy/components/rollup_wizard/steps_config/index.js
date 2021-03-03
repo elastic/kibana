@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
 
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
@@ -17,6 +17,7 @@ export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
 export const STEP_TERMS = 'STEP_TERMS';
 export const STEP_HISTOGRAM = 'STEP_HISTOGRAM';
 export const STEP_METRICS = 'STEP_METRICS';
+export const STEP_REVIEW = 'STEP_REVIEW';
 
 export const stepIds = [
   STEP_DATE_HISTOGRAM,
@@ -24,6 +25,7 @@ export const stepIds = [
   STEP_HISTOGRAM,
   STEP_METRICS,
   STEP_LOGISTICS,
+  STEP_REVIEW,
 ];
 
 /**
@@ -110,23 +112,11 @@ export const stepIdToStepConfigMap = {
       };
     },
   },
+  [STEP_REVIEW]: {
+    getDefaultFields: () => ({}),
+    FieldValueSelectionFilter: () => {},
+  },
 };
-
-export function getAffectedStepsFields(fields, stepsFields) {
-  const { indexPattern } = fields;
-
-  const affectedStepsFields = cloneDeep(stepsFields);
-
-  // A new index pattern means we have to clear all of the fields which depend upon it.
-  if (indexPattern) {
-    affectedStepsFields[STEP_DATE_HISTOGRAM].dateHistogramField = undefined;
-    affectedStepsFields[STEP_TERMS].terms = [];
-    affectedStepsFields[STEP_HISTOGRAM].histogram = [];
-    affectedStepsFields[STEP_METRICS].metrics = [];
-  }
-
-  return affectedStepsFields;
-}
 
 export function hasErrors(fieldErrors) {
   const errorValues = Object.values(fieldErrors);

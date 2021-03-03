@@ -346,6 +346,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       {currentView.id === 'rollupAction' && (
         <RollupWizard
           value={getCurrentRollupForm()[currentView.phase].action}
+          phase={currentView.phase}
           onDone={(rollupAction) => {
             setCurrentRollupForm((currentRollup) => ({
               ...currentRollup,
