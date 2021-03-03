@@ -22,10 +22,7 @@ export function handleResponseBody(
 ) {
   return async (resp: any) => {
     if (resp.error) {
-      const err = new Error(resp.error.type);
-      // @ts-expect-error
-      err.response = JSON.stringify(resp);
-      throw err;
+      throw JSON.stringify(resp);
     }
     const aggregations = get(resp, 'aggregations');
     if (!aggregations) {

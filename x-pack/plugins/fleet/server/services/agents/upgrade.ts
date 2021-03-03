@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentAction, AgentActionSOAttributes } from '../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { agentPolicyService } from '../../services';
 import { IngestManagerError } from '../../errors';

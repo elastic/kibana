@@ -6,15 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 import url from 'url';
-import {
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  SettingsSOAttributes,
-  Settings,
-  decodeCloudId,
-  BaseSettings,
-} from '../../common';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, decodeCloudId } from '../../common';
+import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
 import { appContextService } from './app_context';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {

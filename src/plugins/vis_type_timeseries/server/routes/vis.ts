@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData } from '../lib/get_vis_data';
@@ -19,7 +18,7 @@ import type { VisPayload } from '../../common/types';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
-  router.post(
+  router.post<{}, {}, VisPayload>(
     {
       path: ROUTES.VIS_DATA,
       validate: {
@@ -43,11 +42,7 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
         );
       }
 
-      const results = await getVisData(
-        requestContext,
-        request as KibanaRequest<{}, {}, VisPayload>,
-        framework
-      );
+      const results = await getVisData(requestContext, request, framework);
       return response.ok({ body: results });
     }
   );

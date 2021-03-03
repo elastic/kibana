@@ -7,14 +7,13 @@
  */
 
 import { uniqBy } from 'lodash';
-import { KibanaRequest } from 'kibana/server';
 
 import { Framework } from '../plugin';
-import { VisTypeTimeseriesRequestHandlerContext } from '../types';
+import { VisTypeTimeseriesFieldsRequest, VisTypeTimeseriesRequestHandlerContext } from '../types';
 
 export async function getFields(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
-  request: KibanaRequest,
+  request: VisTypeTimeseriesFieldsRequest,
   framework: Framework,
   indexPatternString: string
 ) {

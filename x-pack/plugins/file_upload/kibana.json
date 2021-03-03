@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "usageCollection"]
+  "requiredPlugins": ["data", "usageCollection"],
+  "requiredBundles": ["kibanaReact"]
 }

@@ -15,8 +15,14 @@ import {
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
 import { VisTypeTimeseriesRequest, VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-const getTimezoneFromRequest = (request: VisTypeTimeseriesVisDataRequest) => {
-  return request.body.timerange.timezone;
+const isVisDataRequest = (
+  request: VisTypeTimeseriesRequest
+): request is VisTypeTimeseriesVisDataRequest => {
+  return !!(request as VisTypeTimeseriesVisDataRequest).body;
+};
+
+const getTimezoneFromRequest = (request: VisTypeTimeseriesRequest) => {
+  if (isVisDataRequest(request)) return request.body.timerange.timezone;
 };
 
 export class DefaultSearchCapabilities {
@@ -50,7 +56,7 @@ export class DefaultSearchCapabilities {
   }
 
   public get searchTimezone() {
-    return getTimezoneFromRequest(this.request as VisTypeTimeseriesVisDataRequest);
+    return getTimezoneFromRequest(this.request);
   }
 
   createUiRestriction(restrictionsObject?: Record<string, any>) {
