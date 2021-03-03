@@ -74,6 +74,12 @@ export const FlyoutHome = (props: Props) => {
     }
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
+  const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
+  const manageJobsLinkProps = useLinkProps({
+    app: 'ml',
+    pathname: '/jobs',
+  });
+
   if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashContent />;
   } else if (!hasInfraMLReadCapabilities) {
@@ -111,16 +117,32 @@ export const FlyoutHome = (props: Props) => {
           </EuiTab>
         </EuiTabs>
 
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          banner={
+            tab === 'jobs' &&
+            hasJobs && (
+              <JobsEnabledCallout
+                hasHostJobs={hostJobSummaries.length > 0}
+                hasK8sJobs={k8sJobSummaries.length > 0}
+                jobIds={jobIds}
+              />
+            )
+          }
+        >
           {tab === 'jobs' && (
             <>
-              {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
+              {hasJobs && (
                 <>
-                  <JobsEnabledCallout
-                    hasHostJobs={hostJobSummaries.length > 0}
-                    hasK8sJobs={k8sJobSummaries.length > 0}
-                    jobIds={jobIds}
-                  />
+                  <EuiFlexGroup gutterSize={'s'}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
+                        <FormattedMessage
+                          defaultMessage="Manage jobs in ML"
+                          id="xpack.infra.ml.anomalyFlyout.manageJobs"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   <EuiSpacer size="l" />
                 </>
               )}
@@ -175,11 +197,6 @@ const JobsEnabledCallout = (props: CalloutProps) => {
     });
   }
 
-  const manageJobsLinkProps = useLinkProps({
-    app: 'ml',
-    pathname: '/jobs',
-  });
-
   return (
     <>
       <EuiCallOut
@@ -194,19 +211,6 @@ const JobsEnabledCallout = (props: CalloutProps) => {
         }
         iconType="check"
       />
-
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup gutterSize={'s'}>
-        <EuiFlexItem grow={false}>
-          <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
-            <FormattedMessage
-              defaultMessage="Manage jobs in ML"
-              id="xpack.infra.ml.anomalyFlyout.manageJobs"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 };
