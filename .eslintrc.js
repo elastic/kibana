@@ -790,6 +790,22 @@ module.exports = {
     },
 
     /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -1316,7 +1332,7 @@ module.exports = {
 
     {
       files: [
-        // platform-team owned code
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
@@ -1325,6 +1341,14 @@ module.exports = {
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
+        'packages/kbn-analytics/**',
+        'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',

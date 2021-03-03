@@ -20,7 +20,7 @@ interface IIndexingStatusErrorsProps {
 export const IndexingStatusErrors: React.FC<IIndexingStatusErrorsProps> = ({ viewLinkPath }) => (
   <EuiCallOut
     color="danger"
-    iconType="cross"
+    iconType="alert"
     title="There was an error"
     data-test-subj="IndexingStatusErrors"
   >

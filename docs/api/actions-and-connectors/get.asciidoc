@@ -11,11 +11,16 @@ Retrieves an action by ID.
 
 `GET <kibana host>:<port>/api/actions/action/<id>`
 
+`GET <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
+
 [[actions-and-connectors-api-get-params]]
 ==== Path parameters
 
 `id`::
   (Required, string) The ID of the action.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-api-get-codes]]
 ==== Response code

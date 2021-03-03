@@ -5,7 +5,7 @@
 
 --
 
-Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
 
 image::images/alerting-overview.png[Alerts and actions UI]
 
@@ -157,7 +157,7 @@ Pre-packaged *alert types* simplify setup, hide the details complex domain-speci
 
 If you are using an *on-premises* Elastic Stack deployment:
 
-* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
+* In the kibana.yml configuration file, add the <<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
 * For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
