@@ -12,30 +12,25 @@ export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
     ...(doc.attributes && {
-      attributes: Object.keys(doc.attributes).reduce(
-        (acc, key) =>
-          key.startsWith('siem:')
-            ? {
-                ...acc,
-                [key.replace('siem', 'securitySolution')]: doc.attributes[key],
-              }
-            : {
-                ...acc,
-                [key]: doc.attributes[key],
-              },
-        {}
-      ),
-    }),
-    ...(doc.attributes && {
       attributes: Object.keys(doc.attributes).reduce((acc, key) => {
-        if (key === 'timepicker:quickRanges' && doc.attributes[key].indexOf('section') > -1) {
-          const ranges = JSON.parse(doc.attributes[key]).map(({ from, to, display }) => {
-            return {
-              from,
-              to,
-              display,
-            };
-          });
+        if (key.startsWith('siem:')) {
+          return {
+            ...acc,
+            [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+          };
+        } else if (
+          key === 'timepicker:quickRanges' &&
+          doc.attributes[key].indexOf('section') > -1
+        ) {
+          const ranges = JSON.parse(doc.attributes[key]).map(
+            ({ from, to, display }: { from: string; to: string; display: string }) => {
+              return {
+                from,
+                to,
+                display,
+              };
+            }
+          );
           return {
             ...acc,
             'timepicker:quickRanges': JSON.stringify(ranges, null, 2),
