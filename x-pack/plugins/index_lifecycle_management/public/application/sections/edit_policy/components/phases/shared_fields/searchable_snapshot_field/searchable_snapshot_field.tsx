@@ -26,7 +26,7 @@ import {
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues, UseField, searchableSnapshotFields } from '../../../../form';
-import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
+import { FieldLoadingError, DescribedFormRow, LearnMoreLink, MoreLessSection } from '../../../';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
 import './_searchable_snapshot_field.scss';
@@ -247,24 +247,26 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               </>
             )}
 
-            <EuiSpacer />
-            <UseField
-              key={searchableSnapshotStoragePath}
-              path={searchableSnapshotStoragePath}
-              config={{
-                ...searchableSnapshotFields.storage,
-                defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
-              }}
-              component={SelectField}
-              componentProps={{
-                'data-test-subj': `searchableSnapshotStorage`,
-                hasEmptyLabelSpace: true,
-                euiFieldProps: {
-                  options: storageOptions,
-                  'aria-label': searchableSnapshotFields.storage.label,
-                },
-              }}
-            />
+            <EuiSpacer size="s" />
+            <MoreLessSection align="right">
+              <UseField
+                key={searchableSnapshotStoragePath}
+                path={searchableSnapshotStoragePath}
+                config={{
+                  ...searchableSnapshotFields.storage,
+                  defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
+                }}
+                component={SelectField}
+                componentProps={{
+                  'data-test-subj': `searchableSnapshotStorage`,
+                  hasEmptyLabelSpace: true,
+                  euiFieldProps: {
+                    options: storageOptions,
+                    'aria-label': searchableSnapshotFields.storage.label,
+                  },
+                }}
+              />
+            </MoreLessSection>
           </div>
         );
       }}

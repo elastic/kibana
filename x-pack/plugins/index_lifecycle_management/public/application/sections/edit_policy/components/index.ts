@@ -14,4 +14,5 @@ export { Timeline } from './timeline';
 export { FormErrorsCallout } from './form_errors_callout';
 export { PhaseFooter } from './phase_footer';
 export { InfinityIcon } from './infinity_icon';
+export { MoreLessSection } from './more_less_section';
 export * from './phases';

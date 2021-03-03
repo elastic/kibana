@@ -57,7 +57,7 @@ export const searchableSnapshotFields = {
   },
   storage: {
     label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
-      defaultMessage: 'Searchable snapshot storage',
+      defaultMessage: 'Storage',
     }),
   },
 };

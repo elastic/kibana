@@ -66,7 +66,7 @@ export const FrozenPhase: FunctionComponent = () => {
           titleSize="xs"
           switchProps={{
             'data-test-subj': 'freezeSwitch',
-            path: '_meta.cold.freezeEnabled',
+            path: '_meta.frozen.freezeEnabled',
           }}
         >
           <div />
@@ -76,7 +76,7 @@ export const FrozenPhase: FunctionComponent = () => {
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase="cold"
+        phase="frozen"
       />
 
       <IndexPriorityField phase="frozen" />
