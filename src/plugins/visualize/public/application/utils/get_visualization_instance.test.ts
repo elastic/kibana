@@ -7,7 +7,12 @@
  */
 
 import { createSavedSearchesLoader } from '../../../../discover/public';
-import type { VisualizeInput } from 'src/plugins/visualizations/public';
+import type {
+  VisualizeInput,
+  VisSavedObject,
+  Vis,
+  VisParams,
+} from 'src/plugins/visualizations/public';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
@@ -29,8 +34,8 @@ describe('getVisualizationInstance', () => {
   const serializedVisMock = {
     type: 'area',
   };
-  let savedVisMock: any;
-  let visMock: any;
+  let savedVisMock: VisSavedObject;
+  let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
@@ -40,8 +45,8 @@ describe('getVisualizationInstance', () => {
     visMock = {
       type: {},
       data: {},
-    };
-    savedVisMock = {};
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
     // @ts-expect-error
     mockServices.data.search.showError.mockImplementation(() => {});
     // @ts-expect-error
@@ -89,6 +94,7 @@ describe('getVisualizationInstance', () => {
 
   test('should load existing vis by id and call vis type setup if exists', async () => {
     const newVisObj = { data: {} };
+    // @ts-expect-error
     visMock.type.setup = jest.fn(() => newVisObj);
     const { vis } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
@@ -122,8 +128,8 @@ describe('getVisualizationInstanceInput', () => {
   const serializedVisMock = {
     type: 'pie',
   };
-  let savedVisMock: any;
-  let visMock: any;
+  let savedVisMock: VisSavedObject;
+  let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
@@ -133,8 +139,8 @@ describe('getVisualizationInstanceInput', () => {
     visMock = {
       type: {},
       data: {},
-    };
-    savedVisMock = {};
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
     // @ts-expect-error
     mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
     // @ts-expect-error
