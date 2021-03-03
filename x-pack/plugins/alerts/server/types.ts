@@ -62,13 +62,8 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
-  /**
-   * @deprecated Use `scopedClusterClient` instead.
-   */
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 export interface AlertServices<

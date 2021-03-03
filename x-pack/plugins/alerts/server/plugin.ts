@@ -31,7 +31,6 @@ import {
   SavedObjectsServiceStart,
   IContextProvider,
   ElasticsearchServiceStart,
-  ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
@@ -419,12 +418,8 @@ export class AlertingPlugin {
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
     return (request) => ({
-      callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
-      getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
-        return clusterClient.asScoped(request);
-      },
     });
   }
 

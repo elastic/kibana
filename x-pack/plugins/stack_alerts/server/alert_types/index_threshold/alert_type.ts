@@ -146,7 +146,7 @@ export function getAlertType(
       );
     }
 
-    const callCluster = services.callCluster;
+    const esClient = services.scopedClusterClient;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -166,7 +166,7 @@ export function getAlertType(
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await (await data).timeSeriesQuery({
       logger,
-      callCluster,
+      esClient,
       query: queryParams,
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);

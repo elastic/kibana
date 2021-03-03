@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -157,7 +156,7 @@ export function getAlertType(
     const { alertId, name, services, params, state } = options;
     const previousTimestamp = state.latestTimestamp;
 
-    const callCluster = services.callCluster;
+    const esClient = services.scopedClusterClient;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -215,7 +214,7 @@ export function getAlertType(
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const searchResult: ESSearchResponse<unknown, {}> = await callCluster('search', query);
+    const { body: searchResult } = await esClient.search(query);
 
     if (searchResult.hits.hits.length > 0) {
       const numMatches = searchResult.hits.total.value;

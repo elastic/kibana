@@ -206,7 +206,7 @@ describe('Task Runner', () => {
     expect(call.createdBy).toBe('alert-creator');
     expect(call.updatedBy).toBe('alert-updater');
     expect(call.services.alertInstanceFactory).toBeTruthy();
-    expect(call.services.callCluster).toBeTruthy();
+    expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
