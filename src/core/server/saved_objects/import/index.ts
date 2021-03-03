@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { ISavedObjectsImporter, SavedObjectsImporter } from './saved_objects_importer';
-export {
+export { SavedObjectsImporter } from './saved_objects_importer';
+export type { ISavedObjectsImporter } from './saved_objects_importer';
+export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportFailure,
