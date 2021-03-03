@@ -59803,7 +59803,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(745);
-/* harmony import */ var _utils_bazel_run__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(374);
+/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(371);
 /* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(131);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(246);
 /* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(251);
@@ -59832,7 +59832,7 @@ async function buildBazelProductionProjects({
   const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_8__["getBazelProjectsOnly"])(await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["getProductionProjects"])(kibanaRoot, onlyOSS));
   const projectNames = [...projects.values()].map(project => project.name);
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
-  await Object(_utils_bazel_run__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['build', '//packages:build']);
+  await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['build', '//packages:build']);
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
 
   for (const project of projects.values()) {
@@ -59856,9 +59856,8 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
-  const bazelFilesToExclude = ['!*.sh.runfiles*', '!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts', '!*_loader.js', '!*_require_patch.js', '!*.sh'];
-  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*'], buildProjectPath, {
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -59880,7 +59879,7 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby__WEBPACK_IMPORTED_MODULE_1___default()([`**/*`], {
     onlyFiles: false,
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
     dot: true
   });
 
