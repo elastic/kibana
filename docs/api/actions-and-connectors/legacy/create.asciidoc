@@ -1,31 +1,37 @@
-[[actions-and-connectors-api-create]]
-=== Create connector API
+[[actions-and-connectors-legacy-api-create]]
+=== Legacy Create connector API
 ++++
 <titleabbrev>Create connector API</titleabbrev>
 ++++
 
-Creates a connector.
+deprecated::[7.13.0]
 
-[[actions-and-connectors-api-create-request]]
+**This API is deprecated and will not be supported as of 8.0.**
+
+Please use the <<actions-and-connectors-api-create>> instead.
+
+Creates an connector.
+
+[[actions-and-connectors-legacy-api-create-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/actions/connector`
+`POST <kibana host>:<port>/api/actions/action`
 
-`POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
+`POST <kibana host>:<port>/s/<space_id>/api/actions/action`
 
-[[actions-and-connectors-api-create-path-params]]
+[[actions-and-connectors-legacy-api-create-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-create-request-body]]
+[[actions-and-connectors-legacy-api-create-request-body]]
 ==== Request body
 
 `name`::
   (Required, string) The display name for the connector.
 
-`connector_type_id`::
+`actionTypeId`::
   (Required, string) The connector type ID for the connector.
 
 `config`::
@@ -36,23 +42,23 @@ Creates a connector.
   (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
   depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 +
-WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-api-update, update>> API.
+WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-legacy-api-update, update>> API.
 
-[[actions-and-connectors-api-create-request-codes]]
+[[actions-and-connectors-legacy-api-create-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-create-example]]
+[[actions-and-connectors-legacy-api-create-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "name": "my-connector",
-  "connector_type_id": ".index",
+  "actionTypeId": ".index",
   "config": {
     "index": "test-index"
   }
@@ -66,13 +72,13 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-  "connector_type_id": ".index",
+  "actionTypeId": ".index",
   "name": "my-connector",
   "config": {
     "index": "test-index",
     "refresh": false,
     "executionTimeField": null
   },
-  "is_preconfigured": false
+  "isPreconfigured": false
 }
 --------------------------------------------------

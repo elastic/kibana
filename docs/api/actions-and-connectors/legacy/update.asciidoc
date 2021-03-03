@@ -1,19 +1,25 @@
-[[actions-and-connectors-api-update]]
+[[actions-and-connectors-legacy-api-update]]
 === Update connector API
 ++++
 <titleabbrev>Update connector API</titleabbrev>
 ++++
 
+deprecated::[7.13.0]
+
+**This API is deprecated and will not be supported as of 8.0.**
+
+Please use the <<actions-and-connectors-api-update>> instead.
+
 Updates the attributes for an existing connector.
 
-[[actions-and-connectors-api-update-request]]
+[[actions-and-connectors-legacy-api-update-request]]
 ==== Request
 
-`PUT <kibana host>:<port>/api/actions/connector/<id>`
+`PUT <kibana host>:<port>/api/actions/action/<id>`
 
-`PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
+`PUT <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
 
-[[actions-and-connectors-api-update-params]]
+[[actions-and-connectors-legacy-api-update-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +28,7 @@ Updates the attributes for an existing connector.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-update-request-body]]
+[[actions-and-connectors-legacy-api-update-request-body]]
 ==== Request body
 
 `name`::
@@ -34,18 +40,18 @@ Updates the attributes for an existing connector.
 `secrets`::
   (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
-[[actions-and-connectors-api-update-codes]]
+[[actions-and-connectors-legacy-api-update-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-update-example]]
+[[actions-and-connectors-legacy-api-update-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X PUT api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "name": "updated-connector",
   "config": {
@@ -61,13 +67,13 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-  "connector_type_id": ".index",
+  "actionTypeId": ".index",
   "name": "updated-connector",
   "config": {
     "index": "updated-index",
     "refresh": false,
     "executionTimeField": null
   },
-  "is_preconfigured": false
+  "isPreconfigured": false
 }
 --------------------------------------------------

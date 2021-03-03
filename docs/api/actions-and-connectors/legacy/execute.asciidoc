@@ -1,19 +1,25 @@
-[[actions-and-connectors-api-execute]]
+[[actions-and-connectors-legacy-api-execute]]
 === Execute connector API
 ++++
 <titleabbrev>Execute connector API</titleabbrev>
 ++++
 
+deprecated::[7.13.0]
+
+**This API is deprecated and will not be supported as of 8.0.**
+
+Please use the <<actions-and-connectors-api-execute>> instead.
+
 Executes an connector by ID.
 
-[[actions-and-connectors-api-execute-request]]
+[[actions-and-connectors-legacy-api-execute-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/actions/connector/<id>/_execute`
+`POST <kibana host>:<port>/api/actions/action/<id>/_execute`
 
-`POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
+`POST <kibana host>:<port>/s/<space_id>/api/actions/action/<id>/_execute`
 
-[[actions-and-connectors-api-execute-params]]
+[[actions-and-connectors-legacy-api-execute-params]]
 ==== Path parameters
 
 `id`::
@@ -22,25 +28,25 @@ Executes an connector by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-execute-request-body]]
+[[actions-and-connectors-legacy-api-execute-request-body]]
 ==== Request body
 
 `params`::
   (Required, object) The parameters of the connector. Parameter properties vary depending on
   the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
 
-[[actions-and-connectors-api-execute-codes]]
+[[actions-and-connectors-legacy-api-execute-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-execute-example]]
+[[actions-and-connectors-legacy-api-execute-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "params": {
     "documents": [
@@ -83,6 +89,6 @@ The API returns the following:
       }
     ]
   },
-  "connector_id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+  "actionId": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
 }
 --------------------------------------------------
