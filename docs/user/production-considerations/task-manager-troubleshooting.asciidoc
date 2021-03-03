@@ -36,7 +36,7 @@ You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> 
 
 *Symptoms*:
 
-By far the most common symptom of an underlying problem in Task manager is that tasks appear to be running late.
+The most common symptom of an underlying problem in Task Manager is that tasks appear to run late.
 For instance, recurring Tasks might run at an inconsistent cadence, or long after their scheduled time.
 
 *Resolution*:
