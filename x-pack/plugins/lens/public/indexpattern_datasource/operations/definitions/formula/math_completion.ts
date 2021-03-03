@@ -10,9 +10,8 @@ import { monaco } from '@kbn/monaco';
 
 import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { IndexPattern } from '../../../types';
-import { getAvailableOperationsByMetadata } from '../../';
+import { getAvailableOperationsByMetadata } from '../../operations';
 import type { GenericOperationDefinition } from '..';
-import { operationDefinitionMap } from '..';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -60,6 +59,7 @@ export async function suggest(
   position: number,
   context: monaco.languages.CompletionContext,
   indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>,
   word?: monaco.editor.IWordAtPosition
 ): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
@@ -74,11 +74,12 @@ export async function suggest(
       return getArgumentSuggestions(
         tokenInfo.parent.name,
         tokenInfo.parent.args.length - 1,
-        indexPattern
+        indexPattern,
+        operationDefinitionMap
       );
     }
     if (tokenInfo && word) {
-      return getFunctionSuggestions(word);
+      return getFunctionSuggestions(word, operationDefinitionMap);
     }
   } catch (e) {
     // Fail silently
@@ -86,14 +87,22 @@ export async function suggest(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
-function getFunctionSuggestions(word: monaco.editor.IWordAtPosition) {
+function getFunctionSuggestions(
+  word: monaco.editor.IWordAtPosition,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
   const list = Object.keys(operationDefinitionMap)
     .filter((func) => startsWith(func, word.word))
     .map((key) => operationDefinitionMap[key]);
   return { list, type: SUGGESTION_TYPE.FUNCTIONS };
 }
 
-function getArgumentSuggestions(name: string, position: number, indexPattern: IndexPattern) {
+function getArgumentSuggestions(
+  name: string,
+  position: number,
+  indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
   const operation = operationDefinitionMap[name];
   if (!operation) {
     return { list: [], type: SUGGESTION_TYPE.FIELD };

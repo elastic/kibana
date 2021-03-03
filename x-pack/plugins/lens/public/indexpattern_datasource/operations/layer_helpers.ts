@@ -7,6 +7,7 @@
 
 import _, { partition } from 'lodash';
 import type { OperationMetadata } from '../../types';
+import { getSortScoreByPriority } from './operations';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -15,7 +16,6 @@ import {
   RequiredReference,
 } from './definitions';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
-import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula/formula';

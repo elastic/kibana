@@ -208,7 +208,9 @@ function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
       }
     },
-    { skipFirstRender: true },
+    // Make it validate on flyout open in case of a broken formula left over
+    // from a previous edit
+    { skipFirstRender: false },
     256,
     [text]
   );
@@ -250,7 +252,8 @@ function FormulaEditor({
             innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
             innerText.length - lengthAfterPosition,
             context,
-            indexPattern
+            indexPattern,
+            operationDefinitionMap
           );
         }
       } else {
@@ -266,6 +269,7 @@ function FormulaEditor({
           innerText.length - lengthAfterPosition,
           context,
           indexPattern,
+          operationDefinitionMap,
           wordUntil
         );
       }
@@ -274,7 +278,7 @@ function FormulaEditor({
         suggestions: aSuggestions.list.map((s) => getSuggestion(s, aSuggestions.type, wordRange)),
       };
     },
-    [indexPattern]
+    [indexPattern, operationDefinitionMap]
   );
 
   return (

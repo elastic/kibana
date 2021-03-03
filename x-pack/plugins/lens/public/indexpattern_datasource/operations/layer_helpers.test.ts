@@ -2238,7 +2238,8 @@ describe('state_helpers', () => {
           },
         },
         'col1',
-        indexPattern
+        indexPattern,
+        operationDefinitionMap
       );
     });
   });
