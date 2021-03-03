@@ -49,7 +49,7 @@ export const ResolverNoProcessEvents = () => (
     </EuiText>
     <EuiSpacer size="m" />
     <StyledEuiCodeBlock language="html" paddingSize="s" isCopyable>
-      {"event.category: 'process'"}
+      {'event.category: "process"'}
     </StyledEuiCodeBlock>
   </StyledEuiFlexGroup>
 );

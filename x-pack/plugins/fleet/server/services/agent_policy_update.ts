@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { isAgentsSetup, unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
