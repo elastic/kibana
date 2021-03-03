@@ -7,22 +7,22 @@
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { InlineTagsList } from './inline_tags_list';
+import { TagsList, TagsCount } from './tags';
 
-describe('InlineTagsList', () => {
+describe('TagsList', () => {
   it('renders', () => {
-    const wrapper = mount(<InlineTagsList tags={['test']} />);
+    const wrapper = shallow(<TagsList tags={['test']} />);
 
     expect(wrapper.find(EuiBadge)).toHaveLength(1);
     expect(wrapper.find(EuiBadge).prop('children')).toEqual('test');
   });
 
   it('renders >2 badges in a tooltip list', () => {
-    const wrapper = mount(<InlineTagsList tags={['1', '2', '3', '4', '5']} />);
+    const wrapper = shallow(<TagsList tags={['1', '2', '3', '4', '5']} />);
 
     expect(wrapper.find(EuiBadge)).toHaveLength(3);
     expect(wrapper.find(EuiToolTip)).toHaveLength(1);
@@ -33,17 +33,34 @@ describe('InlineTagsList', () => {
     expect(wrapper.find(EuiToolTip).prop('content')).toEqual('3, 4, 5');
   });
 
+  it('does not render if missing tags', () => {
+    const wrapper = shallow(<TagsList tags={[]} />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+});
+
+describe('TagsCount', () => {
   it('renders a count and all tags in a tooltip', () => {
-    const wrapper = mount(<InlineTagsList displayCountOnly tags={['1', '2', '3']} />);
+    const wrapper = shallow(<TagsCount tags={['1', '2', '3']} />);
 
     expect(wrapper.find(EuiToolTip)).toHaveLength(1);
     expect(wrapper.find(EuiBadge)).toHaveLength(1);
-    expect(wrapper.find(EuiBadge).at(0).prop('children')).toEqual('3 tags');
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('3 tags');
     expect(wrapper.find(EuiToolTip).prop('content')).toEqual('1, 2, 3');
   });
 
-  it('does not render with no tags', () => {
-    const wrapper = shallow(<InlineTagsList tags={[]} />);
+  it('handles pluralization correctly', () => {
+    const wrapper = shallow(<TagsCount tags={['1']} />);
+
+    expect(wrapper.find(EuiToolTip)).toHaveLength(1);
+    expect(wrapper.find(EuiBadge)).toHaveLength(1);
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('1 tag');
+    expect(wrapper.find(EuiToolTip).prop('content')).toEqual('1');
+  });
+
+  it('does not render if missing tags', () => {
+    const wrapper = shallow(<TagsCount tags={[]} />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });

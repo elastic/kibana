@@ -31,7 +31,7 @@ describe('QueryClicksTable', () => {
         engine: 'another-engine',
         id: 'another-document',
       },
-      tags: ['tagB', 'tagC'],
+      tags: ['tagB'],
       doc_count: 5,
     },
     {
@@ -59,8 +59,8 @@ describe('QueryClicksTable', () => {
     // deleted-document should not have a link
 
     expect(tableContent).toContain('Analytics tags');
-    expect(tableContent).toContain('1 tag');
-    expect(tableContent).toContain('2 tags');
+    expect(tableContent).toContain('tagA');
+    expect(tableContent).toContain('tagB');
     expect(wrapper.find(EuiBadge)).toHaveLength(2);
 
     expect(tableContent).toContain('Clicks');

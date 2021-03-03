@@ -40,6 +40,8 @@ import {
 } from '../constants';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
+import './analytics.scss';
+
 export const Analytics: React.FC = () => {
   const {
     totalQueries,
@@ -122,14 +124,14 @@ export const Analytics: React.FC = () => {
         )}
         iconType="search"
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup className="analyticsOverviewTables">
           <EuiFlexItem>
             <DataPanel
               title={<h3>{TOP_QUERIES}</h3>}
               filled
               action={<ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_PATH)} />}
             >
-              <AnalyticsTable items={topQueries.slice(0, 10)} hasClicks />
+              <AnalyticsTable items={topQueries.slice(0, 10)} hasClicks isSmall />
             </DataPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -142,7 +144,7 @@ export const Analytics: React.FC = () => {
                 />
               }
             >
-              <AnalyticsTable items={topQueriesNoResults.slice(0, 10)} />
+              <AnalyticsTable items={topQueriesNoResults.slice(0, 10)} isSmall />
             </DataPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -162,7 +164,7 @@ export const Analytics: React.FC = () => {
         )}
         iconType={CursorIcon}
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup className="analyticsOverviewTables">
           <EuiFlexItem>
             <DataPanel
               title={<h3>{TOP_QUERIES_WITH_CLICKS}</h3>}
@@ -173,7 +175,7 @@ export const Analytics: React.FC = () => {
                 />
               }
             >
-              <AnalyticsTable items={topQueriesWithClicks.slice(0, 10)} hasClicks />
+              <AnalyticsTable items={topQueriesWithClicks.slice(0, 10)} hasClicks isSmall />
             </DataPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -186,7 +188,7 @@ export const Analytics: React.FC = () => {
                 />
               }
             >
-              <AnalyticsTable items={topQueriesNoClicks.slice(0, 10)} />
+              <AnalyticsTable items={topQueriesNoClicks.slice(0, 10)} isSmall />
             </DataPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

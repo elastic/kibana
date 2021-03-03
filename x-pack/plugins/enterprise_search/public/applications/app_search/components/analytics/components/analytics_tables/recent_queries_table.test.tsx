@@ -27,7 +27,7 @@ describe('RecentQueriesTable', () => {
     {
       query_string: 'another search',
       timestamp: '1970-01-02T12:00:00Z',
-      tags: ['tagB', 'tagC'],
+      tags: ['tagB'],
       document_ids: ['documentC'],
     },
     {
@@ -53,9 +53,9 @@ describe('RecentQueriesTable', () => {
     expect(tableContent).toContain('Jan 1, 1970');
 
     expect(tableContent).toContain('Analytics tags');
-    expect(tableContent).toContain('1 tag');
-    expect(tableContent).toContain('2 tags');
-    expect(wrapper.find(EuiBadge)).toHaveLength(3);
+    expect(tableContent).toContain('tagA');
+    expect(tableContent).toContain('tagB');
+    expect(wrapper.find(EuiBadge)).toHaveLength(4);
 
     expect(tableContent).toContain('Results');
     expect(tableContent).toContain('2');
