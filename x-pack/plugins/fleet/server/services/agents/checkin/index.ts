@@ -6,19 +6,18 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
 } from 'src/core/server';
-import {
+import type {
   Agent,
   NewAgentEvent,
   AgentEvent,
   AgentSOAttributes,
   AgentEventSOAttributes,
 } from '../../../types';
-
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { agentCheckinState } from './state';
 import { getAgentActionsForCheckin } from '../actions';
