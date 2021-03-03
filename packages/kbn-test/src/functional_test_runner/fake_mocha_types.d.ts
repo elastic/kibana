@@ -34,7 +34,13 @@ export interface Runnable {
   isPassed: () => boolean;
 }
 
-export type Test = Runnable;
+export interface Test extends Runnable {
+  type: 'test';
+}
+
+export interface Hook extends Runnable {
+  type: 'hook';
+}
 
 export interface Runner extends EventEmitter {
   abort(): void;
