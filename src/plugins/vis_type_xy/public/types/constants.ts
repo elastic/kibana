@@ -55,3 +55,5 @@ export const ColorMode = Object.freeze({
   None: 'None' as const,
 });
 export type ColorMode = $Values<typeof ColorMode>;
+
+export const MAX_DATE_HISTOGRAM_TICKS = 10;

@@ -36,6 +36,7 @@ export const XYAxis: FC<XYAxisPros> = ({
     position={position}
     integersOnly={integersOnly}
     showGridLines={grid?.show}
+    ticks={ticks?.count}
     tickFormat={ticks?.formatter}
     labelFormat={ticks?.labelFormatter}
     showOverlappingLabels={ticks?.showOverlappingLabels}

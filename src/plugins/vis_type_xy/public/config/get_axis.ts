@@ -26,6 +26,7 @@ import {
   XScaleType,
   YScaleType,
   SeriesParam,
+  MAX_DATE_HISTOGRAM_TICKS,
 } from '../types';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
 
@@ -61,6 +62,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     rotation: labels.rotate,
     showOverlappingLabels: !labels.filter,
     showDuplicates: !labels.filter,
+    count: aggType === BUCKET_TYPES.DATE_HISTOGRAM ? MAX_DATE_HISTOGRAM_TICKS : undefined,
   };
   const scale = getScale<S>(axisScale, params, format, isCategoryAxis);
   const title = axisTitle.text || fallbackTitle;
