@@ -1,0 +1,139 @@
+{
+  "id": "monitoring",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-server.IBulkUploader",
+        "type": "Interface",
+        "label": "IBulkUploader",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.IBulkUploader.getKibanaStats",
+            "type": "Function",
+            "label": "getKibanaStats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 93,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L93"
+            },
+            "signature": [
+              "() => any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IBulkUploader.stop",
+            "type": "Function",
+            "label": "stop",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 94,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L94"
+            },
+            "signature": [
+              "() => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/types.ts",
+          "lineNumber": 92,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L92"
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "id": "def-server.KibanaSettingsCollector",
+        "type": "Type",
+        "label": "KibanaSettingsCollector",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
+          "lineNumber": 53,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts#L53"
+        },
+        "signature": [
+          "Collector<EmailSettingData | undefined, {}> & KibanaSettingsCollectorExtraOptions"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.MonitoringConfig",
+        "type": "Type",
+        "label": "MonitoringConfig",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/config.ts",
+          "lineNumber": 92,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/config.ts#L92"
+        },
+        "signature": [
+          "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
+          "Duration",
+          "; }>; agent: Readonly<{} & { interval: string; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "id": "def-server.MonitoringPluginSetup",
+      "type": "Interface",
+      "label": "MonitoringPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-server.MonitoringPluginSetup.getKibanaStats",
+          "type": "Function",
+          "label": "getKibanaStats",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "lineNumber": 98,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L98"
+          },
+          "signature": [
+            "() => any"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/monitoring/server/types.ts",
+        "lineNumber": 97,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L97"
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
