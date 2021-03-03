@@ -82,7 +82,7 @@ There are two types of layout supported at the moment: `pattern` and `json`.
 
 ### Pattern layout
 With `pattern` layout it's possible to define a string pattern with special placeholders `%conversion_pattern` (see the table below) that
-will be replaced with data from the actual log message. By default the following pattern is used: 
+will be replaced with data from the actual log message. By default the following pattern is used:
 `[%date][%level][%logger] %message`. Also `highlight` option can be enabled for `pattern` layout so that
 some parts of the log message are highlighted with different colors that may be quite handy if log messages are forwarded
 to the terminal with color support.
@@ -143,7 +143,7 @@ Example of `%date` output:
 Outputs the process ID.
 
 ### JSON layout
-With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context name, message
+With `json` layout log messages will be formatted as JSON strings in [ECS format](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html) that includes a timestamp, log level, context name, message
 text and any other metadata that may be associated with the log message itself.
 
 ## Appenders

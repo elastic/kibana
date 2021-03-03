@@ -1,3 +1,5 @@
+# Expose those targets as they are required as part of
+# other packages builds and need to be included as inputs
 exports_files(
   [
     "tsconfig.json",

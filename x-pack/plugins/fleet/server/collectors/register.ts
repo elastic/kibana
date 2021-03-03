@@ -7,13 +7,15 @@
 
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { CoreSetup } from 'kibana/server';
+
+import type { FleetConfigType } from '..';
+
 import { getIsAgentsEnabled } from './config_collectors';
 import { getAgentUsage } from './agent_collectors';
 import type { AgentUsage } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
-import type { FleetConfigType } from '..';
 
 interface Usage {
   agents_enabled: boolean;
