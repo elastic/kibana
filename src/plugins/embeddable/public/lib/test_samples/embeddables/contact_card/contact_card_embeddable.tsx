@@ -68,6 +68,11 @@ export class ContactCardEmbeddable extends Embeddable<
     });
   }
 
+  // expose update output for testing purposes
+  public updateOutput(outputChanges: Partial<ContactCardEmbeddableOutput>) {
+    super.updateOutput(outputChanges);
+  }
+
   public render(node: HTMLElement) {
     this.node = node;
     ReactDom.render(

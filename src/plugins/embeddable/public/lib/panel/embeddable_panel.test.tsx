@@ -12,6 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
+import { waitFor } from '@testing-library/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
@@ -541,4 +542,51 @@ test('Check when hide header option is true', async () => {
 
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
+});
+
+test('Embeddable panel debounces loading state', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = (await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  })) as ContactCardEmbeddable;
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        application={applicationMock}
+        overlays={{} as any}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  );
+
+  expect(findTestSubject(component, 'embeddablePanel').hasClass('embPanel--loading')).toBe(false);
+
+  embeddable.updateOutput({ loading: true });
+  await nextTick();
+  embeddable.updateOutput({ loading: false });
+  await nextTick();
+  embeddable.updateOutput({ loading: true });
+  component.update();
+  expect(findTestSubject(component, 'embeddablePanel').hasClass('embPanel--loading')).toBe(false);
+
+  await waitFor(() => {
+    component.update();
+    expect(findTestSubject(component, 'embeddablePanel').hasClass('embPanel--loading')).toBe(true);
+  });
 });

@@ -9,7 +9,8 @@
 import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Subscription } from 'rxjs';
+import { EMPTY, Subscription, timer } from 'rxjs';
+import { debounce } from 'rxjs/operators';
 import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
@@ -251,21 +252,35 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
-          },
-          (error) => {
-            if (this.embeddableRoot.current) {
-              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
-              errorEmbeddable.render(this.embeddableRoot.current);
-              this.setState({ errorEmbeddable });
+        this.props.embeddable
+          .getOutput$()
+          .pipe(
+            // This observable is needed to apply loading or error state to embeddable panel
+            // To avoid unnecessary flickering we debounce output updates when transitioning into error or loading state,
+            // This skips loading or error state when quickly switching back to loaded state.
+            // This is useful in case of frequent auto refresh interval.
+            debounce((output: EmbeddableOutput) => {
+              if (!output.error && !output.loading) return EMPTY; // don't debounce in case we are in "regular" state
+              return timer(1000); // debounce "loading" or "error" state
+            })
+          )
+          .subscribe(
+            (output: EmbeddableOutput) => {
+              this.setState({
+                error: output.error,
+                loading: output.loading,
+              });
+            },
+            (error) => {
+              if (this.embeddableRoot.current) {
+                const errorEmbeddable = new ErrorEmbeddable(error, {
+                  id: this.props.embeddable.id,
+                });
+                errorEmbeddable.render(this.embeddableRoot.current);
+                this.setState({ errorEmbeddable });
+              }
             }
-          }
-        )
+          )
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
