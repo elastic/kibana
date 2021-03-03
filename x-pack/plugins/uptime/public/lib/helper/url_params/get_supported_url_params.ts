@@ -80,7 +80,6 @@ export const getSupportedUrlParams = (params: {
   } = filteredParams;
 
   return {
-    query,
     pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,
@@ -99,5 +98,6 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
+    query: query || '',
   };
 };

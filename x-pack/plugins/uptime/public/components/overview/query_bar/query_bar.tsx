@@ -55,6 +55,9 @@ export const QueryBar = () => {
           if (queryN?.language === 'text') {
             setQuery({ query: queryN.query as string, language: queryN.language });
           }
+          if (queryN?.language === 'kuery' && queryN.query === '') {
+            setQuery({ query: queryN.query as string, language: queryN.language });
+          }
         }}
         onQuerySubmit={({ query: queryN }) => {
           if (queryN) setQuery({ query: queryN.query as string, language: queryN.language });

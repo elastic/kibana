@@ -40,7 +40,7 @@ describe('alert monitor status component', () => {
           <EuiSpacer
             size="m"
           />
-          <KueryBar
+          <Component
             aria-label="Input that allows filtering criteria for the monitor status alert"
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
             defaultKuery="monitor.id: foo"

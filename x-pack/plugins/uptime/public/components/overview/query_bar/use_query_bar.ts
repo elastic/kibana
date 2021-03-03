@@ -36,7 +36,7 @@ export const useQueryBar = () => {
     queryParam
       ? {
           query: queryParam,
-          language: SyntaxType.kuery,
+          language: SyntaxType.text,
         }
       : search
       ? { query: search, language: SyntaxType.kuery }
@@ -65,8 +65,11 @@ export const useQueryBar = () => {
 
   useDebounce(
     () => {
-      if (query.language === SyntaxType.text) {
+      if (query.language === SyntaxType.text && queryParam !== query.query) {
         updateUrlParams({ query: query.query as string });
+      }
+      if (query.language === SyntaxType.kuery) {
+        updateUrlParams({ query: '' });
       }
     },
     250,
@@ -77,6 +80,12 @@ export const useQueryBar = () => {
     () => {
       if (query.language === SyntaxType.kuery && !error && esFilters) {
         updateUrlParams({ search: query.query as string });
+      }
+      if (query.language === SyntaxType.text) {
+        updateUrlParams({ search: '' });
+      }
+      if (query.language === SyntaxType.kuery && query.query === '') {
+        updateUrlParams({ search: '' });
       }
     },
     250,
