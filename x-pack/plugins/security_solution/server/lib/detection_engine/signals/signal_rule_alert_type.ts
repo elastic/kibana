@@ -12,6 +12,7 @@ import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
+import { performance } from 'perf_hooks';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
@@ -25,6 +26,7 @@ import {
   isEqlRule,
   isThreatMatchRule,
   hasLargeValueItem,
+  normalizeThresholdField,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
@@ -49,6 +51,7 @@ import {
   hasTimestampFields,
   hasReadIndexPrivileges,
   getRuleRangeTuples,
+  makeFloatString,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -214,6 +217,7 @@ export const signalRulesAlertType = ({
                   hasTimestampFields(
                     wroteStatus,
                     hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    name,
                     timestampFieldCaps,
                     inputIndices,
                     ruleStatusService,
@@ -374,10 +378,6 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
 
-          const thresholdFields = Array.isArray(threshold.field)
-            ? threshold.field
-            : [threshold.field];
-
           const {
             filters: bucketFilters,
             searchErrors: previousSearchErrors,
@@ -388,7 +388,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            bucketByFields: thresholdFields,
+            bucketByFields: normalizeThresholdField(threshold.field),
             timestampOverride,
             buildRuleMessage,
           });
@@ -404,7 +404,11 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
+          const {
+            searchResult: thresholdResults,
+            searchErrors,
+            searchDuration: thresholdSearchDuration,
+          } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
             to,
@@ -459,6 +463,7 @@ export const signalRulesAlertType = ({
               createdSignalsCount: createdItemsCount,
               createdSignals: createdItems,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+              searchAfterTimes: [thresholdSearchDuration],
             }),
           ]);
         } else if (isThreatMatchRule(type)) {
@@ -592,10 +597,14 @@ export const signalRulesAlertType = ({
             exceptionItems ?? [],
             eventCategoryOverride
           );
+          const eqlSignalSearchStart = performance.now();
           const response: EqlSignalSearchResponse = await services.callCluster(
             'transport.request',
             request
           );
+          const eqlSignalSearchEnd = performance.now();
+          const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
+          result.searchAfterTimes = [eqlSearchDuration];
           let newSignals: WrappedSignalHit[] | undefined;
           if (response.hits.sequences !== undefined) {
             newSignals = response.hits.sequences.reduce(
@@ -636,7 +645,6 @@ export const signalRulesAlertType = ({
 
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
             const toInMs = parseScheduleDates('now')?.format('x');
-
             const resultsLink = getNotificationResultsLink({
               from: fromInMs,
               to: toInMs,
