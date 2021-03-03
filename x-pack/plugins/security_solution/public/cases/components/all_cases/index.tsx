@@ -231,10 +231,10 @@ export const AllCases = React.memo<AllCasesProps>(
     );
 
     const toggleBulkDeleteModal = useCallback(
-      (caseIds: string[]) => {
+      (cases: Case[]) => {
         handleToggleModal();
-        if (caseIds.length === 1) {
-          const singleCase = selectedCases.find((theCase) => theCase.id === caseIds[0]);
+        if (cases.length === 1) {
+          const singleCase = cases[0];
           if (singleCase) {
             return setDeleteThisCase({
               id: singleCase.id,
@@ -243,13 +243,14 @@ export const AllCases = React.memo<AllCasesProps>(
             });
           }
         }
-        const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({
+        const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title, type }) => ({
           id,
-          type: CaseType.individual,
+          title,
+          type,
         }));
         setDeleteBulk(convertToDeleteCases);
       },
-      [selectedCases, setDeleteBulk, handleToggleModal]
+      [setDeleteBulk, handleToggleModal]
     );
 
     const handleUpdateCaseStatus = useCallback(
@@ -257,11 +258,6 @@ export const AllCases = React.memo<AllCasesProps>(
         updateBulkStatus(selectedCases, status);
       },
       [selectedCases, updateBulkStatus]
-    );
-
-    const selectedCaseIds = useMemo(
-      (): string[] => selectedCases.map((caseObj: Case) => caseObj.id),
-      [selectedCases]
     );
 
     const getBulkItemsPopoverContent = useCallback(
@@ -272,19 +268,13 @@ export const AllCases = React.memo<AllCasesProps>(
             caseStatus: filterOptions.status,
             closePopover,
             deleteCasesAction: toggleBulkDeleteModal,
-            selectedCaseIds,
+            selectedCases,
             updateCaseStatus: handleUpdateCaseStatus,
             includeCollections: isSelectedCasesIncludeCollections(selectedCases),
           })}
         />
       ),
-      [
-        selectedCases,
-        selectedCaseIds,
-        filterOptions.status,
-        toggleBulkDeleteModal,
-        handleUpdateCaseStatus,
-      ]
+      [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
