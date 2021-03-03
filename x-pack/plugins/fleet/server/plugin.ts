@@ -84,6 +84,7 @@ import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
+import { FleetArtifactsClient } from './services/artifacts';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -166,6 +167,12 @@ export interface FleetStartContract {
    * @param args
    */
   registerExternalCallback: (...args: ExternalCallback) => void;
+
+  /**
+   * Create a Fleet Artifact Client instance
+   * @param packageName
+   */
+  createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 }
 
 export class FleetPlugin
@@ -328,6 +335,9 @@ export class FleetPlugin
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
+      },
+      createArtifactsClient(packageName: string) {
+        return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
     };
   }
