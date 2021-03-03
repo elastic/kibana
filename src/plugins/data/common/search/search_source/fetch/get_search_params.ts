@@ -37,11 +37,12 @@ export function getSearchParamsFromRequest(
   const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { track_total_hits, ...body } = searchRequest.body;
+  const { scroll, track_total_hits, ...body } = searchRequest.body;
 
   return {
     index: searchRequest.index.title || searchRequest.index,
     body,
+    scroll,
     track_total_hits,
     ...searchParams,
   };

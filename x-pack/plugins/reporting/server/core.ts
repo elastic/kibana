@@ -244,9 +244,9 @@ export class ReportingCore {
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
-  public async getSearchService() {
+  public async getDataService() {
     const startDeps = await this.getPluginStartDeps();
-    return startDeps.data.search;
+    return startDeps.data;
   }
 
   public async getEsClient() {

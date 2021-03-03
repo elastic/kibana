@@ -6,11 +6,11 @@
  */
 
 import { CSV_JOB_TYPE } from '../../../common/constants';
+import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
 import { CsvGenerator } from './generate_csv/generate_csv';
 import { TaskPayloadCSV } from './types';
-import { getFieldFormats } from '../../services';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   reporting,
@@ -26,8 +26,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
 
-    const searchService = await reporting.getSearchService();
-    const searchSourceService = await searchService.searchSource.asScoped(fakeRequest);
+    const dataPluginStart = await reporting.getDataService();
+    const searchSourceService = await dataPluginStart.search.searchSource.asScoped(fakeRequest);
+    const data = dataPluginStart.search.asScoped(fakeRequest);
+
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
       uiSettingsClient
     );
@@ -38,6 +40,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
       job,
       config,
       esClient,
+      data,
       uiSettingsClient,
       searchSourceService,
       fieldFormatsRegistry,

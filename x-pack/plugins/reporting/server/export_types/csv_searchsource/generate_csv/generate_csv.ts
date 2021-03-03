@@ -8,13 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
-  EsQuerySearchAfter,
+  ES_SEARCH_STRATEGY,
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
+  ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
   tabifyDocs,
@@ -34,19 +36,48 @@ export class CsvGenerator {
   private _formatters: Record<string, FieldFormat> | null = null;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
-  private needsSorting = false;
   private csvRowCount = 0;
 
   constructor(
     private job: JobParamsCSV,
     private config: ReportingConfig,
     private esClient: IScopedClusterClient,
+    private data: IScopedSearchClient,
     private uiSettingsClient: IUiSettingsClient,
     private searchSourceService: ISearchStartSearchSource,
     private fieldFormatsRegistry: IFieldFormatsRegistry,
     private cancellationToken: CancellationToken,
     private logger: LevelLogger
   ) {}
+
+  private async search(searchSource: ISearchSource, scrollSettings: CsvExportSettings['scroll']) {
+    const { body: searchBody, index: searchIndex } = searchSource.flatten();
+    this.logger.debug(`executing search request`);
+    const searchParams = {
+      params: {
+        body: searchBody,
+        index: searchIndex.title,
+        scroll: scrollSettings.duration,
+        size: scrollSettings.size,
+      },
+    };
+    const results = (
+      await this.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
+    ).rawResponse;
+
+    return results;
+  }
+
+  private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
+    this.logger.debug(`executing scroll request`);
+    const results = (
+      await this.esClient.asCurrentUser.scroll({
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
+      })
+    ).body as SearchResponse<unknown>;
+    return results;
+  }
 
   /*
    * Build a map for ordering the fields of search results into CSV columns
@@ -200,9 +231,6 @@ export class CsvGenerator {
     }
   }
 
-  /*
-   * Open a Point In Time on the Elasticsearch index and collect all the data from the index
-   */
   public async generateData(): Promise<TaskRunResult> {
     const [settings, searchSource] = await Promise.all([
       getExportSettings(this.uiSettingsClient, this.config, this.job.browserTimezone, this.logger),
@@ -212,34 +240,16 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
     const fields = searchSource.getField('fields');
 
-    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
-    searchSource.setField('size', settings.scroll.size);
+    const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
     const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
-
+    const warnings: string[] = [];
+    let first = true;
     let currentRecord = -1;
     let totalRecords = 0;
-    let first = true;
-    let lastSortId: EsQuerySearchAfter | undefined;
-    let pitId: string | undefined;
-    const warnings: string[] = [];
+    let scrollId: string | undefined;
 
-    // open PIT and set field format config
     if (index) {
-      // use _pit API
-      const { title: indexPatternTitle } = index;
-      const { duration } = settings.scroll;
-      this.logger.debug(`Open PIT: index: '${indexPatternTitle}' keep_alive: '${duration}'`);
-      const { body, statusCode } = await this.esClient.asCurrentUser.openPointInTime({
-        index: indexPatternTitle,
-        keep_alive: duration,
-      });
-      if (statusCode === 404) {
-        this.logger.error('Unable to open point in time!');
-        this.logger.error(new Error(JSON.stringify(body)));
-      }
-      pitId = body.id as string;
-
       // apply timezone from the job to all date field formatters
       try {
         index.fields.getByType('date').forEach(({ name }) => {
@@ -259,39 +269,32 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.debug(`Received PIT ID: ${pitId?.substring(0, 9)}`);
-    if (pitId) {
-      searchSource.setField('pit', { id: pitId, keep_alive: '2m' });
-    } else {
-      this.logger.error(`Unable to open a point in time with ${searchSource.getId()}!`);
-    }
-
     do {
       if (this.cancellationToken.isCancelled()) {
         break;
       }
-
-      if (lastSortId) {
-        searchSource.setField('searchAfter', lastSortId);
-      }
       let results: SearchResponse<unknown> | undefined;
       try {
-        results = await searchSource.fetch();
+        if (scrollId == null) {
+          // open a scroll cursor in Elasticsearch
+          results = await this.search(searchSource, scrollSettings);
+          scrollId = results._scroll_id;
+          if (results.hits?.total != null) {
+            totalRecords = results.hits.total;
+            this.logger.debug(`Total search results: ${totalRecords}`);
+          }
+        } else {
+          // use the scroll cursor in Elasticsearch
+          results = await this.scroll(scrollId, scrollSettings);
+        }
       } catch (err) {
         this.logger.error(err);
       }
 
       if (!results) {
+        this.logger.warning(`Search results are undefined!`);
         break;
       }
-
-      if (results.hits?.total == null) {
-        this.logger.error('Expected total number of records in the search response');
-        totalRecords = -1;
-      } else {
-        totalRecords = results.hits.total;
-      }
-      this.logger.debug(`Search results: ${totalRecords}`);
 
       let table: Datatable | undefined;
       try {
@@ -318,31 +321,6 @@ export class CsvGenerator {
       const formatters = this.getFormatters(table);
       this.generateRows(fields, table, builder, formatters, settings);
 
-      const hits = results.hits?.hits || [];
-
-      let tempSortId: EsQuerySearchAfter | undefined;
-      try {
-        tempSortId = hits[hits.length - 1]?.sort as EsQuerySearchAfter;
-        if (lastSortId && tempSortId?.join() === lastSortId?.join()) {
-          // repeated sort ID: results are not thoroughly sorted
-          this.needsSorting = true;
-        }
-
-        const uniqueSortIds = new Set<string | undefined>();
-        hits.forEach((hit) => {
-          uniqueSortIds.add(hit.sort?.join());
-        });
-        if (lastSortId && (!uniqueSortIds.size || uniqueSortIds.size < hits.length)) {
-          // not enough unique sort IDs for the number of hits: results are not thoroughly sorted
-          this.needsSorting = true;
-        }
-      } catch (err) {
-        this.logger.error(err);
-      }
-
-      // update last sort ID for next query
-      lastSortId = tempSortId;
-
       // update iterator
       currentRecord += table.rows.length;
     } while (currentRecord < totalRecords - 1);
@@ -351,12 +329,6 @@ export class CsvGenerator {
     this.logger.debug(
       `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
     );
-
-    // the row count is wrong and it's not because of max size limit
-    // results are not thoroughly sorted
-    if (this.csvRowCount !== totalRecords && !this.maxSizeReached) {
-      this.needsSorting = true;
-    }
 
     // Add warnings to be logged
     if (this.csvContainsFormulas && escapeFormulaValues) {
@@ -367,18 +339,16 @@ export class CsvGenerator {
       );
     }
 
-    if (this.needsSorting) {
-      warnings.push(
-        i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.unsortedResults', {
-          defaultMessage: `The export may have duplicated or missing data: sort values in the search results must be unique`,
-        })
-      );
-    }
-
-    // clean PIT
-    if (pitId) {
-      this.logger.debug(`Closing PIT`);
-      await this.esClient.asCurrentUser.closePointInTime({ body: { id: pitId } });
+    // clear scrollID
+    if (scrollId) {
+      this.logger.debug(`executing clearScroll request`);
+      try {
+        await this.esClient.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
+      } catch (err) {
+        this.logger.error(err);
+      }
+    } else {
+      this.logger.warn(`No scrollId to clear!`);
     }
 
     return {
@@ -386,7 +356,6 @@ export class CsvGenerator {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      needs_sorting: this.needsSorting,
       size,
       warnings,
     };

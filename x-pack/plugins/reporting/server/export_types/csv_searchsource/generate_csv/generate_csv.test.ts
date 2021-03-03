@@ -18,6 +18,8 @@ import {
   ISearchStartSearchSource,
 } from 'src/plugins/data/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
+import { IScopedSearchClient } from 'src/plugins/data/server';
+import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig } from '../../../';
 import { CancellationToken } from '../../../../common';
 import {
@@ -38,6 +40,7 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 });
 
 let mockEsClient: IScopedClusterClient;
+let mockDataClient: IScopedSearchClient;
 let mockConfig: ReportingConfig;
 let uiSettingsClient: IUiSettingsClient;
 
@@ -75,6 +78,7 @@ const mockFieldFormatsRegistry = ({
 
 beforeEach(async () => {
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
+  mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
 
   uiSettingsClient = uiSettingsServiceMock
     .createStartContract()
@@ -112,6 +116,7 @@ it('formats an empty search result to CSV content', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -147,6 +152,7 @@ it('formats a search result to CSV content', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -188,6 +194,7 @@ it('calculates the bytes of the content', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -233,6 +240,7 @@ it('warns if max size was reached', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -272,6 +280,7 @@ it('warns if it detects paging through unsorted search results', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -301,6 +310,7 @@ it('warns if it detects paging through poorly sorted data', async () => {
     createMockJob({}),
     mockConfig,
     mockEsClient,
+    mockDataClient,
     uiSettingsClient,
     mockSearchSourceService,
     mockFieldFormatsRegistry,
@@ -340,6 +350,7 @@ describe('fields', () => {
       createMockJob({ searchSource: {} }),
       mockConfig,
       mockEsClient,
+      mockDataClient,
       uiSettingsClient,
       mockSearchSourceService,
       mockFieldFormatsRegistry,
@@ -393,6 +404,7 @@ describe('fields', () => {
       }),
       mockConfig,
       mockEsClient,
+      mockDataClient,
       uiSettingsClient,
       mockSearchSourceService,
       mockFieldFormatsRegistry,
@@ -436,6 +448,7 @@ describe('formulas', () => {
       createMockJob({}),
       mockConfig,
       mockEsClient,
+      mockDataClient,
       uiSettingsClient,
       mockSearchSourceService,
       mockFieldFormatsRegistry,
@@ -482,6 +495,7 @@ describe('formulas', () => {
       createMockJob({}),
       mockConfig,
       mockEsClient,
+      mockDataClient,
       uiSettingsClient,
       mockSearchSourceService,
       mockFieldFormatsRegistry,
@@ -531,6 +545,7 @@ describe('formulas', () => {
       createMockJob({}),
       mockConfig,
       mockEsClient,
+      mockDataClient,
       uiSettingsClient,
       mockSearchSourceService,
       mockFieldFormatsRegistry,

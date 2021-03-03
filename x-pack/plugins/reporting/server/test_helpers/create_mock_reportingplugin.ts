@@ -135,7 +135,7 @@ export const createMockReportingCore = async (
   const mockReportingCore = ({
     getConfig: () => config,
     getElasticsearchService: () => setupDepsMock?.elasticsearch,
-    getSearchService: () => startDepsMock?.data?.search,
+    getDataService: () => startDepsMock?.data,
   } as unknown) as ReportingCore;
 
   if (!setupDepsMock) {

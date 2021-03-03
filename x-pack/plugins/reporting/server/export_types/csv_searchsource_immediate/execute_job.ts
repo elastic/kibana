@@ -36,8 +36,9 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const esClient = (await reporting.getEsClient()).asScoped(req);
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const searchService = await reporting.getSearchService();
-    const searchSourceService = await searchService.searchSource.asScoped(req);
+    const dataPluginStart = await reporting.getDataService();
+    const searchSourceService = await dataPluginStart.search.searchSource.asScoped(req);
+    const data = dataPluginStart.search.asScoped(req);
 
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
       uiSettingsClient
@@ -52,6 +53,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
       job,
       config,
       esClient,
+      data,
       uiSettingsClient,
       searchSourceService,
       fieldFormatsRegistry,

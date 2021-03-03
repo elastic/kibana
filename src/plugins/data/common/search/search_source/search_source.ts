@@ -439,8 +439,10 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
-      case 'pit':
-        return addToRoot(key, val);
+      case 'scroll':
+        return addToBody(key, val); // TODO: should be addParam (same as trackTotalHits)
+      case 'scrollId':
+        return addToBody('scroll_id', val);
       default:
         return addToBody(key, val);
     }
@@ -540,7 +542,7 @@ export class SearchSource {
     return field;
   }
 
-  private flatten() {
+  public flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
