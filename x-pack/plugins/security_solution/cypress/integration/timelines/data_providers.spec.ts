@@ -10,6 +10,7 @@ import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
+  TIMELINE_FLYOUT_HEADER,
 } from '../../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../../screens/hosts/all_hosts';
 
@@ -57,11 +58,15 @@ describe('timeline data providers', () => {
 
   it('displays the data provider action menu when Enter is pressed', () => {
     dragAndDropFirstHostToTimeline();
-    openTimelineUsingToggle();
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
 
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().focus();
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().parent().type('{enter}');
+    openTimelineUsingToggle();
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).should('exist');
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).first().focus();
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+      .first()
+      .parent()
+      .type('{enter}');
 
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
