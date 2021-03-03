@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
+import { StatusAll } from '../components/status';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -95,8 +95,9 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   reporters: [],
-  status: CaseStatuses.open,
+  status: StatusAll,
   tags: [],
+  onlyCollectionType: false,
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -129,10 +130,13 @@ export interface UseGetCases extends UseGetCasesState {
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
-export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
+export const useGetCases = (
+  initialQueryParams?: QueryParams,
+  initialFilterOptions?: FilterOptions
+): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: DEFAULT_FILTER_OPTIONS,
+    filterOptions: initialFilterOptions ?? DEFAULT_FILTER_OPTIONS,
     isError: false,
     loading: [],
     queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,

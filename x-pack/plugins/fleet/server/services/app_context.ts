@@ -8,22 +8,22 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
-
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-  KibanaRequest,
 } from 'src/core/server';
-import {
+
+import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import { SecurityPluginStart } from '../../../security/server';
-import { FleetConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
-import { CloudSetup } from '../../../cloud/server';
+import type { SecurityPluginStart } from '../../../security/server';
+import type { FleetConfigType } from '../../common';
+import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;

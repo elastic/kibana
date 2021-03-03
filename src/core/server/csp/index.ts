@@ -9,4 +9,5 @@
 import { CspConfig, ICspConfig } from './csp_config';
 import { CspConfigType, config } from './config';
 
-export { CspConfig, CspConfigType, config, ICspConfig };
+export { CspConfig, config };
+export type { CspConfigType, ICspConfig };

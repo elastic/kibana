@@ -288,7 +288,7 @@ function FieldPanelHeader({
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
 
