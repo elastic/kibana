@@ -24,7 +24,7 @@ export const OverviewAgentSection = () => {
   const agentStatusRequest = useGetAgentStatus({});
 
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-agent-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPageAgentsPanelTitle', {
           defaultMessage: 'Agents',

@@ -130,7 +130,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickQuickSave();
 
       await testSubjects.existOrFail('saveDashboardSuccess');
-      await testSubjects.existOrFail('dashboardEditMode');
+    });
+
+    it('Stays in edit mode after performing a quick save', async function () {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     });
   });
 }

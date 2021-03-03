@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
+import type { FakeRequest, IUiSettingsClient } from 'kibana/server';
 
 import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
 
@@ -14,6 +14,7 @@ import type { Framework } from '../../../plugin';
 import type { FieldSpec, IndexPatternsService } from '../../../../../data/common';
 import type { VisPayload, SanitizedFieldType } from '../../../../common/types';
 import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
+import { getIndexPatternObject } from '../lib/get_index_pattern';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -29,7 +30,6 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
     indexPatternsFetcher?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
   getEsShardTimeout: () => Promise<number>;
   getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
@@ -89,16 +89,14 @@ export abstract class AbstractSearchStrategy {
       rollupIndex: string;
     }>
   ) {
-    const { indexPatternsFetcher } = req.pre;
-    const indexPatternsService = await req.getIndexPatternsService();
-    const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
-      (index) => index.title === indexPattern
-    );
+    const { indexPatternObject } = await getIndexPatternObject(indexPattern, {
+      indexPatternsService: await req.getIndexPatternsService(),
+    });
 
     return toSanitizedFieldType(
-      kibanaIndexPattern
-        ? kibanaIndexPattern.getNonScriptedFields()
-        : await indexPatternsFetcher!.getFieldsForWildcard({
+      indexPatternObject
+        ? indexPatternObject.getNonScriptedFields()
+        : await req.pre.indexPatternsFetcher!.getFieldsForWildcard({
             pattern: indexPattern,
             fieldCapsOptions: { allow_no_indices: true },
             metaFields: [],

@@ -80,6 +80,11 @@ import {
   CUSTOM_QUERY_REQUIRED,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW,
+  THREAT_MATCH_INDICATOR_INDEX,
+  THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
+  THREAT_MATCH_CUSTOM_QUERY_INPUT,
+  THREAT_MATCH_QUERY_INPUT,
+  THREAT_MAPPING_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -325,17 +330,17 @@ export const fillIndicatorMatchRow = ({
 }) => {
   const computedRowNumber = rowNumber == null ? 1 : rowNumber;
   const computedValueRows = validColumns == null ? 'both' : validColumns;
-  const OFFSET = 2;
-  cy.get(COMBO_BOX_INPUT)
-    .eq(computedRowNumber * OFFSET + 1)
+  cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
+    .eq(computedRowNumber * 2 - 2)
+    .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
     cy.get(`button[title="${indexField}"]`)
       .should('be.visible')
       .then(([e]) => e.click());
   }
-  cy.get(COMBO_BOX_INPUT)
-    .eq(computedRowNumber * OFFSET + 2)
+  cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
+    .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
@@ -393,19 +398,20 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
-export const getIndicatorIndex = () => cy.get(COMBO_BOX_INPUT).eq(0);
+export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
 
 /** Returns the indicator's indicator index */
-export const getIndicatorIndicatorIndex = () => cy.get(COMBO_BOX_INPUT).eq(2);
+export const getIndicatorIndicatorIndex = () =>
+  cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
 export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN);
 
 /** Returns the custom query input */
-export const getCustomQueryInput = () => cy.get(CUSTOM_QUERY_INPUT).eq(0);
+export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
 
 /** Returns the custom query input */
-export const getCustomIndicatorQueryInput = () => cy.get(CUSTOM_QUERY_INPUT).eq(1);
+export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPUT).eq(0);
 
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);

@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 import { DocumentStatsTable } from './document_stats';
@@ -17,7 +18,11 @@ export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'mlDVOtherContent'}>
       <DocumentStatsTable config={config} />
-      {Array.isArray(stats.examples) && <ExamplesList examples={stats.examples} />}
+      {Array.isArray(stats.examples) && (
+        <EuiFlexItem>
+          <ExamplesList examples={stats.examples} />
+        </EuiFlexItem>
+      )}
     </ExpandedRowContent>
   );
 };

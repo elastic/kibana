@@ -551,7 +551,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('it does not use date range if the x is not a time scale', () => {
+    test('it has xDomain undefined if the x is not a time scale or a histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -570,7 +570,27 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(component.find(Settings).prop('xDomain')).toBeUndefined();
+      const xDomain = component.find(Settings).prop('xDomain');
+      expect(xDomain).toEqual(undefined);
+    });
+
+    test('it uses min interval if interval is passed in and visualization is histogram', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          minInterval={101}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              { ...args.layers[0], seriesType: 'line', xScaleType: 'linear', isHistogram: true },
+            ],
+          }}
+        />
+      );
+      expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
     });
 
     test('it renders bar', () => {
@@ -1879,6 +1899,24 @@ describe('xy_expression', () => {
         jest.fn().mockResolvedValue({ interval: '5m' })
       );
       expect(result).toEqual(5 * 60 * 1000);
+    });
+
+    it('should return interval of number histogram if available on first x axis columns', async () => {
+      xyProps.args.layers[0].xScaleType = 'linear';
+      xyProps.data.tables.first.columns[2].meta = {
+        source: 'esaggs',
+        type: 'number',
+        field: 'someField',
+        sourceParams: {
+          type: 'histogram',
+          params: {
+            interval: 'auto',
+            used_interval: 5,
+          },
+        },
+      };
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(5);
     });
 
     it('should return undefined if data table is empty', async () => {

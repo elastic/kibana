@@ -80,7 +80,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   deleteFirstRule,
   deleteSelectedRules,
   editFirstRule,
@@ -88,8 +88,8 @@ import {
   goToCreateNewRule,
   goToRuleDetails,
   selectNumberOfRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
+  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -108,6 +108,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { activatesRule } from '../../tasks/rule_details';
 
 import { DETECTIONS_URL } from '../../urls/navigation';
 
@@ -136,7 +137,7 @@ describe('Custom detection rules creation', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -158,8 +159,7 @@ describe('Custom detection rules creation', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -245,7 +245,7 @@ describe('Custom detection rules deletion and edition', () => {
           cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
 
           deleteFirstRule();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(
@@ -275,7 +275,7 @@ describe('Custom detection rules deletion and edition', () => {
 
           selectNumberOfRules(numberOfRulesToBeDeleted);
           deleteSelectedRules();
-          waitForRulesToBeLoaded();
+          waitForRulesTableToBeRefreshed();
 
           cy.get(RULES_TABLE).then(($table) => {
             cy.wrap($table.find(RULES_ROW).length).should(
@@ -307,6 +307,21 @@ describe('Custom detection rules deletion and edition', () => {
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(existingRule, 'rule1');
       reload();
+    });
+
+    it('Only modifies rule active status on enable/disable', () => {
+      activatesRule();
+
+      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+
+      goToRuleDetails();
+
+      cy.wait('@fetchRuleDetails').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+
+        cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
+        cy.wrap(response!.body.enabled).should('eql', false);
+      });
     });
 
     it('Allows a rule to be edited', () => {
@@ -348,7 +363,16 @@ describe('Custom detection rules deletion and edition', () => {
       goToAboutStepTab();
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(editedRule);
+
+      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+
       saveEditedRule();
+
+      cy.wait('@getRule').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+        // ensure that editing rule does not modify max_signals
+        cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
+      });
 
       cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
