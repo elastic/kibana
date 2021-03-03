@@ -453,7 +453,7 @@ Hypothetically, suppose the output of `drift` and `load` was the following:
 }
 --------------------------------------------------
 <1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
-<2> load shows us that at least half of the time Task Manager is running at a load of 80%
+<2> `load` shows us that at least half of the time Task Manager is running at a load of 80%.
 
 We can infer from these stats that this {kib} is utilizing most of its capacity, but seems to keep up with the work most of the time.
 This assessment is based on the following:
