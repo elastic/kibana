@@ -303,10 +303,11 @@ You can infer from this output that the {kib} instance only polls for work once 
 
 There are two possible reasons for such a configuration:
 
-The first, is that these settings have been configured manually, which can be resolved by reconfiguring these settings.
+. These settings have been configured manually, which can be resolved by reconfiguring these settings.
 For details, see <<task-manager-settings-kb, Task Manager Settings>>.
 
-The second, is that {kib} has reduced its own throughput in reaction to excessive load on the {es} cluster.
+. {kib} has reduced its own throughput in reaction to excessive load on the {es} cluster.
+
 Task Manager is equipped with a reactive self-healing mechanism in response to an increase in load related errors in {es}. This mechanism will increase the `poll_interval` setting (reducing the rate at which it queries {es}), and decrease the `max_workers` (reducing the amount of operations it executes against {es}). Once the error rate reduces, these settings are incrementally dialed up again, returning them to the configured settings.
 
 This scenario can be identified by searching the {kib} Server Log for messages such as:
