@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { getSeverityColor } from '@kbn/ml-utils';
+import { getSeverityColor } from '@kbn/ml-utils/src/anomaly_utils';
 import {
   AnomalyAlertSeverityType,
   ANOMALY_ALERT_SEVERITY_TYPES,

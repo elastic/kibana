@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from '@kbn/ml-utils';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils/src/constants/anomalies';
 import { EuiTheme } from '../../../../src/plugins/kibana_react/common';
 
 export enum ServiceHealthStatus {

@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
-  ANOMALY_SEVERITY,
-} from '@kbn/ml-utils';
+} from '@kbn/ml-utils/src/anomaly_utils';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils/src/constants/anomalies';
 import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {
