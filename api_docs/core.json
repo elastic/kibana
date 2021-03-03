@@ -6721,14 +6721,6 @@
               {
                 "pluginId": "core",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.FakeRequest",
-                "text": "FakeRequest"
-              },
-              " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
@@ -6740,6 +6732,14 @@
                 "docId": "kibCoreHttpPluginApi",
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
+              },
+              " | ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.FakeRequest",
+                "text": "FakeRequest"
               },
               " | undefined) => Pick<",
               {
@@ -6763,14 +6763,6 @@
                   {
                     "pluginId": "core",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.FakeRequest",
-                    "text": "FakeRequest"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
                     "docId": "kibCoreHttpPluginApi",
                     "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
@@ -6782,6 +6774,14 @@
                     "docId": "kibCoreHttpPluginApi",
                     "section": "def-server.LegacyRequest",
                     "text": "LegacyRequest"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.FakeRequest",
+                    "text": "FakeRequest"
                   },
                   " | undefined"
                 ],
@@ -17075,14 +17075,6 @@
           {
             "pluginId": "core",
             "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.FakeRequest",
-            "text": "FakeRequest"
-          },
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
@@ -17094,6 +17086,14 @@
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
+          },
+          " | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.FakeRequest",
+            "text": "FakeRequest"
           },
           " | undefined) => Pick<LegacyScopedClusterClient, \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
         ],
@@ -17120,14 +17120,6 @@
           {
             "pluginId": "core",
             "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.FakeRequest",
-            "text": "FakeRequest"
-          },
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
@@ -17139,6 +17131,14 @@
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
+          },
+          " | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.FakeRequest",
+            "text": "FakeRequest"
           },
           " | undefined) => Pick<LegacyScopedClusterClient, \"callAsCurrentUser\" | \"callAsInternalUser\">; }"
         ],
@@ -17204,14 +17204,6 @@
           {
             "pluginId": "core",
             "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.FakeRequest",
-            "text": "FakeRequest"
-          },
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
@@ -17223,6 +17215,14 @@
             "docId": "kibCoreHttpPluginApi",
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
+          },
+          " | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.FakeRequest",
+            "text": "FakeRequest"
           }
         ],
         "initialIsOpen": false
