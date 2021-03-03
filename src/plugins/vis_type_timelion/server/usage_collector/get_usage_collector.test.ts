@@ -7,9 +7,7 @@
  */
 
 import { getStats } from './get_usage_collector';
-import { setIndexPatternsService } from '../services';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import { IndexPatternsServiceStart } from '../../../../plugins/data/server/index_patterns';
 
 const mockedSavedObjects = [
   {
@@ -66,21 +64,21 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
   fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
+  fetchParamsMock.soClient.find = jest.fn().mockResolvedValue({
+    saved_objects: [
+      {
+        attributes: {
+          title: 'my-test',
+          fields: JSON.stringify([{ scripted: true, name: 'scripted-test-field' }]),
+        },
+      },
+    ],
+  });
   return fetchParamsMock;
 };
 
 describe('Timelion visualization usage collector', () => {
   const mockIndex = 'mock_index';
-  const indexPatternServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'] = ((() => {
-    return {
-      find: () => [
-        { title: 'my-test', getScriptedFields: () => [{ name: 'scripted-test-field' }] },
-      ],
-    };
-  }) as unknown) as IndexPatternsServiceStart['indexPatternsServiceFactory'];
-  setIndexPatternsService({
-    indexPatternsServiceFactory: indexPatternServiceFactory,
-  });
 
   test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(

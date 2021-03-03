@@ -58,7 +58,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
 
         for (const index in indexArgs) {
           if (indexArgs[index]?.value.text) {
-            const foundIndexPatterns = await getIndexPatterns().find(indexArgs[index]?.value.text);
+            const foundIndexPatterns = await getIndexPatterns().find(indexArgs[index].value.text);
             indexPatterns = indexPatterns.concat(foundIndexPatterns);
           }
         }
