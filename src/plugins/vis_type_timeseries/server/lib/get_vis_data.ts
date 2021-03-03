@@ -10,6 +10,7 @@ import _ from 'lodash';
 
 import { Framework } from '../plugin';
 import { TimeseriesVisData } from '../../common/types';
+import { PANEL_TYPES } from '../../common/panel_types';
 import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestHandlerContext,
@@ -37,7 +38,7 @@ export async function getVisData(
   };
 
   const promises = request.body.panels.map((panel) => {
-    if (panel.type === 'table') {
+    if (panel.type === PANEL_TYPES.TABLE) {
       return getTableData(requestContext, request, panel, services);
     }
     return getSeriesData(requestContext, request, panel, services);
