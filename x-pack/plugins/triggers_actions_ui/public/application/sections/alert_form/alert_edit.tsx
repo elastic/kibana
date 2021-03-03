@@ -44,7 +44,9 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 
@@ -52,10 +54,12 @@ export const AlertEdit = ({
   initialAlert,
   onClose,
   reloadAlerts,
+  onSave,
   alertTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertEditProps) => {
+  const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
     alert: cloneDeep(initialAlert),
   });
@@ -203,8 +207,8 @@ export const AlertEdit = ({
                       setIsSaving(false);
                       if (savedAlert) {
                         onClose(AlertFlyoutCloseReason.SAVED);
-                        if (reloadAlerts) {
-                          reloadAlerts();
+                        if (onSaveHandler) {
+                          onSaveHandler();
                         }
                       }
                     }}

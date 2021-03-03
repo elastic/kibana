@@ -13,7 +13,12 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '../../common';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  ISearchOptionsSerializable,
+} from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
   SearchTimeoutError,
@@ -60,7 +65,7 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
   private batchedFetch!: BatchedFunc<
-    { request: IKibanaSearchRequest; options: ISearchOptions },
+    { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >;
 
@@ -127,14 +132,23 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal, sessionId, ...requestOptions } = options || {};
+    const combined = {
+      ...requestOptions,
+      ...this.deps.session.getSearchOptions(sessionId),
+    };
+    const serializableOptions: ISearchOptionsSerializable = {};
+
+    if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
+    if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.legacyHitsTotal !== undefined)
+      serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
+    if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
+    if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
 
     return this.batchedFetch(
       {
         request,
-        options: {
-          ...requestOptions,
-          ...this.deps.session.getSearchOptions(sessionId),
-        },
+        options: serializableOptions,
       },
       abortSignal
     );

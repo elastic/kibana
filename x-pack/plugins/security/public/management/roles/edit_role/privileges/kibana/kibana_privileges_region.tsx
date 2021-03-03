@@ -6,15 +6,18 @@
  */
 
 import React, { Component } from 'react';
-import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../spaces/public';
-import { Role } from '../../../../../../common/model';
-import { RoleValidator } from '../../validate_role';
+
+import type { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { Space } from '../../../../../../../spaces/public';
+import type { Role } from '../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
+import type { RoleValidator } from '../../validate_role';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import { KibanaPrivileges } from '../../../model';
 
 interface Props {
   role: Role;
@@ -26,6 +29,7 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   validator: RoleValidator;
+  spacesApiUi?: SpacesApiUi;
 }
 
 export class KibanaPrivilegesRegion extends Component<Props, {}> {
@@ -48,6 +52,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       onChange,
       editable,
       validator,
+      spacesApiUi,
     } = this.props;
 
     if (role._transform_error && role._transform_error.includes('kibana')) {
@@ -65,6 +70,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           editable={editable}
           canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
           validator={validator}
+          spacesApiUi={spacesApiUi!}
         />
       );
     } else {

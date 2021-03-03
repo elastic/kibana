@@ -10,7 +10,5 @@ export {
   hasImportPermission,
   processResults,
   readFile,
-  getMaxBytes,
-  getMaxBytesFormatted,
   DEFAULT_LINES_TO_SAMPLE,
 } from './utils';

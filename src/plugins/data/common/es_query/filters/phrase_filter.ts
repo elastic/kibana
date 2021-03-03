@@ -96,9 +96,15 @@ export const getPhraseScript = (field: IFieldType, value: string) => {
   };
 };
 
-// See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
-// and https://github.com/elastic/elasticsearch/pull/22201
-// for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
+/**
+ * @internal
+ * See issues bellow for the reason behind this change.
+ * Values need to be converted to correct types for boolean \ numeric fields.
+ * https://github.com/elastic/kibana/issues/74301
+ * https://github.com/elastic/kibana/issues/8677
+ * https://github.com/elastic/elasticsearch/issues/20941
+ * https://github.com/elastic/elasticsearch/pull/22201
+ **/
 export const getConvertedValueForField = (field: IFieldType, value: any) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if ([1, 'true'].includes(value)) {
@@ -109,10 +115,15 @@ export const getConvertedValueForField = (field: IFieldType, value: any) => {
       throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
     }
   }
+
+  if (typeof value !== 'number' && field.type === 'number') {
+    return Number(value);
+  }
   return value;
 };
 
 /**
+ * @internal
  * Takes a scripted field and returns an inline script appropriate for use in a script query.
  * Handles lucene expression and Painless scripts. Other langs aren't guaranteed to generate valid
  * scripts.

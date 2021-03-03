@@ -16,6 +16,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { documentField } from './document_field';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -70,6 +71,7 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        documentField,
       ],
     } as IndexPattern;
 
@@ -221,5 +223,15 @@ describe('IndexPattern Field Item', () => {
         fieldName: 'bytes',
       }),
     });
+  });
+
+  it('should not request field stats for document field', async () => {
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} field={documentField} />);
+
+    clickField(wrapper, 'Records');
+
+    expect(core.http.post).not.toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
   });
 });

@@ -30,14 +30,13 @@ export interface TimeRange {
 }
 
 function useUiFilters(params: IUrlParams): UIFilters {
-  const { kuery, environment, ...urlParams } = params;
   const localUiFilters = mapValues(
-    pickKeys(urlParams, ...localUIFilterNames),
+    pickKeys(params, ...localUIFilterNames),
     (val) => (val ? val.split(',') : [])
   ) as Partial<Record<LocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
-    kuery,
+    environment: params.environment,
     ...localUiFilters,
   });
 }

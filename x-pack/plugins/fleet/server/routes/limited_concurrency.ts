@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import type {
   CoreSetup,
-  KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
   OnPreAuthHandler,
 } from 'kibana/server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
-import { FleetConfigType } from '../index';
+import type { FleetConfigType } from '../index';
 
 export class MaxCounter {
   constructor(private readonly max: number = 1) {}
