@@ -1,7 +1,7 @@
 [[actions-and-connectors-legacy-api-update]]
-====  LegacyUpdate connector API
+==== Legacy Update connector API
 ++++
-<titleabbrev>Update connector API</titleabbrev>
+<titleabbrev>Legacy Update connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]

@@ -1,7 +1,7 @@
 [[actions-and-connectors-legacy-api-create]]
-====  Legacy Create connector API
+==== Legacy Create connector API
 ++++
-<titleabbrev>Create connector API</titleabbrev>
+<titleabbrev>Legacy Create connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]

@@ -1,7 +1,7 @@
 [[actions-and-connectors-legacy-api-get]]
-====  LegacyGet connector API
+==== Legacy Get connector API
 ++++
-<titleabbrev>Get connector API</titleabbrev>
+<titleabbrev>Legacy Get connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]

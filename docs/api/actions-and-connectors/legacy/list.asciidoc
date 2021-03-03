@@ -1,7 +1,7 @@
 [[actions-and-connectors-legacy-api-list]]
-====  LegacyList connector types API
+==== Legacy List connector types API
 ++++
-<titleabbrev>List all connector types API</titleabbrev>
+<titleabbrev>Legacy List all connector types API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
