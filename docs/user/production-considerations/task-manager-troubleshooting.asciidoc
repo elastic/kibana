@@ -468,7 +468,6 @@ For details on achieving higher throughput by adjusting your scaling strategy, s
 Tasks run for too long, overrunning their schedule
 
 *Diagnosis*:
-
 The <<task-manager-theory-insufficient-throughput,"Insufficient throughtput to handle the scheduled workload">> theory analyzed a hypothetical scenario where both _drift_ and _load_ were unusually high.
 
 Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
@@ -536,7 +535,6 @@ In the hypothetical example above, most likely, this would be resolved by modify
 Tasks take multiple attempts to succeed
 
 *Diagnosis*:
-
 A high error rate could cause a task to appear to run late, when in fact it runs on time, but experiences a high failure rate.
 
 Evaluating the health stats above, we can see the following output under `stats.runtime.value.execution.result_frequency_percent_as_number`:
