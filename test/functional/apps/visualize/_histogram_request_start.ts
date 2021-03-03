@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Field = machine.ram_range');
         await PageObjects.visEditor.selectField('machine.ram_range');
         await retry.waitFor('interval to be set', async () => {
-          return await PageObjects.visEditor.getNumericInterval();
+          return Boolean(await PageObjects.visEditor.getNumericInterval());
         });
         expect(await PageObjects.visEditor.getNumericInterval()).to.eql(100);
       });
