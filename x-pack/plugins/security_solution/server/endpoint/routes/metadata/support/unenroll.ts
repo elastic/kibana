@@ -20,8 +20,7 @@ export async function findAllUnenrolledAgentIds(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery:
-        '(fleet-agents.active : false) OR (NOT fleet-agents.packages : "endpoint" AND fleet-agents.active : true)',
+      kuery: '(active : false) OR (NOT packages : "endpoint" AND active : true)',
     };
   };
 

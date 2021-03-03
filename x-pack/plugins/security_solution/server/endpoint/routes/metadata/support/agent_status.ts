@@ -31,7 +31,7 @@ export async function findAgentIDsByStatus(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery: `(fleet-agents.packages : "endpoint" AND (${helpers.join(' OR ')}))`,
+      kuery: `(packages : "endpoint" AND (${helpers.join(' OR ')}))`,
     };
   };
 

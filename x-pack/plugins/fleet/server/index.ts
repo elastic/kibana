@@ -31,9 +31,10 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
     renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
+    unused('agents.fleetServerEnabled'),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
