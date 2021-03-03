@@ -50,7 +50,6 @@ export function buildApiDeclaration(
   name?: string
 ): ApiDeclaration {
   const apiName = name ? name : isNamedNode(node) ? node.getName() : 'Unnamed';
-  log.debug(`Building API Declaration for ${apiName} of kind ${node.getKindName()}`);
   const apiId = parentApiId ? parentApiId + '.' + apiName : apiName;
   const anchorLink: AnchorLink = { scope, pluginName, apiName: apiId };
 

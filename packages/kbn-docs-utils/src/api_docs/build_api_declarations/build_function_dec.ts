@@ -39,7 +39,6 @@ export function buildFunctionDec(
   const label = Node.isConstructorDeclaration(node)
     ? 'Constructor'
     : node.getName() || '(WARN: Missing name)';
-  log.debug(`Getting function doc def for node ${label} of kind ${node.getKindName()}`);
   return {
     id: getApiSectionId(anchorLink),
     type: TypeKind.FunctionKind,
