@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        '_id:2 _type:_doc _index:flstest _score:0 customer_name.keyword:ABC Company customer_ssn:444.555.6666 customer_region.keyword:WEST runtime_customer_ssn:444.555.6666 calculated at runtime customer_region:WEST customer_name:ABC Company customer_ssn.keyword:444.555.6666'
+        'customer_name:ABC Company customer_name.keyword:ABC Company customer_region:WEST customer_region.keyword:WEST customer_ssn:444.555.6666 customer_ssn.keyword:444.555.6666 runtime_customer_ssn:444.555.6666 calculated at runtime _id:2 _index:flstest _score:0 _type: -'
       );
     });
 
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        '_id:2 _type:_doc _index:flstest _score:0 customer_name.keyword:ABC Company customer_region.keyword:WEST customer_region:WEST customer_name:ABC Company'
+        'customer_name:ABC Company customer_name.keyword:ABC Company customer_region:WEST customer_region.keyword:WEST _id:2 _index:flstest _score:0 _type: -'
       );
     });
 
