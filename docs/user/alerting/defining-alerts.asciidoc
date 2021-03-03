@@ -5,9 +5,9 @@
 {kib} alerts can be created in a variety of apps including <<xpack-apm,*APM*>>, <<xpack-ml,*{ml-app}*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>> and from <<management,*Management*>> UI. While alerting details may differ from app to app, they share a common interface for defining and configuring alerts that this section describes in more detail.
 
 [float]
-=== Alert flyout
+=== Create an alert
 
-When an alert is created in an app, the app will display a flyout panel with three main sections to configure:
+When you create an alert, you must define the alert details, conditions, and actions.
 
 . <<defining-alerts-general-details, General alert details>>
 . <<defining-alerts-type-conditions, Alert type and conditions>>
@@ -19,7 +19,7 @@ image::images/alert-flyout-sections.png[The three sections of an alert definitio
 [[defining-alerts-general-details]]
 === General alert details
 
-All alerts share the following four properties in common:
+All alerts share the following four properties.
 
 [role="screenshot"]
 image::images/alert-flyout-general-details.png[alt='All alerts have name, tags, check every, and notify properties in common']
@@ -69,6 +69,7 @@ Each action type exposes different properties. For example an email action allow
 image::images/alert-flyout-action-details.png[UI for defining an email action]
 
 [float]
+[[defining-alerts-actions-variables]]
 ==== Action variables
 Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. You can access the list of available variables using the "add variable" button. Although available variables differ by alert type, all alert types pass the following variables:
 
@@ -105,6 +106,6 @@ Actions are not required on alerts. You can run an alert without actions to unde
 ==============================================
 
 [float]
-=== Managing alerts
+=== Manage alerts
 
 To modify an alert after it was created, including muting or disabling it, use the <<alert-management, alert listing in the Management UI>>.
