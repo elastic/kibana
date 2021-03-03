@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { createAppContextStartContractMock } from '../../../../plugins/fleet/server/mocks';
+import { createAppContextStartContractMock } from '../../../../plugins/fleet/server/mocks/app_context_mock';
 import { appContextService } from '../../../../plugins/fleet/server/services';
 import { getTemplate } from '../../../../plugins/fleet/server/services/epm/elasticsearch/template/template';
 
