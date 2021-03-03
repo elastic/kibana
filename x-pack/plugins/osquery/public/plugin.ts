@@ -20,17 +20,19 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  // SetupPlugins,
+  SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
-  LazyOsqueryManagedEmptyCreatePolicyExtension,
+  // LazyOsqueryManagedEmptyCreatePolicyExtension,
   LazyOsqueryManagedEmptyEditPolicyExtension,
 } from './fleet_integration';
-// import { getActionType } from './osquery_action_type';
+import { getActionType } from './osquery_action_type';
+import { getLazyCasesIntegration } from './cases_integration/lazy_index';
+import { getLazyCreateOsqueryActionForm } from './shared_components/create_action_form/lazy_index';
 
 export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
   http.fetch('/api/fleet/epm/packages', { query: { experimental: true } }).then(({ response }) => {
@@ -54,11 +56,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(
-    core: CoreSetup
-    // plugins: SetupPlugins
-  ): OsqueryPluginSetup {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+  public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+    }>();
 
     if (!config.enabled) {
       return {};
@@ -89,7 +91,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    // plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
+    if (config.actionEnabled) {
+      plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
+    }
 
     // Return methods that should be available to other plugins
     return {};
@@ -131,7 +135,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }));
     }
 
-    return {};
+    return {
+      getCasesIntegration: getLazyCasesIntegration,
+      getCreateOsqueryActionForm: getLazyCreateOsqueryActionForm,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

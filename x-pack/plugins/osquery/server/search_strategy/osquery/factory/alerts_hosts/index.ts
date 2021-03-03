@@ -14,14 +14,14 @@ import {
 } from '../../../../../common/search_strategy/osquery';
 import { inspectStringifyObject } from '../../../../../common/utils/build_query';
 import { OsqueryFactory } from '../types';
-import { buildResultsQuery } from './query.all_results.dsl';
+import { buildAlertsHostsQuery } from './query.alerts_hosts.dsl';
 
-export const allResults: OsqueryFactory<OsqueryQueries.results> = {
+export const alertsHosts: OsqueryFactory<OsqueryQueries.results> = {
   buildDsl: (options: ResultsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-    return buildResultsQuery(options);
+    return buildAlertsHostsQuery(options);
   },
   parse: async (
     options: ResultsRequestOptions,
@@ -29,10 +29,8 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
   ): Promise<ResultsStrategyResponse> => {
     const { activePage } = options.pagination;
     const inspect = {
-      dsl: [inspectStringifyObject(buildResultsQuery(options))],
+      dsl: [inspectStringifyObject(buildAlertsHostsQuery(options))],
     };
-
-    console.log(response.rawResponse);
 
     return {
       ...response,

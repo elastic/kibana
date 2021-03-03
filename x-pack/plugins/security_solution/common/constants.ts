@@ -172,6 +172,7 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
   Rule notifications options
 */
 export const ENABLE_CASE_CONNECTOR = true;
+export const ENABLE_OSQUERY_CONNECTOR = true;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
@@ -185,6 +186,10 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
+if (ENABLE_OSQUERY_CONNECTOR) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.osquery');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';

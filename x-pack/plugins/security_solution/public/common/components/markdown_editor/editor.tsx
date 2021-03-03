@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useCallback } from 'react';
-import { EuiMarkdownEditor } from '@elastic/eui';
+import React, { memo, useEffect, useRef, useState, useCallback } from 'react';
+import { EuiMarkdownEditor, EuiSpacer } from '@elastic/eui';
+import { IndexPattern } from 'src/plugins/data/public';
+import {
+  TypedLensByValueInput,
+  PersistedIndexPatternLayer,
+  XYState,
+} from '../../../../../../plugins/lens/public';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
+import { useKibana } from '../../lib/kibana';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;

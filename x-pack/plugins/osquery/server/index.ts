@@ -13,6 +13,7 @@ export const config = {
   schema: ConfigSchema,
   exposeToBrowser: {
     enabled: true,
+    actionEnabled: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

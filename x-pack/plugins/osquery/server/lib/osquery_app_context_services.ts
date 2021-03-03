@@ -41,6 +41,8 @@ export class OsqueryAppContextService {
     this.packageService = dependencies.packageService;
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
+    // @ts-expect-error update types
+    this.getCasesClient = dependencies.getCasesClient;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -60,6 +62,10 @@ export class OsqueryAppContextService {
 
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.agentPolicyService;
+  }
+
+  public getCasesClient(props) {
+    return this.getCasesClient(props);
   }
 }
 

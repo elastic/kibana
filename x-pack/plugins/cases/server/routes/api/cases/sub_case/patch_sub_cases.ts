@@ -206,7 +206,7 @@ async function getAlertComments({
     client,
     id: ids,
     options: {
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.osqueryAlert}`,
     },
   });
 }

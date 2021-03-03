@@ -79,6 +79,8 @@ const getCommentContent = (comment: CommentResponse): string => {
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
+  } else if (comment.type === CommentType.osqueryAlert) {
+    return `Osquery action alert with action_id: ${comment.alertId} added to case`;
   }
 
   return '';
@@ -86,7 +88,11 @@ const getCommentContent = (comment: CommentResponse): string => {
 
 const countAlerts = (comments: CaseResponse['comments']): number =>
   comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+    if (
+      comment.type === CommentType.alert ||
+      comment.type === CommentType.generatedAlert ||
+      comment.type === CommentType.osqueryAlert
+    ) {
       return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
     }
     return total;
@@ -335,6 +341,7 @@ export const getCommentContextFromAttributes = (
         type: CommentType.user,
         comment: attributes.comment,
       };
+    case CommentType.osqueryAlert:
     case CommentType.generatedAlert:
     case CommentType.alert:
       return {

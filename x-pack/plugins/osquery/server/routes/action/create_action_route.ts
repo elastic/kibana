@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 
 import { IRouter } from '../../../../../../src/core/server';
+import { createActionHandler } from '../../handlers';
 
 export const createActionRoute = (router: IRouter) => {
   router.post(
@@ -21,32 +20,18 @@ export const createActionRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-
-      const action = {
-        action_id: uuid.v4(),
-        '@timestamp': moment().toISOString(),
-        expiration: moment().add(2, 'days').toISOString(),
-        type: 'INPUT_ACTION',
-        input_type: 'osquery',
-        // @ts-expect-error update validation
-        agents: request.body.agents,
-        data: {
-          // @ts-expect-error update validation
-          id: request.body.query.id ?? uuid.v4(),
-          // @ts-expect-error update validation
-          query: request.body.query.query,
-        },
-      };
-      const query = await esClient.index<{}, {}>({
-        index: '.fleet-actions',
-        body: action,
-      });
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { query, actions } = await createActionHandler(
+        esClient,
+        savedObjectsClient,
+        request.body
+      );
 
       return response.ok({
         body: {
           response: query,
-          action,
+          actions,
         },
       });
     }

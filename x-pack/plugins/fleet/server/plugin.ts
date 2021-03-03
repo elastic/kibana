@@ -80,6 +80,7 @@ import {
   authenticateAgentWithAccessToken,
   listAgents,
   getAgent,
+  getAgents,
 } from './services/agents';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
@@ -321,12 +322,14 @@ export class FleetPlugin
       },
       agentService: {
         getAgent,
+        getAgents,
         listAgents,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
       agentPolicyService: {
         get: agentPolicyService.get,
+        getByIDs: agentPolicyService.getByIDs,
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,

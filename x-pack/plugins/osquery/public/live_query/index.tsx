@@ -14,14 +14,22 @@ import { useKibana } from '../common/lib/kibana';
 import { LiveQueryForm } from './form';
 import { ResultTabs } from '../queries/edit/tabs';
 
-const LiveQueryComponent = () => {
+interface LiveQueryProps {
+  onSuccess?: () => void;
+}
+
+const LiveQueryComponent: React.FC<LiveQueryProps> = ({ onSuccess }) => {
   const location = useLocation();
   const { http } = useKibana().services;
 
-  const createActionMutation = useMutation((payload: Record<string, unknown>) =>
-    http.post('/internal/osquery/action', {
-      body: JSON.stringify(payload),
-    })
+  const createActionMutation = useMutation(
+    (payload: Record<string, unknown>) =>
+      http.post('/internal/osquery/action', {
+        body: JSON.stringify(payload),
+      }),
+    {
+      onSuccess,
+    }
   );
 
   return (
@@ -37,7 +45,7 @@ const LiveQueryComponent = () => {
       {createActionMutation.data && (
         <>
           <EuiSpacer />
-          <ResultTabs actionId={createActionMutation.data?.action.action_id} />
+          <ResultTabs actionId={createActionMutation.data?.actions[0].action_id} />
         </>
       )}
     </>

@@ -55,16 +55,16 @@ export function getActionType(): ActionTypeModel {
         message: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.message?.length) {
-        errors.message.push(
-          i18n.translate(
-            'xpack.osquery.components.builtinActionTypes.error.requiredExampleMessageText',
-            {
-              defaultMessage: 'Message is required.',
-            }
-          )
-        );
-      }
+      // if (!actionParams.message?.length) {
+      //   errors.message.push(
+      //     i18n.translate(
+      //       'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredExampleMessageText',
+      //       {
+      //         defaultMessage: 'Message is required.',
+      //       }
+      //     )
+      //   );
+      // }
       return validationResult;
     },
     actionConnectorFields: null,
