@@ -26,7 +26,12 @@ interface Props {
 export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
   <section>
     <header>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        justifyContent="flexStart"
+        responsive={false}
+      >
         {iconType && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={iconType} size="l" />
