@@ -4,15 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { coreMock } from '../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+  coreMock,
+} from '../../../../../src/core/server/mocks';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
+import type { FleetAppContext } from '../plugin';
 
-// This mock is used in an api integration test, it lives in a separate file
-// so that the jest dependency is decoupled
-export { createAppContextStartContractMock } from './app_context_mock';
+export const createAppContextStartContractMock = (): FleetAppContext => {
+  return {
+    elasticsearch: elasticsearchServiceMock.createStart(),
+    encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+    security: securityMock.createStart(),
+    logger: loggingSystemMock.create().get(),
+    isProductionMode: true,
+    kibanaVersion: '8.0.0',
+    kibanaBranch: 'master',
+  };
+};
 
 function createCoreRequestHandlerContextMock() {
   return {
