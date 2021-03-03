@@ -16,16 +16,17 @@ import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 
 export async function getTableData(req, panel) {
-  const panelIndexPattern = panel.index_pattern;
-
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(
+    panel.index_pattern,
+    {
+      indexPatternsService: await req.getIndexPatternsService(),
+    }
+  );
   const {
     searchStrategy,
     capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
+  } = await req.framework.searchStrategyRegistry.getViableStrategy(req, indexPatternString);
   const esQueryConfig = await getEsQueryConfig(req);
-  const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
-    indexPatternsService: await req.getIndexPatternsService(),
-  });
 
   const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
 
@@ -58,7 +59,7 @@ export async function getTableData(req, panel) {
     const [resp] = await searchStrategy.search(req, [
       {
         body,
-        index: panelIndexPattern,
+        index: indexPatternString,
       },
     ]);
 

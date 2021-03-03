@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
@@ -40,12 +39,14 @@ export default function ({ getService, getPageObjects }) {
 
     it('create rollup tsvb', async () => {
       //Create data for rollup job so it doesn't fail
-      await es.index({
-        index: rollupSourceIndexName,
-        body: {
-          '@timestamp': new Date().toISOString(),
-        },
-      });
+      for (const date of pastDates) {
+        await es.index({
+          index: rollupSourceIndexName,
+          body: {
+            '@timestamp': date.toISOString(),
+          },
+        });
+      }
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
@@ -67,10 +68,11 @@ export default function ({ getService, getPageObjects }) {
             page_size: 1000,
           },
         });
-      });
 
-      await pastDates.map(async (day) => {
-        await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
+        await es.transport.request({
+          path: `/_rollup/job/${rollupJobName}/_start`,
+          method: 'POST',
+        });
       });
 
       await PageObjects.visualize.navigateToNewVisualization();

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { extractIndexPatterns } from '../../../common/index_patterns_utils';
+import {
+  extractIndexPatterns,
+  convertIndexPatternObjectToStringRepresentation,
+} from '../../../common/index_patterns_utils';
 import { PanelSchema } from '../../../common/types';
 import { AbstractSearchStrategy, ReqFacade } from './strategies';
 
@@ -36,7 +39,9 @@ export class SearchStrategyRegistry {
   }
 
   async getViableStrategyForPanel(req: RequestFacade, panel: PanelSchema) {
-    const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern).join(',');
+    const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern)
+      .map(convertIndexPatternObjectToStringRepresentation)
+      .join(',');
 
     return this.getViableStrategy(req, indexPattern);
   }
