@@ -40,8 +40,14 @@ export const evaluateCondition = async (
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, warningComparator, metric, customMetric } = condition;
-  let { threshold, warningThreshold } = condition;
+  const {
+    comparator,
+    warningComparator,
+    metric,
+    customMetric,
+    threshold,
+    warningThreshold,
+  } = condition;
 
   const timerange = {
     to: Date.now(),
@@ -61,9 +67,6 @@ export const evaluateCondition = async (
     filterQuery,
     customMetric
   );
-
-  threshold = threshold.map((n) => convertMetricValue(metric, n));
-  warningThreshold = warningThreshold?.map((n) => convertMetricValue(metric, n));
 
   const valueEvaluator = (value?: DataValue, t?: number[], c?: Comparator) => {
     if (value === undefined || value === null || !t || !c) return [false];
@@ -165,17 +168,4 @@ const comparatorMap = {
   [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
   [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
-};
-
-// Some metrics in the UI are in a different unit that what we store in ES.
-const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
-  if (converters[metric]) {
-    return converters[metric](value);
-  } else {
-    return value;
-  }
-};
-const converters: Record<string, (n: number) => number> = {
-  cpu: (n) => Number(n) / 100,
-  memory: (n) => Number(n) / 100,
 };

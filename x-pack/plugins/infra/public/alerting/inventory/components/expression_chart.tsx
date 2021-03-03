@@ -127,30 +127,13 @@ export const ExpressionChart: React.FC<Props> = ({
     return <NoDataState />;
   }
 
-  const thresholdFormatter = (value: number | undefined) => {
-    const metricFormatter = METRIC_FORMATTERS[expression.metric];
-
-    if (!value || !metricFormatter) {
-      return value;
-    }
-
-    switch (metricFormatter.formatter) {
-      case InfraFormatterType.percent:
-        return value / 100;
-      case InfraFormatterType.bits:
-        return value / 1000;
-      default:
-        return value;
-    }
-  };
-
   const series = {
     ...firstSeries,
     id: nodes[0]?.name,
     rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
-        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdFormatter(thresholdValue);
+        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
       });
       return newRow;
     }),
@@ -160,11 +143,11 @@ export const ExpressionChart: React.FC<Props> = ({
   const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
-    max: Math.max(dataDomain.max, thresholdFormatter(last(thresholds)) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, thresholdFormatter(first(thresholds)) || dataDomain.min) * 0.9, // add 10% floor
+    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor
   };
 
-  if (domain.min === thresholdFormatter(first(expression.threshold))) {
+  if (domain.min === first(expression.threshold)) {
     domain.min = domain.min * 0.9;
   }
 
@@ -188,7 +171,6 @@ export const ExpressionChart: React.FC<Props> = ({
             sortedThresholds={criticalThresholds}
             color={Color.color1}
             id="critical"
-            formatter={thresholdFormatter}
             firstTimestamp={firstTimestamp}
             lastTimestamp={lastTimestamp}
             domain={domain}
@@ -200,7 +182,6 @@ export const ExpressionChart: React.FC<Props> = ({
               sortedThresholds={warningThresholds}
               color={Color.color5}
               id="warning"
-              formatter={thresholdFormatter}
               firstTimestamp={firstTimestamp}
               lastTimestamp={lastTimestamp}
               domain={domain}
