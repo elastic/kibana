@@ -11,6 +11,20 @@
 import { ImAType } from './types';
 
 /**
+ * @internal
+ */
+export class IShouldBeInternalClass {
+  st: string;
+}
+
+/**
+ * @internal
+ */
+export interface IShouldBeInternalInterface {
+  st: string;
+}
+
+/**
  * An interface with a generic.
  */
 export interface WithGen<T = number> {

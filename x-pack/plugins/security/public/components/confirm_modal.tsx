@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { EuiButtonProps, EuiModalProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonProps,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,8 +16,10 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalProps,
 } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface ConfirmModalProps extends Omit<EuiModalProps, 'onClose' | 'initialFocus'> {

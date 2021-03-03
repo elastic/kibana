@@ -516,6 +516,10 @@ export interface VisualizationType {
    * Optional label used in chart type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
+  /**
+   * The group the visualization belongs to
+   */
+  groupLabel: string;
 }
 
 export interface Visualization<T = unknown> {

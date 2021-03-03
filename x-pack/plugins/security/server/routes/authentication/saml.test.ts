@@ -7,15 +7,16 @@
 
 import { Type } from '@kbn/config-schema';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { AuthenticationResult, AuthenticationServiceStart, SAMLLogin } from '../../authentication';
-import { defineSAMLRoutes } from './saml';
-import type { RequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import type { SecurityRouter } from '../../types';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;

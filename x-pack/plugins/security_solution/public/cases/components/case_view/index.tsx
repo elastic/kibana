@@ -397,27 +397,29 @@ export const CaseComponent = React.memo<CaseProps>(
                       userCanCrud={userCanCrud}
                     />
                     {(caseData.type !== CaseType.collection || hasDataToPush) && (
-                      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                      <>
                         <MyEuiHorizontalRule
                           margin="s"
                           data-test-subj="case-view-bottom-actions-horizontal-rule"
                         />
-                        {caseData.type !== CaseType.collection && (
-                          <EuiFlexItem grow={false}>
-                            <StatusActionButton
-                              status={caseData.status}
-                              onStatusChanged={changeStatus}
-                              disabled={!userCanCrud}
-                              isLoading={isLoading && updateKey === 'status'}
-                            />
-                          </EuiFlexItem>
-                        )}
-                        {hasDataToPush && (
-                          <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                            {pushButton}
-                          </EuiFlexItem>
-                        )}
-                      </EuiFlexGroup>
+                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                          {caseData.type !== CaseType.collection && (
+                            <EuiFlexItem grow={false}>
+                              <StatusActionButton
+                                status={caseData.status}
+                                onStatusChanged={changeStatus}
+                                disabled={!userCanCrud}
+                                isLoading={isLoading && updateKey === 'status'}
+                              />
+                            </EuiFlexItem>
+                          )}
+                          {hasDataToPush && (
+                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                              {pushButton}
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      </>
                     )}
                   </>
                 )}
@@ -447,6 +449,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
