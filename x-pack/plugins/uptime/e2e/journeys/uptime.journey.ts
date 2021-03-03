@@ -29,6 +29,7 @@ journey('uptime', async ({ page }) => {
     await page.fill('[data-test-subj=loginPassword]', 'changeme');
 
     await page.click('[data-test-subj=loginSubmit]');
+    await page.waitForTimeout(30 * 1000);
   });
 
   step('dismiss synthetics notice', async () => {
@@ -38,7 +39,14 @@ journey('uptime', async ({ page }) => {
   step('change uptime index pattern', async () => {
     await page.click(byTestId('settings-page-link'));
 
-    if ((await page.textContent(byTestId('heartbeat-indices-input-loaded'))) !== 'heartbeat-*') {
+    await page.waitForTimeout(5 * 1000);
+
+    const currentIndex = await page.$eval(
+      byTestId('heartbeat-indices-input-loaded'),
+      (el) => el.value
+    );
+
+    if (currentIndex !== 'heartbeat-*') {
       await page.fill(byTestId('heartbeat-indices-input-loaded'), 'heartbeat-*');
       await page.click(byTestId('apply-settings-button'));
     }
