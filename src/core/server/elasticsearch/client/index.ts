@@ -13,7 +13,7 @@ export type {
   CountResponse,
   SearchResponse,
   GetResponse,
-  DeleteDocumentResponse
+  DeleteDocumentResponse,
 } from './types';
 export { ScopedClusterClient } from './scoped_cluster_client';
 export type { IScopedClusterClient } from './scoped_cluster_client';
