@@ -198,6 +198,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
 
+          await ml.testExecution.logTestStep('should continue to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('Should have validation callouts');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
+
           await ml.testExecution.logTestStep('should continue to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
