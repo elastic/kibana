@@ -13,16 +13,9 @@ import { installTemplate } from './install';
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.transport.request.mockImplementation((params) => {
-    if (
-      params &&
-      params.method === 'GET' &&
-      params.path === '/_index_template/metrics-package.dataset'
-    ) {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
-    }
-    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
-  });
+  esClient.indices.getIndexTemplate.mockImplementation(() =>
+    elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+  );
 
   const fields: Field[] = [];
   const dataStreamDatasetIsPrefixUnset = {
@@ -48,7 +41,11 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageName: pkg.name,
   });
 
-  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+  const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+    string,
+    any
+  >;
+
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
@@ -56,16 +53,9 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.transport.request.mockImplementation((params) => {
-    if (
-      params &&
-      params.method === 'GET' &&
-      params.path === '/_index_template/metrics-package.dataset'
-    ) {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
-    }
-    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
-  });
+  esClient.indices.getIndexTemplate.mockImplementation(() =>
+    elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+  );
 
   const fields: Field[] = [];
   const dataStreamDatasetIsPrefixFalse = {
@@ -92,7 +82,10 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageName: pkg.name,
   });
 
-  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+  const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+    string,
+    any
+  >;
 
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
@@ -101,16 +94,9 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.transport.request.mockImplementation((params) => {
-    if (
-      params &&
-      params.method === 'GET' &&
-      params.path === '/_index_template/metrics-package.dataset'
-    ) {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] });
-    }
-    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
-  });
+  esClient.indices.getIndexTemplate.mockImplementation(() =>
+    elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+  );
 
   const fields: Field[] = [];
   const dataStreamDatasetIsPrefixTrue = {
@@ -136,7 +122,10 @@ test('tests installPackage to use correct priority and index_patterns for data s
     packageVersion: pkg.version,
     packageName: pkg.name,
   });
-  const sentTemplate = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+  const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+    string,
+    any
+  >;
 
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
@@ -145,26 +134,19 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage remove the aliases property if the property existed', async () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.transport.request.mockImplementation((params) => {
-    if (
-      params &&
-      params.method === 'GET' &&
-      params.path === '/_index_template/metrics-package.dataset'
-    ) {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise({
-        index_templates: [
-          {
-            name: 'metrics-package.dataset',
-            index_template: {
-              index_patterns: ['metrics-package.dataset-*'],
-              template: { aliases: {} },
-            },
+  esClient.indices.getIndexTemplate.mockImplementation(() =>
+    elasticsearchServiceMock.createSuccessTransportRequestPromise({
+      index_templates: [
+        {
+          name: 'metrics-package.dataset',
+          index_template: {
+            index_patterns: ['metrics-package.dataset-*'],
+            template: { aliases: {} },
           },
-        ],
-      });
-    }
-    return elasticsearchServiceMock.createSuccessTransportRequestPromise({});
-  });
+        },
+      ],
+    })
+  );
 
   const fields: Field[] = [];
   const dataStreamDatasetIsPrefixUnset = {
@@ -190,10 +172,16 @@ test('tests installPackage remove the aliases property if the property existed',
     packageName: pkg.name,
   });
 
-  const removeAliases = esClient.transport.request.mock.calls[1][0].body as Record<string, any>;
+  const removeAliases = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+    string,
+    any
+  >;
   expect(removeAliases.template.aliases).not.toBeDefined();
 
-  const sentTemplate = esClient.transport.request.mock.calls[2][0].body as Record<string, any>;
+  const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[1][0]!.body as Record<
+    string,
+    any
+  >;
   expect(sentTemplate).toBeDefined();
   expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
   expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
