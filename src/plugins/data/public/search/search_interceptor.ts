@@ -132,21 +132,23 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal, sessionId, ...requestOptions } = options || {};
-    const { isRestore, isStored, legacyHitsTotal, strategy } = {
+    const combined = {
       ...requestOptions,
       ...this.deps.session.getSearchOptions(sessionId),
     };
+    const serializableOptions: ISearchOptionsSerializable = {};
+
+    if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
+    if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.legacyHitsTotal !== undefined)
+      serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
+    if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
+    if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
 
     return this.batchedFetch(
       {
         request,
-        options: {
-          strategy,
-          legacyHitsTotal,
-          sessionId,
-          isStored,
-          isRestore,
-        },
+        options: serializableOptions,
       },
       abortSignal
     );
