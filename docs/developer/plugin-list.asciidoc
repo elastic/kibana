@@ -27,6 +27,8 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
+|undefined
+
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.

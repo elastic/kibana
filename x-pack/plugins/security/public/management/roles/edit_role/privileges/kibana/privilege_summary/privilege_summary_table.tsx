@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiAccordion,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
   EuiIcon,
   EuiIconTip,
+  EuiInMemoryTable,
   EuiSpacer,
-  EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Fragment, useMemo, useState } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
-import { Space } from '../../../../../../../../spaces/public';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
-import { SpaceColumnHeader } from './space_column_header';
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
-import { SecuredFeature, KibanaPrivileges } from '../../../../model';
-import {
-  PrivilegeSummaryCalculator,
-  EffectiveFeaturePrivileges,
-} from './privilege_summary_calculator';
+import { SpaceColumnHeader } from './space_column_header';
 
 export interface PrivilegeSummaryTableProps {
   role: Role;

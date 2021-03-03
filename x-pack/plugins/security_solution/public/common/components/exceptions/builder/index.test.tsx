@@ -8,7 +8,6 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { ReactWrapper, mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { waitFor } from '@testing-library/react';
 
 import {
@@ -22,6 +21,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getEmptyValue } from '../../empty_value';
 
 import { ExceptionBuilderComponent } from './';
+
+const mockTheme = {
+  eui: {
+    euiColorLightShade: '#ece',
+  },
+};
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -50,7 +55,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if no "exceptionListItems" are passed in', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -86,7 +91,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "exceptionListItems" that are passed in', async () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[
             {
@@ -128,7 +133,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "or", "and" and "add nested button" enabled', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -161,7 +166,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an entry when "and" clicked', async () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -215,7 +220,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an exception item when "or" clicked', async () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -273,7 +278,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if user deletes last remaining entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[
             {
@@ -325,7 +330,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -358,7 +363,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it does not display "and" badge if none of the exception items include more than one entry', () => {
     wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
           exceptionListItems={[]}
           listType="detection"
@@ -394,7 +399,7 @@ describe('ExceptionBuilderComponent', () => {
   describe('nested entry', () => {
     test('it adds a nested entry when "add nested entry" clicked', async () => {
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <ExceptionBuilderComponent
             exceptionListItems={[]}
             listType="detection"

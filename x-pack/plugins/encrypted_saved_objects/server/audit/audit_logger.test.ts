@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
+import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 
 it('properly logs audit events', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
