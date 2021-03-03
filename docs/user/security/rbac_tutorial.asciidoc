@@ -74,11 +74,11 @@ should use the index patterns for your indices.
 image::security/images/role-index-privilege.png["Index privilege"]
 
 [float]
-==== Give the role permission to create visualizations and dashboards
+==== Give the role permissions to {kib} apps
 
 To enable users to create dashboards, visualizations, and saved searches, add {kib} privileges to the `dev-mortgage` role.
 
-. Associate the `dev-mortgage` role with the `Dev Mortgage` space.
+. On the *{kib} privileges* window, select *Dev Mortgage* from the *Space* dropdown.
 
 . Click **Add space privilege**.
 
