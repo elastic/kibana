@@ -53,7 +53,14 @@ pipeline {
       }
       parallel {
         stage('APM-UI') {
+          // This stage reuses the top-level agent
           stages {
+            stage('Prepare build context') {
+              options { skipDefaultCheckout() }
+              steps {
+                pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
+              }
+            }
             stage('Prepare Kibana') {
               options { skipDefaultCheckout() }
               when { expression { return env.RUN_APM_E2E != "false" } }
@@ -112,13 +119,15 @@ pipeline {
           }
         }
         stage('UPTIME-UI') {
+          // This stage requires a new agent
           agent { label 'linux && immutable' }
           options { skipDefaultCheckout() }
           when { expression { return env.RUN_UPTIME_E2E != "false" } }
           stages {
-            stage('Checkout') {
+            stage('Prepare build context') {
               options { skipDefaultCheckout() }
               steps {
+                pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
                 deleteDir()
                 gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
                             shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
