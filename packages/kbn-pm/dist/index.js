@@ -23640,7 +23640,7 @@ function codeFrameColumns(rawLines, loc, opts = {}) {
   let frame = highlightedLines.split(NEWLINE).slice(start, end).map((line, index) => {
     const number = start + 1 + index;
     const paddedNumber = ` ${number}`.slice(-numberMaxWidth);
-    const gutter = ` ${paddedNumber} | `;
+    const gutter = ` ${paddedNumber} |`;
     const hasMarker = markerLines[number];
     const lastMarkerLine = !markerLines[number + 1];
 
@@ -23650,16 +23650,16 @@ function codeFrameColumns(rawLines, loc, opts = {}) {
       if (Array.isArray(hasMarker)) {
         const markerSpacing = line.slice(0, Math.max(hasMarker[0] - 1, 0)).replace(/[^\t]/g, " ");
         const numberOfMarkers = hasMarker[1] || 1;
-        markerLine = ["\n ", maybeHighlight(defs.gutter, gutter.replace(/\d/g, " ")), markerSpacing, maybeHighlight(defs.marker, "^").repeat(numberOfMarkers)].join("");
+        markerLine = ["\n ", maybeHighlight(defs.gutter, gutter.replace(/\d/g, " ")), " ", markerSpacing, maybeHighlight(defs.marker, "^").repeat(numberOfMarkers)].join("");
 
         if (lastMarkerLine && opts.message) {
           markerLine += " " + maybeHighlight(defs.message, opts.message);
         }
       }
 
-      return [maybeHighlight(defs.marker, ">"), maybeHighlight(defs.gutter, gutter), line, markerLine].join("");
+      return [maybeHighlight(defs.marker, ">"), maybeHighlight(defs.gutter, gutter), line.length > 0 ? ` ${line}` : "", markerLine].join("");
     } else {
-      return ` ${maybeHighlight(defs.gutter, gutter)}${line}`;
+      return ` ${maybeHighlight(defs.gutter, gutter)}${line.length > 0 ? ` ${line}` : ""}`;
     }
   }).join("\n");
 
@@ -23712,7 +23712,7 @@ exports.shouldHighlight = shouldHighlight;
 exports.getChalk = getChalk;
 exports.default = highlight;
 
-var _jsTokens = _interopRequireWildcard(__webpack_require__(260));
+var jsTokensNs = _interopRequireWildcard(__webpack_require__(260));
 
 var _helperValidatorIdentifier = __webpack_require__(261);
 
@@ -23724,11 +23724,13 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+const sometimesKeywords = new Set(["as", "async", "from", "get", "of", "set"]);
+
 function getDefs(chalk) {
   return {
     keyword: chalk.cyan,
     capitalized: chalk.yellow,
-    jsx_tag: chalk.yellow,
+    jsxIdentifier: chalk.yellow,
     punctuator: chalk.yellow,
     number: chalk.magenta,
     string: chalk.green,
@@ -23739,66 +23741,81 @@ function getDefs(chalk) {
 }
 
 const NEWLINE = /\r\n|[\n\r\u2028\u2029]/;
-const JSX_TAG = /^[a-z][\w-]*$/i;
 const BRACKET = /^[()[\]{}]$/;
+let tokenize;
+{
+  const {
+    matchToToken
+  } = jsTokensNs;
+  const JSX_TAG = /^[a-z][\w-]*$/i;
 
-function getTokenType(match) {
-  const [offset, text] = match.slice(-2);
-  const token = (0, _jsTokens.matchToToken)(match);
+  const getTokenType = function (token, offset, text) {
+    if (token.type === "name") {
+      if ((0, _helperValidatorIdentifier.isKeyword)(token.value) || (0, _helperValidatorIdentifier.isStrictReservedWord)(token.value, true) || sometimesKeywords.has(token.value)) {
+        return "keyword";
+      }
 
-  if (token.type === "name") {
-    if ((0, _helperValidatorIdentifier.isKeyword)(token.value) || (0, _helperValidatorIdentifier.isReservedWord)(token.value)) {
-      return "keyword";
+      if (JSX_TAG.test(token.value) && (text[offset - 1] === "<" || text.substr(offset - 2, 2) == "</")) {
+        return "jsxIdentifier";
+      }
+
+      if (token.value[0] !== token.value[0].toLowerCase()) {
+        return "capitalized";
+      }
     }
 
-    if (JSX_TAG.test(token.value) && (text[offset - 1] === "<" || text.substr(offset - 2, 2) == "</")) {
-      return "jsx_tag";
+    if (token.type === "punctuator" && BRACKET.test(token.value)) {
+      return "bracket";
     }
 
-    if (token.value[0] !== token.value[0].toLowerCase()) {
-      return "capitalized";
+    if (token.type === "invalid" && (token.value === "@" || token.value === "#")) {
+      return "punctuator";
     }
-  }
 
-  if (token.type === "punctuator" && BRACKET.test(token.value)) {
-    return "bracket";
-  }
+    return token.type;
+  };
 
-  if (token.type === "invalid" && (token.value === "@" || token.value === "#")) {
-    return "punctuator";
-  }
+  tokenize = function* (text) {
+    let match;
 
-  return token.type;
+    while (match = jsTokensNs.default.exec(text)) {
+      const token = matchToToken(match);
+      yield {
+        type: getTokenType(token, match.index, text),
+        value: token.value
+      };
+    }
+  };
 }
 
 function highlightTokens(defs, text) {
-  return text.replace(_jsTokens.default, function (...args) {
-    const type = getTokenType(args);
+  let highlighted = "";
+
+  for (const {
+    type,
+    value
+  } of tokenize(text)) {
     const colorize = defs[type];
 
     if (colorize) {
-      return args[0].split(NEWLINE).map(str => colorize(str)).join("\n");
+      highlighted += value.split(NEWLINE).map(str => colorize(str)).join("\n");
     } else {
-      return args[0];
+      highlighted += value;
     }
-  });
+  }
+
+  return highlighted;
 }
 
 function shouldHighlight(options) {
-  return _chalk.default.supportsColor || options.forceColor;
+  return !!_chalk.default.supportsColor || options.forceColor;
 }
 
 function getChalk(options) {
-  let chalk = _chalk.default;
-
-  if (options.forceColor) {
-    chalk = new _chalk.default.constructor({
-      enabled: true,
-      level: 1
-    });
-  }
-
-  return chalk;
+  return options.forceColor ? new _chalk.default.constructor({
+    enabled: true,
+    level: 1
+  }) : _chalk.default;
 }
 
 function highlight(code, options = {}) {

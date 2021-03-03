@@ -11,12 +11,13 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { CaseStatuses } from '../../../../../case/common/api';
 import { statuses, CaseStatusWithAllStatus } from '../status';
 import * as i18n from './translations';
+import { Case } from '../../containers/types';
 
 interface GetBulkItems {
   caseStatus: CaseStatusWithAllStatus;
   closePopover: () => void;
-  deleteCasesAction: (cases: string[]) => void;
-  selectedCaseIds: string[];
+  deleteCasesAction: (cases: Case[]) => void;
+  selectedCases: Case[];
   updateCaseStatus: (status: string) => void;
   includeCollections: boolean;
 }
@@ -25,7 +26,7 @@ export const getBulkItems = ({
   caseStatus,
   closePopover,
   deleteCasesAction,
-  selectedCaseIds,
+  selectedCases,
   updateCaseStatus,
   includeCollections,
 }: GetBulkItems) => {
@@ -34,7 +35,7 @@ export const getBulkItems = ({
   const openMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-open-button"
-      disabled={selectedCaseIds.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0 || includeCollections}
       key="cases-bulk-open-button"
       icon={statuses[CaseStatuses.open].icon}
       onClick={() => {
@@ -49,7 +50,7 @@ export const getBulkItems = ({
   const inProgressMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-in-progress-button"
-      disabled={selectedCaseIds.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0 || includeCollections}
       key="cases-bulk-in-progress-button"
       icon={statuses[CaseStatuses['in-progress']].icon}
       onClick={() => {
@@ -64,7 +65,7 @@ export const getBulkItems = ({
   const closeMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-close-button"
-      disabled={selectedCaseIds.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0 || includeCollections}
       key="cases-bulk-close-button"
       icon={statuses[CaseStatuses.closed].icon}
       onClick={() => {
@@ -99,10 +100,10 @@ export const getBulkItems = ({
       data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      disabled={selectedCaseIds.length === 0}
+      disabled={selectedCases.length === 0}
       onClick={() => {
         closePopover();
-        deleteCasesAction(selectedCaseIds);
+        deleteCasesAction(selectedCases);
       }}
     >
       {i18n.BULK_ACTION_DELETE_SELECTED}
