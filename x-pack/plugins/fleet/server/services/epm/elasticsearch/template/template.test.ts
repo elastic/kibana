@@ -6,11 +6,14 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
 import path from 'path';
+
+import { safeLoad } from 'js-yaml';
+
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
+
 import {
   generateMappings,
   getTemplate,
