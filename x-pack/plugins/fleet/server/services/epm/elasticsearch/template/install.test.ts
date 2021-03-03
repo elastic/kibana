@@ -16,7 +16,7 @@ describe('EPM install', () => {
     appContextService.start(createAppContextStartContractMock());
   });
 
-  test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
+  it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
     const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
       .callAsCurrentUser;
     callCluster.mockImplementation(async (_, params) => {
@@ -59,7 +59,7 @@ describe('EPM install', () => {
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });
 
-  test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
+  it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
     const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
       .callAsCurrentUser;
     callCluster.mockImplementation(async (_, params) => {
@@ -103,7 +103,7 @@ describe('EPM install', () => {
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
   });
 
-  test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
+  it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
     const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
       .callAsCurrentUser;
     callCluster.mockImplementation(async (_, params) => {
@@ -147,7 +147,7 @@ describe('EPM install', () => {
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
   });
 
-  test('tests installPackage remove the aliases property if the property existed', async () => {
+  it('tests installPackage remove the aliases property if the property existed', async () => {
     const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
       .callAsCurrentUser;
     callCluster.mockImplementation(async (_, params) => {

@@ -36,7 +36,7 @@ describe('EPM template', () => {
     appContextService.start(createAppContextStartContractMock());
   });
 
-  test('get template', () => {
+  it('get template', () => {
     const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
     const template = getTemplate({
@@ -51,7 +51,7 @@ describe('EPM template', () => {
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
 
-  test('adds composed_of correctly', () => {
+  it('adds composed_of correctly', () => {
     const composedOfTemplates = ['component1', 'component2'];
 
     const template = getTemplate({
@@ -66,7 +66,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual(composedOfTemplates);
   });
 
-  test('adds empty composed_of correctly', () => {
+  it('adds empty composed_of correctly', () => {
     const composedOfTemplates: string[] = [];
 
     const template = getTemplate({
@@ -81,7 +81,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual(composedOfTemplates);
   });
 
-  test('adds hidden field correctly', () => {
+  it('adds hidden field correctly', () => {
     const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
     const templateWithHidden = getTemplate({
@@ -108,7 +108,7 @@ describe('EPM template', () => {
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
 
-  test('tests loading base.yml', () => {
+  it('tests loading base.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
@@ -128,7 +128,7 @@ describe('EPM template', () => {
     expect(template).toMatchSnapshot(path.basename(ymlPath));
   });
 
-  test('tests loading coredns.logs.yml', () => {
+  it('tests loading coredns.logs.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/coredns.logs.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
@@ -148,7 +148,7 @@ describe('EPM template', () => {
     expect(template).toMatchSnapshot(path.basename(ymlPath));
   });
 
-  test('tests loading system.yml', () => {
+  it('tests loading system.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
@@ -168,7 +168,7 @@ describe('EPM template', () => {
     expect(template).toMatchSnapshot(path.basename(ymlPath));
   });
 
-  test('tests processing text field with multi fields', () => {
+  it('tests processing text field with multi fields', () => {
     const textWithMultiFieldsLiteralYml = `
 - name: textWithMultiFields
   type: text
@@ -200,7 +200,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(textWithMultiFieldsMapping);
   });
 
-  test('tests processing keyword field with multi fields', () => {
+  it('tests processing keyword field with multi fields', () => {
     const keywordWithMultiFieldsLiteralYml = `
 - name: keywordWithMultiFields
   type: keyword
@@ -234,7 +234,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
   });
 
-  test('tests processing keyword field with multi fields with analyzed text field', () => {
+  it('tests processing keyword field with multi fields with analyzed text field', () => {
     const keywordWithAnalyzedMultiFieldsLiteralYml = `
   - name: keywordWithAnalyzedMultiField
     type: keyword
@@ -266,7 +266,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
   });
 
-  test('tests processing keyword field with multi fields with normalized keyword field', () => {
+  it('tests processing keyword field with multi fields with normalized keyword field', () => {
     const keywordWithNormalizedMultiFieldsLiteralYml = `
   - name: keywordWithNormalizedMultiField
     type: keyword
@@ -297,7 +297,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
   });
 
-  test('tests processing object field with no other attributes', () => {
+  it('tests processing object field with no other attributes', () => {
     const objectFieldLiteralYml = `
 - name: objectField
   type: object
@@ -315,7 +315,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldMapping);
   });
 
-  test('tests processing object field with enabled set to false', () => {
+  it('tests processing object field with enabled set to false', () => {
     const objectFieldEnabledFalseLiteralYml = `
 - name: objectField
   type: object
@@ -335,7 +335,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldEnabledFalseMapping);
   });
 
-  test('tests processing object field with dynamic set to false', () => {
+  it('tests processing object field with dynamic set to false', () => {
     const objectFieldDynamicFalseLiteralYml = `
 - name: objectField
   type: object
@@ -355,7 +355,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldDynamicFalseMapping);
   });
 
-  test('tests processing object field with dynamic set to true', () => {
+  it('tests processing object field with dynamic set to true', () => {
     const objectFieldDynamicTrueLiteralYml = `
 - name: objectField
   type: object
@@ -375,7 +375,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldDynamicTrueMapping);
   });
 
-  test('tests processing object field with dynamic set to strict', () => {
+  it('tests processing object field with dynamic set to strict', () => {
     const objectFieldDynamicStrictLiteralYml = `
 - name: objectField
   type: object
@@ -395,7 +395,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldDynamicStrictMapping);
   });
 
-  test('tests processing object field with property', () => {
+  it('tests processing object field with property', () => {
     const objectFieldWithPropertyLiteralYml = `
 - name: a
   type: object
@@ -420,7 +420,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyMapping);
   });
 
-  test('tests processing object field with property, reverse order', () => {
+  it('tests processing object field with property, reverse order', () => {
     const objectFieldWithPropertyReversedLiteralYml = `
 - name: a.b
   type: keyword
@@ -447,7 +447,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
-  test('tests processing nested field with property', () => {
+  it('tests processing nested field with property', () => {
     const nestedYaml = `
   - name: a.b
     type: keyword
@@ -475,7 +475,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  test('tests processing nested field with property, nested field first', () => {
+  it('tests processing nested field with property, nested field first', () => {
     const nestedYaml = `
   - name: a
     type: nested
@@ -503,7 +503,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  test('tests processing nested leaf field with properties', () => {
+  it('tests processing nested leaf field with properties', () => {
     const nestedYaml = `
   - name: a
     type: object
@@ -531,7 +531,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  test('tests constant_keyword field type handling', () => {
+  it('tests constant_keyword field type handling', () => {
     const constantKeywordLiteralYaml = `
 - name: constantKeyword
   type: constant_keyword
@@ -549,7 +549,7 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
-  test('tests priority and index pattern for data stream without dataset_is_prefix', () => {
+  it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',
       dataset: 'package.dataset',
@@ -568,7 +568,7 @@ describe('EPM template', () => {
     expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
   });
 
-  test('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
+  it('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
     const dataStreamDatasetIsPrefixFalse = {
       type: 'metrics',
       dataset: 'package.dataset',
@@ -588,7 +588,7 @@ describe('EPM template', () => {
     expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
   });
 
-  test('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
+  it('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
     const dataStreamDatasetIsPrefixTrue = {
       type: 'metrics',
       dataset: 'package.dataset',
