@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Route } from 'react-router-dom';
-import { History } from 'history';
+import type { History } from 'history';
 import type { NotificationsStart } from 'src/core/public';
 
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';

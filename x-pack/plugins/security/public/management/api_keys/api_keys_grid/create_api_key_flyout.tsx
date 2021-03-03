@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -24,18 +26,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana, CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-import {
-  APIKeysAPIClient,
-  CreateApiKeyRequest,
-  CreateApiKeyResponse,
-} from '../api_keys_api_client';
-import { useForm, ValidationErrors } from '../../../components/use_form';
-import { FormFlyout, FormFlyoutProps } from '../../../components/form_flyout';
+import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
+import { APIKeysAPIClient } from '../api_keys_api_client';
+import type { ValidationErrors } from '../../../components/use_form';
+import { useForm } from '../../../components/use_form';
+import type { FormFlyoutProps } from '../../../components/form_flyout';
+import { FormFlyout } from '../../../components/form_flyout';
 import { DocLink } from '../../../components/doc_link';
 import { useCurrentUser } from '../../../components/use_current_user';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
-import { RoleDescriptors } from '../../../../common/model';
+import type { RoleDescriptors } from '../../../../common/model';
 
 export interface ApiKeyFormValues {
   name: string;
@@ -114,7 +115,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
   useEffect(() => {
     if (currentUser && roles) {
       const userPermissions = currentUser.roles.reduce<RoleDescriptors>((accumulator, roleName) => {
-        const role = roles.find((role) => role.name === roleName)!;
+        const role = roles.find((r) => r.name === roleName)!;
         if (role) {
           accumulator[role.name] = role.elasticsearch;
         }
@@ -124,7 +125,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
         form.setValue('role_descriptors', JSON.stringify(userPermissions, null, 2));
       }
     }
-  }, [currentUser, roles]);
+  }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
 

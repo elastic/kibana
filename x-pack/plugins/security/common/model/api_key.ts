@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Role } from './role';
+import type { Role } from './role';
 
 export interface ApiKey {
   id: string;

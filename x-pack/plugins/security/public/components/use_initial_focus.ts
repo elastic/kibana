@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useRef, useEffect, DependencyList } from 'react';
+import type { DependencyList } from 'react';
+import { useRef, useEffect } from 'react';
 
 /**
  * Creates a ref for an HTML element, which will be focussed on mount.
@@ -32,6 +33,6 @@ export function useInitialFocus<T extends HTMLElement>(deps: DependencyList = []
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, deps);
+  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
   return inputRef;
 }

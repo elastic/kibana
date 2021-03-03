@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ChromeStart } from '../../../../../src/core/public';
+import type { ChromeStart } from '../../../../../src/core/public';
 
 interface BreadcrumbsContext {
   parents: BreadcrumbProps[];

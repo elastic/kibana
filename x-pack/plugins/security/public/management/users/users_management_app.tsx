@@ -19,9 +19,9 @@ import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
+import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   BreadcrumbsProvider,
-  BreadcrumbsChangeHandler,
   Breadcrumb,
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
