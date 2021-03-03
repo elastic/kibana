@@ -23,10 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-
-
-  describe('import objects', function describeIndexTests() {
-
+  describe('import objects', function describeIndexTests() {    
     describe('.ndjson file', () => {
       beforeEach(async function () {
         await esArchiver.load('management');
