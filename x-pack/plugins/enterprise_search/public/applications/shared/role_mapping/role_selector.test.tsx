@@ -41,9 +41,7 @@ describe('RoleSelector', () => {
 
   it('renders callout when disabled', () => {
     const wrapper = shallow(<RoleSelector {...props} disabled />);
-    const radio = wrapper.find(EuiRadio);
 
-    expect(radio.dive().find(EuiCallOut)).toHaveLength(1);
     expect(wrapper.find(EuiRadio).prop('checked')).toEqual(false);
   });
 
