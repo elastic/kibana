@@ -22,7 +22,6 @@ interface Props {
 
 export const RoleSelector: React.FC<Props> = ({
   disabled,
-  disabledText,
   roleType,
   roleTypeOption,
   description,
