@@ -6,6 +6,7 @@
  */
 
 import { case1 } from '../../objects/case';
+import { COLLAPSED_ACTION_BTN } from '../../screens/alerts_detection_rules';
 
 import {
   ALL_CASES_CLOSE_ACTION,
@@ -93,6 +94,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
     cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
+    cy.get(COLLAPSED_ACTION_BTN).click();
     cy.get(ALL_CASES_DELETE_ACTION).should('exist');
     cy.get(ALL_CASES_CLOSE_ACTION).should('exist');
 
