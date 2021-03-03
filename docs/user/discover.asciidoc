@@ -26,7 +26,7 @@ data-type="inline"
 [float]
 === Select, explore, and present your data
 
-You’ve added your data, and now you’re ready to dig in. You have questions about your data.
+You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
 What processes take longer than 500 milliseconds to respond?
