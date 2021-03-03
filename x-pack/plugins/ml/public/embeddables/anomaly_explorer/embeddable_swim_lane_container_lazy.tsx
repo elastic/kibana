@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
-export const ANOMALY_EXPLORER_EMBEDDABLE_TYPE = 'ml_anomaly_explorer';
+import React from 'react';
+
+export const EmbeddableSwimLaneContainer = React.lazy(
+  () => import('./embeddable_swim_lane_container')
+);

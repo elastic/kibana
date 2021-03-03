@@ -8,6 +8,7 @@
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
 import type { MlCoreSetup } from '../plugin';
 import type { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
+import { AnomalyExplorerEmbeddableFactory } from './anomaly_explorer';
 
 export * from './constants';
 export * from './types';
@@ -20,4 +21,8 @@ export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSet
     anomalySwimlaneEmbeddableFactory.type,
     anomalySwimlaneEmbeddableFactory
   );
+
+  const anomalyExplorerFactory = new AnomalyExplorerEmbeddableFactory(core.getStartServices);
+
+  embeddable.registerEmbeddableFactory(anomalyExplorerFactory.type, anomalyExplorerFactory);
 }

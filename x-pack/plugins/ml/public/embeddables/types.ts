@@ -69,3 +69,39 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
    */
   data?: AppStateSelectedCells;
 }
+
+/**
+ * Anomaly Explorer
+ */
+export interface AnomalyExplorerEmbeddableCustomInput {
+  jobIds: JobId[];
+  swimlaneType: SwimlaneType;
+  viewBy?: string;
+  perPage?: number;
+
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
+}
+
+export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEmbeddableCustomInput;
+
+export interface AnomalyExplorerServices {
+  anomalyDetectorService: AnomalyDetectorService;
+  anomalyTimelineService: AnomalyTimelineService;
+}
+
+export type AnomalyExplorerEmbeddableServices = [
+  CoreStart,
+  MlDependencies,
+  AnomalySwimlaneServices
+];
+export interface AnomalyExplorerCustomOutput {
+  perPage?: number;
+  fromPage?: number;
+  interval?: number;
+  severity?: number;
+}
+export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
