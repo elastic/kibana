@@ -12,9 +12,11 @@ export const esSearchHitToArtifact = (searchHit: ESSearchHit<Artifact>): Artifac
   return searchHit._source;
 };
 
-export const relativeDownloadUrlFromArtifact = ({
+export const relativeDownloadUrlFromArtifact = <
+  T extends Pick<Artifact, 'identifier' | 'decodedSha256'>
+>({
   identifier,
   decodedSha256,
-}: Artifact): string => {
+}: T): string => {
   return `/api/artifact/${identifier}/${decodedSha256}`;
 };

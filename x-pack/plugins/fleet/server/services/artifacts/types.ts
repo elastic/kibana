@@ -15,7 +15,8 @@ export interface Artifact {
   encodedSize: number;
   /**
    * An identifier for the Artifact download. Value is used in download URL route, thus it should
-   * not include spaces and it should be all lowercase
+   * not include spaces and it should be all lowercase. Defaults to the `packageName` if no value
+   * is set during artifact creation.
    */
   identifier: string;
   /** The integration name that owns the artifact */
@@ -40,7 +41,7 @@ export type ArtifactEncodedMetadata = Pick<
 
 type ArtifactUserDefinedMetadata = Pick<Artifact, 'identifier' | 'type'>;
 
-export type ArtifactCreateOptions = ArtifactUserDefinedMetadata & {
+export type ArtifactCreateOptions = Partial<ArtifactUserDefinedMetadata> & {
   /** the artifact content. This value will be compressed and then stored as the `body` of the artifact */
   content: string;
 };

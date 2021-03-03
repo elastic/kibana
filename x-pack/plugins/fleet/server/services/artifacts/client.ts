@@ -8,6 +8,7 @@ import { createHash } from 'crypto';
 import { deflate } from 'zlib';
 import { promisify } from 'util';
 import { ElasticsearchClient } from 'kibana/server';
+import uuid from 'uuid';
 import {
   Artifact,
   ArtifactCreateOptions,
@@ -16,7 +17,7 @@ import {
 } from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { esSearchHitToArtifact } from './mappings';
+import { esSearchHitToArtifact, relativeDownloadUrlFromArtifact } from './mappings';
 import { ArtifactAccessDeniedError } from './errors';
 
 const deflateAsync = promisify(deflate);
@@ -44,8 +45,32 @@ export class FleetArtifactsClient implements ArtifactsInterface {
   /**
    * Creates a new artifact. Content will be compress and stored in binary form.
    */
-  async createArtifact(options: ArtifactCreateOptions): Promise<Artifact> {
-    // REMINDER: catch failures
+  async createArtifact({
+    content,
+    type = '',
+    identifier = this.packageName,
+  }: ArtifactCreateOptions): Promise<Artifact> {
+    const encodedMetaData = await this.encodeContent(content);
+    const id = uuid.v4();
+    const newArtifactData: Omit<Artifact, 'id'> = {
+      type,
+      identifier,
+      packageName: this.packageName,
+      created: new Date().toISOString(),
+      encryptionAlgorithm: 'none',
+      relative_url: relativeDownloadUrlFromArtifact({
+        identifier,
+        decodedSha256: encodedMetaData.decodedSha256,
+      }),
+      ...encodedMetaData,
+    };
+    const esResponse = await this.esClient.create<Artifact, Omit<Artifact, 'id'>>({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      id,
+      body: newArtifactData,
+      refresh: 'wait_for',
+    });
+    return response;
   }
 
   async deleteArtifact(id: string) {
@@ -76,6 +101,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
       encodedSize: encodedContentButter.byteLength,
       body: encodedContentButter.toString('base64'),
     };
+
     return encodedArtifact;
   }
 }
