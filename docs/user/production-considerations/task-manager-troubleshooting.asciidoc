@@ -6,13 +6,13 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting and Telemetry.
+Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting, and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
 This page describes how to resolve common problems you might encounter with Task Manager.
 If your problem isn’t described here, please review open issues in the following GitHub repositories:
 
-* https://github.com/elastic/kibana/issues[kibana] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3ATask+Manager%22[Task Manager issues])
+* https://github.com/elastic/kibana/issues[{kib}] (https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3ATask+Manager%22[Task Manager issues])
 
 Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
@@ -26,9 +26,9 @@ Tasks are scheduled to run every 2 seconds but they seem to be running too late
 
 *Solution*:
 
-Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a Task could run late if it uses a schedule which is smaller than this setting.
+Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a task could run late if it uses a schedule that is smaller than this setting.
 
-This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
+You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting.  However, this will add additional load to both {kib} and {es} instances in the cluster, as they will perform more queries.
 
 [float]
 [[task-manager-health-tasks-run-late]]
@@ -36,7 +36,7 @@ This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manag
 
 *Problem*:
 
-By far the most common symptom of an underlying problem in Task manager is that tasks appear to be running late.
+The most common symptom of an underlying problem in Task Manager is that tasks appear to run late.
 For instance, recurring Tasks might run at an inconsistent cadence, or long after their scheduled time.
 
 *Solution*:
@@ -453,13 +453,13 @@ Hypothetically, suppose the output of `drift` and `load` was the following:
 }
 --------------------------------------------------
 <1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
-<2> load shows us that at least half of the time Task Manager is running at a load of 80%
+<2> `load` shows us that at least half of the time Task Manager is running at a load of 80%.
 
-We can infer from these stats that this {kib} is utilizing most of its capacity, but seems to keep up with the work most of the time.
+You can infer from these stats that this {kib} is using most of its capacity, but seems to keep up with the work most of the time.
 This assessment is based on the following:
 
-* The fact that the `p90` of `load` is at 100% and `p50` is also quite high at 80%. This means that there is little to no room for maneuvering, and a spike of work might cause Task Manager to exceed its capacity. 
-* That said, tasks run soon after their scheduled time, which is to be expected. A `poll_interval` of `3000` milliseconds would often experience a consistent _drift_ of somewhere between `0` and `3000` milliseconds. A `p50 drift` of `2999` suggests that there is room for improvmenet, and we could benefit from a higher throughput.
+* The `p90` of `load` is at 100%, and `p50` is also quite high at 80%. This means that there is little to no room for maneuvering, and a spike of work might cause Task Manager to exceed its capacity. 
+* Tasks run soon after their scheduled time, which is to be expected. A `poll_interval` of `3000` milliseconds would often experience a consistent drift of somewhere between `0` and `3000` milliseconds. A `p50 drift` of `2999` suggests that there is room for improvement, and you could benefit from a higher throughput.
 
 For details on achieving higher throughput by adjusting your scaling strategy, see <<task-manager-scaling-guidance>>.
 

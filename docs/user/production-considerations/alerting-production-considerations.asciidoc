@@ -46,6 +46,6 @@ When estimating the required task throughput, keep the following in mind:
 * Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
 
 It is difficult to predict how much throughput is needed to ensure all alerts and actions are executed at consistent schedules.
-By counting Alerts as recurring tasks and Actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurment.
+By counting alerts as recurring tasks and actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurement.
 
 Predicting the buffer required to account for actions depends heavily on the alert types you use, the amount of alert Instances they might detect, and the number of actions you might choose to assign to action groups. With that in mind, regularly <<task-manager-health-monitoring,monitor the health>> of your Task Manager instances.
