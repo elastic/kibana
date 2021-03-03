@@ -66,6 +66,7 @@ export const createAnomalyDetectionJobsRoute = createRoute({
     }
 
     await createAnomalyDetectionJobs(setup, environments, context.logger);
+
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
       featureName: 'ml',

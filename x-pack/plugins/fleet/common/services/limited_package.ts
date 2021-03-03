@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
+import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
 // Assume packages only ever include 1 config template for now
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
