@@ -19,6 +19,7 @@ import {
   CaseUserActionsResponse,
   User,
 } from '../../common/api';
+import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
@@ -46,14 +47,11 @@ export interface CaseClientAddComment {
 }
 
 export interface CaseClientUpdateAlertsStatus {
-  ids: string[];
-  status: CaseStatuses;
-  indices: Set<string>;
+  alerts: UpdateAlertRequest[];
 }
 
 export interface CaseClientGetAlerts {
-  ids: string[];
-  indices: Set<string>;
+  alertsInfo: AlertInfo[];
 }
 
 export interface CaseClientGetUserActions {
@@ -83,6 +81,15 @@ export interface ConfigureFields {
   actionsClient: ActionsClient;
   connectorId: string;
   connectorType: string;
+}
+
+/**
+ * Defines the fields necessary to update an alert's status.
+ */
+export interface UpdateAlertRequest {
+  id: string;
+  index: string;
+  status: CaseStatuses;
 }
 
 /**

@@ -423,7 +423,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async importLayerReadyForAdd() {
       log.debug(`Wait until import complete`);
-      await testSubjects.find('indexRespCodeBlock', 5000);
+      await testSubjects.find('indexRespCopyButton', 5000);
       let layerAddReady = false;
       await retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
         layerAddReady = await this.importFileButtonEnabled();
@@ -454,21 +454,20 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       );
     }
 
-    async getCodeBlockParsedJson(dataTestSubjName: string) {
-      log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
-      const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
-      return JSON.parse(indexRespJson);
+    async clickCopyButton(dataTestSubj: string): Promise<string> {
+      log.debug(`Click ${dataTestSubj} copy button`);
+
+      await testSubjects.click(dataTestSubj);
+
+      return await browser.getClipboardValue();
     }
 
     async getIndexResults() {
-      log.debug('Get index results');
-      return await this.getCodeBlockParsedJson('indexRespCodeBlock');
+      return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
     }
 
     async getIndexPatternResults() {
-      log.debug('Get index pattern results');
-      return await this.getCodeBlockParsedJson('indexPatternRespCodeBlock');
+      return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
     }
 
     async setLayerQuery(layerName: string, query: string) {

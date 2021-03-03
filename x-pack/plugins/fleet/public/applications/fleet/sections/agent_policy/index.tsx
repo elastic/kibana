@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
+
 import { AgentPolicyListPage } from './list_page';
 import { AgentPolicyDetailsPage } from './details_page';
 import { CreatePackagePolicyPage } from './create_package_policy_page';
