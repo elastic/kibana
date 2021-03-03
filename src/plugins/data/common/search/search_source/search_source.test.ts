@@ -223,6 +223,22 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual([{ field: 'hello', format: 'date_time' }]);
       });
 
+      test('removes fields and docvalue_fields if size equals 0', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: 'hello', format: 'date_time' }],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello']);
+        searchSource.setField('size', 0);
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).not.toHaveProperty('fields');
+        expect(request).not.toHaveProperty('docvalue_fields');
+      });
+
       test('injects a date format for computed docvalue fields while merging other properties', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
