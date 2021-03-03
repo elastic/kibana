@@ -15,6 +15,7 @@ export {
   getSeverity,
   getSeverityColor,
   getSeverityType,
+  getSeverityWithLow,
   getFormattedSeverityScore,
   isRuleSupported,
   showActualForFunction,
