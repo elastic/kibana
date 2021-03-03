@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoJsonImporter } from './geojson_importer';
+import { GeoJsonImporter, toEsDocs } from './geojson_importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import '@loaders.gl/polyfills';
 
@@ -25,9 +25,7 @@ const FEATURE_COLLECTION = {
   ],
 };
 
-describe('readFile', () => {
-  const setFileProgress = jest.fn((a) => a);
-
+describe('previewFile', () => {
   const FILE_WITH_FEATURE_COLLECTION = new File(
     [JSON.stringify(FEATURE_COLLECTION)],
     'testfile.json',
@@ -39,38 +37,26 @@ describe('readFile', () => {
     jest.restoreAllMocks();
   });
 
-  test('should throw error if no file provided', async () => {
-    const importer = new GeoJsonImporter();
-    await importer
-      .readFile(null, setFileProgress, () => {
-        return true;
-      })
-      .catch((e) => {
-        expect(e.message).toMatch('Error, no file provided');
-      });
-  });
-
-  test('should abort if file parse is cancelled', async () => {
-    const importer = new GeoJsonImporter();
-
-    const results = await importer.readFile(FILE_WITH_FEATURE_COLLECTION, setFileProgress, () => {
-      return false;
+  test('should stop reading when importer is destroyed', async () => {
+    const importer = new GeoJsonImporter(FILE_WITH_FEATURE_COLLECTION);
+    importer.destroy();
+    const results = await importer.previewFile();
+    expect(results).toEqual({
+      features: [],
+      previewCoverage: 0,
+      hasPoints: false,
+      hasShapes: false,
     });
-
-    expect(results).toBeNull();
   });
 
   test('should read features from feature collection', async () => {
-    const importer = new GeoJsonImporter();
-    const results = await importer.readFile(FILE_WITH_FEATURE_COLLECTION, setFileProgress, () => {
-      return true;
-    });
-
-    expect(setFileProgress).toHaveBeenCalled();
+    const importer = new GeoJsonImporter(FILE_WITH_FEATURE_COLLECTION);
+    const results = await importer.previewFile();
     expect(results).toEqual({
-      errors: [],
-      geometryTypes: ['Point'],
-      parsedGeojson: FEATURE_COLLECTION,
+      previewCoverage: 100,
+      hasPoints: true,
+      hasShapes: false,
+      features: FEATURE_COLLECTION.features,
     });
   });
 
@@ -99,20 +85,14 @@ describe('readFile', () => {
       { type: 'text/json' }
     );
 
-    const importer = new GeoJsonImporter();
-    const results = await importer.readFile(
-      fileWithFeaturesWithoutGeometry,
-      setFileProgress,
-      () => {
-        return true;
-      }
-    );
+    const importer = new GeoJsonImporter(fileWithFeaturesWithoutGeometry);
+    const results = await importer.previewFile();
 
-    expect(setFileProgress).toHaveBeenCalled();
     expect(results).toEqual({
-      errors: ['2 features without geometry omitted'],
-      geometryTypes: ['Point'],
-      parsedGeojson: FEATURE_COLLECTION,
+      previewCoverage: 100,
+      hasPoints: true,
+      hasShapes: false,
+      features: FEATURE_COLLECTION.features,
     });
   });
 
@@ -134,20 +114,18 @@ describe('readFile', () => {
       { type: 'text/json' }
     );
 
-    const importer = new GeoJsonImporter();
-    const results = await importer.readFile(fileWithUnwrapedFeature, setFileProgress, () => {
-      return true;
-    });
+    const importer = new GeoJsonImporter(fileWithUnwrapedFeature);
+    const results = await importer.previewFile();
 
-    expect(setFileProgress).toHaveBeenCalled();
     expect(results).toEqual({
-      errors: [],
-      geometryTypes: ['Point'],
-      parsedGeojson: FEATURE_COLLECTION,
+      previewCoverage: 100,
+      hasPoints: true,
+      hasShapes: false,
+      features: FEATURE_COLLECTION.features,
     });
   });
 
-  test('should throw if no features', async () => {
+  test('should return empty feature collection if no features', async () => {
     const fileWithNoFeatures = new File(
       [
         JSON.stringify({
@@ -159,17 +137,18 @@ describe('readFile', () => {
       { type: 'text/json' }
     );
 
-    const importer = new GeoJsonImporter();
-    await importer
-      .readFile(fileWithNoFeatures, setFileProgress, () => {
-        return true;
-      })
-      .catch((e) => {
-        expect(e.message).toMatch('Error, no features detected');
-      });
+    const importer = new GeoJsonImporter(fileWithNoFeatures);
+    const results = await importer.previewFile();
+
+    expect(results).toEqual({
+      previewCoverage: 100,
+      hasPoints: false,
+      hasShapes: false,
+      features: [],
+    });
   });
 
-  test('should throw if no features with geometry', async () => {
+  test('should return empty feature collection if no features with geometry', async () => {
     const fileWithFeaturesWithNoGeometry = new File(
       [
         JSON.stringify({
@@ -186,22 +165,22 @@ describe('readFile', () => {
       { type: 'text/json' }
     );
 
-    const importer = new GeoJsonImporter();
-    await importer
-      .readFile(fileWithFeaturesWithNoGeometry, setFileProgress, () => {
-        return true;
-      })
-      .catch((e) => {
-        expect(e.message).toMatch('Error, no features detected');
-      });
+    const importer = new GeoJsonImporter(fileWithFeaturesWithNoGeometry);
+    const results = await importer.previewFile();
+
+    expect(results).toEqual({
+      previewCoverage: 100,
+      hasPoints: false,
+      hasShapes: false,
+      features: [],
+    });
   });
 });
 
-describe('setDocs', () => {
+describe('toEsDocs', () => {
   test('should convert features to geo_point ES documents', () => {
-    const importer = new GeoJsonImporter();
-    importer.setDocs(FEATURE_COLLECTION, ES_FIELD_TYPES.GEO_POINT);
-    expect(importer.getDocs()).toEqual([
+    const esDocs = toEsDocs(FEATURE_COLLECTION.features, ES_FIELD_TYPES.GEO_POINT);
+    expect(esDocs).toEqual([
       {
         coordinates: [-112.0372, 46.608058],
         population: 200,
@@ -210,9 +189,8 @@ describe('setDocs', () => {
   });
 
   test('should convert features to geo_shape ES documents', () => {
-    const importer = new GeoJsonImporter();
-    importer.setDocs(FEATURE_COLLECTION, ES_FIELD_TYPES.GEO_SHAPE);
-    expect(importer.getDocs()).toEqual([
+    const esDocs = toEsDocs(FEATURE_COLLECTION.features, ES_FIELD_TYPES.GEO_SHAPE);
+    expect(esDocs).toEqual([
       {
         coordinates: {
           type: 'point',
