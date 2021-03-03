@@ -34,6 +34,7 @@ const validationErrors = {
   unexpectedNode: 'unexpected node',
   fieldWithNoOperation: 'unexpected field with no operation',
   failedParsing: 'Failed to parse expression.', // note: this string comes from Tinymath, do not change it
+  duplicateArgument: 'duplicate argument',
 };
 export const errorsLookup = new Set(Object.values(validationErrors));
 
@@ -89,6 +90,13 @@ function getMessageFromId({
       message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage:
           'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
+        values,
+      });
+      break;
+    case 'duplicateArgument':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
+        defaultMessage:
+          'The parameters for the operation {operation} have been declared multiple times: {params}',
         values,
       });
       break;
@@ -238,152 +246,186 @@ function runFullASTValidation(
       return [];
     }
     const nodeOperation = operations[node.name];
-    if (!nodeOperation) {
-      return validateMathNodes(node, missingVariablesSet);
-    }
-
     const errors: ErrorWrapper[] = [];
     const { namedArguments, functions } = groupArgsByType(node.args);
     const [firstArg] = node?.args || [];
 
-    if (nodeOperation.input === 'field') {
-      if (shouldHaveFieldArgument(node)) {
-        if (!isFirstArgumentValidType(firstArg, 'variable')) {
-          if (isMathNode(firstArg)) {
+    if (!nodeOperation) {
+      errors.push(...validateMathNodes(node, missingVariablesSet));
+      // carry on with the validation for all the functions within the math operation
+      if (functions?.length) {
+        return errors.concat(functions.flatMap((fn) => validateNode(fn)));
+      }
+    } else {
+      if (nodeOperation.input === 'field') {
+        if (shouldHaveFieldArgument(node)) {
+          if (!isFirstArgumentValidType(firstArg, 'variable')) {
+            if (isMathNode(firstArg)) {
+              errors.push(
+                getMessageFromId({
+                  messageId: 'wrongFirstArgument',
+                  values: {
+                    operation: node.name,
+                    type: 'field',
+                    argument: `math operation`,
+                  },
+                  locations: [node.location],
+                })
+              );
+            } else {
+              errors.push(
+                getMessageFromId({
+                  messageId: 'wrongFirstArgument',
+                  values: {
+                    operation: node.name,
+                    type: 'field',
+                    argument: getValueOrName(firstArg),
+                  },
+                  locations: [node.location],
+                })
+              );
+            }
+          }
+        } else {
+          if (firstArg) {
             errors.push(
               getMessageFromId({
-                messageId: 'wrongFirstArgument',
+                messageId: 'shouldNotHaveField',
                 values: {
                   operation: node.name,
-                  type: 'field',
-                  argument: `math operation`,
-                },
-                locations: [node.location],
-              })
-            );
-          } else {
-            errors.push(
-              getMessageFromId({
-                messageId: 'wrongFirstArgument',
-                values: {
-                  operation: node.name,
-                  type: 'field',
-                  argument: getValueOrName(firstArg),
                 },
                 locations: [node.location],
               })
             );
           }
         }
-      } else {
-        if (firstArg) {
+        if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
             getMessageFromId({
-              messageId: 'shouldNotHaveField',
+              messageId: 'cannotAcceptParameter',
               values: {
                 operation: node.name,
               },
               locations: [node.location],
             })
           );
+        } else {
+          const missingParams = getMissingParams(nodeOperation, namedArguments);
+          if (missingParams.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'missingParameter',
+                values: {
+                  operation: node.name,
+                  params: missingParams.map(({ name }) => name).join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
+          const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
+          if (wrongTypeParams.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongTypeParameter',
+                values: {
+                  operation: node.name,
+                  params: wrongTypeParams.map(({ name }) => name).join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
+          const duplicateParams = getDuplicateParams(namedArguments);
+          if (duplicateParams.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'duplicateArgument',
+                values: {
+                  operation: node.name,
+                  params: duplicateParams.join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
+        }
+        return errors;
+      }
+      if (nodeOperation.input === 'fullReference') {
+        // What about fn(7 + 1)? We may want to allow that
+        // In general this should be handled down the Esaggs route rather than here
+        if (
+          !isFirstArgumentValidType(firstArg, 'function') ||
+          (isMathNode(firstArg) && validateMathNodes(firstArg, missingVariablesSet).length)
+        ) {
+          errors.push(
+            getMessageFromId({
+              messageId: 'wrongFirstArgument',
+              values: {
+                operation: node.name,
+                type: 'operation',
+                argument: getValueOrName(firstArg),
+              },
+              locations: [node.location],
+            })
+          );
+        }
+        if (!canHaveParams(nodeOperation) && namedArguments.length) {
+          errors.push(
+            getMessageFromId({
+              messageId: 'cannotAcceptParameter',
+              values: {
+                operation: node.name,
+              },
+              locations: [node.location],
+            })
+          );
+        } else {
+          const missingParameters = getMissingParams(nodeOperation, namedArguments);
+          if (missingParameters.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'missingParameter',
+                values: {
+                  operation: node.name,
+                  params: missingParameters.map(({ name }) => name).join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
+          const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
+          if (wrongTypeParams.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongTypeParameter',
+                values: {
+                  operation: node.name,
+                  params: wrongTypeParams.map(({ name }) => name).join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
+          const duplicateParams = getDuplicateParams(namedArguments);
+          if (duplicateParams.length) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'duplicateArgument',
+                values: {
+                  operation: node.name,
+                  params: duplicateParams.join(', '),
+                },
+                locations: [node.location],
+              })
+            );
+          }
         }
       }
-      if (!canHaveParams(nodeOperation) && namedArguments.length) {
-        errors.push(
-          getMessageFromId({
-            messageId: 'cannotAcceptParameter',
-            values: {
-              operation: node.name,
-            },
-            locations: [node.location],
-          })
-        );
-      } else {
-        const missingParams = getMissingParams(nodeOperation, namedArguments);
-        if (missingParams.length) {
-          errors.push(
-            getMessageFromId({
-              messageId: 'missingParameter',
-              values: {
-                operation: node.name,
-                params: missingParams.map(({ name }) => name).join(', '),
-              },
-              locations: [node.location],
-            })
-          );
-        }
-        const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
-        if (wrongTypeParams.length) {
-          errors.push(
-            getMessageFromId({
-              messageId: 'wrongTypeParameter',
-              values: {
-                operation: node.name,
-                params: wrongTypeParams.map(({ name }) => name).join(', '),
-              },
-              locations: [node.location],
-            })
-          );
-        }
-      }
-      return errors;
-    }
-    if (nodeOperation.input === 'fullReference') {
-      if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg)) {
-        errors.push(
-          getMessageFromId({
-            messageId: 'wrongFirstArgument',
-            values: {
-              operation: node.name,
-              type: 'operation',
-              argument: getValueOrName(firstArg),
-            },
-            locations: [node.location],
-          })
-        );
-      }
-      if (!canHaveParams(nodeOperation) && namedArguments.length) {
-        errors.push(
-          getMessageFromId({
-            messageId: 'cannotAcceptParameter',
-            values: {
-              operation: node.name,
-            },
-            locations: [node.location],
-          })
-        );
-      } else {
-        const missingParameters = getMissingParams(nodeOperation, namedArguments);
-        if (missingParameters.length) {
-          errors.push(
-            getMessageFromId({
-              messageId: 'missingParameter',
-              values: {
-                operation: node.name,
-                params: missingParameters.map(({ name }) => name).join(', '),
-              },
-              locations: [node.location],
-            })
-          );
-        }
-        const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
-        if (wrongTypeParams.length) {
-          errors.push(
-            getMessageFromId({
-              messageId: 'wrongTypeParameter',
-              values: {
-                operation: node.name,
-                params: wrongTypeParams.map(({ name }) => name).join(', '),
-              },
-              locations: [node.location],
-            })
-          );
-        }
-      }
-
       return errors.concat(validateNode(functions[0]));
     }
-    return [];
+    return errors;
   }
 
   return validateNode(ast);
@@ -430,6 +472,19 @@ export function getWrongTypeParams(
   );
 }
 
+function getDuplicateParams(params: TinymathNamedArgument[]) {
+  const uniqueArgs = Object.create(null);
+  for (const { name } of params) {
+    const counter = uniqueArgs[name] || 0;
+    uniqueArgs[name] = counter + 1;
+  }
+  const uniqueNames = Object.keys(uniqueArgs);
+  if (params.length > uniqueNames.length) {
+    return uniqueNames.filter((name) => uniqueArgs[name] > 1).map(([name]) => name);
+  }
+  return [];
+}
+
 export function validateParams(
   operation:
     | OperationDefinition<IndexPatternColumn, 'field'>
@@ -459,7 +514,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
   const errors = [];
   const invalidNodes = mathNodes.filter((node: TinymathFunction) => {
     // check the following patterns:
-    const { variables } = groupArgsByType(node.args);
+    const { variables, functions } = groupArgsByType(node.args);
     const fieldVariables = variables.filter((v) => isObject(v) && !missingVariableSet.has(v.value));
     // field + field (or string)
     const atLeastTwoFields = fieldVariables.length > 1;
@@ -468,10 +523,12 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
     const validVariables = variables.filter(
       (v) => !isObject(v) || !missingVariableSet.has(v.value)
     );
+    // field + function
+    const fieldMathWithFunction = fieldVariables.length > 0 && functions.length > 0;
     // Make sure to have at least one valid field to compare, or skip the check
     const mathBetweenFieldAndNumbers =
       fieldVariables.length > 0 && validVariables.length - fieldVariables.length > 0;
-    return atLeastTwoFields || mathBetweenFieldAndNumbers;
+    return atLeastTwoFields || mathBetweenFieldAndNumbers || fieldMathWithFunction;
   });
   if (invalidNodes.length) {
     errors.push({

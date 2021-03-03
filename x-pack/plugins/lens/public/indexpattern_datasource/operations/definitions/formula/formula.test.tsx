@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-// import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-// import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-// import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
 import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 
 jest.mock('../../layer_helpers', () => {
@@ -19,20 +16,6 @@ jest.mock('../../layer_helpers', () => {
       Object.keys(columns),
   };
 });
-
-// const defaultProps = {
-//   storage: {} as IStorageWrapper,
-//   uiSettings: {} as IUiSettingsClient,
-//   savedObjectsClient: {} as SavedObjectsClientContract,
-//   dateRange: { fromDate: 'now-1d', toDate: 'now' },
-//   data: dataPluginMock.createStartContract(),
-//   http: {} as HttpSetup,
-//   indexPattern: {
-//     ...createMockedIndexPattern(),
-//     hasRestrictions: false,
-//   } as IndexPattern,
-//   operationDefinitionMap: { avg: {} },
-// };
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   avg: ({
@@ -47,12 +30,16 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       timeScale: false,
     }),
   } as unknown) as GenericOperationDefinition,
+  sum: { input: 'field' } as GenericOperationDefinition,
+  last_value: { input: 'field' } as GenericOperationDefinition,
+  max: { input: 'field' } as GenericOperationDefinition,
   count: { input: 'field' } as GenericOperationDefinition,
   derivative: { input: 'fullReference' } as GenericOperationDefinition,
   moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
   } as GenericOperationDefinition,
+  cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
 };
 
 describe('formula', () => {
@@ -181,6 +168,7 @@ describe('formula', () => {
         'avg(bytes) +',
         'avg(""',
         'moving_average(avg(bytes), window=)',
+        'avg(bytes) + moving_average(avg(bytes), window=)',
       ];
       for (const formula of formulas) {
         testIsBrokenFormula(formula);
@@ -192,7 +180,13 @@ describe('formula', () => {
     });
 
     it('returns no change but error if at least one field in the formula is missing', () => {
-      const formulas = ['noField', 'avg(noField)', 'noField + 1', 'derivative(avg(noField))'];
+      const formulas = [
+        'noField',
+        'avg(noField)',
+        'noField + 1',
+        'derivative(avg(noField))',
+        'avg(bytes) + derivative(avg(noField))',
+      ];
 
       for (const formula of formulas) {
         testIsBrokenFormula(formula);
@@ -207,6 +201,9 @@ describe('formula', () => {
         'derivative(noFn())',
         'noFn() + noFnTwo()',
         'noFn(noFnTwo())',
+        'noFn() + noFnTwo() + 5',
+        'avg(bytes) + derivative(noFn())',
+        'derivative(avg(bytes) + noFn())',
       ];
 
       for (const formula of formulas) {
@@ -223,10 +220,10 @@ describe('formula', () => {
         'avg(bytes + 5)',
         'avg(bytes + bytes)',
         'derivative(7)',
-        'derivative(7 + 1)',
         'derivative(bytes + 7)',
         'derivative(bytes + bytes)',
         'derivative(bytes + avg(bytes))',
+        'derivative(bytes + 7 + avg(bytes))',
       ];
 
       for (const formula of formulas) {
@@ -249,6 +246,11 @@ describe('formula', () => {
 
     it('returns no change but error if a required parameter passed with the wrong type in formula', () => {
       const formula = 'moving_average(avg(bytes), window="m")';
+      testIsBrokenFormula(formula);
+    });
+
+    it('returns error if a required parameter is passed multiple time', () => {
+      const formula = 'moving_average(avg(bytes), window=7, window=3)';
       testIsBrokenFormula(formula);
     });
   });
@@ -402,7 +404,22 @@ describe('formula', () => {
             indexPattern,
             operationDefinitionMap
           )
-        ).toEqual(['Fields noField not found']);
+        ).toEqual(['Field noField not found']);
+      }
+    });
+
+    it('returns an error with plural form correctly handled', () => {
+      const formulas = ['noField + noField2', 'noField + 1 + noField2'];
+
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Fields noField, noField2 not found']);
       }
     });
 
@@ -443,10 +460,6 @@ describe('formula', () => {
         'avg(bytes + 5)',
         'avg(bytes + bytes)',
         'derivative(7)',
-        'derivative(7 + 1)',
-        'derivative(bytes + 7)',
-        'derivative(bytes + bytes)',
-        'derivative(bytes + avg(bytes))',
       ];
 
       for (const formula of formulas) {
@@ -529,6 +542,41 @@ describe('formula', () => {
       ).toEqual([
         'The parameters for the operation moving_average in the Formula are of the wrong type: window',
       ]);
+    });
+
+    it('returns no error for the demo formula example', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`
+          moving_average(
+            cumulative_sum(
+               7 * clamp(sum(bytes), 0, last_value(memory) + max(memory))
+            ), window=10
+          )
+          `),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
+    });
+
+    it('returns no error if a math operation is passed to fullReference operations', () => {
+      const formulas = [
+        'derivative(7+1)',
+        'derivative(7+avg(bytes))',
+        'moving_average(7+avg(bytes), window=7)',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
     });
   });
 });
