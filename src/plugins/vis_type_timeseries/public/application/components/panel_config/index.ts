@@ -8,17 +8,17 @@
 
 // these are not typed yet
 // @ts-expect-error
-import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
+import { TimeseriesPanelConfig as timeseries } from './timeseries';
 // @ts-expect-error
-import { MetricPanelConfig as metric } from './panel_config/metric';
+import { MetricPanelConfig as metric } from './metric';
 // @ts-expect-error
-import { TopNPanelConfig as topN } from './panel_config/top_n';
+import { TopNPanelConfig as topN } from './top_n';
 // @ts-expect-error
-import { TablePanelConfig as table } from './panel_config/table';
+import { TablePanelConfig as table } from './table';
 // @ts-expect-error
-import { GaugePanelConfig as gauge } from './panel_config/gauge';
+import { GaugePanelConfig as gauge } from './gauge';
 // @ts-expect-error
-import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
+import { MarkdownPanelConfig as markdown } from './markdown';
 
 export const panelConfigTypes = {
   timeseries,

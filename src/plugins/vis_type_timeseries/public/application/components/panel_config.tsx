@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Observable } from 'rxjs';
 
 import { IUiSettingsClient } from 'kibana/public';
+import { TimeseriesVisData } from '../../../common/types';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { panelConfigTypes } from './panel_config/index';
@@ -24,7 +25,7 @@ interface FormValidationResults {
 interface PanelConfigProps {
   fields?: VisFields;
   model: TimeseriesVisParams;
-  visData$: Observable<TimeseriesVisParams>;
+  visData$: Observable<TimeseriesVisData | null>;
   getConfig: IUiSettingsClient['get'];
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
@@ -36,7 +37,7 @@ export function PanelConfig(props: PanelConfigProps) {
   const { model, onChange } = props;
   const Component = panelConfigTypes[model.type];
   const formValidationResults = useRef<FormValidationResults>({});
-  const [visData, setVisData] = useState(model);
+  const [visData, setVisData] = useState<TimeseriesVisData | null>(null);
 
   useEffect(() => {
     const visDataSubscription = props.visData$.subscribe(setVisData);

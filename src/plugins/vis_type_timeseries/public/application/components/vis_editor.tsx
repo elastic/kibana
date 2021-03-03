@@ -19,6 +19,7 @@ import {
   Vis,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
+import { TimeseriesVisData } from 'src/plugins/vis_type_timeseries/common/types';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
@@ -54,8 +55,8 @@ interface TimeseriesEditorState {
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
   private abortControllerFetchFields?: AbortController;
   private localStorage: Storage;
-  private visDataSubject: Rx.BehaviorSubject<TimeseriesVisParams>;
-  private visData$: Rx.Observable<TimeseriesVisParams>;
+  private visDataSubject: Rx.BehaviorSubject<TimeseriesVisData | null>;
+  private visData$: Rx.Observable<TimeseriesVisData | null>;
 
   constructor(props: TimeseriesEditorProps) {
     super(props);
@@ -67,7 +68,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       extractedIndexPatterns: [''],
     };
 
-    this.visDataSubject = new Rx.BehaviorSubject<TimeseriesVisParams>(this.props.vis.params);
+    this.visDataSubject = new Rx.BehaviorSubject<TimeseriesVisData | null>(null);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
@@ -142,12 +143,17 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.setState({ autoApply: event.target.checked });
   };
 
-  onDataChange = ({ visData }: { visData: TimeseriesVisParams }) => {
+  onDataChange = ({ visData }: { visData: TimeseriesVisData }) => {
     this.visDataSubject.next(visData);
   };
 
   render() {
-    const { model } = this.state;
+    const { model, visFields } = this.state;
+
+    if (!visFields) {
+      // wait for fields initialization
+      return null;
+    }
 
     return (
       <KibanaContextProvider
@@ -179,7 +185,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
           />
           <div className="tvbEditor--hideForReporting">
             <PanelConfig
-              fields={this.state.visFields}
+              fields={visFields}
               model={model}
               visData$={this.visData$}
               onChange={this.handleChange}
