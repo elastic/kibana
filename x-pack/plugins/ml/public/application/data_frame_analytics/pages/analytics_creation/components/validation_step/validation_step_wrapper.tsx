@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -12,6 +13,11 @@ import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 
+export interface ValidationSummary {
+  warning: number;
+  success: number;
+}
+
 export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
@@ -19,7 +25,7 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
   step,
   stepActivated,
 }) => {
-  const [validationSummary, setValidationSummary] = useState<{ warning: number; success: number }>({
+  const [validationSummary, setValidationSummary] = useState<ValidationSummary>({
     warning: 0,
     success: 0,
   });

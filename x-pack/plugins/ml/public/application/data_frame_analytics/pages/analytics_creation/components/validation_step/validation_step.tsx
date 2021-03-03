@@ -18,9 +18,10 @@ import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data
 import { Callout, CalloutMessage } from '../../../../../components/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
+import { ValidationSummary } from './validation_step_wrapper';
 
 interface Props extends CreateAnalyticsStepProps {
-  setValidationSummary: any;
+  setValidationSummary: React.Dispatch<React.SetStateAction<ValidationSummary>>;
 }
 
 export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidationSummary }) => {
@@ -35,12 +36,12 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
       const analyticsJobConfig = (isAdvancedEditorEnabled
         ? jobConfig
         : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
-      const validationResults = await ml.dataFrameAnalytics.validateDataFrameAnalytics(
+      const validationResults: CalloutMessage[] = await ml.dataFrameAnalytics.validateDataFrameAnalytics(
         analyticsJobConfig
       );
 
       const validationSummary = { warning: 0, success: 0 };
-      validationResults.forEach((message: any) => {
+      validationResults.forEach((message) => {
         if (message?.status === VALIDATION_STATUS.WARNING) {
           validationSummary.warning++;
         } else if (message?.status === VALIDATION_STATUS.SUCCESS) {
