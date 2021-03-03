@@ -12,7 +12,6 @@ import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
 import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementAppMountParams,
@@ -26,14 +25,18 @@ import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { SpacesPluginStart } from '../../spaces/public';
+
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
-import { AlertAddProps } from './application/sections/alert_form/alert_add';
-import { AlertEditProps } from './application/sections/alert_form/alert_edit';
+
+import type { ActionTypeModel, AlertTypeModel } from './types';
+import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
+import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { AlertAddProps } from './application/sections/alert_form/alert_add';
+import type { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -66,6 +69,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   alerts?: AlertingStart;
+  spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
 }
@@ -140,6 +144,7 @@ export class Plugin
           data: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
+          spaces: pluginsStart.spaces,
           element: params.element,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,

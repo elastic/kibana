@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -19,6 +20,7 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { HostOverviewByNameQuery } from '../../../../hosts/containers/hosts/details';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -54,10 +56,25 @@ export const ExpandableHostDetails = ({
   hostName,
 }: ExpandableHostProps & { contextID: string }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields, selectedPatterns } = useSourcererScope();
+  const { docValueFields } = useSourcererScope();
+  /*
+    Normally `selectedPatterns` from useSourcerScope would be where we obtain the indices,
+    but those indices are only loaded when viewing the pages where the sourcerer is initialized (i.e. Hosts and Overview)
+    When a user goes directly to the detections page, the patterns have not been loaded yet
+    as that information isn't used for the detections page. With this details component being accessible
+    from the detections page, the decision was made to get all existing index names to account for this.
+    Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
+    (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
+  */
+  const allExistingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const allPatterns = useDeepEqualSelector<string[]>(allExistingIndexNamesSelector);
+
   return (
     <HostOverviewByNameQuery
-      indexNames={selectedPatterns}
+      indexNames={allPatterns}
       sourceId="default"
       hostName={hostName}
       skip={isInitializing}
@@ -80,7 +97,7 @@ export const ExpandableHostDetails = ({
               data={hostOverview as HostItem}
               anomaliesData={anomaliesData}
               isLoadingAnomaliesData={isLoadingAnomaliesData}
-              indexNames={selectedPatterns}
+              indexNames={allPatterns}
               loading={loading}
               startDate={from}
               endDate={to}
