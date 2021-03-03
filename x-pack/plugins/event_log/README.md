@@ -14,7 +14,7 @@ alerting-specific properties within those Kibana properties.  The number of
 ECS fields is limited today, but can be extended fairly easily.  We are being
 conservative in adding new fields though, to help prevent indexing explosions.
 
-A client API is available for other plugins to 
+A client API is available for other plugins to:
 
 - register the events they want to write
 - write the events, with helpers for `duration` calculation, etc
@@ -29,11 +29,11 @@ users from accessing events for Saved Objects that they do not have access to.
 The queries ensure that the user can read the referenced Saved Objects before
 returning the events relating to them.
 
-The index written to is ILM-controlled.  The actual ILM ploicy is editable by
+The index written to is controlled by ILM.  The actual ILM policy is editable by
 customers, and by default does not delete any indices, but does roll them
 over based on time/space settings.
 
-The default index name is `.kibana-event-log-${kibanaVersion}-${ILM-sequence}`
+The default index name is `.kibana-event-log-${kibanaVersion}-${ILM-sequence}`.
 
 
 ## Event Documents
@@ -93,8 +93,8 @@ The `event.provider` and `event.action` fields provide a scoped mechanism for
 describing who is generating the event, and what kind of event it is.  Plugins
 that write events need to register the `provider` and `action` values they
 will be using.  Generally, each plugin should provide it's own `provider`,
-but a plugin could provide multiple, or a single provider might be used by
-multiple plugins.
+but a plugin could provide multiple providers, or a single provider might be
+used by multiple plugins.
 
 The following `provider` / `action` pairs are used by the alerting and actions
 plugins:
@@ -107,8 +107,8 @@ plugins:
   - `action: execute` - generated when an alert executor runs
   - `action: execute-action` - generated when an alert schedules an action to run
   - `action: new-instance` - generated when an alert has a new instance id that is active
-  - `action: recovered-instance` - generated when an alert has an previously active instance id is no longer active
-  - `action: active-instance` - generated when an alert instances determines an instance id is active
+  - `action: recovered-instance` - generated when an alert has a previously active instance id that is no longer active
+  - `action: active-instance` - generated when an alert determines an instance id is active
 
 For the `saved_objects` array elements, these are references to saved objects
 associated with the event.  For the `alerting` provider, those are alert saved
@@ -123,22 +123,23 @@ only via the alert saved object reference will return the event.
 
 ## Event Log index - associated resources
 
-The index template and ilm policy are defined in the file
+The index template and ILM policy are defined in the file
 [`x-pack/plugins/event_log/server/es/documents.ts`](server/es/documents.ts).
 
-See [ilm rollover action docs][] for more info on the `is_write_index`, and `index.lifecycle.*` properties.
+See [ILM rollover action docs][] for more information on the `is_write_index`
+and `index.lifecycle.*` properties.
 
-[ilm rollover action docs]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-rollover.html
+[ILM rollover action docs]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-rollover.html
 
 
 ## Using the Event Log for diagnosing alerting and actions issues
 
-For ad-hoc diagnostic purposes, your go-to tools are Discover and Lens. Your
+For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
 user will need to have access to the index, which is considered a Kibana
 system index due to it's prefix.
 
 Add the event log index as an index pattern.  The only customization needed is
-to set the `event.duration` field to be a duration in nanoseconds.  You'll
+to set the `event.duration` field to a duration in nanoseconds.  You'll
 probably want it displayed as milliseconds.
 
 
@@ -245,8 +246,8 @@ Follow these steps to use `eventLog` in your plugin:
 }
 ```
 
-2. Register provider / actions, and create your plugin's logger, using service
-API provided in the `setup` stage:
+2. Register provider / actions, and create your plugin's logger, using the
+service API provided in the `setup` stage:
 
 ```typescript
 ...
@@ -264,7 +265,7 @@ public setup(core: CoreSetup, { eventLog }: PluginSetupDependencies) {
 ...
 ```
 
-4. To log an event, call `logEvent()` on the `eventLogger` object you created:
+3. To log an event, call `logEvent()` on the `eventLogger` object you created:
 
 ```typescript
 ...
