@@ -220,7 +220,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'ml:fileDataVisualizerMaxFileSize': {
+  'fileUpload:maxFileSize': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
