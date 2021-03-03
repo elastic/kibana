@@ -97,7 +97,7 @@ Mustache also supports "triple braces" of the form `{{{variable name}}}`, which 
 
 Each alert type defines additional variables as properties of the variable `context`.  For example, if an alert type defines a variable `value`, it can be used in an action parameter as `{{context.value}}`.  
 
-For diagnostic or exploratory purposes, action variables whose values are themselves objects, such as `context`, can be referenced directly as variables.  The resulting value will be a JSON representation of the object.  For example, if an action parameter includes `{{context}}` in an action parameter, it will expand to the JSON representation of all the variables and values provided by the alert type.
+For diagnostic or exploratory purposes, action variables whose values are objects, such as `context`, can be referenced directly as variables.  The resulting value will be a JSON representation of the object.  For example, if an action parameter includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the alert type.
 
 You can attach more than one action. Clicking the "Add action" button will prompt you to select another alert type and repeat the above steps again.
 
