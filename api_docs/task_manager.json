@@ -75,20 +75,12 @@
                   "<unknown>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 55,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L55"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L55"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L55"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L55"
           },
           {
             "id": "def-server.TaskManagerPlugin.setup",
@@ -129,20 +121,12 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 62,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L62"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L62"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L62"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L62"
           },
           {
             "id": "def-server.TaskManagerPlugin.start",
@@ -182,27 +166,15 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 109,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L109"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L109"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L109"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L109"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/plugin.ts",
-          "lineNumber": 44,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L44"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L44",
         "initialIsOpen": false
       }
     ],
@@ -233,20 +205,12 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L21"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L21"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L21"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L21",
         "initialIsOpen": false
       },
       {
@@ -266,247 +230,16 @@
               "Error"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L25"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L25"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L25"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task_running/errors.ts#L25",
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-server.TaskInstance",
-        "type": "Interface",
-        "label": "TaskInstance",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.id",
-            "type": "string",
-            "label": "id",
-            "description": [
-              "\nOptional ID that can be passed by the caller. When ID is undefined, ES\nwill auto-generate a unique id. Otherwise, ID will be used to either\ncreate a new document, or update existing document"
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 201,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L201"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.taskType",
-            "type": "string",
-            "label": "taskType",
-            "description": [
-              "\nThe task definition type whose run function will execute this instance."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 206,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L206"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.scheduledAt",
-            "type": "Object",
-            "label": "scheduledAt",
-            "description": [
-              "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 212,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L212"
-            },
-            "signature": [
-              "Date | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.startedAt",
-            "type": "CompoundType",
-            "label": "startedAt",
-            "description": [
-              "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 219,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L219"
-            },
-            "signature": [
-              "Date | null | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.retryAt",
-            "type": "CompoundType",
-            "label": "retryAt",
-            "description": [
-              "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 225,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L225"
-            },
-            "signature": [
-              "Date | null | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.runAt",
-            "type": "Object",
-            "label": "runAt",
-            "description": [
-              "\nThe date and time that this task is scheduled to be run. It is not\nguaranteed to run at this time, but it is guaranteed not to run earlier\nthan this. Defaults to immediately."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 232,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L232"
-            },
-            "signature": [
-              "Date | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.schedule",
-            "type": "Object",
-            "label": "schedule",
-            "description": [
-              "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L239"
-            },
-            "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.IntervalSchedule",
-                "text": "IntervalSchedule"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.params",
-            "type": "Object",
-            "label": "params",
-            "description": [
-              "\nA task-specific set of parameters, used by the task's run function to tailor\nits work. This is generally user-input, such as { sms: '333-444-2222' }."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 248,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L248"
-            },
-            "signature": [
-              "Record<string, any>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.state",
-            "type": "Object",
-            "label": "state",
-            "description": [
-              "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 258,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L258"
-            },
-            "signature": [
-              "Record<string, any>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.user",
-            "type": "string",
-            "label": "user",
-            "description": [
-              "\nThe id of the user who scheduled this task."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 263,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L263"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.scope",
-            "type": "Array",
-            "label": "scope",
-            "description": [
-              "\nUsed to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',\nand then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks."
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 269,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L269"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.TaskInstance.ownerId",
-            "type": "CompoundType",
-            "label": "ownerId",
-            "description": [
-              "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
-            ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 274,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L274"
-            },
-            "signature": [
-              "string | null | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 195,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L195"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.ConcreteTaskInstance",
         "type": "Interface",
@@ -541,11 +274,7 @@
             "description": [
               "\nThe id of the Elastic document that stores this instance's data. This can\nbe passed by the caller when scheduling the task."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 302,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L302"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L302"
           },
           {
             "tags": [],
@@ -555,11 +284,7 @@
             "description": [
               "\nThe saved object version from the Elaticsearch document."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 307,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L307"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L307",
             "signature": [
               "string | undefined"
             ]
@@ -572,11 +297,7 @@
             "description": [
               "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 313,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L313"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L313",
             "signature": [
               "Date"
             ]
@@ -589,11 +310,7 @@
             "description": [
               "\nThe number of unsuccessful attempts since the last successful run. This\nwill be zeroed out after a successful run."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 319,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L319"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L319"
           },
           {
             "tags": [],
@@ -603,11 +320,7 @@
             "description": [
               "\nIndicates whether or not the task is currently running."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 324,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L324"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L324",
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -626,11 +339,7 @@
             "description": [
               "\nThe date and time that this task is scheduled to be run. It is not guaranteed\nto run at this time, but it is guaranteed not to run earlier than this."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 330,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L330"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L330",
             "signature": [
               "Date"
             ]
@@ -643,11 +352,7 @@
             "description": [
               "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 337,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L337"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L337",
             "signature": [
               "Date | null"
             ]
@@ -660,11 +365,7 @@
             "description": [
               "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 343,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L343"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L343",
             "signature": [
               "Date | null"
             ]
@@ -677,11 +378,7 @@
             "description": [
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 353,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L353"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L353",
             "signature": [
               "Record<string, any>"
             ]
@@ -694,21 +391,13 @@
             "description": [
               "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 358,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L358"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L358",
             "signature": [
               "string | null"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 297,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L297"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L297",
         "initialIsOpen": false
       },
       {
@@ -728,11 +417,7 @@
             "description": [
               "\nThe document describing the task instance, its params, state, id, etc."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L37"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L37",
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -744,11 +429,178 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L33"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L33",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.TaskInstance",
+        "type": "Interface",
+        "label": "TaskInstance",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.id",
+            "type": "string",
+            "label": "id",
+            "description": [
+              "\nOptional ID that can be passed by the caller. When ID is undefined, ES\nwill auto-generate a unique id. Otherwise, ID will be used to either\ncreate a new document, or update existing document"
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L201",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.taskType",
+            "type": "string",
+            "label": "taskType",
+            "description": [
+              "\nThe task definition type whose run function will execute this instance."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L206"
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.scheduledAt",
+            "type": "Object",
+            "label": "scheduledAt",
+            "description": [
+              "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L212",
+            "signature": [
+              "Date | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.startedAt",
+            "type": "CompoundType",
+            "label": "startedAt",
+            "description": [
+              "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L219",
+            "signature": [
+              "Date | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.retryAt",
+            "type": "CompoundType",
+            "label": "retryAt",
+            "description": [
+              "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L225",
+            "signature": [
+              "Date | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.runAt",
+            "type": "Object",
+            "label": "runAt",
+            "description": [
+              "\nThe date and time that this task is scheduled to be run. It is not\nguaranteed to run at this time, but it is guaranteed not to run earlier\nthan this. Defaults to immediately."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L232",
+            "signature": [
+              "Date | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.schedule",
+            "type": "Object",
+            "label": "schedule",
+            "description": [
+              "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L239",
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.IntervalSchedule",
+                "text": "IntervalSchedule"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.params",
+            "type": "Object",
+            "label": "params",
+            "description": [
+              "\nA task-specific set of parameters, used by the task's run function to tailor\nits work. This is generally user-input, such as { sms: '333-444-2222' }."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L248",
+            "signature": [
+              "Record<string, any>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.state",
+            "type": "Object",
+            "label": "state",
+            "description": [
+              "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L258",
+            "signature": [
+              "Record<string, any>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.user",
+            "type": "string",
+            "label": "user",
+            "description": [
+              "\nThe id of the user who scheduled this task."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L263",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.scope",
+            "type": "Array",
+            "label": "scope",
+            "description": [
+              "\nUsed to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',\nand then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks."
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L269",
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.TaskInstance.ownerId",
+            "type": "CompoundType",
+            "label": "ownerId",
+            "description": [
+              "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L274",
+            "signature": [
+              "string | null | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L195",
         "initialIsOpen": false
       }
     ],
@@ -759,11 +611,7 @@
         "label": "TaskStatus",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 171,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L171"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L171",
         "initialIsOpen": false
       }
     ],
@@ -774,11 +622,7 @@
         "label": "TaskRunCreatorFunction",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 96,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L96"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/task.ts#L96",
         "signature": [
           "(context: ",
           {
@@ -801,11 +645,7 @@
       "label": "TaskManagerSetupContract",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L31"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L31",
       "signature": [
         "{ addMiddleware: (middleware: Middleware) => void; } & Pick<TaskTypeDictionary, \"registerTaskDefinitions\">"
       ],
@@ -818,11 +658,7 @@
       "label": "TaskManagerStartContract",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 36,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L36"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/task_manager/server/plugin.ts#L36",
       "signature": [
         "Pick<TaskScheduling, \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<TaskStore, \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: TaskStore['remove']; }"
       ],

@@ -20,18 +20,10 @@
           "type": "boolean",
           "label": "enabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/license_management/public/plugin.ts",
-            "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L29"
-          }
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L29"
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 28,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L28"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L28",
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -41,11 +33,7 @@
       "label": "LicenseManagementUIPluginStart",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 31,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L31"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/license_management/public/plugin.ts#L31",
       "signature": [
         "void"
       ],

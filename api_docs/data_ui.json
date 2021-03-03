@@ -21,11 +21,7 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/index.tsx#L24"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/index.tsx#L24"
           }
         ],
         "signature": [
@@ -41,11 +37,7 @@
         ],
         "description": [],
         "label": "QueryStringInput",
-        "source": {
-          "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/index.tsx#L24"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/index.tsx#L24",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -65,11 +57,7 @@
             "type": "Array",
             "label": "indexPatterns",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L42"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L42",
             "signature": [
               "(string | ",
               {
@@ -88,11 +76,7 @@
             "type": "Object",
             "label": "query",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L43"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L43",
             "signature": [
               {
                 "pluginId": "data",
@@ -109,11 +93,7 @@
             "type": "CompoundType",
             "label": "disableAutoFocus",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L44"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L44",
             "signature": [
               "boolean | undefined"
             ]
@@ -124,11 +104,7 @@
             "type": "string",
             "label": "screenTitle",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L45"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L45",
             "signature": [
               "string | undefined"
             ]
@@ -139,11 +115,7 @@
             "type": "Any",
             "label": "prepend",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L46"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L46",
             "signature": [
               "any"
             ]
@@ -154,11 +126,7 @@
             "type": "Object",
             "label": "persistedLog",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L47"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L47",
             "signature": [
               {
                 "pluginId": "data",
@@ -176,11 +144,7 @@
             "type": "CompoundType",
             "label": "bubbleSubmitEvent",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L48"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L48",
             "signature": [
               "boolean | undefined"
             ]
@@ -191,11 +155,7 @@
             "type": "string",
             "label": "placeholder",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L49"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L49",
             "signature": [
               "string | undefined"
             ]
@@ -206,11 +166,7 @@
             "type": "CompoundType",
             "label": "disableLanguageSwitcher",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L50"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L50",
             "signature": [
               "boolean | undefined"
             ]
@@ -221,11 +177,7 @@
             "type": "CompoundType",
             "label": "languageSwitcherPopoverAnchorPosition",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L51"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L51",
             "signature": [
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ]
@@ -236,11 +188,7 @@
             "type": "Function",
             "label": "onBlur",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L52"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L52",
             "signature": [
               "(() => void) | undefined"
             ]
@@ -251,11 +199,7 @@
             "type": "Function",
             "label": "onChange",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L53"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L53",
             "signature": [
               "((query: ",
               {
@@ -274,11 +218,7 @@
             "type": "Function",
             "label": "onChangeQueryInputFocus",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L54"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L54",
             "signature": [
               "((isFocused: boolean) => void) | undefined"
             ]
@@ -289,11 +229,7 @@
             "type": "Function",
             "label": "onSubmit",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L55"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L55",
             "signature": [
               "((query: ",
               {
@@ -312,11 +248,7 @@
             "type": "string",
             "label": "dataTestSubj",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L56"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L56",
             "signature": [
               "string | undefined"
             ]
@@ -327,11 +259,7 @@
             "type": "CompoundType",
             "label": "size",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L57"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L57",
             "signature": [
               "\"s\" | \"l\" | undefined"
             ]
@@ -342,11 +270,7 @@
             "type": "string",
             "label": "className",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L58"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L58",
             "signature": [
               "string | undefined"
             ]
@@ -357,11 +281,7 @@
             "type": "CompoundType",
             "label": "isInvalid",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L59"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L59",
             "signature": [
               "boolean | undefined"
             ]
@@ -372,11 +292,7 @@
             "type": "CompoundType",
             "label": "isClearable",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L60"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L60",
             "signature": [
               "boolean | undefined"
             ]
@@ -387,11 +303,7 @@
             "type": "CompoundType",
             "label": "iconType",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L61"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L61",
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ]
@@ -402,11 +314,7 @@
             "type": "CompoundType",
             "label": "nonKqlMode",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L67"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L67",
             "signature": [
               "\"text\" | \"lucene\" | undefined"
             ]
@@ -417,37 +325,37 @@
             "type": "string",
             "label": "nonKqlModeHelpText",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L68"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L68",
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-          "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L41"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/query_string_input/query_string_input.tsx#L41",
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "id": "def-public.IndexPatternSelectProps",
+        "type": "Type",
+        "label": "IndexPatternSelectProps",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx#L17",
+        "signature": [
+          "Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\"> & globalThis.Required<Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; fieldTypes?: string[] | undefined; onNoIndexPatterns?: (() => void) | undefined; maxIndexPatterns?: number | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "tags": [],
         "id": "def-public.SearchBar",
         "type": "CompoundType",
         "label": "SearchBar",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/ui/search_bar/index.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/index.tsx#L23"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/index.tsx#L23",
         "signature": [
           "React.ComponentClass<Pick<Pick<",
           {
@@ -475,11 +383,7 @@
         "label": "SearchBarProps",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
-          "lineNumber": 80,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/search_bar.tsx#L80"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/search_bar.tsx#L80",
         "signature": [
           "SearchBarOwnProps & SearchBarInjectedDeps"
         ],
@@ -491,29 +395,9 @@
         "label": "StatefulSearchBarProps",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/create_search_bar.tsx#L31"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/search_bar/create_search_bar.tsx#L31",
         "signature": [
           "SearchBarOwnProps & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IndexPatternSelectProps",
-        "type": "Type",
-        "label": "IndexPatternSelectProps",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx#L17"
-        },
-        "signature": [
-          "Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\"> & globalThis.Required<Pick<Pick<EuiComboBoxProps<any>, \"children\" | \"onClick\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"isClearable\" | \"async\" | \"compressed\" | \"fullWidth\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; fieldTypes?: string[] | undefined; onNoIndexPatterns?: (() => void) | undefined; maxIndexPatterns?: number | undefined; }"
         ],
         "initialIsOpen": false
       }

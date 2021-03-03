@@ -28,11 +28,7 @@
           "type": "Function",
           "label": "getVisData",
           "description": [],
-          "source": {
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-            "lineNumber": 48,
-            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/vis_type_timeseries/server/plugin.ts#L48"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/vis_type_timeseries/server/plugin.ts#L48",
           "signature": [
             "(requestContext: ",
             {
@@ -70,11 +66,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-        "lineNumber": 47,
-        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/vis_type_timeseries/server/plugin.ts#L47"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/vis_type_timeseries/server/plugin.ts#L47",
       "lifecycle": "setup",
       "initialIsOpen": true
     }

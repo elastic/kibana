@@ -3,6 +3,100 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.ManagementApp",
+        "type": "Class",
+        "tags": [],
+        "label": "ManagementApp",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "management",
+            "scope": "public",
+            "docId": "kibManagementPluginApi",
+            "section": "def-public.ManagementApp",
+            "text": "ManagementApp"
+          },
+          " extends ",
+          "ManagementItem"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ManagementApp.mount",
+            "type": "Function",
+            "label": "mount",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L20",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.Mount",
+                "text": "Mount"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ManagementApp.basePath",
+            "type": "string",
+            "label": "basePath",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L21"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ManagementApp.meta",
+            "type": "Object",
+            "label": "meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L22",
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppMeta",
+                "text": "AppMeta"
+              }
+            ]
+          },
+          {
+            "id": "def-public.ManagementApp.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "args",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "management",
+                    "scope": "public",
+                    "docId": "kibManagementPluginApi",
+                    "section": "def-public.RegisterManagementAppArgs",
+                    "text": "RegisterManagementAppArgs"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L24"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L24"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L19",
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ManagementSection",
         "type": "Class",
         "tags": [],
@@ -26,11 +120,7 @@
             "type": "Array",
             "label": "apps",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L20"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L20",
             "signature": [
               {
                 "pluginId": "management",
@@ -67,20 +157,12 @@
                   ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"id\" | \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L22"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L22"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L22"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L22"
           },
           {
             "id": "def-public.ManagementSection.registerApp",
@@ -122,20 +204,12 @@
                   ", \"id\" | \"title\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 26,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L26"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L26"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L26"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L26"
           },
           {
             "id": "def-public.ManagementSection.getApp",
@@ -162,20 +236,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_section.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L41"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L41"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L41"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L41"
           },
           {
             "id": "def-public.ManagementSection.getAppsEnabled",
@@ -196,141 +262,189 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_section.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L45"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L45"
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_section.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ManagementApp",
-        "type": "Class",
-        "tags": [],
-        "label": "ManagementApp",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "management",
-            "scope": "public",
-            "docId": "kibManagementPluginApi",
-            "section": "def-public.ManagementApp",
-            "text": "ManagementApp"
-          },
-          " extends ",
-          "ManagementItem"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ManagementApp.mount",
-            "type": "Function",
-            "label": "mount",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L20"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.Mount",
-                "text": "Mount"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementApp.basePath",
-            "type": "string",
-            "label": "basePath",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L21"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementApp.meta",
-            "type": "Object",
-            "label": "meta",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
-              }
-            ]
-          },
-          {
-            "id": "def-public.ManagementApp.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "args",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "management",
-                    "scope": "public",
-                    "docId": "kibManagementPluginApi",
-                    "section": "def-public.RegisterManagementAppArgs",
-                    "text": "RegisterManagementAppArgs"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/management/public/utils/management_app.ts",
-                  "lineNumber": 24,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L24"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L24"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L19"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_section.ts#L19",
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
+      {
+        "id": "def-public.DefinedSections",
+        "type": "Interface",
+        "label": "DefinedSections",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.ingest",
+            "type": "Object",
+            "label": "ingest",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L18",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L19",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.insightsAndAlerting",
+            "type": "Object",
+            "label": "insightsAndAlerting",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L20",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.security",
+            "type": "Object",
+            "label": "security",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L21",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.kibana",
+            "type": "Object",
+            "label": "kibana",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L22",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DefinedSections.stack",
+            "type": "Object",
+            "label": "stack",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L23",
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L17",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ManagementAppMountParams",
+        "type": "Interface",
+        "label": "ManagementAppMountParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ManagementAppMountParams.basePath",
+            "type": "string",
+            "label": "basePath",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L59"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ManagementAppMountParams.element",
+            "type": "Object",
+            "label": "element",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L60",
+            "signature": [
+              "HTMLElement"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ManagementAppMountParams.setBreadcrumbs",
+            "type": "Function",
+            "label": "setBreadcrumbs",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L61",
+            "signature": [
+              "(crumbs: ",
+              "EuiBreadcrumb",
+              "[]) => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ManagementAppMountParams.history",
+            "type": "Object",
+            "label": "history",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L62",
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.ScopedHistory",
+                "text": "ScopedHistory"
+              },
+              "<unknown>"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L58",
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.RegisterManagementAppArgs",
         "type": "Interface",
@@ -355,11 +469,7 @@
             "type": "Function",
             "label": "mount",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L14"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L14",
             "signature": [
               {
                 "pluginId": "management",
@@ -376,11 +486,7 @@
             "type": "string",
             "label": "basePath",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L15"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L15"
           },
           {
             "tags": [],
@@ -388,11 +494,7 @@
             "type": "Object",
             "label": "meta",
             "description": [],
-            "source": {
-              "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L16",
             "signature": [
               {
                 "pluginId": "core",
@@ -405,233 +507,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ManagementAppMountParams",
-        "type": "Interface",
-        "label": "ManagementAppMountParams",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ManagementAppMountParams.basePath",
-            "type": "string",
-            "label": "basePath",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L59"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementAppMountParams.element",
-            "type": "Object",
-            "label": "element",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L60"
-            },
-            "signature": [
-              "HTMLElement"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementAppMountParams.setBreadcrumbs",
-            "type": "Function",
-            "label": "setBreadcrumbs",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L61"
-            },
-            "signature": [
-              "(crumbs: ",
-              "EuiBreadcrumb",
-              "[]) => void"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ManagementAppMountParams.history",
-            "type": "Object",
-            "label": "history",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L62"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
-              "<unknown>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 58,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L58"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.DefinedSections",
-        "type": "Interface",
-        "label": "DefinedSections",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.ingest",
-            "type": "Object",
-            "label": "ingest",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L18"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.data",
-            "type": "Object",
-            "label": "data",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L19"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.insightsAndAlerting",
-            "type": "Object",
-            "label": "insightsAndAlerting",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L20"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.security",
-            "type": "Object",
-            "label": "security",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L21"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.kibana",
-            "type": "Object",
-            "label": "kibana",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DefinedSections.stack",
-            "type": "Object",
-            "label": "stack",
-            "description": [],
-            "source": {
-              "path": "src/plugins/management/public/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L23"
-            },
-            "signature": [
-              {
-                "pluginId": "management",
-                "scope": "public",
-                "docId": "kibManagementPluginApi",
-                "section": "def-public.ManagementSection",
-                "text": "ManagementSection"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/management/public/types.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L17"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/utils/management_app.ts#L13",
         "initialIsOpen": false
       }
     ],
@@ -643,11 +519,7 @@
         "type": "string",
         "label": "MANAGEMENT_APP_ID",
         "description": [],
-        "source": {
-          "path": "src/plugins/management/common/contants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/common/contants.ts#L9"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/common/contants.ts#L9",
         "signature": [
           "\"management\""
         ],
@@ -668,11 +540,7 @@
           "type": "Object",
           "label": "sections",
           "description": [],
-          "source": {
-            "path": "src/plugins/management/public/types.ts",
-            "lineNumber": 14,
-            "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L14"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L14",
           "signature": [
             {
               "pluginId": "management",
@@ -684,11 +552,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 13,
-        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L13"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L13",
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -699,11 +563,7 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": {
-        "path": "src/plugins/management/public/types.ts",
-        "lineNumber": 27,
-        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L27"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/management/public/types.ts#L27",
       "lifecycle": "start",
       "initialIsOpen": true
     }

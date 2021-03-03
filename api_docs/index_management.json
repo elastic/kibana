@@ -15,11 +15,7 @@
               "string | undefined"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
           },
           {
             "type": "CompoundType",
@@ -29,11 +25,7 @@
               "boolean | undefined"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
           }
         ],
         "signature": [
@@ -41,53 +33,13 @@
         ],
         "description": [],
         "label": "getIndexListUri",
-        "source": {
-          "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/application/services/routing.ts#L38",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.IndexManagementPluginSetup",
-        "type": "Interface",
-        "label": "IndexManagementPluginSetup",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IndexManagementPluginSetup.extensionsService",
-            "type": "Object",
-            "label": "extensionsService",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/public/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L14"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "public",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-public.ExtensionsSetup",
-                "text": "ExtensionsSetup"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/public/types.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L13"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.Index",
         "type": "Interface",
@@ -101,11 +53,7 @@
             "type": "string",
             "label": "health",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
           },
           {
             "tags": [],
@@ -113,11 +61,7 @@
             "type": "string",
             "label": "status",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
           },
           {
             "tags": [],
@@ -125,11 +69,7 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
           },
           {
             "tags": [],
@@ -137,11 +77,7 @@
             "type": "string",
             "label": "uuid",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
           },
           {
             "tags": [],
@@ -149,11 +85,7 @@
             "type": "string",
             "label": "primary",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
           },
           {
             "tags": [],
@@ -161,11 +93,7 @@
             "type": "string",
             "label": "replica",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
           },
           {
             "tags": [],
@@ -173,11 +101,7 @@
             "type": "Any",
             "label": "documents",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61",
             "signature": [
               "any"
             ]
@@ -188,11 +112,7 @@
             "type": "Any",
             "label": "size",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62",
             "signature": [
               "any"
             ]
@@ -203,11 +123,7 @@
             "type": "boolean",
             "label": "isFrozen",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
           },
           {
             "tags": [],
@@ -215,11 +131,7 @@
             "type": "CompoundType",
             "label": "aliases",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64",
             "signature": [
               "string | string[]"
             ]
@@ -230,11 +142,7 @@
             "type": "string",
             "label": "data_stream",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65",
             "signature": [
               "string | undefined"
             ]
@@ -245,21 +153,41 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66",
             "signature": [
               "any"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/indices.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IndexManagementPluginSetup",
+        "type": "Interface",
+        "label": "IndexManagementPluginSetup",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.IndexManagementPluginSetup.extensionsService",
+            "type": "Object",
+            "label": "extensionsService",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L14",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "public",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-public.ExtensionsSetup",
+                "text": "ExtensionsSetup"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/public/types.ts#L13",
         "initialIsOpen": false
       }
     ],
@@ -284,11 +212,7 @@
             "type": "Object",
             "label": "security",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L21"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L21",
             "signature": [
               {
                 "pluginId": "security",
@@ -305,11 +229,7 @@
             "type": "Object",
             "label": "licensing",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L22"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L22",
             "signature": [
               {
                 "pluginId": "licensing",
@@ -326,11 +246,7 @@
             "type": "Object",
             "label": "features",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/server/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L23"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L23",
             "signature": [
               {
                 "pluginId": "features",
@@ -342,11 +258,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/server/types.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L20"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/types.ts#L20",
         "initialIsOpen": false
       },
       {
@@ -362,11 +274,7 @@
             "type": "string",
             "label": "health",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
           },
           {
             "tags": [],
@@ -374,11 +282,7 @@
             "type": "string",
             "label": "status",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
           },
           {
             "tags": [],
@@ -386,11 +290,7 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
           },
           {
             "tags": [],
@@ -398,11 +298,7 @@
             "type": "string",
             "label": "uuid",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
           },
           {
             "tags": [],
@@ -410,11 +306,7 @@
             "type": "string",
             "label": "primary",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
           },
           {
             "tags": [],
@@ -422,11 +314,7 @@
             "type": "string",
             "label": "replica",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
           },
           {
             "tags": [],
@@ -434,11 +322,7 @@
             "type": "Any",
             "label": "documents",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61",
             "signature": [
               "any"
             ]
@@ -449,11 +333,7 @@
             "type": "Any",
             "label": "size",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62",
             "signature": [
               "any"
             ]
@@ -464,11 +344,7 @@
             "type": "boolean",
             "label": "isFrozen",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
           },
           {
             "tags": [],
@@ -476,11 +352,7 @@
             "type": "CompoundType",
             "label": "aliases",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64",
             "signature": [
               "string | string[]"
             ]
@@ -491,11 +363,7 @@
             "type": "string",
             "label": "data_stream",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65",
             "signature": [
               "string | undefined"
             ]
@@ -506,21 +374,13 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66",
             "signature": [
               "any"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/indices.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54",
         "initialIsOpen": false
       },
       {
@@ -538,11 +398,7 @@
             "type": "Array",
             "label": "index_patterns",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100",
             "signature": [
               "string[]"
             ]
@@ -553,11 +409,7 @@
             "type": "number",
             "label": "version",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101",
             "signature": [
               "number | undefined"
             ]
@@ -568,11 +420,7 @@
             "type": "Object",
             "label": "settings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102",
             "signature": [
               {
                 "pluginId": "indexManagement",
@@ -590,11 +438,7 @@
             "type": "Object",
             "label": "aliases",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103",
             "signature": [
               {
                 "pluginId": "indexManagement",
@@ -612,11 +456,7 @@
             "type": "Object",
             "label": "mappings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104",
             "signature": [
               {
                 "pluginId": "indexManagement",
@@ -634,21 +474,13 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105",
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99",
         "initialIsOpen": false
       }
     ],
@@ -660,11 +492,7 @@
         "label": "IndexManagementConfig",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/index_management/server/config.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/config.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/config.ts#L14",
         "signature": [
           "{ readonly enabled: boolean; }"
         ],
@@ -685,11 +513,7 @@
           "type": "Object",
           "label": "indexDataEnricher",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/index_management/server/plugin.ts",
-            "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L26"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L26",
           "signature": [
             "{ add: (enricher: ",
             {
@@ -703,11 +527,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/index_management/server/plugin.ts",
-        "lineNumber": 25,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L25"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/server/plugin.ts#L25",
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -741,11 +561,7 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/lib/utils.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L22"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L22"
           },
           {
             "type": "CompoundType",
@@ -755,11 +571,7 @@
               "\"aliases\" | \"settings\" | \"mappings\""
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/lib/utils.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L23"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L23"
           }
         ],
         "signature": [
@@ -791,478 +603,13 @@
         ],
         "description": [],
         "label": "getTemplateParameter",
-        "source": {
-          "path": "x-pack/plugins/index_management/common/lib/utils.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L21"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/lib/utils.ts#L21",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-common.DataStreamFromEs",
-        "type": "Interface",
-        "label": "DataStreamFromEs",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L31"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.timestamp_field",
-            "type": "Object",
-            "label": "timestamp_field",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L32"
-            },
-            "signature": [
-              "TimestampFieldFromEs"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.indices",
-            "type": "Array",
-            "label": "indices",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L33"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.DataStreamIndexFromEs",
-                "text": "DataStreamIndexFromEs"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.generation",
-            "type": "number",
-            "label": "generation",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L34"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L35"
-            },
-            "signature": [
-              "MetaFromEs | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.status",
-            "type": "CompoundType",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L36"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.HealthFromEs",
-                "text": "HealthFromEs"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.template",
-            "type": "string",
-            "label": "template",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L37"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.ilm_policy",
-            "type": "string",
-            "label": "ilm_policy",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L38"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.store_size",
-            "type": "string",
-            "label": "store_size",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L39"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.store_size_bytes",
-            "type": "number",
-            "label": "store_size_bytes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L40"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.maximum_timestamp",
-            "type": "number",
-            "label": "maximum_timestamp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L41"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.privileges",
-            "type": "Object",
-            "label": "privileges",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L42"
-            },
-            "signature": [
-              "PrivilegesFromEs"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamFromEs.hidden",
-            "type": "boolean",
-            "label": "hidden",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L43"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L30"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.DataStream",
-        "type": "Interface",
-        "label": "DataStream",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.DataStream.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L54"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.timeStampField",
-            "type": "Object",
-            "label": "timeStampField",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L55"
-            },
-            "signature": [
-              "TimestampFieldFromEs"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.indices",
-            "type": "Array",
-            "label": "indices",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L56"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.DataStreamIndex",
-                "text": "DataStreamIndex"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.generation",
-            "type": "number",
-            "label": "generation",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L57"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.health",
-            "type": "CompoundType",
-            "label": "health",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L58"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Health",
-                "text": "Health"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.indexTemplateName",
-            "type": "string",
-            "label": "indexTemplateName",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L59"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.ilmPolicyName",
-            "type": "string",
-            "label": "ilmPolicyName",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L60"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.storageSize",
-            "type": "string",
-            "label": "storageSize",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L61"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.storageSizeBytes",
-            "type": "number",
-            "label": "storageSizeBytes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L62"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.maxTimeStamp",
-            "type": "number",
-            "label": "maxTimeStamp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L63"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L64"
-            },
-            "signature": [
-              "MetaFromEs | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.privileges",
-            "type": "Object",
-            "label": "privileges",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L65"
-            },
-            "signature": [
-              "PrivilegesFromEs"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStream.hidden",
-            "type": "boolean",
-            "label": "hidden",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L66"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-          "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L53"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.DataStreamIndex",
-        "type": "Interface",
-        "label": "DataStreamIndex",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.DataStreamIndex.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L70"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.DataStreamIndex.uuid",
-            "type": "string",
-            "label": "uuid",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L71"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-          "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L69"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-common.Aliases",
         "type": "Interface",
@@ -1276,981 +623,158 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/aliases.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L9"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L9",
             "signature": [
               "any"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/aliases.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L8"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/aliases.ts#L8",
         "initialIsOpen": false
       },
       {
-        "id": "def-common.IndexSettings",
+        "id": "def-common.ComponentTemplateDeserialized",
         "type": "Interface",
-        "label": "IndexSettings",
-        "description": [],
-        "tags": [],
-        "children": [
+        "label": "ComponentTemplateDeserialized",
+        "signature": [
           {
-            "tags": [],
-            "id": "def-common.IndexSettings.index",
-            "type": "Object",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L49"
-            },
-            "signature": [
-              "Partial<IndexModule> | undefined"
-            ]
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.ComponentTemplateDeserialized",
+            "text": "ComponentTemplateDeserialized"
           },
+          " extends ",
           {
-            "tags": [],
-            "id": "def-common.IndexSettings.analysis",
-            "type": "Object",
-            "label": "analysis",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L50"
-            },
-            "signature": [
-              "AnalysisModule | undefined"
-            ]
-          },
-          {
-            "id": "def-common.IndexSettings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L51"
-            },
-            "signature": [
-              "any"
-            ]
+            "pluginId": "indexManagement",
+            "scope": "common",
+            "docId": "kibIndexManagementPluginApi",
+            "section": "def-common.ComponentTemplateSerialized",
+            "text": "ComponentTemplateSerialized"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/indices.ts",
-          "lineNumber": 48,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L48"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Index",
-        "type": "Interface",
-        "label": "Index",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-common.Index.health",
-            "type": "string",
-            "label": "health",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.status",
-            "type": "string",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.name",
+            "id": "def-common.ComponentTemplateDeserialized.name",
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L23"
           },
           {
             "tags": [],
-            "id": "def-common.Index.uuid",
-            "type": "string",
-            "label": "uuid",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.primary",
-            "type": "string",
-            "label": "primary",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.replica",
-            "type": "string",
-            "label": "replica",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.documents",
-            "type": "Any",
-            "label": "documents",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61"
-            },
-            "signature": [
-              "any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.size",
-            "type": "Any",
-            "label": "size",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62"
-            },
-            "signature": [
-              "any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.isFrozen",
-            "type": "boolean",
-            "label": "isFrozen",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.aliases",
-            "type": "CompoundType",
-            "label": "aliases",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64"
-            },
-            "signature": [
-              "string | string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Index.data_stream",
-            "type": "string",
-            "label": "data_stream",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "id": "def-common.Index.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/indices.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/indices.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Mappings",
-        "type": "Interface",
-        "label": "Mappings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-common.Mappings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/mappings.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L11"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/mappings.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.TemplateSerialized",
-        "type": "Interface",
-        "label": "TemplateSerialized",
-        "description": [
-          "\nIndex template format from Elasticsearch"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.index_patterns",
-            "type": "Array",
-            "label": "index_patterns",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L16"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.template",
-            "type": "Object",
-            "label": "template",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L17"
-            },
-            "signature": [
-              "{ settings?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.IndexSettings",
-                "text": "IndexSettings"
-              },
-              " | undefined; aliases?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Aliases",
-                "text": "Aliases"
-              },
-              " | undefined; mappings?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Mappings",
-                "text": "Mappings"
-              },
-              " | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.composed_of",
-            "type": "Array",
-            "label": "composed_of",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L22"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.version",
-            "type": "number",
-            "label": "version",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L23"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.priority",
-            "type": "number",
-            "label": "priority",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L24"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L25"
-            },
-            "signature": [
-              "{ [key: string]: any; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateSerialized.data_stream",
-            "type": "Object",
-            "label": "data_stream",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L26"
-            },
-            "signature": [
-              "{} | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L15"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.TemplateDeserialized",
-        "type": "Interface",
-        "label": "TemplateDeserialized",
-        "description": [
-          "\nTemplateDeserialized is the format the UI will be working with,\nregardless if we are loading the new format (composable) index template,\nor the legacy one. Serialization is done server side."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L35"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.indexPatterns",
-            "type": "Array",
-            "label": "indexPatterns",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L36"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.template",
-            "type": "Object",
-            "label": "template",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L37"
-            },
-            "signature": [
-              "{ settings?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.IndexSettings",
-                "text": "IndexSettings"
-              },
-              " | undefined; aliases?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Aliases",
-                "text": "Aliases"
-              },
-              " | undefined; mappings?: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Mappings",
-                "text": "Mappings"
-              },
-              " | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.composedOf",
-            "type": "Array",
-            "label": "composedOf",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L42"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.version",
-            "type": "number",
-            "label": "version",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L43"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.priority",
-            "type": "number",
-            "label": "priority",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L44"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L45"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.ilmPolicy",
-            "type": "Object",
-            "label": "ilmPolicy",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L46"
-            },
-            "signature": [
-              "{ name: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L49"
-            },
-            "signature": [
-              "{ [key: string]: any; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized.dataStream",
-            "type": "Object",
-            "label": "dataStream",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L51"
-            },
-            "signature": [
-              "{ [key: string]: any; hidden?: boolean | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateDeserialized._kbnMeta",
+            "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
             "type": "Object",
             "label": "_kbnMeta",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L55"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L24",
             "signature": [
-              "{ type: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.TemplateType",
-                "text": "TemplateType"
-              },
-              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
+              "{ usedBy: string[]; isManaged: boolean; }"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L34"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L22",
         "initialIsOpen": false
       },
       {
-        "id": "def-common.TemplateFromEs",
+        "id": "def-common.ComponentTemplateFromEs",
         "type": "Interface",
-        "label": "TemplateFromEs",
+        "label": "ComponentTemplateFromEs",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-common.TemplateFromEs.name",
+            "id": "def-common.ComponentTemplateFromEs.name",
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L65"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L31"
           },
           {
             "tags": [],
-            "id": "def-common.TemplateFromEs.index_template",
+            "id": "def-common.ComponentTemplateFromEs.component_template",
             "type": "Object",
-            "label": "index_template",
+            "label": "component_template",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L66"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L32",
             "signature": [
               {
                 "pluginId": "indexManagement",
                 "scope": "common",
                 "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.TemplateSerialized",
-                "text": "TemplateSerialized"
+                "section": "def-common.ComponentTemplateSerialized",
+                "text": "ComponentTemplateSerialized"
               }
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L64"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L30",
         "initialIsOpen": false
       },
       {
-        "id": "def-common.TemplateListItem",
+        "id": "def-common.ComponentTemplateListItem",
         "type": "Interface",
-        "label": "TemplateListItem",
-        "description": [
-          "\nInterface for the template list in our UI table\nwe don't include the mappings, settings and aliases\nto reduce the payload size sent back to the client."
-        ],
+        "label": "ComponentTemplateListItem",
+        "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-common.TemplateListItem.name",
+            "id": "def-common.ComponentTemplateListItem.name",
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L75"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L36"
           },
           {
             "tags": [],
-            "id": "def-common.TemplateListItem.indexPatterns",
+            "id": "def-common.ComponentTemplateListItem.usedBy",
             "type": "Array",
-            "label": "indexPatterns",
+            "label": "usedBy",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L76"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L37",
             "signature": [
               "string[]"
             ]
           },
           {
             "tags": [],
-            "id": "def-common.TemplateListItem.version",
-            "type": "number",
-            "label": "version",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L77"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateListItem.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L78"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateListItem.priority",
-            "type": "number",
-            "label": "priority",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L79"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateListItem.hasSettings",
-            "type": "boolean",
-            "label": "hasSettings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L80"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateListItem.hasAliases",
-            "type": "boolean",
-            "label": "hasAliases",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L81"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.TemplateListItem.hasMappings",
+            "id": "def-common.ComponentTemplateListItem.hasMappings",
             "type": "boolean",
             "label": "hasMappings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L82"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L38"
           },
           {
             "tags": [],
-            "id": "def-common.TemplateListItem.ilmPolicy",
-            "type": "Object",
-            "label": "ilmPolicy",
+            "id": "def-common.ComponentTemplateListItem.hasAliases",
+            "type": "boolean",
+            "label": "hasAliases",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L83"
-            },
-            "signature": [
-              "{ name: string; } | undefined"
-            ]
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L39"
           },
           {
             "tags": [],
-            "id": "def-common.TemplateListItem._kbnMeta",
-            "type": "Object",
-            "label": "_kbnMeta",
+            "id": "def-common.ComponentTemplateListItem.hasSettings",
+            "type": "boolean",
+            "label": "hasSettings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L86"
-            },
-            "signature": [
-              "{ type: ",
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.TemplateType",
-                "text": "TemplateType"
-              },
-              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
-            ]
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L40"
+          },
+          {
+            "tags": [],
+            "id": "def-common.ComponentTemplateListItem.isManaged",
+            "type": "boolean",
+            "label": "isManaged",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L41"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L74"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.LegacyTemplateSerialized",
-        "type": "Interface",
-        "label": "LegacyTemplateSerialized",
-        "description": [
-          "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.index_patterns",
-            "type": "Array",
-            "label": "index_patterns",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.version",
-            "type": "number",
-            "label": "version",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.settings",
-            "type": "Object",
-            "label": "settings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.IndexSettings",
-                "text": "IndexSettings"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.aliases",
-            "type": "Object",
-            "label": "aliases",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Aliases",
-                "text": "Aliases"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.mappings",
-            "type": "Object",
-            "label": "mappings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104"
-            },
-            "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Mappings",
-                "text": "Mappings"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyTemplateSerialized.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/templates.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L35",
         "initialIsOpen": false
       },
       {
@@ -2266,11 +790,7 @@
             "type": "Object",
             "label": "template",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L13"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L13",
             "signature": [
               "{ settings?: ",
               {
@@ -2305,11 +825,7 @@
             "type": "number",
             "label": "version",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L18"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L18",
             "signature": [
               "number | undefined"
             ]
@@ -2320,218 +836,1070 @@
             "type": "Object",
             "label": "_meta",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L19"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L19",
             "signature": [
               "{ [key: string]: any; } | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L12"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L12",
         "initialIsOpen": false
       },
       {
-        "id": "def-common.ComponentTemplateDeserialized",
+        "id": "def-common.DataStream",
         "type": "Interface",
-        "label": "ComponentTemplateDeserialized",
-        "signature": [
-          {
-            "pluginId": "indexManagement",
-            "scope": "common",
-            "docId": "kibIndexManagementPluginApi",
-            "section": "def-common.ComponentTemplateDeserialized",
-            "text": "ComponentTemplateDeserialized"
-          },
-          " extends ",
-          {
-            "pluginId": "indexManagement",
-            "scope": "common",
-            "docId": "kibIndexManagementPluginApi",
-            "section": "def-common.ComponentTemplateSerialized",
-            "text": "ComponentTemplateSerialized"
-          }
-        ],
+        "label": "DataStream",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateDeserialized.name",
+            "id": "def-common.DataStream.name",
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L23"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L54"
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateDeserialized._kbnMeta",
+            "id": "def-common.DataStream.timeStampField",
             "type": "Object",
-            "label": "_kbnMeta",
+            "label": "timeStampField",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L24"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L55",
             "signature": [
-              "{ usedBy: string[]; isManaged: boolean; }"
+              "TimestampFieldFromEs"
             ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L22"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.ComponentTemplateFromEs",
-        "type": "Interface",
-        "label": "ComponentTemplateFromEs",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.ComponentTemplateFromEs.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L31"
-            }
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateFromEs.component_template",
-            "type": "Object",
-            "label": "component_template",
+            "id": "def-common.DataStream.indices",
+            "type": "Array",
+            "label": "indices",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L32"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L56",
             "signature": [
               {
                 "pluginId": "indexManagement",
                 "scope": "common",
                 "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.ComponentTemplateSerialized",
-                "text": "ComponentTemplateSerialized"
+                "section": "def-common.DataStreamIndex",
+                "text": "DataStreamIndex"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.generation",
+            "type": "number",
+            "label": "generation",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L57"
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.health",
+            "type": "CompoundType",
+            "label": "health",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L58",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Health",
+                "text": "Health"
               }
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.indexTemplateName",
+            "type": "string",
+            "label": "indexTemplateName",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L59"
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.ilmPolicyName",
+            "type": "string",
+            "label": "ilmPolicyName",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L60",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.storageSize",
+            "type": "string",
+            "label": "storageSize",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L61",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.storageSizeBytes",
+            "type": "number",
+            "label": "storageSizeBytes",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L62",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.maxTimeStamp",
+            "type": "number",
+            "label": "maxTimeStamp",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L63",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L64",
+            "signature": [
+              "MetaFromEs | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.privileges",
+            "type": "Object",
+            "label": "privileges",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L65",
+            "signature": [
+              "PrivilegesFromEs"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStream.hidden",
+            "type": "boolean",
+            "label": "hidden",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L66"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L30"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L53",
         "initialIsOpen": false
       },
       {
-        "id": "def-common.ComponentTemplateListItem",
+        "id": "def-common.DataStreamFromEs",
         "type": "Interface",
-        "label": "ComponentTemplateListItem",
+        "label": "DataStreamFromEs",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.name",
+            "id": "def-common.DataStreamFromEs.name",
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L36"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L31"
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.usedBy",
-            "type": "Array",
-            "label": "usedBy",
+            "id": "def-common.DataStreamFromEs.timestamp_field",
+            "type": "Object",
+            "label": "timestamp_field",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L37"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L32",
+            "signature": [
+              "TimestampFieldFromEs"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.indices",
+            "type": "Array",
+            "label": "indices",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L33",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.DataStreamIndexFromEs",
+                "text": "DataStreamIndexFromEs"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.generation",
+            "type": "number",
+            "label": "generation",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L34"
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L35",
+            "signature": [
+              "MetaFromEs | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.status",
+            "type": "CompoundType",
+            "label": "status",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L36",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.HealthFromEs",
+                "text": "HealthFromEs"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.template",
+            "type": "string",
+            "label": "template",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L37"
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.ilm_policy",
+            "type": "string",
+            "label": "ilm_policy",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L38",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.store_size",
+            "type": "string",
+            "label": "store_size",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L39",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.store_size_bytes",
+            "type": "number",
+            "label": "store_size_bytes",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L40",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.maximum_timestamp",
+            "type": "number",
+            "label": "maximum_timestamp",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L41",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.privileges",
+            "type": "Object",
+            "label": "privileges",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L42",
+            "signature": [
+              "PrivilegesFromEs"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamFromEs.hidden",
+            "type": "boolean",
+            "label": "hidden",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L43"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L30",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.DataStreamIndex",
+        "type": "Interface",
+        "label": "DataStreamIndex",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.DataStreamIndex.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L70"
+          },
+          {
+            "tags": [],
+            "id": "def-common.DataStreamIndex.uuid",
+            "type": "string",
+            "label": "uuid",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L71"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L69",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Index",
+        "type": "Interface",
+        "label": "Index",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Index.health",
+            "type": "string",
+            "label": "health",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L55"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.status",
+            "type": "string",
+            "label": "status",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L56"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L57"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.uuid",
+            "type": "string",
+            "label": "uuid",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L58"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.primary",
+            "type": "string",
+            "label": "primary",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L59"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.replica",
+            "type": "string",
+            "label": "replica",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L60"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.documents",
+            "type": "Any",
+            "label": "documents",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L61",
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.size",
+            "type": "Any",
+            "label": "size",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L62",
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.isFrozen",
+            "type": "boolean",
+            "label": "isFrozen",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L63"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.aliases",
+            "type": "CompoundType",
+            "label": "aliases",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L64",
+            "signature": [
+              "string | string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Index.data_stream",
+            "type": "string",
+            "label": "data_stream",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L65",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "id": "def-common.Index.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L66",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L54",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.IndexSettings",
+        "type": "Interface",
+        "label": "IndexSettings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.IndexSettings.index",
+            "type": "Object",
+            "label": "index",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L49",
+            "signature": [
+              "Partial<IndexModule> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.IndexSettings.analysis",
+            "type": "Object",
+            "label": "analysis",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L50",
+            "signature": [
+              "AnalysisModule | undefined"
+            ]
+          },
+          {
+            "id": "def-common.IndexSettings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L51",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/indices.ts#L48",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.LegacyTemplateSerialized",
+        "type": "Interface",
+        "label": "LegacyTemplateSerialized",
+        "description": [
+          "\n------------------------------------------\n--------- LEGACY INDEX TEMPLATES ---------\n------------------------------------------"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.LegacyTemplateSerialized.index_patterns",
+            "type": "Array",
+            "label": "index_patterns",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L100",
             "signature": [
               "string[]"
             ]
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.hasMappings",
-            "type": "boolean",
-            "label": "hasMappings",
+            "id": "def-common.LegacyTemplateSerialized.version",
+            "type": "number",
+            "label": "version",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L38"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L101",
+            "signature": [
+              "number | undefined"
+            ]
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.hasAliases",
-            "type": "boolean",
-            "label": "hasAliases",
+            "id": "def-common.LegacyTemplateSerialized.settings",
+            "type": "Object",
+            "label": "settings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L39"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L102",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined"
+            ]
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.hasSettings",
+            "id": "def-common.LegacyTemplateSerialized.aliases",
+            "type": "Object",
+            "label": "aliases",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L103",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.LegacyTemplateSerialized.mappings",
+            "type": "Object",
+            "label": "mappings",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L104",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.LegacyTemplateSerialized.order",
+            "type": "number",
+            "label": "order",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L105",
+            "signature": [
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L99",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Mappings",
+        "type": "Interface",
+        "label": "Mappings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-common.Mappings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L11",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/mappings.ts#L10",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.TemplateDeserialized",
+        "type": "Interface",
+        "label": "TemplateDeserialized",
+        "description": [
+          "\nTemplateDeserialized is the format the UI will be working with,\nregardless if we are loading the new format (composable) index template,\nor the legacy one. Serialization is done server side."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L35"
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.indexPatterns",
+            "type": "Array",
+            "label": "indexPatterns",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L36",
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.template",
+            "type": "Object",
+            "label": "template",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L37",
+            "signature": [
+              "{ settings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined; aliases?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined; mappings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.composedOf",
+            "type": "Array",
+            "label": "composedOf",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L42",
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.version",
+            "type": "number",
+            "label": "version",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L43",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.priority",
+            "type": "number",
+            "label": "priority",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L44",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.order",
+            "type": "number",
+            "label": "order",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L45",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.ilmPolicy",
+            "type": "Object",
+            "label": "ilmPolicy",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L46",
+            "signature": [
+              "{ name: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L49",
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized.dataStream",
+            "type": "Object",
+            "label": "dataStream",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L51",
+            "signature": [
+              "{ [key: string]: any; hidden?: boolean | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateDeserialized._kbnMeta",
+            "type": "Object",
+            "label": "_kbnMeta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L55",
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateType",
+                "text": "TemplateType"
+              },
+              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L34",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.TemplateFromEs",
+        "type": "Interface",
+        "label": "TemplateFromEs",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.TemplateFromEs.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L65"
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateFromEs.index_template",
+            "type": "Object",
+            "label": "index_template",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L66",
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateSerialized",
+                "text": "TemplateSerialized"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L64",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.TemplateListItem",
+        "type": "Interface",
+        "label": "TemplateListItem",
+        "description": [
+          "\nInterface for the template list in our UI table\nwe don't include the mappings, settings and aliases\nto reduce the payload size sent back to the client."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L75"
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.indexPatterns",
+            "type": "Array",
+            "label": "indexPatterns",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L76",
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.version",
+            "type": "number",
+            "label": "version",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L77",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.order",
+            "type": "number",
+            "label": "order",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L78",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.priority",
+            "type": "number",
+            "label": "priority",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L79",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.hasSettings",
             "type": "boolean",
             "label": "hasSettings",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L40"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L80"
           },
           {
             "tags": [],
-            "id": "def-common.ComponentTemplateListItem.isManaged",
+            "id": "def-common.TemplateListItem.hasAliases",
             "type": "boolean",
-            "label": "isManaged",
+            "label": "hasAliases",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L41"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L81"
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.hasMappings",
+            "type": "boolean",
+            "label": "hasMappings",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L82"
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem.ilmPolicy",
+            "type": "Object",
+            "label": "ilmPolicy",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L83",
+            "signature": [
+              "{ name: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateListItem._kbnMeta",
+            "type": "Object",
+            "label": "_kbnMeta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L86",
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.TemplateType",
+                "text": "TemplateType"
+              },
+              "; hasDatastream: boolean; isLegacy?: boolean | undefined; }"
+            ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/component_templates.ts#L35"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L74",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.TemplateSerialized",
+        "type": "Interface",
+        "label": "TemplateSerialized",
+        "description": [
+          "\nIndex template format from Elasticsearch"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.index_patterns",
+            "type": "Array",
+            "label": "index_patterns",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L16",
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.template",
+            "type": "Object",
+            "label": "template",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L17",
+            "signature": [
+              "{ settings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexSettings",
+                "text": "IndexSettings"
+              },
+              " | undefined; aliases?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Aliases",
+                "text": "Aliases"
+              },
+              " | undefined; mappings?: ",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              },
+              " | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.composed_of",
+            "type": "Array",
+            "label": "composed_of",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L22",
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.version",
+            "type": "number",
+            "label": "version",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L23",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.priority",
+            "type": "number",
+            "label": "priority",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L24",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L25",
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.TemplateSerialized.data_stream",
+            "type": "Object",
+            "label": "data_stream",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L26",
+            "signature": [
+              "{} | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L15",
         "initialIsOpen": false
       }
     ],
@@ -2543,11 +1911,7 @@
         "type": "string",
         "label": "API_BASE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/api_base_path.ts#L8"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/api_base_path.ts#L8",
         "signature": [
           "\"/api/index_management\""
         ],
@@ -2559,11 +1923,7 @@
         "type": "string",
         "label": "BASE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/constants/base_path.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/base_path.ts#L8"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/constants/base_path.ts#L8",
         "signature": [
           "\"/management/data/index_management/\""
         ],
@@ -2575,11 +1935,7 @@
         "label": "Health",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
-          "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L51"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/data_streams.ts#L51",
         "signature": [
           "\"green\" | \"yellow\" | \"red\""
         ],
@@ -2591,11 +1947,7 @@
         "label": "TemplateType",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/index_management/common/types/templates.ts",
-          "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L62"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/index_management/common/types/templates.ts#L62",
         "signature": [
           "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
         ],

@@ -38,20 +38,12 @@
               ">"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L24"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L24"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L24"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L24",
         "initialIsOpen": false
       },
       {
@@ -89,20 +81,12 @@
               ">"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L64"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L64"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L64"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L64",
         "initialIsOpen": false
       },
       {
@@ -140,20 +124,12 @@
               ">"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L43"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L43"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L43"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/space_avatar/space_attributes.ts#L43",
         "initialIsOpen": false
       }
     ],
@@ -188,11 +164,7 @@
             "type": "Object",
             "label": "authorizedPurposes",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22",
             "signature": [
               "Record<",
               {
@@ -206,11 +178,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21",
         "initialIsOpen": false
       },
       {
@@ -226,11 +194,7 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L10"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L10"
           },
           {
             "tags": [],
@@ -238,11 +202,7 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L11"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L11"
           },
           {
             "tags": [],
@@ -250,11 +210,7 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L12"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L12",
             "signature": [
               "string | undefined"
             ]
@@ -265,11 +221,7 @@
             "type": "string",
             "label": "color",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L13"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L13",
             "signature": [
               "string | undefined"
             ]
@@ -280,11 +232,7 @@
             "type": "string",
             "label": "initials",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L14"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L14",
             "signature": [
               "string | undefined"
             ]
@@ -295,11 +243,7 @@
             "type": "Array",
             "label": "disabledFeatures",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L15"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L15",
             "signature": [
               "string[]"
             ]
@@ -310,11 +254,7 @@
             "type": "CompoundType",
             "label": "_reserved",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L16",
             "signature": [
               "boolean | undefined"
             ]
@@ -325,21 +265,13 @@
             "type": "string",
             "label": "imageUrl",
             "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L17"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L17",
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L9"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L9",
         "initialIsOpen": false
       }
     ],
@@ -351,11 +283,7 @@
         "label": "GetAllSpacesPurpose",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15",
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
@@ -369,11 +297,7 @@
       "label": "SpacesPluginSetup",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 39,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/plugin.tsx#L39"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/plugin.tsx#L39",
       "signature": [
         "{}"
       ],
@@ -386,11 +310,7 @@
       "label": "SpacesPluginStart",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 40,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/plugin.tsx#L40"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/public/plugin.tsx#L40",
       "signature": [
         "SpacesApi"
       ],
@@ -418,11 +338,7 @@
               "string"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L44"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L44"
           },
           {
             "type": "string",
@@ -432,11 +348,7 @@
               "string"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L45"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L45"
           },
           {
             "type": "string",
@@ -446,24 +358,189 @@
               "string"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L46"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L46"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L43"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L43",
         "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "id": "def-server.GetAllSpacesOptions",
+        "type": "Interface",
+        "label": "GetAllSpacesOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.GetAllSpacesOptions.purpose",
+            "type": "CompoundType",
+            "label": "purpose",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L11",
+            "signature": [
+              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
+            "type": "CompoundType",
+            "label": "includeAuthorizedPurposes",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L12",
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L10",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.GetSpaceResult",
+        "type": "Interface",
+        "label": "GetSpaceResult",
+        "signature": [
+          {
+            "pluginId": "spaces",
+            "scope": "common",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-common.GetSpaceResult",
+            "text": "GetSpaceResult"
+          },
+          " extends ",
+          {
+            "pluginId": "spacesOss",
+            "scope": "common",
+            "docId": "kibSpacesOssPluginApi",
+            "section": "def-common.Space",
+            "text": "Space"
+          }
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.GetSpaceResult.authorizedPurposes",
+            "type": "Object",
+            "label": "authorizedPurposes",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22",
+            "signature": [
+              "Record<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesPurpose",
+                "text": "GetAllSpacesPurpose"
+              },
+              ", boolean> | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.Space",
+        "type": "Interface",
+        "label": "Space",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.Space.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L10"
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L11"
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L12",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.color",
+            "type": "string",
+            "label": "color",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L13",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.initials",
+            "type": "string",
+            "label": "initials",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L14",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.disabledFeatures",
+            "type": "Array",
+            "label": "disabledFeatures",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L15",
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space._reserved",
+            "type": "CompoundType",
+            "label": "_reserved",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L16",
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.imageUrl",
+            "type": "string",
+            "label": "imageUrl",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L17",
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L9",
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.SpacesServiceSetup",
         "type": "Interface",
@@ -505,22 +582,14 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 23,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L23"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L23"
               }
             ],
             "tags": [
               "deprecated"
             ],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L23"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L23"
           },
           {
             "id": "def-server.SpacesServiceSetup.spaceIdToNamespace",
@@ -541,22 +610,14 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L31"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L31"
               }
             ],
             "tags": [
               "deprecated"
             ],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L31"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L31"
           },
           {
             "id": "def-server.SpacesServiceSetup.namespaceToSpaceId",
@@ -577,29 +638,17 @@
                   "string | undefined"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L39"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L39"
               }
             ],
             "tags": [
               "deprecated"
             ],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L39"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L39"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L16"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L16",
         "initialIsOpen": false
       },
       {
@@ -617,11 +666,7 @@
             "description": [
               "\nCreates a scoped instance of the SpacesClient."
             ],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L46"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L46",
             "signature": [
               "(request: ",
               {
@@ -676,20 +721,12 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 52,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L52"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L52"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L52"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L52"
           },
           {
             "id": "def-server.SpacesServiceStart.isInDefaultSpace",
@@ -725,20 +762,12 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 58,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L58"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L58"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L58"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L58"
           },
           {
             "id": "def-server.SpacesServiceStart.getActiveSpace",
@@ -782,20 +811,12 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 64,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L64"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L64"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L64"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L64"
           },
           {
             "id": "def-server.SpacesServiceStart.spaceIdToNamespace",
@@ -816,20 +837,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 70,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L70"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L70"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L70"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L70"
           },
           {
             "id": "def-server.SpacesServiceStart.namespaceToSpaceId",
@@ -850,290 +863,41 @@
                   "string | undefined"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 76,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L76"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L76"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L76"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L76"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L42"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.GetAllSpacesOptions",
-        "type": "Interface",
-        "label": "GetAllSpacesOptions",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.GetAllSpacesOptions.purpose",
-            "type": "CompoundType",
-            "label": "purpose",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L11"
-            },
-            "signature": [
-              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
-            "type": "CompoundType",
-            "label": "includeAuthorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L12"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.GetSpaceResult",
-        "type": "Interface",
-        "label": "GetSpaceResult",
-        "signature": [
-          {
-            "pluginId": "spaces",
-            "scope": "common",
-            "docId": "kibSpacesPluginApi",
-            "section": "def-common.GetSpaceResult",
-            "text": "GetSpaceResult"
-          },
-          " extends ",
-          {
-            "pluginId": "spacesOss",
-            "scope": "common",
-            "docId": "kibSpacesOssPluginApi",
-            "section": "def-common.Space",
-            "text": "Space"
-          }
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.GetSpaceResult.authorizedPurposes",
-            "type": "Object",
-            "label": "authorizedPurposes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22"
-            },
-            "signature": [
-              "Record<",
-              {
-                "pluginId": "spaces",
-                "scope": "common",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-common.GetAllSpacesPurpose",
-                "text": "GetAllSpacesPurpose"
-              },
-              ", boolean> | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.Space",
-        "type": "Interface",
-        "label": "Space",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.Space.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L10"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L11"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L12"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.color",
-            "type": "string",
-            "label": "color",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L13"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.initials",
-            "type": "string",
-            "label": "initials",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L14"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.disabledFeatures",
-            "type": "Array",
-            "label": "disabledFeatures",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L15"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space._reserved",
-            "type": "CompoundType",
-            "label": "_reserved",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L16"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L17"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/spaces_oss/common/types.ts#L9"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_service/spaces_service.ts#L42",
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "id": "def-server.ISpacesClient",
-        "type": "Type",
-        "label": "ISpacesClient",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_client/spaces_client.ts#L27"
-        },
-        "signature": [
-          "{ get: (id: string) => Promise<Space>; delete: (id: string) => Promise<void>; create: (space: Space) => Promise<Space>; update: (id: string, space: Space) => Promise<Space>; getAll: (options?: GetAllSpacesOptions) => Promise<GetSpaceResult[]>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.GetAllSpacesPurpose",
         "type": "Type",
         "label": "GetAllSpacesPurpose",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15",
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ISpacesClient",
+        "type": "Type",
+        "label": "ISpacesClient",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/spaces_client/spaces_client.ts#L27",
+        "signature": [
+          "{ get: (id: string) => Promise<Space>; delete: (id: string) => Promise<void>; create: (space: Space) => Promise<Space>; update: (id: string, space: Space) => Promise<Space>; getAll: (options?: GetAllSpacesOptions) => Promise<GetSpaceResult[]>; }"
         ],
         "initialIsOpen": false
       }
@@ -1152,11 +916,7 @@
           "type": "Object",
           "label": "spacesService",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 55,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L55"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L55",
           "signature": [
             {
               "pluginId": "spaces",
@@ -1173,11 +933,7 @@
           "type": "Object",
           "label": "spacesClient",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 56,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L56"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L56",
           "signature": [
             "{ setClientRepositoryFactory: (factory: ",
             {
@@ -1199,11 +955,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 54,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L54"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L54",
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1220,11 +972,7 @@
           "type": "Object",
           "label": "spacesService",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 63,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L63"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L63",
           "signature": [
             {
               "pluginId": "spaces",
@@ -1236,11 +984,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 62,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L62"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/server/plugin.ts#L62",
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1248,6 +992,86 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "id": "def-common.addSpaceIdToPath",
+        "type": "Function",
+        "label": "addSpaceIdToPath",
+        "signature": [
+          "(basePath: string, spaceId: string, requestedPath: string) => string"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "string",
+            "label": "basePath",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L44"
+          },
+          {
+            "type": "string",
+            "label": "spaceId",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L45"
+          },
+          {
+            "type": "string",
+            "label": "requestedPath",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L46"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L43",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.getSpaceIdFromPath",
+        "type": "Function",
+        "label": "getSpaceIdFromPath",
+        "signature": [
+          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "requestBasePath",
+            "isRequired": false,
+            "signature": [
+              "string | null | undefined"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L13"
+          },
+          {
+            "type": "CompoundType",
+            "label": "serverBasePath",
+            "isRequired": false,
+            "signature": [
+              "string | null | undefined"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L14"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L12",
+        "initialIsOpen": false
+      },
       {
         "id": "def-common.isReservedSpace",
         "type": "Function",
@@ -1285,130 +1109,14 @@
             "description": [
               "the space"
             ],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/is_reserved_space.ts#L18"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/is_reserved_space.ts#L18"
           }
         ],
         "tags": [],
         "returnComment": [
           "boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/is_reserved_space.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/is_reserved_space.ts#L18"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.addSpaceIdToPath",
-        "type": "Function",
-        "label": "addSpaceIdToPath",
-        "signature": [
-          "(basePath: string, spaceId: string, requestedPath: string) => string"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "string",
-            "label": "basePath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L44"
-            }
-          },
-          {
-            "type": "string",
-            "label": "spaceId",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L45"
-            }
-          },
-          {
-            "type": "string",
-            "label": "requestedPath",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L46"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L43"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.getSpaceIdFromPath",
-        "type": "Function",
-        "label": "getSpaceIdFromPath",
-        "signature": [
-          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "requestBasePath",
-            "isRequired": false,
-            "signature": [
-              "string | null | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L13"
-            }
-          },
-          {
-            "type": "CompoundType",
-            "label": "serverBasePath",
-            "isRequired": false,
-            "signature": [
-              "string | null | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L14"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/lib/spaces_url_parser.ts#L12"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/is_reserved_space.ts#L18",
         "initialIsOpen": false
       }
     ],
@@ -1426,11 +1134,7 @@
             "type": "CompoundType",
             "label": "purpose",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L11"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L11",
             "signature": [
               "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
             ]
@@ -1441,21 +1145,13 @@
             "type": "CompoundType",
             "label": "includeAuthorizedPurposes",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L12"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L12",
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L10"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L10",
         "initialIsOpen": false
       },
       {
@@ -1488,11 +1184,7 @@
             "type": "Object",
             "label": "authorizedPurposes",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L22",
             "signature": [
               "Record<",
               {
@@ -1506,16 +1198,38 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L21",
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "tags": [],
+        "id": "def-common.ENTER_SPACE_PATH",
+        "type": "string",
+        "label": "ENTER_SPACE_PATH",
+        "description": [
+          "\nThe path to enter a space."
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L33",
+        "signature": [
+          "\"/spaces/enter\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.GetAllSpacesPurpose",
+        "type": "Type",
+        "label": "GetAllSpacesPurpose",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15",
+        "signature": [
+          "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
+        ],
+        "initialIsOpen": false
+      },
       {
         "tags": [],
         "id": "def-common.MAX_SPACE_INITIALS",
@@ -1524,11 +1238,7 @@
         "description": [
           "\nThe maximum number of characters allowed in the Space Avatar's initials"
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/constants.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L28"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L28",
         "signature": [
           "2"
         ],
@@ -1542,47 +1252,9 @@
         "description": [
           "\nThe minimum number of spaces required to show a search control."
         ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/constants.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L23"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L23",
         "signature": [
           "8"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.ENTER_SPACE_PATH",
-        "type": "string",
-        "label": "ENTER_SPACE_PATH",
-        "description": [
-          "\nThe path to enter a space."
-        ],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/constants.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/constants.ts#L33"
-        },
-        "signature": [
-          "\"/spaces/enter\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.GetAllSpacesPurpose",
-        "type": "Type",
-        "label": "GetAllSpacesPurpose",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/spaces/common/types.ts#L15"
-        },
-        "signature": [
-          "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
         "initialIsOpen": false
       }

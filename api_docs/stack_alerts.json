@@ -20,11 +20,7 @@
         "type": "string",
         "label": "ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts#L20"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts#L20",
         "signature": [
           "\".index-threshold\""
         ],
@@ -40,34 +36,26 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
-        "id": "def-common.STACK_ALERTS_FEATURE_ID",
-        "type": "string",
-        "label": "STACK_ALERTS_FEATURE_ID",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/stack_alerts/common/index.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/index.ts#L9"
-        },
-        "signature": [
-          "\"stackAlerts\""
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.Config",
         "type": "Type",
         "label": "Config",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/stack_alerts/common/config.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L14",
         "signature": [
           "{ readonly enabled: boolean; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.STACK_ALERTS_FEATURE_ID",
+        "type": "string",
+        "label": "STACK_ALERTS_FEATURE_ID",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/index.ts#L9",
+        "signature": [
+          "\"stackAlerts\""
         ],
         "initialIsOpen": false
       }
@@ -79,11 +67,7 @@
         "type": "Object",
         "label": "configSchema",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/stack_alerts/common/config.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L10"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L10",
         "signature": [
           "ObjectType",
           "<{ enabled: ",

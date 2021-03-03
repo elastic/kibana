@@ -21,54 +21,6 @@
     "functions": [],
     "interfaces": [
       {
-        "id": "def-common.BannerInfoResponse",
-        "type": "Interface",
-        "label": "BannerInfoResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.BannerInfoResponse.allowed",
-            "type": "boolean",
-            "label": "allowed",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L9"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.BannerInfoResponse.banner",
-            "type": "Object",
-            "label": "banner",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L10"
-            },
-            "signature": [
-              {
-                "pluginId": "banners",
-                "scope": "common",
-                "docId": "kibBannersPluginApi",
-                "section": "def-common.BannerConfiguration",
-                "text": "BannerConfiguration"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/banners/common/types.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.BannerConfiguration",
         "type": "Interface",
         "label": "BannerConfiguration",
@@ -81,11 +33,7 @@
             "type": "CompoundType",
             "label": "placement",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L16",
             "signature": [
               {
                 "pluginId": "banners",
@@ -102,11 +50,7 @@
             "type": "string",
             "label": "textContent",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L17"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L17"
           },
           {
             "tags": [],
@@ -114,11 +58,7 @@
             "type": "string",
             "label": "textColor",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L18"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L18"
           },
           {
             "tags": [],
@@ -126,18 +66,46 @@
             "type": "string",
             "label": "backgroundColor",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/banners/common/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L19"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L19"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/banners/common/types.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L15",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.BannerInfoResponse",
+        "type": "Interface",
+        "label": "BannerInfoResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.BannerInfoResponse.allowed",
+            "type": "boolean",
+            "label": "allowed",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L9"
+          },
+          {
+            "tags": [],
+            "id": "def-common.BannerInfoResponse.banner",
+            "type": "Object",
+            "label": "banner",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L10",
+            "signature": [
+              {
+                "pluginId": "banners",
+                "scope": "common",
+                "docId": "kibBannersPluginApi",
+                "section": "def-common.BannerConfiguration",
+                "text": "BannerConfiguration"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L8",
         "initialIsOpen": false
       }
     ],
@@ -149,11 +117,7 @@
         "label": "BannerPlacement",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/banners/common/types.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L13"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L13",
         "signature": [
           "\"disabled\" | \"header\""
         ],

@@ -57,20 +57,12 @@
                   "[]; }>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "src/plugins/url_forwarding/public/plugin.ts",
-                  "lineNumber": 27,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
           },
           {
             "id": "def-public.UrlForwardingPlugin.start",
@@ -119,11 +111,7 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "src/plugins/url_forwarding/public/plugin.ts",
-                  "lineNumber": 75,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L75"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L75"
               },
               {
                 "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }",
@@ -138,11 +126,7 @@
                     "type": "Object",
                     "label": "kibanaLegacy",
                     "description": [],
-                    "source": {
-                      "path": "src/plugins/url_forwarding/public/plugin.ts",
-                      "lineNumber": 76,
-                      "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76"
-                    },
+                    "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76",
                     "signature": [
                       "{ dashboardConfig: ",
                       {
@@ -156,20 +140,12 @@
                     ]
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/url_forwarding/public/plugin.ts",
-                  "lineNumber": 76,
-                  "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L74"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L74"
           },
           {
             "id": "def-public.UrlForwardingPlugin.stop",
@@ -182,18 +158,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L115"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L115"
           }
         ],
-        "source": {
-          "path": "src/plugins/url_forwarding/public/plugin.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L22"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L22",
         "initialIsOpen": false
       }
     ],
@@ -212,11 +180,7 @@
             "type": "string",
             "label": "legacyAppId",
             "description": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L17"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L17"
           },
           {
             "tags": [],
@@ -224,11 +188,7 @@
             "type": "string",
             "label": "newAppId",
             "description": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L18"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L18"
           },
           {
             "tags": [],
@@ -236,21 +196,13 @@
             "type": "Function",
             "label": "rewritePath",
             "description": [],
-            "source": {
-              "path": "src/plugins/url_forwarding/public/plugin.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L19"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L19",
             "signature": [
               "(legacyPath: string) => string"
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/url_forwarding/public/plugin.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L16"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L16",
         "initialIsOpen": false
       }
     ],
@@ -262,11 +214,7 @@
         "label": "UrlForwardingSetup",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/url_forwarding/public/plugin.ts",
-          "lineNumber": 122,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L122"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L122",
         "signature": [
           "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
         ],
@@ -278,11 +226,7 @@
         "label": "UrlForwardingStart",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/url_forwarding/public/plugin.ts",
-          "lineNumber": 123,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L123"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L123",
         "signature": [
           "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ForwardDefinition[]; }"
         ],

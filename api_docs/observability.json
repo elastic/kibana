@@ -4,6 +4,94 @@
     "classes": [],
     "functions": [
       {
+        "id": "def-public.ActionMenu",
+        "type": "Function",
+        "label": "ActionMenu",
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ActionMenuDivider",
+        "type": "Function",
+        "label": "ActionMenuDivider",
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L70",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.getApmTraceUrl",
+        "type": "Function",
+        "label": "getApmTraceUrl",
+        "signature": [
+          "({\n  traceId,\n  rangeFrom,\n  rangeTo,\n}: { traceId: string; rangeFrom: string; rangeTo: string; }) => string"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}",
+            "type": "Object",
+            "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
+                "type": "string",
+                "label": "traceId",
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L13"
+              },
+              {
+                "tags": [],
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
+                "type": "string",
+                "label": "rangeFrom",
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L14"
+              },
+              {
+                "tags": [],
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
+                "type": "string",
+                "label": "rangeTo",
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L15"
+              }
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L12"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L8",
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.getCoreVitalsComponent",
         "type": "Function",
         "label": "getCoreVitalsComponent",
@@ -28,20 +116,12 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13",
         "initialIsOpen": false
       },
       {
@@ -69,123 +149,273 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23",
         "initialIsOpen": false
       },
       {
-        "id": "def-public.useTrackPageview",
+        "tags": [],
+        "id": "def-public.Section",
         "type": "Function",
-        "label": "useTrackPageview",
+        "label": "Section",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L58",
         "signature": [
-          "({ path, ...rest }: TrackPageviewProps, effectDependencies: EffectDeps) => void"
+          "StyledComponent",
+          "<\"div\", any, {}, never>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionLink",
+        "type": "Function",
+        "label": "SectionLink",
+        "signature": [
+          "(props: ",
+          "EuiListGroupItemProps",
+          ") => JSX.Element"
         ],
         "description": [],
         "children": [
           {
             "type": "CompoundType",
-            "label": "{ path, ...rest }",
+            "label": "props",
             "isRequired": true,
             "signature": [
-              "TrackPageviewProps"
+              "EuiListGroupItemProps"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-              "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L88"
-            }
-          },
-          {
-            "type": "Array",
-            "label": "effectDependencies",
-            "isRequired": true,
-            "signature": [
-              "EffectDeps"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L89"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-          "lineNumber": 87,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L87"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66",
         "initialIsOpen": false
       },
       {
-        "id": "def-public.useUiTracker",
+        "id": "def-public.SectionLinks",
         "type": "Function",
-        "label": "useUiTracker",
+        "label": "SectionLinks",
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.TrackMetricOptions",
-            "text": "TrackMetricOptions"
-          },
-          ") => void"
+          "({ children, ...props }: { children?: React.ReactNode; } & ",
+          "CommonProps",
+          " & Pick<React.HTMLAttributes<HTMLUListElement>, \"children\" | \"onClick\" | \"onChange\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"s\" | \"none\" | undefined; listItems?: ",
+          "EuiListGroupItemProps",
+          "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
         ],
         "description": [],
         "children": [
           {
-            "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}",
+            "type": "CompoundType",
+            "label": "{ children, ...props }",
+            "isRequired": true,
+            "signature": [
+              "{ children?: React.ReactNode; } & ",
+              "CommonProps",
+              " & Pick<React.HTMLAttributes<HTMLUListElement>, \"children\" | \"onClick\" | \"onChange\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"s\" | \"none\" | undefined; listItems?: ",
+              "EuiListGroupItemProps",
+              "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionSpacer",
+        "type": "Function",
+        "label": "SectionSpacer",
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L54",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionSubtitle",
+        "type": "Function",
+        "label": "SectionSubtitle",
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.SectionSubtitle.{-children }",
             "type": "Object",
-            "label": "{\n  app: defaultApp,\n}",
+            "label": "{ children }",
             "tags": [],
             "description": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.app",
+                "id": "def-public.SectionSubtitle.{-children }.children",
                 "type": "CompoundType",
-                "label": "app",
+                "label": "children",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40"
-                },
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35",
                 "signature": [
-                  "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "React.ReactNode"
                 ]
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L38"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionTitle",
+        "type": "Function",
+        "label": "SectionTitle",
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.SectionTitle.{-children }",
+            "type": "Object",
+            "label": "{ children }",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.SectionTitle.{-children }.children",
+                "type": "CompoundType",
+                "label": "children",
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24",
+                "signature": [
+                  "React.ReactNode"
+                ]
+              }
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useChartTheme",
+        "type": "Function",
+        "label": "useChartTheme",
+        "signature": [
+          "() => { chartMargins: { left: number; right: number; top: number; bottom: number; }; background: { color: string; }; lineSeriesStyle: { point: { visible: boolean; }; line?: ",
+          "RecursivePartial",
+          "<",
+          "LineStyle",
+          "> | undefined; }; areaSeriesStyle: { point: { visible: boolean; }; area?: ",
+          "RecursivePartial",
+          "<",
+          "AreaStyle",
+          "> | undefined; line?: ",
+          "RecursivePartial"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_chart_theme.tsx#L11",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useFetcher",
+        "type": "Function",
+        "label": "useFetcher",
+        "signature": [
+          "(fn: () => TReturn, fnDeps: any[], options: { preservePreviousData?: boolean | undefined; }) => ",
+          "FetcherResult",
+          "<InferResponseType<TReturn>> & { refetch: () => void; }"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Function",
+            "label": "fn",
+            "isRequired": true,
+            "signature": [
+              "() => TReturn"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L30"
+          },
+          {
+            "type": "Array",
+            "label": "fnDeps",
+            "isRequired": true,
+            "signature": [
+              "any[]"
+            ],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L31"
+          },
+          {
+            "id": "def-public.useFetcher.options",
+            "type": "Object",
+            "label": "options",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.useFetcher.options.preservePreviousData",
+                "type": "CompoundType",
+                "label": "preservePreviousData",
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L33",
+                "signature": [
+                  "boolean | undefined"
+                ]
+              }
+            ],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L32"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L29",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useTheme",
+        "type": "Function",
+        "label": "useTheme",
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "kibanaReact",
+            "scope": "common",
+            "docId": "kibKibanaReactPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          }
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_theme.tsx#L12",
         "initialIsOpen": false
       },
       {
@@ -219,11 +449,7 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L53"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L53"
           },
           {
             "type": "Array",
@@ -233,665 +459,167 @@
               "EffectDeps"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L54"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L54"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L52"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L52",
         "initialIsOpen": false
       },
       {
-        "id": "def-public.useFetcher",
+        "id": "def-public.useTrackPageview",
         "type": "Function",
-        "label": "useFetcher",
+        "label": "useTrackPageview",
         "signature": [
-          "(fn: () => TReturn, fnDeps: any[], options: { preservePreviousData?: boolean | undefined; }) => ",
-          "FetcherResult",
-          "<InferResponseType<TReturn>> & { refetch: () => void; }"
+          "({ path, ...rest }: TrackPageviewProps, effectDependencies: EffectDeps) => void"
         ],
         "description": [],
         "children": [
           {
-            "type": "Function",
-            "label": "fn",
+            "type": "CompoundType",
+            "label": "{ path, ...rest }",
             "isRequired": true,
             "signature": [
-              "() => TReturn"
+              "TrackPageviewProps"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L30"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L88"
           },
           {
             "type": "Array",
-            "label": "fnDeps",
+            "label": "effectDependencies",
             "isRequired": true,
             "signature": [
-              "any[]"
+              "EffectDeps"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L31"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L89"
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L87",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useUiTracker",
+        "type": "Function",
+        "label": "useUiTracker",
+        "signature": [
+          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.TrackMetricOptions",
+            "text": "TrackMetricOptions"
           },
+          ") => void"
+        ],
+        "description": [],
+        "children": [
           {
-            "id": "def-public.useFetcher.options",
+            "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}",
             "type": "Object",
-            "label": "options",
+            "label": "{\n  app: defaultApp,\n}",
             "tags": [],
             "description": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useFetcher.options.preservePreviousData",
+                "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.app",
                 "type": "CompoundType",
-                "label": "preservePreviousData",
+                "label": "app",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-                  "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L33"
-                },
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40",
                 "signature": [
-                  "boolean | undefined"
+                  "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ]
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L32"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L29"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.useChartTheme",
-        "type": "Function",
-        "label": "useChartTheme",
-        "signature": [
-          "() => { chartMargins: { left: number; right: number; top: number; bottom: number; }; background: { color: string; }; lineSeriesStyle: { point: { visible: boolean; }; line?: ",
-          "RecursivePartial",
-          "<",
-          "LineStyle",
-          "> | undefined; }; areaSeriesStyle: { point: { visible: boolean; }; area?: ",
-          "RecursivePartial",
-          "<",
-          "AreaStyle",
-          "> | undefined; line?: ",
-          "RecursivePartial"
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_chart_theme.tsx#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.useTheme",
-        "type": "Function",
-        "label": "useTheme",
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          }
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_theme.tsx",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_theme.tsx#L12"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.getApmTraceUrl",
-        "type": "Function",
-        "label": "getApmTraceUrl",
-        "signature": [
-          "({\n  traceId,\n  rangeFrom,\n  rangeTo,\n}: { traceId: string; rangeFrom: string; rangeTo: string; }) => string"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}",
-            "type": "Object",
-            "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
-                "type": "string",
-                "label": "traceId",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
-                  "lineNumber": 13,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L13"
-                }
-              },
-              {
-                "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
-                "type": "string",
-                "label": "rangeFrom",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
-                  "lineNumber": 14,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L14"
-                }
-              },
-              {
-                "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
-                "type": "string",
-                "label": "rangeTo",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
-                  "lineNumber": 15,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L15"
-                }
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L12"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionTitle",
-        "type": "Function",
-        "label": "SectionTitle",
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.SectionTitle.{-children }",
-            "type": "Object",
-            "label": "{ children }",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.SectionTitle.{-children }.children",
-                "type": "CompoundType",
-                "label": "children",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-                  "lineNumber": 24,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24"
-                },
-                "signature": [
-                  "React.ReactNode"
-                ]
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionSubtitle",
-        "type": "Function",
-        "label": "SectionSubtitle",
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.SectionSubtitle.{-children }",
-            "type": "Object",
-            "label": "{ children }",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.SectionSubtitle.{-children }.children",
-                "type": "CompoundType",
-                "label": "children",
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35"
-                },
-                "signature": [
-                  "React.ReactNode"
-                ]
-              }
-            ],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionLinks",
-        "type": "Function",
-        "label": "SectionLinks",
-        "signature": [
-          "({ children, ...props }: { children?: React.ReactNode; } & ",
-          "CommonProps",
-          " & Pick<React.HTMLAttributes<HTMLUListElement>, \"children\" | \"onClick\" | \"onChange\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"s\" | \"none\" | undefined; listItems?: ",
-          "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "{ children, ...props }",
-            "isRequired": true,
-            "signature": [
-              "{ children?: React.ReactNode; } & ",
-              "CommonProps",
-              " & Pick<React.HTMLAttributes<HTMLUListElement>, \"children\" | \"onClick\" | \"onChange\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"s\" | \"none\" | undefined; listItems?: ",
-              "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionSpacer",
-        "type": "Function",
-        "label": "SectionSpacer",
-        "signature": [
-          "() => JSX.Element"
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L54"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionLink",
-        "type": "Function",
-        "label": "SectionLink",
-        "signature": [
-          "(props: ",
-          "EuiListGroupItemProps",
-          ") => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              "EuiListGroupItemProps"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 66,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ActionMenuDivider",
-        "type": "Function",
-        "label": "ActionMenuDivider",
-        "signature": [
-          "() => JSX.Element"
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 70,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L70"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ActionMenu",
-        "type": "Function",
-        "label": "ActionMenu",
-        "signature": [
-          "(props: Props) => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              "Props"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.Section",
-        "type": "Function",
-        "label": "Section",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 58,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L58"
-        },
-        "signature": [
-          "StyledComponent",
-          "<\"div\", any, {}, never>"
-        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L38",
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
-        "id": "def-public.UXMetrics",
+        "id": "def-public.ApmFetchDataResponse",
         "type": "Interface",
-        "label": "UXMetrics",
+        "label": "ApmFetchDataResponse",
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.ApmFetchDataResponse",
+            "text": "ApmFetchDataResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.FetchDataResponse",
+            "text": "FetchDataResponse"
+          }
+        ],
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.UXMetrics.cls",
-            "type": "CompoundType",
-            "label": "cls",
+            "id": "def-public.ApmFetchDataResponse.stats",
+            "type": "Object",
+            "label": "stats",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L24"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L91",
             "signature": [
-              "number | null"
+              "{ services: ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Stat",
+                "text": "Stat"
+              },
+              "; transactions: ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Stat",
+                "text": "Stat"
+              },
+              "; }"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.UXMetrics.fid",
-            "type": "CompoundType",
-            "label": "fid",
+            "id": "def-public.ApmFetchDataResponse.series",
+            "type": "Object",
+            "label": "series",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L25"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L95",
             "signature": [
-              "number | null | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.lcp",
-            "type": "CompoundType",
-            "label": "lcp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L26"
-            },
-            "signature": [
-              "number | null | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.tbt",
-            "type": "number",
-            "label": "tbt",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L27"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.fcp",
-            "type": "CompoundType",
-            "label": "fcp",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L28"
-            },
-            "signature": [
-              "number | null | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.coreVitalPages",
-            "type": "number",
-            "label": "coreVitalPages",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L29"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.lcpRanks",
-            "type": "Array",
-            "label": "lcpRanks",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L30"
-            },
-            "signature": [
-              "number[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.fidRanks",
-            "type": "Array",
-            "label": "fidRanks",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L31"
-            },
-            "signature": [
-              "number[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXMetrics.clsRanks",
-            "type": "Array",
-            "label": "clsRanks",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L32"
-            },
-            "signature": [
-              "number[]"
+              "{ transactions: ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Series",
+                "text": "Series"
+              },
+              "; }"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L23"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Stat",
-        "type": "Interface",
-        "label": "Stat",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Stat.type",
-            "type": "CompoundType",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L12"
-            },
-            "signature": [
-              "\"number\" | \"percent\" | \"bytesPerSecond\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Stat.value",
-            "type": "number",
-            "label": "value",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L13"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L11"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L90",
         "initialIsOpen": false
       },
       {
@@ -907,11 +635,7 @@
             "type": "number",
             "label": "x",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L17"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L17"
           },
           {
             "tags": [],
@@ -919,202 +643,13 @@
             "type": "number",
             "label": "y",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L18"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L18",
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Series",
-        "type": "Interface",
-        "label": "Series",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Series.coordinates",
-            "type": "Array",
-            "label": "coordinates",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Coordinates",
-                "text": "Coordinates"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L21"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.FetchDataParams",
-        "type": "Interface",
-        "label": "FetchDataParams",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.FetchDataParams.absoluteTime",
-            "type": "Object",
-            "label": "absoluteTime",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L26"
-            },
-            "signature": [
-              "{ start: number; end: number; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FetchDataParams.relativeTime",
-            "type": "Object",
-            "label": "relativeTime",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L27"
-            },
-            "signature": [
-              "{ start: string; end: string; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FetchDataParams.bucketSize",
-            "type": "string",
-            "label": "bucketSize",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L28"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.FetchDataParams.serviceName",
-            "type": "string",
-            "label": "serviceName",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L29"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.HasDataParams",
-        "type": "Interface",
-        "label": "HasDataParams",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.HasDataParams.absoluteTime",
-            "type": "Object",
-            "label": "absoluteTime",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L33"
-            },
-            "signature": [
-              "{ start: number; end: number; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L32"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.UXHasDataResponse",
-        "type": "Interface",
-        "label": "UXHasDataResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UXHasDataResponse.hasData",
-            "type": "boolean",
-            "label": "hasData",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L37"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.UXHasDataResponse.serviceName",
-            "type": "CompoundType",
-            "label": "serviceName",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L38"
-            },
-            "signature": [
-              "string | number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L36"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L16",
         "initialIsOpen": false
       },
       {
@@ -1140,11 +675,7 @@
             "type": "Function",
             "label": "fetchData",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L57"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L57",
             "signature": [
               {
                 "pluginId": "observability",
@@ -1170,11 +701,7 @@
             "type": "Function",
             "label": "hasData",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L58"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L58",
             "signature": [
               {
                 "pluginId": "observability",
@@ -1187,11 +714,59 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L54"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L54",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.FetchDataParams",
+        "type": "Interface",
+        "label": "FetchDataParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.FetchDataParams.absoluteTime",
+            "type": "Object",
+            "label": "absoluteTime",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L26",
+            "signature": [
+              "{ start: number; end: number; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FetchDataParams.relativeTime",
+            "type": "Object",
+            "label": "relativeTime",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L27",
+            "signature": [
+              "{ start: string; end: string; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FetchDataParams.bucketSize",
+            "type": "string",
+            "label": "bucketSize",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L28"
+          },
+          {
+            "tags": [],
+            "id": "def-public.FetchDataParams.serviceName",
+            "type": "string",
+            "label": "serviceName",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L29",
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L25",
         "initialIsOpen": false
       },
       {
@@ -1207,18 +782,32 @@
             "type": "string",
             "label": "appLink",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L62"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L62"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 61,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L61"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L61",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.HasDataParams",
+        "type": "Interface",
+        "label": "HasDataParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.HasDataParams.absoluteTime",
+            "type": "Object",
+            "label": "absoluteTime",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L33",
+            "signature": [
+              "{ start: number; end: number; }"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L32",
         "initialIsOpen": false
       },
       {
@@ -1251,11 +840,7 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L66"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L66",
             "signature": [
               "Record<string, ",
               {
@@ -1274,11 +859,7 @@
             "type": "Object",
             "label": "series",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L67"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L67",
             "signature": [
               "Record<string, ",
               {
@@ -1292,11 +873,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 65,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L65"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L65",
         "initialIsOpen": false
       },
       {
@@ -1329,11 +906,7 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L71"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L71",
             "signature": [
               "{ hosts: ",
               {
@@ -1363,11 +936,222 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 70,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L70"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L70",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ObservabilityFetchDataResponse",
+        "type": "Interface",
+        "label": "ObservabilityFetchDataResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityFetchDataResponse.apm",
+            "type": "Object",
+            "label": "apm",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L105",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ApmFetchDataResponse",
+                "text": "ApmFetchDataResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityFetchDataResponse.infra_metrics",
+            "type": "Object",
+            "label": "infra_metrics",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L106",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.MetricsFetchDataResponse",
+                "text": "MetricsFetchDataResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityFetchDataResponse.infra_logs",
+            "type": "Object",
+            "label": "infra_logs",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L107",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.LogsFetchDataResponse",
+                "text": "LogsFetchDataResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityFetchDataResponse.uptime",
+            "type": "Object",
+            "label": "uptime",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L108",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.UptimeFetchDataResponse",
+                "text": "UptimeFetchDataResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityFetchDataResponse.ux",
+            "type": "Object",
+            "label": "ux",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L109",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.UxFetchDataResponse",
+                "text": "UxFetchDataResponse"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L104",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ObservabilityHasDataResponse",
+        "type": "Interface",
+        "label": "ObservabilityHasDataResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityHasDataResponse.apm",
+            "type": "boolean",
+            "label": "apm",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L113"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityHasDataResponse.infra_metrics",
+            "type": "boolean",
+            "label": "infra_metrics",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L114"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityHasDataResponse.infra_logs",
+            "type": "boolean",
+            "label": "infra_logs",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L115"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityHasDataResponse.uptime",
+            "type": "boolean",
+            "label": "uptime",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L116"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityHasDataResponse.ux",
+            "type": "Object",
+            "label": "ux",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L117",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.UXHasDataResponse",
+                "text": "UXHasDataResponse"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L112",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Series",
+        "type": "Interface",
+        "label": "Series",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Series.coordinates",
+            "type": "Array",
+            "label": "coordinates",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L22",
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Coordinates",
+                "text": "Coordinates"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L21",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Stat",
+        "type": "Interface",
+        "label": "Stat",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Stat.type",
+            "type": "CompoundType",
+            "label": "type",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L12",
+            "signature": [
+              "\"number\" | \"percent\" | \"bytesPerSecond\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Stat.value",
+            "type": "number",
+            "label": "value",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L13"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L11",
         "initialIsOpen": false
       },
       {
@@ -1400,11 +1184,7 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L79"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L79",
             "signature": [
               "{ monitors: ",
               {
@@ -1439,11 +1219,7 @@
             "type": "Object",
             "label": "series",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 84,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L84"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L84",
             "signature": [
               "{ up: ",
               {
@@ -1465,97 +1241,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L78"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ApmFetchDataResponse",
-        "type": "Interface",
-        "label": "ApmFetchDataResponse",
-        "signature": [
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.ApmFetchDataResponse",
-            "text": "ApmFetchDataResponse"
-          },
-          " extends ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.FetchDataResponse",
-            "text": "FetchDataResponse"
-          }
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ApmFetchDataResponse.stats",
-            "type": "Object",
-            "label": "stats",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L91"
-            },
-            "signature": [
-              "{ services: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Stat",
-                "text": "Stat"
-              },
-              "; transactions: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Stat",
-                "text": "Stat"
-              },
-              "; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ApmFetchDataResponse.series",
-            "type": "Object",
-            "label": "series",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L95"
-            },
-            "signature": [
-              "{ transactions: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Series",
-                "text": "Series"
-              },
-              "; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 90,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L90"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L78",
         "initialIsOpen": false
       },
       {
@@ -1588,11 +1274,7 @@
             "type": "Object",
             "label": "coreWebVitals",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L101"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L101",
             "signature": [
               {
                 "pluginId": "observability",
@@ -1604,325 +1286,175 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 100,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L100"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L100",
         "initialIsOpen": false
       },
       {
-        "id": "def-public.ObservabilityFetchDataResponse",
+        "id": "def-public.UXHasDataResponse",
         "type": "Interface",
-        "label": "ObservabilityFetchDataResponse",
+        "label": "UXHasDataResponse",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.apm",
-            "type": "Object",
-            "label": "apm",
+            "id": "def-public.UXHasDataResponse.hasData",
+            "type": "boolean",
+            "label": "hasData",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L105"
-            },
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ApmFetchDataResponse",
-                "text": "ApmFetchDataResponse"
-              }
-            ]
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L37"
           },
           {
             "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.infra_metrics",
-            "type": "Object",
-            "label": "infra_metrics",
+            "id": "def-public.UXHasDataResponse.serviceName",
+            "type": "CompoundType",
+            "label": "serviceName",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L106"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L38",
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.MetricsFetchDataResponse",
-                "text": "MetricsFetchDataResponse"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.infra_logs",
-            "type": "Object",
-            "label": "infra_logs",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L107"
-            },
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.LogsFetchDataResponse",
-                "text": "LogsFetchDataResponse"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.uptime",
-            "type": "Object",
-            "label": "uptime",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L108"
-            },
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.UptimeFetchDataResponse",
-                "text": "UptimeFetchDataResponse"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.ux",
-            "type": "Object",
-            "label": "ux",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L109"
-            },
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.UxFetchDataResponse",
-                "text": "UxFetchDataResponse"
-              }
+              "string | number | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 104,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L104"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L36",
         "initialIsOpen": false
       },
       {
-        "id": "def-public.ObservabilityHasDataResponse",
+        "id": "def-public.UXMetrics",
         "type": "Interface",
-        "label": "ObservabilityHasDataResponse",
+        "label": "UXMetrics",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.apm",
-            "type": "boolean",
-            "label": "apm",
+            "id": "def-public.UXMetrics.cls",
+            "type": "CompoundType",
+            "label": "cls",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L113"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.infra_metrics",
-            "type": "boolean",
-            "label": "infra_metrics",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 114,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L114"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.infra_logs",
-            "type": "boolean",
-            "label": "infra_logs",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L115"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.uptime",
-            "type": "boolean",
-            "label": "uptime",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 116,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L116"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.ux",
-            "type": "Object",
-            "label": "ux",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 117,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L117"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L24",
             "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.UXHasDataResponse",
-                "text": "UXHasDataResponse"
-              }
+              "number | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.fid",
+            "type": "CompoundType",
+            "label": "fid",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L25",
+            "signature": [
+              "number | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.lcp",
+            "type": "CompoundType",
+            "label": "lcp",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L26",
+            "signature": [
+              "number | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.tbt",
+            "type": "number",
+            "label": "tbt",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L27"
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.fcp",
+            "type": "CompoundType",
+            "label": "fcp",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L28",
+            "signature": [
+              "number | null | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.coreVitalPages",
+            "type": "number",
+            "label": "coreVitalPages",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L29"
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.lcpRanks",
+            "type": "Array",
+            "label": "lcpRanks",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L30",
+            "signature": [
+              "number[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.fidRanks",
+            "type": "Array",
+            "label": "fidRanks",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L31",
+            "signature": [
+              "number[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UXMetrics.clsRanks",
+            "type": "Array",
+            "label": "clsRanks",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L32",
+            "signature": [
+              "number[]"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 112,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L112"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L23",
         "initialIsOpen": false
       }
     ],
     "enums": [
-      {
-        "id": "def-public.METRIC_TYPE",
-        "type": "Enum",
-        "label": "METRIC_TYPE",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/node_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10"
-        },
-        "signature": [
-          "METRIC_TYPE"
-        ],
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.FETCH_STATUS",
         "type": "Enum",
         "label": "FETCH_STATUS",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L10"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L10",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.METRIC_TYPE",
+        "type": "Enum",
+        "label": "METRIC_TYPE",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/node_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10",
+        "signature": [
+          "METRIC_TYPE"
+        ],
         "initialIsOpen": false
       }
     ],
     "misc": [
-      {
-        "id": "def-public.UiTracker",
-        "type": "Type",
-        "label": "UiTracker",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L34"
-        },
-        "signature": [
-          "(__0: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.TrackMetricOptions",
-            "text": "TrackMetricOptions"
-          },
-          ") => void"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TrackMetricOptions",
-        "type": "Type",
-        "label": "TrackMetricOptions",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L33"
-        },
-        "signature": [
-          "TrackOptions & { metric: string; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SectionLinkProps",
-        "type": "Type",
-        "label": "SectionLinkProps",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
-          "lineNumber": 65,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L65"
-        },
-        "signature": [
-          "CommonProps",
-          " & Pick<(",
-          "DisambiguateSet",
-          "<(",
-          "DisambiguateSet",
-          "<React.ButtonHTMLAttributes<HTMLButtonElement>, Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">> & Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">) | (",
-          "DisambiguateSet",
-          "<Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>), React.HTMLAttributes<HTMLSpanElement>> & React.HTMLAttributes<HTMLSpanElement>) | (",
-          "DisambiguateSet"
-        ],
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.DragHandleProps",
         "type": "Type",
         "label": "DragHandleProps",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L15",
         "signature": [
           "undefined | ",
           "DraggableProvidedDragHandleProps"
@@ -1935,11 +1467,7 @@
         "label": "DropResult",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L18"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L18",
         "signature": [
           "DropResult"
         ],
@@ -1951,11 +1479,7 @@
         "label": "FetchData",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L41"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L41",
         "signature": [
           "(fetchDataParams: ",
           {
@@ -1975,11 +1499,7 @@
         "label": "HasData",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L45"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L45",
         "signature": [
           "(params: ",
           {
@@ -2007,13 +1527,61 @@
         "label": "ObservabilityFetchDataPlugins",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 49,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L49"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L49",
         "signature": [
           "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"ux\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SectionLinkProps",
+        "type": "Type",
+        "label": "SectionLinkProps",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L65",
+        "signature": [
+          "CommonProps",
+          " & Pick<(",
+          "DisambiguateSet",
+          "<(",
+          "DisambiguateSet",
+          "<React.ButtonHTMLAttributes<HTMLButtonElement>, Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">> & Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">) | (",
+          "DisambiguateSet",
+          "<Pick<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"id\" | \"title\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"media\" | \"target\" | \"download\" | \"ping\" | \"hrefLang\" | \"rel\" | \"referrerPolicy\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>), React.HTMLAttributes<HTMLSpanElement>> & React.HTMLAttributes<HTMLSpanElement>) | (",
+          "DisambiguateSet"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.TrackMetricOptions",
+        "type": "Type",
+        "label": "TrackMetricOptions",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L33",
+        "signature": [
+          "TrackOptions & { metric: string; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UiTracker",
+        "type": "Type",
+        "label": "UiTracker",
+        "tags": [],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L34",
+        "signature": [
+          "(__0: ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.TrackMetricOptions",
+            "text": "TrackMetricOptions"
+          },
+          ") => void"
         ],
         "initialIsOpen": false
       }
@@ -2032,11 +1600,7 @@
           "type": "Object",
           "label": "dashboard",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "lineNumber": 25,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L25"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L25",
           "signature": [
             "{ register: typeof ",
             {
@@ -2050,11 +1614,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 24,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L24"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L24",
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2064,11 +1624,7 @@
       "label": "ObservabilityPluginStart",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 33,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L33"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L33",
       "signature": [
         "void"
       ],
@@ -2101,11 +1657,7 @@
             "type": "Object",
             "label": "originalError",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L12"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L12",
             "signature": [
               "ElasticsearchClientError"
             ]
@@ -2127,27 +1679,15 @@
                   "ElasticsearchClientError"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-                  "lineNumber": 13,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L11"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L11",
         "initialIsOpen": false
       }
     ],
@@ -2192,11 +1732,7 @@
                 "type": "string",
                 "label": "index",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L32"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L32"
               },
               {
                 "tags": [],
@@ -2204,11 +1740,7 @@
                 "type": "Object",
                 "label": "mappings",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L33"
-                },
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L33",
                 "signature": [
                   {
                     "pluginId": "observability",
@@ -2225,11 +1757,7 @@
                 "type": "CompoundType",
                 "label": "client",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L34"
-                },
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L34",
                 "signature": [
                   {
                     "pluginId": "core",
@@ -2246,30 +1774,18 @@
                 "type": "Object",
                 "label": "logger",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L35"
-                },
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L35",
                 "signature": [
                   "Logger"
                 ]
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L31"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L31"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-          "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L26"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L26",
         "initialIsOpen": false
       },
       {
@@ -2291,20 +1807,12 @@
               "T"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L40"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L40"
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
-          "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L39"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L39",
         "initialIsOpen": false
       }
     ],
@@ -2322,11 +1830,7 @@
             "type": "CompoundType",
             "label": "dynamic",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L21"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L21",
             "signature": [
               "boolean | \"strict\" | undefined"
             ]
@@ -2337,11 +1841,7 @@
             "type": "Object",
             "label": "properties",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L22"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L22",
             "signature": [
               "Record<string, ",
               {
@@ -2368,21 +1868,13 @@
             "type": "Array",
             "label": "dynamic_templates",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L23"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L23",
             "signature": [
               "any[] | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L20"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L20",
         "initialIsOpen": false
       }
     ],
@@ -2394,11 +1886,7 @@
         "label": "ObservabilityConfig",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/server/index.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/index.ts#L25"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/index.ts#L25",
         "signature": [
           "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
@@ -2410,11 +1898,7 @@
         "label": "ScopedAnnotationsClient",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts#L24"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts#L24",
         "signature": [
           "{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
           "Annotation",
@@ -2439,21 +1923,13 @@
           "type": "Function",
           "label": "getScopedAnnotationsClient",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/observability/server/plugin.ts",
-            "lineNumber": 22,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L22"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L22",
           "signature": [
             "LazyScopedAnnotationsClientFactory"
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L21"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L21",
       "lifecycle": "setup",
       "initialIsOpen": true
     }

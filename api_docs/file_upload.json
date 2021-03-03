@@ -5,6 +5,81 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-public.CreateDocsResponse",
+        "type": "Interface",
+        "label": "CreateDocsResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L24"
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.remainder",
+            "type": "number",
+            "label": "remainder",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L25"
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.docs",
+            "type": "Array",
+            "label": "docs",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L26",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L27",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L23",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Doc",
+        "type": "Interface",
+        "label": "Doc",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Doc.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25",
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FileUploadComponentProps",
         "type": "Interface",
         "label": "FileUploadComponentProps",
@@ -17,11 +92,7 @@
             "type": "boolean",
             "label": "isIndexingTriggered",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L14"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L14"
           },
           {
             "tags": [],
@@ -29,11 +100,7 @@
             "type": "Function",
             "label": "onFileUpload",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L15"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L15",
             "signature": [
               "(geojsonFile: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>, name: string, previewCoverage: number) => void"
             ]
@@ -44,11 +111,7 @@
             "type": "Function",
             "label": "onFileRemove",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L16",
             "signature": [
               "() => void"
             ]
@@ -59,11 +122,7 @@
             "type": "Function",
             "label": "onIndexReady",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L17"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L17",
             "signature": [
               "(indexReady: boolean) => void"
             ]
@@ -74,11 +133,7 @@
             "type": "Function",
             "label": "onIndexingComplete",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L18"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L18",
             "signature": [
               "(results: { indexDataResp: ",
               {
@@ -105,740 +160,13 @@
             "type": "Function",
             "label": "onIndexingError",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L22"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L22",
             "signature": [
               "() => void"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportResponse",
-        "type": "Interface",
-        "label": "ImportResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.index",
-            "type": "string",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.pipelineId",
-            "type": "string",
-            "label": "pipelineId",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.docCount",
-            "type": "number",
-            "label": "docCount",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.failures",
-            "type": "Array",
-            "label": "failures",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportFailure",
-                "text": "ImportFailure"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15"
-            },
-            "signature": [
-              "any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResponse.ingestError",
-            "type": "CompoundType",
-            "label": "ingestError",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportFailure",
-        "type": "Interface",
-        "label": "ImportFailure",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.item",
-            "type": "number",
-            "label": "item",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.reason",
-            "type": "string",
-            "label": "reason",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.doc",
-            "type": "CompoundType",
-            "label": "doc",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Doc",
-        "type": "Interface",
-        "label": "Doc",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Doc.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Settings",
-        "type": "Interface",
-        "label": "Settings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Settings.pipeline",
-            "type": "string",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Settings.index",
-            "type": "string",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Settings.body",
-            "type": "Array",
-            "label": "body",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34"
-            },
-            "signature": [
-              "any[]"
-            ]
-          },
-          {
-            "id": "def-public.Settings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Mappings",
-        "type": "Interface",
-        "label": "Mappings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Mappings._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39"
-            },
-            "signature": [
-              "{ created_by: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Mappings.properties",
-            "type": "Object",
-            "label": "properties",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42"
-            },
-            "signature": [
-              "{ [key: string]: any; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IngestPipelineWrapper",
-        "type": "Interface",
-        "label": "IngestPipelineWrapper",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IngestPipelineWrapper.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.IngestPipelineWrapper.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IngestPipeline",
-        "type": "Interface",
-        "label": "IngestPipeline",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IngestPipeline.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.IngestPipeline.processors",
-            "type": "Array",
-            "label": "processors",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54"
-            },
-            "signature": [
-              "any[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportConfig",
-        "type": "Interface",
-        "label": "ImportConfig",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.settings",
-            "type": "Object",
-            "label": "settings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L11"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.Settings",
-                "text": "Settings"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.mappings",
-            "type": "Object",
-            "label": "mappings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L12"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.Mappings",
-                "text": "Mappings"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L13"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportResults",
-        "type": "Interface",
-        "label": "ImportResults",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L17"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.failures",
-            "type": "Array",
-            "label": "failures",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L18"
-            },
-            "signature": [
-              "any[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.docCount",
-            "type": "number",
-            "label": "docCount",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L19"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L20"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.CreateDocsResponse",
-        "type": "Interface",
-        "label": "CreateDocsResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L24"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.remainder",
-            "type": "number",
-            "label": "remainder",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L25"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.docs",
-            "type": "Array",
-            "label": "docs",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L26"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L27"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L23"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportFactoryOptions",
-        "type": "Interface",
-        "label": "ImportFactoryOptions",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.excludeLinesPattern",
-            "type": "string",
-            "label": "excludeLinesPattern",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L31"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.multilineStartPattern",
-            "type": "string",
-            "label": "multilineStartPattern",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.importConfig",
-            "type": "Object",
-            "label": "importConfig",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L33"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "public",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-public.ImportConfig",
-                "text": "ImportConfig"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L30"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L13",
         "initialIsOpen": false
       },
       {
@@ -865,20 +193,12 @@
                   "ArrayBuffer"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
           },
           {
             "id": "def-public.IImporter.initializeImport",
@@ -929,11 +249,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L39"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L39"
               },
               {
                 "type": "Object",
@@ -949,11 +265,7 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L40"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L40"
               },
               {
                 "type": "Object",
@@ -969,11 +281,7 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L41"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L41"
               },
               {
                 "type": "Object",
@@ -989,20 +297,12 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L42"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L42"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L38"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L38"
           },
           {
             "id": "def-public.IImporter.import",
@@ -1029,11 +329,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L45"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L45"
               },
               {
                 "type": "string",
@@ -1043,11 +339,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L46"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L46"
               },
               {
                 "type": "string",
@@ -1057,11 +349,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L47"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L47"
               },
               {
                 "type": "Function",
@@ -1071,27 +359,471 @@
                   "(progress: number) => void"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L48"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L48"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L44"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L44"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L36"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L36",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportConfig",
+        "type": "Interface",
+        "label": "ImportConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.settings",
+            "type": "Object",
+            "label": "settings",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L11",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.Settings",
+                "text": "Settings"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.mappings",
+            "type": "Object",
+            "label": "mappings",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L12",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L13",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L10",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportFactoryOptions",
+        "type": "Interface",
+        "label": "ImportFactoryOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.excludeLinesPattern",
+            "type": "string",
+            "label": "excludeLinesPattern",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L31",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.multilineStartPattern",
+            "type": "string",
+            "label": "multilineStartPattern",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L32",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.importConfig",
+            "type": "Object",
+            "label": "importConfig",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L33",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "public",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-public.ImportConfig",
+                "text": "ImportConfig"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L30",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportFailure",
+        "type": "Interface",
+        "label": "ImportFailure",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.item",
+            "type": "number",
+            "label": "item",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.reason",
+            "type": "string",
+            "label": "reason",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.doc",
+            "type": "CompoundType",
+            "label": "doc",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportResponse",
+        "type": "Interface",
+        "label": "ImportResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.pipelineId",
+            "type": "string",
+            "label": "pipelineId",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.docCount",
+            "type": "number",
+            "label": "docCount",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.failures",
+            "type": "Array",
+            "label": "failures",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15",
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.ingestError",
+            "type": "CompoundType",
+            "label": "ingestError",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16",
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportResults",
+        "type": "Interface",
+        "label": "ImportResults",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L17"
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.failures",
+            "type": "Array",
+            "label": "failures",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L18",
+            "signature": [
+              "any[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.docCount",
+            "type": "number",
+            "label": "docCount",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L19",
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L20",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L16",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IngestPipeline",
+        "type": "Interface",
+        "label": "IngestPipeline",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.IngestPipeline.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
+          },
+          {
+            "tags": [],
+            "id": "def-public.IngestPipeline.processors",
+            "type": "Array",
+            "label": "processors",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54",
+            "signature": [
+              "any[]"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IngestPipelineWrapper",
+        "type": "Interface",
+        "label": "IngestPipelineWrapper",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.IngestPipelineWrapper.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
+          },
+          {
+            "tags": [],
+            "id": "def-public.IngestPipelineWrapper.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Mappings",
+        "type": "Interface",
+        "label": "Mappings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Mappings._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39",
+            "signature": [
+              "{ created_by: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Mappings.properties",
+            "type": "Object",
+            "label": "properties",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42",
+            "signature": [
+              "{ [key: string]: any; }"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Settings",
+        "type": "Interface",
+        "label": "Settings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Settings.pipeline",
+            "type": "string",
+            "label": "pipeline",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Settings.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
+          },
+          {
+            "tags": [],
+            "id": "def-public.Settings.body",
+            "type": "Array",
+            "label": "body",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34",
+            "signature": [
+              "any[]"
+            ]
+          },
+          {
+            "id": "def-public.Settings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31",
         "initialIsOpen": false
       }
     ],
@@ -1099,76 +831,11 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-public.UI_SETTING_MAX_FILE_SIZE",
-        "type": "string",
-        "label": "UI_SETTING_MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8"
-        },
-        "signature": [
-          "\"fileUpload:maxFileSize\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MB",
-        "type": "number",
-        "label": "MB",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MAX_FILE_SIZE",
-        "type": "string",
-        "label": "MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11"
-        },
-        "signature": [
-          "\"100MB\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MAX_FILE_SIZE_BYTES",
-        "type": "number",
-        "label": "MAX_FILE_SIZE_BYTES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12"
-        },
-        "signature": [
-          "104857600"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-public.ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14",
         "signature": [
           "1073741274"
         ],
@@ -1180,29 +847,9 @@
         "type": "string",
         "label": "FILE_SIZE_DISPLAY_FORMAT",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15",
         "signature": [
           "\"0,0.[0] b\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "label": "INDEX_META_DATA_CREATED_BY",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19"
-        },
-        "signature": [
-          "\"ml-file-data-visualizer\""
         ],
         "initialIsOpen": false
       },
@@ -1212,11 +859,7 @@
         "label": "ImportDoc",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29",
         "signature": [
           "string | object | ",
           {
@@ -1228,6 +871,63 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19",
+        "signature": [
+          "\"ml-file-data-visualizer\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MAX_FILE_SIZE",
+        "type": "string",
+        "label": "MAX_FILE_SIZE",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11",
+        "signature": [
+          "\"100MB\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MAX_FILE_SIZE_BYTES",
+        "type": "number",
+        "label": "MAX_FILE_SIZE_BYTES",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12",
+        "signature": [
+          "104857600"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MB",
+        "type": "number",
+        "label": "MB",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10",
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.UI_SETTING_MAX_FILE_SIZE",
+        "type": "string",
+        "label": "UI_SETTING_MAX_FILE_SIZE",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8",
+        "signature": [
+          "\"fileUpload:maxFileSize\""
+        ],
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1237,11 +937,7 @@
       "label": "FileUploadPluginStart",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/file_upload/public/plugin.ts",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/plugin.ts#L21"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/plugin.ts#L21",
       "signature": [
         "FileUploadStartApi"
       ],
@@ -1262,6 +958,69 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-common.Doc",
+        "type": "Interface",
+        "label": "Doc",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Doc.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ImportFailure",
+        "type": "Interface",
+        "label": "ImportFailure",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.item",
+            "type": "number",
+            "label": "item",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
+          },
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.reason",
+            "type": "string",
+            "label": "reason",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
+          },
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.doc",
+            "type": "CompoundType",
+            "label": "doc",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19",
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.ImportResponse",
         "type": "Interface",
         "label": "ImportResponse",
@@ -1274,11 +1033,7 @@
             "type": "boolean",
             "label": "success",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
           },
           {
             "tags": [],
@@ -1286,11 +1041,7 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
           },
           {
             "tags": [],
@@ -1298,11 +1049,7 @@
             "type": "string",
             "label": "index",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11",
             "signature": [
               "string | undefined"
             ]
@@ -1313,11 +1060,7 @@
             "type": "string",
             "label": "pipelineId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12",
             "signature": [
               "string | undefined"
             ]
@@ -1328,11 +1071,7 @@
             "type": "number",
             "label": "docCount",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
           },
           {
             "tags": [],
@@ -1340,11 +1079,7 @@
             "type": "Array",
             "label": "failures",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14",
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -1362,11 +1097,7 @@
             "type": "Any",
             "label": "error",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15",
             "signature": [
               "any"
             ]
@@ -1377,273 +1108,13 @@
             "type": "CompoundType",
             "label": "ingestError",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16",
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.ImportFailure",
-        "type": "Interface",
-        "label": "ImportFailure",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.item",
-            "type": "number",
-            "label": "item",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.reason",
-            "type": "string",
-            "label": "reason",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.doc",
-            "type": "CompoundType",
-            "label": "doc",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Doc",
-        "type": "Interface",
-        "label": "Doc",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Doc.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Settings",
-        "type": "Interface",
-        "label": "Settings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Settings.pipeline",
-            "type": "string",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Settings.index",
-            "type": "string",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Settings.body",
-            "type": "Array",
-            "label": "body",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34"
-            },
-            "signature": [
-              "any[]"
-            ]
-          },
-          {
-            "id": "def-common.Settings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Mappings",
-        "type": "Interface",
-        "label": "Mappings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Mappings._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39"
-            },
-            "signature": [
-              "{ created_by: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Mappings.properties",
-            "type": "Object",
-            "label": "properties",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42"
-            },
-            "signature": [
-              "{ [key: string]: any; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.IngestPipelineWrapper",
-        "type": "Interface",
-        "label": "IngestPipelineWrapper",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.IngestPipelineWrapper.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.IngestPipelineWrapper.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8",
         "initialIsOpen": false
       },
       {
@@ -1659,11 +1130,7 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
           },
           {
             "tags": [],
@@ -1671,21 +1138,134 @@
             "type": "Array",
             "label": "processors",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54",
             "signature": [
               "any[]"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.IngestPipelineWrapper",
+        "type": "Interface",
+        "label": "IngestPipelineWrapper",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.IngestPipelineWrapper.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
+          },
+          {
+            "tags": [],
+            "id": "def-common.IngestPipelineWrapper.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49",
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Mappings",
+        "type": "Interface",
+        "label": "Mappings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Mappings._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39",
+            "signature": [
+              "{ created_by: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Mappings.properties",
+            "type": "Object",
+            "label": "properties",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42",
+            "signature": [
+              "{ [key: string]: any; }"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Settings",
+        "type": "Interface",
+        "label": "Settings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Settings.pipeline",
+            "type": "string",
+            "label": "pipeline",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32",
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Settings.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
+          },
+          {
+            "tags": [],
+            "id": "def-common.Settings.body",
+            "type": "Array",
+            "label": "body",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34",
+            "signature": [
+              "any[]"
+            ]
+          },
+          {
+            "id": "def-common.Settings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31",
         "initialIsOpen": false
       }
     ],
@@ -1693,76 +1273,11 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-common.UI_SETTING_MAX_FILE_SIZE",
-        "type": "string",
-        "label": "UI_SETTING_MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8"
-        },
-        "signature": [
-          "\"fileUpload:maxFileSize\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MB",
-        "type": "number",
-        "label": "MB",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MAX_FILE_SIZE",
-        "type": "string",
-        "label": "MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11"
-        },
-        "signature": [
-          "\"100MB\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MAX_FILE_SIZE_BYTES",
-        "type": "number",
-        "label": "MAX_FILE_SIZE_BYTES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12"
-        },
-        "signature": [
-          "104857600"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-common.ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14",
         "signature": [
           "1073741274"
         ],
@@ -1774,29 +1289,9 @@
         "type": "string",
         "label": "FILE_SIZE_DISPLAY_FORMAT",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15",
         "signature": [
           "\"0,0.[0] b\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "label": "INDEX_META_DATA_CREATED_BY",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19"
-        },
-        "signature": [
-          "\"ml-file-data-visualizer\""
         ],
         "initialIsOpen": false
       },
@@ -1806,11 +1301,7 @@
         "label": "ImportDoc",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29",
         "signature": [
           "string | object | ",
           {
@@ -1820,6 +1311,63 @@
             "section": "def-common.Doc",
             "text": "Doc"
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19",
+        "signature": [
+          "\"ml-file-data-visualizer\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_FILE_SIZE",
+        "type": "string",
+        "label": "MAX_FILE_SIZE",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11",
+        "signature": [
+          "\"100MB\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_FILE_SIZE_BYTES",
+        "type": "number",
+        "label": "MAX_FILE_SIZE_BYTES",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12",
+        "signature": [
+          "104857600"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MB",
+        "type": "number",
+        "label": "MB",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10",
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.UI_SETTING_MAX_FILE_SIZE",
+        "type": "string",
+        "label": "UI_SETTING_MAX_FILE_SIZE",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8",
+        "signature": [
+          "\"fileUpload:maxFileSize\""
         ],
         "initialIsOpen": false
       }

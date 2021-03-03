@@ -5,138 +5,6 @@
     "functions": [],
     "interfaces": [
       {
-        "id": "def-public.QuerySuggestionGetFnArgs",
-        "type": "Interface",
-        "label": "QuerySuggestionGetFnArgs",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.language",
-            "type": "string",
-            "label": "language",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L25"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.indexPatterns",
-            "type": "Array",
-            "label": "indexPatterns",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L26"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.query",
-            "type": "string",
-            "label": "query",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L27"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.selectionStart",
-            "type": "number",
-            "label": "selectionStart",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L28"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.selectionEnd",
-            "type": "number",
-            "label": "selectionEnd",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L29"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.signal",
-            "type": "Object",
-            "label": "signal",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L30"
-            },
-            "signature": [
-              "AbortSignal | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.useTimeRange",
-            "type": "CompoundType",
-            "label": "useTimeRange",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L31"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.QuerySuggestionGetFnArgs.boolFilter",
-            "type": "Any",
-            "label": "boolFilter",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L32"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L24"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.QuerySuggestionBasic",
         "type": "Interface",
         "label": "QuerySuggestionBasic",
@@ -151,11 +19,7 @@
             "type": "Enum",
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L37"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L37",
             "signature": [
               {
                 "pluginId": "data",
@@ -172,11 +36,7 @@
             "type": "CompoundType",
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L38"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L38",
             "signature": [
               "string | JSX.Element | undefined"
             ]
@@ -187,11 +47,7 @@
             "type": "number",
             "label": "end",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L39"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L39"
           },
           {
             "tags": [],
@@ -199,11 +55,7 @@
             "type": "number",
             "label": "start",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L40"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L40"
           },
           {
             "tags": [],
@@ -211,11 +63,7 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L41"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L41"
           },
           {
             "tags": [],
@@ -223,21 +71,13 @@
             "type": "number",
             "label": "cursorIndex",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L42"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L42",
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L36"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L36",
         "initialIsOpen": false
       },
       {
@@ -272,11 +112,7 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L47"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L47",
             "signature": [
               {
                 "pluginId": "data",
@@ -294,11 +130,7 @@
             "type": "Object",
             "label": "field",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L48"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L48",
             "signature": [
               {
                 "pluginId": "data",
@@ -310,11 +142,103 @@
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L46"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L46",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.QuerySuggestionGetFnArgs",
+        "type": "Interface",
+        "label": "QuerySuggestionGetFnArgs",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.language",
+            "type": "string",
+            "label": "language",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L25"
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.indexPatterns",
+            "type": "Array",
+            "label": "indexPatterns",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L26",
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.query",
+            "type": "string",
+            "label": "query",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L27"
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionStart",
+            "type": "number",
+            "label": "selectionStart",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L28"
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionEnd",
+            "type": "number",
+            "label": "selectionEnd",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L29"
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.signal",
+            "type": "Object",
+            "label": "signal",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L30",
+            "signature": [
+              "AbortSignal | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.useTimeRange",
+            "type": "CompoundType",
+            "label": "useTimeRange",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L31",
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuerySuggestionGetFnArgs.boolFilter",
+            "type": "Any",
+            "label": "boolFilter",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L32",
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L24",
         "initialIsOpen": false
       }
     ],
@@ -325,15 +249,25 @@
         "label": "QuerySuggestionTypes",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L11"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L11",
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "id": "def-public.AutocompleteStart",
+        "type": "Type",
+        "label": "AutocompleteStart",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/autocomplete_service.ts#L93",
+        "signature": [
+          "{ getQuerySuggestions: QuerySuggestionGetFn; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ValueSuggestionsGetFn; }"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.QuerySuggestion",
         "type": "Type",
@@ -342,11 +276,7 @@
           "public"
         ],
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L52"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L52",
         "signature": [
           {
             "pluginId": "data",
@@ -372,11 +302,7 @@
         "label": "QuerySuggestionGetFn",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L19"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts#L19",
         "signature": [
           "(args: ",
           {
@@ -395,24 +321,6 @@
             "text": "QuerySuggestion"
           },
           "[]> | undefined"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AutocompleteStart",
-        "type": "Type",
-        "label": "AutocompleteStart",
-        "tags": [
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
-          "lineNumber": 93,
-          "link": "https://github.com/elastic/kibana/tree/master/src/plugins/data/public/autocomplete/autocomplete_service.ts#L93"
-        },
-        "signature": [
-          "{ getQuerySuggestions: QuerySuggestionGetFn; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ValueSuggestionsGetFn; }"
         ],
         "initialIsOpen": false
       }

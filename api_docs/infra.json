@@ -23,11 +23,7 @@
               ">"
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx#L13"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx#L13"
           }
         ],
         "signature": [
@@ -37,11 +33,7 @@
         ],
         "description": [],
         "label": "LazyLogStreamWrapper",
-        "source": {
-          "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx#L13"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx#L13",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -55,11 +47,7 @@
         "label": "InfraFormatterType",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/infra/public/lib/lib.ts",
-          "lineNumber": 147,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/lib/lib.ts#L147"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/lib/lib.ts#L147",
         "initialIsOpen": false
       }
     ],
@@ -70,11 +58,7 @@
         "label": "InfraAppId",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/infra/public/index.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/index.ts#L29"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/public/index.ts#L29",
         "signature": [
           "\"metrics\" | \"logs\""
         ],
@@ -93,11 +77,7 @@
             "type": "Function",
             "label": "number",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L16",
             "signature": [
               "(val: number) => string"
             ]
@@ -110,11 +90,7 @@
             "description": [
               "// Because the implimentation for formatting large numbers is the same as formatting\n// bytes we are re-using the same code, we just format the number using the abbreviated number format."
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L19"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L19",
             "signature": [
               "(bytes: number) => string"
             ]
@@ -127,11 +103,7 @@
             "description": [
               "// bytes in bytes formatted string out"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L21"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L21",
             "signature": [
               "(bytes: number) => string"
             ]
@@ -144,11 +116,7 @@
             "description": [
               "// bytes in bits formatted string out"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L23"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L23",
             "signature": [
               "(bytes: number) => string"
             ]
@@ -159,11 +127,7 @@
             "type": "Function",
             "label": "percent",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L24"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L24",
             "signature": [
               "(val: number) => string"
             ]
@@ -174,11 +138,7 @@
             "type": "Function",
             "label": "highPercision",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L25"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L25",
             "signature": [
               "(val: number) => string"
             ]
@@ -186,11 +146,7 @@
         ],
         "description": [],
         "label": "FORMATTERS",
-        "source": {
-          "path": "x-pack/plugins/infra/common/formatters/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L15"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/common/formatters/index.ts#L15",
         "initialIsOpen": false
       }
     ]
@@ -207,11 +163,7 @@
         "label": "InfraConfig",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/infra/server/plugin.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L64"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L64",
         "signature": [
           "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; container?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly query: Readonly<{} & { partitionSize: number; partitionFactor: number; }>; }"
         ],
@@ -232,11 +184,7 @@
           "type": "Function",
           "label": "defineInternalSourceConfiguration",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 75,
-            "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L75"
-          },
+          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L75",
           "signature": [
             "(sourceId: string, sourceProperties: ",
             {
@@ -250,11 +198,7 @@
           ]
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/infra/server/plugin.ts",
-        "lineNumber": 74,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L74"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/infra/server/plugin.ts#L74",
       "lifecycle": "setup",
       "initialIsOpen": true
     }

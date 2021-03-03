@@ -32,20 +32,12 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 50,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L50"
           },
           {
             "id": "def-public.ReportingAPIClient.getReportURL",
@@ -64,20 +56,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L54"
           },
           {
             "id": "def-public.ReportingAPIClient.downloadReport",
@@ -96,20 +80,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L61"
           },
           {
             "id": "def-public.ReportingAPIClient.deleteReport",
@@ -128,20 +104,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 67,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L67"
           },
           {
             "id": "def-public.ReportingAPIClient.list",
@@ -155,11 +123,7 @@
                   "number"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 73,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
               },
               {
                 "type": "Array",
@@ -169,11 +133,7 @@
                   "string[]"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 73,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
               }
             ],
             "signature": [
@@ -189,11 +149,7 @@
             ],
             "description": [],
             "label": "list",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L73",
             "tags": [],
             "returnComment": []
           },
@@ -208,11 +164,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L86"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L86"
           },
           {
             "id": "def-public.ReportingAPIClient.getContent",
@@ -239,20 +191,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 92,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L92"
           },
           {
             "id": "def-public.ReportingAPIClient.getInfo",
@@ -279,20 +223,12 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 98,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 98,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L98"
           },
           {
             "id": "def-public.ReportingAPIClient.findForJobIds",
@@ -306,11 +242,7 @@
                   "string[]"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
               }
             ],
             "signature": [
@@ -326,11 +258,7 @@
             ],
             "description": [],
             "label": "findForJobIds",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L104",
             "tags": [],
             "returnComment": []
           },
@@ -346,11 +274,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 114,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
               },
               {
                 "type": "Object",
@@ -360,11 +284,7 @@
                   "JobParams"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 114,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
               }
             ],
             "signature": [
@@ -372,11 +292,7 @@
             ],
             "description": [],
             "label": "getReportingJobPath",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 114,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L114",
             "tags": [],
             "returnComment": []
           },
@@ -392,11 +308,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 122,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
               },
               {
                 "type": "Any",
@@ -406,11 +318,7 @@
                   "any"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 122,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
               }
             ],
             "signature": [
@@ -418,11 +326,7 @@
             ],
             "description": [],
             "label": "createReportingJob",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 122,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L122",
             "tags": [],
             "returnComment": []
           },
@@ -435,11 +339,7 @@
             ],
             "description": [],
             "label": "getManagementLink",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 136,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L136"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L136",
             "tags": [],
             "returnComment": []
           },
@@ -455,11 +355,7 @@
                   "string"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-                  "lineNumber": 139,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
               }
             ],
             "signature": [
@@ -467,11 +363,7 @@
             ],
             "description": [],
             "label": "getDownloadLink",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 139,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L139",
             "tags": [],
             "returnComment": []
           },
@@ -484,11 +376,7 @@
             ],
             "description": [],
             "label": "getServerBasePath",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L145"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L145",
             "tags": [],
             "returnComment": []
           },
@@ -509,11 +397,7 @@
             ],
             "description": [],
             "label": "verifyConfig",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L150"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L150",
             "tags": [],
             "returnComment": []
           },
@@ -534,11 +418,7 @@
             ],
             "description": [],
             "label": "verifyBrowser",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L158"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L158",
             "tags": [],
             "returnComment": []
           },
@@ -559,20 +439,12 @@
             ],
             "description": [],
             "label": "verifyScreenCapture",
-            "source": {
-              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L166"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L166",
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/public/lib/reporting_api_client.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L47"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/lib/reporting_api_client.ts#L47",
         "initialIsOpen": false
       },
       {
@@ -641,20 +513,12 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 107,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L107"
           },
           {
             "id": "def-public.ReportingPublicPlugin.setup",
@@ -703,11 +567,7 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 112,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L112"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L112"
               },
               {
                 "type": "Object",
@@ -723,20 +583,12 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 113,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L113"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L113"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L111"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L111"
           },
           {
             "id": "def-public.ReportingPublicPlugin.start",
@@ -776,20 +628,12 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 175,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 175,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L175"
           },
           {
             "id": "def-public.ReportingPublicPlugin.stop",
@@ -802,18 +646,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 194,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L194"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L194"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/public/plugin.ts",
-          "lineNumber": 85,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L85"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/plugin.ts#L85",
         "initialIsOpen": false
       }
     ],
@@ -828,11 +664,7 @@
         ],
         "description": [],
         "label": "getDefaultLayoutSelectors",
-        "source": {
-          "path": "x-pack/plugins/reporting/common/index.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -848,11 +680,7 @@
       "label": "ReportingStart",
       "tags": [],
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/reporting/public/index.ts",
-        "lineNumber": 23,
-        "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/index.ts#L23"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/public/index.ts#L23",
       "signature": [
         "ReportingSetup"
       ],
@@ -862,6 +690,627 @@
   },
   "server": {
     "classes": [
+      {
+        "id": "def-server.ReportingCore",
+        "type": "Class",
+        "tags": [],
+        "label": "ReportingCore",
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.ReportingCore.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "logger",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.LevelLogger",
+                    "text": "LevelLogger"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
+          },
+          {
+            "id": "def-server.ReportingCore.pluginSetup",
+            "type": "Function",
+            "label": "pluginSetup",
+            "signature": [
+              "(setupDeps: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingInternalSetup",
+                "text": "ReportingInternalSetup"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "setupDeps",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.ReportingInternalSetup",
+                    "text": "ReportingInternalSetup"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
+          },
+          {
+            "id": "def-server.ReportingCore.pluginStart",
+            "type": "Function",
+            "label": "pluginStart",
+            "signature": [
+              "(startDeps: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingInternalStart",
+                "text": "ReportingInternalStart"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "startDeps",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.ReportingInternalStart",
+                    "text": "ReportingInternalStart"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
+          },
+          {
+            "id": "def-server.ReportingCore.pluginSetsUp",
+            "type": "Function",
+            "label": "pluginSetsUp",
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L79"
+          },
+          {
+            "id": "def-server.ReportingCore.pluginStartsUp",
+            "type": "Function",
+            "label": "pluginStartsUp",
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L90"
+          },
+          {
+            "id": "def-server.ReportingCore.pluginIsStarted",
+            "type": "Function",
+            "label": "pluginIsStarted",
+            "signature": [
+              "() => boolean"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L97"
+          },
+          {
+            "id": "def-server.ReportingCore.setConfig",
+            "type": "Function",
+            "label": "setConfig",
+            "signature": [
+              "(config: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingConfig",
+                "text": "ReportingConfig"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "config",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.ReportingConfig",
+                    "text": "ReportingConfig"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
+          },
+          {
+            "id": "def-server.ReportingCore.registerFeature",
+            "type": "Function",
+            "label": "registerFeature",
+            "signature": [
+              "() => void"
+            ],
+            "description": [
+              "\nRegisters reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L112"
+          },
+          {
+            "id": "def-server.ReportingCore.getConfig",
+            "type": "Function",
+            "label": "getConfig",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingConfig",
+                "text": "ReportingConfig"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L132"
+          },
+          {
+            "id": "def-server.ReportingCore.getPluginStartDeps",
+            "type": "Function",
+            "label": "getPluginStartDeps",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingInternalStart",
+                "text": "ReportingInternalStart"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L142"
+          },
+          {
+            "id": "def-server.ReportingCore.getExportTypesRegistry",
+            "type": "Function",
+            "label": "getExportTypesRegistry",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ExportTypesRegistry",
+                "text": "ExportTypesRegistry"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L150"
+          },
+          {
+            "id": "def-server.ReportingCore.getEsqueue",
+            "type": "Function",
+            "label": "getEsqueue",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ESQueueInstance",
+                "text": "ESQueueInstance"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L154"
+          },
+          {
+            "id": "def-server.ReportingCore.getLicenseInfo",
+            "type": "Function",
+            "label": "getLicenseInfo",
+            "signature": [
+              "() => Promise<Record<string, ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.LicenseCheckResult",
+                "text": "LicenseCheckResult"
+              },
+              ">>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L158"
+          },
+          {
+            "id": "def-server.ReportingCore.getScreenshotsObservable",
+            "type": "Function",
+            "label": "getScreenshotsObservable",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ScreenshotsObservableFn",
+                "text": "ScreenshotsObservableFn"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L168"
+          },
+          {
+            "id": "def-server.ReportingCore.getPluginSetupDeps",
+            "type": "Function",
+            "label": "getPluginSetupDeps",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingInternalSetup",
+                "text": "ReportingInternalSetup"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L177"
+          },
+          {
+            "id": "def-server.ReportingCore.getElasticsearchService",
+            "type": "Function",
+            "label": "getElasticsearchService",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchServiceSetup",
+                "text": "ElasticsearchServiceSetup"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L184"
+          },
+          {
+            "id": "def-server.ReportingCore.getUiSettingsServiceFactory",
+            "type": "Function",
+            "label": "getUiSettingsServiceFactory",
+            "signature": [
+              "(savedObjectsClient: Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsClient",
+                "text": "SavedObjectsClient"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "savedObjectsClient",
+                "isRequired": true,
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsClient",
+                    "text": "SavedObjectsClient"
+                  },
+                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
+          },
+          {
+            "id": "def-server.ReportingCore.getSpaceId",
+            "type": "Function",
+            "label": "getSpaceId",
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, logger?: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.LevelLogger",
+                "text": "LevelLogger"
+              },
+              ") => string | undefined"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "request",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
+              },
+              {
+                "type": "Object",
+                "label": "logger",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.LevelLogger",
+                    "text": "LevelLogger"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
+          },
+          {
+            "id": "def-server.ReportingCore.getFakeRequest",
+            "type": "Function",
+            "label": "getFakeRequest",
+            "signature": [
+              "(baseRequest: object, spaceId: string | undefined, logger?: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.LevelLogger",
+                "text": "LevelLogger"
+              },
+              ") => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "baseRequest",
+                "isRequired": true,
+                "signature": [
+                  "object"
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
+              },
+              {
+                "type": "string",
+                "label": "spaceId",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
+              },
+              {
+                "type": "Object",
+                "label": "logger",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.LevelLogger",
+                    "text": "LevelLogger"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
+          },
+          {
+            "id": "def-server.ReportingCore.getUiSettingsClient",
+            "type": "Function",
+            "label": "getUiSettingsClient",
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, logger?: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.LevelLogger",
+                "text": "LevelLogger"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "request",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
+              },
+              {
+                "type": "Object",
+                "label": "logger",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.LevelLogger",
+                    "text": "LevelLogger"
+                  }
+                ],
+                "description": [],
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L50",
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.ReportingPlugin",
         "type": "Class",
@@ -929,20 +1378,12 @@
                   "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L30"
           },
           {
             "id": "def-server.ReportingPlugin.setup",
@@ -984,11 +1425,7 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
               },
               {
                 "type": "Object",
@@ -1004,20 +1441,12 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L36"
           },
           {
             "id": "def-server.ReportingPlugin.start",
@@ -1058,11 +1487,7 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
               },
               {
                 "type": "Object",
@@ -1078,945 +1503,20 @@
                   }
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L105"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/plugin.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L24"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ReportingCore",
-        "type": "Class",
-        "tags": [],
-        "label": "ReportingCore",
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.ReportingCore.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "logger",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 58,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L58"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginSetup",
-            "type": "Function",
-            "label": "pluginSetup",
-            "signature": [
-              "(setupDeps: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalSetup",
-                "text": "ReportingInternalSetup"
-              },
-              ") => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "setupDeps",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportingInternalSetup",
-                    "text": "ReportingInternalSetup"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L63"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginStart",
-            "type": "Function",
-            "label": "pluginStart",
-            "signature": [
-              "(startDeps: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalStart",
-                "text": "ReportingInternalStart"
-              },
-              ") => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "startDeps",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportingInternalStart",
-                    "text": "ReportingInternalStart"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 71,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L71"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginSetsUp",
-            "type": "Function",
-            "label": "pluginSetsUp",
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L79"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginStartsUp",
-            "type": "Function",
-            "label": "pluginStartsUp",
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L90"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.pluginIsStarted",
-            "type": "Function",
-            "label": "pluginIsStarted",
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L97"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.setConfig",
-            "type": "Function",
-            "label": "setConfig",
-            "signature": [
-              "(config: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingConfig",
-                "text": "ReportingConfig"
-              },
-              ") => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "config",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.ReportingConfig",
-                    "text": "ReportingConfig"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L104"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.registerFeature",
-            "type": "Function",
-            "label": "registerFeature",
-            "signature": [
-              "() => void"
-            ],
-            "description": [
-              "\nRegisters reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L112"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getConfig",
-            "type": "Function",
-            "label": "getConfig",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingConfig",
-                "text": "ReportingConfig"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L132"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getPluginStartDeps",
-            "type": "Function",
-            "label": "getPluginStartDeps",
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalStart",
-                "text": "ReportingInternalStart"
-              },
-              ">"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L142"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getExportTypesRegistry",
-            "type": "Function",
-            "label": "getExportTypesRegistry",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ExportTypesRegistry",
-                "text": "ExportTypesRegistry"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L150"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getEsqueue",
-            "type": "Function",
-            "label": "getEsqueue",
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ESQueueInstance",
-                "text": "ESQueueInstance"
-              },
-              ">"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L154"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getLicenseInfo",
-            "type": "Function",
-            "label": "getLicenseInfo",
-            "signature": [
-              "() => Promise<Record<string, ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LicenseCheckResult",
-                "text": "LicenseCheckResult"
-              },
-              ">>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L158"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getScreenshotsObservable",
-            "type": "Function",
-            "label": "getScreenshotsObservable",
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ScreenshotsObservableFn",
-                "text": "ScreenshotsObservableFn"
-              },
-              ">"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L168"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getPluginSetupDeps",
-            "type": "Function",
-            "label": "getPluginSetupDeps",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.ReportingInternalSetup",
-                "text": "ReportingInternalSetup"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L177"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getElasticsearchService",
-            "type": "Function",
-            "label": "getElasticsearchService",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServiceSetup",
-                "text": "ElasticsearchServiceSetup"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 184,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L184"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getUiSettingsServiceFactory",
-            "type": "Function",
-            "label": "getUiSettingsServiceFactory",
-            "signature": [
-              "(savedObjectsClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "savedObjectsClient",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 193,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 193,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L193"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getSpaceId",
-            "type": "Function",
-            "label": "getSpaceId",
-            "signature": [
-              "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
-              ") => string | undefined"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "request",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "logger",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L199"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getFakeRequest",
-            "type": "Function",
-            "label": "getFakeRequest",
-            "signature": [
-              "(baseRequest: object, spaceId: string | undefined, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Uncategorized",
-                "label": "baseRequest",
-                "isRequired": true,
-                "signature": [
-                  "object"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
-                }
-              },
-              {
-                "type": "string",
-                "label": "spaceId",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "logger",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L213"
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getUiSettingsClient",
-            "type": "Function",
-            "label": "getUiSettingsClient",
-            "signature": [
-              "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>, logger?: ",
-              {
-                "pluginId": "reporting",
-                "scope": "server",
-                "docId": "kibReportingPluginApi",
-                "section": "def-server.LevelLogger",
-                "text": "LevelLogger"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              ">"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "request",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "logger",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "reporting",
-                    "scope": "server",
-                    "docId": "kibReportingPluginApi",
-                    "section": "def-server.LevelLogger",
-                    "text": "LevelLogger"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 233,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L233"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/core.ts#L50"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/plugin.ts#L24",
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
-      {
-        "id": "def-server.ReportingSetupDeps",
-        "type": "Interface",
-        "label": "ReportingSetupDeps",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.licensing",
-            "type": "Object",
-            "label": "licensing",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L28"
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginSetup",
-                "text": "LicensingPluginSetup"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.features",
-            "type": "Object",
-            "label": "features",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L29"
-            },
-            "signature": [
-              {
-                "pluginId": "features",
-                "scope": "server",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.security",
-            "type": "Object",
-            "label": "security",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L30"
-            },
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.SecurityPluginSetup",
-                "text": "SecurityPluginSetup"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.spaces",
-            "type": "Object",
-            "label": "spaces",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L31"
-            },
-            "signature": [
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesPluginSetup",
-                "text": "SpacesPluginSetup"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ReportingSetupDeps.usageCollection",
-            "type": "Object",
-            "label": "usageCollection",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L32"
-            },
-            "signature": [
-              "Pick<",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.CollectorSet",
-                "text": "CollectorSet"
-              },
-              ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L27"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ReportingStartDeps",
-        "type": "Interface",
-        "label": "ReportingStartDeps",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ReportingStartDeps.data",
-            "type": "Object",
-            "label": "data",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L36"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L35"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.ReportingConfig",
         "type": "Interface",
@@ -2042,21 +1542,141 @@
             "type": "Object",
             "label": "kbnConfig",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/config/config.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L58"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L58",
             "signature": [
               "Config<KbnServerConfigType>"
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/server/config/config.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L57"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/config/config.ts#L57",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ReportingSetupDeps",
+        "type": "Interface",
+        "label": "ReportingSetupDeps",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ReportingSetupDeps.licensing",
+            "type": "Object",
+            "label": "licensing",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L28",
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginSetup",
+                "text": "LicensingPluginSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ReportingSetupDeps.features",
+            "type": "Object",
+            "label": "features",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L29",
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ReportingSetupDeps.security",
+            "type": "Object",
+            "label": "security",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L30",
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.SecurityPluginSetup",
+                "text": "SecurityPluginSetup"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ReportingSetupDeps.spaces",
+            "type": "Object",
+            "label": "spaces",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L31",
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ReportingSetupDeps.usageCollection",
+            "type": "Object",
+            "label": "usageCollection",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L32",
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.CollectorSet",
+                "text": "CollectorSet"
+              },
+              ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L27",
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ReportingStartDeps",
+        "type": "Interface",
+        "label": "ReportingStartDeps",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ReportingStartDeps.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L36",
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataPluginApi",
+                "section": "def-server.DataPluginStart",
+                "text": "DataPluginStart"
+              }
+            ]
+          }
+        ],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/types.ts#L35",
         "initialIsOpen": false
       }
     ],
@@ -2084,11 +1704,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L14"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L14"
           },
           {
             "id": "def-common.CancellationToken.on",
@@ -2102,11 +1718,7 @@
                   "Function"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-                  "lineNumber": 19,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19"
               }
             ],
             "signature": [
@@ -2114,11 +1726,7 @@
             ],
             "description": [],
             "label": "on",
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L19",
             "tags": [],
             "returnComment": []
           },
@@ -2131,11 +1739,7 @@
             ],
             "description": [],
             "label": "cancel",
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L32"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L32",
             "tags": [],
             "returnComment": []
           },
@@ -2150,18 +1754,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L37"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L37"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L10"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/cancellation_token.ts#L10",
         "initialIsOpen": false
       },
       {
@@ -2188,20 +1784,12 @@
                   "PollerOptions"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/reporting/common/poller.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L32"
           },
           {
             "id": "def-common.Poller.getPollFrequency",
@@ -2214,11 +1802,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L45"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L45"
           },
           {
             "id": "def-common.Poller._poll",
@@ -2231,11 +1815,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L49"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L49"
           },
           {
             "id": "def-common.Poller.start",
@@ -2248,11 +1828,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L76"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L76"
           },
           {
             "id": "def-common.Poller.stop",
@@ -2265,11 +1841,7 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L89"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L89"
           },
           {
             "id": "def-common.Poller.isRunning",
@@ -2282,18 +1854,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/common/poller.ts",
-              "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L103"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L103"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/reporting/common/poller.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L21"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/poller.ts#L21",
         "initialIsOpen": false
       }
     ],
@@ -2308,11 +1872,7 @@
         ],
         "description": [],
         "label": "getDefaultLayoutSelectors",
-        "source": {
-          "path": "x-pack/plugins/reporting/common/index.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L14",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2328,11 +1888,7 @@
         "label": "constants",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/reporting/common/index.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L10"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/common/index.ts#L10",
         "signature": [
           "typeof ",
           "x-pack/plugins/reporting/common/constants"

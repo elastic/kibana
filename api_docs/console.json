@@ -23,11 +23,7 @@
         "public"
       ],
       "description": [],
-      "source": {
-        "path": "src/plugins/console/server/types.ts",
-        "lineNumber": 13,
-        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/console/server/types.ts#L13"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/console/server/types.ts#L13",
       "signature": [
         "{ addExtensionSpecFilePath: (path: string) => void; }"
       ],
@@ -42,11 +38,7 @@
         "public"
       ],
       "description": [],
-      "source": {
-        "path": "src/plugins/console/server/types.ts",
-        "lineNumber": 18,
-        "link": "https://github.com/elastic/kibana/tree/master/src/plugins/console/server/types.ts#L18"
-      },
+      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/console/server/types.ts#L18",
       "signature": [
         "{ addProcessorDefinition: (processor: any) => void; }"
       ],

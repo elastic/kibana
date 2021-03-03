@@ -25,11 +25,7 @@
             "type": "string",
             "label": "status",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L12"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L12"
           },
           {
             "tags": [],
@@ -37,11 +33,7 @@
             "type": "string",
             "label": "uid",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L13"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L13"
           },
           {
             "tags": [],
@@ -49,11 +41,7 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L14"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L14"
           },
           {
             "tags": [],
@@ -61,11 +49,7 @@
             "type": "string",
             "label": "issue_date",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L15"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L15"
           },
           {
             "tags": [],
@@ -73,11 +57,7 @@
             "type": "number",
             "label": "issue_date_in_millis",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L16"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L16"
           },
           {
             "tags": [],
@@ -85,11 +65,7 @@
             "type": "string",
             "label": "expiry_date",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L17"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L17"
           },
           {
             "tags": [],
@@ -97,11 +73,7 @@
             "type": "number",
             "label": "expirty_date_in_millis",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L18"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L18"
           },
           {
             "tags": [],
@@ -109,11 +81,7 @@
             "type": "number",
             "label": "max_nodes",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L19"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L19"
           },
           {
             "tags": [],
@@ -121,11 +89,7 @@
             "type": "string",
             "label": "issued_to",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L20"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L20"
           },
           {
             "tags": [],
@@ -133,11 +97,7 @@
             "type": "string",
             "label": "issuer",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L21"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L21"
           },
           {
             "tags": [],
@@ -145,18 +105,10 @@
             "type": "number",
             "label": "start_date_in_millis",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L22"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L22"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L11"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L11",
         "initialIsOpen": false
       }
     ],

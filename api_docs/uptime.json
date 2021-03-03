@@ -29,11 +29,7 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
           },
           {
             "type": "Object",
@@ -49,11 +45,7 @@
               }
             ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
           }
         ],
         "signature": [
@@ -65,11 +57,7 @@
         ],
         "description": [],
         "label": "initServerWithKibana",
-        "source": {
-          "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28",
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -100,11 +88,7 @@
             "type": "Function",
             "label": "route",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L25"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L25",
             "signature": [
               "(options: ",
               {
@@ -118,11 +102,7 @@
             ]
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L24"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L24",
         "initialIsOpen": false
       }
     ],

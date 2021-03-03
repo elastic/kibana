@@ -27,11 +27,7 @@
         "label": "REPOSITORY_TYPES",
         "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L25"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L25",
         "initialIsOpen": false
       }
     ],
@@ -42,13 +38,45 @@
         "type": "string",
         "label": "API_BASE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L23"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L23",
         "signature": [
           "\"/api/snapshot_restore/\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.APP_REQUIRED_CLUSTER_PRIVILEGES",
+        "type": "Array",
+        "label": "APP_REQUIRED_CLUSTER_PRIVILEGES",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L55",
+        "signature": [
+          "string[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.APP_RESTORE_INDEX_PRIVILEGES",
+        "type": "Array",
+        "label": "APP_RESTORE_INDEX_PRIVILEGES",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L59",
+        "signature": [
+          "string[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.APP_SLM_CLUSTER_PRIVILEGES",
+        "type": "Array",
+        "label": "APP_SLM_CLUSTER_PRIVILEGES",
+        "description": [],
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L60",
+        "signature": [
+          "string[]"
         ],
         "initialIsOpen": false
       },
@@ -58,11 +86,7 @@
         "type": "Array",
         "label": "DEFAULT_REPOSITORY_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L36"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L36",
         "signature": [
           "RepositoryType",
           "[]"
@@ -75,62 +99,10 @@
         "type": "Array",
         "label": "PLUGIN_REPOSITORY_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L41"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L41",
         "signature": [
           "RepositoryType",
           "[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.APP_REQUIRED_CLUSTER_PRIVILEGES",
-        "type": "Array",
-        "label": "APP_REQUIRED_CLUSTER_PRIVILEGES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L55"
-        },
-        "signature": [
-          "string[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.APP_RESTORE_INDEX_PRIVILEGES",
-        "type": "Array",
-        "label": "APP_RESTORE_INDEX_PRIVILEGES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 59,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L59"
-        },
-        "signature": [
-          "string[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.APP_SLM_CLUSTER_PRIVILEGES",
-        "type": "Array",
-        "label": "APP_SLM_CLUSTER_PRIVILEGES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 60,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L60"
-        },
-        "signature": [
-          "string[]"
         ],
         "initialIsOpen": false
       }
@@ -147,11 +119,7 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L14"
-            }
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L14"
           },
           {
             "tags": [],
@@ -159,11 +127,7 @@
             "type": "string",
             "label": "minimumLicenseType",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L15"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L15",
             "signature": [
               "\"basic\""
             ]
@@ -180,11 +144,7 @@
                   "any"
                 ],
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-                  "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L16"
-                }
+                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L16"
               }
             ],
             "signature": [
@@ -192,22 +152,14 @@
             ],
             "description": [],
             "label": "getI18nName",
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L16"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L16",
             "tags": [],
             "returnComment": []
           }
         ],
         "description": [],
         "label": "PLUGIN",
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L13"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L13",
         "initialIsOpen": false
       },
       {
@@ -221,11 +173,7 @@
             "type": "string",
             "label": "'repository-s3'",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L49"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L49",
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -243,11 +191,7 @@
             "type": "string",
             "label": "'repository-hdfs'",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L50"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L50",
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -265,11 +209,7 @@
             "type": "string",
             "label": "'repository-azure'",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L51"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L51",
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -287,11 +227,7 @@
             "type": "string",
             "label": "'repository-gcs'",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L52"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L52",
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -306,11 +242,7 @@
         ],
         "description": [],
         "label": "REPOSITORY_PLUGINS_MAP",
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 48,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L48"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L48",
         "initialIsOpen": false
       },
       {
@@ -324,11 +256,7 @@
             "type": "string",
             "label": "DAY",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L63"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L63",
             "signature": [
               "\"d\""
             ]
@@ -339,11 +267,7 @@
             "type": "string",
             "label": "HOUR",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L64"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L64",
             "signature": [
               "\"h\""
             ]
@@ -354,11 +278,7 @@
             "type": "string",
             "label": "MINUTE",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L65"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L65",
             "signature": [
               "\"m\""
             ]
@@ -369,11 +289,7 @@
             "type": "string",
             "label": "SECOND",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L66"
-            },
+            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L66",
             "signature": [
               "\"s\""
             ]
@@ -381,11 +297,7 @@
         ],
         "description": [],
         "label": "TIME_UNITS",
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L62"
-        },
+        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/snapshot_restore/common/constants.ts#L62",
         "initialIsOpen": false
       }
     ]
