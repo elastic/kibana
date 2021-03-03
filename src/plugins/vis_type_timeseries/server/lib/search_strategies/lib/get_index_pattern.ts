@@ -17,6 +17,7 @@ export async function getIndexPatternObject(
   { indexPatternsService }: IndexPatternObjectDependencies
 ) {
   let indexPatternObject: IndexPattern | undefined | null;
+  let indexPatternString: string = '';
 
   const getIndexPatternFromString = async (v: string) =>
     (await indexPatternsService.find(v)).find((index) => index.title === indexPattern);
@@ -26,15 +27,21 @@ export async function getIndexPatternObject(
   } else {
     if (typeof indexPattern === 'string') {
       indexPatternObject = await getIndexPatternFromString(indexPattern);
+
+      if (!indexPatternObject) {
+        indexPatternString = indexPattern;
+      }
     } else if (indexPattern.id) {
       indexPatternObject = await indexPatternsService.get(indexPattern.id);
-    } else if (indexPattern.title) {
-      indexPatternObject = await getIndexPatternFromString(indexPattern.title);
+
+      if (!indexPatternObject && indexPattern.title) {
+        indexPatternString = indexPattern.title;
+      }
     }
   }
 
   return {
     indexPatternObject,
-    indexPatternString: indexPatternObject?.title ?? '',
+    indexPatternString: indexPatternObject?.title ?? indexPatternString,
   };
 }
