@@ -8,8 +8,11 @@
 
 import chalk from 'chalk';
 import { CliArgs, Env, RawConfigService } from './config';
-import { Root } from './root';
 import { CriticalError } from './errors';
+import { getClusteringInfo } from './clustering';
+import { KibanaCoordinator } from './root/coordinator';
+import { KibanaWorker } from './root/worker';
+import { KibanaRoot } from './root/types';
 
 interface KibanaFeatures {
   // Indicates whether we can run Kibana in dev mode in which Kibana is run as
@@ -49,45 +52,42 @@ export async function bootstrap({
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { REPO_ROOT } = require('@kbn/utils');
 
-  const env = Env.createDefault(REPO_ROOT, {
-    configs,
-    cliArgs,
-    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
-  });
-
-  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
+  const rawConfigService = new RawConfigService(configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService, env, onRootShutdown);
+  const clusterInfo = await getClusteringInfo(rawConfigService);
+  const isDevCliParent =
+    cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild;
 
-  process.on('SIGHUP', () => reloadLoggingConfig());
-
-  // This is only used by the LogRotator service
-  // in order to be able to reload the log configuration
-  // under the cluster mode
-  process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
-      return;
-    }
-
-    reloadLoggingConfig();
+  const env = Env.createDefault(REPO_ROOT, {
+    // TODO: do we want to add clusterInfo to Env ?
+    configs,
+    cliArgs,
+    isDevCliParent,
   });
 
-  function reloadLoggingConfig() {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
-
-    try {
-      rawConfigService.reloadConfig();
-    } catch (err) {
-      return shutdown(err);
-    }
-
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+  let root: KibanaRoot;
+  if (clusterInfo.isCoordinator && !isDevCliParent) {
+    root = new KibanaCoordinator(rawConfigService, env, clusterInfo, onRootShutdown);
+  } else {
+    root = new KibanaWorker(rawConfigService, env, clusterInfo, onRootShutdown);
   }
 
-  process.on('SIGINT', () => shutdown());
-  process.on('SIGTERM', () => shutdown());
+  if (clusterInfo.isMaster) {
+    process.on('SIGHUP', () => root.reloadLoggingConfig());
+
+    // This is only used by the legacy LogRotator service
+    // in order to be able to reload the log configuration
+    // under the cluster mode
+    process.on('message', (msg) => {
+      if (msg?.reloadLoggingConfig === true) {
+        root.reloadLoggingConfig();
+      }
+    });
+
+    process.on('SIGINT', () => root.shutdown());
+    process.on('SIGTERM', () => root.shutdown());
+  }
 
   function shutdown(reason?: Error) {
     rawConfigService.stop();
@@ -109,9 +109,7 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
-
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
-
   process.exit(0);
 }

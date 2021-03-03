@@ -26,6 +26,7 @@ import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
+import { ClusteringService, clusteringConfig } from './clustering';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -67,6 +68,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly clustering: ClusteringService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -86,6 +88,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.context = new ContextService(core);
+    this.clustering = new ClusteringService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
@@ -127,6 +130,8 @@ export class Server {
       await this.configService.validate();
       await ensureValidConfiguration(this.configService, legacyConfigSetup);
     }
+
+    const clusteringSetup = await this.clustering.setup();
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -318,6 +323,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
+      clusteringConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
