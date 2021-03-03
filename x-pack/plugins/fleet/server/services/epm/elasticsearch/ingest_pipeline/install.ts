@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import {
+import type { SavedObjectsClientContract } from 'src/core/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type {
   EsAssetReference,
   RegistryDataStream,
-  ElasticsearchAssetType,
   InstallablePackage,
+  CallESAsCurrentUser,
 } from '../../../../types';
-import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
-import { CallESAsCurrentUser } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
+
 import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {

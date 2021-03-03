@@ -7,10 +7,11 @@
 
 // handlers that handle events from agents in response to actions received
 
-import { RequestHandler } from 'kibana/server';
-import { AcksService } from '../../services/agents';
-import { AgentEvent } from '../../../common/types/models';
-import { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
+import type { RequestHandler } from 'kibana/server';
+
+import type { AcksService } from '../../services/agents';
+import type { AgentEvent } from '../../../common/types/models';
+import type { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentAcksHandlerBuilder = function (

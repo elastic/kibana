@@ -8,18 +8,19 @@
 import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import uuid from 'uuid/v4';
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/server';
+
+import type { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
-import {
+import type {
   PackagePolicy,
   NewAgentPolicy,
   AgentPolicy,
@@ -28,27 +29,26 @@ import {
   ListWithKuery,
 } from '../types';
 import {
-  DeleteAgentPolicyResponse,
-  Settings,
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
-  FleetServerPolicy,
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
+import type { DeleteAgentPolicyResponse, Settings, FleetServerPolicy } from '../../common';
 import {
   AgentPolicyNameExistsError,
   AgentPolicyDeletionError,
   IngestManagerError,
 } from '../errors';
+import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
-import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 import { isAgentsSetup } from './agents/setup';
 import { appContextService } from './app_context';
 

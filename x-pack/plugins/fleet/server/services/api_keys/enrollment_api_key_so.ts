@@ -8,13 +8,15 @@
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
+import type { SavedObjectsClientContract, SavedObject } from 'src/core/server';
+
+import type { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { normalizeKuery, escapeSearchQueryPhrase } from '../saved_object';
+
+import { createAPIKey, invalidateAPIKeys } from './security';
 
 const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
