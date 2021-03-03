@@ -19,6 +19,8 @@ The following action APIs are available:
 
 * <<actions-and-connectors-api-delete, Delete connector API>> to delete an connector by ID
 
+For deprecated APIs, refer to <<actions-and-connectors-legacy-apis>>.
+
 For information about the actions and connectors that {kib} supports, refer to <<action-types,Action and connector types>>.
 
 include::actions-and-connectors/get.asciidoc[]
