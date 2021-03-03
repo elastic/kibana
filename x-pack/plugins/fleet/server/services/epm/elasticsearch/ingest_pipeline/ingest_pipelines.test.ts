@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
-import { RegistryDataStream } from '../../../../types';
+import type { RegistryDataStream } from '../../../../types';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
