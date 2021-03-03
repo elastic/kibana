@@ -54,7 +54,9 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { Stats } from '../status';
+import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../translations';
 import { getExpandedRowMap } from './expanded_row';
+import { isSelectedCasesIncludeCollections } from './helpers';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -268,10 +270,17 @@ export const AllCases = React.memo<AllCasesProps>(
             deleteCasesAction: toggleBulkDeleteModal,
             selectedCaseIds,
             updateCaseStatus: handleUpdateCaseStatus,
+            includeCollections: isSelectedCasesIncludeCollections(selectedCases),
           })}
         />
       ),
-      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
+      [
+        selectedCases,
+        selectedCaseIds,
+        filterOptions.status,
+        toggleBulkDeleteModal,
+        handleUpdateCaseStatus,
+      ]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
@@ -379,9 +388,8 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
-        selectable: (theCase) => isEmpty(theCase.subCases),
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? i18n.SELECTABLE_MESSAGE_COLLECTIONS : ''),
+        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
       }),
       [setSelectedCases]
     );
@@ -409,6 +417,8 @@ export const AllCases = React.memo<AllCasesProps>(
       },
       [isModal, onRowClick]
     );
+
+    const enableBuckActions = userCanCrud && !isModal;
 
     return (
       <>
@@ -506,10 +516,12 @@ export const AllCases = React.memo<AllCasesProps>(
                   </UtilityBarGroup>
                   {!isModal && (
                     <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-                      <UtilityBarText data-test-subj="case-table-selected-case-count">
-                        {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                      </UtilityBarText>
-                      {userCanCrud && (
+                      {enableBuckActions && (
+                        <UtilityBarText data-test-subj="case-table-selected-case-count">
+                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                        </UtilityBarText>
+                      )}
+                      {enableBuckActions && (
                         <UtilityBarAction
                           data-test-subj="case-table-bulk-actions"
                           iconSide="right"
@@ -529,7 +541,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
-                isSelectable={userCanCrud && !isModal}
+                isSelectable={enableBuckActions}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -556,7 +568,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
                 rowProps={tableRowProps}
-                selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
+                selection={enableBuckActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
                 className={classnames({ isModal })}
               />

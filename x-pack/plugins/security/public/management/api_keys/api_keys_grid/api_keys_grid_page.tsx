@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -23,20 +22,22 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  EuiInMemoryTableProps,
 } from '@elastic/eui';
+import moment from 'moment-timezone';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import moment from 'moment-timezone';
 import type { NotificationsStart } from 'src/core/public';
+
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
-import { APIKeysAPIClient } from '../api_keys_api_client';
-import { PermissionDenied } from './permission_denied';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
+import type { APIKeysAPIClient } from '../api_keys_api_client';
 import { EmptyPrompt } from './empty_prompt';
-import { NotEnabled } from './not_enabled';
 import { InvalidateProvider } from './invalidate_provider';
+import { NotEnabled } from './not_enabled';
+import { PermissionDenied } from './permission_denied';
 
 interface Props {
   notifications: NotificationsStart;
