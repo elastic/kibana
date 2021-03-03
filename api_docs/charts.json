@@ -107,7 +107,7 @@
         "children": [
           {
             "type": "Object",
-            "label": "{ onChange, color: selectedColor, id, label }",
+            "label": "{\n  onChange,\n  color: selectedColor,\n  id,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n}",
             "isRequired": true,
             "signature": [
               "ColorPickerProps"
@@ -115,20 +115,20 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L83"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L105"
             }
           }
         ],
         "signature": [
-          "({ onChange, color: selectedColor, id, label }: ColorPickerProps) => JSX.Element"
+          "({ onChange, color: selectedColor, id, label, useLegacyColors, colorIsOverwritten, }: ColorPickerProps) => JSX.Element"
         ],
         "description": [],
         "label": "ColorPicker",
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-          "lineNumber": 83,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L83"
+          "lineNumber": 105,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/charts/public/static/components/color_picker.tsx#L105"
         },
         "tags": [],
         "returnComment": [],

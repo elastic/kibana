@@ -26227,8 +26227,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
+              "lineNumber": 107,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L107"
             }
           },
           {
@@ -26241,8 +26241,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
+              "lineNumber": 107,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L107"
             }
           }
         ],
@@ -26257,12 +26257,14 @@
           },
           ", value: any) => any"
         ],
-        "description": [],
+        "description": [
+          "\nSee issues bellow for the reason behind this change.\nValues need to be converted to correct types for boolean \\ numeric fields.\nhttps://github.com/elastic/kibana/issues/74301\nhttps://github.com/elastic/kibana/issues/8677\nhttps://github.com/elastic/elasticsearch/issues/20941\nhttps://github.com/elastic/elasticsearch/pull/22201"
+        ],
         "label": "getConvertedValueForField",
         "source": {
           "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-          "lineNumber": 102,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
+          "lineNumber": 107,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L107"
         },
         "tags": [],
         "returnComment": [],
@@ -26282,8 +26284,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 123,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L123"
+              "lineNumber": 132,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L132"
             }
           }
         ],
@@ -26296,8 +26298,8 @@
         "label": "buildInlineScriptForPhraseFilter",
         "source": {
           "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-          "lineNumber": 123,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L123"
+          "lineNumber": 132,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L132"
         },
         "tags": [],
         "returnComment": [
