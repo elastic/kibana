@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { featuresPluginMock } from '../../../../features/public/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
+import { rolesManagementApp } from './roles_management_app';
 
 jest.mock('./roles_grid', () => ({
   RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,
@@ -16,11 +20,6 @@ jest.mock('./edit_role', () => ({
   EditRolePage: (props: any) =>
     `Role Edit Page: ${JSON.stringify({ ...props, docLinks: props.docLinks ? {} : undefined })}`,
 }));
-
-import { rolesManagementApp } from './roles_management_app';
-
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
-import { featuresPluginMock } from '../../../../features/public/mocks';
 
 async function mountApp(basePath: string, pathname: string) {
   const { fatalErrors } = coreMock.createSetup();

@@ -6,7 +6,7 @@
  */
 
 import { safeDump } from 'js-yaml';
-import { FullAgentPolicy } from '../types';
+import type { FullAgentPolicy } from '../types';
 
 const POLICY_KEYS_ORDER = [
   'id',
