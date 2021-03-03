@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sep } from 'path';
+import { resolve, sep } from 'path';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -26,13 +26,13 @@ export const BootstrapCommand: ICommand = {
   async run(projects, projectGraph, { options, kbn, rootPath }) {
     const nonBazelProjectsOnly = await getNonBazelProjectsOnly(projects);
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
-    const kibanaProjectPath = projects.get('kibana')?.path;
+    const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
     const forceInstall = !!options && options['force-install'] === true;
 
     // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
-    await ensureYarnIntegrityFileExists(`${kibanaProjectPath}${sep}node_modules`);
+    await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);

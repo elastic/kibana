@@ -8905,12 +8905,12 @@ const BootstrapCommand = {
 
     const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
-    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path;
+    const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
     const forceInstall = !!options && options['force-install'] === true; // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}node_modules`); // Install bazel machinery tools if needed
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules')); // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
