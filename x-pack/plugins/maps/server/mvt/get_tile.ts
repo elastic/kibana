@@ -27,6 +27,7 @@ import {
   convertRegularRespToGeoJson,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
+  TotalHits,
 } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
@@ -71,7 +72,7 @@ export async function getGridTile({
       MAX_ZOOM
     );
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
-    requestBody.trackTotalHits = false;
+    requestBody.track_total_hits = false;
 
     const response = await context
       .search!.search(
@@ -148,7 +149,7 @@ export async function getTile({
             body: {
               size: 0,
               query: requestBody.query,
-              trackTotalHits: requestBody.size + 1,
+              track_total_hits: requestBody.size + 1,
             },
           },
         },
@@ -156,7 +157,9 @@ export async function getTile({
       )
       .toPromise();
 
-    if (isTotalHitsGreaterThan(countResponse.rawResponse.hits.total, requestBody.size)) {
+    if (
+      isTotalHitsGreaterThan(countResponse.rawResponse.hits.total as TotalHits, requestBody.size)
+    ) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
         .search!.search(
@@ -173,7 +176,7 @@ export async function getTile({
                     },
                   },
                 },
-                trackTotalHits: false,
+                track_total_hits: false,
               },
             },
           },
@@ -201,7 +204,7 @@ export async function getTile({
               index,
               body: {
                 ...requestBody,
-                trackTotalHits: false,
+                track_total_hits: false,
               },
             },
           },
