@@ -19,16 +19,17 @@ export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, 
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     const ransomware = {
+      mode: ProtectionModes.off,
+    };
+    const ransomwarePopup = {
       message: '',
       enabled: false,
     };
     if (input && input.config) {
       const policy = input.config.policy.value;
 
-      policy.windows.ransomware = ProtectionModes.off;
-      policy.mac.ransomware = ProtectionModes.off;
-      policy.windows.popup.ransomware = ransomware;
-      policy.mac.popup.ransomware = ransomware;
+      policy.windows.ransomware = ransomware;
+      policy.windows.popup.ransomware = ransomwarePopup;
     }
   }
 

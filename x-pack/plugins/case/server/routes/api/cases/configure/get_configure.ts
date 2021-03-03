@@ -12,7 +12,7 @@ import { wrapError } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { transformESConnectorToCaseConnector } from '../helpers';
 
-export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps) {
+export function initGetCaseConfigure({ caseConfigureService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_CONFIGURE_URL,
@@ -63,6 +63,7 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
               : {},
         });
       } catch (error) {
+        logger.error(`Failed to get case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
