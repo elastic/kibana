@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
 import { AddRoleTemplateButton } from './add_role_template_button';
 
 describe('AddRoleTemplateButton', () => {

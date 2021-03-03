@@ -139,7 +139,7 @@ and Kibana instance that the tests will be run against.
          node scripts/functional_tests_server --config test/accessibility/config.ts
          node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=ml
 
-    ML accessibility tests are located in `x-pack/test/accessibility/app`.
+    ML accessibility tests are located in `x-pack/test/accessibility/apps`.
 
 ## Shared functions
 
