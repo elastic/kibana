@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ArchiveEntry } from './index';
 import type { ArchivePackage, RegistryPackage } from '../../../../common';
+
+import type { ArchiveEntry } from './index';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);

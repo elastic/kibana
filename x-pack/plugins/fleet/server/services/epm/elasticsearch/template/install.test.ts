@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
+
 import type { RegistryDataStream } from '../../../../types';
 import type { Field } from '../../fields/field';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { installTemplate } from './install';
 
 describe('EPM install', () => {
