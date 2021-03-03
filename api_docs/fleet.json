@@ -2607,8 +2607,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-          "lineNumber": 592,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L592"
+          "lineNumber": 590,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L590"
         },
         "signature": [
           "PackagePolicyService"
