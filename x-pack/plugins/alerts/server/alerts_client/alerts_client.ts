@@ -57,6 +57,7 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
+import { mapSortField } from './lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -465,6 +466,7 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
+      sortField: mapSortField(options.sortField),
       filter:
         (authorizationFilter && options.filter
           ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
