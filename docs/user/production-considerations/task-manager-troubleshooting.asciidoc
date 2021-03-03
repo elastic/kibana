@@ -28,7 +28,7 @@ Tasks are scheduled to run every 2 seconds but they seem to be running too late
 
 Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a task could run late if it uses a schedule that is smaller than this setting.
 
-This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, though this will add additional load to both {kib} and {es} instances in the cluster, as they will peform more queries.
+You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting.  However, this will add additional load to both {kib} and {es} instances in the cluster, as they will perform more queries.
 
 [float]
 [[task-manager-health-tasks-run-late]]
