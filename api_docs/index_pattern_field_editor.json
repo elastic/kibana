@@ -31,8 +31,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L77"
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L75"
             }
           },
           {
@@ -43,8 +43,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L76"
             },
             "signature": [
               {
@@ -91,8 +91,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L80"
+                  "lineNumber": 78,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               },
               {
@@ -111,8 +111,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 80,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L80"
+                  "lineNumber": 78,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               }
             ],
@@ -120,8 +120,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L80"
+              "lineNumber": 78,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
             }
           },
           {
@@ -138,8 +138,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 92,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L92"
+                  "lineNumber": 90,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
                 }
               }
             ],
@@ -150,8 +150,8 @@
             "label": "onChange",
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L92"
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
             },
             "tags": [],
             "returnComment": []
@@ -169,15 +169,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L101"
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L99"
             }
           }
         ],
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-          "lineNumber": 73,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L73"
+          "lineNumber": 71,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L71"
         },
         "initialIsOpen": false
       }
