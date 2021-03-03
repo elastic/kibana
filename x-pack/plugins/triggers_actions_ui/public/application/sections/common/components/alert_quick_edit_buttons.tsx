@@ -64,7 +64,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteAlertsMessage',
           {
-            defaultMessage: 'Failed to mute alert(s)',
+            defaultMessage: 'Failed to mute rule(s)',
           }
         ),
       });
@@ -84,7 +84,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteAlertsMessage',
           {
-            defaultMessage: 'Failed to unmute alert(s)',
+            defaultMessage: 'Failed to unmute rule(s)',
           }
         ),
       });
@@ -104,7 +104,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableAlertsMessage',
           {
-            defaultMessage: 'Failed to enable alert(s)',
+            defaultMessage: 'Failed to enable rule(s)',
           }
         ),
       });
@@ -124,7 +124,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableAlertsMessage',
           {
-            defaultMessage: 'Failed to disable alert(s)',
+            defaultMessage: 'Failed to disable rule(s)',
           }
         ),
       });
@@ -144,7 +144,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteAlertsMessage',
           {
-            defaultMessage: 'Failed to delete alert(s)',
+            defaultMessage: 'Failed to delete rule(s)',
           }
         ),
       });

@@ -23,7 +23,7 @@ const getLicenseCheckResult = (alertType: AlertType) => {
     message: i18n.translate(
       'xpack.triggersActionsUI.checkAlertTypeEnabled.alertTypeDisabledByLicenseMessage',
       {
-        defaultMessage: 'This alert type requires a {minimumLicenseRequired} license.',
+        defaultMessage: 'This rule type requires a {minimumLicenseRequired} license.',
         values: {
           minimumLicenseRequired: upperFirst(alertType.minimumLicenseRequired),
         },

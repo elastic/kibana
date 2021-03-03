@@ -118,7 +118,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
             {
-              defaultMessage: 'To create an alert, set a value for ',
+              defaultMessage: 'To create a rule, set a value for ',
             }
           )}
           <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
@@ -193,11 +193,11 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
       <div className={`${className}__body`}>
         <p role="banner">
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsError', {
-            defaultMessage: 'To create an alert, set alerts and actions plugins enabled. ',
+            defaultMessage: 'To create a rule, set alerts and actions plugins enabled. ',
           })}
           <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
-              defaultMessage: 'Learn how to enable Alerts and Actions.',
+              defaultMessage: 'Learn how to enable Rules and Connectors.',
             })}
           </EuiLink>
         </p>

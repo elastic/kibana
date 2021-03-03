@@ -44,7 +44,7 @@ export const alertInstancesTableColumns = (
     field: 'instance',
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
-      { defaultMessage: 'Instance' }
+      { defaultMessage: 'Alert' }
     ),
     sortable: false,
     truncateText: true,

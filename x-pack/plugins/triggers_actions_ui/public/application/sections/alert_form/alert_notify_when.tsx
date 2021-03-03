@@ -62,7 +62,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time alert is active',
+        defaultMessage: 'Every time rule is active',
       }
     ),
     'data-test-subj': 'onActiveAlert',

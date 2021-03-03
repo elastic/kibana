@@ -150,7 +150,7 @@ export const AlertsList: React.FunctionComponent = () => {
         toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
+            { defaultMessage: 'Unable to load rule types' }
           ),
         });
         setAlertTypesState({ ...alertTypesState, isLoading: false });
@@ -175,7 +175,7 @@ export const AlertsList: React.FunctionComponent = () => {
         toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
+            { defaultMessage: 'Unable to load rule types' }
           ),
         });
       }
@@ -210,7 +210,7 @@ export const AlertsList: React.FunctionComponent = () => {
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
             {
-              defaultMessage: 'Unable to load alerts',
+              defaultMessage: 'Unable to load rules',
             }
           ),
         });
@@ -236,7 +236,7 @@ export const AlertsList: React.FunctionComponent = () => {
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
           {
-            defaultMessage: 'Unable to load alert statuses info',
+            defaultMessage: 'Unable to load rule status info',
           }
         ),
       });
@@ -730,10 +730,10 @@ export const AlertsList: React.FunctionComponent = () => {
         apiDeleteCall={deleteAlerts}
         idsToDelete={alertsToDelete}
         singleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.singleTitle', {
-          defaultMessage: 'alert',
+          defaultMessage: 'rule',
         })}
         multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
-          defaultMessage: 'alerts',
+          defaultMessage: 'rules',
         })}
         setIsLoadingState={(isLoading: boolean) => {
           setAlertsState({ ...alertsState, isLoading });

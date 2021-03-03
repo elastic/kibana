@@ -71,7 +71,7 @@ export async function getAlertInstanceSummary(
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertInstanceSummaryMessage',
         {
-          defaultMessage: 'Unable to load alert instance summary: {message}',
+          defaultMessage: 'Unable to load alert summary: {message}',
           values: {
             message: e.message,
           },
