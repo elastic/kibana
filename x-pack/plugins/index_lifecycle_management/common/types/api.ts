@@ -36,3 +36,15 @@ export interface ListSnapshotReposResponse {
    */
   repositories: string[];
 }
+
+export interface CheckIndexPatternFieldResponse {
+  name: string;
+  type: 'date' | 'keyword' | 'numeric' | 'unknown';
+}
+
+export type CheckIndexPatternFieldsResponse = CheckIndexPatternFieldResponse[];
+
+export interface CheckIndexPatternResponse {
+  doesMatchIndices: boolean;
+  fields: CheckIndexPatternFieldsResponse;
+}
