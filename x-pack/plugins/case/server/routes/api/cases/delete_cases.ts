@@ -24,26 +24,28 @@ async function deleteSubCases({
   caseIds: string[];
 }) {
   const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
-
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllSubCaseComments({
-    client,
-    id: subCaseIDs,
-  });
 
-  // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
-  // per case ID
-  await Promise.all(
-    commentsForSubCases.saved_objects.map((commentSO) =>
-      caseService.deleteComment({ client, commentId: commentSO.id })
-    )
-  );
+  if (subCaseIDs.length > 0) {
+    const commentsForSubCases = await caseService.getAllSubCaseComments({
+      client,
+      id: subCaseIDs,
+    });
 
-  await Promise.all(
-    subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(client, subCaseSO.id)
-    )
-  );
+    // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
+    // per case ID
+    await Promise.all(
+      commentsForSubCases.saved_objects.map((commentSO) =>
+        caseService.deleteComment({ client, commentId: commentSO.id })
+      )
+    );
+
+    await Promise.all(
+      subCasesForCaseIds.saved_objects.map((subCaseSO) =>
+        caseService.deleteSubCase(client, subCaseSO.id)
+      )
+    );
+  }
 }
 
 export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {

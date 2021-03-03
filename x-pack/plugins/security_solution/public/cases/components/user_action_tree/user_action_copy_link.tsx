@@ -19,16 +19,16 @@ interface UserActionCopyLinkProps {
 }
 
 const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps) => {
-  const { detailName: caseId, subCaseId } = useParams<{ detailName: string; subCaseId?: string }>();
+  const { detailName: caseId } = useParams<{ detailName: string }>();
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
 
   const handleAnchorLink = useCallback(() => {
     copy(
-      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
+      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId }), {
         absolute: true,
       })
     );
-  }, [caseId, commentId, formatUrl, subCaseId]);
+  }, [caseId, commentId, formatUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>
