@@ -9,8 +9,6 @@
 
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { TimeSeriesQueryParameters, TimeSeriesQuery, timeSeriesQuery } from './time_series_query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 
 const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',
@@ -29,18 +27,18 @@ const DefaultQueryParams: TimeSeriesQuery = {
 
 describe('timeSeriesQuery', () => {
   let params: TimeSeriesQueryParameters;
-  const esClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
+  const mockCallCluster = jest.fn();
 
   beforeEach(async () => {
     params = {
       logger: loggingSystemMock.create().get(),
-      esClient,
+      callCluster: mockCallCluster,
       query: DefaultQueryParams,
     };
   });
 
   it('fails as expected when the callCluster call fails', async () => {
-    esClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
+    mockCallCluster.mockRejectedValue(new Error('woopsie'));
     expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error running search"`
     );
