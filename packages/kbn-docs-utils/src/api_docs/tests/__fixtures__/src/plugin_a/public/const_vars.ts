@@ -46,6 +46,13 @@ export const aPretendNamespaceObj = {
 };
 
 /**
+ * @internal
+ */
+export const iShouldBeInternalObj = {
+  foo: 'hi',
+};
+
+/**
  * This is a complicated union type
  */
 export const aUnionProperty: string | number | (() => string) | CrazyClass = '6';
