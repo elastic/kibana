@@ -57,12 +57,13 @@ describe('timeline data providers', () => {
   });
 
   it.only('displays the data provider action menu when Enter is pressed', () => {
-    openTimelineUsingToggle();
     dragAndDropFirstHostToTimeline();
+    openTimelineUsingToggle();
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
 
-    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).should('exist');
-    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).first().focus();
+    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+      .pipe(($el) => $el.trigger('focus'))
+      .should('exist');
     cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
       .first()
       .parent()
