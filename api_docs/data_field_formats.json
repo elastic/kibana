@@ -3459,8 +3459,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L80"
+              "lineNumber": 83,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L83"
             },
             "signature": [
               "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
@@ -3479,8 +3479,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L82"
+              "lineNumber": 85,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L85"
             }
           },
           {
@@ -3497,8 +3497,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 102,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+                  "lineNumber": 105,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L105"
                 }
               }
             ],
@@ -3509,8 +3509,8 @@
             "label": "textConvert",
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L105"
             },
             "tags": [],
             "returnComment": []
@@ -3638,6 +3638,186 @@
           "path": "src/plugins/data/common/field_formats/converters/truncate.ts",
           "lineNumber": 17,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/truncate.ts#L17"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.HistogramFormat",
+        "type": "Class",
+        "tags": [],
+        "label": "HistogramFormat",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataFieldFormatsPluginApi",
+            "section": "def-common.HistogramFormat",
+            "text": "HistogramFormat"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          }
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.id",
+            "type": "Enum",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L18"
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataFieldFormatsPluginApi",
+                "section": "def-common.FIELD_FORMAT_IDS",
+                "text": "FIELD_FORMAT_IDS"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.fieldType",
+            "type": "Enum",
+            "label": "fieldType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L19"
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L20"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.id",
+            "type": "Enum",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L24"
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataFieldFormatsPluginApi",
+                "section": "def-common.FIELD_FORMAT_IDS",
+                "text": "FIELD_FORMAT_IDS"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L25"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.HistogramFormat.allowsNumericalAggregations",
+            "type": "boolean",
+            "label": "allowsNumericalAggregations",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L26"
+            }
+          },
+          {
+            "id": "def-common.HistogramFormat.getParamDefaults",
+            "type": "Function",
+            "label": "getParamDefaults",
+            "signature": [
+              "() => { id: string; params: {}; }"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L29"
+            }
+          },
+          {
+            "id": "def-common.HistogramFormat.textConvert",
+            "type": "Function",
+            "children": [
+              {
+                "type": "Any",
+                "label": "val",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+                  "lineNumber": 36,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L36"
+                }
+              }
+            ],
+            "signature": [
+              "(val: any) => string"
+            ],
+            "description": [],
+            "label": "textConvert",
+            "source": {
+              "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+              "lineNumber": 36,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L36"
+            },
+            "tags": [],
+            "returnComment": []
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/field_formats/converters/histogram.ts",
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/histogram.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -3790,8 +3970,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
+              "lineNumber": 63,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
             }
           },
           {
@@ -3802,8 +3982,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
             },
             "signature": [
               "Record<string, any>"
@@ -3817,8 +3997,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L65"
             },
             "signature": [
               "boolean | undefined"
@@ -3827,8 +4007,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 61,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L61"
+          "lineNumber": 62,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
         },
         "initialIsOpen": false
       }
@@ -3896,8 +4076,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/constants/base_formatters.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/base_formatters.ts#L27"
+          "lineNumber": 28,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/constants/base_formatters.ts#L28"
         },
         "signature": [
           "FieldFormatInstanceType",
@@ -3957,8 +4137,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L67"
+          "lineNumber": 68,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L68"
         },
         "signature": [
           "(key: string, defaultOverride: T | undefined) => T"
@@ -3993,8 +4173,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L74"
+          "lineNumber": 75,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L75"
         },
         "signature": [
           "string"
@@ -4009,8 +4189,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L69"
+          "lineNumber": 70,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L70"
         },
         "signature": [
           "FieldFormat"
@@ -4025,8 +4205,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 96,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L96"
+          "lineNumber": 97,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L97"
         },
         "signature": [
           "{ init: (getConfig: GetConfigFn, metaParamsOptions?: Record<string, any>, defaultFieldConverters?: FieldFormatInstanceType[]) => void; register: (fieldFormats: FieldFormatInstanceType[]) => void; deserialize: ",
