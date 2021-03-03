@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import * as rt from 'io-ts';
 import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../adapters/framework';
 
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
   options: CallWithRequestParams
-) => Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
+) => TransportRequestPromise<ApiResponse<InfraDatabaseSearchResponse<Hit, Aggregation>>>;
 
 const NumberOrNullRT = rt.union([rt.number, rt.null]);
 
