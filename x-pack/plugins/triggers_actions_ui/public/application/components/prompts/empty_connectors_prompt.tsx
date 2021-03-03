@@ -22,7 +22,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyTitle"
+              id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyTitle"
               defaultMessage="Create your first connector"
             />
           </h2>
@@ -32,14 +32,14 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
     body={
       <p>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyBody"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyBody"
           defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana runs."
         />
       </p>
     }
     actions={
       <EuiButton
-        data-test-subj="createFirstActionButton"
+        data-test-subj="createFirstConnectorButton"
         key="create-action"
         fill
         iconType="plusInCircle"
@@ -47,7 +47,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
         onClick={onCTAClicked}
       >
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionButtonLabel"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
           defaultMessage="Create connector"
         />
       </EuiButton>

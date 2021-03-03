@@ -503,8 +503,8 @@ export const AlertsList: React.FunctionComponent = () => {
               onClick={() => setAlertFlyoutVisibility(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-                defaultMessage="Create alert"
+                id="xpack.triggersActionsUI.sections.alertsList.addRuleButtonLabel"
+                defaultMessage="Create rule"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -546,7 +546,7 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
-                  defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
+                  defaultMessage="Error found in {totalStausesError, plural, one {# rule} other {# rules}}."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
                   }}
@@ -582,7 +582,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
-              defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
+              defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
               values={{
                 totalItemCount: alertsState.totalItemCount,
                 pageSize: alertsState.data.length,
@@ -771,7 +771,7 @@ const noPermissionPrompt = (
       <h1>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateTitle"
-          defaultMessage="No permissions to create alerts"
+          defaultMessage="No permissions to create rules"
         />
       </h1>
     }

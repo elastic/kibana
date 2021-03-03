@@ -183,7 +183,7 @@ const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create alert"
+                defaultMessage="Create rule"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
             </h3>

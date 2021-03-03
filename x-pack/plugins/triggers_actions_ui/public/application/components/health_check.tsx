@@ -184,8 +184,8 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle"
-          defaultMessage="You must enable Alerts and Actions"
+          id="xpack.triggersActionsUI.components.healthCheck.rulesErrorTitle"
+          defaultMessage="You must enable Rules and Connectors"
         />
       </h2>
     }

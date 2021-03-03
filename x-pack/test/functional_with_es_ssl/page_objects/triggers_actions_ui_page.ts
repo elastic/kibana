@@ -39,7 +39,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
     async clickCreateFirstConnectorButton() {
-      const createBtn = await testSubjects.find('createFirstActionButton');
+      const createBtn = await testSubjects.find('createFirstConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();

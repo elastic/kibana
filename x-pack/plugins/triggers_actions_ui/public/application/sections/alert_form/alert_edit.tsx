@@ -139,7 +139,7 @@ export const AlertEdit = ({
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit alert"
+                defaultMessage="Edit rule"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
             </h3>

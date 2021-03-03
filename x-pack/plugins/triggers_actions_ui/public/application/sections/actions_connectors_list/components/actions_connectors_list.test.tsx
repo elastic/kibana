@@ -81,13 +81,13 @@ describe('actions_connectors_list component empty', () => {
       wrapper.find('[data-test-subj="createFirstConnectorEmptyPrompt"]').find('EuiEmptyPrompt')
     ).toHaveLength(1);
     expect(
-      wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
+      wrapper.find('[data-test-subj="createFirstConnectorButton"]').find('EuiButton')
     ).toHaveLength(1);
   });
 
   test('if click create button should render ConnectorAddFlyout', async () => {
     await setup();
-    wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="createFirstConnectorButton"]').first().simulate('click');
     expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
   });
 });

@@ -331,11 +331,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 ) : (
                   <Fragment>
                     <EuiSpacer />
-                    <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                    <EuiCallOut title="Disabled Rule" color="warning" iconType="help">
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                          defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"
+                          defaultMessage="This rule is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
                         />
                       </p>
                     </EuiCallOut>
