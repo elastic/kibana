@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './plugins_service';
+export { PluginsService } from './plugins_service';
 export type { Plugin, AsyncPlugin, PluginInitializer } from './plugin';
 export type { PluginInitializerContext } from './plugin_context';
 export type { PluginOpaqueId } from '../../server/types';

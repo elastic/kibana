@@ -84,6 +84,15 @@ export type {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
 } from './cookie_session_storage';
-export * from './types';
+export type {
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  HttpAuth,
+  HttpServiceSetup,
+  InternalHttpServiceSetup,
+  HttpServiceStart,
+  InternalHttpServiceStart,
+  HttpServerInfo,
+} from './types';
 export { BasePath } from './base_path_service';
 export type { IBasePath } from './base_path_service';

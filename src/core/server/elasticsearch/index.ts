@@ -31,7 +31,6 @@ export type {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  Explanation,
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
