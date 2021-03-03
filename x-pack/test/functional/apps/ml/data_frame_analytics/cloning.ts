@@ -203,7 +203,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('Should have validation callouts');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
+
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(
+            testData?.job?.analysis?.outlier_detection !== undefined ? 1 : 4
+          );
 
           await ml.testExecution.logTestStep('should continue to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();

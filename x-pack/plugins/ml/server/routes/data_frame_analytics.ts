@@ -692,7 +692,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         body: dataAnalyticsJobConfigSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
