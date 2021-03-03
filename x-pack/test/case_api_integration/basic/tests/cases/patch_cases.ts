@@ -438,8 +438,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should be no change in their status since syncing is disabled
-          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.open);
-          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses.open);
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+            CaseStatuses.open
+          );
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+            CaseStatuses.open
+          );
 
           const updatedIndWithStatus: CasesResponse = (await setStatus({
             supertest,
@@ -467,8 +471,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should still be no change in their status since syncing is disabled
-          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.open);
-          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses.open);
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+            CaseStatuses.open
+          );
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+            CaseStatuses.open
+          );
 
           // turn on the sync settings
           await supertest
@@ -492,8 +500,139 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // alerts should be updated now that the
-          expect(signals.get(signalID)?._source.signal.status).to.be(CaseStatuses.closed);
-          expect(signals.get(signalID2)?._source.signal.status).to.be(CaseStatuses['in-progress']);
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+            CaseStatuses.closed
+          );
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+            CaseStatuses['in-progress']
+          );
+        });
+      });
+
+      describe('esArchiver', () => {
+        const defaultSignalsIndex = '.siem-signals-default-000001';
+
+        beforeEach(async () => {
+          await esArchiver.load('cases/signals/duplicate_ids');
+        });
+        afterEach(async () => {
+          await esArchiver.unload('cases/signals/duplicate_ids');
+          await deleteAllCaseItems(es);
+        });
+
+        it('should not update the status of duplicate alert ids in separate indices', async () => {
+          const getSignals = async () => {
+            return getSignalsWithES({
+              es,
+              indices: [defaultSignalsIndex, signalsIndex2],
+              ids: [signalIDInFirstIndex, signalIDInSecondIndex],
+            });
+          };
+
+          // this id exists only in .siem-signals-default-000001
+          const signalIDInFirstIndex =
+            'cae78067e65582a3b277c1ad46ba3cb29044242fe0d24bbf3fcde757fdd31d1c';
+          // This id exists in both .siem-signals-default-000001 and .siem-signals-default-000002
+          const signalIDInSecondIndex = 'duplicate-signal-id';
+          const signalsIndex2 = '.siem-signals-default-000002';
+
+          const { body: individualCase } = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...postCaseReq,
+              settings: {
+                syncAlerts: false,
+              },
+            });
+
+          const { body: updatedIndWithComment } = await supertest
+            .post(`${CASES_URL}/${individualCase.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: signalIDInFirstIndex,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+            })
+            .expect(200);
+
+          const { body: updatedIndWithComment2 } = await supertest
+            .post(`${CASES_URL}/${updatedIndWithComment.id}/comments`)
+            .set('kbn-xsrf', 'true')
+            .send({
+              alertId: signalIDInSecondIndex,
+              index: signalsIndex2,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+            })
+            .expect(200);
+
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
+          let signals = await getSignals();
+          // There should be no change in their status since syncing is disabled
+          expect(
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+          ).to.be(CaseStatuses.open);
+          expect(
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+          ).to.be(CaseStatuses.open);
+
+          const updatedIndWithStatus: CasesResponse = (await setStatus({
+            supertest,
+            cases: [
+              {
+                id: updatedIndWithComment2.id,
+                version: updatedIndWithComment2.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+            type: 'case',
+          })) as CasesResponse;
+
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
+          signals = await getSignals();
+
+          // There should still be no change in their status since syncing is disabled
+          expect(
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+          ).to.be(CaseStatuses.open);
+          expect(
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+          ).to.be(CaseStatuses.open);
+
+          // turn on the sync settings
+          await supertest
+            .patch(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              cases: [
+                {
+                  id: updatedIndWithStatus[0].id,
+                  version: updatedIndWithStatus[0].version,
+                  settings: { syncAlerts: true },
+                },
+              ],
+            })
+            .expect(200);
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
+          signals = await getSignals();
+
+          // alerts should be updated now that the
+          expect(
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+          ).to.be(CaseStatuses.closed);
+          expect(
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+          ).to.be(CaseStatuses.closed);
+
+          // the duplicate signal id in the other index should not be affect (so its status should be open)
+          expect(
+            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source.signal.status
+          ).to.be(CaseStatuses.open);
         });
       });
 
