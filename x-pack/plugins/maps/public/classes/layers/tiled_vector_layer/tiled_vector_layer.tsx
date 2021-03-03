@@ -23,6 +23,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -68,18 +69,22 @@ export class TiledVectorLayer extends VectorLayer {
       this._style as IVectorStyle
     );
     const prevDataRequest = this.getSourceDataRequest();
-
-    const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+    const dataRequest = await this._source.getUrlTemplateWithMeta(searchFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
       if (data) {
-        const canSkipBecauseNoChanges =
+        const noChangesInSourceState: boolean =
           data.layerName === this._source.getLayerName() &&
           data.minSourceZoom === this._source.getMinZoom() &&
-          data.maxSourceZoom === this._source.getMaxZoom() &&
-          data.urlTemplate === templateWithMeta.urlTemplate;
-
-        if (canSkipBecauseNoChanges) {
+          data.maxSourceZoom === this._source.getMaxZoom();
+        const noChangesInSearchState: boolean = await canSkipSourceUpdate({
+          considerSpatialParameters: false,
+          source: this.getSource(),
+          prevDataRequest,
+          nextMeta: searchFilters,
+        });
+        const canSkip = noChangesInSourceState && noChangesInSearchState;
+        if (canSkip) {
           return null;
         }
       }
@@ -87,7 +92,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataRequest, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
