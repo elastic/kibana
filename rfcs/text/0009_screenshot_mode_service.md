@@ -4,16 +4,11 @@
 
 # Summary
 
-The Kibana Reporting team has been chasing ways of improving performance of
-loading Kibana pages and capturing screenshots of the visualizations. We think
-that performance is a barrier to adding more integrations in Kibana, however we
-want to add more integrations and have Reporting be a factor of growth for
-Kibana. However, it looks like there are too many constraints to streamlining
-performance for Reporting if we only look for ways to change the Reporting code
-to do it. In other words, it will take a cross-team effort to improve the main
-performance issues. This RFC proposes one way to make cross-team efforts work
-smoothly, which is to have a new plugin-provided service in Kibana that helps UIs and
-visualizations work nicely when loaded for screenshot capture.
+Applications should be aware when their UI is rendered for purposes of
+capturing a screenshot. This ability would improve the quality of the Kibana
+Reporting feature for a few reasons:
+ - Fewer objects in the headless browser memory since interactive code doesn't run
+ - Fewer Reporting bugs in releases since App teams have more ownership and control over the reportability of their UI
 
 **Screenshot mode service**
 
