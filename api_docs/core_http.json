@@ -2361,319 +2361,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.KibanaRequest",
-        "type": "Class",
-        "tags": [
-          "public"
-        ],
-        "label": "KibanaRequest",
-        "description": [
-          "\nKibana specific abstraction for an incoming request."
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
-          "<Params, Query, Body, Method>"
-        ],
-        "children": [
-          {
-            "tags": [
-              "remarks"
-            ],
-            "id": "def-server.KibanaRequest.id",
-            "type": "string",
-            "label": "id",
-            "description": [
-              "\nA identifier to identify this request.\n"
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L145"
-            }
-          },
-          {
-            "tags": [
-              "remarks"
-            ],
-            "id": "def-server.KibanaRequest.uuid",
-            "type": "string",
-            "label": "uuid",
-            "description": [
-              "\nA UUID to identify this request.\n"
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L153"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.url",
-            "type": "Object",
-            "label": "url",
-            "description": [
-              "a WHATWG URL standard object."
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L155"
-            },
-            "signature": [
-              "URL"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.route",
-            "type": "Object",
-            "label": "route",
-            "description": [
-              "matched route details"
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L157"
-            },
-            "signature": [
-              "Readonly<{ path: string; method: ",
-              "RecursiveReadonly",
-              "<Method>; options: ",
-              "RecursiveReadonly",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequestRouteOptions",
-                "text": "KibanaRequestRouteOptions"
-              },
-              "<Method>>; }>"
-            ]
-          },
-          {
-            "tags": [
-              "remarks"
-            ],
-            "id": "def-server.KibanaRequest.headers",
-            "type": "CompoundType",
-            "label": "headers",
-            "description": [
-              "\nReadonly copy of incoming request headers."
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 163,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L163"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.Headers",
-                "text": "Headers"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.isSystemRequest",
-            "type": "boolean",
-            "label": "isSystemRequest",
-            "description": [
-              "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L168"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.socket",
-            "type": "Object",
-            "label": "socket",
-            "description": [
-              "{@link IKibanaSocket}"
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 171,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L171"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.IKibanaSocket",
-                "text": "IKibanaSocket"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.events",
-            "type": "Object",
-            "label": "events",
-            "description": [
-              "Request events {@link KibanaRequestEvents}"
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 173,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L173"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequestEvents",
-                "text": "KibanaRequestEvents"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.auth",
-            "type": "Object",
-            "label": "auth",
-            "description": [],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L174"
-            },
-            "signature": [
-              "{ isAuthenticated: boolean; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.KibanaRequest.rewrittenUrl",
-            "type": "Object",
-            "label": "rewrittenUrl",
-            "description": [
-              "\nURL rewritten in onPreRouting request interceptor."
-            ],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 182,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L182"
-            },
-            "signature": [
-              "URL",
-              " | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaRequest.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "request",
-                "isRequired": true,
-                "signature": [
-                  "Request"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L188"
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "params",
-                "isRequired": true,
-                "signature": [
-                  "Params"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 189,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L189"
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "query",
-                "isRequired": true,
-                "signature": [
-                  "Query"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 190,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L190"
-                }
-              },
-              {
-                "type": "Uncategorized",
-                "label": "body",
-                "isRequired": true,
-                "signature": [
-                  "Body"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 191,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L191"
-                }
-              },
-              {
-                "type": "boolean",
-                "label": "withoutSecretHeaders",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 194,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L194"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 187,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L187"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/server/http/router/request.ts",
-          "lineNumber": 90,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L90"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.RouteValidationError",
         "type": "Class",
         "tags": [
@@ -2746,6 +2433,319 @@
           "path": "src/core/server/http/router/validator/validator_error.ts",
           "lineNumber": 15,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/validator/validator_error.ts#L15"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.KibanaRequest",
+        "type": "Class",
+        "tags": [
+          "public"
+        ],
+        "label": "KibanaRequest",
+        "description": [
+          "\nKibana specific abstraction for an incoming request."
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<Params, Query, Body, Method>"
+        ],
+        "children": [
+          {
+            "tags": [
+              "remarks"
+            ],
+            "id": "def-server.KibanaRequest.id",
+            "type": "string",
+            "label": "id",
+            "description": [
+              "\nA identifier to identify this request.\n"
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 144,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L144"
+            }
+          },
+          {
+            "tags": [
+              "remarks"
+            ],
+            "id": "def-server.KibanaRequest.uuid",
+            "type": "string",
+            "label": "uuid",
+            "description": [
+              "\nA UUID to identify this request.\n"
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 152,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L152"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.url",
+            "type": "Object",
+            "label": "url",
+            "description": [
+              "a WHATWG URL standard object."
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 154,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L154"
+            },
+            "signature": [
+              "URL"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.route",
+            "type": "Object",
+            "label": "route",
+            "description": [
+              "matched route details"
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 156,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L156"
+            },
+            "signature": [
+              "Readonly<{ path: string; method: ",
+              "RecursiveReadonly",
+              "<Method>; options: ",
+              "RecursiveReadonly",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequestRouteOptions",
+                "text": "KibanaRequestRouteOptions"
+              },
+              "<Method>>; }>"
+            ]
+          },
+          {
+            "tags": [
+              "remarks"
+            ],
+            "id": "def-server.KibanaRequest.headers",
+            "type": "CompoundType",
+            "label": "headers",
+            "description": [
+              "\nReadonly copy of incoming request headers."
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 162,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L162"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.Headers",
+                "text": "Headers"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.isSystemRequest",
+            "type": "boolean",
+            "label": "isSystemRequest",
+            "description": [
+              "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 167,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L167"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.socket",
+            "type": "Object",
+            "label": "socket",
+            "description": [
+              "{@link IKibanaSocket}"
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 170,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L170"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.IKibanaSocket",
+                "text": "IKibanaSocket"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.events",
+            "type": "Object",
+            "label": "events",
+            "description": [
+              "Request events {@link KibanaRequestEvents}"
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 172,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L172"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequestEvents",
+                "text": "KibanaRequestEvents"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.auth",
+            "type": "Object",
+            "label": "auth",
+            "description": [],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L173"
+            },
+            "signature": [
+              "{ isAuthenticated: boolean; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.KibanaRequest.rewrittenUrl",
+            "type": "Object",
+            "label": "rewrittenUrl",
+            "description": [
+              "\nURL rewritten in onPreRouting request interceptor."
+            ],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 181,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L181"
+            },
+            "signature": [
+              "URL",
+              " | undefined"
+            ]
+          },
+          {
+            "id": "def-server.KibanaRequest.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "request",
+                "isRequired": true,
+                "signature": [
+                  "Request"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 187,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L187"
+                }
+              },
+              {
+                "type": "Uncategorized",
+                "label": "params",
+                "isRequired": true,
+                "signature": [
+                  "Params"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 188,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L188"
+                }
+              },
+              {
+                "type": "Uncategorized",
+                "label": "query",
+                "isRequired": true,
+                "signature": [
+                  "Query"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 189,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L189"
+                }
+              },
+              {
+                "type": "Uncategorized",
+                "label": "body",
+                "isRequired": true,
+                "signature": [
+                  "Body"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 190,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L190"
+                }
+              },
+              {
+                "type": "boolean",
+                "label": "withoutSecretHeaders",
+                "isRequired": true,
+                "signature": [
+                  "boolean"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 193,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L193"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 186,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L186"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 90,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/router/request.ts#L90"
         },
         "initialIsOpen": false
       }

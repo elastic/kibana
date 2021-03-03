@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
 import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
@@ -36,6 +37,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 import { useGetPackageInstallStatus, useSetPackageInstallStatus } from '../../hooks';
+
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
