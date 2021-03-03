@@ -51,6 +51,13 @@ export const findPreviousThresholdSignals = async ({
             'signal.rule.rule_id': ruleId,
           },
         },
+        {
+          range: {
+            'signal.original_time': {
+              gte: from,
+            },
+          },
+        },
         ...bucketByFields.map((field) => {
           return {
             term: {

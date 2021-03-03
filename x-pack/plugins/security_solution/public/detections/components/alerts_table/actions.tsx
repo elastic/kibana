@@ -146,87 +146,104 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationData = (
-  ecsData: Ecs | Ecs[],
-  nonEcsData: TimelineNonEcsData[]
-): {
+interface ThresholdAggregationData {
   thresholdFrom: string;
   thresholdTo: string;
   dataProviders: DataProvider[];
-} => {
+}
+
+export const getThresholdAggregationData = (
+  ecsData: Ecs | Ecs[],
+  nonEcsData: TimelineNonEcsData[]
+): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
-  return thresholdEcsData.reduce<DataProvider[]>((outerAcc, thresholdData) => {
-    const threshold = thresholdData.signal?.rule?.threshold as string[];
+  return thresholdEcsData.reduce<ThresholdAggregationData>(
+    (outerAcc, thresholdData) => {
+      const threshold = thresholdData.signal?.rule?.threshold as string[];
 
-    let aggField: string[] = [];
-    let thresholdResult: {
-      terms?: Array<{
-        field?: string;
-        value: string;
-      }>;
-      count: number;
-    };
-
-    try {
-      thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
-      aggField = JSON.parse(threshold[0]).field;
-    } catch (err) {
-      thresholdResult = {
-        terms: [
-          {
-            field: (thresholdData.rule?.threshold as { field: string }).field,
-            value: (thresholdData.signal?.threshold_result as { value: string }).value,
-          },
-        ],
-        count: (thresholdData.signal?.threshold_result as { count: number }).count,
+      let aggField: string[] = [];
+      let thresholdResult: {
+        terms?: Array<{
+          field?: string;
+          value: string;
+        }>;
+        count: number;
+        from: string;
       };
-    }
 
-    const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
-
-    return [
-      ...outerAcc,
-      ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-        const aggregationValue = (thresholdResult.terms ?? []).filter(
-          (term: { field?: string | undefined; value: string }) => term.field === aggregationField
-        )[0].value;
-        const dataProviderValue = Array.isArray(aggregationValue)
-          ? aggregationValue[0]
-          : aggregationValue;
-
-        if (!dataProviderValue) {
-          return acc;
-        }
-
-        const aggregationFieldId = aggregationField.replace('.', '-');
-        const dataProviderPartial = {
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-          name: aggregationField,
-          enabled: true,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: aggregationField,
-            value: dataProviderValue,
-            operator: ':' as QueryOperator,
-          },
-        };
-
-        if (i === 0) {
-          return [
-            ...acc,
+      try {
+        thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+        aggField = JSON.parse(threshold[0]).field;
+      } catch (err) {
+        thresholdResult = {
+          terms: [
             {
-              ...dataProviderPartial,
-              and: [],
+              field: (thresholdData.rule?.threshold as { field: string }).field,
+              value: (thresholdData.signal?.threshold_result as { value: string }).value,
             },
-          ];
-        } else {
-          acc[0].and.push(dataProviderPartial);
-          return acc;
-        }
-      }, []),
-    ];
-  }, []);
+          ],
+          count: (thresholdData.signal?.threshold_result as { count: number }).count,
+          from: (thresholdData.signal?.threshold_result as { from: string }).from,
+        };
+      }
+
+      const originalTime = moment(thresholdData.signal?.original_time![0]);
+      const now = moment();
+      const ruleFrom = dateMath.parse(thresholdData.signal?.rule?.from![0]!);
+      const ruleInterval = moment.duration(now.diff(ruleFrom));
+      const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
+      const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
+
+      return {
+        thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
+        thresholdTo: originalTime.toISOString(),
+        dataProviders: [
+          ...outerAcc.dataProviders,
+          ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
+            const aggregationValue = (thresholdResult.terms ?? []).filter(
+              (term: { field?: string | undefined; value: string }) =>
+                term.field === aggregationField
+            )[0].value;
+            const dataProviderValue = Array.isArray(aggregationValue)
+              ? aggregationValue[0]
+              : aggregationValue;
+
+            if (!dataProviderValue) {
+              return acc;
+            }
+
+            const aggregationFieldId = aggregationField.replace('.', '-');
+            const dataProviderPartial = {
+              id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+              name: aggregationField,
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: aggregationField,
+                value: dataProviderValue,
+                operator: ':' as QueryOperator,
+              },
+            };
+
+            if (i === 0) {
+              return [
+                ...acc,
+                {
+                  ...dataProviderPartial,
+                  and: [],
+                },
+              ];
+            } else {
+              acc[0].and.push(dataProviderPartial);
+              return acc;
+            }
+          }, []),
+        ],
+      };
+    },
+    { dataProviders: [], thresholdFrom: '', thresholdTo: '' } as ThresholdAggregationData
+  );
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
@@ -450,40 +467,13 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
-    const originalTime = moment(ecsData.signal?.original_time![0]);
-
-    /*
-    console.log(originalTime);
-    console.log(JSON.stringify(ecsData.signal?.rule));
-    const int = ecsData.signal?.rule?.interval![0];
-    console.log(int);
-    const inte = `now-${int}`;
-    console.log(inte);
-    const inter = dateMath.parse(inte);
-    console.log(inter);
-    const interval = moment().diff(inter);
-    console.log(interval);
-    const ruleInterval = moment.duration(interval);
-    console.log(ruleInterval.humanize());
-    console.log(ruleInterval);
-
-    // const ruleLookback = moment.duration(5, 'm');
-    const ruleLookback = moment.duration(dateMath.parse('now-0s')!.diff(dateMath.parse(`now-${ecsData.signal?.rule?.meta?.from![0]}`)));
-    console.log(ruleLookback.humanize());
-    const ruleLookback = moment(ecsData.signal?.rule?.meta?.from![0]);
-    console.log(ruleLookback);
-    */
-    const ruleInterval = moment.duration(1, 'm');
-    const ruleLookback = moment.duration(5, 'm');
-    const fromOriginalTime = originalTime.clone().subtract(ruleInterval).subtract(ruleLookback);
-
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
       ecsData,
       nonEcsData
     );
 
     return createTimeline({
-      from: thresholdFrom, // TODO: use `from` value from signal if available... otherwise, use thresholdFrom
+      from: thresholdFrom,
       notes: null,
       timeline: {
         ...timelineDefaults,
@@ -493,8 +483,8 @@ export const sendAlertToTimelineAction = async ({
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
-          start: fromOriginalTime.toISOString(),
-          end: originalTime.toISOString(),
+          start: thresholdFrom,
+          end: thresholdTo,
         },
         eventType: 'all',
         kqlQuery: {
