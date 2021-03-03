@@ -47,15 +47,32 @@ describe('WarningsFlyoutStep', () => {
 
   if (mockKibanaSemverVersion.major === 7) {
     it('does not allow proceeding until all are checked', () => {
+      const defaultPropsWithWarnings = {
+        ...defaultProps,
+        warnings: [
+          {
+            warningType: 'customTypeName',
+            meta: {
+              typeName: 'my_mapping_type',
+            },
+          },
+          {
+            warningType: 'indexSetting',
+            meta: {
+              deprecatedSettings: ['index.force_memory_term_dictionary'],
+            },
+          },
+        ] as ReindexWarning[],
+      };
       const wrapper = mount(
         <I18nProvider>
-          <WarningsFlyoutStep {...defaultProps} />
+          <WarningsFlyoutStep {...defaultPropsWithWarnings} />
         </I18nProvider>
       );
       const button = wrapper.find('EuiButton');
 
       button.simulate('click');
-      expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.advanceNextStep).not.toHaveBeenCalled();
 
       // first warning (customTypeName)
       wrapper.find(`input#${idForWarning(0)}`).simulate('change');
@@ -63,7 +80,7 @@ describe('WarningsFlyoutStep', () => {
       wrapper.find(`input#${idForWarning(1)}`).simulate('change');
       button.simulate('click');
 
-      expect(defaultProps.advanceNextStep).toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.advanceNextStep).toHaveBeenCalled();
     });
   }
 });

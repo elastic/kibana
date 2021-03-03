@@ -13,3 +13,13 @@ import SemVer from 'semver/classes/semver';
  */
 export const mockKibanaVersion = '8.0.0';
 export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
+
+/*
+ * Map of index setting deprecation log messages and associated settings
+ */
+export const indexSettingDeprecations = {
+  translog: {
+    deprecationMessage: 'translog retention settings are ignored',
+    settings: ['translog.retention.size', 'translog.retention.age', 'index.soft_deletes.enabled'],
+  },
+};

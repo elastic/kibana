@@ -133,9 +133,6 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle"
           defaultMessage="Deprecated index settings will be removed"
-          values={{
-            defaultType: <EuiCode>_doc</EuiCode>,
-          }}
         />
       }
       description={

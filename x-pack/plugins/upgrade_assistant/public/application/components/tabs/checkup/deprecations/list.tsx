@@ -36,6 +36,7 @@ const MessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationIn
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
       reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
+      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
       docUrl={deprecation.url}
       items={items}
     />
@@ -59,12 +60,13 @@ const SimpleMessageDeprecation: FunctionComponent<{ deprecation: EnrichedDepreca
       reindexBlocker={deprecation.blockerForReindexing}
       items={items}
       docUrl={deprecation.url}
+      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
     />
   );
 };
 
 interface IndexDeprecationProps {
-  deprecation: DeprecationInfo;
+  deprecation: EnrichedDeprecationInfo;
   indices: IndexDeprecationDetails[];
 }
 
@@ -73,7 +75,10 @@ interface IndexDeprecationProps {
  */
 const IndexDeprecation: FunctionComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
   return (
-    <DeprecationCell docUrl={deprecation.url}>
+    <DeprecationCell
+      docUrl={deprecation.url}
+      deprecatedIndexSettings={deprecation?.deprecatedIndexSettings}
+    >
       <IndexDeprecationTable indices={indices} />
     </DeprecationCell>
   );
@@ -96,6 +101,7 @@ export const DeprecationList: FunctionComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
+      deprecatedIndexSettings: dep.deprecatedIndexSettings,
       blockerForReindexing: dep.blockerForReindexing,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;

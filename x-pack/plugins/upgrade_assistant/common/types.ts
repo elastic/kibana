@@ -183,6 +183,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  deprecatedIndexSettings?: string[];
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.
