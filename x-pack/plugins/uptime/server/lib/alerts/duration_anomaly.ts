@@ -8,7 +8,8 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { getSeverityType, AnomaliesTableRecord } from '@kbn/ml-utils';
+import { getSeverityType } from '@kbn/ml-utils/src/anomaly_utils/get_severity_type';
+import type { AnomaliesTableRecord } from '@kbn/ml-utils';
 import { ActionGroupIdsOf } from '../../../../alerts/common';
 import { updateState } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';

@@ -12,10 +12,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './constants/detector_rule';
-import { MULTI_BUCKET_IMPACT } from './constants/multi_bucket_impact';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants/anomalies';
-import type { AnomalyRecordDoc } from './types/anomalies';
+
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
+import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
+import type { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;
@@ -133,22 +134,6 @@ export function getSeverity(normalizedScore: number): SeverityType {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;
-  }
-}
-
-export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
-  if (normalizedScore >= 75) {
-    return ANOMALY_SEVERITY.CRITICAL;
-  } else if (normalizedScore >= 50) {
-    return ANOMALY_SEVERITY.MAJOR;
-  } else if (normalizedScore >= 25) {
-    return ANOMALY_SEVERITY.MINOR;
-  } else if (normalizedScore >= 3) {
-    return ANOMALY_SEVERITY.WARNING;
-  } else if (normalizedScore >= 0) {
-    return ANOMALY_SEVERITY.LOW;
-  } else {
-    return ANOMALY_SEVERITY.UNKNOWN;
   }
 }
 

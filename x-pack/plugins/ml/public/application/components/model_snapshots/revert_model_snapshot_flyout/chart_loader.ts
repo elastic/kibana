@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSeverityType } from '@kbn/ml-utils';
+import { getSeverityType } from '@kbn/ml-utils/src/anomaly_utils/get_severity_type';
 
 import { MlResultsService } from '../../../services/results_service';
 import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';

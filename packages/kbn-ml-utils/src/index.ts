@@ -14,7 +14,6 @@ export {
   getMultiBucketImpactLabel,
   getSeverity,
   getSeverityColor,
-  getSeverityType,
   getSeverityWithLow,
   getFormattedSeverityScore,
   isRuleSupported,
@@ -22,6 +21,7 @@ export {
   showTypicalForFunction,
   EntityField,
 } from './anomaly_utils';
+export { getSeverityType } from './anomaly_utils/get_severity_type';
 export {
   ANOMALY_SEVERITY,
   ANOMALY_RESULT_TYPE,

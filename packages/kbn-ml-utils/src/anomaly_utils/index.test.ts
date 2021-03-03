@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnomalyRecordDoc } from './types/anomalies';
+import { AnomalyRecordDoc } from '../types/anomalies';
 
 import {
   aggregationTypeTransform,
@@ -20,7 +20,7 @@ import {
   isRuleSupported,
   showActualForFunction,
   showTypicalForFunction,
-} from './anomaly_utils';
+} from './';
 
 describe('ML - anomaly utils', () => {
   const partitionEntityRecord: AnomalyRecordDoc = {
