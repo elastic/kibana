@@ -21,7 +21,7 @@ journey('uptime', async ({ page }) => {
 
   step('Go to  Kibana', async () => {
     await page.goto('http://localhost:5620/app/uptime?dateRangeStart=now-2y&dateRangeEnd=now');
-    await page.waitForTimeout(5 * 1000);
+    await page.waitForTimeout(30 * 1000);
   });
 
   step('Login into kibana', async () => {
