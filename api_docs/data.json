@@ -6059,7 +6059,7 @@
             "type": "Function",
             "label": "setField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"routing\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6126,7 +6126,7 @@
             "type": "Function",
             "label": "removeField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"routing\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
             ],
             "description": [
               "\nremove field"
@@ -6259,7 +6259,7 @@
             "type": "Function",
             "label": "getField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"routing\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6315,7 +6315,7 @@
             "type": "Function",
             "label": "getOwnField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"routing\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6800,8 +6800,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 689,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+                  "lineNumber": 690,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L690"
                 }
               }
             ],
@@ -6809,8 +6809,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 689,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+              "lineNumber": 690,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L690"
             }
           },
           {
@@ -6838,8 +6838,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 718,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L718"
+              "lineNumber": 719,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L719"
             }
           }
         ],
@@ -11096,14 +11096,31 @@
           },
           {
             "tags": [],
+            "id": "def-public.SearchSourceFields.routing",
+            "type": "string",
+            "label": "routing",
+            "description": [
+              "\nSearch a specific shard, used for retrieving documents with known routing"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/search_source/types.ts",
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L103"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.SearchSourceFields.searchAfter",
             "type": "Object",
             "label": "searchAfter",
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L100"
+              "lineNumber": 104,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L104"
             },
             "signature": [
               {
@@ -11124,8 +11141,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L101"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L105"
             },
             "signature": [
               "string | undefined"
@@ -11139,8 +11156,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L102"
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L106"
             },
             "signature": [
               "number | undefined"
@@ -11154,8 +11171,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L104"
+              "lineNumber": 108,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/types.ts#L108"
             },
             "signature": [
               {
