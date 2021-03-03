@@ -222,7 +222,3 @@ include::{kib-repo-dir}/discover/search.asciidoc[]
 include::{kib-repo-dir}/discover/context.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
-
-
-
-

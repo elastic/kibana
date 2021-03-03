@@ -14,14 +14,11 @@ and displayed using the same set of columns as the *Discover* view from which
 the context was opened. The anchor document is highlighted in blue.
 +
 [role="screenshot"]
-image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
+image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
 +
-The filters you applied in *Discover* are carried over to the context view.
-+
-[role="screenshot"]
-image::images/discover-context-filters-active.png[Disabled filter in main view]
-+
-Pinned filters remain active, while normal filters are copied in a disabled state.
+The filters you applied in *Discover* are carried over to the context view. Pinned 
+filters remain active, while normal filters are copied in a disabled state.
+
 +
 [role="screenshot"]
 image::images/discover-context-filters-inactive.png[Filter in context view]
@@ -42,7 +39,7 @@ image::images/discover-context-load-newer-documents.png[Load button and the numb
 Configure the appearance and behavior in *Advanced Settings*.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
-. Search for context, then edit the settings.
+. Search for `context`, then edit the settings.
 +
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
