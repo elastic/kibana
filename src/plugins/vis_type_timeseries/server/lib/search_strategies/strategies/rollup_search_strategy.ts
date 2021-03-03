@@ -41,9 +41,9 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
       .catch(() => Promise.resolve({}));
   }
 
-  async checkForViability<T extends VisTypeTimeseriesRequest>(
+  async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string
   ) {
     let isViable = false;
@@ -69,9 +69,9 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     };
   }
 
-  async getFieldsForWildcard<T extends VisTypeTimeseriesRequest>(
+  async getFieldsForWildcard(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string,
     capabilities?: unknown
   ) {

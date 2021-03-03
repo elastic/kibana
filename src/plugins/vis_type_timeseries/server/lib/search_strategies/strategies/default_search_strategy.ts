@@ -11,9 +11,9 @@ import { DefaultSearchCapabilities } from '../capabilities/default_search_capabi
 import { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRequest } from '../../../types';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  checkForViability<T extends VisTypeTimeseriesRequest>(
+  checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T
+    req: VisTypeTimeseriesRequest
   ) {
     return Promise.resolve({
       isViable: true,
@@ -21,9 +21,9 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
     });
   }
 
-  async getFieldsForWildcard<T extends VisTypeTimeseriesRequest>(
+  async getFieldsForWildcard(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string,
     capabilities?: unknown
   ) {

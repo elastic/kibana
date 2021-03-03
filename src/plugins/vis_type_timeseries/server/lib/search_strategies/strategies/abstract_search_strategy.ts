@@ -63,17 +63,17 @@ export abstract class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  checkForViability<T extends VisTypeTimeseriesRequest>(
+  checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string
   ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 
-  async getFieldsForWildcard<T extends VisTypeTimeseriesRequest>(
+  async getFieldsForWildcard(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: T,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string,
     capabilities?: unknown,
     options?: Partial<{
