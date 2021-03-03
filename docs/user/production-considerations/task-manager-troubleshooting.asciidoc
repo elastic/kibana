@@ -20,11 +20,11 @@ Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
 ==== Tasks with small schedule intervals run late
 
-*Symptom*:
+*Problem*:
 
 Tasks are scheduled to run every 2 seconds but they seem to be running too late
 
-*Resolution*:
+*Solution*:
 
 Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a Task could run late if it uses a schedule which is smaller than this setting.
 
@@ -32,14 +32,14 @@ This can be addressed by adjusting the <<task-manager-settings,`xpack.task_manag
 
 [float]
 [[task-manager-health-tasks-run-late]]
-==== Tasks Run Late
+==== Tasks run late
 
-*Symptoms*:
+*Problem*:
 
 By far the most common symptom of an underlying problem in Task manager is that tasks appear to be running late.
 For instance, recurring Tasks might run at an inconsistent cadence, or long after their scheduled time.
 
-*Resolution*:
+*Solution*:
 
 By default {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
 
