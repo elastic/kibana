@@ -264,10 +264,7 @@ describe('AllCases', () => {
     );
     wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="action-open"]').exists()).toBeFalsy();
-      expect(
-        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
-      ).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toBeTruthy();
       expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toBeFalsy();
       expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
     });
@@ -312,9 +309,6 @@ describe('AllCases', () => {
         .last()
         .simulate('click');
       expect(wrapper.find('[data-test-subj="action-open"]').first().props().disabled).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="action-in-progress"]').first().props().disabled
-      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="action-close"]').first().props().disabled).toEqual(
         true
       );
@@ -365,6 +359,7 @@ describe('AllCases', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="action-close"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
@@ -398,6 +393,7 @@ describe('AllCases', () => {
       </TestProviders>
     );
     await waitFor(() => {
+      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').last().simulate('click');
       wrapper.find('[data-test-subj="action-open"]').first().simulate('click');
       const firstCase = useGetCasesMockState.data.cases[0];
       expect(dispatchUpdateCaseProperty).toBeCalledWith({
@@ -464,9 +460,6 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').exists()).toEqual(
-        false
-      );
       expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
       expect(
         wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
@@ -505,9 +498,6 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
-      ).toEqual(true);
       expect(
         wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
       ).toEqual(true);

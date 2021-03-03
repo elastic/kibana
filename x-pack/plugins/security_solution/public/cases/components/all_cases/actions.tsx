@@ -26,16 +26,8 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
-    description: i18n.DELETE_CASE,
-    icon: 'trash',
-    name: i18n.DELETE_CASE,
-    onClick: deleteCaseOnClick,
-    type: 'icon',
-    'data-test-subj': 'action-delete',
-  },
-  {
-    available: (item: Case | SubCase) => item.status !== CaseStatuses.closed,
-    enabled: (item: Case | SubCase) => isIndividual(item),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.closed,
+    description: i18n.CLOSE_CASE,
     icon: 'folderCheck',
     name: i18n.CLOSE_CASE,
     onClick: (theCase: Case) =>
@@ -49,8 +41,7 @@ export const getActions = ({
     'data-test-subj': 'action-close',
   },
   {
-    available: (item: Case | SubCase) => item.status !== CaseStatuses.open,
-    enabled: (item: Case | SubCase) => isIndividual(item),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.open,
     description: i18n.REOPEN_CASE,
     icon: 'folderOpen',
     name: i18n.REOPEN_CASE,
@@ -63,5 +54,13 @@ export const getActions = ({
       }),
     type: 'icon',
     'data-test-subj': 'action-open',
+  },
+  {
+    description: i18n.DELETE_CASE,
+    icon: 'trash',
+    name: i18n.DELETE_CASE,
+    onClick: deleteCaseOnClick,
+    type: 'icon',
+    'data-test-subj': 'action-delete',
   },
 ];

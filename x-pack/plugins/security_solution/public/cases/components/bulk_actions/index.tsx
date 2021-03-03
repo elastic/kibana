@@ -29,34 +29,53 @@ export const getBulkItems = ({
   updateCaseStatus,
   includeCollections,
 }: GetBulkItems) => {
+  let statusMenuItems: JSX.Element[] = [];
+
+  const openMenuItem = (
+    <EuiContextMenuItem
+      data-test-subj="cases-bulk-open-button"
+      disabled={selectedCaseIds.length === 0 || includeCollections}
+      key={i18n.BULK_ACTION_OPEN_SELECTED}
+      icon="folderOpen"
+      onClick={() => {
+        closePopover();
+        updateCaseStatus(CaseStatuses.open);
+      }}
+    >
+      {i18n.BULK_ACTION_OPEN_SELECTED}
+    </EuiContextMenuItem>
+  );
+
+  const closeMenuItem = (
+    <EuiContextMenuItem
+      data-test-subj="cases-bulk-close-button"
+      disabled={selectedCaseIds.length === 0 || includeCollections}
+      key={i18n.BULK_ACTION_CLOSE_SELECTED}
+      icon="folderCheck"
+      onClick={() => {
+        closePopover();
+        updateCaseStatus(CaseStatuses.closed);
+      }}
+    >
+      {i18n.BULK_ACTION_CLOSE_SELECTED}
+    </EuiContextMenuItem>
+  );
+
+  switch (caseStatus) {
+    case CaseStatuses.open:
+      statusMenuItems = [closeMenuItem];
+      break;
+
+    case CaseStatuses.closed:
+      statusMenuItems = [openMenuItem];
+      break;
+
+    default:
+      break;
+  }
+
   return [
-    caseStatus === CaseStatuses.open ? (
-      <EuiContextMenuItem
-        data-test-subj="cases-bulk-close-button"
-        disabled={selectedCaseIds.length === 0 || includeCollections}
-        key={i18n.BULK_ACTION_CLOSE_SELECTED}
-        icon="folderCheck"
-        onClick={() => {
-          closePopover();
-          updateCaseStatus(CaseStatuses.closed);
-        }}
-      >
-        {i18n.BULK_ACTION_CLOSE_SELECTED}
-      </EuiContextMenuItem>
-    ) : (
-      <EuiContextMenuItem
-        data-test-subj="cases-bulk-open-button"
-        disabled={selectedCaseIds.length === 0 || includeCollections}
-        key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="folderOpen"
-        onClick={() => {
-          closePopover();
-          updateCaseStatus(CaseStatuses.open);
-        }}
-      >
-        {i18n.BULK_ACTION_OPEN_SELECTED}
-      </EuiContextMenuItem>
-    ),
+    ...statusMenuItems,
     <EuiContextMenuItem
       data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
