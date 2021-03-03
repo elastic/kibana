@@ -229,6 +229,56 @@ function checkMissingVariableOrFunctions(
   return [...missingErrors, ...invalidVariableErrors];
 }
 
+function validateNameArguments(
+  node: TinymathFunction,
+  nodeOperation:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+  namedArguments: TinymathNamedArgument[] | undefined
+) {
+  const errors = [];
+  const missingParams = getMissingParams(nodeOperation, namedArguments);
+  if (missingParams.length) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'missingParameter',
+        values: {
+          operation: node.name,
+          params: missingParams.map(({ name }) => name).join(', '),
+        },
+        locations: [node.location],
+      })
+    );
+  }
+  const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
+  if (wrongTypeParams.length) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'wrongTypeParameter',
+        values: {
+          operation: node.name,
+          params: wrongTypeParams.map(({ name }) => name).join(', '),
+        },
+        locations: [node.location],
+      })
+    );
+  }
+  const duplicateParams = getDuplicateParams(namedArguments);
+  if (duplicateParams.length) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'duplicateArgument',
+        values: {
+          operation: node.name,
+          params: duplicateParams.join(', '),
+        },
+        locations: [node.location],
+      })
+    );
+  }
+  return errors;
+}
+
 function runFullASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
@@ -310,44 +360,9 @@ function runFullASTValidation(
             })
           );
         } else {
-          const missingParams = getMissingParams(nodeOperation, namedArguments);
-          if (missingParams.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'missingParameter',
-                values: {
-                  operation: node.name,
-                  params: missingParams.map(({ name }) => name).join(', '),
-                },
-                locations: [node.location],
-              })
-            );
-          }
-          const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
-          if (wrongTypeParams.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'wrongTypeParameter',
-                values: {
-                  operation: node.name,
-                  params: wrongTypeParams.map(({ name }) => name).join(', '),
-                },
-                locations: [node.location],
-              })
-            );
-          }
-          const duplicateParams = getDuplicateParams(namedArguments);
-          if (duplicateParams.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'duplicateArgument',
-                values: {
-                  operation: node.name,
-                  params: duplicateParams.join(', '),
-                },
-                locations: [node.location],
-              })
-            );
+          const argumentsErrors = validateNameArguments(node, nodeOperation, namedArguments);
+          if (argumentsErrors.length) {
+            errors.push(...argumentsErrors);
           }
         }
         return errors;
@@ -382,44 +397,9 @@ function runFullASTValidation(
             })
           );
         } else {
-          const missingParameters = getMissingParams(nodeOperation, namedArguments);
-          if (missingParameters.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'missingParameter',
-                values: {
-                  operation: node.name,
-                  params: missingParameters.map(({ name }) => name).join(', '),
-                },
-                locations: [node.location],
-              })
-            );
-          }
-          const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
-          if (wrongTypeParams.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'wrongTypeParameter',
-                values: {
-                  operation: node.name,
-                  params: wrongTypeParams.map(({ name }) => name).join(', '),
-                },
-                locations: [node.location],
-              })
-            );
-          }
-          const duplicateParams = getDuplicateParams(namedArguments);
-          if (duplicateParams.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'duplicateArgument',
-                values: {
-                  operation: node.name,
-                  params: duplicateParams.join(', '),
-                },
-                locations: [node.location],
-              })
-            );
+          const argumentsErrors = validateNameArguments(node, nodeOperation, namedArguments);
+          if (argumentsErrors.length) {
+            errors.push(...argumentsErrors);
           }
         }
       }
@@ -472,7 +452,7 @@ export function getWrongTypeParams(
   );
 }
 
-function getDuplicateParams(params: TinymathNamedArgument[]) {
+function getDuplicateParams(params: TinymathNamedArgument[] = []) {
   const uniqueArgs = Object.create(null);
   for (const { name } of params) {
     const counter = uniqueArgs[name] || 0;
@@ -480,7 +460,7 @@ function getDuplicateParams(params: TinymathNamedArgument[]) {
   }
   const uniqueNames = Object.keys(uniqueArgs);
   if (params.length > uniqueNames.length) {
-    return uniqueNames.filter((name) => uniqueArgs[name] > 1).map(([name]) => name);
+    return uniqueNames.filter((name) => uniqueArgs[name] > 1);
   }
   return [];
 }
