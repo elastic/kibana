@@ -58,16 +58,3 @@ You can configure the following settings in the `kibana.yml` file.
 ==== Alert settings
 
 You do not need to configure any additional settings to use alerting in {kib}.
-
-[float]
-[[event-log-ilm]]
-==== Event log index lifecycle managment
-
-Alerts and actions log their activity in a set of "event log" indices.  These indices are configured with an index lifecycle managment (ILM) policy which can be customized.  The default policy will perform a rollover of the index when it reaches 50GB in size, or after 30 days.  Indices over 90 days old will be deleted.
-
-The name of the index policy is `kibana-event-log-policy`.  It will be created when Kibana starts, if it doesn't exist, otherwise it will never be modified by Kibana.  It can be customized for your environment.
-
-The event log is current used to display historic data on alert and action activity, and for diagnostic purposes.
-
-For more information on index lifecycle management, see:
-{ref}/index-lifecycle-management.html[Index Lifecycle Policies].

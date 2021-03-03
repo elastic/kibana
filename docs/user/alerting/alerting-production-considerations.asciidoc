@@ -33,3 +33,16 @@ For details on the settings that can influence the performance and throughput of
 === Deployment considerations
 
 {es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
+
+[float]
+[[event-log-ilm]]
+==== Event log index lifecycle managment
+
+Alerts and actions log activity in a set of "event log" indices.  These indices are configured with an index lifecycle management (ILM) policy, which you can customize.  The default policy rolls over the index when it reaches 50GB, or after 30 days.  Indices over 90 days old are deleted.
+
+The name of the index policy is `kibana-event-log-policy`.  {kib} creates the index policy on startup, if it doesn't already exist.  The index policy can be customized for your environment, but {kib} never modifies the index policy after creating it.
+
+Because the documents in the event log are used to display historic alert and action activity in {kib}, take care when using the ILM delete phase.  For example, if the rolled over indices are deleted after 2 weeks, no historic data will be shown in {kib} that is more than 2 weeks old.
+
+For more information on index lifecycle management, see:
+{ref}/index-lifecycle-management.html[Index Lifecycle Policies].
