@@ -203,3 +203,7 @@ function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {
       return 'common';
   }
 }
+
+export const isInternal = (dec: ApiDeclaration) => {
+  return dec.tags && dec.tags.find((tag) => tag === 'internal');
+};

@@ -2,20 +2,17 @@
 [[alert-type-index-threshold]]
 === Index threshold
 
-The index threshold alert type is designed to run an {es} query over indices, aggregating field values from documents, comparing them to threshold values, and scheduling actions to run when the thresholds are met.
+The index threshold alert type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 
 [float]
-==== Creating the alert
+==== Create the alert
 
-An index threshold alert can be created from the *Create* button in the <<alert-management, alert management UI>>. Fill in the <<defining-alerts-general-details, general alert details>>, then select *Index Threshold*.
-
-[role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-select.png[Choosing an index threshold alert type]
+Fill in the <<defining-alerts-general-details, alert details>>, then select *Index Threshold*.
 
 [float]
-==== Defining the conditions
+==== Define the conditions
 
-The index threshold has 5 clauses that define the condition to detect.
+Define properties to detect the condition.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-conditions.png[Five clauses define the condition to detect]
@@ -32,9 +29,9 @@ If data is available and all clauses have been defined, a preview chart will ren
 image::user/alerting/images/alert-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
-==== Action variables
+==== Add action variables
 
-When the index threshold alert condition is met, the following variables are available to use inside each action:
+<<defining-alerts-actions-details, Add an action>> to run when the alert condition is met. The following variables are specific to the index threshold alert. You can also specify <<defining-alerts-actions-variables, variables common to all alerts>>.
 
 `context.title`:: A preconstructed title for the alert. Example: `alert kibana sites - high egress met threshold`.
 `context.message`:: A preconstructed message for the alert. Example: +
@@ -51,68 +48,53 @@ When the index threshold alert condition is met, the following variables are ava
 [float]
 ==== Example
 
-In this section, you will use the {kib} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.
+In this example, you will use the {kib} <<add-sample-data, sample weblog dataset>> to set up and tune the conditions on an index threshold alert. For this example, you want to detect when any of the top four sites serve more than 420,000 bytes over a 24 hour period.
 
-From the <<alert-management, alert management UI>>, create a new alert, and fill in the <<defining-alerts-general-details, general alert details>>. This alert will be checked every 4 hours, and will not execute actions more than once per day. Choose the index threshold alert type. 
+.  Open the main menu, then click **Stack Management > Alerts and Actions**.
 
+.  Create a new alert that is checked every four hours and executes actions when the alert status changes.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-select.png[Choosing an index threshold alert type]
 
-Click on each clause to open a control that helps you set the value:
+.  Select the **Index threshold** alert type.
 
-[float]
-==== Index clause
-The index clause control will list and allow you to search for available indices. Choose *kibana_sample_data_logs*
-
+. Click *Index*, and set *Indices to query* to *kibana_sample_data_logs*.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-index.png[Choosing an index]
 
-Once an index is selected, the list of time fields for that index will be available to select. Choose *@timestamp*.
-
+. Set the *Time field* to *@timestamp*.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-timefield.png[Choosing a time field]
 
-[float]
-==== When clause
-
-We want to detect the number of bytes served during the time window, so we select `sum` as the aggregation, and `bytes` as the field to aggregate. 
-
+. To detect the number of bytes served during the time window, click *When* and select `sum` as the aggregation, and bytes as the field to aggregate.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-aggregation.png[Choosing the aggregation]
 
-[float]
-==== Over/Grouped over clause
-
-We want to alert on the three sites that have the most traffic, so we'll group the sum of bytes by the `host.keyword` field and take the top 3 values. 
-
+. To detect the four sites that have the most traffic, click *Over* and select `top`, enter `4`, and select `host.keyword` as the field.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-grouping.png[Choosing the groups]
 
-[float]
-==== Threshold clause
-
-We want to alert when any site exceeds 420,000 bytes over a 24 hour period, so we'll set the threshold to 420,000 and use the `is above` comparison. 
-
+. To alert when any of the top four sites exceeds 420,000 bytes over a 24 hour period, select `is above` and enter `420000`.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-threshold.png[Setting the threshold]
 
-[float]
-==== Time window clause
-
-Finally, set the time window to 24 hours to complete the alert configuration.
-
+. Finally, click *For the last*, enter `24` and select `hours` to complete the alert configuration.
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-window.png[Setting the time window]
 
-The preview chart will render showing the 24 hour sum of bytes at 4 hours intervals (the *check every* interval) for the past 120 hours (the last 30 intervals).
-
+. The preview chart will render showing the 24 hour sum of bytes at 4 hours intervals (the *check every* interval) for the past 120 hours (the last 30 intervals).
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-preview.png[Setting the time window]
 
-[float]
-==== Comparing time windows
-
-You can interactively change the time window and observe the effect it has on the chart. Compare a 24 window to a 12 hour window. Notice the variability in the sum of bytes, due to different traffic levels during the day compared to at night. This variability would result in noisy alerts, so the 24 hour window is better. The preview chart can help you find the right values for your alert. 
-
+. Change the time window and observe the effect it has on the chart. Compare a 24 window to a 12 hour window. Notice the variability in the sum of bytes, due to different traffic levels during the day compared to at night. This variability would result in noisy alerts, so the 24 hour window is better. The preview chart can help you find the right values for your alert. 
++
 [role="screenshot"]
 image::user/alerting/images/alert-types-index-threshold-example-comparison.png[Comparing two time windows]

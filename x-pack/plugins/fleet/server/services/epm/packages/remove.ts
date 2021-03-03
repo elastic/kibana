@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
+import { ElasticsearchAssetType } from '../../../types';
+import type {
   AssetReference,
   AssetType,
-  ElasticsearchAssetType,
   EsAssetReference,
   KibanaAssetReference,
   Installation,

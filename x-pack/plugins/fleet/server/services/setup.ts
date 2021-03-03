@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
@@ -16,13 +16,10 @@ import {
 } from './epm/packages/install';
 import {
   packageToPackagePolicy,
-  PackagePolicy,
-  AgentPolicy,
-  Installation,
-  Output,
   DEFAULT_AGENT_POLICIES_PACKAGES,
   FLEET_SERVER_PACKAGE,
 } from '../../common';
+import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';

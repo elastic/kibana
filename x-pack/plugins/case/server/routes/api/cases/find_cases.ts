@@ -37,7 +37,6 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
           CasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
-
         const queryArgs = {
           tags: queryParams.tags,
           reporters: queryParams.reporters,
@@ -47,7 +46,6 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
         };
 
         const caseQueries = constructQueryOptions(queryArgs);
-
         const cases = await caseService.findCasesGroupedByID({
           client,
           caseOptions: { ...queryParams, ...caseQueries.case },

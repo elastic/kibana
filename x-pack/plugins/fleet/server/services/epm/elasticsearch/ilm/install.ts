@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { ElasticsearchAssetType } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 

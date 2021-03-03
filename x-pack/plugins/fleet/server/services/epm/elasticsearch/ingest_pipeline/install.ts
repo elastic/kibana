@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import {
-  EsAssetReference,
-  RegistryDataStream,
-  ElasticsearchAssetType,
-  InstallablePackage,
-} from '../../../../types';
-import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
 import { deletePipelineRefs } from './remove';

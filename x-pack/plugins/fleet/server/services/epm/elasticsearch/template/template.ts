@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Field, Fields } from '../../fields/field';
-import {
+import type { ElasticsearchClient } from 'kibana/server';
+import type { Field, Fields } from '../../fields/field';
+import type {
   RegistryDataStream,
   TemplateRef,
   IndexTemplate,

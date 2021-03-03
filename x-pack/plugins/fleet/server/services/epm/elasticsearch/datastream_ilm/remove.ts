@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { ElasticsearchAssetType, EsAssetReference } from '../../../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 
 export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: string[]) => {

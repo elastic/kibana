@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import {
-  ElasticsearchAssetType,
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type {
   EsAssetReference,
   InstallablePackage,
   RegistryDataStream,

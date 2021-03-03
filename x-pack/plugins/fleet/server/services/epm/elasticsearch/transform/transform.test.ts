@@ -20,8 +20,9 @@ jest.mock('./common', () => {
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
 import { installTransform } from './install';
-import { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { ElasticsearchAssetType, Installation, RegistryPackage } from '../../../../types';
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

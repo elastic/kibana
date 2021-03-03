@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
-import { BulkInstallResponse, IBulkInstallPackageError, upgradePackage } from './install';
+import { upgradePackage } from './install';
+import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
