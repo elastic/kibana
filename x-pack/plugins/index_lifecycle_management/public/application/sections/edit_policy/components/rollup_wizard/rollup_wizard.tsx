@@ -107,6 +107,7 @@ interface Props {
 export interface StepFields {
   STEP_LOGISTICS: { rollupIndexIlmPolicy?: string };
   STEP_DATE_HISTOGRAM: {
+    dateHistogramIntervalType: InternalRollup['dateHistogramIntervalType'];
     dateHistogramInterval: string;
     dateHistogramTimeZone: string;
     dateHistogramField: string;
@@ -277,7 +278,12 @@ export class RollupWizard extends Component<Props, State> {
     const {
       stepsFields: {
         STEP_LOGISTICS: { rollupIndexIlmPolicy },
-        STEP_DATE_HISTOGRAM: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
+        STEP_DATE_HISTOGRAM: {
+          dateHistogramInterval,
+          dateHistogramTimeZone,
+          dateHistogramField,
+          dateHistogramIntervalType,
+        },
         STEP_TERMS: { terms },
         STEP_HISTOGRAM: { histogram, histogramInterval },
         STEP_METRICS: { metrics },
@@ -287,6 +293,7 @@ export class RollupWizard extends Component<Props, State> {
 
     return {
       rollupIndexIlmPolicy,
+      dateHistogramIntervalType,
       dateHistogramInterval,
       dateHistogramTimeZone,
       dateHistogramField,

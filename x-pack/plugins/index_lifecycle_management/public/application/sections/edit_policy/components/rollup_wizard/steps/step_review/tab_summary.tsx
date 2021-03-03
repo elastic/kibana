@@ -13,13 +13,16 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiTitle,
-  EuiSpacer,
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { InternalRollup } from '../../types';
+
+// @ts-ignore
+import { i18nTexts as dateHistogramI18nTexts } from '../step_date_histogram';
 
 interface Props {
   rollupAction: InternalRollup;
@@ -27,6 +30,7 @@ interface Props {
 
 export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
   const {
+    dateHistogramIntervalType,
     dateHistogramInterval,
     dateHistogramTimeZone,
     dateHistogramField,
@@ -101,10 +105,24 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
               <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramTimezoneDescription">
                 {dateHistogramTimeZone}
               </EuiDescriptionListDescription>
+
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalType"
+                  data-test-subj="rollupDetailDateHistogramIntervalType"
+                  defaultMessage="Interval type"
+                />
+              </EuiDescriptionListTitle>
+
+              <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramIntervalTypeDescription">
+                {dateHistogramI18nTexts.timeIntervalField[dateHistogramIntervalType]}
+              </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>
       </section>
+
+      <EuiSpacer />
 
       <section
         aria-labelledby="rollupActionConfigDetailLogisticsTitle"

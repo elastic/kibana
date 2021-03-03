@@ -21,6 +21,7 @@ function removeEmptyValues<O extends { [key: string]: unknown }>(object: O): O {
 
 export function serializeRollup(rollupConfig: InternalRollup): RollupAction['config'] {
   const {
+    dateHistogramIntervalType,
     dateHistogramInterval,
     rollupDelay,
     dateHistogramTimeZone,
@@ -34,13 +35,18 @@ export function serializeRollup(rollupConfig: InternalRollup): RollupAction['con
   const serializedRollup: RollupAction['config'] = {
     groups: {
       date_histogram: removeEmptyValues({
-        interval: dateHistogramInterval,
         delay: rollupDelay,
         time_zone: dateHistogramTimeZone,
         field: dateHistogramField,
       }),
     },
   };
+
+  if (dateHistogramIntervalType === 'calender') {
+    serializedRollup.groups.date_histogram.calendar_interval = dateHistogramInterval;
+  } else {
+    serializedRollup.groups.date_histogram.fixed_interval = dateHistogramInterval;
+  }
 
   if (terms.length) {
     serializedRollup.groups.terms = {
@@ -95,7 +101,12 @@ export function deserializeRollup(rollupAction: RollupAction): InternalRollup {
   // mutually exclusive.
   const dateHistogramInterval = interval || fixedInterval || calendarInterval || '';
 
+  const dateHistogramIntervalType: InternalRollup['dateHistogramIntervalType'] = calendarInterval
+    ? 'fixed'
+    : 'calender';
+
   const deserializedJob: InternalRollup = {
+    dateHistogramIntervalType,
     dateHistogramInterval,
     rollupDelay,
     dateHistogramTimeZone,

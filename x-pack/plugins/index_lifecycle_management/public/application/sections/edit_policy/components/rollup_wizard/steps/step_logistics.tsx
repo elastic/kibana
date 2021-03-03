@@ -79,7 +79,7 @@ export class StepLogistics extends Component<Props, State> {
     const { fields, onFieldsChange } = this.props;
     const { rollupIndexIlmPolicy } = fields;
 
-    const { policies, useCustomPolicy } = this.state;
+    const { policies, useCustomPolicy, isLoadingPolicies } = this.state;
 
     const policyOptions = policies.map((policy) => ({
       value: policy,
@@ -161,7 +161,7 @@ export class StepLogistics extends Component<Props, State> {
                   valueOfSelected={rollupIndexIlmPolicy}
                   onChange={(policy) => onFieldsChange({ rollupIndexIlmPolicy: policy })}
                   options={policyOptions}
-                  isLoading={this.state.isLoadingPolicies}
+                  isLoading={isLoadingPolicies}
                   data-test-subj="rollupIndexIlmPolicy"
                   fullWidth
                 />
