@@ -29,11 +29,14 @@ users from accessing events for Saved Objects that they do not have access to.
 The queries ensure that the user can read the referenced Saved Objects before
 returning the events relating to them.
 
-The index written to is controlled by ILM.  The actual ILM policy is editable by
-customers, and by default does not delete any indices, but does roll them
-over based on time/space settings.
-
 The default index name is `.kibana-event-log-${kibanaVersion}-${ILM-sequence}`.
+
+The index written to is controlled by ILM.  The ILM policy is initially created
+by the plugin, but is otherwise never updated by the plugin.  This allows
+customers to customize it to their environment, without having to worry about
+their updates getting overwritten by newer versions of Kibana.
+The policy provides some default phases to roll over and delete older
+indices.  The name of the policy is `kibana-event-log-policy`.
 
 
 ## Event Documents
