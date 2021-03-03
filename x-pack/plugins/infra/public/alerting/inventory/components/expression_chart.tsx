@@ -33,6 +33,7 @@ import {
   getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 interface Props {
   expression: InventoryMetricConditions;
@@ -65,6 +66,7 @@ export const ExpressionChart: React.FC<Props> = ({
     type: 'custom' as SnapshotMetricType,
   });
 
+  const options = useWaffleOptionsContext();
   const { loading, nodes } = useSnapshot(
     filterQuery,
     expression.metric === 'custom'
@@ -74,8 +76,8 @@ export const ExpressionChart: React.FC<Props> = ({
     nodeType,
     sourceId,
     0,
-    '',
-    '',
+    options.accountId,
+    options.region,
     true,
     timerange
   );
