@@ -116,7 +116,7 @@ export class TopNPanelConfig extends Component {
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              allowSwitchUseKibanaIndexesMode={true}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />

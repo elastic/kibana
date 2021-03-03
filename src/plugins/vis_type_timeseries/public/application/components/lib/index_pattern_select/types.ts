@@ -14,5 +14,5 @@ export interface SelectIndexComponentProps {
   'data-test-subj': string;
   placeholder?: string;
   disabled?: boolean;
-  allowSwitchUseKibanaIndexesMode?: boolean;
+  allowSwitchMode?: boolean;
 }

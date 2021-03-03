@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectIndexComponentProps } from './types';
-import { MigrationCallout } from './migration_callout';
 import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
 import { IndexPatternObject } from '../../../../../common/types';
 import { getDataStart } from '../../../../services';
@@ -99,7 +98,6 @@ export const SwitchModePopover = ({
         </EuiText>
         <EuiSpacer />
         <EuiSwitch
-          name="switch"
           checked={useKibanaIndices}
           label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
@@ -110,9 +108,6 @@ export const SwitchModePopover = ({
           onChange={switchMode}
           data-test-subj="switchIndexPatternSelectionMode"
         />
-        {value && isStringTypeIndexPattern(value) && (
-          <MigrationCallout value={value} switchMode={switchMode} matchedIndex={matchedIndex} />
-        )}
       </div>
     </EuiPopover>
   );

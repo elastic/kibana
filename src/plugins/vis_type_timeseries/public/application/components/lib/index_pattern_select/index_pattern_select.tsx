@@ -21,7 +21,7 @@ interface IndexPatternSelectProps {
   defaultIndexPattern: string;
   onChange: Function;
   disabled?: boolean;
-  allowSwitchUseKibanaIndexesMode?: boolean;
+  allowIndexSwitchingMode?: boolean;
 }
 
 export const IndexPatternSelect = ({
@@ -30,7 +30,7 @@ export const IndexPatternSelect = ({
   onChange,
   disabled,
   defaultIndexPattern,
-  allowSwitchUseKibanaIndexesMode,
+  allowIndexSwitchingMode,
 }: IndexPatternSelectProps) => {
   const panelModel = useContext(PanelModelContext);
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
@@ -67,7 +67,7 @@ export const IndexPatternSelect = ({
       placeholder={defaultIndexPattern}
       onIndexChange={setInputValue}
       onModeChange={onModeChange}
-      allowSwitchUseKibanaIndexesMode={allowSwitchUseKibanaIndexesMode}
+      allowSwitchMode={allowIndexSwitchingMode}
     />
   );
 };

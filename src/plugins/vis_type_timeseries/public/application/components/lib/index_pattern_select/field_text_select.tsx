@@ -19,7 +19,7 @@ export const FieldTextSelect = ({
   value,
   placeholder,
   onModeChange,
-  allowSwitchUseKibanaIndexesMode,
+  allowSwitchMode,
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const textualValue = convertIndexPatternObjectToStringRepresentation(value);
@@ -38,7 +38,7 @@ export const FieldTextSelect = ({
       value={textualValue}
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
-      {...(allowSwitchUseKibanaIndexesMode && {
+      {...(allowSwitchMode && {
         append: (
           <SwitchModePopover onModeChange={onModeChange} value={value} useKibanaIndices={false} />
         ),

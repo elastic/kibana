@@ -66,7 +66,7 @@ export const IndexPattern = ({
   disabled,
   model: _model,
   allowLevelOfDetail,
-  allowSwitchUseKibanaIndexesMode,
+  allowIndexSwitchingMode,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -183,7 +183,7 @@ export const IndexPattern = ({
               onChange={onChange}
               defaultIndexPattern={model.default_index_pattern}
               disabled={disabled}
-              allowSwitchUseKibanaIndexesMode={allowSwitchUseKibanaIndexesMode}
+              allowIndexSwitchingMode={allowIndexSwitchingMode}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -334,5 +334,5 @@ IndexPattern.propTypes = {
   disabled: PropTypes.bool,
   className: PropTypes.string,
   allowLevelOfDetail: PropTypes.bool,
-  allowSwitchUseKibanaIndexesMode: PropTypes.bool,
+  allowIndexSwitchingMode: PropTypes.bool,
 };
