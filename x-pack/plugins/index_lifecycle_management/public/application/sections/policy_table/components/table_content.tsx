@@ -184,8 +184,8 @@ export const TableContent: React.FunctionComponent<Props> = ({
     );
     const deletePolicyTooltip = hasLinkedIndices
       ? i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip', {
-        defaultMessage: 'You cannot delete a policy that is being used by an index',
-      })
+          defaultMessage: 'You cannot delete a policy that is being used by an index',
+        })
       : null;
     const items = [];
     if (hasLinkedIndices) {

@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  describe.only('Home page', function () {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
