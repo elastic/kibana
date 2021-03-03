@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-delete]]
-=== Delete connector API
+====  LegacyDelete connector API
 ++++
 <titleabbrev>Delete connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
-
-**This API is deprecated and will not be supported as of 8.0.**
 
 Please use the <<actions-and-connectors-api-delete>> instead.
 
@@ -15,14 +13,14 @@ Deletes an connector by ID.
 WARNING: When you delete an connector, _it cannot be recovered_.
 
 [[actions-and-connectors-legacy-api-delete-request]]
-==== Request
+===== Request
 
 `DELETE <kibana host>:<port>/api/actions/action/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
 
 [[actions-and-connectors-legacy-api-delete-path-params]]
-==== Path parameters
+===== Path parameters
 
 `id`::
   (Required, string) The ID of the connector.
@@ -31,12 +29,12 @@ WARNING: When you delete an connector, _it cannot be recovered_.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-delete-response-codes]]
-==== Response code
+===== Response code
 
 `200`::
   Indicates a successful call.
 
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

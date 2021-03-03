@@ -1,26 +1,24 @@
 [[actions-and-connectors-legacy-api-get]]
-=== Get connector API
+====  LegacyGet connector API
 ++++
 <titleabbrev>Get connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-get>> instead.
 
 Retrieves an connector by ID.
 
 [[actions-and-connectors-legacy-api-get-request]]
-==== Request
+===== Request
 
 `GET <kibana host>:<port>/api/actions/action/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
 
 [[actions-and-connectors-legacy-api-get-params]]
-==== Path parameters
+===== Path parameters
 
 `id`::
   (Required, string) The ID of the action.
@@ -29,13 +27,13 @@ Retrieves an connector by ID.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-get-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-get-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

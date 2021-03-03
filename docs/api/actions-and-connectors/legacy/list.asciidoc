@@ -1,38 +1,36 @@
 [[actions-and-connectors-legacy-api-list]]
-=== List connector types API
+====  LegacyList connector types API
 ++++
 <titleabbrev>List all connector types API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-list>> instead.
 
 Retrieves a list of all connector types.
 
 [[actions-and-connectors-legacy-api-list-request]]
-==== Request
+===== Request
 
 `GET <kibana host>:<port>/api/actions/list_action_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/list_action_types`
 
 [[actions-and-connectors-legacy-api-list-path-params]]
-==== Path parameters
+===== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-list-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-list-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

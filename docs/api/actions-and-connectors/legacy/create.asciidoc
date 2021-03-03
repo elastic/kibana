@@ -1,32 +1,30 @@
 [[actions-and-connectors-legacy-api-create]]
-=== Legacy Create connector API
+====  Legacy Create connector API
 ++++
 <titleabbrev>Create connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-create>> instead.
 
 Creates an connector.
 
 [[actions-and-connectors-legacy-api-create-request]]
-==== Request
+===== Request
 
 `POST <kibana host>:<port>/api/actions/action`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/action`
 
 [[actions-and-connectors-legacy-api-create-path-params]]
-==== Path parameters
+===== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-create-request-body]]
-==== Request body
+===== Request body
 
 `name`::
   (Required, string) The display name for the connector.
@@ -45,13 +43,13 @@ Creates an connector.
 WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-legacy-api-update, update>> API.
 
 [[actions-and-connectors-legacy-api-create-request-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-create-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

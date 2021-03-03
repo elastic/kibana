@@ -1,26 +1,24 @@
 [[actions-and-connectors-legacy-api-execute]]
-=== Execute connector API
+====  LegacyExecute connector API
 ++++
 <titleabbrev>Execute connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-execute>> instead.
 
 Executes an connector by ID.
 
 [[actions-and-connectors-legacy-api-execute-request]]
-==== Request
+===== Request
 
 `POST <kibana host>:<port>/api/actions/action/<id>/_execute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/action/<id>/_execute`
 
 [[actions-and-connectors-legacy-api-execute-params]]
-==== Path parameters
+===== Path parameters
 
 `id`::
   (Required, string) The ID of the connector.
@@ -29,20 +27,20 @@ Executes an connector by ID.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-execute-request-body]]
-==== Request body
+===== Request body
 
 `params`::
   (Required, object) The parameters of the connector. Parameter properties vary depending on
   the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
 
 [[actions-and-connectors-legacy-api-execute-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-execute-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

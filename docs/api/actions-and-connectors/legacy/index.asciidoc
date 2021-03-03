@@ -1,0 +1,11 @@
+====  LegacyDeprecated 7.x APIs
+
+**These APIs are deprecated and will not be supported as of 8.0.**
+
+include::./get.asciidoc[]
+include::./get_all.asciidoc[]
+include::./list.asciidoc[]
+include::./create.asciidoc[]
+include::./update.asciidoc[]
+include::./execute.asciidoc[]
+include::./delete.asciidoc[]

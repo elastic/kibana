@@ -1,38 +1,36 @@
 [[actions-and-connectors-legacy-api-get-all]]
-=== Get all connector API
+====  LegacyGet all connector API
 ++++
 <titleabbrev>Get all connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-get-all>> instead.
 
 Retrieves all connectors.
 
 [[actions-and-connectors-legacy-api-get-all-request]]
-==== Request
+===== Request
 
 `GET <kibana host>:<port>/api/actions`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions`
 
 [[actions-and-connectors-legacy-api-get-all-path-params]]
-==== Path parameters
+===== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-get-all-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-get-all-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------

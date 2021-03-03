@@ -1,26 +1,24 @@
 [[actions-and-connectors-legacy-api-update]]
-=== Update connector API
+====  LegacyUpdate connector API
 ++++
 <titleabbrev>Update connector API</titleabbrev>
 ++++
 
 deprecated::[7.13.0]
 
-**This API is deprecated and will not be supported as of 8.0.**
-
 Please use the <<actions-and-connectors-api-update>> instead.
 
 Updates the attributes for an existing connector.
 
 [[actions-and-connectors-legacy-api-update-request]]
-==== Request
+===== Request
 
 `PUT <kibana host>:<port>/api/actions/action/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/actions/action/<id>`
 
 [[actions-and-connectors-legacy-api-update-params]]
-==== Path parameters
+===== Path parameters
 
 `id`::
   (Required, string) The ID of the connector.
@@ -29,7 +27,7 @@ Updates the attributes for an existing connector.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-legacy-api-update-request-body]]
-==== Request body
+===== Request body
 
 `name`::
   (Required, string) The new name of the connector.
@@ -41,13 +39,13 @@ Updates the attributes for an existing connector.
   (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
 [[actions-and-connectors-legacy-api-update-codes]]
-==== Response code
+===== Response code
 
 `200`::
     Indicates a successful call.
 
 [[actions-and-connectors-legacy-api-update-example]]
-==== Example
+===== Example
 
 [source,sh]
 --------------------------------------------------
