@@ -34,8 +34,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 70,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L70"
+                  "lineNumber": 75,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L75"
                 }
               }
             ],
@@ -43,8 +43,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L70"
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L75"
             }
           },
           {
@@ -67,8 +67,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L86"
+              "lineNumber": 91,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L91"
             }
           },
           {
@@ -128,8 +128,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 95,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L95"
+                  "lineNumber": 100,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L100"
                 }
               },
               {
@@ -142,8 +142,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 96,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L96"
+                  "lineNumber": 101,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L101"
                 }
               },
               {
@@ -163,8 +163,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 97,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L97"
+                  "lineNumber": 102,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L102"
                 }
               }
             ],
@@ -172,8 +172,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 94,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L94"
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L99"
             }
           },
           {
@@ -230,8 +230,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L233"
+                  "lineNumber": 247,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L247"
                 }
               },
               {
@@ -251,8 +251,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 234,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L234"
+                  "lineNumber": 248,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L248"
                 }
               }
             ],
@@ -264,8 +264,8 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 232,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L232"
+              "lineNumber": 246,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L246"
             }
           },
           {
@@ -287,8 +287,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 261,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L261"
+                  "lineNumber": 275,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L275"
                 }
               }
             ],
@@ -296,15 +296,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 261,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L261"
+              "lineNumber": 275,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L275"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/public/search/search_interceptor.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L45"
+          "lineNumber": 50,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L50"
         },
         "initialIsOpen": false
       },
@@ -990,8 +990,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L36"
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L41"
             },
             "signature": [
               {
@@ -1011,8 +1011,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L37"
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L42"
             },
             "signature": [
               {
@@ -1032,8 +1032,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L38"
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L43"
             },
             "signature": [
               {
@@ -1053,8 +1053,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L39"
+              "lineNumber": 44,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L44"
             },
             "signature": [
               "Promise<[",
@@ -1076,8 +1076,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L40"
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L45"
             },
             "signature": [
               "Pick<",
@@ -1099,8 +1099,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L41"
+              "lineNumber": 46,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L46"
             },
             "signature": [
               {
@@ -1121,8 +1121,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L42"
+              "lineNumber": 47,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L47"
             },
             "signature": [
               "Pick<",
@@ -1139,8 +1139,8 @@
         ],
         "source": {
           "path": "src/plugins/data/public/search/search_interceptor.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L35"
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/search/search_interceptor.ts#L40"
         },
         "initialIsOpen": false
       },
@@ -19189,6 +19189,24 @@
             "text": "ISearchOptions"
           },
           " | undefined) => Promise<void>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ISearchOptionsSerializable",
+        "type": "Type",
+        "label": "ISearchOptionsSerializable",
+        "tags": [],
+        "description": [
+          "\nSame as `ISearchOptions`, but contains only serializable fields, which can\nbe sent over the network."
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/types.ts",
+          "lineNumber": 127,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/types.ts#L127"
+        },
+        "signature": [
+          "{ isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
         ],
         "initialIsOpen": false
       }
