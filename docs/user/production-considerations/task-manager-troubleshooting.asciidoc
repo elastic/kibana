@@ -64,14 +64,14 @@ The following is a step-by-step guide to identifying a root cause for _drift_ by
 
 The guide evaluates the output in order to validate the following theories:
 
-. <<task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
-.. <<task-manager-theory-reduced-polling-rate,Perhaps {kib} is configured to poll for tasks at a reduced rate?>>
-. <<task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
-.. <<task-manager-theory-actual-polling-frequently,Perhaps {kib} is not actually polling as frequently as it should?>>
-.. <<task-manager-theory-insufficient-throughput,Perhaps {kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload?>>
-.. <<task-manager-theory-long-running-tasks,Perhaps tasks aren't "running late" so much as "running for too long"?>>
-.. <<task-manager-theory-high-fail-rate,Perhaps tasks aren't "running late" so much as "take multiple attempts to succeed"?>>
-. <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
+* <<task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
+** <<task-manager-theory-reduced-polling-rate,{kib} is configured to poll for tasks at a reduced rate>>
+* <<task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
+** <<task-manager-theory-actual-polling-frequently,{kib} is not actually polling as frequently as it should>>
+** <<task-manager-theory-insufficient-throughput,{kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload>>
+** <<task-manager-theory-long-running-tasks,tasks aren't "running late" so much as "running for too long">>
+** <<task-manager-theory-high-fail-rate,tasks aren't "running late" so much as "take multiple attempts to succeed">>
+* <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
 
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
 
