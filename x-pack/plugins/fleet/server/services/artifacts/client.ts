@@ -4,12 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createHash } from 'crypto';
+import { deflate } from 'zlib';
+import { promisify } from 'util';
 import { ElasticsearchClient } from 'kibana/server';
-import { Artifact, ArtifactCreateOptions, ArtifactsInterface } from './types';
+import {
+  Artifact,
+  ArtifactCreateOptions,
+  ArtifactEncodedMetadata,
+  ArtifactsInterface,
+} from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { esSearchHitToArtifact } from './mappings';
 import { ArtifactAccessDeniedError } from './errors';
+
+const deflateAsync = promisify(deflate);
 
 export class FleetArtifactsClient implements ArtifactsInterface {
   constructor(private esClient: ElasticsearchClient, private packageName: string) {}
@@ -48,5 +58,24 @@ export class FleetArtifactsClient implements ArtifactsInterface {
         id,
       });
     }
+  }
+
+  generateHash(content: string): string {
+    return createHash('sha256').update(content).digest('hex');
+  }
+
+  async encodeContent(content: ArtifactCreateOptions['content']): Promise<ArtifactEncodedMetadata> {
+    const decodedContentBuffer = Buffer.from(content);
+    const encodedContentButter = await deflateAsync(decodedContentBuffer);
+
+    const encodedArtifact: ArtifactEncodedMetadata = {
+      compressionAlgorithm: 'zlib',
+      decodedSha256: this.generateHash(decodedContentBuffer.toString()),
+      decodedSize: decodedContentBuffer.byteLength,
+      encodedSha256: this.generateHash(encodedContentButter.toString()),
+      encodedSize: encodedContentButter.byteLength,
+      body: encodedContentButter.toString('base64'),
+    };
+    return encodedArtifact;
   }
 }

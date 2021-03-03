@@ -22,11 +22,21 @@ export interface Artifact {
   packageName: string;
   /** The relative URL to download this artifact from fleet-server */
   relative_url: string;
-  /** The encoded binary content of the artifact as BASE64 string  */
+  /** The encoded (binary) content of the artifact as BASE64 string  */
   body: string;
   created: string;
   type?: string;
 }
+
+export type ArtifactEncodedMetadata = Pick<
+  Artifact,
+  | 'decodedSha256'
+  | 'decodedSize'
+  | 'encodedSha256'
+  | 'encodedSize'
+  | 'compressionAlgorithm'
+  | 'body'
+>;
 
 type ArtifactUserDefinedMetadata = Pick<Artifact, 'identifier' | 'type'>;
 
@@ -39,4 +49,6 @@ export interface ArtifactsInterface {
   getArtifact(id: string): Promise<Artifact | undefined>;
   createArtifact(options: ArtifactCreateOptions): Promise<Artifact>;
   deleteArtifact(id: string): Promise<void>;
+  encodeContent(content: ArtifactCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
+  generateHash(content: string): string;
 }
