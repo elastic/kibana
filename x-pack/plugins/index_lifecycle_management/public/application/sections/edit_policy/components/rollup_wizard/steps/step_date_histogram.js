@@ -277,7 +277,7 @@ export class StepDateHistogram extends Component {
                         <EuiText size="s">{i18nTexts.timeIntervalField.fixed}</EuiText>
                         <EuiText size="s" color="subdued">
                           <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.fixedLabel"
+                            id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.fixedHelpText"
                             defaultMessage="Each time interval is the same size."
                           />
                         </EuiText>
