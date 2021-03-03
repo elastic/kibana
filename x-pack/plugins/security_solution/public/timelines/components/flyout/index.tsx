@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiFocusTrap } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -36,6 +36,25 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
+
+  const [focusOwnership, setFocusOwnership] = useState(true);
+  const searchListener = useRef(new AbortController());
+
+  const onOutsideClick = useCallback((event) => {
+    setFocusOwnership(false);
+    const classes = event.target.classList;
+    if (classes.contains('euiFieldSearch')) {
+      window.setTimeout(() => event.target.focus(), 0);
+      searchListener.current = new AbortController();
+      event.target.addEventListener(
+        'blur',
+        () => {
+          setFocusOwnership(true);
+        },
+        { signal: searchListener.current.signal }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {
@@ -77,16 +96,24 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
         return actions.default();
       }
     });
+    return () => {
+      if (searchListener.current) {
+        searchListener.current.abort();
+      }
+    };
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
+
   return (
-    <>
-      <EuiFocusTrap disabled={!show}>
-        <Visible show={show}>
-          <Pane timelineId={timelineId} />
-        </Visible>
-      </EuiFocusTrap>
-      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
-    </>
+    <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+      <>
+        <EuiFocusTrap disabled={!focusOwnership}>
+          <Visible show={show}>
+            <Pane timelineId={timelineId} />
+          </Visible>
+        </EuiFocusTrap>
+        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+      </>
+    </EuiOutsideClickDetector>
   );
 };
 
