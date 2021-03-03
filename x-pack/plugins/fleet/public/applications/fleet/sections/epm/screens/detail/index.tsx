@@ -38,6 +38,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 import { useSetPackageInstallStatus } from '../../hooks';
+
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
