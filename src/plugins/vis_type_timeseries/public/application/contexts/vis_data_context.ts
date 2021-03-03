@@ -9,4 +9,4 @@
 import React from 'react';
 import { TimeseriesVisData } from 'src/plugins/vis_type_timeseries/common/types';
 
-export const VisDataContext = React.createContext<TimeseriesVisData | null>(null);
+export const VisDataContext = React.createContext<TimeseriesVisData>({} as TimeseriesVisData);

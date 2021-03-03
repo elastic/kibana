@@ -25,7 +25,7 @@ interface FormValidationResults {
 interface PanelConfigProps {
   fields?: VisFields;
   model: TimeseriesVisParams;
-  visData$: Observable<TimeseriesVisData | null>;
+  visData$: Observable<TimeseriesVisData | undefined>;
   getConfig: IUiSettingsClient['get'];
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
@@ -37,14 +37,14 @@ export function PanelConfig(props: PanelConfigProps) {
   const { model, onChange } = props;
   const Component = panelConfigTypes[model.type];
   const formValidationResults = useRef<FormValidationResults>({});
-  const [visData, setVisData] = useState<TimeseriesVisData | null>(null);
+  const [visData, setVisData] = useState<TimeseriesVisData>({} as TimeseriesVisData);
 
   useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe(setVisData);
+    const visDataSubscription = props.visData$.subscribe((data = {} as TimeseriesVisData) =>
+      setVisData(data)
+    );
 
-    return function cleanup() {
-      visDataSubscription.unsubscribe();
-    };
+    return () => visDataSubscription.unsubscribe();
   }, [model.id, props.visData$]);
 
   const updateControlValidity = useCallback(

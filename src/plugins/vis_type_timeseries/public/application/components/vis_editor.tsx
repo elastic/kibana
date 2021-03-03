@@ -55,8 +55,8 @@ interface TimeseriesEditorState {
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
   private abortControllerFetchFields?: AbortController;
   private localStorage: Storage;
-  private visDataSubject: Rx.BehaviorSubject<TimeseriesVisData | null>;
-  private visData$: Rx.Observable<TimeseriesVisData | null>;
+  private visDataSubject: Rx.BehaviorSubject<TimeseriesVisData | undefined>;
+  private visData$: Rx.Observable<TimeseriesVisData | undefined>;
 
   constructor(props: TimeseriesEditorProps) {
     super(props);
@@ -68,7 +68,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       extractedIndexPatterns: [''],
     };
 
-    this.visDataSubject = new Rx.BehaviorSubject<TimeseriesVisData | null>(null);
+    this.visDataSubject = new Rx.BehaviorSubject<TimeseriesVisData | undefined>(undefined);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
