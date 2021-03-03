@@ -13,7 +13,7 @@ $visColorPickerWidth: $euiSizeL * 8; // 8 columns
 
   // removes the grey background that appears on the first dot when the popover is open
   &:focus {
-    background-color: white;
+    background-color: #ffffff;
   }
 
   &-isSelected {
