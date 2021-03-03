@@ -29,7 +29,7 @@ export const MetricsAlertDropdown = () => {
   const { hasInfraMLCapabilities } = useInfraMLCapabilities();
   const uiCapabilities = useKibana().services.application?.capabilities;
 
-  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure.save), [
+  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
     uiCapabilities,
   ]);
 
