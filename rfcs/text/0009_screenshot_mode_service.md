@@ -8,7 +8,8 @@ Applications should be aware when their UI is rendered for purposes of
 capturing a screenshot. This ability would improve the quality of the Kibana
 Reporting feature for a few reasons:
  - Fewer objects in the headless browser memory since interactive code doesn't run
- - Fewer Reporting bugs in releases since App teams have more ownership and control over the reportability of their UI
+ - Fewer Reporting bugs in releases since App teams have more ownership and
+   control over the reportability of their UI
 
 **Screenshot mode service**
 
@@ -66,180 +67,71 @@ direction is appropriate for improving PDF report generation.
 
 # Detailed design
 
-The Screenshot Mode Service is a callable API available in the context of a
-request on the server side, and as a pubic pluginsSetup Javascript API.
+The Screenshot Mode Service is a callable API available as dependency for
+Kibana applications.
 
-The data provided by the Screenshot Mode are signals about:
- - whether or not the context of the page load is for a screenshot capture
- - layout and dimensions that the result image is expected to be
- - time zone for which to format the page data
+A method of the API tells the Application whether or not it should render
+itself to optimize for non-interactivity.
 
-To obtain the screenshot mode context data and provide it as a service to
-plugins, this RFC recommends using a URL query string variable with raw data,
-and provide an interface to it in the form of an observable. The Screenshot
-Mode Service plugin will read the data in its `setup` method and provide the
-observable to the data interface in its plugin contract. The interface is
-described below as the `ScreenshotModeServiceApi`.
+In a future phase, the API might also tell the application more about the
+report, such as PDF page dimensions, or special layout types (print layout,
+etc).
 
-The new query string parameter could appear in the URL of any Kibana
-application. Adding new URL query string parameters is a non-breaking change,
-and applications would not be impacted by having this additional data in the URL.
-
-Since the service data needs to be an object, the best way to encode it as data
-in a URL is to use Rison encoding. An example of what that would look like in a
-Kibana URL (with linebreaks added):
+## Interface
+The `setupDeps.screenshotMode` object has a single purpose: tell the app if it
+should render in an optimized way for screenshot capture:
 
 ```
-http://localhost:5601/app/kibana
-?screenshots=(enabled:!t,layout:(height:500,width:400),timezone:PST)
-#/discover?_g=()&_a=(columns:!(_source),index:'6a047550-4e87-11ea-ad93-21278bc67061',interval:auto,query:(language:kuery,query:''),sort:!())
-
-```
-
-That shows an example way of encoding this raw data into the URL as a global
-variable called `screenshots`:
-```
-{
-  "enabled": true,
-  "layout": {
-    "height": 500,
-    "width": 400
-  },
-  "timezone": "PST"
+interface ScreenshotModeServiceSetup {
+  isScreenshotMode: () => boolean;
 }
 ```
 
-The rest of the URL is needed by the application and is used for recreating a
-certain state of data in the page. In order to be "reportable" these parts of
-the URL must be totally sufficient for recreating everything the user expects
-to see in a report.
-
-The `screenshot` object has to be crafted by a client that is generating a
-request for a screenshot. That can be done by anything, but the implementation
-concerns will be left out to keep the RFC about the details on the service.
-
-The Screenshot Mode Service would be a plugin designed to wrap the raw context data for
-applications to consume, and it is up to an outside feature (i.e.  Kibana
-Reporting) to craft the raw context data. Applications are the parts that make
-this design useful for Kibana, by reading the service data and using it to
-inform its rendering.
-
-As a plugin, the screenshot mode service won't automatically work in the
-background to inject the data into the various running stages of applications.
-This is in line with the pattern on the client-side where all query parameters
-are delegated to the individual applications, letting them do as they wish with
-it. For this RFC, it's an important topic because plugins have to "wire-up"
-this service in their router and UI app, but it will prevent "magical" behavior
-happening.
-
-## Server side
-On the server side, applications will have to interact with the screenshot
-plugin to support custom endpoints include the screenshot data as part of the
-route handling context. Example:
-```
-const screenshotRouter = plugins.screenshots.wrapRouter(router);
-screenshotRouter.get(
-  { path: '/my-endpoint' },
-  async (context, req, res) => {
-    const isScreenshotMode = context.screenshots.isScreenshotMode();
-  }
-);
-```
-
-The `screenshotRouter` handlers could either replace the existing routes of the
-application, or the application can feature custom endpoints for screenshot
-export that use this plugin.
-
-## Front-end
-On the front-end, the plugin service could be built as a simple utility that takes a
-[History](https://developer.mozilla.org/en-US/docs/Web/API/History)
-instance and returns an Observable that emits the screenshot data by listening
-for location updates and computing the data based on the query parameters.
+Internally, this object is constructed from a class that refers to information
+sent via a custom proprietary header:
 
 ```
-const screenshot$ = plugins.screenshots.readFrom(history);
-```
+interface HeaderData {
+  'X-Screenshot-Mode': true
+}
 
-## Types
-The `request.screenshotMode` object is an instance of a class that has
-functions to abstract it's internal raw data:
-
-```
-class ScreenshotModeServiceApi {
-  constructor(rawData) {
-  }
-  public isScreenshotMode (): boolean {
-  }
-  public getScreenshotDimensions (): ScreenshotLayoutDimensions {
-  }
-  public getTimezone (): Timezone {
-  }
+class ScreenshotModeServiceSetup {
+  constructor(rawData: HeaderData) {}
+  public isScreenshotMode (): boolean {}
 }
 ```
 
-Getting the screenshot dimensions would be needed only for very specialized use
-cases such as the Dashboard application's "print layout" mode.
-
-# Drawbacks
-
-Why should we *not* do this? Please consider:
-
-- Plugins have to "wire-up" this service in their router and UI app
-- Low-level of discoverability since this logic is hidden in a plugin rather than exposed on the CoreSetup API.
-- Hard for application teams to create an environment to test against to check the screenshot mode rendering of their work.
-
-As a solution to the drawbacks of extra maintenance and tests needed, the
-Reporting Services team could provide libraries to use in automated functional
-tests that help verify the integration. There could also be a development tool
-in the form of a test Kibana plugin or bookmarklet to help developers check their
-work for screenshot mode.
+This works because the headless browser that opens the page can inject custom
+headers into the request. Teams can test how their app renders when loaded with
+this header using a new configuration setting, or a web debugging proxy, or
+some other tool that is TBD.
 
 # Alternatives
 
 - Print media query CSS
-  Many things can be improved on capturing screenshots from the page using
-  `@print` CSS media query selecting. Also, CSS makes things hidden on the
-  page, but they are still loading in the DOM and take browser memory
-  resources. Print media query CSS are a good supplement to the Screenshot Mode
-  Service, but the best performance will come with streamlining the page
-  rendering in Javascript. See "further examples" in this RFC about how this
-  alternative solution can still be leveraged.
+  If applications UIs supported printability using `@media print`, and Kibana 
+  Reporting uses `page.print()` to capture the PDF, it would be easy for application 
+  developers to test, and prevent bugs showing up in the report.
+  
+  However, this solution doesn't include performance benefits of reducing objects 
+  in the headless browser memory: the headless browser still has to render the entire 
+  page as a "normal" render before it is able to call `page.print()`. No one sees the 
+  results of that initial render, so it is the same amount of wasted rendering cycles 
+  during report generation that we have today.
 
 # Adoption strategy
 
-Integrating applications with this service is only going to be necessary when
-there are customizations needed to make the application more "reportable."
-That will be done by examining the default results of how applications perform
-for screenshot capture mode, and tuning the app code for performance as needed.
-
-Some of the first steps would be to have the Reporting services team hoist some
-code out of the screenshot pipeline, and start adding the `screenshots`
-variable to the URL as a query string parameter. Then, parts of the Reporting
-code can be taken apart a bit. The areas that need customization for screenshot
-capture will no longer rely on the Reporting plugin to inject those
-customizations. The applications will check the Screenshot Mode Service and
-inject the specialized customizations as needed.
-
-Having the Screenshot mode service would be a means towards fixing a few bugs
-with Reporting rendering. The bug fixes will involve adopting the Screenshot
-Mode Service throughout applications: especially in the Dashboard application.
-Those fixes will be driven by the Reporting Services team initially.
-Eventually, the Dashboard application could feature a few examples in the code
-on how to integrate with the Screenshot Mode Service.
-
-Further adoption of this service would happen as we look for ways to improve
-the performance and quality of Reporting services throughout Kibana. Those
-fine-tuning adoptions can be driven by the Reporting services team, or
-application teams, depending on bandwidth available.
+The Reporting Services team should create an few example in a developer example plugin
+on how to integrate an App with the Screenshot Mode Service. From there, the team should 
+work with App teams in a consulting role to establish usage of this service.
 
 # How we teach this
 
-Not every Kibana developer will need to understand the screenshot mode service
-to be effective at day-to-day work, but every Kibana developer should be at
-least aware of its existence. That way, they can understand it when the time
-comes to specialize their application for Reporting. As long as developers are
-aware of its existence, they could understand it by reading the code and trying
-the test Kibana plugin (if it exists).
+The Reporting Services team can offer statistics in a weekly update about how many 
+Reporting-enabled applications are using this service. This will help people remember
+that it is available. If the team can also provide statistics about how many bugs this is 
+fixing, how much time it saves in generating a report, etc, then it will also help
+people understand why it is important.
 
 # Further examples
 
