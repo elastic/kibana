@@ -22,12 +22,12 @@ import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import {
   DEFAULT_LINES_TO_SAMPLE,
-  getMaxBytes,
   readFile,
   createUrlOverrides,
   processResults,
   hasImportPermission,
 } from '../utils';
+import { getFileUpload } from '../../../../util/dependency_cache';
 
 import { MODE } from './constants';
 
@@ -60,7 +60,7 @@ export class FileDataVisualizerView extends Component {
     this.originalSettings = {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
-    this.maxFileUploadBytes = getMaxBytes();
+    this.maxFileUploadBytes = getFileUpload().getMaxBytes();
   }
 
   async componentDidMount() {
