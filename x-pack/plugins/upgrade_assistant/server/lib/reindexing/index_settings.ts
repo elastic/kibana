@@ -17,7 +17,6 @@ export interface ParsedIndexName {
 }
 
 const deprecatedSettings = [
-  'index.merge.policy.reclaim_deletes_weight',
   'index.force_memory_term_dictionary',
   'index.max_adjacency_matrix_filters',
   'index.soft_deletes.enabled',
@@ -99,8 +98,8 @@ export const getDeprecatedSettingWarning = (
     return deprecatedSettings.indexOf(setting) > -1;
   });
 
-  // Translog settings are only marked as deprecated if soft deletes is enabled (default)
-  if (settings['index.soft_deletes.enabled'] !== false) {
+  // Translog settings are only marked as deprecated if soft deletes is enabled
+  if (settings['index.soft_deletes.enabled'] === 'true') {
     if (settings['index.translog.retention.size']) {
       deprecatedSettingsInUse.push('index.translog.retention.size');
     }
@@ -178,8 +177,8 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
 const removeDeprecatedSettings = (settings: FlatSettings['settings']) => {
   const updatedSettings = { ...settings };
 
-  // Translog settings are only marked as deprecated if soft deletes is enabled (default)
-  if (updatedSettings['index.soft_deletes.enabled'] !== false) {
+  // Translog settings are only marked as deprecated if soft deletes is enabled
+  if (updatedSettings['index.soft_deletes.enabled'] === 'true') {
     if (updatedSettings['index.translog.retention.size']) {
       delete updatedSettings['index.translog.retention.size'];
     }

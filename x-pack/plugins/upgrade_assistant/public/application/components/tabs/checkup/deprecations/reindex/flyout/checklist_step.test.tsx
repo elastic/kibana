@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus, ReindexWarning } from '../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -29,7 +29,7 @@ describe('ChecklistFlyout', () => {
       status: undefined,
       reindexTaskPercComplete: null,
       errorMessage: null,
-      reindexWarnings: [ReindexWarning.customTypeName],
+      reindexWarnings: [],
       hasRequiredPrivileges: true,
     } as ReindexState,
   };
