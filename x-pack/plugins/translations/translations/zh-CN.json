@@ -16340,7 +16340,6 @@
     "xpack.rollupJobs.listBreadcrumbTitle": "汇总/打包作业",
     "xpack.rollupJobs.loadAction.errorTitle": "加载汇总/打包作业时出错",
     "xpack.rollupJobs.refreshAction.errorTitle": "刷新汇总/打包作业时出错",
-    "xpack.rollupJobs.rollupIndexPatternsDescription": "启用用于捕获汇总/打包索引的索引模式的创建，\n              汇总/打包索引反过来基于汇总/打包数据启用可视化。刷新\n              页面以应用更改。",
     "xpack.rollupJobs.rollupIndexPatternsTitle": "启用汇总索引模式",
     "xpack.rollupJobs.startJobsAction.errorTitle": "启动汇总/打包作业时出错",
     "xpack.rollupJobs.stopJobsAction.errorTitle": "停止汇总/打包作业时出错",

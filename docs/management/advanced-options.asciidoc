@@ -240,10 +240,6 @@ in the current index pattern is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-aggs-terms-size]]`discover:aggs:terms:size`::
-The number terms that are visualized when clicking the *Visualize* button in the
-field drop down. The default is `20`.
-
 [[discover-samplesize]]`discover:sampleSize`::
 The number of rows to show in the *Discover* table.
 
