@@ -82,7 +82,7 @@ The `setupDeps.screenshotMode` object has a single purpose: tell the app if it
 should render in an optimized way for screenshot capture:
 
 ```
-interface ScreenshotModeServiceSetup {
+interface IScreenshotModeServiceSetup {
   isScreenshotMode: () => boolean;
 }
 ```
@@ -95,7 +95,7 @@ interface HeaderData {
   'X-Screenshot-Mode': true
 }
 
-class ScreenshotModeServiceSetup {
+class ScreenshotModeServiceSetup implements IScreenshotModeServiceSetup {
   constructor(rawData: HeaderData) {}
   public isScreenshotMode (): boolean {}
 }
