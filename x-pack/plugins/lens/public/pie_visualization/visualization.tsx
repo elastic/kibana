@@ -193,11 +193,6 @@ export const getPieVisualization = ({
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
-
-      shape:
-        prevState.shape === 'donut' && prevState.layers.every((l) => l.groups.length === 1)
-          ? 'pie'
-          : prevState.shape,
       layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
