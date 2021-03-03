@@ -17,7 +17,7 @@ import {
   PropertyAssignment,
 } from 'ts-morph';
 import { getApiSectionId } from '../utils';
-import { getCommentsFromNode } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { AnchorLink, TypeKind } from '../types';
 import { getSourceForNode } from './utils';
 import { buildApiDecsForParameters } from './build_parameter_decs';
@@ -55,6 +55,7 @@ export function getArrowFunctionDec(
     description: getCommentsFromNode(node),
     label: node.getName(),
     source: getSourceForNode(node),
+    tags: getJSDocTagNames(node),
     returnComment: getJSDocReturnTagComment(node),
   };
 }
