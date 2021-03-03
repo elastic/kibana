@@ -723,6 +723,32 @@ describe('CaseView ', () => {
     });
   });
 
+  it('should show the correct connector name on the push button', async () => {
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetCaseUserActionsMock.mockImplementation(() => ({
+      ...defaultUseGetCaseUserActions,
+      hasDataToPush: true,
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find('[data-test-subj="has-data-to-push-button"]')
+          .first()
+          .text()
+          .includes('My Connector 2')
+      ).toBe(true);
+    });
+  });
+
   describe('Callouts', () => {
     it('it shows the danger callout when a connector has been deleted', async () => {
       useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));

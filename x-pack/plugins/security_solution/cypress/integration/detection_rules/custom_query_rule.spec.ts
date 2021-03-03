@@ -108,6 +108,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { activatesRule } from '../../tasks/rule_details';
 
 import { DETECTIONS_URL } from '../../urls/navigation';
 
@@ -308,6 +309,21 @@ describe('Custom detection rules deletion and edition', () => {
       reload();
     });
 
+    it('Only modifies rule active status on enable/disable', () => {
+      activatesRule();
+
+      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+
+      goToRuleDetails();
+
+      cy.wait('@fetchRuleDetails').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+
+        cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
+        cy.wrap(response!.body.enabled).should('eql', false);
+      });
+    });
+
     it('Allows a rule to be edited', () => {
       editFirstRule();
       waitForKibana();
@@ -347,7 +363,16 @@ describe('Custom detection rules deletion and edition', () => {
       goToAboutStepTab();
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(editedRule);
+
+      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+
       saveEditedRule();
+
+      cy.wait('@getRule').then(({ response }) => {
+        cy.wrap(response!.statusCode).should('eql', 200);
+        // ensure that editing rule does not modify max_signals
+        cy.wrap(response!.body.max_signals).should('eql', existingRule.maxSignals);
+      });
 
       cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);

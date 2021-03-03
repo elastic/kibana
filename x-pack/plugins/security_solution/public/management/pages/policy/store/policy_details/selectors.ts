@@ -192,7 +192,6 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
-        ransomware: mac.ransomware,
         popup: mac.popup,
       },
       linux: {
