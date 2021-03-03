@@ -5,6 +5,9 @@
       {
         "id": "def-public.SimpleSavedObject",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SimpleSavedObject",
         "description": [
           "\nThis class is a very simple wrapper for SavedObjects loaded from the server\nwith the {@link SavedObjectsClient}.\n\nIt provides basic functionality for creating/saving/deleting saved objects,\nbut doesn't include any type-specific implementations.\n"
@@ -21,6 +24,7 @@
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -35,6 +39,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject._version",
             "type": "string",
             "label": "_version",
@@ -49,6 +54,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.id",
             "type": "string",
             "label": "id",
@@ -60,6 +66,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.type",
             "type": "string",
             "label": "type",
@@ -71,6 +78,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -92,6 +100,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.coreMigrationVersion",
             "type": "string",
             "label": "coreMigrationVersion",
@@ -106,6 +115,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.error",
             "type": "Object",
             "label": "error",
@@ -127,6 +137,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SimpleSavedObject.references",
             "type": "Array",
             "label": "references",
@@ -371,51 +382,14 @@
       {
         "id": "def-public.SavedObjectsClient",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsClient",
         "description": [
           "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state. The client-side\nSavedObjectsClient is a thin convenience library around the SavedObjects\nHTTP API for interacting with Saved Objects.\n"
         ],
         "children": [
-          {
-            "id": "def-public.SavedObjectsClient.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "http",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 207,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L207"
-                }
-              }
-            ],
-            "tags": [
-              "internal"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 207,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L207"
-            }
-          },
           {
             "id": "def-public.SavedObjectsClient.create",
             "type": "Function",
@@ -497,6 +471,7 @@
               "lineNumber": 220,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L220"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -581,6 +556,9 @@
               "lineNumber": 255,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L255"
             },
+            "tags": [
+              "property"
+            ],
             "returnComment": [
               "The result of the create operation containing created saved objects."
             ]
@@ -659,6 +637,7 @@
               "lineNumber": 283,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L283"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -716,6 +695,15 @@
               "lineNumber": 313,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L313"
             },
+            "tags": [
+              "property",
+              "property",
+              "property",
+              "property",
+              "property",
+              "property",
+              "property"
+            ],
             "returnComment": [
               "A find result with objects matching the specified search."
             ]
@@ -773,6 +761,7 @@
               "lineNumber": 372,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L372"
             },
+            "tags": [],
             "returnComment": [
               "The saved object for the given type and id."
             ]
@@ -816,6 +805,9 @@
               "lineNumber": 395,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/saved_objects/saved_objects_client.ts#L395"
             },
+            "tags": [
+              "example"
+            ],
             "returnComment": [
               "The saved objects with the given type and ids requested"
             ]
@@ -1008,8 +1000,12 @@
           "<T>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBatchResponse.savedObjects",
             "type": "Array",
             "label": "savedObjects",
@@ -1060,8 +1056,12 @@
           }
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkCreateObject.type",
             "type": "string",
             "label": "type",
@@ -1073,6 +1073,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkCreateObject.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -1099,8 +1100,12 @@
         "type": "Interface",
         "label": "SavedObjectsBulkCreateOptions",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkCreateOptions.overwrite",
             "type": "CompoundType",
             "label": "overwrite",
@@ -1139,8 +1144,12 @@
           "<T>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateObject.type",
             "type": "string",
             "label": "type",
@@ -1152,6 +1161,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateObject.id",
             "type": "string",
             "label": "id",
@@ -1163,6 +1173,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateObject.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -1177,6 +1188,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateObject.version",
             "type": "string",
             "label": "version",
@@ -1191,6 +1203,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateObject.references",
             "type": "Array",
             "label": "references",
@@ -1224,8 +1237,12 @@
         "type": "Interface",
         "label": "SavedObjectsBulkUpdateOptions",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsBulkUpdateOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -1252,8 +1269,12 @@
         "type": "Interface",
         "label": "SavedObjectsCreateOptions",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsCreateOptions.id",
             "type": "string",
             "label": "id",
@@ -1270,6 +1291,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsCreateOptions.overwrite",
             "type": "CompoundType",
             "label": "overwrite",
@@ -1286,6 +1308,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -1309,6 +1332,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsCreateOptions.coreMigrationVersion",
             "type": "string",
             "label": "coreMigrationVersion",
@@ -1325,6 +1349,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsCreateOptions.references",
             "type": "Array",
             "label": "references",
@@ -1378,8 +1403,12 @@
         "description": [
           "\nReturn type of the Saved Objects `find()` method.\n\n*Note*: this type is different between the Public and Server Saved Objects\nclients.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsFindResponsePublic.total",
             "type": "number",
             "label": "total",
@@ -1391,6 +1420,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsFindResponsePublic.perPage",
             "type": "number",
             "label": "perPage",
@@ -1402,6 +1432,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsFindResponsePublic.page",
             "type": "number",
             "label": "page",
@@ -1425,8 +1456,12 @@
         "type": "Interface",
         "label": "SavedObjectsUpdateOptions",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsUpdateOptions.version",
             "type": "string",
             "label": "version",
@@ -1441,6 +1476,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsUpdateOptions.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -1464,6 +1500,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.SavedObjectsUpdateOptions.references",
             "type": "Array",
             "label": "references",
@@ -1497,8 +1534,12 @@
         "type": "Interface",
         "label": "SavedObjectsStart",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.SavedObjectsStart.client",
             "type": "Object",
             "label": "client",
@@ -1537,6 +1578,9 @@
         "id": "def-public.SavedObjectsClientContract",
         "type": "Type",
         "label": "SavedObjectsClientContract",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSavedObjectsClientContract as implemented by the {@link SavedObjectsClient}\n"
         ],
@@ -1558,12 +1602,16 @@
       {
         "id": "def-server.SavedObjectsClient",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsClient",
         "description": [
           "\n"
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClient.errors",
             "type": "Object",
             "label": "errors",
@@ -1585,6 +1633,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClient.errors",
             "type": "Object",
             "label": "errors",
@@ -1604,48 +1653,6 @@
                 "text": "SavedObjectsErrorHelpers"
               }
             ]
-          },
-          {
-            "id": "def-server.SavedObjectsClient.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "repository",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsRepository",
-                    "text": "SavedObjectsRepository"
-                  },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"deleteByNamespace\" | \"incrementCounter\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 403,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/saved_objects_client.ts#L403"
-                }
-              }
-            ],
-            "tags": [
-              "internal"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 403,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/saved_objects_client.ts#L403"
-            }
           },
           {
             "id": "def-server.SavedObjectsClient.create",
@@ -2917,6 +2924,9 @@
       {
         "id": "def-server.SavedObjectsErrorHelpers",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsErrorHelpers",
         "description": [],
         "children": [
@@ -4364,53 +4374,15 @@
       {
         "id": "def-server.SavedObjectsSerializer",
         "type": "Class",
+        "tags": [
+          "remarks",
+          "public"
+        ],
         "label": "SavedObjectsSerializer",
         "description": [
           "\nA serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or\n{@link SavedObjectSanitizedDoc | sanitized} documents to the other kind.\n"
         ],
         "children": [
-          {
-            "id": "def-server.SavedObjectsSerializer.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "registry",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectTypeRegistry",
-                    "text": "SavedObjectTypeRegistry"
-                  },
-                  ", \"getType\" | \"getVisibleTypes\" | \"getAllTypes\" | \"getImportableAndExportableTypes\" | \"isNamespaceAgnostic\" | \"isSingleNamespace\" | \"isMultiNamespace\" | \"isShareable\" | \"isHidden\" | \"getIndex\" | \"isImportableAndExportable\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/serialization/serializer.ts#L32"
-                }
-              }
-            ],
-            "tags": [
-              "internal"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/serialization/serializer.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/serialization/serializer.ts#L32"
-            }
-          },
           {
             "id": "def-server.SavedObjectsSerializer.isRawSavedObject",
             "type": "Function",
@@ -4784,6 +4756,9 @@
       {
         "id": "def-server.SavedObjectTypeRegistry",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectTypeRegistry",
         "description": [
           "\nRegistry holding information about all the registered {@link SavedObjectsType | saved object types}.\n"
@@ -5209,6 +5184,9 @@
       {
         "id": "def-server.SavedObjectsUtils",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsUtils",
         "description": [],
         "children": [
@@ -5243,6 +5221,7 @@
               "lineNumber": 29,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/utils.ts#L29"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -5276,6 +5255,7 @@
               "lineNumber": 43,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/utils.ts#L43"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -5331,6 +5311,7 @@
               "lineNumber": 54,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/utils.ts#L54"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -5417,144 +5398,12 @@
       {
         "id": "def-server.SavedObjectsRepository",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsRepository",
         "description": [],
         "children": [
-          {
-            "id": "def-server.SavedObjectsRepository.createRepository",
-            "type": "Function",
-            "label": "createRepository",
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ".createRepository"
-            ],
-            "description": [
-              "\nA factory function for creating SavedObjectRepository instances.\n"
-            ],
-            "children": [
-              {
-                "type": "Object",
-                "label": "migrator",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.KibanaMigrator",
-                    "text": "KibanaMigrator"
-                  },
-                  ", \"kibanaVersion\" | \"savedObjectsConfig\" | \"runMigrations\" | \"prepareMigrations\" | \"getStatus$\" | \"getActiveMappings\" | \"migrateDocument\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 161,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L161"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "typeRegistry",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectTypeRegistry",
-                    "text": "SavedObjectTypeRegistry"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 162,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L162"
-                }
-              },
-              {
-                "type": "string",
-                "label": "indexName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 163,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L163"
-                }
-              },
-              {
-                "type": "CompoundType",
-                "label": "client",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 164,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L164"
-                }
-              },
-              {
-                "type": "Array",
-                "label": "includedHiddenTypes",
-                "isRequired": true,
-                "signature": [
-                  "string[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 165,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L165"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "injectedConstructor",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 166,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L166"
-                }
-              }
-            ],
-            "tags": [
-              "internalRemarks",
-              "internal"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 160,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/saved_objects/service/lib/repository.ts#L160"
-            }
-          },
           {
             "id": "def-server.SavedObjectsRepository.create",
             "type": "Function",
@@ -7073,10 +6922,14 @@
       {
         "id": "def-server.SavedObjectsExporter",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsExporter",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExporter.#savedObjectsClient",
             "type": "Object",
             "label": "#savedObjectsClient",
@@ -7099,6 +6952,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExporter.#exportTransforms",
             "type": "Object",
             "label": "#exportTransforms",
@@ -7121,6 +6975,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExporter.#exportSizeLimit",
             "type": "number",
             "label": "#exportSizeLimit",
@@ -7132,6 +6987,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExporter.#log",
             "type": "Object",
             "label": "#log",
@@ -7158,9 +7014,11 @@
                 "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
@@ -7183,6 +7041,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
@@ -7205,6 +7064,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.exportSizeLimit",
                     "type": "number",
                     "label": "exportSizeLimit",
@@ -7216,6 +7076,7 @@
                     }
                   },
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.logger",
                     "type": "Object",
                     "label": "logger",
@@ -7360,6 +7221,9 @@
       {
         "id": "def-server.SavedObjectsExportError",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsExportError",
         "description": [],
         "signature": [
@@ -7636,10 +7500,14 @@
       {
         "id": "def-server.SavedObjectsImporter",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsImporter",
         "description": [],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImporter.#savedObjectsClient",
             "type": "Object",
             "label": "#savedObjectsClient",
@@ -7662,6 +7530,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImporter.#typeRegistry",
             "type": "Object",
             "label": "#typeRegistry",
@@ -7684,6 +7553,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImporter.#importSizeLimit",
             "type": "number",
             "label": "#importSizeLimit",
@@ -7695,6 +7565,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImporter.#importHooks",
             "type": "Object",
             "label": "#importHooks",
@@ -7729,9 +7600,11 @@
                 "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
@@ -7754,6 +7627,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
@@ -7776,6 +7650,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.importSizeLimit",
                     "type": "number",
                     "label": "importSizeLimit",
@@ -7929,6 +7804,9 @@
       {
         "id": "def-server.SavedObjectsImportError",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "SavedObjectsImportError",
         "description": [],
         "signature": [
@@ -8177,8 +8055,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.id",
             "type": "string",
             "label": "id",
@@ -8193,6 +8075,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.type",
             "type": "string",
             "label": "type",
@@ -8204,6 +8087,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.attributes",
             "type": "Uncategorized",
             "label": "attributes",
@@ -8218,6 +8102,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.version",
             "type": "string",
             "label": "version",
@@ -8232,6 +8117,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.references",
             "type": "Array",
             "label": "references",
@@ -8253,6 +8139,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -8276,6 +8163,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.SavedObjectsBulkCreateObject.coreMigrationVersion",
             "type": "string",
             "label": "coreMigrationVersion",
@@ -8292,6 +8182,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.originId",
             "type": "string",
             "label": "originId",
@@ -8308,6 +8199,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkCreateObject.initialNamespaces",
             "type": "Array",
             "label": "initialNamespaces",
@@ -8338,8 +8230,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkGetObject.id",
             "type": "string",
             "label": "id",
@@ -8351,6 +8247,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkGetObject.type",
             "type": "string",
             "label": "type",
@@ -8362,6 +8259,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkGetObject.fields",
             "type": "Array",
             "label": "fields",
@@ -8410,8 +8308,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateObject.id",
             "type": "string",
             "label": "id",
@@ -8425,6 +8327,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateObject.type",
             "type": "string",
             "label": "type",
@@ -8438,6 +8341,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateObject.attributes",
             "type": "Object",
             "label": "attributes",
@@ -8454,6 +8358,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateObject.namespace",
             "type": "string",
             "label": "namespace",
@@ -8501,8 +8406,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -8543,8 +8452,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkResponse.saved_objects",
             "type": "Array",
             "label": "saved_objects",
@@ -8590,8 +8503,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkResponse.saved_objects",
             "type": "Array",
             "label": "saved_objects",
@@ -8637,8 +8554,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBulkUpdateResponse.saved_objects",
             "type": "Array",
             "label": "saved_objects",
@@ -8674,8 +8595,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCheckConflictsObject.id",
             "type": "string",
             "label": "id",
@@ -8687,6 +8612,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCheckConflictsObject.type",
             "type": "string",
             "label": "type",
@@ -8712,8 +8638,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCheckConflictsResponse.errors",
             "type": "Array",
             "label": "errors",
@@ -8750,8 +8680,12 @@
         "description": [
           "\nOptions to control the creation of the Saved Objects Client."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClientProviderOptions.excludedWrappers",
             "type": "Array",
             "label": "excludedWrappers",
@@ -8766,6 +8700,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClientProviderOptions.includedHiddenTypes",
             "type": "Array",
             "label": "includedHiddenTypes",
@@ -8794,8 +8729,12 @@
         "description": [
           "\nOptions passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClientWrapperOptions.client",
             "type": "Object",
             "label": "client",
@@ -8818,6 +8757,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClientWrapperOptions.typeRegistry",
             "type": "Object",
             "label": "typeRegistry",
@@ -8840,6 +8780,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClientWrapperOptions.request",
             "type": "Object",
             "label": "request",
@@ -8873,8 +8814,12 @@
         "type": "Interface",
         "label": "SavedObjectsClosePointInTimeResponse",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClosePointInTimeResponse.succeeded",
             "type": "boolean",
             "label": "succeeded",
@@ -8888,6 +8833,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsClosePointInTimeResponse.num_freed",
             "type": "number",
             "label": "num_freed",
@@ -8932,8 +8878,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.id",
             "type": "string",
             "label": "id",
@@ -8950,6 +8900,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.overwrite",
             "type": "CompoundType",
             "label": "overwrite",
@@ -8966,6 +8917,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.version",
             "type": "string",
             "label": "version",
@@ -8982,6 +8934,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -9005,6 +8958,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.SavedObjectsCreateOptions.coreMigrationVersion",
             "type": "string",
             "label": "coreMigrationVersion",
@@ -9021,6 +8977,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.references",
             "type": "Array",
             "label": "references",
@@ -9042,6 +8999,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -9058,6 +9016,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.originId",
             "type": "string",
             "label": "originId",
@@ -9074,6 +9033,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCreateOptions.initialNamespaces",
             "type": "Array",
             "label": "initialNamespaces",
@@ -9104,8 +9064,12 @@
         "description": [
           "\nStructure of the export result details entry"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportResultDetails.exportedCount",
             "type": "number",
             "label": "exportedCount",
@@ -9119,6 +9083,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportResultDetails.missingRefCount",
             "type": "number",
             "label": "missingRefCount",
@@ -9132,6 +9097,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportResultDetails.missingReferences",
             "type": "Array",
             "label": "missingReferences",
@@ -9174,8 +9140,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResult.score",
             "type": "number",
             "label": "score",
@@ -9189,6 +9159,10 @@
             }
           },
           {
+            "tags": [
+              "remarks",
+              "example"
+            ],
             "id": "def-server.SavedObjectsFindResult.sort",
             "type": "Array",
             "label": "sort",
@@ -9229,8 +9203,12 @@
         "description": [
           "\nReturn type of the Saved Objects `find()` method.\n\n*Note*: this type is different between the Public and Server Saved Objects\nclients.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.saved_objects",
             "type": "Array",
             "label": "saved_objects",
@@ -9252,6 +9230,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.total",
             "type": "number",
             "label": "total",
@@ -9263,6 +9242,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.per_page",
             "type": "number",
             "label": "per_page",
@@ -9274,6 +9254,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.page",
             "type": "number",
             "label": "page",
@@ -9285,6 +9266,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.pit_id",
             "type": "string",
             "label": "pit_id",
@@ -9313,8 +9295,12 @@
         "description": [
           "\nRepresents a failure to import due to a conflict."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportConflictError.type",
             "type": "string",
             "label": "type",
@@ -9329,6 +9315,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportConflictError.destinationId",
             "type": "string",
             "label": "destinationId",
@@ -9357,8 +9344,12 @@
         "description": [
           "\nRepresents a failure to import due to a conflict, which can be resolved in different ways with an overwrite."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportAmbiguousConflictError.type",
             "type": "string",
             "label": "type",
@@ -9373,6 +9364,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportAmbiguousConflictError.destinations",
             "type": "Array",
             "label": "destinations",
@@ -9401,8 +9393,12 @@
         "description": [
           "\nRepresents a failure to import."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportFailure.id",
             "type": "string",
             "label": "id",
@@ -9414,6 +9410,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportFailure.type",
             "type": "string",
             "label": "type",
@@ -9425,6 +9422,9 @@
             }
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.SavedObjectsImportFailure.title",
             "type": "string",
             "label": "title",
@@ -9439,6 +9439,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportFailure.meta",
             "type": "Object",
             "label": "meta",
@@ -9453,6 +9454,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportFailure.overwrite",
             "type": "CompoundType",
             "label": "overwrite",
@@ -9469,6 +9471,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportFailure.error",
             "type": "CompoundType",
             "label": "error",
@@ -9535,8 +9538,12 @@
         "description": [
           "\nRepresents a failure to import due to missing references."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportMissingReferencesError.type",
             "type": "string",
             "label": "type",
@@ -9551,6 +9558,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportMissingReferencesError.references",
             "type": "Array",
             "label": "references",
@@ -9579,8 +9587,12 @@
         "description": [
           "\nOptions to control the import operation."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportOptions.readStream",
             "type": "Object",
             "label": "readStream",
@@ -9597,6 +9609,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportOptions.overwrite",
             "type": "boolean",
             "label": "overwrite",
@@ -9610,6 +9623,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -9626,6 +9640,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportOptions.createNewCopies",
             "type": "boolean",
             "label": "createNewCopies",
@@ -9653,8 +9668,12 @@
         "description": [
           "\nThe response describing the result of an import."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportResponse.success",
             "type": "boolean",
             "label": "success",
@@ -9666,6 +9685,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportResponse.successCount",
             "type": "number",
             "label": "successCount",
@@ -9677,6 +9697,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportResponse.successResults",
             "type": "Array",
             "label": "successResults",
@@ -9698,6 +9719,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportResponse.warnings",
             "type": "Array",
             "label": "warnings",
@@ -9719,6 +9741,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportResponse.errors",
             "type": "Array",
             "label": "errors",
@@ -9754,8 +9777,12 @@
         "description": [
           "\nDescribes a retry operation for importing a saved object."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.type",
             "type": "string",
             "label": "type",
@@ -9767,6 +9794,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.id",
             "type": "string",
             "label": "id",
@@ -9778,6 +9806,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.overwrite",
             "type": "boolean",
             "label": "overwrite",
@@ -9789,6 +9818,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.destinationId",
             "type": "string",
             "label": "destinationId",
@@ -9805,6 +9835,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.replaceReferences",
             "type": "Array",
             "label": "replaceReferences",
@@ -9819,6 +9850,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.createNewCopy",
             "type": "CompoundType",
             "label": "createNewCopy",
@@ -9835,6 +9867,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportRetry.ignoreMissingReferences",
             "type": "CompoundType",
             "label": "ignoreMissingReferences",
@@ -9865,8 +9898,12 @@
         "description": [
           "\nRepresents a successful import."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSuccess.id",
             "type": "string",
             "label": "id",
@@ -9878,6 +9915,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSuccess.type",
             "type": "string",
             "label": "type",
@@ -9889,6 +9927,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSuccess.destinationId",
             "type": "string",
             "label": "destinationId",
@@ -9905,6 +9944,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.SavedObjectsImportSuccess.createNewCopy",
             "type": "CompoundType",
             "label": "createNewCopy",
@@ -9919,6 +9961,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSuccess.meta",
             "type": "Object",
             "label": "meta",
@@ -9933,6 +9976,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSuccess.overwrite",
             "type": "CompoundType",
             "label": "overwrite",
@@ -9963,8 +10007,12 @@
         "description": [
           "\nRepresents a failure to import due to an unknown reason."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportUnknownError.type",
             "type": "string",
             "label": "type",
@@ -9979,6 +10027,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportUnknownError.message",
             "type": "string",
             "label": "message",
@@ -9990,6 +10039,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportUnknownError.statusCode",
             "type": "number",
             "label": "statusCode",
@@ -10015,8 +10065,12 @@
         "description": [
           "\nRepresents a failure to import due to having an unsupported saved object type."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportUnsupportedTypeError.type",
             "type": "string",
             "label": "type",
@@ -10045,8 +10099,12 @@
         "description": [
           "\nMigration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectMigrationContext.log",
             "type": "Object",
             "label": "log",
@@ -10069,6 +10127,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectMigrationContext.migrationVersion",
             "type": "string",
             "label": "migrationVersion",
@@ -10082,6 +10141,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion",
             "type": "string",
             "label": "convertToMultiNamespaceTypeVersion",
@@ -10110,8 +10170,12 @@
         "type": "Interface",
         "label": "SavedObjectsMigrationLogger",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsMigrationLogger.debug",
             "type": "Function",
             "label": "debug",
@@ -10126,6 +10190,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsMigrationLogger.info",
             "type": "Function",
             "label": "info",
@@ -10140,6 +10205,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.SavedObjectsMigrationLogger.warning",
             "type": "Function",
             "label": "warning",
@@ -10154,6 +10222,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsMigrationLogger.warn",
             "type": "Function",
             "label": "warn",
@@ -10168,6 +10237,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsMigrationLogger.error",
             "type": "Function",
             "label": "error",
@@ -10213,8 +10283,12 @@
           }
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsOpenPointInTimeOptions.keepAlive",
             "type": "string",
             "label": "keepAlive",
@@ -10231,6 +10305,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsOpenPointInTimeOptions.preference",
             "type": "string",
             "label": "preference",
@@ -10259,8 +10334,12 @@
         "type": "Interface",
         "label": "SavedObjectsOpenPointInTimeResponse",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsOpenPointInTimeResponse.id",
             "type": "string",
             "label": "id",
@@ -10288,8 +10367,12 @@
         "description": [
           "\nA raw document as represented directly in the saved object index.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRawDoc._id",
             "type": "string",
             "label": "_id",
@@ -10301,6 +10384,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRawDoc._source",
             "type": "Object",
             "label": "_source",
@@ -10321,6 +10405,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRawDoc._seq_no",
             "type": "number",
             "label": "_seq_no",
@@ -10335,6 +10420,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRawDoc._primary_term",
             "type": "number",
             "label": "_primary_term",
@@ -10363,8 +10449,12 @@
         "description": [
           "\nOptions that can be specified when using the saved objects serializer to parse a raw document.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRawDocParseOptions.namespaceTreatment",
             "type": "CompoundType",
             "label": "namespaceTreatment",
@@ -10395,8 +10485,12 @@
         "description": [
           "\nFactory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}\nSee {@link SavedObjectsServiceSetup.setClientFactoryProvider}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRepositoryFactory.createScopedRepository",
             "type": "Function",
             "label": "createScopedRepository",
@@ -10429,6 +10523,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository",
             "type": "Function",
             "label": "createInternalRepository",
@@ -10467,8 +10562,12 @@
         "description": [
           "\nOptions to control the \"resolve import\" operation."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveImportErrorsOptions.readStream",
             "type": "Object",
             "label": "readStream",
@@ -10485,6 +10584,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveImportErrorsOptions.retries",
             "type": "Array",
             "label": "retries",
@@ -10508,6 +10608,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveImportErrorsOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -10524,6 +10625,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveImportErrorsOptions.createNewCopies",
             "type": "boolean",
             "label": "createNewCopies",
@@ -10561,8 +10663,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveResponse.saved_object",
             "type": "Object",
             "label": "saved_object",
@@ -10584,6 +10690,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveResponse.outcome",
             "type": "CompoundType",
             "label": "outcome",
@@ -10600,6 +10707,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsResolveResponse.aliasTargetId",
             "type": "string",
             "label": "aliasTargetId",
@@ -10647,8 +10755,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsUpdateOptions.version",
             "type": "string",
             "label": "version",
@@ -10665,6 +10777,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsUpdateOptions.references",
             "type": "Array",
             "label": "references",
@@ -10688,6 +10801,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsUpdateOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -10730,8 +10844,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsUpdateResponse.attributes",
             "type": "Object",
             "label": "attributes",
@@ -10746,6 +10864,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsUpdateResponse.references",
             "type": "Array",
             "label": "references",
@@ -10798,8 +10917,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsAddToNamespacesOptions.version",
             "type": "string",
             "label": "version",
@@ -10816,6 +10939,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsAddToNamespacesOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -10846,8 +10970,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsAddToNamespacesResponse.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -10895,8 +11023,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsDeleteFromNamespacesOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -10927,8 +11059,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsDeleteFromNamespacesResponse.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -10976,8 +11112,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRemoveReferencesToOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -11025,8 +11165,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsRemoveReferencesToResponse.updated",
             "type": "number",
             "label": "updated",
@@ -11054,8 +11198,12 @@
         "description": [
           "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The\nSavedObjectsServiceStart API provides a scoped Saved Objects client for\ninteracting with Saved Objects.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.getScopedClient",
             "type": "Function",
             "label": "getScopedClient",
@@ -11096,6 +11244,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.SavedObjectsServiceStart.createScopedRepository",
             "type": "Function",
             "label": "createScopedRepository",
@@ -11128,6 +11279,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.createInternalRepository",
             "type": "Function",
             "label": "createInternalRepository",
@@ -11152,6 +11304,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.createSerializer",
             "type": "Function",
             "label": "createSerializer",
@@ -11175,6 +11328,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.createExporter",
             "type": "Function",
             "label": "createExporter",
@@ -11207,6 +11361,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.createImporter",
             "type": "Function",
             "label": "createImporter",
@@ -11239,6 +11394,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceStart.getTypeRegistry",
             "type": "Function",
             "label": "getTypeRegistry",
@@ -11277,8 +11433,15 @@
         "description": [
           "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods\nfor registering Saved Object types, creating and registering Saved Object client wrappers and factories.\n"
         ],
+        "tags": [
+          "remarks",
+          "example",
+          "example",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceSetup.setClientFactoryProvider",
             "type": "Function",
             "label": "setClientFactoryProvider",
@@ -11303,6 +11466,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsServiceSetup.addClientWrapper",
             "type": "Function",
             "label": "addClientWrapper",
@@ -11327,6 +11491,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.SavedObjectsServiceSetup.registerType",
             "type": "Function",
             "label": "registerType",
@@ -11365,8 +11532,12 @@
         "description": [
           "\nMeta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectStatusMeta.migratedIndices",
             "type": "Object",
             "label": "migratedIndices",
@@ -11412,8 +11583,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsDeleteOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -11430,6 +11605,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsDeleteOptions.force",
             "type": "CompoundType",
             "label": "force",
@@ -11477,8 +11653,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsDeleteByNamespaceOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -11524,8 +11704,12 @@
           }
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsIncrementCounterOptions.initialize",
             "type": "CompoundType",
             "label": "initialize",
@@ -11542,6 +11726,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsIncrementCounterOptions.migrationVersion",
             "type": "Object",
             "label": "migrationVersion",
@@ -11565,6 +11750,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsIncrementCounterOptions.refresh",
             "type": "CompoundType",
             "label": "refresh",
@@ -11593,8 +11779,12 @@
         "type": "Interface",
         "label": "SavedObjectsIncrementCounterField",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsIncrementCounterField.fieldName",
             "type": "string",
             "label": "fieldName",
@@ -11608,6 +11798,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsIncrementCounterField.incrementBy",
             "type": "number",
             "label": "incrementBy",
@@ -11638,8 +11829,12 @@
         "description": [
           "\nSee {@link SavedObjectsFieldMapping} for documentation.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsComplexFieldMapping.dynamic",
             "type": "CompoundType",
             "label": "dynamic",
@@ -11656,6 +11851,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsComplexFieldMapping.enabled",
             "type": "CompoundType",
             "label": "enabled",
@@ -11670,6 +11866,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsComplexFieldMapping.doc_values",
             "type": "CompoundType",
             "label": "doc_values",
@@ -11684,6 +11881,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsComplexFieldMapping.type",
             "type": "string",
             "label": "type",
@@ -11698,6 +11896,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsComplexFieldMapping.properties",
             "type": "Object",
             "label": "properties",
@@ -11732,8 +11931,12 @@
         "description": [
           "\nSee {@link SavedObjectsFieldMapping} for documentation.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCoreFieldMapping.type",
             "type": "string",
             "label": "type",
@@ -11745,6 +11948,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCoreFieldMapping.null_value",
             "type": "CompoundType",
             "label": "null_value",
@@ -11759,6 +11963,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCoreFieldMapping.index",
             "type": "CompoundType",
             "label": "index",
@@ -11773,6 +11978,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCoreFieldMapping.doc_values",
             "type": "CompoundType",
             "label": "doc_values",
@@ -11787,6 +11993,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsCoreFieldMapping.fields",
             "type": "Object",
             "label": "fields",
@@ -11815,8 +12022,13 @@
         "description": [
           "\nDescribe a saved object type mapping.\n"
         ],
+        "tags": [
+          "example",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeMappingDefinition.dynamic",
             "type": "CompoundType",
             "label": "dynamic",
@@ -11833,6 +12045,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeMappingDefinition.properties",
             "type": "Object",
             "label": "properties",
@@ -11869,11 +12082,15 @@
         "description": [
           "\nDescribe the fields of a {@link SavedObjectsTypeMappingDefinition | saved object type}.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-server.SavedObjectsMappingProperties.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/mappings/types.ts",
@@ -11897,8 +12114,13 @@
         "type": "Interface",
         "label": "SavedObjectsType",
         "description": [],
+        "tags": [
+          "remarks",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.name",
             "type": "string",
             "label": "name",
@@ -11912,6 +12134,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.hidden",
             "type": "boolean",
             "label": "hidden",
@@ -11925,6 +12148,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.namespaceType",
             "type": "CompoundType",
             "label": "namespaceType",
@@ -11947,6 +12171,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.indexPattern",
             "type": "string",
             "label": "indexPattern",
@@ -11963,6 +12188,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.convertToAliasScript",
             "type": "string",
             "label": "convertToAliasScript",
@@ -11979,6 +12205,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.mappings",
             "type": "Object",
             "label": "mappings",
@@ -12001,6 +12228,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.migrations",
             "type": "CompoundType",
             "label": "migrations",
@@ -12032,6 +12260,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.convertToMultiNamespaceTypeVersion",
             "type": "string",
             "label": "convertToMultiNamespaceTypeVersion",
@@ -12048,6 +12277,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsType.management",
             "type": "Object",
             "label": "management",
@@ -12085,8 +12315,12 @@
         "description": [
           "\nConfiguration options for the {@link SavedObjectsType | type}'s management section.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.importableAndExportable",
             "type": "CompoundType",
             "label": "importableAndExportable",
@@ -12103,6 +12337,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.defaultSearchField",
             "type": "string",
             "label": "defaultSearchField",
@@ -12119,6 +12354,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.icon",
             "type": "string",
             "label": "icon",
@@ -12135,6 +12371,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.getTitle",
             "type": "Function",
             "label": "getTitle",
@@ -12159,6 +12396,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.getEditUrl",
             "type": "Function",
             "label": "getEditUrl",
@@ -12183,6 +12421,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsTypeManagementDefinition.getInAppUrl",
             "type": "Function",
             "label": "getInAppUrl",
@@ -12207,6 +12446,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.SavedObjectsTypeManagementDefinition.onExport",
             "type": "Function",
             "label": "onExport",
@@ -12230,6 +12472,11 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "remarks",
+              "remarks"
+            ],
             "id": "def-server.SavedObjectsTypeManagementDefinition.onImport",
             "type": "Function",
             "label": "onImport",
@@ -12267,11 +12514,16 @@
         "description": [
           "\nA map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
         ],
+        "tags": [
+          "example",
+          "public"
+        ],
         "children": [
           {
             "id": "def-server.SavedObjectMigrationMap.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/migrations/types.ts",
@@ -12295,8 +12547,12 @@
         "type": "Interface",
         "label": "SavedObjectExportBaseOptions",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectExportBaseOptions.request",
             "type": "Object",
             "label": "request",
@@ -12320,6 +12576,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectExportBaseOptions.includeReferencesDeep",
             "type": "CompoundType",
             "label": "includeReferencesDeep",
@@ -12336,6 +12593,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectExportBaseOptions.excludeExportDetails",
             "type": "CompoundType",
             "label": "excludeExportDetails",
@@ -12352,6 +12610,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectExportBaseOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -12399,8 +12658,12 @@
         "description": [
           "\nOptions for the {@link SavedObjectsExporter.exportByObjects | export by objects API}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportByObjectOptions.objects",
             "type": "Array",
             "label": "objects",
@@ -12448,8 +12711,12 @@
         "description": [
           "\nOptions for the {@link SavedObjectsExporter.exportByTypes | export by type API}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportByTypeOptions.types",
             "type": "Array",
             "label": "types",
@@ -12466,6 +12733,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportByTypeOptions.hasReference",
             "type": "Array",
             "label": "hasReference",
@@ -12489,6 +12757,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportByTypeOptions.search",
             "type": "string",
             "label": "search",
@@ -12519,8 +12788,12 @@
         "description": [
           "\nContext passed down to a {@link SavedObjectsExportTransform | export transform function}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsExportTransformContext.request",
             "type": "Object",
             "label": "request",
@@ -12558,8 +12831,12 @@
         "description": [
           "\nResult from a {@link SavedObjectsImportHook | import hook}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportHookResult.warnings",
             "type": "Array",
             "label": "warnings",
@@ -12597,8 +12874,12 @@
         "description": [
           "\nA simple informative warning that will be displayed to the user.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSimpleWarning.type",
             "type": "string",
             "label": "type",
@@ -12613,6 +12894,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportSimpleWarning.message",
             "type": "string",
             "label": "message",
@@ -12640,8 +12922,13 @@
         "description": [
           "\nA warning meant to notify that a specific user action is required to finalize the import\nof some type of object.\n"
         ],
+        "tags": [
+          "remark",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportActionRequiredWarning.type",
             "type": "string",
             "label": "type",
@@ -12656,6 +12943,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportActionRequiredWarning.message",
             "type": "string",
             "label": "message",
@@ -12669,6 +12957,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportActionRequiredWarning.actionPath",
             "type": "string",
             "label": "actionPath",
@@ -12682,6 +12971,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsImportActionRequiredWarning.buttonLabel",
             "type": "string",
             "label": "buttonLabel",
@@ -12712,8 +13002,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsBaseOptions.namespace",
             "type": "string",
             "label": "namespace",
@@ -12744,8 +13038,12 @@
         "description": [
           "\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.type",
             "type": "CompoundType",
             "label": "type",
@@ -12760,6 +13058,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.page",
             "type": "number",
             "label": "page",
@@ -12774,6 +13073,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.perPage",
             "type": "number",
             "label": "perPage",
@@ -12788,6 +13088,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.sortField",
             "type": "string",
             "label": "sortField",
@@ -12802,6 +13103,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.sortOrder",
             "type": "string",
             "label": "sortOrder",
@@ -12816,6 +13118,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-server.SavedObjectsFindOptions.fields",
             "type": "Array",
             "label": "fields",
@@ -12832,6 +13137,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.search",
             "type": "string",
             "label": "search",
@@ -12848,6 +13154,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.searchFields",
             "type": "Array",
             "label": "searchFields",
@@ -12864,6 +13171,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.searchAfter",
             "type": "Array",
             "label": "searchAfter",
@@ -12880,6 +13188,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.rootSearchFields",
             "type": "Array",
             "label": "rootSearchFields",
@@ -12896,6 +13205,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.hasReference",
             "type": "CompoundType",
             "label": "hasReference",
@@ -12927,6 +13237,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.hasReferenceOperator",
             "type": "CompoundType",
             "label": "hasReferenceOperator",
@@ -12943,6 +13254,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.defaultSearchOperator",
             "type": "CompoundType",
             "label": "defaultSearchOperator",
@@ -12959,6 +13271,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.filter",
             "type": "Any",
             "label": "filter",
@@ -12973,6 +13286,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.namespaces",
             "type": "Array",
             "label": "namespaces",
@@ -12987,6 +13301,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.typeToNamespacesMap",
             "type": "Object",
             "label": "typeToNamespacesMap",
@@ -13003,6 +13318,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.preference",
             "type": "string",
             "label": "preference",
@@ -13019,6 +13335,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptions.pit",
             "type": "Object",
             "label": "pit",
@@ -13054,8 +13371,12 @@
         "type": "Interface",
         "label": "SavedObjectsFindOptionsReference",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptionsReference.type",
             "type": "string",
             "label": "type",
@@ -13067,6 +13388,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsFindOptionsReference.id",
             "type": "string",
             "label": "id",
@@ -13090,8 +13412,12 @@
         "type": "Interface",
         "label": "SavedObjectsPitParams",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SavedObjectsPitParams.id",
             "type": "string",
             "label": "id",
@@ -13103,6 +13429,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SavedObjectsPitParams.keepAlive",
             "type": "string",
             "label": "keepAlive",
@@ -13131,6 +13458,9 @@
         "id": "def-server.SavedObjectsClientWrapperFactory",
         "type": "Type",
         "label": "SavedObjectsClientWrapperFactory",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDescribes the factory used to create instances of Saved Objects Client Wrappers."
         ],
@@ -13164,6 +13494,9 @@
         "id": "def-server.SavedObjectsClientFactory",
         "type": "Type",
         "label": "SavedObjectsClientFactory",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDescribes the factory used to create instances of the Saved Objects Client."
         ],
@@ -13197,6 +13530,9 @@
         "id": "def-server.SavedObjectsClientFactoryProvider",
         "type": "Type",
         "label": "SavedObjectsClientFactoryProvider",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nProvider to invoke to retrieve a {@link SavedObjectsClientFactory}."
         ],
@@ -13229,6 +13565,9 @@
         "id": "def-server.SavedObjectsClosePointInTimeOptions",
         "type": "Type",
         "label": "SavedObjectsClosePointInTimeOptions",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
@@ -13244,6 +13583,9 @@
         "id": "def-server.SavedObjectSanitizedDoc",
         "type": "Type",
         "label": "SavedObjectSanitizedDoc",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDescribes Saved Object documents that have passed through the migration\nframework and are guaranteed to have a `references` root property.\n"
         ],
@@ -13261,6 +13603,9 @@
         "id": "def-server.SavedObjectUnsanitizedDoc",
         "type": "Type",
         "label": "SavedObjectUnsanitizedDoc",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDescribes Saved Object documents from Kibana < 7.0.0 which don't have a\n`references` root property defined. This type should only be used in\nmigrations.\n"
         ],
@@ -13278,6 +13623,9 @@
         "id": "def-server.ISavedObjectsRepository",
         "type": "Type",
         "label": "ISavedObjectsRepository",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link SavedObjectsRepository}\n"
         ],
@@ -13295,6 +13643,9 @@
         "id": "def-server.SavedObjectsFieldMapping",
         "type": "Type",
         "label": "SavedObjectsFieldMapping",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDescribe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.\n\nPlease refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}\nFor the mapping documentation\n"
         ],
@@ -13326,6 +13677,9 @@
         "id": "def-server.ISavedObjectTypeRegistry",
         "type": "Type",
         "label": "ISavedObjectTypeRegistry",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link SavedObjectTypeRegistry} for documentation.\n"
         ],
@@ -13343,6 +13697,9 @@
         "id": "def-server.SavedObjectsNamespaceType",
         "type": "Type",
         "label": "SavedObjectsNamespaceType",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
@@ -13360,6 +13717,10 @@
         "id": "def-server.SavedObjectMigrationFn",
         "type": "Type",
         "label": "SavedObjectMigrationFn",
+        "tags": [
+          "example",
+          "public"
+        ],
         "description": [
           "\nA migration function for a {@link SavedObjectsType | saved object type}\nused to migrate it to a given version\n"
         ],
@@ -13401,6 +13762,9 @@
         "id": "def-server.ISavedObjectsExporter",
         "type": "Type",
         "label": "ISavedObjectsExporter",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
@@ -13420,6 +13784,12 @@
         "id": "def-server.SavedObjectsExportTransform",
         "type": "Type",
         "label": "SavedObjectsExportTransform",
+        "tags": [
+          "example",
+          "example",
+          "remarks",
+          "public"
+        ],
         "description": [
           "\nTransformation function used to mutate the exported objects of the associated type.\n\nA type's export transform function will be executed once per user-initiated export,\nfor all objects of that type.\n"
         ],
@@ -13451,6 +13821,9 @@
         "id": "def-server.ISavedObjectsImporter",
         "type": "Type",
         "label": "ISavedObjectsImporter",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/import/saved_objects_importer.ts",
@@ -13466,6 +13839,10 @@
         "id": "def-server.SavedObjectsImportHook",
         "type": "Type",
         "label": "SavedObjectsImportHook",
+        "tags": [
+          "remark",
+          "public"
+        ],
         "description": [
           "\nA hook associated with a specific saved object type, that will be invoked during\nthe import process. The hook will have access to the objects of the registered type.\n\nCurrently, the only supported feature for import hooks is to return warnings to be displayed\nin the UI when the import succeeds.\n"
         ],
@@ -13501,6 +13878,9 @@
         "id": "def-server.SavedObjectsImportWarning",
         "type": "Type",
         "label": "SavedObjectsImportWarning",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nComposite type of all the possible types of import warnings.\n\nSee {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarning}\nfor more details.\n"
         ],
@@ -13532,6 +13912,9 @@
         "id": "def-server.MutatingOperationRefreshSetting",
         "type": "Type",
         "label": "MutatingOperationRefreshSetting",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nElasticsearch Refresh setting for mutating operation"
         ],
@@ -13549,6 +13932,9 @@
         "id": "def-server.SavedObjectsClientContract",
         "type": "Type",
         "label": "SavedObjectsClientContract",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistance and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
         ],

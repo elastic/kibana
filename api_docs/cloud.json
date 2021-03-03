@@ -1,0 +1,249 @@
+{
+  "id": "cloud",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-public.CloudConfigType",
+        "type": "Interface",
+        "label": "CloudConfigType",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L17"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.resetPasswordUrl",
+            "type": "string",
+            "label": "resetPasswordUrl",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L18"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.deploymentUrl",
+            "type": "string",
+            "label": "deploymentUrl",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L19"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.accountUrl",
+            "type": "string",
+            "label": "accountUrl",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L20"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L16"
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-public.CloudSetup",
+      "type": "Interface",
+      "label": "CloudSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.cloudId",
+          "type": "string",
+          "label": "cloudId",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 32,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L32"
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.cloudDeploymentUrl",
+          "type": "string",
+          "label": "cloudDeploymentUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 33,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L33"
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.isCloudEnabled",
+          "type": "boolean",
+          "label": "isCloudEnabled",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 34,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L34"
+          }
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.resetPasswordUrl",
+          "type": "string",
+          "label": "resetPasswordUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 35,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L35"
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.accountUrl",
+          "type": "string",
+          "label": "accountUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 36,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L36"
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/cloud/public/plugin.ts",
+        "lineNumber": 31,
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/public/plugin.ts#L31"
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-server.CloudSetup",
+      "type": "Interface",
+      "label": "CloudSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-server.CloudSetup.cloudId",
+          "type": "string",
+          "label": "cloudId",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 19,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/server/plugin.ts#L19"
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.CloudSetup.isCloudEnabled",
+          "type": "boolean",
+          "label": "isCloudEnabled",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 20,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/server/plugin.ts#L20"
+          }
+        },
+        {
+          "tags": [],
+          "id": "def-server.CloudSetup.apm",
+          "type": "Object",
+          "label": "apm",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 21,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/server/plugin.ts#L21"
+          },
+          "signature": [
+            "{ url?: string | undefined; secretToken?: string | undefined; }"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/cloud/server/plugin.ts",
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/cloud/server/plugin.ts#L18"
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

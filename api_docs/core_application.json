@@ -5,6 +5,9 @@
       {
         "id": "def-public.ScopedHistory",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "ScopedHistory",
         "description": [
           "\nA wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves\nsimilarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope\nof this base path.\n\nThis wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing\nthe history of other applications.\n\nThe {@link ScopedHistory.createSubHistory | createSubHistory} method is particularly useful for applications that\ncontain any number of \"sub-apps\" which should not have access to the main application's history or basePath.\n"
@@ -108,12 +111,14 @@
               "lineNumber": 77,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L77"
             },
+            "tags": [],
             "returnComment": []
           },
           {
             "id": "def-public.ScopedHistory.length",
             "type": "number",
             "label": "length",
+            "tags": [],
             "description": [
               "\nThe number of entries in the history stack, including all entries forwards and backwards from the current location."
             ],
@@ -127,6 +132,7 @@
             "id": "def-public.ScopedHistory.location",
             "type": "Object",
             "label": "location",
+            "tags": [],
             "description": [
               "\nThe current location of the history stack."
             ],
@@ -144,6 +150,7 @@
             "id": "def-public.ScopedHistory.action",
             "type": "CompoundType",
             "label": "action",
+            "tags": [],
             "description": [
               "\nThe last action dispatched on the history stack."
             ],
@@ -205,6 +212,7 @@
               "lineNumber": 113,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L113"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -256,6 +264,7 @@
               "lineNumber": 131,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L131"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -289,6 +298,7 @@
               "lineNumber": 150,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L150"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -307,6 +317,7 @@
               "lineNumber": 168,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L168"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -325,6 +336,7 @@
               "lineNumber": 177,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L177"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -363,6 +375,7 @@
               "lineNumber": 185,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L185"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -405,6 +418,7 @@
               "lineNumber": 205,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L205"
             },
+            "tags": [],
             "returnComment": [
               "an function to unsubscribe the listener."
             ]
@@ -432,9 +446,11 @@
                 "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }",
                 "type": "Object",
                 "label": "{ prependBasePath = true }",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.prependBasePath",
                     "type": "CompoundType",
                     "label": "prependBasePath",
@@ -470,6 +486,7 @@
               "lineNumber": 222,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/application/scoped_history.ts#L222"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -488,6 +505,9 @@
         "type": "Interface",
         "label": "ApplicationSetup",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.ApplicationSetup.register",
@@ -610,8 +630,12 @@
         "type": "Interface",
         "label": "ApplicationStart",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.ApplicationStart.capabilities",
             "type": "Object",
             "label": "capabilities",
@@ -628,6 +652,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.ApplicationStart.applications$",
             "type": "Object",
             "label": "applications$",
@@ -784,9 +811,11 @@
                 "id": "def-public.ApplicationStart.getUrlForApp.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-public.ApplicationStart.getUrlForApp.options.path",
                     "type": "string",
                     "label": "path",
@@ -801,6 +830,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-public.ApplicationStart.getUrlForApp.options.absolute",
                     "type": "CompoundType",
                     "label": "absolute",
@@ -831,6 +861,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.ApplicationStart.currentAppId$",
             "type": "Object",
             "label": "currentAppId$",
@@ -870,8 +901,12 @@
           "<HistoryLocationState>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.App.id",
             "type": "string",
             "label": "id",
@@ -885,6 +920,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.App.title",
             "type": "string",
             "label": "title",
@@ -898,6 +934,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.App.category",
             "type": "Object",
             "label": "category",
@@ -921,6 +958,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.status",
             "type": "CompoundType",
             "label": "status",
@@ -944,6 +982,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.navLinkStatus",
             "type": "CompoundType",
             "label": "navLinkStatus",
@@ -967,6 +1006,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.defaultPath",
             "type": "string",
             "label": "defaultPath",
@@ -983,6 +1023,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.App.updater$",
             "type": "Object",
             "label": "updater$",
@@ -1008,6 +1051,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.order",
             "type": "number",
             "label": "order",
@@ -1024,6 +1068,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.tooltip",
             "type": "string",
             "label": "tooltip",
@@ -1040,6 +1085,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.euiIconType",
             "type": "string",
             "label": "euiIconType",
@@ -1056,6 +1102,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.icon",
             "type": "string",
             "label": "icon",
@@ -1072,6 +1119,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.capabilities",
             "type": "Object",
             "label": "capabilities",
@@ -1096,6 +1144,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.chromeless",
             "type": "CompoundType",
             "label": "chromeless",
@@ -1112,6 +1161,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.mount",
             "type": "Function",
             "label": "mount",
@@ -1135,6 +1185,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.App.appRoute",
             "type": "string",
             "label": "appRoute",
@@ -1151,6 +1202,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.App.exactRoute",
             "type": "CompoundType",
             "label": "exactRoute",
@@ -1167,6 +1221,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "example"
+            ],
             "id": "def-public.App.meta",
             "type": "Object",
             "label": "meta",
@@ -1212,8 +1270,12 @@
           "<HistoryLocationState>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AppMountParameters.element",
             "type": "Object",
             "label": "element",
@@ -1230,6 +1292,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.AppMountParameters.history",
             "type": "Object",
             "label": "history",
@@ -1253,6 +1318,10 @@
             ]
           },
           {
+            "tags": [
+              "deprecated",
+              "example"
+            ],
             "id": "def-public.AppMountParameters.appBasePath",
             "type": "string",
             "label": "appBasePath",
@@ -1266,6 +1335,10 @@
             }
           },
           {
+            "tags": [
+              "example",
+              "deprecated"
+            ],
             "id": "def-public.AppMountParameters.onAppLeave",
             "type": "Function",
             "label": "onAppLeave",
@@ -1290,6 +1363,9 @@
             ]
           },
           {
+            "tags": [
+              "example"
+            ],
             "id": "def-public.AppMountParameters.setHeaderActionMenu",
             "type": "Function",
             "label": "setHeaderActionMenu",
@@ -1328,8 +1404,12 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AppLeaveDefaultAction.type",
             "type": "string",
             "label": "type",
@@ -1365,8 +1445,12 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AppLeaveConfirmAction.type",
             "type": "string",
             "label": "type",
@@ -1388,6 +1472,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AppLeaveConfirmAction.text",
             "type": "string",
             "label": "text",
@@ -1399,6 +1484,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.AppLeaveConfirmAction.title",
             "type": "string",
             "label": "title",
@@ -1413,6 +1499,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AppLeaveConfirmAction.callback",
             "type": "Function",
             "label": "callback",
@@ -1441,8 +1528,12 @@
         "description": [
           "\nInput type for meta data for an application.\n\nMeta fields include `keywords` and `searchDeepLinks`\nKeywords is an array of string with which to associate the app, must include at least one unique string as an array.\n`searchDeepLinks` is an array of links that represent secondary in-app locations for the app."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.AppMeta.keywords",
             "type": "Array",
             "label": "keywords",
@@ -1459,6 +1550,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.AppMeta.searchDeepLinks",
             "type": "Array",
             "label": "searchDeepLinks",
@@ -1496,8 +1588,10 @@
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
+        "tags": [],
         "children": [
           {
+            "tags": [],
             "id": "def-public.NavigateToAppOptions.path",
             "type": "string",
             "label": "path",
@@ -1514,6 +1608,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NavigateToAppOptions.state",
             "type": "Unknown",
             "label": "state",
@@ -1530,6 +1625,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.NavigateToAppOptions.replace",
             "type": "CompoundType",
             "label": "replace",
@@ -1559,6 +1655,9 @@
         "id": "def-public.AppNavLinkStatus",
         "type": "Enum",
         "label": "AppNavLinkStatus",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nStatus of the application's navLink.\n"
         ],
@@ -1573,6 +1672,9 @@
         "id": "def-public.AppStatus",
         "type": "Enum",
         "label": "AppStatus",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAccessibility status of an application.\n"
         ],
@@ -1587,6 +1689,9 @@
         "id": "def-public.AppLeaveActionType",
         "type": "Enum",
         "label": "AppLeaveActionType",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
@@ -1603,6 +1708,10 @@
         "id": "def-public.AppMount",
         "type": "Type",
         "label": "AppMount",
+        "tags": [
+          "link",
+          "public"
+        ],
         "description": [
           "\nA mount function called when the user navigates to this app's route.\n"
         ],
@@ -1644,6 +1753,9 @@
         "id": "def-public.AppUnmount",
         "type": "Type",
         "label": "AppUnmount",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nA function called when an application should be unmounted from the page. This function should be synchronous."
         ],
@@ -1661,6 +1773,10 @@
         "id": "def-public.AppLeaveHandler",
         "type": "Type",
         "label": "AppLeaveHandler",
+        "tags": [
+          "public",
+          "deprecated"
+        ],
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
         ],
@@ -1687,6 +1803,9 @@
         "id": "def-public.AppLeaveAction",
         "type": "Type",
         "label": "AppLeaveAction",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
         ],
@@ -1718,6 +1837,9 @@
         "id": "def-public.AppUpdatableFields",
         "type": "Type",
         "label": "AppUpdatableFields",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
@@ -1735,6 +1857,9 @@
         "id": "def-public.AppUpdater",
         "type": "Type",
         "label": "AppUpdater",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nUpdater for applications.\nsee {@link ApplicationSetup}"
         ],
@@ -1768,6 +1893,9 @@
         "id": "def-public.AppSearchDeepLink",
         "type": "Type",
         "label": "AppSearchDeepLink",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
@@ -1801,6 +1929,9 @@
         "id": "def-public.PublicAppInfo",
         "type": "Type",
         "label": "PublicAppInfo",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nPublic information about a registered {@link App | application}\n"
         ],
@@ -1818,6 +1949,9 @@
         "id": "def-public.PublicAppMetaInfo",
         "type": "Type",
         "label": "PublicAppMetaInfo",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nPublic information about a registered app's {@link AppMeta | keywords }\n"
         ],
@@ -1835,6 +1969,9 @@
         "id": "def-public.PublicAppSearchDeepLinkInfo",
         "type": "Type",
         "label": "PublicAppSearchDeepLinkInfo",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nPublic information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}\n"
         ],

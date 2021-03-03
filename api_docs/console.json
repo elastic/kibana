@@ -1,0 +1,65 @@
+{
+  "id": "console",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-server.ConsoleSetup",
+      "type": "Type",
+      "label": "ConsoleSetup",
+      "tags": [
+        "public"
+      ],
+      "description": [],
+      "source": {
+        "path": "src/plugins/console/server/types.ts",
+        "lineNumber": 13,
+        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/console/server/types.ts#L13"
+      },
+      "signature": [
+        "{ addExtensionSpecFilePath: (path: string) => void; }"
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-server.ConsoleStart",
+      "type": "Type",
+      "label": "ConsoleStart",
+      "tags": [
+        "public"
+      ],
+      "description": [],
+      "source": {
+        "path": "src/plugins/console/server/types.ts",
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/console/server/types.ts#L18"
+      },
+      "signature": [
+        "{ addProcessorDefinition: (processor: any) => void; }"
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
