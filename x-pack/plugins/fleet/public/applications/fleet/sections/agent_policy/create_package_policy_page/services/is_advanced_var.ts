@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistryVarsEntry } from '../../../../types';
+import type { RegistryVarsEntry } from '../../../../types';
 
 export const isAdvancedVar = (varDef: RegistryVarsEntry): boolean => {
   if (varDef.show_user || (varDef.required && varDef.default === undefined)) {

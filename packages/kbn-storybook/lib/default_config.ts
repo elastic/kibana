@@ -19,6 +19,9 @@ export const defaultConfig: StorybookConfig = {
       config.parallelism = 4;
       config.cache = true;
     }
+
+    config.node = { fs: 'empty' };
+
     return config;
   },
 };

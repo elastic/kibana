@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, HttpSetup } from 'src/core/public';
+import type { CoreSetup, HttpSetup } from 'src/core/public';
 
 interface CreateDeps {
   application: CoreSetup['application'];
