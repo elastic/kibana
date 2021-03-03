@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient, ToastsSetup } from 'kibana/public';
-import { MapsEmsConfig } from '../../maps_ems/config';
+import type { MapsEmsConfig, IServiceSettings } from '../../maps_ems/public';
 
 let toast: ToastsSetup;
 export const setToasts = (notificationToast: ToastsSetup) => (toast = notificationToast);
@@ -19,5 +19,11 @@ export const getUiSettings = () => uiSettings;
 
 let mapsEmsConfig: MapsEmsConfig;
 export const setMapsEmsConfig = (config: MapsEmsConfig) => (mapsEmsConfig = config);
-
 export const getEmsTileLayerId = () => mapsEmsConfig.emsTileLayerId;
+
+let getServiceSettingsFunction: () => Promise<IServiceSettings>;
+export const setGetServiceSettings = (getSS: () => Promise<IServiceSettings>) =>
+  (getServiceSettingsFunction = getSS);
+export const getServiceSettings = async (): Promise<IServiceSettings> => {
+  return await getServiceSettingsFunction();
+};

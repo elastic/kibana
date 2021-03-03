@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IServiceSettings } from './service_settings_types';
+import type { IServiceSettings } from '../service_settings/service_settings_types';
 import { getMapsEmsConfig } from '../kibana_services';
-import { ServiceSettings } from './service_settings';
 
 let loadPromise: Promise<IServiceSettings>;
 
@@ -18,6 +17,7 @@ export async function getServiceSettings(): Promise<IServiceSettings> {
   }
 
   loadPromise = new Promise(async (resolve) => {
+    const { ServiceSettings } = await import('./lazy');
     const config = getMapsEmsConfig();
     resolve(new ServiceSettings(config, config.tilemap));
   });

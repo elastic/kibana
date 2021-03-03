@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { CoreStart } from 'kibana/public';
-import { MapsEmsConfig } from '../../../../src/plugins/maps_ems/config';
+import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';

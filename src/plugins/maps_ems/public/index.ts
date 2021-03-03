@@ -8,6 +8,8 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
+import { IServiceSettings } from './service_settings';
+import { MapsEmsConfig } from '../config';
 
 /** @public */
 export {
@@ -16,14 +18,17 @@ export {
   FileLayer,
   TmsLayer,
   IServiceSettings,
-  getServiceSettings,
 } from './service_settings';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
+export { MapsEmsConfig } from '../config';
 export * from '../common';
 
-export type MapsEmsPluginSetup = ReturnType<MapsEmsPlugin['setup']>;
+export interface MapsEmsPluginSetup {
+  config: MapsEmsConfig;
+  getServiceSettings: () => Promise<IServiceSettings>;
+}
 export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;

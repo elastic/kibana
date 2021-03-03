@@ -51,7 +51,7 @@ import { MapsStartApi } from './api';
 import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsEmsConfig } from '../../../../src/plugins/maps_ems/config';
+import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { FileUploadPluginStart } from '../../file_upload/public';
@@ -71,7 +71,7 @@ export interface MapsPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsEms: { config: MapsEmsConfig };
+  mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
 }

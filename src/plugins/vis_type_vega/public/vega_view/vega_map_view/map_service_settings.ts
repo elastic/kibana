@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EMSClient, TMSService } from '@elastic/ems-client';
 import { getUISettings } from '../../services';
 import { userConfiguredLayerId } from './constants';
-import type { MapsEmsConfig } from '../../../../maps_ems/config';
+import type { MapsEmsConfig } from '../../../../maps_ems/public';
 
 type EmsClientConfig = ConstructorParameters<typeof EMSClient>[0];
 

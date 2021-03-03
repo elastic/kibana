@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './service_settings_types';
+export { ServiceSettings } from '../../service_settings/service_settings';

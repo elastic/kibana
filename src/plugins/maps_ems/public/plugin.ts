@@ -13,7 +13,7 @@ import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
 // @ts-ignore
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
 import { MapsEmsConfig } from '../config';
-import { getServiceSettings } from './service_settings';
+import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
