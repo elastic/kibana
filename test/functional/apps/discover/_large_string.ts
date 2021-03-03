@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ' located before using this ebook.' +
         ' Title: Hamlet Author: William Shakespeare Release Date: November 1998 [EBook #1524]' +
         ' Last Updated: December 30, 2017 Language: English Character set encoding:' +
-        ' _id:1 _type: - _index:testlargestring _score:0';
+        ' _id:1 _type: _doc _index:testlargestring _score:0';
 
       let rowData;
       await PageObjects.common.navigateToApp('discover');
