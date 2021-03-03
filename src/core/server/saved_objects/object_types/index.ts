@@ -7,5 +7,5 @@
  */
 
 export { LEGACY_URL_ALIAS_TYPE } from './constants';
-export { LegacyUrlAlias } from './types';
+export type { LegacyUrlAlias } from './types';
 export { registerCoreObjectTypes } from './registration';
