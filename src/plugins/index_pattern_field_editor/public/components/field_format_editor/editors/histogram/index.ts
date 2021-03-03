@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { ReactText } from 'react';
-
-export type SampleInput = ReactText | ReactText[] | Record<string, ReactText[]>;
-
-export interface Sample {
-  input: SampleInput;
-  output: string;
-}
+export { HistogramFormatEditor } from './histogram';
