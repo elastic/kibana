@@ -156,10 +156,7 @@ export const ActionConnectorForm = ({
                 values={{
                   actionType: actionTypeName ?? connector.actionTypeId,
                   docLink: (
-                    <EuiLink
-                      href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
-                      target="_blank"
-                    >
+                    <EuiLink href={docLinks.links.alerting.actionTypes} target="_blank">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningHelpLinkText"
                         defaultMessage="Learn more."

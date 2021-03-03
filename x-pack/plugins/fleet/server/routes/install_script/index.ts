@@ -6,7 +6,10 @@
  */
 
 import url from 'url';
-import { IRouter, BasePath, KibanaRequest } from 'src/core/server';
+
+import { BasePath, KibanaRequest } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
+
 import { INSTALL_SCRIPT_API_ROUTES } from '../../constants';
 import { getScript } from '../../services/install_script';
 import { InstallScriptRequestSchema } from '../../types';

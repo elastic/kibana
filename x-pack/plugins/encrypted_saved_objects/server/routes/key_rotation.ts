@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '.';
+
+import type { RouteDefinitionParams } from './';
 
 /**
  * The default maximum value of from + size for searches to .kibana index. Since we cannot use scroll
