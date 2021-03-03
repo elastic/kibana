@@ -9,7 +9,7 @@ search source fields
 <b>Signature:</b>
 
 ```typescript
-export interface SearchSourceFields
+export interface SearchSourceFields 
 ```
 
 ## Properties
@@ -35,3 +35,4 @@ export interface SearchSourceFields
 |  [trackTotalHits](./kibana-plugin-plugins-data-public.searchsourcefields.tracktotalhits.md) | <code>boolean &#124; number</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.searchsourcefields.type.md) | <code>string</code> |  |
 |  [version](./kibana-plugin-plugins-data-public.searchsourcefields.version.md) | <code>boolean</code> |  |
+
