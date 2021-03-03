@@ -1,44 +1,72 @@
 steps:
   - command: "echo 'Pretending this is a build job'"
+    agents:
+      queue: ci-group
   - wait
   - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 1'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=2 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 2'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=3 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 3'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=4 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 4'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=5 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 5'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=6 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 6'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=7 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 7'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=8 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 8'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=9 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 9'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=10 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 10'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=11 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 11'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=12 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 12'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - command: 'CI_GROUP=13 .ci/buildkite/xpack-cigroup.sh'
     label: 'Default CI Group 13'
+    agents:
+      queue: ci-group
     artifact_paths: target/junit/**/*.xml
   - wait: ~
     continue_on_failure: true
