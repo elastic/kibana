@@ -27,6 +27,6 @@ export function getSourceForNode(node: Node): SourceLink {
   return {
     path,
     lineNumber,
-    link: `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}${path}#L${lineNumber}`,
+    link: `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}/${path}#L${lineNumber}`,
   };
 }
