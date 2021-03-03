@@ -31,12 +31,13 @@ import { AnomaliesTable } from './anomalies_table/anomalies_table';
 interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
+  closeFlyout(): void;
 }
 
 type Tab = 'jobs' | 'anomalies';
 export const FlyoutHome = (props: Props) => {
   const [tab, setTab] = useState<Tab>('jobs');
-  const { goToSetup } = props;
+  const { goToSetup, closeFlyout } = props;
   const {
     fetchJobStatus: fetchHostJobStatus,
     setupStatus: hostSetupStatus,
@@ -144,7 +145,7 @@ export const FlyoutHome = (props: Props) => {
             </>
           )}
 
-          {tab === 'anomalies' && <AnomaliesTable />}
+          {tab === 'anomalies' && <AnomaliesTable closeFlyout={closeFlyout} />}
         </EuiFlyoutBody>
       </>
     );

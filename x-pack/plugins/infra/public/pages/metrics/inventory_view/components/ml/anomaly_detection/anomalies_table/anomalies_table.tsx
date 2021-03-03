@@ -52,114 +52,115 @@ interface JobOption {
   id: JobType;
   label: string;
 }
-const AnomalyActionMenu = React.memo(
-  ({
-    jobId,
-    type,
-    startTime,
-    partitionFieldName,
-    partitionFieldValue,
-  }: {
-    jobId: string;
-    type: string;
-    startTime: number;
-    partitionFieldName?: string;
-    partitionFieldValue?: string;
-  }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isAlertOpen, setIsAlertOpen] = useState(false);
-    const close = useCallback(() => setIsOpen(false), [setIsOpen]);
-    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-    const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
-    const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
-    const { onViewChange } = useWaffleViewState();
+const AnomalyActionMenu = ({
+  jobId,
+  type,
+  startTime,
+  closeFlyout,
+  partitionFieldName,
+  partitionFieldValue,
+}: {
+  jobId: string;
+  type: string;
+  startTime: number;
+  closeFlyout: () => void;
+  partitionFieldName?: string;
+  partitionFieldValue?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const openAlert = useCallback(() => setIsAlertOpen(true), [setIsAlertOpen]);
+  const closeAlert = useCallback(() => setIsAlertOpen(false), [setIsAlertOpen]);
+  const { onViewChange } = useWaffleViewState();
 
-    const showInInventory = useCallback(() => {
-      const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
-        memory_usage: 'memory',
-        network_in: 'rx',
-        network_out: 'tx',
-      };
-      // parse the anomaly job id for metric type
-      const jobIdParts = jobId.split('-');
-      const jobIdMetric = jobIdParts[jobIdParts.length - 1];
-      const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
-      const anomalyViewParams: WaffleViewState = {
-        metric: { type: metricType },
-        sort: { by: 'name', direction: 'desc' },
-        groupBy: [],
-        nodeType: type === 'metrics_k8s' ? 'pod' : 'host',
-        view: 'map',
-        customOptions: [],
-        customMetrics: [],
-        boundsOverride: { max: 1, min: 0 },
-        autoBounds: true,
-        accountId: '',
-        region: '',
-        autoReload: false,
-        filterQuery: {
-          expression:
-            partitionFieldName && partitionFieldValue
-              ? `${partitionFieldName}: "${partitionFieldValue}"`
-              : ``,
-          kind: 'kuery',
-        },
-        legend: { palette: 'cool', reverseColors: false, steps: 10 },
-        time: startTime,
-      };
-      onViewChange(anomalyViewParams);
-    }, [jobId, onViewChange, startTime, type, partitionFieldName, partitionFieldValue]);
+  const showInInventory = useCallback(() => {
+    const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
+      memory_usage: 'memory',
+      network_in: 'rx',
+      network_out: 'tx',
+    };
+    // parse the anomaly job id for metric type
+    const jobIdParts = jobId.split('-');
+    const jobIdMetric = jobIdParts[jobIdParts.length - 1];
+    const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
+    const anomalyViewParams: WaffleViewState = {
+      metric: { type: metricType },
+      sort: { by: 'name', direction: 'desc' },
+      groupBy: [],
+      nodeType: type === 'metrics_k8s' ? 'pod' : 'host',
+      view: 'map',
+      customOptions: [],
+      customMetrics: [],
+      boundsOverride: { max: 1, min: 0 },
+      autoBounds: true,
+      accountId: '',
+      region: '',
+      autoReload: false,
+      filterQuery: {
+        expression:
+          partitionFieldName && partitionFieldValue
+            ? `${partitionFieldName}: "${partitionFieldValue}"`
+            : ``,
+        kind: 'kuery',
+      },
+      legend: { palette: 'cool', reverseColors: false, steps: 10 },
+      time: startTime,
+    };
+    onViewChange(anomalyViewParams);
+    closeFlyout();
+  }, [jobId, onViewChange, startTime, type, partitionFieldName, partitionFieldValue, closeFlyout]);
 
-    const anomaliesUrl = useLinkProps({
-      app: 'ml',
-      pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
-    });
+  const anomaliesUrl = useLinkProps({
+    app: 'ml',
+    pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
+  });
 
-    const items = [
-      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
-        <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-          defaultMessage="Show in Inventory"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
-        <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
-          defaultMessage="Open in Anomaly Explorer"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
-        <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
-          defaultMessage="Create Alert"
-        />
-      </EuiContextMenuItem>,
-    ];
+  const items = [
+    <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+        defaultMessage="Show in Inventory"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
+        defaultMessage="Open in Anomaly Explorer"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="createAlert" icon="bell" onClick={openAlert}>
+      <FormattedMessage
+        id="xpack.infra.ml.anomalyFlyout.actions.createAlert"
+        defaultMessage="Create Alert"
+      />
+    </EuiContextMenuItem>,
+  ];
 
-    return (
-      <>
-        <EuiPopover
-          anchorPosition="downRight"
-          panelPaddingSize="none"
-          button={
-            <EuiButtonIcon
-              iconType="boxesHorizontal"
-              onClick={handleToggleMenu}
-              aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
-                defaultMessage: 'Open',
-              })}
-            />
-          }
-          isOpen={isOpen && !isAlertOpen}
-          closePopover={close}
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
-        {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen && !isAlertOpen}
+        closePopover={close}
+      >
+        <EuiContextMenuPanel items={items} />
+      </EuiPopover>
+      {isAlertOpen && <PrefilledAnomalyAlertFlyout onClose={closeAlert} />}
+    </>
+  );
+};
 export const NoAnomaliesFound = withTheme(({ theme }) => (
   <EuiText>
     <EuiSpacer size="xl" />
@@ -181,7 +182,11 @@ export const NoAnomaliesFound = withTheme(({ theme }) => (
     </EuiText>
   </EuiText>
 ));
-export const AnomaliesTable = () => {
+interface Props {
+  closeFlyout(): void;
+}
+export const AnomaliesTable = (props: Props) => {
+  const { closeFlyout } = props;
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
@@ -324,6 +329,83 @@ export const AnomaliesTable = () => {
     });
   };
 
+  const columns: Array<
+    | EuiTableFieldDataColumnType<MetricsHostsAnomaly>
+    | EuiTableActionsColumnType<MetricsHostsAnomaly>
+  > = [
+    {
+      field: 'startTime',
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnTime', {
+        defaultMessage: 'Time',
+      }),
+      width: '15%',
+      sortable: true,
+      textOnly: true,
+      truncateText: true,
+      render: (startTime: number) => (
+        <FormattedDate value={startTime} year="numeric" month="short" day="2-digit" />
+      ),
+    },
+    {
+      field: 'jobId',
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnJob', {
+        defaultMessage: 'Job',
+      }),
+      width: '25%',
+      render: (jobId: string) => jobId,
+    },
+    {
+      field: 'anomalyScore',
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnSeverit', {
+        defaultMessage: 'Severity',
+      }),
+      width: '15%',
+      sortable: true,
+      render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
+    },
+    {
+      field: 'typical',
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnSummary', {
+        defaultMessage: 'Summary',
+      }),
+      width: '15%',
+      textOnly: true,
+      render: (typical: number, item: MetricsHostsAnomaly) => <AnomalySummary anomaly={item} />,
+    },
+    {
+      field: 'influencers',
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnInfluencerName', {
+        defaultMessage: 'Node name',
+      }),
+      width: '20%',
+      textOnly: true,
+      truncateText: true,
+      render: (influencers: string[]) => influencers.join(','),
+    },
+    {
+      name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
+        defaultMessage: 'Actions',
+      }),
+      width: '10%',
+      actions: [
+        {
+          render: (anomaly: MetricsHostsAnomaly) => {
+            return (
+              <AnomalyActionMenu
+                jobId={anomaly.jobId}
+                type={anomaly.type}
+                partitionFieldName={anomaly.partitionFieldName}
+                partitionFieldValue={anomaly.partitionFieldValue}
+                startTime={anomaly.startTime}
+                closeFlyout={closeFlyout}
+              />
+            );
+          },
+        },
+      ],
+    },
+  ];
+
   useEffect(() => {
     if (getAnomalies) {
       getAnomalies(undefined, search);
@@ -399,78 +481,3 @@ export const AnomaliesTable = () => {
     </div>
   );
 };
-
-const columns: Array<
-  EuiTableFieldDataColumnType<MetricsHostsAnomaly> | EuiTableActionsColumnType<MetricsHostsAnomaly>
-> = [
-  {
-    field: 'startTime',
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnTime', {
-      defaultMessage: 'Time',
-    }),
-    width: '15%',
-    sortable: true,
-    textOnly: true,
-    truncateText: true,
-    render: (startTime: number) => (
-      <FormattedDate value={startTime} year="numeric" month="short" day="2-digit" />
-    ),
-  },
-  {
-    field: 'jobId',
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnJob', {
-      defaultMessage: 'Job',
-    }),
-    width: '25%',
-    render: (jobId: string) => jobId,
-  },
-  {
-    field: 'anomalyScore',
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnSeverit', {
-      defaultMessage: 'Severity',
-    }),
-    width: '15%',
-    sortable: true,
-    render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
-  },
-  {
-    field: 'typical',
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnSummary', {
-      defaultMessage: 'Summary',
-    }),
-    width: '15%',
-    textOnly: true,
-    render: (typical: number, item: MetricsHostsAnomaly) => <AnomalySummary anomaly={item} />,
-  },
-  {
-    field: 'influencers',
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnInfluencerName', {
-      defaultMessage: 'Node name',
-    }),
-    width: '20%',
-    textOnly: true,
-    truncateText: true,
-    render: (influencers: string[]) => influencers.join(','),
-  },
-  {
-    name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
-      defaultMessage: 'Actions',
-    }),
-    width: '10%',
-    actions: [
-      {
-        render: (anomaly: MetricsHostsAnomaly) => {
-          return (
-            <AnomalyActionMenu
-              jobId={anomaly.jobId}
-              type={anomaly.type}
-              partitionFieldName={anomaly.partitionFieldName}
-              partitionFieldValue={anomaly.partitionFieldValue}
-              startTime={anomaly.startTime}
-            />
-          );
-        },
-      },
-    ],
-  },
-];
