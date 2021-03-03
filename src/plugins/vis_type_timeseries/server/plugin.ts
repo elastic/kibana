@@ -12,7 +12,7 @@ import {
   CoreStart,
   Plugin,
   Logger,
-  FakeRequest,
+  KibanaRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
@@ -25,7 +25,10 @@ import { IndexPatternsService } from '../../data/common';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { uiSettings } from './ui_settings';
-import type { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRouter } from './types';
+import type {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from './types';
 
 import {
   SearchStrategyRegistry,
@@ -49,7 +52,7 @@ interface VisTypeTimeseriesPluginStartDependencies {
 export interface VisTypeTimeseriesSetup {
   getVisData: (
     requestContext: VisTypeTimeseriesRequestHandlerContext,
-    fakeRequest: FakeRequest,
+    fakeRequest: KibanaRequest,
     // ideally this should be VisPayload type, but currently has inconsistencies with x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts
     options: any
   ) => Promise<TimeseriesVisData>;
@@ -61,7 +64,6 @@ export interface Framework {
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
   logger: Logger;
-  router: VisTypeTimeseriesRouter;
   searchStrategyRegistry: SearchStrategyRegistry;
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
@@ -91,7 +93,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       config$,
       globalConfig$,
       logger,
-      router,
       searchStrategyRegistry,
       getEsShardTimeout: () =>
         globalConfig$
@@ -114,15 +115,19 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     searchStrategyRegistry.addStrategy(new RollupSearchStrategy(framework));
 
     visDataRoutes(router, framework);
-    fieldsRoutes(framework);
+    fieldsRoutes(router, framework);
 
     return {
       getVisData: async (
         requestContext: VisTypeTimeseriesRequestHandlerContext,
-        fakeRequest: FakeRequest,
+        fakeRequest: KibanaRequest,
         options: VisPayload
       ) => {
-        return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
+        return await getVisData(
+          requestContext,
+          { ...fakeRequest, body: options } as VisTypeTimeseriesVisDataRequest,
+          framework
+        );
       },
     };
   }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, FakeRequest, IUiSettingsClient } from 'src/core/server';
+import type { IRouter, IUiSettingsClient, KibanaRequest } from 'src/core/server';
 import type {
   DataRequestHandlerContext,
   EsQueryConfig,
@@ -17,8 +17,11 @@ import { SearchStrategyRegistry } from './lib/search_strategies';
 
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
-export type VisTypeTimeseriesRequest<TPayload = unknown> = FakeRequest & { body: TPayload };
-export type VisTypeTimeseriesVisDataRequest = VisTypeTimeseriesRequest<VisPayload>;
+export type VisTypeTimeseriesVisDataRequest = KibanaRequest<{}, {}, VisPayload>;
+export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, {}>;
+export type VisTypeTimeseriesRequest =
+  | VisTypeTimeseriesFieldsRequest
+  | VisTypeTimeseriesVisDataRequest;
 
 export interface VisTypeTimeseriesRequestServices {
   esShardTimeout: number;
