@@ -455,7 +455,7 @@ Hypothetically, suppose the output of `drift` and `load` was the following:
 <1> drift shows us that all tasks are running 3 to 4 seconds after their scheduled time
 <2> `load` shows us that at least half of the time Task Manager is running at a load of 80%.
 
-We can infer from these stats that this {kib} is utilizing most of its capacity, but seems to keep up with the work most of the time.
+You can infer from these stats that this {kib} is using most of its capacity, but seems to keep up with the work most of the time.
 This assessment is based on the following:
 
 * The fact that the `p90` of `load` is at 100% and `p50` is also quite high at 80%. This means that there is little to no room for maneuvering, and a spike of work might cause Task Manager to exceed its capacity. 
