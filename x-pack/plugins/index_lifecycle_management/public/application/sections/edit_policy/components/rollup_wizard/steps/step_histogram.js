@@ -28,6 +28,8 @@ export class StepHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
+    indexPattern: PropTypes.string.isRequired,
+    onIndexPatternChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
     hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
@@ -52,7 +54,7 @@ export class StepHistogram extends Component {
   };
 
   render() {
-    const { fields } = this.props;
+    const { fields, onIndexPatternChange, indexPattern } = this.props;
 
     const { histogram } = fields;
 
@@ -105,8 +107,9 @@ export class StepHistogram extends Component {
                   defaultMessage="Add histogram fields"
                 />
               }
+              onIndexPatternChange={onIndexPatternChange}
+              indexPattern={indexPattern}
               columns={columns}
-              fields={[]}
               selectedFields={histogram}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobHistogramFieldChooser"

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { debounce } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -17,22 +17,42 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  EuiFormRow,
+  EuiFieldText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { checkIndexPatternResults } from '../../../../../../services/api';
+
+function sortFields(a, b) {
+  const nameA = a.name.toUpperCase();
+  const nameB = b.name.toUpperCase();
+
+  if (nameA < nameB) {
+    return -1;
+  }
+
+  if (nameA > nameB) {
+    return 1;
+  }
+
+  return 0;
+}
 
 export class FieldChooser extends Component {
   static propTypes = {
     buttonLabel: PropTypes.node.isRequired,
     columns: PropTypes.array.isRequired,
-    fields: PropTypes.array.isRequired,
     selectedFields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
+    indexPattern: PropTypes.string.isRequired,
+    onIndexPatternChange: PropTypes.func.isRequired,
     prompt: PropTypes.string,
     dataTestSubj: PropTypes.string,
   };
 
   static defaultProps = {
     prompt: 'Search',
-    dataTestSubj: 'rollupJobFieldChooser',
+    dataTestSubj: 'rollupFieldChooser',
   };
 
   constructor(props) {
@@ -40,8 +60,12 @@ export class FieldChooser extends Component {
 
     this.state = {
       isOpen: false,
+      isLoading: false,
+      fields: [],
       searchValue: '',
     };
+
+    this.updateFields();
   }
 
   onSearch = (e) => {
@@ -62,16 +86,48 @@ export class FieldChooser extends Component {
     });
   };
 
+  updateFields = debounce(
+    () => {
+      const updateFieldsResult = async () => {
+        const { indexPattern } = this.props;
+        if (indexPattern == null || indexPattern === '') {
+          this.setState({ isLoading: false, fields: [] });
+          return;
+        }
+        this.setState({ isLoading: true, fields: [] });
+        try {
+          const { fields } = await checkIndexPatternResults({ indexPattern });
+          this.setState({
+            isLoading: false,
+            fields: fields.map(({ name }) => ({ name })).sort(sortFields),
+          });
+        } catch (e) {
+          this.setState({ isLoading: false, fields: [], error: e });
+        }
+      };
+      updateFieldsResult();
+    },
+    200,
+    { trailing: true }
+  );
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.indexPattern !== this.props.indexPattern) {
+      this.updateFields();
+    }
+  }
+
   render() {
     const {
       buttonLabel,
       columns,
-      fields,
       selectedFields,
       prompt,
       onSelectField,
       dataTestSubj,
     } = this.props;
+
+    const { fields } = this.state;
 
     const { isOpen, searchValue } = this.state;
 
@@ -85,18 +141,16 @@ export class FieldChooser extends Component {
 
     const renderFlyout = () => {
       // Derive the fields which the user can select.
-      const selectedFieldNames = selectedFields.map(({ name }) => name);
       const unselectedFields = fields.filter(({ name }) => {
-        return !selectedFieldNames.includes(name);
+        return !selectedFields.find(({ name: selectedName }) => selectedName === name);
       });
+
+      const { indexPattern, onIndexPatternChange } = this.props;
 
       const searchedItems = searchValue
         ? unselectedFields.filter((item) => {
             const normalizedSearchValue = searchValue.trim().toLowerCase();
-            return (
-              item.name.toLowerCase().includes(normalizedSearchValue) ||
-              item.type.toLowerCase().includes(normalizedSearchValue)
-            );
+            return item.name.toLowerCase().includes(normalizedSearchValue);
           })
         : unselectedFields;
 
@@ -112,12 +166,21 @@ export class FieldChooser extends Component {
             <EuiTitle
               size="m"
               id="fieldChooserFlyoutTitle"
-              data-test-subj="rollupJobCreateFlyoutTitle"
+              data-test-subj="rollupCreateFlyoutTitle"
             >
               <h2>{buttonLabel}</h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
+
+            <EuiFormRow label="Index pattern">
+              <EuiFieldText
+                value={indexPattern}
+                onChange={(e) => onIndexPatternChange(e.target.value)}
+              />
+            </EuiFormRow>
+
+            <EuiHorizontalRule />
 
             <EuiFieldSearch
               placeholder={prompt}
@@ -142,7 +205,7 @@ export class FieldChooser extends Component {
     };
     return (
       <Fragment>
-        <EuiButton onClick={this.onButtonClick} data-test-subj="rollupJobShowFieldChooserButton">
+        <EuiButton onClick={this.onButtonClick} data-test-subj="rollupShowFieldChooserButton">
           {buttonLabel}
         </EuiButton>
 
