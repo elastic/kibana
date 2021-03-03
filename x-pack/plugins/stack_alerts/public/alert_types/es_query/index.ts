@@ -18,9 +18,7 @@ export function getAlertType(): AlertTypeModel<EsQueryAlertParams> {
       defaultMessage: 'Alert on matches against an ES query.',
     }),
     iconClass: 'logoElastic',
-    documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/alert-types.html#alert-type-es-query`;
-    },
+    documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
