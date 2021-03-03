@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { RoleTemplate } from '../../../../../common/model';
 import {
-  isStoredRoleTemplate,
   isInlineRoleTemplate,
   isInvalidRoleTemplate,
+  isStoredRoleTemplate,
 } from './role_template_type';
-import { RoleTemplate } from '../../../../../common/model';
 
 describe('#isStoredRoleTemplate', () => {
   it('returns true for stored templates, false otherwise', () => {

@@ -1,4 +1,5 @@
-# Call each package final target
+# Grouping target to call all underlying packages build
+# targets so we can build them all at once
 filegroup(
   name = "build",
   srcs = [],

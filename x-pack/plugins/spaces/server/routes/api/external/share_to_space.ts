@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { wrapError } from '../../../lib/errors';
-import { ExternalRouteDeps } from '.';
+
 import { ALL_SPACES_ID } from '../../../../common/constants';
+import { wrapError } from '../../../lib/errors';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareToSpacesApi(deps: ExternalRouteDeps) {

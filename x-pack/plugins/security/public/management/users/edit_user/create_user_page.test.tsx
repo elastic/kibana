@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import React from 'react';
+
+import { coreMock } from 'src/core/public/mocks';
+
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 import { CreateUserPage } from './create_user_page';
