@@ -75,7 +75,7 @@ export const getColorPicker = (
         panelPaddingSize="s"
       >
         <ColorPicker
-          color={color.toLowerCase()}
+          color={paletteName === 'kibana_palette' ? color : color.toLowerCase()}
           onChange={handlChange}
           label={seriesName}
           useLegacyColors={paletteName === 'kibana_palette'}
