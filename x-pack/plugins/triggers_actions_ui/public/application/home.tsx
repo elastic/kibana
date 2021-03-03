@@ -105,7 +105,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 data-test-subj="documentationLink"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
+                  id="xpack.triggersActionsUI.home.docsLinkText"
                   defaultMessage="Documentation"
                 />
               </EuiButtonEmpty>

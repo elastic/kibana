@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -331,7 +332,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 ) : (
                   <Fragment>
                     <EuiSpacer />
-                    <EuiCallOut title="Disabled Rule" color="warning" iconType="help">
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertDetails.alerts.disabledRuleTitle',
+                        {
+                          defaultMessage: 'Disabled Rule',
+                        }
+                      )}
+                      color="warning"
+                      iconType="help"
+                    >
                       <p>
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"

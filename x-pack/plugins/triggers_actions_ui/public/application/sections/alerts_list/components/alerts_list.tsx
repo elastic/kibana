@@ -174,8 +174,8 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load rule types' }
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
           ),
         });
       }

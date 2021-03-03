@@ -124,8 +124,8 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
           ),
         });
       } finally {
@@ -431,7 +431,7 @@ export const ActionForm = ({
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorTypesDescription"
                   defaultMessage="Loading connector types…"
                 />
               </SectionLoading>

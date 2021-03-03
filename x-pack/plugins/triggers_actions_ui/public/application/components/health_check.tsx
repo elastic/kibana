@@ -184,8 +184,8 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.rulesErrorTitle"
-          defaultMessage="You must enable Rules and Connectors"
+          id="xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle"
+          defaultMessage="You must enable Alerting and Actions"
         />
       </h2>
     }
@@ -193,11 +193,11 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
       <div className={`${className}__body`}>
         <p role="banner">
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsError', {
-            defaultMessage: 'To create a rule, set alerts and actions plugins enabled. ',
+            defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
           })}
           <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
-              defaultMessage: 'Learn how to enable Rules and Connectors.',
+              defaultMessage: 'Learn how.',
             })}
           </EuiLink>
         </p>
@@ -231,7 +231,7 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
               {
-                defaultMessage: 'Learn how',
+                defaultMessage: 'Learn how.',
               }
             )}
           </EuiLink>

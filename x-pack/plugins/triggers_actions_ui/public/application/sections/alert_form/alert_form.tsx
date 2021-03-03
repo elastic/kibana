@@ -113,7 +113,7 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   if (emptyConnectorActions !== undefined) {
     errors.actionConnectors.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
-        defaultMessage: 'Action connector for {actionTypeId} is required.',
+        defaultMessage: 'Action for {actionTypeId} connector is required.',
         values: { actionTypeId: emptyConnectorActions.actionTypeId },
       })
     );
@@ -904,7 +904,7 @@ const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
         <p role="banner">
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypes"
-            defaultMessage="In order to {operation} an Rule you need to have been granted the appropriate privileges."
+            defaultMessage="In order to {operation} a Rule you need to have been granted the appropriate privileges."
             values={{ operation }}
           />
         </p>

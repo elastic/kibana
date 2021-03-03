@@ -19,7 +19,7 @@ export const ConfirmAlertClose: React.FC<Props> = ({ onConfirm, onCancel }) => {
   return (
     <EuiConfirmModal
       title={i18n.translate(
-        'xpack.triggersActionsUI.sections.confirmAlertClose.confirmRuleCloseTitle',
+        'xpack.triggersActionsUI.sections.confirmAlertClose.confirmAlertCloseTitle',
         {
           defaultMessage: 'Discard unsaved changes to rule?',
         }
