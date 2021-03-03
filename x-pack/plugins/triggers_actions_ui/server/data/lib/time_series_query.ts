@@ -7,9 +7,9 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'kibana/server';
+import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
-import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
 export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
@@ -127,9 +127,10 @@ export async function timeSeriesQuery(
     };
   }
 
+  let esResult: SearchResponse<unknown>;
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
-  let esResult: SearchResponse<unknown>;
+
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
   // isn't as nice since it's a single long JSON line.

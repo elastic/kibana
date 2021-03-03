@@ -30,6 +30,7 @@ describe('timeSeriesQuery', () => {
   const mockCallCluster = jest.fn();
 
   beforeEach(async () => {
+    mockCallCluster.mockReset();
     params = {
       logger: loggingSystemMock.create().get(),
       callCluster: mockCallCluster,
