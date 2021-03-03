@@ -127,7 +127,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     );
   },
   onFieldChange: (oldColumn, field) => {
-    // TODO: Handle switch with number_range fields
     return {
       ...oldColumn,
       label: field.name,

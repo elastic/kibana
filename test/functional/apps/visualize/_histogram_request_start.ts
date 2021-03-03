@@ -76,7 +76,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
         log.debug('Field = machine.ram_range');
         await PageObjects.visEditor.selectField('machine.ram_range');
-        await PageObjects.common.sleep(1000); // fix this
+        await retry.waitFor('interval to be set', async () => {
+          return await PageObjects.visEditor.getNumericInterval();
+        });
         expect(await PageObjects.visEditor.getNumericInterval()).to.eql(100);
       });
     });
