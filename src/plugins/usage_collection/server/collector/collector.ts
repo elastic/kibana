@@ -45,7 +45,7 @@ export type PossibleSchemaTypes<U> = U extends string
 
 export type RecursiveMakeSchemaFrom<U> = U extends object
   ? MakeSchemaFrom<U>
-  : { type: PossibleSchemaTypes<U> };
+  : { type: PossibleSchemaTypes<U>; _meta?: { description: string } };
 
 // Using Required to enforce all optional keys in the object
 export type MakeSchemaFrom<Base> = {

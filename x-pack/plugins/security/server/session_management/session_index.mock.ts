@@ -6,7 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SessionIndex, SessionIndexValue } from './session_index';
+
+import type { SessionIndex, SessionIndexValue } from './session_index';
 
 export const sessionIndexMock = {
   create: (): jest.Mocked<PublicMethodsOf<SessionIndex>> => ({

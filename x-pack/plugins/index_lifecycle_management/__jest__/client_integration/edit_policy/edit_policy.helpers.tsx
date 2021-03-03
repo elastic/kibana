@@ -183,13 +183,6 @@ export const setup = async (arg?: {
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-  const showDataAllocationOptions = (phase: Phases) => () => {
-    act(() => {
-      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
-    });
-    component.update();
-  };
-
   const createMinAgeActions = (phase: Phases) => {
     return {
       hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
@@ -229,12 +222,10 @@ export const setup = async (arg?: {
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
-    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
-      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
       searchableSnapshotDisabled: () =>
         exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
       searchableSnapshotsExists: () => exists(fieldSelector),
@@ -386,7 +377,6 @@ export const setup = async (arg?: {
       },
       warm: {
         enable: enable('warm'),
-        showDataAllocationOptions: showDataAllocationOptions('warm'),
         ...createMinAgeActions('warm'),
         setReplicas: setReplicas('warm'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
@@ -398,7 +388,6 @@ export const setup = async (arg?: {
       },
       cold: {
         enable: enable('cold'),
-        showDataAllocationOptions: showDataAllocationOptions('cold'),
         ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,
