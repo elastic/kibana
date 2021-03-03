@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'kibana/server';
+
 import { ElasticsearchAssetType } from '../../../../types';
 import type { CallESAsCurrentUser, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';

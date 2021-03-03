@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+
 import { AgentEnrollmentFlyout } from '../components';
 import { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
@@ -45,6 +46,7 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../components';
+
 import { AgentTableHeader } from './components/table_header';
 import { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';

@@ -790,6 +790,22 @@ module.exports = {
     },
 
     /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
