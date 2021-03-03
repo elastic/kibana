@@ -12,6 +12,7 @@ const filterManager = ({
   getGlobalFilters: () => [],
   getAppFilters: () => [],
 } as unknown) as FilterManager;
+const addBasePath = (path: string) => `/base${path}`;
 
 describe('Get context url', () => {
   test('returning a valid context url', async () => {
@@ -22,9 +23,10 @@ describe('Get context url', () => {
       filterManager,
       documentTime: '2021-02-10T20:01:01.000Z',
       routing: undefined,
+      addBasePath,
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
+      `"/base/app/discover#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
     );
   });
 
@@ -36,9 +38,10 @@ describe('Get context url', () => {
       filterManager,
       documentTime: '2021-02-10T20:01:01.000Z',
       routing: 'shard1',
+      addBasePath,
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!(),routing:shard1)"`
+      `"/base/app/discover#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!(),routing:shard1)"`
     );
   });
 
@@ -50,9 +53,10 @@ describe('Get context url', () => {
       filterManager,
       documentTime: '2021-02-10T20:01:01.000Z',
       routing: undefined,
+      addBasePath,
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
+      `"/base/app/discover#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
     );
   });
 });

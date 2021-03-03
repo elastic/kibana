@@ -109,7 +109,16 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           // Each document is guaranteed to have a time field, this allows changing from one document to another
           documentTime: $scope.flattenedRow[$scope.indexPattern.timeFieldName],
           routing: $scope.row._routing,
+          addBasePath: getServices().addBasePath,
         });
+      };
+
+      $scope.getSingleDocHref = () => {
+        return getServices().addBasePath(
+          `/app/discover#/doc/${$scope.indexPattern.id}/${
+            $scope.row._index
+          }?id=${encodeURIComponent($scope.row._id)}`
+        );
       };
 
       // create a tr element that lists the value for each *column*

@@ -59,6 +59,7 @@ describe('Doc Table', () => {
       uiSettings: core.uiSettings,
       filterManager: dataMock.query.filterManager,
       timefilter: dataMock.query.timefilter.timefilter,
+      addBasePath: (path) => path,
     });
 
     setDocViewsRegistry({

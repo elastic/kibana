@@ -10,6 +10,7 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { url } from '../../../../kibana_utils/common';
 import { esFilters, FilterManager } from '../../../../data/public';
+import { DiscoverServices } from '../../build_services';
 
 /**
  * Helper function to generate an URL to a document in Discover's context view
@@ -23,8 +24,17 @@ export function getContextUrl(props: {
   /* Routing is optional, but allows the context query to be more optimized
    */
   routing: string | undefined;
+  addBasePath: DiscoverServices['addBasePath'];
 }) {
-  const { documentId, routing, indexPatternId, columns, filterManager, documentTime } = props;
+  const {
+    documentId,
+    routing,
+    indexPatternId,
+    columns,
+    filterManager,
+    documentTime,
+    addBasePath,
+  } = props;
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
 
@@ -44,7 +54,9 @@ export function getContextUrl(props: {
     { encode: false, sort: false }
   );
 
-  return `#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-    documentId
-  )}?${hash}`;
+  return addBasePath(
+    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+      documentId
+    )}?${hash}`
+  );
 }
