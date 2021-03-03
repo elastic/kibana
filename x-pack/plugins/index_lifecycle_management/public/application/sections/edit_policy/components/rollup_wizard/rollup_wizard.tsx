@@ -317,7 +317,7 @@ export class RollupWizard extends Component<Props, State> {
                   id="xpack.indexLifecycleMgmt.rollup.createTitle"
                   defaultMessage="Configure {phase} phase rollup action"
                   values={{
-                    phase: i18nTexts[phase],
+                    phase: i18nTexts.title[phase],
                   }}
                 />
               </h1>
