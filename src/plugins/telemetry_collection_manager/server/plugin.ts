@@ -121,10 +121,11 @@ export class TelemetryCollectionManagerPlugin
       ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
       : this.elasticsearchClient?.asInternalUser;
     // Scope the saved objects client appropriately and pass to the stats collection config
-    const soRepository = config.unencrypted
-      ? this.savedObjectsService?.createScopedRepository(config.request)
-      : this.savedObjectsService?.createInternalRepository();
-    const soClient = soRepository && new TelemetrySavedObjectsClient(soRepository);
+    const soClient =
+      this.savedObjectsService &&
+      (config.unencrypted
+        ? this.savedObjectsService.getScopedClient(config.request) // Intentionally using the scoped client here to make use of all the security wrappers. It will also return spaces-scoped telemetry.
+        : new TelemetrySavedObjectsClient(this.savedObjectsService.createInternalRepository()));
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
