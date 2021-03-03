@@ -213,6 +213,19 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 
 . Save your visualization for use on a dashboard.
 
+Given your documents contain fields of type geo point, you can visualize them in **Maps**.
+
+. Make sure the index pattern is set to **kibana_sample_data_flights**. And the configured time range 
+contains data.
+
+. From the **Available fields** list, click `OriginLocation` and then click **Visualize**.
++
+[role="screenshot"]
+image:images/discover-maps.png[Map containing documents]
+
+. Save your map for use on a dashboard.
+
+
 [float]
 === What’s next?
 
