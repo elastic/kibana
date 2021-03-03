@@ -8,7 +8,6 @@
 import Path from 'path';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { SourceLink } from '../types';
 
 export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolean {
   return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
@@ -21,12 +20,8 @@ export function getRelativePath(fullPath: string): string {
   return Path.relative(REPO_ROOT, fullPath);
 }
 
-export function getSourceForNode(node: Node): SourceLink {
+export function getSourceForNode(node: Node): string {
   const path = getRelativePath(node.getSourceFile().getFilePath());
   const lineNumber = node.getStartLineNumber();
-  return {
-    path,
-    lineNumber,
-    link: `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}/${path}#L${lineNumber}`,
-  };
+  return `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}/${path}#L${lineNumber}`;
 }

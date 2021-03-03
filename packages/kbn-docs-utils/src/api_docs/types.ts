@@ -172,13 +172,7 @@ export interface ApiDeclaration {
   /**
    * Used to create links to github to view the code for this API.
    */
-  source: SourceLink;
-}
-
-export interface SourceLink {
-  path: string;
-  lineNumber: number;
-  link: string;
+  source: string;
 }
 
 /**
