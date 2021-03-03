@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'],false);
+      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
