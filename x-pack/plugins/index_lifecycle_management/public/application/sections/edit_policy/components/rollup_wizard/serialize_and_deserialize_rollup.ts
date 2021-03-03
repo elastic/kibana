@@ -42,7 +42,7 @@ export function serializeRollup(rollupConfig: InternalRollup): RollupAction['con
     },
   };
 
-  if (dateHistogramIntervalType === 'calender') {
+  if (dateHistogramIntervalType === 'calendar') {
     serializedRollup.groups.date_histogram.calendar_interval = dateHistogramInterval;
   } else {
     serializedRollup.groups.date_histogram.fixed_interval = dateHistogramInterval;
@@ -102,8 +102,8 @@ export function deserializeRollup(rollupAction: RollupAction): InternalRollup {
   const dateHistogramInterval = interval || fixedInterval || calendarInterval || '';
 
   const dateHistogramIntervalType: InternalRollup['dateHistogramIntervalType'] = calendarInterval
-    ? 'fixed'
-    : 'calender';
+    ? 'calendar'
+    : 'fixed';
 
   const deserializedJob: InternalRollup = {
     dateHistogramIntervalType,

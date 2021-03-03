@@ -6,7 +6,7 @@
  */
 
 export interface InternalRollup {
-  dateHistogramIntervalType: 'fixed' | 'calender';
+  dateHistogramIntervalType: 'fixed' | 'calendar';
   dateHistogramInterval: string;
   dateHistogramTimeZone?: string;
   dateHistogramField: string;
