@@ -17,8 +17,7 @@ releases, refer to:
 * {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
 * {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>.
+For the full list of changes in {minor-version}, see <<release-notes>>.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide

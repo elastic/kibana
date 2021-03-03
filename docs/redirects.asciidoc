@@ -296,3 +296,13 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="explore-dashboard-data"]
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
+
+[role="exclude",id="breaking-changes"]
+== Breaking changes
+
+This content has moved. Refer to the following:
+
+* <<release-notes, Release notes>>
+
+* <<plugin-api-changes,Plugin API changes>>
+

@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.12.0>>
 * <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
 * <<release-notes-7.10.2>>
@@ -90,10 +91,356 @@ For detailed information about the n.n.n release, review the following sections.
 
 --
 
+[[release-notes-7.12.0]]
+== {kib} 7.12.0
+
+coming::[7.12.0]
+
+For detailed information about the {kib} 7.12.0 release, review the following information.
+
+[float]
+[[breaking-changes-7.12.0]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.12.0, review the breaking change, then mitigate the
+impact to your application.
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+// tag::notable-breaking-changes[]
+
+[discrete]
+[[maps-7.12.0-breaking-change]]
+.Removes the Geo threshold alert type
+[%collapsible]
+====
+*Details:* +
+Geo containment alerts and the Geo threshold alert type have similar functionality, so the Geo threshold alert type has been removed.
+
+*Impact* +
+Use Geo containment alerts.
+
+For more information, refer to {kibana-pull}89632[#89632].
+====
+
+// end::notable-breaking-changes[]
+
+[float]
+[[deprecation-v7.12.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.12.0, and will be removed in 8.0.0. Deprecated functionality does not have an immediate impact on your application, but 
+we strongly recommend you make the necessary updates after you upgrade to 7.12.0. 
+
+[discrete]
+[[alerting-7.12.0-deprecation]]
+.Deprecates `services.callCluster` in alerts and actions executors
+[%collapsible]
+====
+*Details* +
+Deprecates `services.callCluster` in the alert and action type executors. For more information, refer to {kibana-pull}86474[#86474].
+
+*Impact* +
+Use `services.scopedClusterClient`.
+====
+
+[discrete]
+[[management-7.12.0-deprecation]]
+.Deprecates configuring [kib] with a `server.host` value of `0`
+[%collapsible]
+====
+*Details* +
+In the new version of joi, `0` is an invalid hostname. When upgraded, the extra validate function can be removed. For more information, refer to {kibana-pull}87114[#87114].
+
+*Impact* +
+To bind to all interfaces, use `0.0.0.0`.
+====
+
+[discrete]
+[[platform-7.12.0-deprecation]]
+.Deprecates the use of `elasticsearch.logQueries`
+[%collapsible]
+====
+*Details* +
+When `logging.verbose: true` or `logging.root.level: 'debug'`, {es} query logs are now always shown. 
+In 7.11.0 and earlier, {es} query logs were not included in verbose logging unless `elasticsearch.logQueries` was configured. 
+For more information, refer to {kibana-pull}89296[#89296].
+
+*Impact* +
+To use verbose logging without {es} query logs, configure the query logs to `off` in kibana.yml:
+[source,js]
+----
+logging:
+  loggers:
+     - context: elasticsearch.query
+       level: off
+----
+====
+
+[float]
+[[feaatures-v7.12.0]]
+=== Features
+
+{kib} 7.12.0 adds the following new and notable features. For more information about the features introduced in 7.12.0, refer to 
+//{kibana-ref-all}/7.12/whats-new.html[What's new in 7.12].
+
+Alerting::
+* Adds Search alert {kibana-pull}88528[#88528]
+APM::
+* Correlations Beta (#86477) {kibana-pull}89952[#89952]
+Dashboard::
+* Adds the ability to copy a panel to another dashboard {kibana-pull}90856[#90856]
+Discover::
+* Adds "Hide chart" / "Show chart" persistence {kibana-pull}88603[#88603]
+{kib} Home & Add Data::
+* Adds custom global header banner {kibana-pull}87438[#87438]
+Lens and visualizations::
+* Adds the counter rate, cumulative sum, differences and moving average functions to *Lens* {kibana-pull}84384[#84384]
+* Adds the percentile function to *Lens* {kibana-pull}86490[#86490]
+* Adds support for histogram mapping type for all numeric functions {kibana-pull}90357[#90357]
+* Renames *Visualize* to *Visualize Library* {kibana-pull}91015[#91015]
+Logs::
+* Show anomalies across the log rate and categorization ML jobs in a swimlane visualization {kibana-pull}89589[#89589]
+Management::
+* Adds Search Sessions, which enable users to Inspect, Extend, or Delete a saved Search Session {kibana-pull}81707[#81707]
+* Allows configuration of expiration, tracking interval, and other Search Session related settings in kibana.yml {kibana-pull}88023[#88023]
+* Enables Search Sessions in Discover and Dashboard {kibana-pull}91097[#91097]
+* Redesign of the policy phases {kibana-pull}88671[#88671]
+* Adds userPermissions method to plugin start interface {kibana-pull}89232[#89232]
+* Moves the IndexPatternManagement.formatEditors API to IndexPatternFieldEditor.formatEditors {kibana-pull}89259[#89259]
+Maps::
+* Removes the Geo containment alert type experimental config settings and refs {kibana-pull}90301[#90301]
+Monitoring::
+* Removes support for the legacy elasticsearch client from the usage collector's fetch context {kibana-pull}87356[#87356]
+Platform::
+* Adds the ability to sync colors on dashboard panels {kibana-pull}86180[#86180]
+* Explicit typings for request handler context {kibana-pull}88718[#88718]
+* Enforce camelCase plugin IDs {kibana-pull}90752[#90752]
+Uptime::
+* ServiceNow SIR Connector {kibana-pull}88190[#88190]
+
+For detailed information about the 7.12.0 release, refer to <<enhancements-and-bug-fixes,Enhancements and bug fixes>>.
+
+[[enhancements-and-bug-fixes]]
+=== Enhancements and bug fixes
+
+The 7.12.0 release includes the following enhancements and bug fixes. 
+
+[float]
+[[enhancement-v7.12.0]]
+=== Enhancements
+Alerting::
+* Alert and Connector flyouts Save and Save&Test buttons should be active by default. {kibana-pull}86708[#86708]
+* Adds a "Refresh" button to the alerts list and alert details views {kibana-pull}87016[#87016]
+* Allow user to select existing connector of same type when fixing broken connector {kibana-pull}89062[#89062]
+* Adds support for custom alert ids {kibana-pull}89814[#89814]
+APM::
+* Showing confirmation modal on Alert Add/Edit when flyout closed without saving and changes made. {kibana-pull}86370[#86370]
+* Instances latency distribution chart {kibana-pull}88546[#88546]
+* Round start and end values {kibana-pull}89030[#89030]
+Canvas::
+* Adds support for IP data type {kibana-pull}85087[#85087]
+* Adds Label option for Dropdown Control {kibana-pull}88505[#88505]
+Dashboard::
+* Adds URL encoding for URL drilldowns {kibana-pull}86902[#86902]
+* Removes Panels from URL {kibana-pull}86939[#86939]
+* Adds URL template editor {kibana-pull}88577[#88577]
+* Enable right click on visualizations and dashboards listings {kibana-pull}88936[#88936]
+* Adds Save as button to top menu {kibana-pull}90320[#90320]
+* Improves error messages when in Dashboard {kibana-pull}90668[#90668]
+* Adds Unsaved Changes Badge {kibana-pull}91073[#91073]
+* Combines Discard & Cancel {kibana-pull}91267[#91267]
+* Adds the ability to stay in Edit Mode After Dashboard Quicksave {kibana-pull}91729[#91729]
+* Dashboard Save As New by Default {kibana-pull}91761[#91761]
+Discover::
+* Change default sort handling {kibana-pull}85561[#85561]
+* Replaces EuiCodeBlock with Monaco editor {kibana-pull}90781[#90781]
+{kib} Home & Add Data::
+* Fixes values of `products.min_price` field in Kibana sample ecommerce data set {kibana-pull}90428[#90428]
+* Navigation search now implements keyword registration for applications, allowing you to search for applications by keywords as well as by title {kibana-pull}85686[#85686]
+* Updated favicons {kibana-pull}87271[#87271]
+Lens and visualizations::
+* Adds more in-editor Advanced documentation {kibana-pull}86821[#86821]
+* Adds specific IP and Range/Interval sorting to datatable {kibana-pull}87006[#87006]
+* Use datagrid with resizable columns for datatable {kibana-pull}88069[#88069]
+* Use first decimal when required for data summaries {kibana-pull}88463[#88463]
+* Hide column in table {kibana-pull}88680[#88680]
+* Table column text alignment {kibana-pull}89300[#89300]
+* Allow custom label for fields via index pattern field management {kibana-pull}84612[#84612]
+* Align Lens & Visualize Top nav Buttons & Behaviour {kibana-pull}86922[#86922]
+* Align Lens & Visualize Breadcrumbs {kibana-pull}86941[#86941]
+* User should be able to set a specific tilemap service using the mapStyle property {kibana-pull}88440[#88440]
+* Leaflet (https://leafletjs.com/) map layer in *Vega* was replaced by MapBox (https://www.mapbox.com/) {kibana-pull}88605[#88605]
+* Communicate the index pattern to the dashboard {kibana-pull}90623[#90623]
+* Adds a new "Series Agg" to count the number of series {kibana-pull}91225[#91225]
+* Support min and max with histogram data types {kibana-pull}91581[#91581]
+* Adds possibility to folding in CodeEditor. Updates 'spec viewer' in vega and 'request/response code viewer' in inspector {kibana-pull}90152[#90152]
+Logs::
+* Adds sorting capabilities to categories page {kibana-pull}88051[#88051]
+* Display category in anomalies table {kibana-pull}88677[#88677]
+Machine Learning::
+* Adds documentation links in the help menu for machine learning {kibana-pull}85366[#85366]
+* Redesign file-based Data Visualizer {kibana-pull}87598[#87598]
+* Data Frame Analytics: Adds scatterplot matrix to regression/classification results pages. {kibana-pull}88353[#88353]
+* Anomaly Detection: add anomalies map to explorer for jobs with 'lat_long' function {kibana-pull}88416[#88416]
+* Improves model snapshot revert UI experience {kibana-pull}88588[#88588]
+* Adds embedded map to geo_point fields for Data Visualizer {kibana-pull}88880[#88880]
+* Adds ML deep links to navigational search {kibana-pull}88958[#88958]
+* Anomaly Detection alert type {kibana-pull}89286[#89286]
+* Adds Lens and Discover integration to index based Data Visualizer {kibana-pull}89471[#89471]
+* Data Frame Analytics creation: improve existing job check {kibana-pull}89627[#89627]
+* Data Frame Analytics: ROC Curve Chart {kibana-pull}89991[#89991]
+* Data Frame Analytics: Support early stopping data frame analytics job parameter {kibana-pull}90695[#90695]
+* Data Frame Analytics creation wizard: adds support for extended hyper-parameters {kibana-pull}90843[#90843]
+* Adds Create Data Frame Analytics card to Data Visualizer {kibana-pull}91011[#91011]
+* Anomaly Detection: when no anomalies present for time range show no results message {kibana-pull}91151[#91151]
+* Adds index pattern runtime fields to anomaly detection wizards {kibana-pull}91168[#91168]
+* Anomaly Detection alert initialisation from the ML app  {kibana-pull}91283[#91283]
+* Prevent duplicate notifications about the same anomaly result  {kibana-pull}91485[#91485]
+* Filtering runtime mappings in anomaly detection wizards {kibana-pull}91534[#91534]
+Management::
+* Adds support to configure a URI parts processor {kibana-pull}86163[#86163]
+* In Index Management, Data Streams tab now displays data streams with long names much better {kibana-pull}86285[#86285]
+* Adds a timeline component to the Index Lifecycle Management plugin so that users get a more intuitive understanding of how long data will be in a given phase {kibana-pull}88024[#88024]
+* Adds runtime fields to index patterns and searchsource {kibana-pull}88542[#88542]
+* Adds a field editor in the index pattern management app that lets you create and edit runtime fields, adding them to the index pattern field list {kibana-pull}88995[#88995]
+* Adds better UI support for runtime fields Transforms  {kibana-pull}90363[#90363]
+* Transforms: Adds retention policy options to transform UI {kibana-pull}91162[#91162]
+* Transforms: Adds missing bucket checkbox to group by popover form {kibana-pull}91650[#91650]
+Maps::
+* Always show solution layers {kibana-pull}86053[#86053]
+* Labels for polygons and lines {kibana-pull}86191[#86191]
+* Term join limit {kibana-pull}86491[#86491]
+* Show map saved objects in visualize listing page {kibana-pull}87165[#87165]
+* Set containment alert recovery action group to 'No longer contained' {kibana-pull}87182[#87182]
+* Support geometry-collection {kibana-pull}87867[#87867]
+* Scale control {kibana-pull}88031[#88031]
+* Use chart pallete registry to support sync colors in dashboard {kibana-pull}88099[#88099]
+* Allow saving maps to dashboards {kibana-pull}88759[#88759]
+Metrics::
+* Adds custom metrics to node tooltip {kibana-pull}88545[#88545]
+* Adds ability to filter anomaly detection datafeed {kibana-pull}89721[#89721]
+* Adds helper text to of expressions when creating Threshold Alerts {kibana-pull}89750[#89750]
+* Adds warning severity to Metric Alerts {kibana-pull}90070[#90070]
+* Adds ability for user to set anomaly threshold {kibana-pull}90313[#90313]
+Monitoring::
+* Removes deprecated watcher-based cluster alerts {kibana-pull}85047[#85047]
+* Large shard alert {kibana-pull}89410[#89410]
+* Enable edit/create for Stack Monitoring alerts in Alerts Management {kibana-pull}91726[#91726]
+Operations::
+* Adds docker images for ARM64 based operating systems {kibana-pull}84831[#84831]
+* Enables support for {es} clusters using action.destructive_requires_name=true {kibana-pull}88986[#88986]
+Platform::
+* Replaces legacy visualize chart library with @elastic/charts {kibana-pull}78154[#78154]
+* Implements new palette service {kibana-pull}86876[#86876]
+* Support `pit` and `search_after` in server `savedObjects.find` {kibana-pull}89915[#89915]
+* Adds support for limited concurrency tasks {kibana-pull}90365[#90365]
+Security::
+* Adds audit events for spaces {kibana-pull}86343[#86343]
+* Updates the user management page with a new design and functionality {kibana-pull}87133[#87133]
+* Allow custom index privileges for role management {kibana-pull}88076[#88076]
+Sharing::
+* Anonymous authentication is now exposed in Dashboard, Discover and Visualize apps in the *Share* menu {kibana-pull}86965[#86965]
+Uptime::
+* Service overview: Introduce time-series comparison {kibana-pull}88665[#88665]
+* Break down transaction table api removing the sparklines {kibana-pull}88946[#88946]
+* Expand synthetic journey step thumbnail on hover {kibana-pull}89179[#89179]
+* Waterfall filters {kibana-pull}89185[#89185]
+* Adds waterfall flyout {kibana-pull}89449[#89449]
+* Removes UI filters from UI {kibana-pull}89793[#89793]
+* Adds nav search keywords for uptime and user experience app {kibana-pull}90616[#90616]
+* Format `PingList` duration time as seconds when appropriate {kibana-pull}90703[#90703]
+
+[float]
+[[bug-v7.12.0]]
+=== Bug fixes
+Alerting::
+* Edit alert should show and update all actions with deleted connectors {kibana-pull}86838[#86838]
+* Gracefully handling unknown action type {kibana-pull}86910[#86910]
+* Adds missing configuration options for the alerting related plugins to the kibana-docker. {kibana-pull}88297[#88297]
+* Ensures we always select the correct index in UI tests {kibana-pull}88876[#88876]
+* Fixes a bad UX for `xpack.actions.enabled` is set as false. UI should show the proper message instead of the endless spinner. {kibana-pull}89043[#89043]
+* Skips Alert Instances that were instantiated but have no scheduled actions {kibana-pull}91179[#91179]
+APM::
+* Latency percentile labels and instances table support {kibana-pull}91758[#91758]
+* [Kql Search Bar suggests values outside the selected time range {kibana-pull}91918[#91918]
+Dashboard::
+* Fixes Dashboard OnAppLeave {kibana-pull}86193[#86193]
+* Fixes Visualize Link Redirecting to Dashboard Linked Visualization {kibana-pull}90243[#90243]
+* Removes Multiple History Entries & Stay in Edit Mode on Save As {kibana-pull}92105[#92105]
+Discover::
+* Adds icon for nested fields in sidebar {kibana-pull}85147[#85147]
+* Could not expand cell content in DiscoverGrid {kibana-pull}91289[#91289]
+* Fixes icon for conflicting fields {kibana-pull}90641[#90641]
+Lens::
+* Make sure filter object is persistable {kibana-pull}87828[#87828]
+* Close popover on repeated button click {kibana-pull}87834[#87834]
+* Make Lens intervals default value adapt to histogram:maxBars Advanced Setting changes {kibana-pull}89305[#89305]
+* Fixes telemetry read only error {kibana-pull}91104[#91104]
+* Fixes empty display name issue in XY chart {kibana-pull}91132[#91132]
+* Pass used histogram interval to chart {kibana-pull}91370[#91370]
+* Fixes unformatted timeseries functions {kibana-pull}92498[#92498]
+* Fixes sorting undefined, null and NaN values {kibana-pull}92575[#92575]
+* Adds better aria-labels for global search and field search in Lens {kibana-pull}89215[#89215]
+* Vega Maps Referencing from kibana.yml {kibana-pull}88316[#88316]
+* Fixes the timeseries legend, renders the metric, gauge charts for series with empty strings {kibana-pull}90760[#90760]
+* Restores signal values on refresh {kibana-pull}90774[#90774]
+* Stop inserting zeroes for null series {kibana-pull}90861[#90861]
+Logs::
+* Use useMlHref hook for ML links {kibana-pull}90935[#90935]
+* Check for privileges with user management links {kibana-pull}91134[#91134]
+Machine Learning::
+* Fixes rare page crash when deleting anomaly detection job {kibana-pull}88622[#88622]
+* Allow filtering by mlcategory in Anomaly Explorer Influencers list {kibana-pull}90282[#90282]
+* Stops new line on enter key press for KQL query bars {kibana-pull}90960[#90960]
+* Data Frame Analytics cloning: ensure classification hyperparameters retained when cloning job {kibana-pull}91507[#91507]
+* Data Frame Analytics exploration page: filters improvements {kibana-pull}91748[#91748]
+* Fixes event rate chart annotation position {kibana-pull}91899[#91899]
+* Data Frame Analytics: Improved error handling for scatterplot matrix. {kibana-pull}91993[#91993]
+* Fixes handling of built-in models  {kibana-pull}92154[#92154]
+* Data Frame Analytics wizard: ensure required config options are loaded before enabling `Continue` {kibana-pull}92254[#92254]
+* Anomaly Explorer:  ensure filtering works as expected when influencer value has trailing backslash {kibana-pull}92471[#92471]
+Management::
+* Use "untitled" filename for panels with no title in dashboard {kibana-pull}86333[#86333]
+* Fixes saved object view path {kibana-pull}89057[#89057]
+* Fixes a documentation link in Upgrade Assistant that directed users to information on Snapshot and Restore {kibana-pull}89363[#89363]
+* Can't create single character index without wildcard {kibana-pull}90919[#90919]
+* Fixes a small form validation bug that required an input for the set processor value field and gsub processor replacement field {kibana-pull}91146[#91146]
+* The rollup job form now has an autofocus on the input field after the switch between cron expression and frequency selection {kibana-pull}86324[#86324]
+Maps::
+* Geo containment latency and concurrent containment fix {kibana-pull}86980[#86980]
+* Fixes users without access to Maps should not have the option to create them {kibana-pull}88830[#88830]
+* Fixes reporting jobs fail when Elastic Maps Service (EMS) is unavailable {kibana-pull}90834[#90834]
+* Fixes geo shape agg telemetry not collecting due to missing index pattern IDs {kibana-pull}90886[#90886]
+* Fixes issue preventing WebGL warning message from appearing {kibana-pull}91069[#91069]
+Metrics::
+* Completely remove GraphQL and Apollo {kibana-pull}89036[#89036]
+* Fixes history drawer when navigation is docked {kibana-pull}89630[#89630]
+* Fixes alert preview accuracy with new Notify settings {kibana-pull}89939[#89939]
+* Fixes saving/loading saved views from URL {kibana-pull}90216[#90216]
+* Fixes node details overlay title with long host name {kibana-pull}90825[#90825]
+* Fixes alerts repeatedly firing "recovered" actions {kibana-pull}91038[#91038]
+Monitoring::
+* Fetch status once and change fetchStatus to support an array of clusters {kibana-pull}91749[#91749]
+* Adds missing fields for security telemetry {kibana-pull}91920[#91920]
+Platform::
+* Cancel expired tasks as part of the available workers check {kibana-pull}88483[#88483]
+* Reject invalid Timeout values in Task Type Definitions {kibana-pull}88602[#88602]
+* Increment task `attempts` when they fail during markTaskAsRunning {kibana-pull}88669[#88669]
+* Fixes lens doesn't cancel pending search requests when navigating away or re-running a search {kibana-pull}91486[#91486]
+Reporting::
+* Deserialize query string options for serverside ES Query {kibana-pull}90050[#90050]
+Security::
+* Removes the ability to generate an ephemeral encryption key in production {kibana-pull}81511[#81511]
+* Fixes ECS audit logging config settings for docker environments {kibana-pull}92497[#92497]
+Sharing::
+* Resilient saved object migration algorithm {kibana-pull}78413[#78413]
+
 [[release-notes-7.11.1]]
 == {kib} 7.11.1
 
-The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+The 7.11.1 release includes the following enhancements and bug fixes. For information about the breaking changes, 
+refer to link:https://www.elastic.co/guide/en/kibana/7.11/breaking-changes-7.11.html[Breaking changes in 7.11].
 
 [float]
 [[enhancement-v7.11.1]]
@@ -131,7 +478,7 @@ Monitoring::
 == {kib} 7.11.0 
 
 For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
-For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+For the 7.11.0 breaking changes, refer to link:https://www.elastic.co/guide/en/kibana/7.11/breaking-changes-7.11.html[Breaking changes in 7.11].
 
 [float]
 [[deprecation-v7.11.0]]
@@ -500,7 +847,8 @@ Uptime::
 [[release-notes-7.10.2]]
 == {kib} 7.10.2
 
-For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, 
+refer to the link:https://www.elastic.co/guide/en/kibana/7.10/breaking-changes-7.10.html[Breaking changes in 7.10].
 
 [float]
 [[security-update-v7.10.2]]
@@ -551,7 +899,7 @@ Security::
 
 For detailed information about the 7.10.1 release, review the following enhancements and bug fixes.
 
-For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+For the breaking changes, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/breaking-changes-7.10.html[Breaking changes in 7.10].
 
 [float]
 [[enhancement-v7.10.1]]
@@ -624,7 +972,9 @@ Uptime::
 
 For detailed information about the 7.10.0 release, review the following sections.
 
-<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
+<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>>
+
+For the breaking changes, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/breaking-changes-7.10.html[Breaking changes in 7.10].
 
 [float]
 [[enhancement-v7.10.0]]
@@ -1098,22 +1448,10 @@ The Timelion visualization panel appears on the dashboard.
 [role="screenshot"]
 image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 
-[float]
-[[breaking-v7.10.0]]
-=== Breaking changes
-Lens and visualizations::
-* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
-Operations::
-* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
-Platform::
-* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
-
-For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
-
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
 
-For breaking changes, refer to <<breaking-changes-7.9,breaking changes in 7.9>>.
+For breaking changes, refer to link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html[Breaking changes in 7.9].
 
 [float]
 [[enhancement-v7.9.3]]
@@ -1146,7 +1484,7 @@ Security::
 [[release-notes-7.9.2]]
 == {kib} 7.9.2
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html[Breaking changes in 7.9].
 
 [float]
 [[enhancement-v7.9.2]]
@@ -1192,7 +1530,7 @@ Uptime::
 [[release-notes-7.9.1]]
 == {kib} 7.9.1
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html[Breaking changes in 7.9].
 
 [float]
 [[bug-v7.9.1]]
@@ -1242,7 +1580,7 @@ Uptime::
 [[release-notes-7.9.0]]
 == {kib} 7.9.0
 
-See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html[Breaking changes in 7.9].
 
 Operations::
 * Moves kibana-keystore from data/ to config/ {kibana-pull}57856[#57856]
@@ -1547,7 +1885,7 @@ Platform::
 [[release-notes-7.8.1]]
 == {kib} 7.8.1
 
-See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.8/breaking-changes-7.8.html[Breaking changes in 7.8].
 
 [float]
 [[security-update-7.8.1]]
@@ -1620,7 +1958,7 @@ SIEM::
 [[breaking-changes-7.8.0]]
 === Breaking changes
 
-See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.8/breaking-changes-7.8.html[Breaking changes in 7.8].
 
 Dashboard::
 * Fixes back button by removing panels from url in dashboard in view mode {kib-pull}62415[#62415]
@@ -1888,7 +2226,7 @@ Security::
 [[release-notes-7.7.1]]
 == {kib} 7.7.1
 
-See <<breaking-changes-7.7,breaking changes in 7.7>>.
+See link:https://www.elastic.co/guide/en/kibana/7.7/breaking-changes-7.7.html[Breaking changes in 7.7].
 
 [float]
 [[security-update-7.1.1]]
@@ -1972,7 +2310,7 @@ Uptime::
 [[release-notes-7.7.0]]
 == {kib} 7.7.0
 
-See <<breaking-changes-7.7,breaking changes in 7.7>>.
+See link:https://www.elastic.co/guide/en/kibana/7.7/breaking-changes-7.7.html[Breaking changes in 7.7].
 
 [float]
 [[security-update-7.7.0]]
@@ -2304,7 +2642,7 @@ Platform::
 [[release-notes-7.6.2]]
 == {kib} 7.6.2
 
-See <<breaking-changes-7.6,breaking changes in 7.6>>.
+See link:https://www.elastic.co/guide/en/kibana/7.6/breaking-changes-7.6.html[Breaking changes in 7.6].
 
 [float]
 [[known-issue-7.6.2]]
@@ -2355,7 +2693,7 @@ Visualizations::
 [[release-notes-7.6.1]]
 == {kib} 7.6.1
 
-See <<breaking-changes-7.6,breaking changes in 7.6>>.
+See link:https://www.elastic.co/guide/en/kibana/7.6/breaking-changes-7.6.html[Breaking changes in 7.6].
 
 [float]
 [[known-issue-7.6.1]]
@@ -2441,7 +2779,7 @@ Uptime::
 [[release-notes-7.6.0]]
 == {kib} 7.6.0
 
-See also <<breaking-changes-7.6,breaking changes in 7.6>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.6/breaking-changes-7.6.html[Breaking changes in 7.6].
 
 [float]
 [[known-issue-7.6.0]]
@@ -2818,7 +3156,7 @@ Security::
 [[release-notes-7.5.2]]
 == {kib} 7.5.2
 
-See <<breaking-changes-7.5, breaking changes in 7.5>>.
+See link:https://www.elastic.co/guide/en/kibana/7.5/breaking-changes-7.5.html[Breaking changes in 7.5].
 
 [float]
 [[bug-7.5.2]]
@@ -2876,7 +3214,7 @@ image::images/rn_7.5.2.png[]
 [[breaking-7.5.1]]
 === Breaking changes
 
-See <<breaking-changes-7.5, breaking changes in 7.5>>.
+See link:https://www.elastic.co/guide/en/kibana/7.5/breaking-changes-7.5.html[Breaking changes in 7.5].
 
 [float]
 [[enhancement-7.5.1]]
@@ -2934,7 +3272,8 @@ Lens::
 [float]
 [[breaking-7.5.0]]
 === Breaking changes
-See also <<breaking-changes-7.5, breaking changes in 7.5>>.
+
+See also link:https://www.elastic.co/guide/en/kibana/7.5/breaking-changes-7.5.html[Breaking changes in 7.5].
 
 Code::
 * Removes experimental code app {kib-pull}49404[#49404]
@@ -3234,7 +3573,7 @@ Visualizations::
 [[release-notes-7.4.2]]
 == {kib} 7.4.2
 
-Also see <<breaking-changes-7.4, breaking changes in 7.4>>.
+Also see link:https://www.elastic.co/guide/en/kibana/7.4/breaking-changes-7.4.html[Breaking changes in 7.4].
 
 [float]
 [[bug-7.4.2]]
@@ -3249,7 +3588,7 @@ Visualizations::
 [[release-notes-7.4.1]]
 == {kib} 7.4.1
 
-See also <<breaking-changes-7.4, breaking changes in 7.4>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.4/breaking-changes-7.4.html[Breaking changes in 7.4].
 
 
 [float]
@@ -3300,7 +3639,8 @@ Uptime::
 [float]
 [[breaking-7.4.0]]
 === Breaking Changes
-See also <<breaking-changes-7.4, breaking changes in 7.4>>.
+
+See also link:https://www.elastic.co/guide/en/kibana/7.4/breaking-changes-7.4.html[Breaking changes in 7.4].
 
 Platform::
 * Use search instead of msearch when batching is disabled in courier {kib-pull}43923[#43923]
@@ -3571,7 +3911,7 @@ Visualizations::
 [[release-notes-7.3.2]]
 == {kib} 7.3.2
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.3/breaking-changes-7.3.html[Breaking changes in 7.3].
 
 [float]
 [[bug-7.3.2]]
@@ -3599,7 +3939,7 @@ Platform::
 [[breaking-7.3.1]]
 === Breaking Changes
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.3/breaking-changes-7.3.html[Breaking changes in 7.3].
 
 Platform::
 * Fixes import API so it doesn't override SavedObjectClient errors {kib-pull}41125[#41125]
@@ -3659,7 +3999,7 @@ Visualizations::
 [[breaking-7.3.0]]
 === Breaking Changes
 
-See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.3/breaking-changes-7.3.html[Breaking changes in 7.3].
 
 Machine Learning::
 * Data Frame: Remove format from date_histogram configs. {kib-pull}39811[#39811]
@@ -3900,7 +4240,7 @@ Visualize::
 [[release-notes-7.2.1]]
 == {kib} 7.2.1
 
-See also <<breaking-changes-7.2, breaking changes in 7.2>>.
+See also link:https://www.elastic.co/guide/en/kibana/7.2/breaking-changes-7.2.html[Breaking changes in 7.2].
 
 [float]
 [[enhancement-7.2.1]]
@@ -3955,7 +4295,7 @@ Visualize::
 [[breaking-7.2.0]]
 === Breaking Changes
 
-See <<breaking-changes-7.2, breaking changes in 7.2>> for more information.
+See link:https://www.elastic.co/guide/en/kibana/7.2/breaking-changes-7.2.html[Breaking changes in 7.2] for more information.
 
 Index Patterns::
 * Removes support for time-based interval index patterns with migration {kib-pull}35262[#35262]
@@ -4321,7 +4661,7 @@ Monitoring::
 == {kib} 7.0.1
 
 
-See <<breaking-changes, breaking changes>> for the changes to be aware of when migrating your application
+See link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0] for the changes to be aware of when migrating your application
 from one version of Kibana to another.
 
 
@@ -4417,7 +4757,7 @@ cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -4955,7 +5295,7 @@ cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -5476,7 +5816,7 @@ if the field is switched, and then switched back to the previous field {kib-pull
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {kib-pull}15640[#15640]
@@ -5993,7 +6333,7 @@ if the field is switched, and then switched back to the previous field {kib-pull
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 Design::
 * Removes references to K6 EUI, using the default UI theme in its place {kib-pull}29152[#29152]
@@ -6191,7 +6531,7 @@ Visualizations::
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 [float]
 [[highlight-7.0.0-alpha2]]
@@ -6386,7 +6726,7 @@ formatter {kib-pull}25654[#25654]
 === Breaking changes
 
 For more details about breaking changes in this release, see
-<<breaking-changes-7.0, Breaking changes in 7.0>>.
+link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
 
 Discover::
 * Does not apply `query:queryString:options` to `query_string` filters {kib-pull}15640[#15640]
