@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import type { AlertingRouter } from '../types';
 import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -45,7 +46,7 @@ export function healthRoute(
               ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
             } = {},
           },
-        } = await context.core.elasticsearch.client.asInternalUser.transport // Do not augment with such input. // `transport.request` is potentially unsafe when combined with untrusted user input.
+        }: ApiResponse<XPackUsageSecurity> = await context.core.elasticsearch.client.asInternalUser.transport // Do not augment with such input. // `transport.request` is potentially unsafe when combined with untrusted user input.
           .request({
             method: 'GET',
             path: '/_xpack/usage',
