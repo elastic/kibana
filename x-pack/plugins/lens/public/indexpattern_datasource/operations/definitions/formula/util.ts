@@ -62,7 +62,7 @@ export function getOperationParams(
     },
     {}
   );
-  // At the moment is positional as expressed in operationParams
+
   return params.reduce<Record<string, string | number>>((args, { name, value }) => {
     if (formalArgs[name]) {
       args[name] = value;
@@ -70,7 +70,27 @@ export function getOperationParams(
     return args;
   }, {});
 }
-export const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
+export const tinymathValidOperators = new Set([
+  'add',
+  'subtract',
+  'multiply',
+  'divide',
+  'abs',
+  'cbrt',
+  'ceil',
+  'clamp',
+  'cube',
+  'exp',
+  'fix',
+  'floor',
+  'log',
+  'log10',
+  'mod',
+  'pow',
+  'round',
+  'sqrt',
+  'square',
+]);
 
 export function isMathNode(node: TinymathAST) {
   return isObject(node) && node.type === 'function' && tinymathValidOperators.has(node.name);
