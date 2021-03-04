@@ -15,19 +15,11 @@ export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const title = drilldowns.useTitle();
   const footer = drilldowns.useFooter();
+  const route = drilldowns.useRoute();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
-  // const footer =
-  //   route[0] === 'create' ? (
-  //     <EuiButton
-  //       onClick={drilldowns.onCreateDrilldown}
-  //       fill
-  //       // isDisabled={!isActionValid(wizardConfig)}
-  //       data-test-subj={'drilldownWizardSubmit'}
-  //     >
-  //       {route[0] === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
-  //     </EuiButton>
-  //   ) : null;
+  const handleBack =
+    route.length < 2 ? undefined : () => drilldowns.setRoute(route.slice(0, route.length - 1));
 
   const banner = !hideWelcomeMessage && (
     <DrilldownHelloBar
@@ -42,8 +34,7 @@ export const DrilldownManager: React.FC = ({}) => {
       banner={banner}
       footer={footer}
       onClose={drilldowns.close}
-      // onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-      // onBack={() => drilldowns.setScreen('list')}
+      onBack={handleBack}
     >
       <DrilldownManagerContent />
     </FlyoutFrame>
