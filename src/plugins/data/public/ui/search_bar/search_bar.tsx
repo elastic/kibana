@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
-import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
@@ -20,10 +19,11 @@ import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/pu
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { TimeRange, Query, Filter } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { QueryInputCommonProps } from '../query_string_input/query_string_input';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -35,12 +35,9 @@ interface SearchBarInjectedDeps {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
-export interface SearchBarOwnProps {
-  indexPatterns?: IIndexPattern[];
+export type SearchBarOwnProps = QueryInputCommonProps & {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
-  screenTitle?: string;
-  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -54,7 +51,6 @@ export interface SearchBarOwnProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
-  query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -69,15 +65,7 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-
-  placeholder?: string;
-  isClearable?: boolean;
-  iconType?: EuiIconProps['type'];
-  nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
-  autoSubmit?: boolean;
-  storageKey?: string;
-}
+};
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
@@ -415,6 +403,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           autoSubmit={this.props.autoSubmit}
           storageKey={this.props.storageKey}
+          disableLanguageSwitcher={this.props.disableLanguageSwitcher}
         />
       );
     }

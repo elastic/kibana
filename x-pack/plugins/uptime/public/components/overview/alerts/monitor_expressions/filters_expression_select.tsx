@@ -162,12 +162,9 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               }}
             />
           </EuiFlexItem>
-
           <EuiSpacer size="xs" />
         </EuiFlexGroup>
       ))}
-
-      <EuiSpacer size="xs" />
     </>
   );
 };

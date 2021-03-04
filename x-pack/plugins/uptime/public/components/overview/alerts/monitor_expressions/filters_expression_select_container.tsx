@@ -25,7 +25,7 @@ export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectP
     values: string[];
   }>({ fieldName: '', values: [] });
 
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values, props.shouldUpdateUrl);
+  // useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values, props.shouldUpdateUrl);
 
   const overviewFilters = useSelector(overviewFiltersSelector);
 

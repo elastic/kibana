@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import {
   EuiButton,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -38,27 +39,17 @@ import { fromUser, getQueryLog, matchPairs, PersistedLog, toUser } from '../../q
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
-export interface QueryStringInputProps {
-  indexPatterns: Array<IIndexPattern | string>;
+export interface QueryInputCommonProps {
   query: Query;
+  indexPatterns: Array<IIndexPattern | string>;
   disableAutoFocus?: boolean;
-  screenTitle?: string;
-  prepend?: any;
-  persistedLog?: PersistedLog;
-  bubbleSubmitEvent?: boolean;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   placeholder?: string;
-  disableLanguageSwitcher?: boolean;
-  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
-  onBlur?: () => void;
-  onChange?: (query: Query) => void;
-  onChangeQueryInputFocus?: (isFocused: boolean) => void;
-  onSubmit?: (query: Query) => void;
-  dataTestSubj?: string;
-  size?: SuggestionsListSize;
-  className?: string;
-  isInvalid?: boolean;
-  isClearable?: boolean;
   iconType?: EuiIconProps['type'];
+  isClearable?: boolean;
+  disableLanguageSwitcher?: boolean;
+  screenTitle?: string;
+  dataTestSubj?: string;
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -69,6 +60,19 @@ export interface QueryStringInputProps {
   autoSubmit?: boolean;
   storageKey?: string;
 }
+
+export type QueryStringInputProps = QueryInputCommonProps & {
+  persistedLog?: PersistedLog;
+  bubbleSubmitEvent?: boolean;
+  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  onBlur?: () => void;
+  onChange?: (query: Query) => void;
+  onChangeQueryInputFocus?: (isFocused: boolean) => void;
+  onSubmit?: (query: Query) => void;
+  size?: SuggestionsListSize;
+  className?: string;
+  isInvalid?: boolean;
+};
 
 interface Props extends QueryStringInputProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

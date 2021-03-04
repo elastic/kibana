@@ -60,6 +60,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
       disabled={items.length === 0}
       iconType="plusInCircleFilled"
       onClick={onButtonClick}
+      size="s"
     >
       {labels.ADD_FILTER}
     </EuiButtonEmpty>

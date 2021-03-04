@@ -13,7 +13,7 @@ import { FiltersExpressionSelectContainer, StatusExpressionSelect } from './moni
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
 import { AvailabilityExpressionSelect } from './monitor_expressions/availability_expression_select';
-import { KueryBar } from '..';
+import { AlertQueryBar } from './alert_query_bar/query_bar';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
@@ -52,9 +52,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     <>
       <OldAlertCallOut isOldAlert={isOldAlert} />
 
-      <EuiSpacer size="m" />
-
-      <KueryBar
+      <AlertQueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         defaultKuery={alertParams.search}
         shouldUpdateUrl={shouldUpdateUrl}
@@ -81,7 +79,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
           }
         }}
         setAlertParams={setAlertParams}
-        shouldUpdateUrl={shouldUpdateUrl}
+        shouldUpdateUrl={false}
       />
 
       <EuiHorizontalRule />

@@ -17,17 +17,15 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
-  EuiFieldText,
   prettyDuration,
-  EuiIconProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import { IDataPluginServices, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
-import QueryStringInputUI from './query_string_input';
+import QueryStringInputUI, { QueryInputCommonProps } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
@@ -35,17 +33,11 @@ import { NoDataPopover } from './no_data_popover';
 const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
-export interface QueryBarTopRowProps {
-  query?: Query;
+export type QueryBarTopRowProps = QueryInputCommonProps & {
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
-  dataTestSubj?: string;
-  disableAutoFocus?: boolean;
-  screenTitle?: string;
-  indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -58,14 +50,7 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
-  iconType?: EuiIconProps['type'];
-  placeholder?: string;
-  isClearable?: boolean;
-  nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
-  autoSubmit?: boolean;
-  storageKey?: string;
-}
+};
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
@@ -200,6 +185,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           nonKqlMode={props.nonKqlMode}
           nonKqlModeHelpText={props.nonKqlModeHelpText}
           storageKey={props.storageKey}
+          disableLanguageSwitcher={props.disableLanguageSwitcher}
         />
       </EuiFlexItem>
     );
