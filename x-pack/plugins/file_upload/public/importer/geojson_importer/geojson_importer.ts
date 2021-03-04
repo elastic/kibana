@@ -196,7 +196,10 @@ export class GeoJsonImporter extends Importer {
           });
 
           if (!this._isActive) {
-            break;
+            return {
+              success: false,
+              failures,
+            };
           }
 
           if (retries < IMPORT_RETRIES) {
