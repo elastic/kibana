@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
-import { casesStatus, useGetCasesMockState } from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 import * as i18n from './translations';
 
 import { CaseStatuses, CaseType } from '../../../../../case/common/api';
@@ -436,7 +436,7 @@ describe('AllCases', () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-      selectedCases: useGetCasesMockState.data.cases,
+      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
     });
 
     useDeleteCasesMock
@@ -465,9 +465,14 @@ describe('AllCases', () => {
         )
         .last()
         .simulate('click');
-      expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-        useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
-      );
+      expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
+        ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
+        {
+          id: collectionCase.id,
+          title: collectionCase.title,
+          type: collectionCase.type,
+        },
+      ]);
     });
   });
 
