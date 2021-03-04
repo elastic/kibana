@@ -12,6 +12,7 @@ import type {
   OnPreAuthToolkit,
   OnPreAuthHandler,
 } from 'kibana/server';
+
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
 import type { FleetConfigType } from '../index';
 

@@ -18,7 +18,6 @@ import {
   Logger,
 } from 'kibana/server';
 import {
-  AlertInfo,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
 } from '../../routes/api/utils';
@@ -53,7 +52,8 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../saved_object_types';
 import { CaseClientHandler } from '..';
-import { addAlertInfoToStatusMap } from '../../common';
+import { createAlertUpdateRequest } from '../../common';
+import { UpdateAlertRequest } from '../types';
 import { createCaseError } from '../../common/error';
 
 /**
@@ -291,33 +291,25 @@ async function updateAlerts({
   // get a map of sub case id to the sub case status
   const subCasesToStatus = await getSubCasesToStatus({ totalAlerts, client, caseService });
 
-  // create a map of the case statuses to the alert information that we need to update for that status
-  // This allows us to make at most 3 calls to ES, one for each status type that we need to update
-  // One potential improvement here is to do a tick (set timeout) to reduce the memory footprint if that becomes an issue
-  const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
-      const status = getSyncStatusForComment({
-        alertComment,
-        casesToSyncToStatus,
-        subCasesToStatus,
-      });
+  // create an array of requests that indicate the id, index, and status to update an alert
+  const alertsToUpdate = totalAlerts.saved_objects.reduce(
+    (acc: UpdateAlertRequest[], alertComment) => {
+      if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
+        const status = getSyncStatusForComment({
+          alertComment,
+          casesToSyncToStatus,
+          subCasesToStatus,
+        });
 
-      addAlertInfoToStatusMap({ comment: alertComment.attributes, statusMap: acc, status });
-    }
+        acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
+      }
 
-    return acc;
-  }, new Map<CaseStatuses, AlertInfo>());
+      return acc;
+    },
+    []
+  );
 
-  // This does at most 3 calls to Elasticsearch to update the status of the alerts to either open, closed, or in-progress
-  for (const [status, alertInfo] of alertsToUpdate.entries()) {
-    if (alertInfo.ids.length > 0 && alertInfo.indices.size > 0) {
-      caseClient.updateAlertsStatus({
-        ids: alertInfo.ids,
-        status,
-        indices: alertInfo.indices,
-      });
-    }
-  }
+  await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
 }
 
 interface UpdateArgs {
