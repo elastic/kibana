@@ -22,16 +22,14 @@
         "index": false
       },
       "decodedSha256": {
-        "type": "keyword",
-        "index": false
+        "type": "keyword"
       },
       "decodedSize": {
         "type": "long",
         "index": false
       },
       "created": {
-        "type": "date",
-        "index": false
+        "type": "date"
       },
       "packageName": {
         "type": "keyword"
