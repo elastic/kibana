@@ -212,7 +212,7 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 
 . Save your visualization for use on a dashboard.
 
-Given your documents contain geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]), you can visualize them in **Maps**.
+If your documents contain geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]), you can visualize them in **Maps**.
 
 . Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range 
 contains data.
