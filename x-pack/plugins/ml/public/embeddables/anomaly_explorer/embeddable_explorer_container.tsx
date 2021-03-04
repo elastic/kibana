@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
@@ -26,6 +26,10 @@ import {
   AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerServices,
 } from '..';
+import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
+import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
+import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
+import { ANOMALY_THRESHOLD } from '../../../common';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
@@ -49,10 +53,22 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [fromPage, setFromPage] = useState<number>(1);
+  const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
 
-  const [{}, { uiActions }] = services;
+  const [
+    {},
+    {
+      uiActions,
+      data: dataServices,
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
+  ] = services;
+  const { timefilter } = dataServices.query.timefilter;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
+  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   const [
     swimlaneType,
@@ -60,7 +76,7 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     perPage,
     setPerPage,
     timeBuckets,
-    isLoading,
+    isSwimlaneLoading,
     error,
   ] = useSwimlaneInputResolver(
     embeddableInput,
@@ -71,14 +87,15 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     fromPage
   );
 
-  const test = useExplorerInputResolver(
+  const { chartsData, isLoading: isExplorerLoading } = useExplorerInputResolver(
     embeddableInput,
     onInputChange,
     refresh,
     services,
     chartWidth,
     fromPage,
-    selectedCells
+    selectedCells,
+    severity.val
   );
 
   useEffect(() => {
@@ -124,7 +141,11 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   return (
     <div
-      style={{ width: '100%', padding: '8px' }}
+      style={{
+        width: '100%',
+        overflowY: 'scroll',
+        padding: '8px',
+      }}
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
@@ -148,7 +169,7 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
             setPerPage(update.perPage);
           }
         }}
-        isLoading={isLoading}
+        isLoading={isSwimlaneLoading}
         noDataWarning={
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.noDataFound"
@@ -156,6 +177,20 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
           />
         }
       />
+      {chartsData && (
+        <>
+          <EuiSpacer />
+          <ExplorerAnomaliesContainer
+            showCharts={true}
+            chartsData={chartsData}
+            severity={severity}
+            setSeverity={setSeverity}
+            mlUrlGenerator={mlUrlGenerator}
+            timeBuckets={timeBuckets}
+            timefilter={timefilter}
+          />
+        </>
+      )}
     </div>
   );
 };

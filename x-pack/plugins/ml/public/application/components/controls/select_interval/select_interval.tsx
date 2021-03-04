@@ -10,7 +10,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '../../../util/url_state';
 
-interface TableInterval {
+export interface TableInterval {
   display: string;
   val: string;
 }
@@ -64,6 +64,14 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 export const SelectInterval: FC = () => {
   const [interval, setInterval] = useTableInterval();
 
+  return <SelectIntervalUI interval={interval} setInterval={setInterval} />;
+};
+
+interface SelectIntervalUIProps {
+  interval: TableInterval;
+  setInterval: (interval: TableInterval) => void;
+}
+export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, setInterval }) => {
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInterval(optionValueToInterval(e.target.value));
   };

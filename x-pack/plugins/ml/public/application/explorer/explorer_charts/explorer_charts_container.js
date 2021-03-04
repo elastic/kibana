@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -31,9 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
@@ -67,14 +65,20 @@ function ExplorerChartContainer({
   wrapLabel,
   mlUrlGenerator,
   basePath,
+  timeBuckets,
+  timefilter,
 }) {
-  const [explorerSeriesLink, setExplorerSeriesLink] = useState();
+  const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
   useEffect(() => {
     let isCancelled = false;
     const generateLink = async () => {
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
-        const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
+        const singleMetricViewerLink = await getExploreSeriesLink(
+          mlUrlGenerator,
+          series,
+          timefilter
+        );
         setExplorerSeriesLink(singleMetricViewerLink);
       }
     };
@@ -84,9 +88,9 @@ function ExplorerChartContainer({
     };
   }, [mlUrlGenerator, series]);
 
-  const addToRecentlyAccessed = useCallback(() => {
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
-  }, [explorerSeriesLink]);
+  // const addToRecentlyAccessed = useCallback(() => {
+  //   addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
+  // }, [explorerSeriesLink]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -146,7 +150,8 @@ function ExplorerChartContainer({
                   iconType="visLine"
                   size="xs"
                   href={`${basePath}/app/ml${explorerSeriesLink}`}
-                  onClick={addToRecentlyAccessed}
+                  // @TODO: renable onClick, remove addToRecentlyAccessed dependency cache
+                  // onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
                 </EuiButtonEmpty>
@@ -190,6 +195,7 @@ function ExplorerChartContainer({
             <MlTooltipComponent>
               {(tooltipService) => (
                 <ExplorerChartSingleMetric
+                  timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
                   severity={severity}
@@ -212,13 +218,13 @@ export const ExplorerChartsContainerUI = ({
   tooManyBuckets,
   kibana,
   errorMessages,
+  mlUrlGenerator,
+  timeBuckets,
+  timefilter,
 }) => {
   const {
     services: {
       http: { basePath },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
       embeddable: embeddablePlugin,
       maps: mapsPlugin,
     },
@@ -244,8 +250,6 @@ export const ExplorerChartsContainerUI = ({
 
   const seriesToUse = seriesToPlotFiltered !== undefined ? seriesToPlotFiltered : seriesToPlot;
 
-  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
-
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
@@ -270,6 +274,8 @@ export const ExplorerChartsContainerUI = ({
                 wrapLabel={wrapLabel}
                 mlUrlGenerator={mlUrlGenerator}
                 basePath={basePath.get()}
+                timeBuckets={timeBuckets}
+                timefilter={timefilter}
               />
             </EuiFlexItem>
           ))}

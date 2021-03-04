@@ -220,10 +220,9 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlUrlGenerator, series) {
+export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
-  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
   const to = bounds.max.toISOString();

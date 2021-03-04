@@ -76,6 +76,13 @@ interface ChartRange {
   max: number;
 }
 
+export interface AnomalyChartData {
+  chartsPerRow: number;
+  errorMessages?: Record<string, any>;
+  seriesToPlot: SeriesConfigWithMetadata[];
+  tooManyBuckets: boolean;
+  timeFieldName: string;
+}
 /**
  * Service for retrieving anomaly swim lanes data.
  */
@@ -332,7 +339,7 @@ export class AnomalyExplorerService {
     selectedLatestMs: number,
     timefilter: TimefilterContract,
     severity = 0
-  ) {
+  ): Promise<void | AnomalyChartData> {
     const data = this.getDefaultChartsData();
 
     const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
@@ -732,7 +739,7 @@ export class AnomalyExplorerService {
       return chartData.find((point) => point.date === time);
     }
 
-    Promise.all(seriesPromises)
+    return Promise.all(seriesPromises)
       .then((response) => {
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
@@ -765,8 +772,7 @@ export class AnomalyExplorerService {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
         }
-        console.log('data.seriesToPlot', data.seriesToPlot);
-        return data;
+        return Promise.resolve(data);
 
         // explorerService.setCharts({ ...data });
       })

@@ -38,7 +38,7 @@ const optionsMap = {
   [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
 };
 
-interface TableSeverity {
+export interface TableSeverity {
   val: number;
   display: string;
   color: string;
@@ -67,7 +67,7 @@ export const SEVERITY_OPTIONS: TableSeverity[] = [
   },
 ];
 
-function optionValueToThreshold(value: number) {
+export function optionValueToThreshold(value: number) {
   // Get corresponding threshold object with required display and val properties from the specified value.
   let threshold = SEVERITY_OPTIONS.find((opt) => opt.val === value);
 
@@ -121,6 +121,14 @@ interface Props {
 export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) => {
   const [severity, setSeverity] = useTableSeverity();
 
+  return <SelectSeverityUI severity={severity} setSeverity={setSeverity} />;
+};
+
+export const SelectSeverityUI: FC<{
+  classNames?: string;
+  severity: TableSeverity;
+  setSeverity: (s: TableSeverity) => void;
+}> = ({ classNames = '', severity, setSeverity }) => {
   const onChange = (valueDisplay: string) => {
     setSeverity(optionValueToThreshold(optionsMap[valueDisplay]));
   };
