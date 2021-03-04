@@ -5,9 +5,9 @@
 
 The *Rules* tab provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting, *Maps*>> and <<xpack-ml, *Machine Learning*>> can offer their own rules. The *Rules* tab provides a central place to:
 
-* <<create-edit-alerts, Create and edit>> rules
-* <<controlling-alerts, Control rules>> including enabling/disabling, muting/unmuting, and deleting
-* Drill-down to <<alert-details, rule details>>
+* <<create-edit-rules, Create and edit>> rules
+* <<controlling-rules, Control rules>> including enabling/disabling, muting/unmuting, and deleting
+* Drill-down to <<rule-details, rule details>>
 
 [role="screenshot"]
 image:management/alerting/images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
@@ -15,44 +15,44 @@ image:management/alerting/images/rules-and-connectors-ui.png[Example rule listin
 For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
 [float]
-==== Finding alerts
+==== Finding rules
 
-The *Alerts* tab lists all alerts in the current space, including summary information about their execution frequency, tags, and type.
+The *Rules* tab lists all rules in the current space, including summary information about their execution frequency, tags, and type.
 
-The *search bar* can be used to quickly find alerts by name or tag.
-
-[role="screenshot"]
-image::images/alerts-filter-by-search.png[Filtering the alerts list using the search bar]
-
-The *type* dropdown lets you filter to a subset of alert types.
+The *search bar* can be used to quickly find rules by name or tag.
 
 [role="screenshot"]
-image::images/alerts-filter-by-type.png[Filtering the alerts list by types of alert]
+image::images/alerts-filter-by-search.png[Filtering the rules list using the search bar]
 
-The *Action type* dropdown lets you filter by the type of action used in the alert.
+The *type* dropdown lets you filter to a subset of rule types.
 
 [role="screenshot"]
-image::images/alerts-filter-by-action-type.png[Filtering the alert list by type of action]
+image::images/alerts-filter-by-type.png[Filtering the rules list by types of rule]
+
+The *Action type* dropdown lets you filter by the type of action used in the rule.
+
+[role="screenshot"]
+image::images/alerts-filter-by-action-type.png[Filtering the rule list by type of action]
 
 [float]
-[[create-edit-alerts]]
-==== Creating and editing alerts
+[[create-edit-rules]]
+==== Creating and editing rules
 
-Many alerts must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic alert types can be created in the *Alerts* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting an alert type and configuring it's properties. Refer to <<alert-types>> for details on what types of alerts are available and how to configure them.
+Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its properties. Refer to <<rule-types>> for details on what types of rules are available and how to configure them.
 
-After an alert is created, you can re-open the flyout and change an alerts properties by clicking the *Edit* button shown on each row of the alert listing.
+After a rule is created, you can re-open the flyout and change a rule's properties by clicking the *Edit* button shown on each row of the rule listing.
 
 
 [float]
-[[controlling-alerts]]
-==== Controlling alerts
+[[controlling-rules]]
+==== Controlling rules
 
-The alert listing allows you to quickly mute/unmute, disable/enable, and delete individual alerts by clicking the action button. 
-
-[role="screenshot"]
-image:management/alerting/images/individual-mute-disable.png[The actions button allows an individual alert to be muted, disabled, or deleted]
-
-These operations can also be performed in bulk by multi-selecting alerts and clicking the *Manage alerts* button:
+The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking the action button. 
 
 [role="screenshot"]
-image:management/alerting/images/bulk-mute-disable.png[The Manage alerts button lets you mute/unmute, enable/disable, and delete in bulk]
+image:management/alerting/images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
+
+These operations can also be performed in bulk by multi-selecting rules and clicking the *Manage rules* button:
+
+[role="screenshot"]
+image:management/alerting/images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk]

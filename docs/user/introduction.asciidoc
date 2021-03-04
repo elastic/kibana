@@ -187,7 +187,7 @@ to name a few.
 A dedicated view for creating, searching, and editing rules is in <<rule-management,*Rules and Connectors*>>.
 
 [role="screenshot"]
-image::images/alerts-and-actions.png[Alerts and Actions view]
+image::images/alerts-and-actions.png[Rules and Connectors view]
 
 
 [float]

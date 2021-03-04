@@ -2,7 +2,7 @@
 [[action-types]]
 == Actions and connectors
 
-Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
+Connectors are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
 
 [cols="2"]
 |===

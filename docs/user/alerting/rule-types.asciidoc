@@ -1,5 +1,5 @@
 [role="xpack"]
-[[alert-types]]
+[[rule-types]]
 == Alerts
 
 Kibana provides two types of alerts:

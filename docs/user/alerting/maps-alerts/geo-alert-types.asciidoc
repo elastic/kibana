@@ -31,7 +31,7 @@ than the current time minus the amount of the interval. If data older than
 [float]
 ==== Creating a geo alert
 Click the *Create* button in the <<rule-management, rule management UI>>.
-Complete the <<defining-alerts-general-details, general alert details>>.
+Complete the <<defining-rules-general-details, general alert details>>.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-tracking-select.png[Choosing a tracking alert type]

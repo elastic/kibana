@@ -5,9 +5,9 @@
 
 --
 
-Alerting allows you to define *rules* to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, connectors>> and <<alert-types, rules>> (known as stack rules) for you to use.
+Alerting allows you to define *rules* to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, connectors>> and <<rule-types, rules>> (known as stack rules) for you to use.
 
-image::images/alerting-overview.png[Alerts and actions UI]
+image::images/alerting-overview.png[Rules and Connectors UI]
 
 [IMPORTANT]
 ==============================================
@@ -17,9 +17,9 @@ To make sure you can access alerting and actions, see the <<alerting-setup-prere
 [float]
 == Concepts and terminology
 
-Alerting works by running checks on a schedule to detect conditions defined by a *rule*. When a condition is met, the rule tracks it as an *alert* and responds by triggering one or more *actions*. 
+Alerting works by running checks on a schedule to detect conditions defined by a *rule*. When a condition is met, the rule tracks it as an *alert* and responds by triggering one or more *actions*.
 Actions typically involve interaction with {kib} services or third party integrations. *Connectors* allow actions to talk to these services and integrations. 
-This section describes all of these elements and how they operate together. 
+This section describes all of these elements and how they operate together.
 
 [float]
 === What is a rule?
@@ -32,7 +32,7 @@ A rule specifies a background task that runs on the {kib} server to check for sp
 
 For example, when monitoring a set of servers, a rule might check for average CPU usage > 0.9 on each server for the last two minutes (condition), checked every minute (schedule), sending a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
 
-image::images/what-is-an-alert.svg[Three components of an alert]
+image::images/what-is-an-alert.svg[Three components of a rule]
 
 The following sections describe each part of the rule in more detail.
 
@@ -45,9 +45,9 @@ Under the hood, {kib} rules detect conditions by running a javascript function o
 These conditions are packaged and exposed as *rule types*. A rule type hides the underlying details of the condition, and exposes a set of parameters
 to control the details of the conditions to detect.
 
-For example, an <<alert-types, index threshold rule type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
+For example, an <<rule-type-index-threshold, index threshold rule type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
 
-See <<alert-types>> for the types of rules provided by {kib} and how they express their conditions.
+See <<rule-types>> for the types of rules provided by {kib} and how they express their conditions.
 
 [float]
 [[alerting-concepts-scheduling]]
@@ -90,13 +90,13 @@ When checking for a condition, a rule might identify multiple occurrences of the
 
 Using the server monitoring example, each server with average CPU > 0.9 is tracked as an alert. This means a separate email is sent for each server that exceeds the threshold.
 
-image::images/alert-instances.svg[{kib} tracks each detected condition as an alert instance and takes action on each instance]
+image::images/alert-instances.svg[{kib} tracks each detected condition as an alert and takes action on each instance]
 
 [float]
 [[alerting-concepts-suppressing-duplicate-notifications]]
 === Suppressing duplicate notifications
 
-Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9: 
+Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9:
 
 * Minute 1: server X123 > 0.9. *One email* is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, one for X123 and one for Y456.
@@ -113,9 +113,9 @@ In the above example, three emails are sent for server X123 in the span of 3 min
 === Connectors
 
 Actions often involve connecting with services inside {kib} or integrating with third-party systems.
-Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using *connectors*. 
+Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using *connectors*.
 
-*Connectors* provide a central place to store connection information for services and integrations. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector. When the SMTP settings change, you can update them once in the connector, instead of having to update four rule.
+*Connectors* provide a central place to store connection information for services and integrations. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector. When the SMTP settings change, you can update them once in the connector, instead of having to update four rules.
 
 image::images/alert-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
 
@@ -124,12 +124,12 @@ image::images/alert-concepts-connectors.svg[Connectors provide a central place t
 
 A *rule* consists of conditions, *actions*, and a schedule. When conditions are met, *alerts* are created that render *actions* and invoke them. To make action setup and update easier, actions use *connectors* that centralize the information used to connect with {kib} services and third-party integrations. The following example ties these concepts together:
 
-image::images/alert-concepts-summary.svg[Alerts, actions, alert instances and connectors work together to convert detection into action]
+image::images/alert-concepts-summary.svg[Rules, connectors, alerts and actions work together to convert detection into action]
 
 . Anytime a *rule*'s conditions are met, an *alert* is created.  This example checks for servers with average CPU > 0.9. Three servers meet the condition, so three alerts are created. 
-. Alerts create *actions* as long as they are not muted or throttled. When actions are created, the template that was setup in the rule is filled with actual values. In this example, three actions are created, and the template string {{server}} is replaced with the server name for each alert. 
+. Alerts create *actions* as long as they are not muted or throttled. When actions are created, the template that was setup in the rule is filled with actual values. In this example, three actions are created, and the template string {{server}} is replaced with the server name for each alert.
 . {kib} invokes the actions, sending them to a third party *integration* like an email service.
-. If the third party integration has connection parameters or credentials, {kib} will fetch these from the *connector* referenced in the action. 
+. If the third party integration has connection parameters or credentials, {kib} will fetch these from the *connector* referenced in the action.
 
 
 [float]
@@ -138,7 +138,7 @@ image::images/alert-concepts-summary.svg[Alerts, actions, alert instances and co
 
 {kib} alerting and <<watcher-ui, {es} alerting>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
 
-This section will clarify some of the important differences in the function and intent of the two systems. 
+This section will clarify some of the important differences in the function and intent of the two systems.
 
 Functionally, {kib} alerting differs in that: 
 

@@ -15,7 +15,7 @@
 * Polling an {es} task index for overdue tasks at 3 second intervals.  You can change this interval using the <<task-manager-settings, `xpack.task_manager.poll_interval`>> setting.
 * Tasks are then claiming them by updating them in the {es} index, using optimistic concurrency control to prevent conflicts. Each {kib} instance can run a maximum of 10 concurrent tasks, so a maximum of 10 tasks are claimed each interval. 
 * Tasks are run on the {kib} server. 
-* In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
+* In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-rules-general-details, check interval>>.
 
 [IMPORTANT]
 ==============================================
