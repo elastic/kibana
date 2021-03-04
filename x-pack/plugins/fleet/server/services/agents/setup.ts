@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
+
 import { getLatestConfigChangeAction } from './actions';
 
 export async function isAgentsSetup(soClient: SavedObjectsClientContract): Promise<boolean> {
