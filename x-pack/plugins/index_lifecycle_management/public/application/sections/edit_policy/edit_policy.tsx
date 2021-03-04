@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState, useEffect } from 'react';
 import { get } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
@@ -30,6 +30,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { RollupAction } from '../../../../common/types';
 
 import { TextField, useForm, useFormData } from '../../../shared_imports';
 
@@ -54,7 +56,6 @@ import {
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
 
 import { useEditPolicyContext } from './edit_policy_context';
-import { useRollupFormContext } from './rollup_form_context';
 
 import { FormInternal } from './types';
 
@@ -65,10 +66,6 @@ export interface Props {
 const policyNamePath = 'name';
 
 export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
   const {
     isNewPolicy,
@@ -77,12 +74,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policyName,
     currentView,
   } = useEditPolicyContext();
-
-  const {
-    getCurrent: getCurrentRollupForm,
-    setCurrent: setCurrentRollupForm,
-    addRollupConfigToPolicy,
-  } = useRollupFormContext();
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
@@ -129,10 +120,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       );
     } else {
       const success = await savePolicy(
-        {
-          ...addRollupConfigToPolicy(policy),
-          name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName,
-        },
+        { ...policy, name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName },
         isNewPolicy || saveAsNew
       );
       if (success) {
@@ -144,6 +132,21 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const togglePolicyJsonFlyout = () => {
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const currentViewPhase = currentView.id === 'rollupAction' ? currentView.phase : undefined;
+
+  useEffect(() => {
+    if (currentViewPhase) {
+      const rollupFieldSwitch = form.getFields()[`_meta.${currentViewPhase}.rollupEnabled`];
+      if (rollupFieldSwitch.value !== true) {
+        rollupFieldSwitch.setValue(true);
+      }
+    }
+  }, [currentViewPhase, form]);
 
   return (
     <>
@@ -345,13 +348,15 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       </div>
       {currentView.id === 'rollupAction' && (
         <RollupWizard
-          value={getCurrentRollupForm()[currentView.phase].action}
+          value={
+            form.getFields()[`phases.${currentView.phase}.actions.rollup`]?.value as
+              | undefined
+              | RollupAction
+          }
           phase={currentView.phase}
           onDone={(rollupAction) => {
-            setCurrentRollupForm((currentRollup) => ({
-              ...currentRollup,
-              [currentView.phase]: { enabled: true, action: rollupAction },
-            }));
+            const rollupField = form.getFields()[`phases.${currentView.phase}.actions.rollup`];
+            rollupField.setValue(rollupAction);
             const { search } = history.location;
             const newQueryParams = qs.parse(search);
             delete newQueryParams.rollup;

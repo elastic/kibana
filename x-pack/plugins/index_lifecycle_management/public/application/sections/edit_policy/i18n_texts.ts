@@ -12,6 +12,13 @@ export const i18nTexts = {
     shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
       defaultMessage: 'Shrink index',
     }),
+    rollupLabel: i18n.translate('xpack.indexLifecycleMgmt.rollupField', {
+      defaultMessage: 'Rollup',
+    }),
+    rollupSwitchLabel: i18n.translate('xpack.indexLifecycleMgmt.rollup.enabledFieldLabel', {
+      // TODO: Copy required
+      defaultMessage: '[communicate adding rollup config to policy]',
+    }),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
@@ -176,6 +183,11 @@ export const i18nTexts = {
         {
           defaultMessage: 'A snapshot repository name is required.',
         }
+      ),
+      // TODO: Copy required
+      rollupRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.rollupConfigRequiredErrorLabel',
+        { defaultMessage: '[Error stating that rollup configuration is missing]' }
       ),
     },
     titles: {

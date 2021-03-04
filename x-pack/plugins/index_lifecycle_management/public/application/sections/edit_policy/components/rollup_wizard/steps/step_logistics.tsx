@@ -141,6 +141,9 @@ export class StepLogistics extends Component<Props, State> {
                   checked={useCustomPolicy}
                   onChange={(e) => {
                     this.setState({ useCustomPolicy: e.target.checked });
+                    if (!e.target.checked) {
+                      onFieldsChange({ rollupIlmPolicy: undefined });
+                    }
                   }}
                 />
               </>

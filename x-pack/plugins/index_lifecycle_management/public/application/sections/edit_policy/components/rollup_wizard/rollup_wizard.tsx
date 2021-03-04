@@ -308,7 +308,9 @@ export class RollupWizard extends Component<Props, State> {
     const rollupConfig = this.getAllFields();
     this.props.onDone({
       config: serializeRollup(rollupConfig),
-      rollup_policy: rollupConfig.rollupIndexIlmPolicy,
+      rollup_policy: rollupConfig.rollupIndexIlmPolicy
+        ? rollupConfig.rollupIndexIlmPolicy
+        : undefined,
     });
   };
 

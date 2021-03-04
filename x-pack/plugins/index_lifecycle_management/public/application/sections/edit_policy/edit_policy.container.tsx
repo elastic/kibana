@@ -19,7 +19,6 @@ import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
-import { RollupFormContextProvider } from './rollup_form_context';
 
 interface RouterProps {
   policyName: string;
@@ -105,9 +104,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         },
       }}
     >
-      <RollupFormContextProvider policy={policy}>
-        <PresentationComponent history={history} />
-      </RollupFormContextProvider>
+      <PresentationComponent history={history} />
     </EditPolicyContextProvider>
   );
 };

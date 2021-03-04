@@ -26,8 +26,6 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
-import { useRollupFormContext } from '../rollup_form_context';
-
 import { FormInternal } from '../types';
 
 interface Props {
@@ -55,18 +53,17 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
    * policy === {@link SerializedPolicy} we have determined the policy is valid
    */
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
-  const { addRollupConfigToPolicy } = useRollupFormContext();
   const { validate: validateForm } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
 
   const updatePolicy = useCallback(async () => {
     setPolicy(undefined);
     if (await validateForm()) {
-      setPolicy(prettifyFormJson(addRollupConfigToPolicy(getFormData())));
+      setPolicy(prettifyFormJson(getFormData()));
     } else {
       setPolicy(null);
     }
-  }, [setPolicy, getFormData, validateForm, addRollupConfigToPolicy]);
+  }, [setPolicy, getFormData, validateForm]);
 
   useEffect(() => {
     updatePolicy();

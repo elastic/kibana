@@ -60,6 +60,9 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
+      rollupEnabled: {
+        label: i18nTexts.editPolicy.rollupSwitchLabel,
+      },
     },
     warm: {
       enabled: {
@@ -108,6 +111,9 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      rollupEnabled: {
+        label: i18nTexts.editPolicy.rollupSwitchLabel,
       },
     },
     delete: {
@@ -208,6 +214,14 @@ export const schema: FormSchema<FormInternal> = {
             ],
             serializer: serializers.stringToNumber,
           },
+        },
+        rollup: {
+          label: i18nTexts.editPolicy.rollupLabel,
+          validations: [
+            {
+              validator: emptyField(i18nTexts.editPolicy.errors.rollupRequired),
+            },
+          ],
         },
         set_priority: {
           priority: {
@@ -349,6 +363,14 @@ export const schema: FormSchema<FormInternal> = {
               { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
             ],
           },
+        },
+        rollup: {
+          label: i18nTexts.editPolicy.rollupLabel,
+          validations: [
+            {
+              validator: emptyField(i18nTexts.editPolicy.errors.rollupRequired),
+            },
+          ],
         },
       },
     },
