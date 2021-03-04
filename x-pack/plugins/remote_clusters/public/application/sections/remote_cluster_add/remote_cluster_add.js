@@ -12,8 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContent } from '@elastic/eui';
 
 import { extractQueryParams } from '../../../shared_imports';
-import { getRouter, redirect } from '../../services';
-import { setBreadcrumbs } from '../../services/breadcrumb';
+import { getRouter, redirect, setBreadcrumbs } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 export class RemoteClusterAdd extends PureComponent {
@@ -79,6 +78,7 @@ export class RemoteClusterAdd extends PureComponent {
         />
 
         <RemoteClusterForm
+          isNewCluster={true}
           isSaving={isAddingCluster}
           saveError={addClusterError}
           save={this.save}

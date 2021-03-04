@@ -9,10 +9,12 @@ export { loadClusters, addCluster, editCluster, removeClusterRequest } from './a
 
 export { showApiError, showApiWarning } from './api_errors';
 
-export { initRedirect, redirect } from './redirect';
+export { redirect } from './redirect';
 
 export { isAddressValid, isPortValid } from './validate_address';
 
 export { setUserHasLeftApp, getUserHasLeftApp, registerRouter, getRouter } from './routing';
 
 export { trackUiMetric, METRIC_TYPE } from './ui_metric';
+
+export { setBreadcrumbs } from './breadcrumb';

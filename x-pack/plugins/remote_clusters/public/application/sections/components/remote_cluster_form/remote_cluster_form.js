@@ -54,6 +54,7 @@ import {
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
 import { AppContext } from '../../../app_context';
+import { CloudDeploymentForm } from '../cloud_deployment_form';
 
 const defaultFields = {
   name: '',
@@ -76,6 +77,7 @@ export class RemoteClusterForm extends Component {
     saveError: PropTypes.object,
     fields: PropTypes.object,
     disabledFields: PropTypes.object,
+    isNewCluster: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -88,7 +90,7 @@ export class RemoteClusterForm extends Component {
   constructor(props, context) {
     super(props, context);
 
-    const { fields, disabledFields } = props;
+    const { fields, disabledFields, isNewCluster } = props;
     const { isCloudEnabled } = context;
 
     // Connection mode should default to "proxy" in cloud
@@ -104,12 +106,19 @@ export class RemoteClusterForm extends Component {
       fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
       isRequestVisible: false,
+      isCloudFormVisible: isCloudEnabled && isNewCluster,
     };
   }
 
   toggleRequest = () => {
     this.setState(({ isRequestVisible }) => ({
       isRequestVisible: !isRequestVisible,
+    }));
+  };
+
+  toggleIsCloudFormVisible = () => {
+    this.setState(({ isCloudFormVisible }) => ({
+      isCloudFormVisible: !isCloudFormVisible,
     }));
   };
 
@@ -495,6 +504,15 @@ export class RemoteClusterForm extends Component {
                 id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
                 defaultMessage="Connection mode"
               />
+              <EuiButtonEmpty size="s" onClick={this.toggleIsCloudFormVisible} iconType="logoCloud">
+                {/*
+                 * TODO copy review
+                 */}
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloudFormButton"
+                  defaultMessage="Add Cloud deployment"
+                />
+              </EuiButtonEmpty>
             </h2>
           </EuiTitle>
         }
@@ -878,6 +896,7 @@ export class RemoteClusterForm extends Component {
 
     const {
       isRequestVisible,
+      isCloudFormVisible,
       areErrorsVisible,
       fields: { name },
       fieldsErrors: { name: errorClusterName },
@@ -949,13 +968,20 @@ export class RemoteClusterForm extends Component {
 
         {this.renderSavingFeedback()}
 
-        {isRequestVisible ? (
+        {isRequestVisible && (
           <RequestFlyout
             name={name}
             cluster={this.getAllFields()}
             close={() => this.setState({ isRequestVisible: false })}
           />
-        ) : null}
+        )}
+
+        {isCloudFormVisible && (
+          <CloudDeploymentForm
+            onClose={this.toggleIsCloudFormVisible}
+            onClusterConfigure={this.onFieldsChange}
+          />
+        )}
       </Fragment>
     );
   }
