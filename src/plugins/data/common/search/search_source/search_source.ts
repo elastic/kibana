@@ -59,10 +59,9 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
-import { isObject } from 'rxjs/internal-compatibility';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -429,6 +428,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':

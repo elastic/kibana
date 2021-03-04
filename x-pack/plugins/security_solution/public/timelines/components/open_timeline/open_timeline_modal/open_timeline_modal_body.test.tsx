@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -19,11 +18,19 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('OpenTimelineModal', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const mockTheme = getMockTheme({
+    eui: {
+      euiColorMediumShade: '#ece',
+      euiBreakpoints: {
+        s: '500px',
+      },
+    },
+  });
   const title = 'All Timelines / Open Timelines';
   let mockResults: OpenTimelineResult[];
 
@@ -62,7 +69,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the title row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -73,7 +80,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the search row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -84,7 +91,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the timelines table', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -99,7 +106,7 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: jest.fn(),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -119,7 +126,7 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -139,7 +146,7 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
@@ -159,7 +166,7 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );

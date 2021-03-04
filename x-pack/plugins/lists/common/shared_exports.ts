@@ -36,6 +36,7 @@ export {
   listSchema,
   entry,
   entriesNested,
+  nestedEntryItem,
   entriesMatch,
   entriesMatchAny,
   entriesExists,

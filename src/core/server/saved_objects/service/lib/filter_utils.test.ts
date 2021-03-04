@@ -76,6 +76,9 @@ const mockMappings = {
             },
           },
         },
+        params: {
+          type: 'flattened',
+        },
       },
     },
     hiddenType: {
@@ -166,6 +169,12 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(esKuery.fromKueryExpression('alert.actions:{ actionTypeId: ".server-log" }'));
+    });
+
+    test('Assemble filter for flattened fields', () => {
+      expect(
+        validateConvertFilterToKueryNode(['alert'], 'alert.attributes.params.foo:bar', mockMappings)
+      ).toEqual(esKuery.fromKueryExpression('alert.params.foo:bar'));
     });
 
     test('Lets make sure that we are throwing an exception if we get an error', () => {

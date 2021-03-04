@@ -15,7 +15,7 @@ import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 import { QueryStringManager, QueryStringContract } from './query_string';
-import { buildEsQuery, getEsQueryConfig } from '../../common';
+import { buildEsQuery, getEsQueryConfig, TimeRange } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
 import { IndexPattern } from '..';
@@ -80,8 +80,8 @@ export class QueryService {
       savedQueries: createSavedQueryService(savedObjectsClient),
       state$: this.state$,
       timefilter: this.timefilter,
-      getEsQuery: (indexPattern: IndexPattern) => {
-        const timeFilter = this.timefilter.timefilter.createFilter(indexPattern);
+      getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {
+        const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, timeRange);
 
         return buildEsQuery(
           indexPattern,
