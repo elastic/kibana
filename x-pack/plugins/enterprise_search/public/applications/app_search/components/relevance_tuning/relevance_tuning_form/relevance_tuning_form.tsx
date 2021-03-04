@@ -54,22 +54,24 @@ export const RelevanceTuningForm: React.FC = () => {
         </EuiTitle>
         <EuiSpacer />
         {schemaFields.length > FIELD_FILTER_CUTOFF && (
-          <EuiFieldSearch
-            value={filterInputValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
-              {
-                defaultMessage: 'Filter {schemaFieldsLength} fields...',
-                values: {
-                  schemaFieldsLength: schemaFields.length,
-                },
-              }
-            )}
-            fullWidth
-          />
+          <>
+            <EuiFieldSearch
+              value={filterInputValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              placeholder={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.manageFields.filterPlaceholder',
+                {
+                  defaultMessage: 'Filter {schemaFieldsLength} fields...',
+                  values: {
+                    schemaFieldsLength: schemaFields.length,
+                  },
+                }
+              )}
+              fullWidth
+            />
+            <EuiSpacer />
+          </>
         )}
-        <EuiSpacer />
         {filteredSchemaFields.map((fieldName) => (
           <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
             <EuiAccordion
