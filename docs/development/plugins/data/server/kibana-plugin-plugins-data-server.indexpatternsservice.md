@@ -7,13 +7,42 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> 
+export declare class IndexPatternsService 
 ```
+
+## Constructors
+
+|  Constructor | Modifiers | Description |
+|  --- | --- | --- |
+|  [(constructor)({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, })](./kibana-plugin-plugins-data-server.indexpatternsservice._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternsService</code> class |
+
+## Properties
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [clearCache](./kibana-plugin-plugins-data-server.indexpatternsservice.clearcache.md) |  | <code>(id?: string &#124; undefined) =&gt; void</code> | Clear index pattern list cache |
+|  [ensureDefaultIndexPattern](./kibana-plugin-plugins-data-server.indexpatternsservice.ensuredefaultindexpattern.md) |  | <code>EnsureDefaultIndexPattern</code> |  |
+|  [fieldArrayToMap](./kibana-plugin-plugins-data-server.indexpatternsservice.fieldarraytomap.md) |  | <code>(fields: FieldSpec[], fieldAttrs?: FieldAttrs &#124; undefined) =&gt; Record&lt;string, FieldSpec&gt;</code> | Converts field array to map |
+|  [find](./kibana-plugin-plugins-data-server.indexpatternsservice.find.md) |  | <code>(search: string, size?: number) =&gt; Promise&lt;IndexPattern[]&gt;</code> | Find and load index patterns by title |
+|  [get](./kibana-plugin-plugins-data-server.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
+|  [getCache](./kibana-plugin-plugins-data-server.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
+|  [getDefault](./kibana-plugin-plugins-data-server.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
+|  [getFieldsForIndexPattern](./kibana-plugin-plugins-data-server.indexpatternsservice.getfieldsforindexpattern.md) |  | <code>(indexPattern: IndexPattern &#124; IndexPatternSpec, options?: GetFieldsOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Get field list by providing an index patttern (or spec) |
+|  [getFieldsForWildcard](./kibana-plugin-plugins-data-server.indexpatternsservice.getfieldsforwildcard.md) |  | <code>(options: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing { pattern } |
+|  [getIds](./kibana-plugin-plugins-data-server.indexpatternsservice.getids.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern ids |
+|  [getIdsWithTitle](./kibana-plugin-plugins-data-server.indexpatternsservice.getidswithtitle.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;Array&lt;{</code><br/><code>        id: string;</code><br/><code>        title: string;</code><br/><code>    }&gt;&gt;</code> | Get list of index pattern ids with titles |
+|  [getTitles](./kibana-plugin-plugins-data-server.indexpatternsservice.gettitles.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern titles |
+|  [refreshFields](./kibana-plugin-plugins-data-server.indexpatternsservice.refreshfields.md) |  | <code>(indexPattern: IndexPattern) =&gt; Promise&lt;void&gt;</code> | Refresh field list for a given index pattern |
+|  [savedObjectToSpec](./kibana-plugin-plugins-data-server.indexpatternsservice.savedobjecttospec.md) |  | <code>(savedObject: SavedObject&lt;IndexPatternAttributes&gt;) =&gt; IndexPatternSpec</code> | Converts index pattern saved object to index pattern spec |
+|  [setDefault](./kibana-plugin-plugins-data-server.indexpatternsservice.setdefault.md) |  | <code>(id: string, force?: boolean) =&gt; Promise&lt;void&gt;</code> | Optionally set default index pattern, unless force = true |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [setup(core, { expressions })](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
-|  [start(core, { fieldFormats, logger })](./kibana-plugin-plugins-data-server.indexpatternsservice.start.md) |  |  |
+|  [create(spec, skipFetchFields)](./kibana-plugin-plugins-data-server.indexpatternsservice.create.md) |  | Create a new index pattern instance |
+|  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-server.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
+|  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-server.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
+|  [delete(indexPatternId)](./kibana-plugin-plugins-data-server.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
+|  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-server.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
 

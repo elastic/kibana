@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import qs from 'querystring';
 import { isEmpty } from 'lodash';
@@ -19,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const url = `/api/apm/services/opbeans-java/transactions/charts/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
-    uiFilters: encodeURIComponent('{}'),
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
   })}`;
@@ -81,16 +82,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Array [
             Object {
-              "traceId": "af0f18dc0841cfc1f567e7e1d55cfda7",
-              "transactionId": "925f02e5ac122897",
+              "traceId": "a4eb3781a21dc11d289293076fd1a1b3",
+              "transactionId": "21892bde4ff1364d",
             },
             Object {
               "traceId": "ccd327537120e857bdfa407434dfb9a4",
               "transactionId": "c5f923159cc1b8a6",
             },
             Object {
-              "traceId": "a4eb3781a21dc11d289293076fd1a1b3",
-              "transactionId": "21892bde4ff1364d",
+              "traceId": "af0f18dc0841cfc1f567e7e1d55cfda7",
+              "transactionId": "925f02e5ac122897",
             },
           ]
         `);

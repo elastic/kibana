@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -34,13 +35,19 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
   return async function runTask(jobId, jobPayload, context, req) {
     const generateCsv = createGenerateCsv(logger);
-    const { panel, visType } = jobPayload;
+    const { panel } = jobPayload;
 
-    logger.debug(`Execute job generating [${visType}] csv`);
+    logger.debug(`Execute job generating saved search CSV`);
 
     const savedObjectsClient = context.core.savedObjects.client;
     const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobPayload, panel, savedObjectsClient, uiSettingsClient);
+    const job = await getGenerateCsvParams(
+      jobPayload,
+      panel,
+      savedObjectsClient,
+      uiSettingsClient,
+      logger
+    );
 
     const elasticsearch = reporting.getElasticsearchService();
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
-import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState } from './deserialize';
+import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -119,9 +120,9 @@ describe('deserialize', () => {
       savedWorkspace,
       {
         getNonScriptedFields: () => [
-          { name: 'field1', type: 'string', aggregatable: true },
-          { name: 'field2', type: 'string', aggregatable: true },
-          { name: 'field3', type: 'string', aggregatable: true },
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
       } as IndexPattern,
       workspace
@@ -234,6 +235,24 @@ describe('deserialize', () => {
       const success = migrateLegacyIndexPatternRef(workspacePayload, []);
       expect(success).toEqual({ success: true });
       expect(workspacePayload).toEqual(savedWorkspace);
+    });
+  });
+
+  describe('mapFields', () => {
+    it('should not include unmapped fields', () => {
+      const indexPattern = {
+        getNonScriptedFields: () => [
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'runtimeField', type: 'string', aggregatable: true, isMapped: false },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
+        ],
+      } as IndexPattern;
+      expect(mapFields(indexPattern).map(({ name }) => name)).toEqual([
+        'field1',
+        'field2',
+        'field3',
+      ]);
     });
   });
 });

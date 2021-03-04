@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { generatePath } from 'react-router-dom';
@@ -56,6 +57,7 @@ export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
+export const ALPHA_PATH = '/alpha';
 export const SOURCES_PATH = '/sources';
 export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
@@ -131,3 +133,4 @@ export const getReindexJobRoute = (
   isOrganization: boolean
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
+export const getRoleMappingPath = (roleId: string) => generatePath(ROLE_MAPPING_PATH, { roleId });

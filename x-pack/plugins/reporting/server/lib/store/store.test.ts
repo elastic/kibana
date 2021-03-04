@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -202,7 +203,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'ABC',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
@@ -243,7 +243,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'BCD',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportFailed(report, { errors: 'yes' } as any);
@@ -284,7 +283,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'CDE',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
@@ -325,7 +323,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'utc',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
@@ -46,8 +47,7 @@ export interface ESPolygonFilter {
 
 export function createExtentFilter(
   mapExtent: MapExtent,
-  geoFieldName: string,
-  geoFieldType: ES_GEO_FIELD_TYPE
+  geoFieldName: string
 ): ESPolygonFilter | ESGeoBoundingBoxFilter;
 
 export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBox;

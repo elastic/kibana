@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -11,7 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('classification creation', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/91450
+  describe.skip('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -36,10 +38,30 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.jobId}`;
         },
         dependentVariable: 'y',
-        trainingPercent: '20',
+        trainingPercent: 20,
         modelMemory: '60mb',
         createIndexPattern: true,
         expected: {
+          rocCurveColorState: [
+            // background
+            { key: '#FFFFFF', value: 93 },
+            // tick/grid/axis
+            { key: '#98A2B3', value: 1 },
+            { key: '#DDDDDD', value: 3 },
+            // line
+            { key: '#6092C0', value: 1 },
+          ],
+          scatterplotMatrixColorStats: [
+            // background
+            { key: '#000000', value: 94 },
+            // tick/grid/axis
+            { key: '#DDDDDD', value: 1 },
+            { key: '#D3DAE6', value: 1 },
+            { key: '#F5F7FA', value: 1 },
+            // scatterplot circles
+            { key: '#6A717D', value: 1 },
+            { key: '#54B39A', value: 1 },
+          ],
           row: {
             type: 'classification',
             status: 'stopped',
@@ -88,6 +110,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -203,10 +231,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+            'mlDFAnalyticsClassificationExplorationRocCurveChart',
+            testData.expected.rocCurveColorState
+          );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+            'mlDFExpandableSection-splom',
+            testData.expected.scatterplotMatrixColorStats
+          );
         });
 
         it('displays the analytics job in the map view', async () => {

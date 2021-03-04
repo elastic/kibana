@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface ElasticsearchResponse {
@@ -97,6 +98,29 @@ export interface ElasticsearchNodeStats {
   };
 }
 
+export interface ElasticsearchIndexStats {
+  index?: string;
+  primaries?: {
+    docs?: {
+      count?: number;
+    };
+    store?: {
+      size_in_bytes?: number;
+    };
+    indexing?: {
+      index_total?: number;
+    };
+  };
+  total?: {
+    store?: {
+      size_in_bytes?: number;
+    };
+    search?: {
+      query_total?: number;
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -130,7 +154,10 @@ export interface ElasticsearchLegacySource {
   cluster_state?: {
     status?: string;
     nodes?: {
-      [nodeUuid: string]: {};
+      [nodeUuid: string]: {
+        ephemeral_id?: string;
+        name?: string;
+      };
     };
     master_node?: boolean;
   };
@@ -146,6 +173,7 @@ export interface ElasticsearchLegacySource {
   license?: {
     status?: string;
     type?: string;
+    expiry_date_in_millis?: number;
   };
   logstash_state?: {
     pipeline?: {
@@ -243,28 +271,7 @@ export interface ElasticsearchLegacySource {
       name?: string;
     };
   };
-  index_stats?: {
-    index?: string;
-    primaries?: {
-      docs?: {
-        count?: number;
-      };
-      store?: {
-        size_in_bytes?: number;
-      };
-      indexing?: {
-        index_total?: number;
-      };
-    };
-    total?: {
-      store?: {
-        size_in_bytes?: number;
-      };
-      search?: {
-        query_total?: number;
-      };
-    };
-  };
+  index_stats?: ElasticsearchIndexStats;
   node_stats?: ElasticsearchNodeStats;
   service?: {
     address?: string;

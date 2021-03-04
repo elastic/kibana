@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ApplicationStart, IBasePath } from 'src/core/public';
@@ -70,7 +70,6 @@ interface TableState {
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
-  isColumnDataLoaded: boolean;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -80,21 +79,11 @@ export class Table extends PureComponent<TableProps, TableState> {
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
-    isColumnDataLoaded: false,
   };
 
   constructor(props: TableProps) {
     super(props);
   }
-
-  componentDidMount() {
-    this.loadColumnData();
-  }
-
-  loadColumnData = async () => {
-    await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
-    this.setState({ isColumnDataLoaded: true });
-  };
 
   onChange = ({ query, error }: any) => {
     if (error) {

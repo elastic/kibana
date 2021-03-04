@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import { format } from 'url';
@@ -17,12 +19,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // url parameters
   const { start, end } = archives_metadata[archiveName];
-  const uiFilters = '{}';
   const transactionType = 'request';
 
   const url = format({
     pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-    query: { start, end, uiFilters, transactionType },
+    query: { start, end, transactionType },
   });
 
   registry.when('Error rate when data is not loaded', { config: 'basic', archives: [] }, () => {

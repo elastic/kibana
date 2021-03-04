@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -334,6 +335,11 @@ describe('Policy Details', () => {
       it('ransomware card is hidden', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
+      });
+
+      it('shows the locked card in place of 1 paid feature', () => {
+        const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
+        expect(lockedCard).toHaveLength(1);
       });
     });
   });

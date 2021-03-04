@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './dimension_editor.scss';
@@ -58,6 +59,9 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
 
+  // Save the initial value
+  const initialValue = useRef(value);
+
   const onChangeDebounced = useMemo(() => {
     const callback = _.debounce((val: string) => {
       onChange(val);
@@ -78,7 +82,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);
     setInputValue(val);
-    onChangeDebounced(val);
+    onChangeDebounced(val || initialValue.current);
   };
 
   return (
@@ -95,6 +99,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
         data-test-subj="indexPattern-label-edit"
         value={inputValue}
         onChange={handleInputChange}
+        placeholder={initialValue.current}
       />
     </EuiFormRow>
   );

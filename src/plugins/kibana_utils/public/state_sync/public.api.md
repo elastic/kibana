@@ -22,6 +22,7 @@ export const createSessionStorageStateStorage: (storage?: Storage) => ISessionSt
 
 // @public
 export interface IKbnUrlStateStorage extends IStateStorage {
+    cancel: () => void;
     // (undocumented)
     change$: <State = unknown>(key: string) => Observable<State | null>;
     // (undocumented)

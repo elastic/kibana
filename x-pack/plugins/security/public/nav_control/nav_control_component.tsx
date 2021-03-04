@@ -1,27 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import './nav_control_component.scss';
+
+import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiContextMenu,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
+import React, { Component } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
-import {
-  EuiAvatar,
-  EuiHeaderSectionItemButton,
-  EuiPopover,
-  EuiLoadingSpinner,
-  EuiIcon,
-  EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-  IconType,
-  EuiText,
-} from '@elastic/eui';
-import { AuthenticatedUser } from '../../common/model';
 
-import './nav_control_component.scss';
+import type { AuthenticatedUser } from '../../common/model';
 
 export interface UserMenuLink {
   label: string;

@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { SecurityLicense } from '../../../common/licensing';
-import { APIKeys } from './api_keys';
+import { elasticsearchServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import {
-  httpServerMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { securityMock } from '../../mocks';
+import { APIKeys } from './api_keys';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 

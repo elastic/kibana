@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,15 +12,15 @@ import {
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 import {
   APP_SEARCH_PLUGIN,

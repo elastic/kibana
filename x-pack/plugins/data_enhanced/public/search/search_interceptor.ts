@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { once } from 'lodash';
@@ -44,15 +45,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       ? TimeoutErrorMode.CHANGE
       : TimeoutErrorMode.CONTACT;
   }
-
-  /**
-   * Abort our `AbortController`, which in turn aborts any intercepted searches.
-   */
-  public cancelPending = () => {
-    this.abortController.abort();
-    this.abortController = new AbortController();
-    if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
-  };
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({

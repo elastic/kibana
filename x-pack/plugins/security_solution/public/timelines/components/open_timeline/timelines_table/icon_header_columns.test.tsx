@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -15,10 +15,12 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { TimelinesTable, TimelinesTableProps } from '.';
 import { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
+
+const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
+
 jest.mock('../../../../common/lib/kibana');
 
 describe('#getActionsColumns', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
@@ -27,7 +29,7 @@ describe('#getActionsColumns', () => {
 
   test('it renders the pinned events header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
@@ -41,7 +43,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with6Events),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -51,7 +53,7 @@ describe('#getActionsColumns', () => {
 
   test('it renders the notes count header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
@@ -65,7 +67,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with4Notes),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -75,7 +77,7 @@ describe('#getActionsColumns', () => {
 
   test('it renders the favorites header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
@@ -89,7 +91,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(undefinedFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -103,7 +105,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(nullFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -117,7 +119,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(emptyFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -142,7 +144,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );
@@ -171,7 +173,7 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <TimelinesTable {...testProps} />
       </ThemeProvider>
     );

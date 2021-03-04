@@ -1,49 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { UnwrapPromise } from '@kbn/utility-types';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { isRequiredPackage } from './index';
+
+import { defaultPackages } from '../../../../common';
+import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
-  BulkInstallPackageInfo,
-  InstallablePackage,
-  InstallSource,
-  defaultPackages,
-} from '../../../../common';
+  IngestManagerError,
+  PackageOperationNotSupportedError,
+  PackageOutdatedError,
+} from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import {
+import { KibanaAssetType } from '../../../types';
+import type {
   AssetReference,
   Installation,
   CallESAsCurrentUser,
   AssetType,
   EsAssetReference,
   InstallType,
-  KibanaAssetType,
 } from '../../../types';
+import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import { toAssetReference } from '../kibana/assets/install';
+import type { ArchiveAsset } from '../kibana/assets/install';
+
 import {
+  isRequiredPackage,
   getInstallation,
   getInstallationObject,
   bulkInstallPackages,
   isBulkInstallError,
 } from './index';
-import { toAssetReference, ArchiveAsset } from '../kibana/assets/install';
 import { removeInstallation } from './remove';
-import {
-  IngestManagerError,
-  PackageOperationNotSupportedError,
-  PackageOutdatedError,
-} from '../../../errors';
 import { getPackageSavedObjects } from './get';
-import { appContextService } from '../../app_context';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {

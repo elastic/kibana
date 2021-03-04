@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
-import _ from 'lodash';
 import uuid from 'uuid/v4';
 
 import {
@@ -24,6 +24,7 @@ import { Join } from './resources/join';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../../classes/fields/field';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 export interface Props {
   joins: JoinDescriptor[];
@@ -44,19 +45,25 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         onChange(layer, [...joins.slice(0, index), ...joins.slice(index + 1)]);
       };
 
-      return (
-        <Fragment key={index}>
-          <EuiSpacer size="m" />
-          <Join
-            join={joinDescriptor}
-            layer={layer}
-            onChange={handleOnChange}
-            onRemove={handleOnRemove}
-            leftFields={leftJoinFields}
-            leftSourceName={layerDisplayName}
-          />
-        </Fragment>
-      );
+      if (joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+        throw new Error(
+          'PEBKAC - Table sources cannot be edited in the UX and should only be used in MapEmbeddable'
+        );
+      } else {
+        return (
+          <Fragment key={index}>
+            <EuiSpacer size="m" />
+            <Join
+              join={joinDescriptor}
+              layer={layer}
+              onChange={handleOnChange}
+              onRemove={handleOnRemove}
+              leftFields={leftJoinFields}
+              leftSourceName={layerDisplayName}
+            />
+          </Fragment>
+        );
+      }
     });
   };
 

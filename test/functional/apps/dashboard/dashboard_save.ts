@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
+  const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/89476
   describe.skip('dashboard save', function describeIndexTests() {
@@ -111,6 +112,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardNameEnterKey, 1);
+    });
+
+    it('Does not show quick save menu item on a new dashboard', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.expectMissingQuickSaveOption();
+    });
+
+    it('Does not show dashboard save modal when on quick save', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.saveDashboard('test quick save');
+
+      await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.dashboard.expectExistsQuickSaveOption();
+      await PageObjects.dashboard.clickQuickSave();
+
+      await testSubjects.existOrFail('saveDashboardSuccess');
+    });
+
+    it('Stays in edit mode after performing a quick save', async function () {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     });
   });
 }

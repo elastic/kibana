@@ -1,11 +1,5 @@
 $ilmTimelineBarHeight: $euiSizeS;
 
-/*
-* For theming we need to shade or tint to get the right color from the base EUI color
-*/
-$ilmDeletePhaseBackgroundColor: tintOrShade($euiColorVis5_behindText, 80%,80%);
-$ilmDeletePhaseColor: shadeOrTint($euiColorVis5, 40%, 40%);
-
 .ilmTimeline {
   overflow: hidden;
   width: 100%;
@@ -49,14 +43,16 @@ $ilmDeletePhaseColor: shadeOrTint($euiColorVis5, 40%, 40%);
     */
     padding: $euiSizeM;
     margin-left: $euiSizeM;
-    background-color: $ilmDeletePhaseBackgroundColor;
-    color: $ilmDeletePhaseColor;
-    border-radius: calc(#{$euiSizeS} / 2);
+    background-color: $euiColorLightestShade;
+    color: $euiColorDarkShade;
+    border-radius: 50%;
   }
 
   &__colorBar {
     display: inline-block;
     height: $ilmTimelineBarHeight;
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeXS;
     border-radius: calc(#{$ilmTimelineBarHeight} / 2);
     width: 100%;
   }

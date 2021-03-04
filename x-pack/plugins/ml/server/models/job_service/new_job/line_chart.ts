@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  AggFieldNamePair,
+  EVENT_RATE_FIELD_ID,
+  RuntimeMappings,
+} from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
@@ -17,7 +22,7 @@ interface Result {
   value: Value;
 }
 
-interface ProcessedResults {
+export interface ProcessedResults {
   success: boolean;
   results: Record<number, Result[]>;
   totalResults: number;
@@ -33,7 +38,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    splitFieldValue: string | null
+    splitFieldValue: string | null,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const json: object = getSearchJsonFromConfig(
       indexPatternTitle,
@@ -44,7 +50,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
       query,
       aggFieldNamePairs,
       splitFieldName,
-      splitFieldValue
+      splitFieldValue,
+      runtimeMappings
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -102,7 +109,8 @@ function getSearchJsonFromConfig(
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
   splitFieldName: string | null,
-  splitFieldValue: string | null
+  splitFieldValue: string | null,
+  runtimeMappings: RuntimeMappings | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -124,6 +132,7 @@ function getSearchJsonFromConfig(
           aggs: {},
         },
       },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   };
 

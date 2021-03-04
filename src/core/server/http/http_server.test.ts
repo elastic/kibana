@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Server } from 'http';
@@ -1016,13 +1016,9 @@ describe('body options', () => {
         options: { body: { parse: false } },
       },
       (context, req, res) => {
-        try {
-          expect(req.body).toBeInstanceOf(Buffer);
-          expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
+        expect(req.body).toBeInstanceOf(Buffer);
+        expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
+        return res.ok({ body: req.route.options.body });
       }
     );
     registerRouter(router);
@@ -1053,15 +1049,11 @@ describe('timeout options', () => {
           },
         },
         (context, req, res) => {
-          try {
-            return res.ok({
-              body: {
-                timeout: req.route.options.timeout,
-              },
-            });
-          } catch (err) {
-            return res.internalError({ body: err.message });
-          }
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
         }
       );
       registerRouter(router);
@@ -1091,15 +1083,11 @@ describe('timeout options', () => {
           },
         },
         (context, req, res) => {
-          try {
-            return res.ok({
-              body: {
-                timeout: req.route.options.timeout,
-              },
-            });
-          } catch (err) {
-            return res.internalError({ body: err.message });
-          }
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
         }
       );
       registerRouter(router);
@@ -1128,15 +1116,11 @@ describe('timeout options', () => {
           },
         },
         (context, req, res) => {
-          try {
-            return res.ok({
-              body: {
-                timeout: req.route.options.timeout,
-              },
-            });
-          } catch (err) {
-            return res.internalError({ body: err.message });
-          }
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
         }
       );
       registerRouter(router);
@@ -1165,15 +1149,11 @@ describe('timeout options', () => {
           },
         },
         (context, req, res) => {
-          try {
-            return res.ok({
-              body: {
-                timeout: req.route.options.timeout,
-              },
-            });
-          } catch (err) {
-            return res.internalError({ body: err.message });
-          }
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
         }
       );
       registerRouter(router);
@@ -1294,12 +1274,8 @@ test('should return a stream in the body', async () => {
       options: { body: { output: 'stream' } },
     },
     (context, req, res) => {
-      try {
-        expect(req.body).toBeInstanceOf(Readable);
-        return res.ok({ body: req.route.options.body });
-      } catch (err) {
-        return res.internalError({ body: err.message });
-      }
+      expect(req.body).toBeInstanceOf(Readable);
+      return res.ok({ body: req.route.options.body });
     }
   );
   registerRouter(router);

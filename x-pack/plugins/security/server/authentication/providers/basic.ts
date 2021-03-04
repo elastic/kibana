@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import {
-  HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
 } from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 

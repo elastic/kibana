@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -16,7 +16,7 @@ import { VegaInspectorAdapters } from './vega_inspector/index';
 import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
-type Input = KibanaContext | null;
+type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {

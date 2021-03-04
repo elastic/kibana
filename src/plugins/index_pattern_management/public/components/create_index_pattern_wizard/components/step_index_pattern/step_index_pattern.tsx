@@ -1,20 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  indexPatterns,
-  IndexPatternAttributes,
-  UI_SETTINGS,
-} from '../../../../../../../plugins/data/public';
+import { indexPatterns, UI_SETTINGS } from '../../../../../../../plugins/data/public';
 import {
   getIndices,
   containsIllegalCharacters,
@@ -118,18 +114,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const {
-      savedObjects,
-    } = await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
-    });
-
-    const existingIndexPatterns = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.title : ''
-    ) as string[];
-
+    const existingIndexPatterns = await this.context.services.data.indexPatterns.getTitles();
     this.setState({ existingIndexPatterns });
   };
 
@@ -193,12 +178,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(query)) {
+    if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
     } else {
-      if (query === '*' && appendedWildcard) {
+      if (['', '*'].includes(query) && appendedWildcard) {
         query = '';
         this.setState({ appendedWildcard: false });
       }

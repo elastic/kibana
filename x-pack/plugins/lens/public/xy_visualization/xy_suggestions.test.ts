@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSuggestions } from './xy_suggestions';
@@ -483,7 +484,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(visualizationTypes.length - 1);
-    expect(suggestion.title).toEqual('Stacked bar');
+    expect(suggestion.title).toEqual('Bar vertical stacked');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
         layers: [

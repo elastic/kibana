@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
@@ -46,10 +48,10 @@ export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
 export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
-  private readonly isESOUsingEphemeralEncryptionKey: boolean;
+  private readonly isESOCanEncrypt: boolean;
 
-  constructor({ isESOUsingEphemeralEncryptionKey }: { isESOUsingEphemeralEncryptionKey: boolean }) {
-    this.isESOUsingEphemeralEncryptionKey = isESOUsingEphemeralEncryptionKey;
+  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
+    this.isESOCanEncrypt = isESOCanEncrypt;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -70,9 +72,9 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
-    if (this.isESOUsingEphemeralEncryptionKey === true) {
+    if (!this.isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -35,78 +36,84 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface Props {
+  hideConnectorServiceNowSir?: boolean;
   withSteps?: boolean;
 }
 
-export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true }) => {
-  const { isSubmitting } = useFormContext();
+export const CreateCaseForm: React.FC<Props> = React.memo(
+  ({ hideConnectorServiceNowSir = false, withSteps = true }) => {
+    const { isSubmitting } = useFormContext();
 
-  const firstStep = useMemo(
-    () => ({
-      title: i18n.STEP_ONE_TITLE,
-      children: (
-        <>
-          <Title isLoading={isSubmitting} />
+    const firstStep = useMemo(
+      () => ({
+        title: i18n.STEP_ONE_TITLE,
+        children: (
+          <>
+            <Title isLoading={isSubmitting} />
+            <Container>
+              <Tags isLoading={isSubmitting} />
+            </Container>
+            <Container big>
+              <Description isLoading={isSubmitting} />
+            </Container>
+          </>
+        ),
+      }),
+      [isSubmitting]
+    );
+
+    const secondStep = useMemo(
+      () => ({
+        title: i18n.STEP_TWO_TITLE,
+        children: (
           <Container>
-            <Tags isLoading={isSubmitting} />
+            <SyncAlertsToggle isLoading={isSubmitting} />
           </Container>
-          <Container big>
-            <Description isLoading={isSubmitting} />
+        ),
+      }),
+      [isSubmitting]
+    );
+
+    const thirdStep = useMemo(
+      () => ({
+        title: i18n.STEP_THREE_TITLE,
+        children: (
+          <Container>
+            <Connector
+              hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+              isLoading={isSubmitting}
+            />
           </Container>
-        </>
-      ),
-    }),
-    [isSubmitting]
-  );
+        ),
+      }),
+      [hideConnectorServiceNowSir, isSubmitting]
+    );
 
-  const secondStep = useMemo(
-    () => ({
-      title: i18n.STEP_TWO_TITLE,
-      children: (
-        <Container>
-          <SyncAlertsToggle isLoading={isSubmitting} />
-        </Container>
-      ),
-    }),
-    [isSubmitting]
-  );
+    const allSteps = useMemo(() => [firstStep, secondStep, thirdStep], [
+      firstStep,
+      secondStep,
+      thirdStep,
+    ]);
 
-  const thirdStep = useMemo(
-    () => ({
-      title: i18n.STEP_THREE_TITLE,
-      children: (
-        <Container>
-          <Connector isLoading={isSubmitting} />
-        </Container>
-      ),
-    }),
-    [isSubmitting]
-  );
-
-  const allSteps = useMemo(() => [firstStep, secondStep, thirdStep], [
-    firstStep,
-    secondStep,
-    thirdStep,
-  ]);
-
-  return (
-    <>
-      {isSubmitting && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
-      {withSteps ? (
-        <EuiSteps
-          headingElement="h2"
-          steps={allSteps}
-          data-test-subj={'case-creation-form-steps'}
-        />
-      ) : (
-        <>
-          {firstStep.children}
-          {secondStep.children}
-          {thirdStep.children}
-        </>
-      )}
-    </>
-  );
-});
+    return (
+      <>
+        {isSubmitting && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
+        {withSteps ? (
+          <EuiSteps
+            headingElement="h2"
+            steps={allSteps}
+            data-test-subj={'case-creation-form-steps'}
+          />
+        ) : (
+          <>
+            {firstStep.children}
+            {secondStep.children}
+            {thirdStep.children}
+          </>
+        )}
+      </>
+    );
+  }
+);
 
 CreateCaseForm.displayName = 'CreateCaseForm';

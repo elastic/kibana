@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
@@ -53,6 +54,7 @@ export interface CustomRule {
   runsEvery: Interval;
   lookBack: Interval;
   timeline: CompleteTimeline;
+  maxSignals: number;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -173,6 +175,7 @@ export const newRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const existingRule: CustomRule = {
@@ -191,6 +194,9 @@ export const existingRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  // Please do not change, or if you do, needs
+  // to be any number other than default value
+  maxSignals: 500,
 };
 
 export const newOverrideRule: OverrideRule = {
@@ -212,6 +218,7 @@ export const newOverrideRule: OverrideRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThresholdRule: ThresholdRule = {
@@ -231,6 +238,7 @@ export const newThresholdRule: ThresholdRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const machineLearningRule: MachineLearningRule = {
@@ -264,6 +272,7 @@ export const eqlRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const eqlSequenceRule: CustomRule = {
@@ -284,6 +293,7 @@ export const eqlSequenceRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
@@ -303,6 +313,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   indicatorMapping: 'agent.id',
   indicatorIndexField: 'agent.threat',
   timeline,
+  maxSignals: 100,
 };
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];

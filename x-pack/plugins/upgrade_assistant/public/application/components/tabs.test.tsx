@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from 'src/core/public/mocks';
+import { mockKibanaSemverVersion } from '../../../common/constants';
 import { UpgradeAssistantTabs } from './tabs';
 import { LoadingState } from './types';
 
@@ -24,6 +26,11 @@ jest.mock('../app_context', () => {
         docLinks: {
           DOC_LINK_VERSION: 'current',
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+        kibanaVersionInfo: {
+          currentMajor: mockKibanaSemverVersion.major,
+          prevMajor: mockKibanaSemverVersion.major - 1,
+          nextMajor: mockKibanaSemverVersion.major + 1,
         },
       };
     },

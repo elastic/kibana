@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('appears correctly in discover', async function () {
       await PageObjects.common.navigateToApp('discover');
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData.includes('"values": [ 0.3, 1, 3, 4.2, 4.8 ]')).to.be.ok();
+      expect(rowData.includes('"values":[0.3,1,3,4.2,4.8]')).to.be.ok();
     });
 
     describe('works in visualizations', () => {
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with average aggregation', async () => {
         const data = await renderTableForAggregation('Average');
-        expect(data).to.eql([['2.8510720308359434']]);
+        expect(data).to.eql([['2.865']]);
       });
 
       it('with median aggregation', async () => {
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with sum aggregation', async () => {
         const data = await renderTableForAggregation('Sum');
-        expect(data).to.eql([['11834.800000000001']]);
+        expect(data).to.eql([['10,983']]);
       });
     });
   });

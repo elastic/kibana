@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -21,6 +22,7 @@ interface AppValues extends WorkplaceSearchInitialData {
 interface AppActions {
   initializeAppData(props: InitialAppData): InitialAppData;
   setContext(isOrganization: boolean): boolean;
+  setSourceRestriction(canCreatePersonalSources: boolean): boolean;
 }
 
 const emptyOrg = {} as Organization;
@@ -34,6 +36,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       isFederatedAuth,
     }),
     setContext: (isOrganization) => isOrganization,
+    setSourceRestriction: (canCreatePersonalSources: boolean) => canCreatePersonalSources,
   },
   reducers: {
     hasInitialized: [
@@ -64,6 +67,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       emptyAccount,
       {
         initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.account || emptyAccount,
+        setSourceRestriction: (state, canCreatePersonalSources) => ({
+          ...state,
+          canCreatePersonalSources,
+        }),
       },
     ],
   },

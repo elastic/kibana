@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -12,7 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header']);
+  const docTable = getService('docTable');
+  const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header', 'context']);
   const searchSessions = getService('searchSessions');
 
   describe('discover async search', () => {
@@ -59,6 +62,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
+    });
+
+    it('navigation to context cleans the session', async () => {
+      await PageObjects.common.clearAllToasts();
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[0].click();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await searchSessions.missingOrFail();
     });
   });
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { throwError, of } from 'rxjs';
@@ -13,6 +13,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 
 const mockSearchApi = jest.fn();
 
@@ -27,6 +28,20 @@ jest.mock('../../../kibana_services', () => {
       data: {
         search: {
           search: mockSearchApi,
+        },
+      },
+      docLinks: {
+        links: {
+          apis: {
+            indexExists: 'mockUrl',
+          },
+        },
+      },
+      uiSettings: {
+        get: (key: string) => {
+          if (key === mockSearchFieldsFromSource) {
+            return false;
+          }
         },
       },
     }),

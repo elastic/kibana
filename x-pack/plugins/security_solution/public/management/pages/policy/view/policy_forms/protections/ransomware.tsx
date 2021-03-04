@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -41,7 +42,7 @@ import { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
 import { RadioFlexGroup } from './malware';
 
-const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows, OS.mac];
+const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows];
 const protection = 'ransomware';
 
 const ProtectionRadio = React.memo(
@@ -49,7 +50,6 @@ const ProtectionRadio = React.memo(
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const dispatch = useDispatch<(action: AppAction) => void>();
     const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
-    // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
     const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
 
     const handleRadioChange: EuiRadioProps['onChange'] = useCallback(() => {
@@ -96,7 +96,6 @@ ProtectionRadio.displayName = 'ProtectionRadio';
 export const Ransomware = React.memo(() => {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const dispatch = useDispatch<(action: AppAction) => void>();
-  // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
   const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
   const userNotificationSelected =
     policyDetailsConfig && policyDetailsConfig.windows.popup.ransomware.enabled;
@@ -317,7 +316,7 @@ export const Ransomware = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
         defaultMessage: 'Ransomware',
       })}
-      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC]}
+      supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="ransomwareProtectionsForm"
       rightCorner={protectionSwitch}
     >

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,13 +22,9 @@ import {
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
-import { EndpointAppContext } from '../../types';
 import { SecuritySolutionPluginRouter } from '../../../types';
 
-export const registerTrustedAppsRoutes = (
-  router: SecuritySolutionPluginRouter,
-  endpointAppContext: EndpointAppContext
-) => {
+export const registerTrustedAppsRoutes = (router: SecuritySolutionPluginRouter) => {
   // DELETE one
   router.delete(
     {
@@ -35,7 +32,7 @@ export const registerTrustedAppsRoutes = (
       validate: DeleteTrustedAppsRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsDeleteRouteHandler(endpointAppContext)
+    getTrustedAppsDeleteRouteHandler()
   );
 
   // GET list
@@ -45,7 +42,7 @@ export const registerTrustedAppsRoutes = (
       validate: GetTrustedAppsRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsListRouteHandler(endpointAppContext)
+    getTrustedAppsListRouteHandler()
   );
 
   // CREATE
@@ -55,7 +52,7 @@ export const registerTrustedAppsRoutes = (
       validate: PostTrustedAppCreateRequestSchema,
       options: { authRequired: true },
     },
-    getTrustedAppsCreateRouteHandler(endpointAppContext)
+    getTrustedAppsCreateRouteHandler()
   );
 
   // SUMMARY
@@ -65,6 +62,6 @@ export const registerTrustedAppsRoutes = (
       validate: false,
       options: { authRequired: true },
     },
-    getTrustedAppsSummaryRouteHandler(endpointAppContext)
+    getTrustedAppsSummaryRouteHandler()
   );
 };

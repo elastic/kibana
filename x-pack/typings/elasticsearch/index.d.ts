@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ValuesType } from 'utility-types';
 import { Explanation, SearchParams, SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
@@ -23,7 +25,7 @@ export type MaybeReadonlyArray<T> = T[] | readonly T[];
 
 interface CollapseQuery {
   field: string;
-  inner_hits: {
+  inner_hits?: {
     name: string;
     size?: number;
     sort?: SortOptions;
@@ -70,6 +72,7 @@ export interface ESSearchBody {
   aggs?: AggregationInputMap;
   track_total_hits?: boolean | number;
   collapse?: CollapseQuery;
+  search_after?: Array<string | number>;
   _source?: ESSourceOptions;
 }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { generateId } from './utils';
@@ -315,19 +316,9 @@ describe('singleBulkCreate', () => {
   });
 
   test('filter duplicate rules will return back search responses if they do not have a signal and will NOT filter the source out', () => {
-    const ancestors = sampleDocWithAncestors();
-    ancestors.hits.hits[0]._source = { '@timestamp': '2020-04-20T21:27:45+0000' };
+    const ancestors = sampleDocSearchResultsNoSortId();
     const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', ancestors);
-    expect(filtered).toEqual([
-      {
-        _index: 'myFakeSignalIndex',
-        _type: 'doc',
-        _score: 100,
-        _version: 1,
-        _id: 'e1e08ddc-5e37-49ff-a258-5393aa44435a',
-        _source: { '@timestamp': '2020-04-20T21:27:45+0000' },
-      },
-    ]);
+    expect(filtered).toEqual(ancestors.hits.hits);
   });
 
   test('filter duplicate rules does not attempt filters when the signal is not an event type of signal but rather a "clash" from the source index having its own numeric signal type', () => {

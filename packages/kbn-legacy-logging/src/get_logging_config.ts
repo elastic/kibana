@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -27,14 +27,14 @@ export function getLoggingConfiguration(config: LegacyLoggingConfig, opsInterval
     });
   } else if (config.verbose) {
     _.defaults(events, {
-      log: '*',
-      // To avoid duplicate logs, we explicitly disable this in verbose
-      // mode as it is already provided by the new logging config under
-      // the `metrics.ops` context.
-      ops: '!',
-      request: '*',
-      response: '*',
       error: '*',
+      log: '*',
+      // To avoid duplicate logs, we explicitly disable these in verbose
+      // mode as they are already provided by the new logging config under
+      // the `http.server.response` and `metrics.ops` contexts.
+      ops: '!',
+      request: '!',
+      response: '!',
     });
   } else {
     _.defaults(events, {
@@ -75,6 +75,7 @@ export function getLoggingConfiguration(config: LegacyLoggingConfig, opsInterval
     },
     includes: {
       request: ['headers', 'payload'],
+      response: ['headers', 'payload'],
     },
     reporters: {
       logReporter: [loggerStream],

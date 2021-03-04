@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import set from 'set-value';
 
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import {
-  Threshold,
+  ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
@@ -17,12 +19,13 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerts/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { BaseHit, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse, ThresholdAggregationBucket } from './types';
-import { calculateThresholdSignalUuid } from './utils';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from './utils';
 import { BuildRuleMessage } from './rule_messages';
+import { TermAggregationBucket } from '../../types';
+import { MultiAggBucket, SignalSearchResponse, SignalSource } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -54,70 +57,126 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
 ) => {
-  if (isEmpty(threshold.field)) {
-    const totalResults =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+  const aggParts = threshold.field.length
+    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    : {
+        field: null,
+        index: 0,
+        name: 'threshold_0',
+      };
 
-    if (totalResults < threshold.value) {
-      return [];
-    }
-
-    const hit = results.hits.hits[0];
-    if (hit == null) {
-      logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
-      return [];
-    }
-
-    const source = {
-      '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
-      threshold_result: {
-        count: totalResults,
-        value: ruleId,
-      },
-    };
-
-    return [
-      {
-        _index: inputIndex,
-        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
-        _source: source,
-      },
-    ];
-  }
-
-  if (!results.aggregations?.threshold) {
+  if (!aggParts) {
     return [];
   }
 
-  return results.aggregations.threshold.buckets
-    .map(
-      ({ key, doc_count: docCount, top_threshold_hits: topHits }: ThresholdAggregationBucket) => {
-        const hit = topHits.hits.hits[0];
-        if (hit == null) {
-          return null;
+  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
+    return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
+      if (i < threshold.field.length - 1) {
+        const nextLevelIdx = i + 1;
+        const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
+        if (nextLevelAggParts == null) {
+          throw new Error('Unable to parse aggregation.');
         }
-
-        const source = {
-          '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
-          threshold_result: {
-            count: docCount,
-            value: get(threshold.field, hit._source),
-          },
+        const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
+        const nextBuckets = get(nextLevelPath, bucket);
+        const combinations = getCombinations(nextBuckets, nextLevelIdx, nextLevelAggParts.field);
+        combinations.forEach((val) => {
+          const el = {
+            terms: [
+              {
+                field,
+                value: bucket.key,
+              },
+              ...val.terms,
+            ].filter((term) => term.field != null),
+            cardinality: val.cardinality,
+            topThresholdHits: val.topThresholdHits,
+            docCount: val.docCount,
+          };
+          acc.push(el);
+        });
+      } else {
+        const el = {
+          terms: [
+            {
+              field,
+              value: bucket.key,
+            },
+          ].filter((term) => term.field != null),
+          cardinality: threshold.cardinality?.length
+            ? [
+                {
+                  field: threshold.cardinality[0].field,
+                  value: bucket.cardinality_count!.value,
+                },
+              ]
+            : undefined,
+          topThresholdHits: bucket.top_threshold_hits,
+          docCount: bucket.doc_count,
         };
-
-        return {
-          _index: inputIndex,
-          _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field, key),
-          _source: source,
-        };
+        acc.push(el);
       }
-    )
-    .filter((bucket: ThresholdAggregationBucket) => bucket != null);
+
+      return acc;
+    }, []);
+  };
+
+  return getCombinations(results.aggregations[aggParts.name].buckets, 0, aggParts.field).reduce(
+    (acc: Array<BaseHit<SignalSource>>, bucket) => {
+      const hit = bucket.topThresholdHits?.hits.hits[0];
+      if (hit == null) {
+        return acc;
+      }
+
+      const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+      if (timestampArray == null) {
+        return acc;
+      }
+
+      const timestamp = timestampArray[0];
+      if (typeof timestamp !== 'string') {
+        return acc;
+      }
+
+      const source = {
+        '@timestamp': timestamp,
+        threshold_result: {
+          terms: bucket.terms.map((term) => {
+            return {
+              field: term.field,
+              value: term.value,
+            };
+          }),
+          cardinality: bucket.cardinality?.map((cardinality) => {
+            return {
+              field: cardinality.field,
+              value: cardinality.value,
+            };
+          }),
+          count: bucket.docCount,
+        },
+      };
+
+      acc.push({
+        _index: inputIndex,
+        _id: calculateThresholdSignalUuid(
+          ruleId,
+          startedAt,
+          threshold.field,
+          bucket.terms.map((term) => term.value).join(',')
+        ),
+        _source: source,
+      });
+
+      return acc;
+    },
+    []
+  );
 };
 
 export const transformThresholdResultsToEcs = (
@@ -126,7 +185,7 @@ export const transformThresholdResultsToEcs = (
   startedAt: Date,
   filter: unknown,
   logger: Logger,
-  threshold: Threshold,
+  threshold: ThresholdNormalized,
   ruleId: string,
   timestampOverride: TimestampOverrideOrUndefined
 ): SignalSearchResponse => {
@@ -148,7 +207,7 @@ export const transformThresholdResultsToEcs = (
     },
   };
 
-  delete thresholdResults.aggregations; // no longer needed
+  delete thresholdResults.aggregations; // delete because no longer needed
 
   set(thresholdResults, 'results.hits.total', transformedHits.length);
 
@@ -159,13 +218,17 @@ export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
   const thresholdResults = params.someResult;
+  const threshold = params.ruleParams.threshold!;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.filter,
     params.logger,
-    params.ruleParams.threshold!,
+    {
+      ...threshold,
+      field: normalizeThresholdField(threshold.field),
+    },
     params.ruleParams.ruleId,
     params.timestampOverride
   );

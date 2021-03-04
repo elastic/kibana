@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get, map } from 'lodash';
@@ -57,17 +57,13 @@ export function registerValueSuggestionsRoute(
       const field = indexPattern && getFieldByName(fieldName, indexPattern);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
-      try {
-        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
+      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
-        const buckets: any[] =
-          get(result, 'aggregations.suggestions.buckets') ||
-          get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+      const buckets: any[] =
+        get(result, 'aggregations.suggestions.buckets') ||
+        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
-        return response.ok({ body: map(buckets || [], 'key') });
-      } catch (error) {
-        return response.internalError({ body: error });
-      }
+      return response.ok({ body: map(buckets || [], 'key') });
     }
   );
 }

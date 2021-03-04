@@ -5,12 +5,15 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "strictNullChecks": false
   },
   "include": [
     "server/**/*",
     "public/**/*",
-    "*.ts"
+    "*.ts",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/test_utils/vega_map_test.json"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

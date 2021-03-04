@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './import_summary.scss';
@@ -123,7 +123,10 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {errorCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4 className="savedObjectsManagementImportSummary__errorCount">
+            <h4
+              data-test-subj="importSavedObjectsErrorsCount"
+              className="savedObjectsManagementImportSummary__errorCount"
+            >
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.errorCountHeader"
                 defaultMessage="{errorCount} error"

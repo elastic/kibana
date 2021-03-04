@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
@@ -158,43 +160,45 @@ export const ThreatMatchComponent = ({
   }, []);
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      {entries.map((entryListItem, index) => (
-        <EuiFlexItem grow={1} key={`${index}`}>
-          <EuiFlexGroup gutterSize="s" direction="column">
-            {index !== 0 &&
-              (andLogicIncluded ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="none" direction="row">
-                    <MyInvisibleAndBadge grow={false}>
-                      <MyAndBadge includeAntennas type="and" />
-                    </MyInvisibleAndBadge>
-                    <EuiFlexItem grow={false}>
-                      <MyAndBadge type="or" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ) : (
-                <EuiFlexItem grow={false}>
-                  <MyAndBadge type="or" />
-                </EuiFlexItem>
-              ))}
-            <EuiFlexItem grow={false}>
-              <ListItemComponent
-                key={`${index}`}
-                listItem={entryListItem}
-                listId={`${index}`}
-                indexPattern={indexPatterns}
-                threatIndexPatterns={threatIndexPatterns}
-                listItemIndex={index}
-                andLogicIncluded={andLogicIncluded}
-                isOnlyItem={entries.length === 1}
-                onDeleteEntryItem={handleDeleteEntryItem}
-                onChangeEntryItem={handleEntryItemChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
+      {entries.map((entryListItem, index) => {
+        const key = (entryListItem as typeof entryListItem & { id?: string }).id ?? `${index}`;
+        return (
+          <EuiFlexItem grow={1} key={key}>
+            <EuiFlexGroup gutterSize="s" direction="column">
+              {index !== 0 &&
+                (andLogicIncluded ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="none" direction="row">
+                      <MyInvisibleAndBadge grow={false}>
+                        <MyAndBadge includeAntennas type="and" />
+                      </MyInvisibleAndBadge>
+                      <EuiFlexItem grow={false}>
+                        <MyAndBadge type="or" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow={false}>
+                    <MyAndBadge type="or" />
+                  </EuiFlexItem>
+                ))}
+              <EuiFlexItem grow={false}>
+                <ListItemComponent
+                  key={key}
+                  listItem={entryListItem}
+                  indexPattern={indexPatterns}
+                  threatIndexPatterns={threatIndexPatterns}
+                  listItemIndex={index}
+                  andLogicIncluded={andLogicIncluded}
+                  isOnlyItem={entries.length === 1}
+                  onDeleteEntryItem={handleDeleteEntryItem}
+                  onChangeEntryItem={handleEntryItemChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
 
       <MyButtonsContainer data-test-subj={'andOrOperatorButtons'}>
         <EuiFlexGroup gutterSize="s">

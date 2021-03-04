@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { cloneDeep } from 'lodash';
@@ -12,11 +12,6 @@ import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 jest.mock('../services');
-
-jest.mock('../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
 
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {
@@ -284,7 +279,27 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      0
+    )
+  );
+
+  test(
+    'emsTileServiceId',
+    check(
+      {
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
         zoomControl: true,
         scrollWheelZoom: false,
       },
@@ -299,7 +314,7 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
@@ -308,37 +323,12 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
       },
       0
-    )
-  );
-
-  test(
-    'warnings',
-    check(
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        zoom: 'abc', // ignored
-        mapStyle: 'abc',
-        zoomControl: 'abc',
-        scrollWheelZoom: 'abc',
-        maxBounds: [2, 3, 4],
-      },
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        mapStyle: 'default',
-        zoomControl: true,
-        scrollWheelZoom: false,
-      },
-      5
     )
   );
 });

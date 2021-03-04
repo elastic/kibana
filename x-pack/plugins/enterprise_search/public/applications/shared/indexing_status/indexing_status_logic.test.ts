@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-} from '../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { IndexingStatusLogic } from './indexing_status_logic';
 
@@ -57,37 +55,34 @@ describe('IndexingStatusLogic', () => {
 
     it('calls API and sets values', async () => {
       const setIndexingStatusSpy = jest.spyOn(IndexingStatusLogic.actions, 'setIndexingStatus');
-      const promise = Promise.resolve(mockStatusResponse);
-      http.get.mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.resolve(mockStatusResponse));
 
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
       expect(http.get).toHaveBeenCalledWith(statusPath);
-      await promise;
+      await nextTick();
 
       expect(setIndexingStatusSpy).toHaveBeenCalledWith(mockStatusResponse);
     });
 
     it('handles error', async () => {
-      const promise = Promise.reject('An error occured');
-      http.get.mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.reject('An error occured'));
 
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      await expectedAsyncError(promise);
+      await nextTick();
 
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
 
     it('handles indexing complete state', async () => {
-      const promise = Promise.resolve({ ...mockStatusResponse, percentageComplete: 100 });
-      http.get.mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.resolve({ ...mockStatusResponse, percentageComplete: 100 }));
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      await promise;
+      await nextTick();
 
       expect(clearInterval).toHaveBeenCalled();
       expect(onComplete).toHaveBeenCalledWith(mockStatusResponse.numDocumentsWithErrors);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chunk } from 'lodash/fp';
@@ -173,6 +174,7 @@ export const importRulesRoute = (
                   threat_query: threatQuery,
                   threat_mapping: threatMapping,
                   threat_language: threatLanguage,
+                  threat_indicator_path: threatIndicatorPath,
                   concurrent_searches: concurrentSearches,
                   items_per_search: itemsPerSearch,
                   threshold,
@@ -238,6 +240,7 @@ export const importRulesRoute = (
                       threshold,
                       threatFilters,
                       threatIndex,
+                      threatIndicatorPath,
                       threatQuery,
                       threatMapping,
                       threatLanguage,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -12,6 +13,7 @@ import {
   threat_query,
   threat_mapping,
   threat_index,
+  threat_indicator_path,
   concurrent_searches,
   items_per_search,
 } from '../types/threat_mapping';
@@ -212,6 +214,7 @@ const threatMatchRuleParams = {
     filters,
     saved_id,
     threat_filters,
+    threat_indicator_path,
     threat_language: t.keyof({ kuery: null, lucene: null }),
     concurrent_searches,
     items_per_search,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -13,8 +14,9 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { SchemaErrorsAccordion } from '../../../../../shared/schema/schema_errors_accordion';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { SchemaLogic } from './schema_logic';
+
 import { SCHEMA_ERRORS_HEADING } from './constants';
+import { SchemaLogic } from './schema_logic';
 
 export const SchemaChangeErrors: React.FC = () => {
   const { activeReindexJobId, sourceId } = useParams() as {

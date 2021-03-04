@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  KibanaRequest,
-  LoggerFactory,
-  IBasePath,
-  IClusterClient,
-} from '../../../../../src/core/server';
+import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+
+import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
@@ -19,30 +18,32 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { SessionValue, Session } from '../session_management';
-
-import {
-  AnonymousAuthenticationProvider,
+import type { Session, SessionValue } from '../session_management';
+import { AuthenticationResult } from './authentication_result';
+import { canRedirectRequest } from './can_redirect_request';
+import { DeauthenticationResult } from './deauthentication_result';
+import { HTTPAuthorizationHeader } from './http_authentication';
+import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,
-  SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
-  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
 } from './providers';
-import { AuthenticationResult } from './authentication_result';
-import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { canRedirectRequest } from './can_redirect_request';
-import { HTTPAuthorizationHeader } from './http_authentication';
 
 /**
  * The shape of the login attempt.

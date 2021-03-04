@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SafeResolverEvent } from '../../../common/endpoint/types';
@@ -50,7 +51,7 @@ export function mockEndpointEvent({
     process: {
       entity_id: entityID,
       executable: 'executable',
-      args: 'args',
+      args: ['args0', 'args1', 'args2'],
       name: processName,
       pid,
       hash: {

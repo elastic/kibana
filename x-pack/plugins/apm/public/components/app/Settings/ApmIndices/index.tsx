@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -74,6 +75,7 @@ async function saveApmIndices({
 }) {
   await callApmApi({
     endpoint: 'POST /api/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },

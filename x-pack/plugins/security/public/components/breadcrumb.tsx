@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { createContext, useEffect, useRef, useContext, FunctionComponent } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {

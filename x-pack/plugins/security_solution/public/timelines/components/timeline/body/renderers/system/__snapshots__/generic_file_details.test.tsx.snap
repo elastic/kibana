@@ -11,6 +11,8 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
     outcome="failure"
     processPid={6278}
     showMessage={true}
+    skipRedundantFileDetails={false}
+    skipRedundantProcessDetails={false}
     text="[generic-text-123]"
     userName="Evan"
   />

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
@@ -54,7 +55,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
             return response.forbidden(e.message);
           }
 
-          return response.internalError({ body: e });
+          throw e;
         }
       }
     )

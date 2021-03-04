@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import querystring from 'querystring';
+import url from 'url';
 import expect from '@kbn/expect';
 import { isEmpty, uniq } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
@@ -48,7 +50,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
-          uiFilters: encodeURIComponent('{}'),
         });
         const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
@@ -131,110 +132,127 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
         expectSnapshot(body).toMatch();
       });
-    });
 
-    describe('/api/apm/service-map with ML data', () => {
-      describe('with the default apm user', () => {
-        let response: PromiseReturnType<typeof supertest.get>;
+      describe('with ML data', () => {
+        describe('with the default apm user', () => {
+          before(async () => {
+            response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+          });
 
-        before(async () => {
-          response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
-        });
+          it('returns service map elements with anomaly stats', () => {
+            expect(response.status).to.be(200);
+            const dataWithAnomalies = response.body.elements.filter(
+              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+            );
 
-        it('returns service map elements with anomaly stats', () => {
-          expect(response.status).to.be(200);
-          const dataWithAnomalies = response.body.elements.filter(
-            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-          );
+            expect(dataWithAnomalies).to.not.empty();
 
-          expect(dataWithAnomalies).to.not.empty();
+            dataWithAnomalies.forEach(({ data }: any) => {
+              expect(
+                Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
+              ).to.not.empty();
+            });
+          });
 
-          dataWithAnomalies.forEach(({ data }: any) => {
-            expect(
-              Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
-            ).to.not.empty();
+          it('returns the correct anomaly stats', () => {
+            const dataWithAnomalies = response.body.elements.filter(
+              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+            );
+
+            expectSnapshot(dataWithAnomalies.length).toMatchInline(`8`);
+            expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
+              Array [
+                Object {
+                  "data": Object {
+                    "agent.name": "python",
+                    "id": "opbeans-python",
+                    "service.name": "opbeans-python",
+                    "serviceAnomalyStats": Object {
+                      "actualValue": 24282.2352941176,
+                      "anomalyScore": 0,
+                      "healthStatus": "healthy",
+                      "jobId": "apm-environment_not_defined-5626-high_mean_transaction_duration",
+                      "serviceName": "opbeans-python",
+                      "transactionType": "request",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "nodejs",
+                    "id": "opbeans-node",
+                    "service.environment": "testing",
+                    "service.name": "opbeans-node",
+                    "serviceAnomalyStats": Object {
+                      "actualValue": 29300.5555555556,
+                      "anomalyScore": 0,
+                      "healthStatus": "healthy",
+                      "jobId": "apm-testing-384f-high_mean_transaction_duration",
+                      "serviceName": "opbeans-node",
+                      "transactionType": "request",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "rum-js",
+                    "id": "opbeans-rum",
+                    "service.environment": "testing",
+                    "service.name": "opbeans-rum",
+                    "serviceAnomalyStats": Object {
+                      "actualValue": 2386500,
+                      "anomalyScore": 0,
+                      "healthStatus": "healthy",
+                      "jobId": "apm-testing-384f-high_mean_transaction_duration",
+                      "serviceName": "opbeans-rum",
+                      "transactionType": "page-load",
+                    },
+                  },
+                },
+              ]
+            `);
+
+            expectSnapshot(response.body).toMatch();
           });
         });
 
-        it('returns the correct anomaly stats', () => {
-          const dataWithAnomalies = response.body.elements.filter(
-            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-          );
+        describe('with a user that does not have access to ML', () => {
+          before(async () => {
+            response = await supertestAsApmReadUserWithoutMlAccess.get(
+              `/api/apm/service-map?start=${start}&end=${end}`
+            );
+          });
 
-          expectSnapshot(dataWithAnomalies.length).toMatchInline(`8`);
-          expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
-            Array [
-              Object {
-                "data": Object {
-                  "agent.name": "python",
-                  "id": "opbeans-python",
-                  "service.name": "opbeans-python",
-                  "serviceAnomalyStats": Object {
-                    "actualValue": 24282.2352941176,
-                    "anomalyScore": 0,
-                    "healthStatus": "healthy",
-                    "jobId": "apm-environment_not_defined-5626-high_mean_transaction_duration",
-                    "serviceName": "opbeans-python",
-                    "transactionType": "request",
-                  },
-                },
-              },
-              Object {
-                "data": Object {
-                  "agent.name": "nodejs",
-                  "id": "opbeans-node",
-                  "service.environment": "testing",
-                  "service.name": "opbeans-node",
-                  "serviceAnomalyStats": Object {
-                    "actualValue": 29300.5555555556,
-                    "anomalyScore": 0,
-                    "healthStatus": "healthy",
-                    "jobId": "apm-testing-384f-high_mean_transaction_duration",
-                    "serviceName": "opbeans-node",
-                    "transactionType": "request",
-                  },
-                },
-              },
-              Object {
-                "data": Object {
-                  "agent.name": "rum-js",
-                  "id": "opbeans-rum",
-                  "service.environment": "testing",
-                  "service.name": "opbeans-rum",
-                  "serviceAnomalyStats": Object {
-                    "actualValue": 2386500,
-                    "anomalyScore": 0,
-                    "healthStatus": "healthy",
-                    "jobId": "apm-testing-384f-high_mean_transaction_duration",
-                    "serviceName": "opbeans-rum",
-                    "transactionType": "page-load",
-                  },
-                },
-              },
-            ]
-          `);
+          it('returns service map elements without anomaly stats', () => {
+            expect(response.status).to.be(200);
 
-          expectSnapshot(response.body).toMatch();
+            const dataWithAnomalies = response.body.elements.filter(
+              (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
+            );
+
+            expect(dataWithAnomalies).to.be.empty();
+          });
         });
       });
 
-      describe('with a user that does not have access to ML', () => {
-        let response: PromiseReturnType<typeof supertest.get>;
+      describe('with a single service', () => {
+        describe('when ENVIRONMENT_ALL is selected', () => {
+          it('returns service map elements', async () => {
+            response = await supertest.get(
+              url.format({
+                pathname: '/api/apm/service-map',
+                query: {
+                  environment: 'ENVIRONMENT_ALL',
+                  start: metadata.start,
+                  end: metadata.end,
+                  serviceName: 'opbeans-java',
+                },
+              })
+            );
 
-        before(async () => {
-          response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/service-map?start=${start}&end=${end}`
-          );
-        });
-
-        it('returns service map elements without anomaly stats', () => {
-          expect(response.status).to.be(200);
-
-          const dataWithAnomalies = response.body.elements.filter(
-            (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
-          );
-
-          expect(dataWithAnomalies).to.be.empty();
+            expect(response.status).to.be(200);
+            expect(response.body.elements.length).to.be.greaterThan(1);
+          });
         });
       });
     });

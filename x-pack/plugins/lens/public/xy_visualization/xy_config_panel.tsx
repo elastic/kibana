@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './xy_config_panel.scss';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -179,8 +180,7 @@ function getValueLabelDisableReason({
     defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
   });
 }
-
-export function XyToolbar(props: VisualizationToolbarProps<State>) {
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
@@ -336,7 +336,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                       <EuiIconTip
                         color="subdued"
                         content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `Gaps in the data are not shown by default, but can be represented as dotted lines with different modes.`,
+                          defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
                         })}
                         iconProps={{
                           className: 'eui-alignTop',
@@ -485,7 +485,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
+
 const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
@@ -507,7 +508,7 @@ export function DimensionEditor(
     return (
       <>
         <PalettePicker
-          palettes={props.frame.availablePalettes}
+          palettes={props.paletteService}
           activePalette={layer.palette}
           setPalette={(newPalette) => {
             setState(updateLayer(state, { ...layer, palette: newPalette }, index));
@@ -653,7 +654,7 @@ const ColorPicker = ({
     }
   };
 
-  const updateColorInState: EuiColorPickerProps['onChange'] = React.useMemo(
+  const updateColorInState: EuiColorPickerProps['onChange'] = useMemo(
     () =>
       debounce((text, output) => {
         const newYConfigs = [...(layer.yConfig || [])];

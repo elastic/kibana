@@ -10,5 +10,5 @@
     "kbn": "node ../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
   },
-  "license": "SSPL-1.0 OR Elastic License"
+  "license": "Elastic License 2.0"
 }

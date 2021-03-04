@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mean } from 'lodash';
@@ -20,6 +21,7 @@ export const fetchObservabilityOverviewPageData = async ({
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
     endpoint: 'GET /api/apm/observability_overview',
+    signal: null,
     params: {
       query: {
         start: new Date(absoluteTime.start).toISOString(),
@@ -59,5 +61,6 @@ export const fetchObservabilityOverviewPageData = async ({
 export async function hasData() {
   return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_data',
+    signal: null,
   });
 }

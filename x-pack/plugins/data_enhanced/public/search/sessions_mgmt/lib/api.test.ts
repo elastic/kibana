@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -45,7 +46,13 @@ describe('Search Sessions Management API', () => {
           saved_objects: [
             {
               id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: 'complete' },
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                status: 'complete',
+                initialState: {},
+                restoreState: {},
+              },
             },
           ],
         } as SavedObjectsFindResponse;
@@ -60,16 +67,18 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
-              "reload",
+              "inspect",
               "extend",
-              "cancel",
+              "delete",
             ],
             "appId": "pizza",
             "created": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
+            "initialState": Object {},
             "name": "Veggie",
             "reloadUrl": "hello-cool-undefined-url",
+            "restoreState": Object {},
             "restoreUrl": "hello-cool-undefined-url",
             "status": "complete",
           },
@@ -145,7 +154,7 @@ describe('Search Sessions Management API', () => {
       await api.sendCancel('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was canceled and expired.',
+        title: 'The search session was deleted.',
       });
     });
 
@@ -161,40 +170,14 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to cancel the search session!' }
+        { title: 'Failed to delete the search session!' }
       );
-    });
-  });
-
-  describe('reload', () => {
-    beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return {
-          saved_objects: [
-            {
-              id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: SearchSessionStatus.COMPLETE },
-            },
-          ],
-        } as SavedObjectsFindResponse;
-      });
-    });
-
-    test('send cancel calls the cancel endpoint with a session ID', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
-        notifications: mockCoreStart.notifications,
-        application: mockCoreStart.application,
-      });
-      await api.reloadSearchSession('www.myurl.com');
-
-      expect(mockCoreStart.application.navigateToUrl).toHaveBeenCalledWith('www.myurl.com');
     });
   });
 
   describe('extend', () => {
     beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.extend = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -214,6 +197,20 @@ describe('Search Sessions Management API', () => {
       });
       await api.sendExtend('my-id', '5d');
 
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
+      expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+    });
+
+    test('displays error on reject', async () => {
+      sessionsClient.extend = jest.fn().mockRejectedValue({});
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        urls: mockUrls,
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+      });
+      await api.sendExtend('my-id', '5d');
+
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalled();
     });
   });

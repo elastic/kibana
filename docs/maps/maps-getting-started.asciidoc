@@ -1,15 +1,11 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Create a map with multiple layers and data sources
-
-++++
-<titleabbrev>Create a multilayer map</titleabbrev>
-++++
+== Build a map to compare metrics by country or region
 
 If you are new to **Maps**, this tutorial is a good place to start.
 It guides you through the common steps for working with your location data.
 
-You'll learn to:
+You will learn to:
 
 - Create a map with multiple layers and data sources
 - Use symbols, colors, and labels to style data values

@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent, EsAssetReference } from '../types';
-import * as settingsService from './settings';
-import { getAgent, listAgents } from './agents';
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
-import { agentPolicyService } from './agent_policy';
+import { KibanaRequest } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
+import type { AgentStatus, Agent, EsAssetReference } from '../types';
+
+import { getAgent, listAgents } from './agents';
+import { agentPolicyService } from './agent_policy';
+import * as settingsService from './settings';
+
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
 
 /**
@@ -48,6 +52,7 @@ export interface AgentService {
    */
   authenticateAgentWithAccessToken(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -392,7 +393,11 @@ describe('Lens App', () => {
       const { component, services } = mountWith({});
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Create' },
       ]);
 
@@ -402,7 +407,11 @@ describe('Lens App', () => {
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Daaaaaaadaumching!' },
       ]);
     });
@@ -416,7 +425,11 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Create' },
       ]);
 
@@ -427,7 +440,11 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
-        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        {
+          text: 'Visualize Library',
+          href: '/testbasepath/app/visualize#/',
+          onClick: expect.anything(),
+        },
         { text: 'Daaaaaaadaumching!' },
       ]);
     });

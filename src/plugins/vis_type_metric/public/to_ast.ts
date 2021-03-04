@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -43,6 +43,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   const {
     percentageMode,
+    percentageFormatPattern,
     useRanges,
     colorSchema,
     metricColorMode,
@@ -55,7 +56,10 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   // fix formatter for percentage mode
   if (get(vis.params, 'metric.percentageMode') === true) {
     schemas.metric.forEach((metric: SchemaConfig) => {
-      metric.format = { id: 'percent' };
+      metric.format = {
+        id: 'percent',
+        params: { pattern: percentageFormatPattern },
+      };
     });
   }
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { first } from 'lodash';
 import { MetricsChartsByAgentAPIResponse } from '../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
@@ -25,14 +27,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('for opbeans-node', () => {
         const start = encodeURIComponent('2020-09-08T14:50:00.000Z');
         const end = encodeURIComponent('2020-09-08T14:55:00.000Z');
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         const agentName = 'nodejs';
 
         describe('returns metrics data', () => {
           let chartsResponse: ChartResponse;
           before(async () => {
             chartsResponse = await supertest.get(
-              `/api/apm/services/opbeans-node/metrics/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&agentName=${agentName}`
+              `/api/apm/services/opbeans-node/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
             );
           });
           it('contains CPU usage and System memory usage chart data', async () => {
@@ -111,7 +112,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('for opbeans-java', () => {
-        const uiFilters = encodeURIComponent(JSON.stringify({}));
         const agentName = 'java';
 
         describe('returns metrics data', () => {
@@ -121,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let chartsResponse: ChartResponse;
           before(async () => {
             chartsResponse = await supertest.get(
-              `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&agentName=${agentName}`
+              `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
             );
           });
 
@@ -410,7 +410,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const end = encodeURIComponent('2020-09-08T15:05:00.000Z');
 
           const chartsResponse: ChartResponse = await supertest.get(
-            `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&uiFilters=${uiFilters}&agentName=${agentName}`
+            `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
           );
 
           const systemMemoryUsageChart = chartsResponse.body.charts.find(

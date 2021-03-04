@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { wrapError } from '../../../lib/errors';
-import { ExternalRouteDeps } from '.';
+
 import { ALL_SPACES_ID } from '../../../../common/constants';
+import { wrapError } from '../../../lib/errors';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareToSpacesApi(deps: ExternalRouteDeps) {

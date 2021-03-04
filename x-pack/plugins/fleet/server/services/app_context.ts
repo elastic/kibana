@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
+import { kibanaPackageJson } from '@kbn/utils';
+import { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-  KibanaRequest,
 } from 'src/core/server';
-import {
+
+import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import packageJSON from '../../../../../package.json';
-import { SecurityPluginStart } from '../../../security/server';
-import { FleetConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
-import { CloudSetup } from '../../../cloud/server';
+import type { SecurityPluginStart } from '../../../security/server';
+import type { FleetConfigType } from '../../common';
+import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -31,8 +34,8 @@ class AppContextService {
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
-  private kibanaVersion: FleetAppContext['kibanaVersion'] = packageJSON.version;
-  private kibanaBranch: FleetAppContext['kibanaBranch'] = packageJSON.branch;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -75,6 +78,10 @@ class AppContextService {
       throw new Error('Security service not set.');
     }
     return this.security;
+  }
+
+  public hasSecurity() {
+    return !!this.security;
   }
 
   public getCloud() {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -200,7 +201,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.created_by:Moi* OR exception-list-agnostic.attributes.created_by:Moi*) AND (exception-list.attributes.name:Sample Endpoint* OR exception-list-agnostic.attributes.name:Sample Endpoint*) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)',
+          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },

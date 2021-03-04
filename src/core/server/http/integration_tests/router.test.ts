@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Stream } from 'stream';
@@ -1672,7 +1672,11 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
-      expect(result.body.message).toBe('reason');
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'reason',
+        statusCode: 500,
+      });
       expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 

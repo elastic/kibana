@@ -1,5 +1,5 @@
 {
-  "id": "data_search_plugin",
+  "id": "dataSearchPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["data_search_test_plugin"],

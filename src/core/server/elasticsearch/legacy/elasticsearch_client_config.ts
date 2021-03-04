@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ConfigOptions } from 'elasticsearch';
@@ -29,7 +29,6 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     ElasticsearchConfig,
     | 'apiVersion'
     | 'customHeaders'
-    | 'logQueries'
     | 'requestHeadersWhitelist'
     | 'sniffOnStart'
     | 'sniffOnConnectionFault'
@@ -76,6 +75,7 @@ type ExtendedConfigOptions = ConfigOptions &
 export function parseElasticsearchClientConfig(
   config: LegacyElasticsearchClientConfig,
   log: Logger,
+  type: string,
   { ignoreCertAndKey = false, auth = true }: LegacyElasticsearchClientConfigOverrides = {}
 ) {
   const esClientConfig: ExtendedConfigOptions = {
@@ -91,7 +91,7 @@ export function parseElasticsearchClientConfig(
   };
 
   if (esClientConfig.log == null) {
-    esClientConfig.log = getLoggerClass(log, config.logQueries);
+    esClientConfig.log = getLoggerClass(log, type);
   }
 
   if (config.pingTimeout != null) {
@@ -106,11 +106,14 @@ export function parseElasticsearchClientConfig(
     esClientConfig.sniffInterval = getDurationAsMs(config.sniffInterval);
   }
 
+  const needsAuth = auth !== false && config.username && config.password;
+  if (needsAuth) {
+    esClientConfig.httpAuth = `${config.username}:${config.password}`;
+  }
+
   if (Array.isArray(config.hosts)) {
-    const needsAuth = auth !== false && config.username && config.password;
     esClientConfig.hosts = config.hosts.map((nodeUrl: string) => {
       const uri = url.parse(nodeUrl);
-
       const httpsURI = uri.protocol === 'https:';
       const httpURI = uri.protocol === 'http:';
 
@@ -125,10 +128,6 @@ export function parseElasticsearchClientConfig(
           ...config.customHeaders,
         },
       };
-
-      if (needsAuth) {
-        host.auth = `${config.username}:${config.password}`;
-      }
 
       return host;
     });
@@ -180,7 +179,9 @@ function getDurationAsMs(duration: number | Duration) {
   return duration.asMilliseconds();
 }
 
-function getLoggerClass(log: Logger, logQueries = false) {
+function getLoggerClass(log: Logger, type: string) {
+  const queryLogger = log.get('query', type);
+
   return class ElasticsearchClientLogging {
     public error(err: string | Error) {
       log.error(err);
@@ -197,11 +198,7 @@ function getLoggerClass(log: Logger, logQueries = false) {
       _: unknown,
       statusCode: string
     ) {
-      if (logQueries) {
-        log.debug(`${statusCode}\n${method} ${options.path}\n${query ? query.trim() : ''}`, {
-          tags: ['query'],
-        });
-      }
+      queryLogger.debug(`${statusCode}\n${method} ${options.path}\n${query ? query.trim() : ''}`);
     }
 
     // elasticsearch-js expects the following functions to exist

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IndexPatternSavedObject } from '../../csv/types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../../csv/types';
 import { SavedObjectReference, SavedSearchObjectAttributesJSON, SearchSource } from '../types';
 
 export async function getDataSource(
@@ -12,10 +13,10 @@ export async function getDataSource(
   indexPatternId?: string,
   savedSearchObjectId?: string
 ): Promise<{
-  indexPatternSavedObject: IndexPatternSavedObject;
+  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   searchSource: SearchSource | null;
 }> {
-  let indexPatternSavedObject: IndexPatternSavedObject;
+  let indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   let searchSource: SearchSource | null = null;
 
   if (savedSearchObjectId) {

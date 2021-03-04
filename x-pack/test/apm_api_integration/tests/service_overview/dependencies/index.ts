@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { last, omit, pick, sortBy } from 'lodash';
 import url from 'url';
-import { sortBy, pick, last } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { registry } from '../../../common/registry';
-import { Maybe } from '../../../../../plugins/apm/typings/common';
-import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { roundNumber } from '../../../utils';
 import { ENVIRONMENT_ALL } from '../../../../../plugins/apm/common/environment_filter_values';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
-
-const round = (num: Maybe<number>): string => (isFiniteNumber(num) ? num.toPrecision(4) : '');
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -234,9 +232,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: round(opbeansNode?.latency.value),
-          throughput: round(opbeansNode?.throughput.value),
-          errorRate: round(opbeansNode?.errorRate.value),
+          latency: roundNumber(opbeansNode?.latency.value),
+          throughput: roundNumber(opbeansNode?.throughput.value),
+          errorRate: roundNumber(opbeansNode?.errorRate.value),
           ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment', 'impact'),
         };
 
@@ -249,16 +247,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: '',
           serviceName: 'opbeans-node',
           type: 'service',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 100,
         });
 
-        const firstValue = round(opbeansNode?.latency.timeseries[0].y);
-        const lastValue = round(last(opbeansNode?.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.latency.timeseries)?.y);
 
-        expect(firstValue).to.be(round(20 / 3));
+        expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
       });
 
@@ -270,9 +268,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: round(postgres?.latency.value),
-          throughput: round(postgres?.throughput.value),
-          errorRate: round(postgres?.errorRate.value),
+          latency: roundNumber(postgres?.latency.value),
+          throughput: roundNumber(postgres?.throughput.value),
+          errorRate: roundNumber(postgres?.errorRate.value),
           ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'impact', 'type'),
         };
 
@@ -285,9 +283,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           spanSubtype: 'http',
           name: 'postgres',
           type: 'external',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 0,
         });
       });
@@ -306,7 +304,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/dependencies`,
+            pathname: `/api/apm/services/opbeans-python/dependencies`,
             query: {
               start,
               end,
@@ -323,14 +321,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns at least one item', () => {
         expect(response.body.length).to.be.greaterThan(0);
+
+        expectSnapshot(
+          omit(response.body[0], [
+            'errorRate.timeseries',
+            'throughput.timeseries',
+            'latency.timeseries',
+          ])
+        ).toMatchInline(`
+          Object {
+            "errorRate": Object {
+              "value": 0,
+            },
+            "impact": 1.97910470896139,
+            "latency": Object {
+              "value": 1043.99015586546,
+            },
+            "name": "redis",
+            "spanSubtype": "redis",
+            "spanType": "db",
+            "throughput": Object {
+              "value": 40.6333333333333,
+            },
+            "type": "external",
+          }
+        `);
       });
 
       it('returns the right names', () => {
         const names = response.body.map((item) => item.name);
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
-            "opbeans-go",
+            "elasticsearch",
+            "opbeans-java",
             "postgresql",
+            "redis",
           ]
         `);
       });
@@ -342,7 +367,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(serviceNames.sort()).toMatchInline(`
           Array [
-            "opbeans-go",
+            "opbeans-java",
           ]
         `);
       });
@@ -356,12 +381,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(latencyValues).toMatchInline(`
           Array [
             Object {
-              "latency": 38506.4285714286,
-              "name": "opbeans-go",
+              "latency": 2568.40816326531,
+              "name": "elasticsearch",
             },
             Object {
-              "latency": 5908.77272727273,
+              "latency": 25593.875,
+              "name": "opbeans-java",
+            },
+            Object {
+              "latency": 28885.3293963255,
               "name": "postgresql",
+            },
+            Object {
+              "latency": 1043.99015586546,
+              "name": "redis",
             },
           ]
         `);
@@ -369,19 +402,68 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right throughput values', () => {
         const throughputValues = sortBy(
-          response.body.map((item) => ({ name: item.name, latency: item.throughput.value })),
+          response.body.map((item) => ({ name: item.name, throughput: item.throughput.value })),
           'name'
         );
 
         expectSnapshot(throughputValues).toMatchInline(`
           Array [
             Object {
-              "latency": 0.466666666666667,
-              "name": "opbeans-go",
+              "name": "elasticsearch",
+              "throughput": 13.0666666666667,
             },
             Object {
-              "latency": 3.66666666666667,
+              "name": "opbeans-java",
+              "throughput": 0.533333333333333,
+            },
+            Object {
               "name": "postgresql",
+              "throughput": 50.8,
+            },
+            Object {
+              "name": "redis",
+              "throughput": 40.6333333333333,
+            },
+          ]
+        `);
+      });
+
+      it('returns the right impact values', () => {
+        const impactValues = sortBy(
+          response.body.map((item) => ({
+            name: item.name,
+            impact: item.impact,
+            latency: item.latency.value,
+            throughput: item.throughput.value,
+          })),
+          'name'
+        );
+
+        expectSnapshot(impactValues).toMatchInline(`
+          Array [
+            Object {
+              "impact": 1.36961744704522,
+              "latency": 2568.40816326531,
+              "name": "elasticsearch",
+              "throughput": 13.0666666666667,
+            },
+            Object {
+              "impact": 0,
+              "latency": 25593.875,
+              "name": "opbeans-java",
+              "throughput": 0.533333333333333,
+            },
+            Object {
+              "impact": 100,
+              "latency": 28885.3293963255,
+              "name": "postgresql",
+              "throughput": 50.8,
+            },
+            Object {
+              "impact": 1.97910470896139,
+              "latency": 1043.99015586546,
+              "name": "redis",
+              "throughput": 40.6333333333333,
             },
           ]
         `);

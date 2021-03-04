@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
@@ -11,6 +13,26 @@ export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
   statusAgentIDs?: string[];
 }
+
+// sort using either event.created, or HostDetails.event.created,
+// depending on whichever exists. This works for QueryStrat v1 and v2, and the v2+ schema change.
+// using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
+// effectively ignoring it
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
+const MetadataSortMethod = [
+  {
+    'event.created': {
+      order: 'desc',
+      unmapped_type: 'date',
+    },
+  },
+  {
+    'HostDetails.event.created': {
+      order: 'desc',
+      unmapped_type: 'date',
+    },
+  },
+];
 
 export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +53,7 @@ export async function kibanaRequestToMetadataListESQuery(
         queryBuilderOptions?.statusAgentIDs!
       ),
       ...metadataQueryStrategy.extraBodyProperties,
-      sort: metadataQueryStrategy.sortProperty,
+      sort: MetadataSortMethod,
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
@@ -68,23 +90,29 @@ function buildQueryBody(
   statusAgentIDs: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
+  // the filtered properties may be preceded by 'HostDetails' under an older index mapping
   const filterUnenrolledAgents =
     unerolledAgentIds && unerolledAgentIds.length > 0
       ? {
-          must_not: {
-            terms: {
-              [metadataQueryStrategy.elasticAgentIdProperty]: unerolledAgentIds,
-            },
-          },
+          must_not: [
+            { terms: { 'elastic.agent.id': unerolledAgentIds } }, // OR
+            { terms: { 'HostDetails.elastic.agent.id': unerolledAgentIds } },
+          ],
         }
       : null;
   const filterStatusAgents = statusAgentIDs
     ? {
-        must: {
-          terms: {
-            [metadataQueryStrategy.elasticAgentIdProperty]: statusAgentIDs,
+        filter: [
+          {
+            bool: {
+              // OR's the two together
+              should: [
+                { terms: { 'elastic.agent.id': statusAgentIDs } },
+                { terms: { 'HostDetails.elastic.agent.id': statusAgentIDs } },
+              ],
+            },
           },
-        },
+        ],
       }
     : null;
 
@@ -122,11 +150,20 @@ export function getESQueryHostMetadataByID(
   return {
     body: {
       query: {
-        match: {
-          [metadataQueryStrategy.hostIdProperty]: agentID,
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { 'agent.id': agentID } },
+                  { term: { 'HostDetails.agent.id': agentID } },
+                ],
+              },
+            },
+          ],
         },
       },
-      sort: metadataQueryStrategy.sortProperty,
+      sort: MetadataSortMethod,
       size: 1,
     },
     index: metadataQueryStrategy.index,

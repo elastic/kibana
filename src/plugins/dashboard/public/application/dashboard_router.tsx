@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
@@ -15,12 +15,17 @@ import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-
 
 import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
-import { addHelpMenuToAppChrome } from './lib';
+import { addHelpMenuToAppChrome, DashboardPanelStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
-import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
+import {
+  DashboardFeatureFlagConfig,
+  DashboardSetupDependencies,
+  DashboardStart,
+  DashboardStartDependencies,
+} from '../plugin';
 
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { KibanaContextProvider } from '../services/kibana_react';
@@ -94,8 +99,11 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
+    dashboardPanelStorage: new DashboardPanelStorage(core.notifications.toasts),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
+      .allowByValueEmbeddables,
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),
@@ -122,7 +130,7 @@ export async function mountApp({
     let destination;
     if (redirectTo.destination === 'dashboard') {
       destination = redirectTo.id
-        ? createDashboardEditUrl(redirectTo.id)
+        ? createDashboardEditUrl(redirectTo.id, redirectTo.editMode)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     } else {
       destination = createDashboardListingFilterUrl(redirectTo.filter);

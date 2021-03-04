@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
-import {
-  ElasticsearchAssetType,
-  EsAssetReference,
-  InstallablePackage,
-} from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
+import type { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
+import { appContextService } from '../../../app_context';
+import { isLegacyESClientError } from '../../../../errors';
+
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
-import { appContextService } from '../../../app_context';
 
 interface TransformInstallation {
   installationName: string;
@@ -40,9 +40,13 @@ export const installTransform = async (
     previousInstalledTransformEsAssets = installation.installed_es.filter(
       ({ type, id }) => type === ElasticsearchAssetType.transform
     );
-    logger.info(
-      `Found previous transform references:\n ${JSON.stringify(previousInstalledTransformEsAssets)}`
-    );
+    if (previousInstalledTransformEsAssets.length) {
+      logger.info(
+        `Found previous transform references:\n ${JSON.stringify(
+          previousInstalledTransformEsAssets
+        )}`
+      );
+    }
   }
 
   // delete all previous transform
@@ -115,17 +119,27 @@ async function handleTransformInstall({
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
-  // defer validation on put if the source index is not available
-  await callCluster('transport.request', {
-    method: 'PUT',
-    path: `/_transform/${transform.installationName}`,
-    query: 'defer_validation=true',
-    body: transform.content,
-  });
-
+  try {
+    // defer validation on put if the source index is not available
+    await callCluster('transport.request', {
+      method: 'PUT',
+      path: `/_transform/${transform.installationName}`,
+      query: 'defer_validation=true',
+      body: transform.content,
+    });
+  } catch (err) {
+    // swallow the error if the transform already exists.
+    const isAlreadyExistError =
+      isLegacyESClientError(err) && err?.body?.error?.type === 'resource_already_exists_exception';
+    if (!isAlreadyExistError) {
+      throw err;
+    }
+  }
   await callCluster('transport.request', {
     method: 'POST',
     path: `/_transform/${transform.installationName}/_start`,
+    // Ignore error if the transform is already started
+    ignore: [409],
   });
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };

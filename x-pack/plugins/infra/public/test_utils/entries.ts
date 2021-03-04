@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import faker from 'faker';
@@ -28,6 +29,7 @@ export function generateFakeEntries(
     const timestamp = i === count - 1 ? endTimestamp : startTimestamp + timestampStep * i;
     entries.push({
       id: `entry-${i}`,
+      index: 'logs-fake',
       context: {},
       cursor: { time: timestamp, tiebreaker: i },
       columns: columns.map((column) => {

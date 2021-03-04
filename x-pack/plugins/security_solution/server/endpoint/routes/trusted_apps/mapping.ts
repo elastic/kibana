@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
@@ -14,7 +15,7 @@ import {
   ExceptionListItemSchema,
   NestedEntriesArray,
 } from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
   ConditionEntry,
@@ -183,7 +184,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: [],
+    tags: ['policy:all'],
     type: 'simple',
   };
 };

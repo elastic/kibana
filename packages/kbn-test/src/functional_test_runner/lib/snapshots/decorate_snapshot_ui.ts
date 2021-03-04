@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -71,43 +71,51 @@ export function decorateSnapshotUi({
   updateSnapshots: boolean;
   isCi: boolean;
 }) {
-  globalState.registered = true;
-  globalState.snapshotStates = {};
-  globalState.currentTest = null;
+  let rootSuite: Suite | undefined;
 
-  if (isCi) {
-    // make sure snapshots that have not been committed
-    // are not written to file on CI, passing the test
-    globalState.updateSnapshot = 'none';
-  } else {
-    globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
-  }
+  lifecycle.beforeTests.add((root) => {
+    if (!root) {
+      throw new Error('Root suite was not set');
+    }
+    rootSuite = root;
 
-  modifyStackTracePrepareOnce();
+    globalState.registered = true;
+    globalState.snapshotStates = {};
+    globalState.currentTest = null;
 
-  addSerializer({
-    serialize: (num: number) => {
-      return String(parseFloat(num.toPrecision(15)));
-    },
-    test: (value: any) => {
-      return typeof value === 'number';
-    },
+    if (isCi) {
+      // make sure snapshots that have not been committed
+      // are not written to file on CI, passing the test
+      globalState.updateSnapshot = 'none';
+    } else {
+      globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
+    }
+
+    modifyStackTracePrepareOnce();
+
+    addSerializer({
+      serialize: (num: number) => {
+        return String(parseFloat(num.toPrecision(15)));
+      },
+      test: (value: any) => {
+        return typeof value === 'number';
+      },
+    });
+
+    // @ts-expect-error
+    global.expectSnapshot = expectSnapshot;
   });
-
-  // @ts-expect-error
-  global.expectSnapshot = expectSnapshot;
 
   lifecycle.beforeEachTest.add((test: Test) => {
     globalState.currentTest = test;
   });
 
-  lifecycle.afterTestSuite.add(function (testSuite: Suite) {
-    // save snapshot & check unused after top-level test suite completes
-    if (!testSuite.root) {
+  lifecycle.cleanup.add(() => {
+    if (!rootSuite) {
       return;
     }
 
-    testSuite.eachTest((test) => {
+    rootSuite.eachTest((test) => {
       const file = test.file;
 
       if (!file) {

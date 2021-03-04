@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -16,6 +17,7 @@ import { getAllEnvironments } from '../../lib/environments/get_all_environments'
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { notifyFeatureUsage } from '../../feature';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute({
@@ -30,10 +32,13 @@ export const anomalyDetectionJobsRoute = createRoute({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    const [jobs, legacyJobs] = await Promise.all([
-      getAnomalyDetectionJobs(setup, context.logger),
-      hasLegacyJobs(setup),
-    ]);
+    const [jobs, legacyJobs] = await withApmSpan('get_available_ml_jobs', () =>
+      Promise.all([
+        getAnomalyDetectionJobs(setup, context.logger),
+        hasLegacyJobs(setup),
+      ])
+    );
+
     return {
       jobs,
       hasLegacyJobs: legacyJobs,
@@ -61,6 +66,7 @@ export const createAnomalyDetectionJobsRoute = createRoute({
     }
 
     await createAnomalyDetectionJobs(setup, environments, context.logger);
+
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
       featureName: 'ml',

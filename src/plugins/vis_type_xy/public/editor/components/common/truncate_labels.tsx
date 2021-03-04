@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-interface TruncateLabelsOptionProps {
+export interface TruncateLabelsOptionProps {
   disabled?: boolean;
   value?: number | null;
   setValue: (paramName: 'truncate', value: null | number) => void;
@@ -29,6 +29,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
       display="rowCompressed"
     >
       <EuiFieldNumber
+        data-test-subj="xyLabelTruncateInput"
         disabled={disabled}
         value={value === null ? '' : value}
         onChange={onChange}

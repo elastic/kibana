@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -26,7 +27,12 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
     <EuiDescribedFormGroup
       fullWidth
       title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}
-      description={i18n.CASE_CLOSURE_OPTIONS_DESC}
+      description={
+        <>
+          <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>
+          <p>{i18n.CASE_COLSURE_OPTIONS_SUB_CASES}</p>
+        </>
+      }
       data-test-subj="case-closure-options-form-group"
     >
       <EuiFormRow

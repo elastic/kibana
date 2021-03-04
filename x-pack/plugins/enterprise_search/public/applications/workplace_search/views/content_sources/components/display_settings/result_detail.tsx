@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -27,10 +28,9 @@ import {
 } from '@elastic/eui';
 
 import { ADD_FIELD_LABEL, EDIT_FIELD_LABEL, REMOVE_FIELD_LABEL } from '../../../../constants';
+
 import { VISIBLE_FIELDS_TITLE, EMPTY_FIELDS_DESCRIPTION, PREVIEW_TITLE } from './constants';
-
 import { DisplaySettingsLogic } from './display_settings_logic';
-
 import { ExampleResultDetailCard } from './example_result_detail_card';
 
 export const ResultDetail: React.FC = () => {
@@ -78,7 +78,7 @@ export const ResultDetail: React.FC = () => {
                     <EuiDroppable
                       droppableId="visible_fields"
                       className="visible-fields-container"
-                      withPanel={true}
+                      withPanel
                     >
                       <>
                         {detailFields.map(({ fieldName, label }, index) => (
@@ -86,7 +86,7 @@ export const ResultDetail: React.FC = () => {
                             key={`${fieldName}-${index}`}
                             index={index}
                             draggableId={`${fieldName}-${index}`}
-                            customDragHandle={true}
+                            customDragHandle
                             spacing="m"
                           >
                             {(provided) => (

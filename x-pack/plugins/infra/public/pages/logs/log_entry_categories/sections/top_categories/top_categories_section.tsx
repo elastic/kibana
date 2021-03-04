@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -17,6 +19,8 @@ import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysi
 import { DatasetsSelector } from '../../../../../components/logging/log_analysis_results/datasets_selector';
 import { TopCategoriesTable } from './top_categories_table';
 import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
 
 export const TopCategoriesSection: React.FunctionComponent<{
   availableDatasets: string[];
@@ -47,6 +51,22 @@ export const TopCategoriesSection: React.FunctionComponent<{
   sortOptions,
   changeSortOptions,
 }) => {
+  const {
+    services: { ml, http },
+  } = useKibanaContextForPlugin();
+
+  const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_EXPLORER,
+    pageState: {
+      jobIds: [jobId],
+      timeRange: {
+        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        mode: 'absolute',
+      },
+    },
+  });
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -65,7 +85,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />
+          <AnalyzeInMlButton href={analyzeInMlLink} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

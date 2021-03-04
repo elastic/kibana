@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
+  // Failing: See https://github.com/elastic/kibana/issues/92567
   describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
@@ -255,13 +257,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -409,13 +406,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -457,6 +449,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Clear the value
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
+
+        // Make sure the toast button closes so the save button on the sticky footer is visible
+        await (await testSubjects.find('toastCloseButton')).click();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -556,13 +552,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },

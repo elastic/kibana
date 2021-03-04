@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -21,7 +23,8 @@ import type {
   ObservabilityPluginStart,
 } from '../../observability/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import { MlPluginStart } from '../../ml/public';
+import { MlPluginStart, MlPluginSetup } from '../../ml/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
@@ -33,6 +36,8 @@ export interface InfraClientSetupDeps {
   observability: ObservabilityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  ml: MlPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -43,6 +48,7 @@ export interface InfraClientStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionStart;
   ml: MlPluginStart;
+  embeddable?: EmbeddableStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 import { DocumentStatsTable } from './document_stats';
@@ -16,7 +18,11 @@ export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'mlDVOtherContent'}>
       <DocumentStatsTable config={config} />
-      {Array.isArray(stats.examples) && <ExamplesList examples={stats.examples} />}
+      {Array.isArray(stats.examples) && (
+        <EuiFlexItem>
+          <ExamplesList examples={stats.examples} />
+        </EuiFlexItem>
+      )}
     </ExpandedRowContent>
   );
 };

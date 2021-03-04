@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
+  EuiFlexGroup,
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -31,7 +32,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeBreadcrumbsAppendExtension, ChromeHelpExtension } from '../../chrome_service';
+import {
+  ChromeBreadcrumbsAppendExtension,
+  ChromeHelpExtension,
+  ChromeUserBanner,
+} from '../../types';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -40,10 +45,13 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
+import { HeaderExtension } from './header_extension';
+import { HeaderTopBanner } from './header_top_banner';
 
 export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
+  headerBanner$: Observable<ChromeUserBanner | undefined>;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -73,27 +81,40 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
+  breadcrumbsAppendExtension$,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
+    return (
+      <>
+        <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
+        <HeaderTopBanner headerBanner$={observables.headerBanner$} />
+      </>
+    );
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
+  const Breadcrumbs = (
+    <HeaderBreadcrumbs appTitle$={observables.appTitle$} breadcrumbs$={observables.breadcrumbs$} />
+  );
+
   return (
     <>
+      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header className={className} data-test-subj="headerGlobalNav">
-        <div id="globalHeaderBars">
+        <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
             position="fixed"
+            className="header__firstBar"
             sections={[
               {
                 items: [
@@ -136,7 +157,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed">
+          <EuiHeader position="fixed" className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
@@ -157,11 +178,23 @@ export function Header({
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
 
-            <HeaderBreadcrumbs
-              appTitle$={observables.appTitle$}
-              breadcrumbs$={observables.breadcrumbs$}
-              breadcrumbsAppendExtension$={observables.breadcrumbsAppendExtension$}
-            />
+            {!breadcrumbsAppendExtension ? (
+              Breadcrumbs
+            ) : (
+              <EuiFlexGroup
+                responsive={false}
+                wrap={false}
+                alignItems={'center'}
+                className={'header__breadcrumbsWithExtensionContainer'}
+                gutterSize={'none'}
+              >
+                {Breadcrumbs}
+                <HeaderExtension
+                  extension={breadcrumbsAppendExtension.content}
+                  containerClassName={'header__breadcrumbsAppendExtension'}
+                />
+              </EuiFlexGroup>
+            )}
 
             <HeaderBadge badge$={observables.badge$} />
 

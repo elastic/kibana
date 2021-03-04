@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -22,11 +22,14 @@ import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { getPalettesService, getTrackUiMetric } from '../../../../services';
+import { getFittingFunctions } from '../../../collections';
+
+const fittingFunctions = getFittingFunctions();
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
   const trackUiMetric = getTrackUiMetric();
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
-  const { stateParams, setValue, vis, aggs } = props;
+  const { stateParams, setValue, aggs } = props;
 
   const hasLineChart = stateParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
@@ -69,7 +72,7 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           label={i18n.translate('visTypeXy.editors.elasticChartsOptions.missingValuesLabel', {
             defaultMessage: 'Fill missing values',
           })}
-          options={vis.type.editorConfig.collections.fittingFunctions}
+          options={fittingFunctions}
           paramName="fittingFunction"
           value={stateParams.fittingFunction}
           setValue={(paramName, value) => {

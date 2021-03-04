@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -20,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
+  getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -379,12 +381,11 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
-        const displayScore = score > 0 ? score : '< 1';
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.singleMetricChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',
           }),
-          value: displayScore,
+          value: getFormattedSeverityScore(score),
           color: getSeverityColor(score),
           seriesIdentifier: {
             key: seriesKey,

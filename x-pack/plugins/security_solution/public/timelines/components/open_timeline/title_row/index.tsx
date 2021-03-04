@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -23,7 +24,7 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'title'> & {
  */
 export const TitleRow = React.memo<Props>(
   ({ children, onAddTimelinesToFavorites, selectedTimelinesCount, title }) => (
-    <HeaderSection title={title} split={true}>
+    <HeaderSection title={title} split={true} height={40}>
       <EuiFlexGroup gutterSize="s" responsive={false}>
         {onAddTimelinesToFavorites && (
           <EuiFlexItem grow={false}>

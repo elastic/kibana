@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,10 +16,11 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index-preconfigured';
 // eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 
   describe('preconfigured index action', () => {
-    beforeEach(() => clearTestIndex(es));
+    beforeEach(() => esDeleteAllIndices(ES_TEST_INDEX_NAME));
 
     it('should execute successfully when expected for a single body', async () => {
       const { body: result } = await supertest
@@ -47,13 +49,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
       const timeMinuteAgo = timeNow - 1000 * 60;
       expect(timestampTime).to.be.within(timeMinuteAgo, timeNow);
     });
-  });
-}
-
-async function clearTestIndex(es: any) {
-  return await es.indices.delete({
-    index: ES_TEST_INDEX_NAME,
-    ignoreUnavailable: true,
   });
 }
 

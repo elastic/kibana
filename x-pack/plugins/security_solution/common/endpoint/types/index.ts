@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
@@ -425,13 +426,8 @@ export type HostInfo = Immutable<{
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
@@ -843,13 +839,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
-    ransomware: ProtectionFields;
     popup: {
       malware: {
-        message: string;
-        enabled: boolean;
-      };
-      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -885,7 +876,7 @@ export interface UIPolicyConfig {
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'ransomware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
@@ -937,6 +928,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**

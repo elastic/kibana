@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { Logger } from '../../../../../src/core/server';
-import { ConfigSchema, createConfig } from '../config';
-import { AnonymousAccessService } from './anonymous_access_service';
 
+import type { Logger } from 'src/core/server';
 import {
   coreMock,
+  elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-  elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
 import { spacesMock } from '../../../spaces/server/mocks';
+import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
+import { AnonymousAccessService } from './anonymous_access_service';
 
 const createSecurityConfig = (config: Record<string, any> = {}) => {
   return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -32,7 +32,12 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
+        services={
+          ({
+            filterManager: createFilterManagerMock(),
+            addBasePath: (path: string) => path,
+          } as unknown) as DiscoverServices
+        }
       />
     );
 
@@ -53,17 +58,22 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
+        services={
+          ({
+            filterManager: createFilterManagerMock(),
+            addBasePath: (path: string) => `/base${path}`,
+          } as unknown) as DiscoverServices
+        }
       />
     );
 
     const actions = findTestSubject(component, 'docTableRowAction');
     expect(actions.length).toBe(2);
     expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"#/doc/index-pattern-with-timefield-id/i?id=1"`
+      `"/base#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
+      `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
     );
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(onClose).toHaveBeenCalled();

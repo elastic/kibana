@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
-import { Vis } from '../../../../../../visualizations/public';
 import {
   SelectOption,
   SwitchOption,
@@ -21,6 +20,9 @@ import { ValueAxis } from '../../../../types';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { SetParamByIndex } from '.';
+import { getConfigCollections } from '../../../collections';
+
+const collections = getConfigCollections();
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
   paramName: T,
@@ -33,7 +35,6 @@ export interface ValueAxisOptionsParams {
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setParamByIndex: SetParamByIndex;
   valueAxis: ValueAxis;
-  vis: Vis;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
@@ -41,7 +42,6 @@ export function ValueAxisOptions({
   axis,
   index,
   valueAxis,
-  vis,
   onValueAxisPositionChanged,
   setParamByIndex,
   setMultipleValidity,
@@ -101,7 +101,7 @@ export function ValueAxisOptions({
         label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.positionLabel', {
           defaultMessage: 'Position',
         })}
-        options={vis.type.editorConfig.collections.positions}
+        options={collections.positions}
         paramName="position"
         value={axis.position}
         setValue={onPositionChanged}
@@ -112,7 +112,7 @@ export function ValueAxisOptions({
         label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.modeLabel', {
           defaultMessage: 'Mode',
         })}
-        options={vis.type.editorConfig.collections.axisModes}
+        options={collections.axisModes}
         paramName="mode"
         value={axis.scale.mode}
         setValue={setValueAxisScale}
@@ -123,7 +123,7 @@ export function ValueAxisOptions({
         label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.scaleTypeLabel', {
           defaultMessage: 'Scale type',
         })}
-        options={vis.type.editorConfig.collections.scaleTypes}
+        options={collections.scaleTypes}
         paramName="type"
         value={axis.scale.type}
         setValue={setValueAxisScale}

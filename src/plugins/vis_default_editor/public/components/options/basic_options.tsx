@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -19,18 +19,23 @@ interface BasicOptionsParams {
   legendPosition: string;
 }
 
+type LegendPositions = Array<{
+  value: string;
+  text: string;
+}>;
+
 function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
-  vis,
-}: VisEditorOptionsProps<VisParams>) {
+  legendPositions,
+}: VisEditorOptionsProps<VisParams> & { legendPositions: LegendPositions }) {
   return (
     <>
       <SelectOption
         label={i18n.translate('visDefaultEditor.options.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
-        options={vis.type.editorConfig.collections.legendPositions}
+        options={legendPositions}
         paramName="legendPosition"
         value={stateParams.legendPosition}
         setValue={setValue}

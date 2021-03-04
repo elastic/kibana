@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
 
@@ -42,15 +42,13 @@ export const DeleteScritpedFieldConfirmationModal = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={hideDeleteConfirmationModal}
-        onConfirm={deleteField}
-        cancelButtonText={cancelButtonText}
-        confirmButtonText={confirmButtonText}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-      />
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={hideDeleteConfirmationModal}
+      onConfirm={deleteField}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={confirmButtonText}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+    />
   );
 };

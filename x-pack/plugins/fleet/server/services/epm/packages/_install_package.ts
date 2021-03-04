@@ -1,23 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import {
-  InstallablePackage,
-  InstallSource,
-  PackageAssetReference,
-  MAX_TIME_COMPLETE_INSTALL,
-  ASSETS_SAVED_OBJECT_TYPE,
-} from '../../../../common';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
+import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
+import { ElasticsearchAssetType } from '../../../types';
+import type {
   AssetReference,
   Installation,
   CallESAsCurrentUser,
-  ElasticsearchAssetType,
   InstallType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
@@ -26,12 +23,13 @@ import { installPipelines, deletePreviousPipelines } from '../elasticsearch/inge
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
-import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
+
+import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
+import { deleteKibanaSavedObjectsAssets } from './remove';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExceptionListClient } from '../../../lists/server';
@@ -38,37 +39,18 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
     if (manifest == null) {
       // New computed manifest based on current state of exception list
       const newManifest = await manifestManager.buildNewManifest();
-      const diffs = newManifest.diff(Manifest.getDefault());
-
-      // Compress new artifacts
-      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
-      for (const artifactId of adds) {
-        const compressError = await newManifest.compressArtifact(artifactId);
-        if (compressError) {
-          throw compressError;
-        }
-      }
 
       // Persist new artifacts
-      const artifacts = adds
-        .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
-      if (artifacts.length !== adds.length) {
-        throw new Error('Invalid artifact encountered.');
-      }
-      const persistErrors = await manifestManager.pushArtifacts(artifacts);
+      const persistErrors = await manifestManager.pushArtifacts(
+        newManifest.getAllArtifacts() as InternalArtifactCompleteSchema[]
+      );
       if (persistErrors.length) {
         reportErrors(logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
       }
 
       // Commit the manifest state
-      if (diffs.length) {
-        const error = await manifestManager.commit(newManifest);
-        if (error) {
-          throw error;
-        }
-      }
+      await manifestManager.commit(newManifest);
 
       manifest = newManifest;
     }
@@ -92,7 +74,7 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
 ): ExternalCallback[1] => {
-  const handlePackagePolicyCreate = async (
+  return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
@@ -142,7 +124,7 @@ export const getPackagePolicyCreateCallback = (
 
     // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
-    const serializedManifest = manifest.toEndpointFormat();
+    const serializedManifest = manifest.toPackagePolicyManifest();
     if (!manifestDispatchSchema.is(serializedManifest)) {
       // This should not happen.
       // But if it does, we log it and return it anyway.
@@ -182,15 +164,13 @@ export const getPackagePolicyCreateCallback = (
 
     return updatedPackagePolicy;
   };
-
-  return handlePackagePolicyCreate;
 };
 
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService
 ): ExternalCallback[1] => {
-  const handlePackagePolicyUpdate = async (
+  return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
@@ -212,5 +192,4 @@ export const getPackagePolicyUpdateCallback = (
     }
     return newPackagePolicy;
   };
-  return handlePackagePolicyUpdate;
 };

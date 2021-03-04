@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -22,6 +20,12 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
+
+import {
+  migratePackagePolicyToV7110,
+  migratePackagePolicyToV7120,
+  // @ts-expect-error
+} from './security_solution';
 import {
   migrateAgentToV7100,
   migrateAgentEventToV7100,
@@ -31,7 +35,7 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120 } from './migrations/to_v7_12_0';
+import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
 
 /*
  * Saved object types and mappings
@@ -122,6 +126,8 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
+  // TODO: Remove this saved object type. Core will drop any saved objects of
+  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_EVENT_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -160,6 +166,8 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_default_fleet_server: { type: 'boolean' },
+        is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
         updated_at: { type: 'date' },
@@ -170,6 +178,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
+      '7.12.0': migrateAgentPolicyToV7120,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AuthenticatedUser } from '../../../security/common/model';
@@ -74,8 +75,8 @@ export interface SearchHits<T> {
   max_score: number;
   hits: Array<
     BaseHit<T> & {
-      _type: string;
-      _score: number;
+      _type?: string;
+      _score?: number;
       _version?: number;
       _explanation?: Explanation;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,6 +107,14 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface TermAggregationBucket {
   key: string;
   doc_count: number;
+  top_threshold_hits?: {
+    hits: {
+      hits: SearchHit[];
+    };
+  };
+  cardinality_count?: {
+    value: number;
+  };
 }
 
 export interface TermAggregation {

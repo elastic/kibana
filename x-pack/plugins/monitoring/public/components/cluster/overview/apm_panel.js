@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -134,7 +135,7 @@ export function ApmPanel(props) {
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
                         defaultMessage="APM servers: {apmsTotal}"
-                        values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
+                        values={{ apmsTotal }}
                       />
                     </EuiLink>
                   </h3>

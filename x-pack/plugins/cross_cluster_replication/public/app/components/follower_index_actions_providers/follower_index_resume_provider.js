@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -9,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { routing } from '../../services/routing';
 import { resumeFollowerIndex } from '../../store/actions';
@@ -67,77 +68,75 @@ class FollowerIndexResumeProviderUi extends PureComponent {
         );
 
     return (
-      <EuiOverlayMask>
-        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
-        <EuiConfirmModal
-          title={title}
-          onCancel={this.closeConfirmModal}
-          onConfirm={this.onConfirm}
-          cancelButtonText={i18n.translate(
-            'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor="primary"
-          confirmButtonText={i18n.translate(
-            'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Resume replication',
-            }
-          )}
-          onMouseOver={this.onMouseOverModal}
-          data-test-subj="resumeReplicationConfirmation"
-        >
-          {isSingle ? (
+      // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
+      <EuiConfirmModal
+        title={title}
+        onCancel={this.closeConfirmModal}
+        onConfirm={this.onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        buttonColor="primary"
+        confirmButtonText={i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Resume replication',
+          }
+        )}
+        onMouseOver={this.onMouseOverModal}
+        data-test-subj="resumeReplicationConfirmation"
+      >
+        {isSingle ? (
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
+              defaultMessage="Replication resumes using the default advanced settings. To use
+                  custom advanced settings, {editLink}."
+              values={{
+                editLink: (
+                  <EuiLink
+                    {...reactRouterNavigate(
+                      routing._reactRouter.history,
+                      routing.getFollowerIndexPath(ids[0])
+                    )}
+                    data-test-subj="editLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
+                      defaultMessage="edit the follower index"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        ) : (
+          <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
-                defaultMessage="Replication resumes using the default advanced settings. To use
-                  custom advanced settings, {editLink}."
-                values={{
-                  editLink: (
-                    <EuiLink
-                      {...reactRouterNavigate(
-                        routing._reactRouter.history,
-                        routing.getFollowerIndexPath(ids[0])
-                      )}
-                      data-test-subj="editLink"
-                    >
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
-                        defaultMessage="edit the follower index"
-                      />
-                    </EuiLink>
-                  ),
-                }}
+                id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescriptionWithSettingWarning"
+                defaultMessage="Replication resumes using the default advanced settings."
               />
             </p>
-          ) : (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescriptionWithSettingWarning"
-                  defaultMessage="Replication resumes using the default advanced settings."
-                />
-              </p>
 
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="Replication will resume on these follower indices:"
-                />
-              </p>
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
+                defaultMessage="Replication will resume on these follower indices:"
+              />
+            </p>
 
-              <ul>
-                {ids.map((id) => (
-                  <li key={id}>{id}</li>
-                ))}
-              </ul>
-            </Fragment>
-          )}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            <ul>
+              {ids.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </EuiConfirmModal>
     );
   };
 

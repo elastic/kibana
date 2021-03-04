@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validate } from './validation';
-import { ALERT_MISSING_MONITORING_DATA, ALERT_DETAILS } from '../../../common/constants';
+import {
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
 import { Expression } from './expression';
 
 export function createMissingMonitoringDataAlertType(): AlertTypeModel {
@@ -26,6 +32,6 @@ export function createMissingMonitoringDataAlertType(): AlertTypeModel {
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

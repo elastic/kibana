@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import ipaddr from 'ipaddr.js';
@@ -61,6 +62,8 @@ function getRangeCriteria(sortBy: string, directionFactor: number) {
   };
 }
 
+type CompareFn = (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => number;
+
 export function getSortingCriteria(
   type: string | undefined,
   sortBy: string,
@@ -70,22 +73,47 @@ export function getSortingCriteria(
   // handle the direction with a multiply factor.
   const directionFactor = direction === 'asc' ? 1 : -1;
 
+  let criteria: CompareFn;
+
   if (['number', 'date'].includes(type || '')) {
-    return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) =>
+    criteria = (rowA: Record<string, unknown>, rowB: Record<string, unknown>) =>
       directionFactor * ((rowA[sortBy] as number) - (rowB[sortBy] as number));
   }
   // this is a custom type, and can safely assume the gte and lt fields are all numbers or undefined
-  if (type === 'range') {
-    return getRangeCriteria(sortBy, directionFactor);
+  else if (type === 'range') {
+    criteria = getRangeCriteria(sortBy, directionFactor);
   }
   // IP have a special sorting
-  if (type === 'ip') {
-    return getIPCriteria(sortBy, directionFactor);
+  else if (type === 'ip') {
+    criteria = getIPCriteria(sortBy, directionFactor);
+  } else {
+    // use a string sorter for the rest
+    criteria = (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
+      const aString = formatter.convert(rowA[sortBy]);
+      const bString = formatter.convert(rowB[sortBy]);
+      return directionFactor * aString.localeCompare(bString);
+    };
   }
-  // use a string sorter for the rest
+  return getUndefinedHandler(sortBy, criteria);
+}
+
+function getUndefinedHandler(
+  sortBy: string,
+  sortingCriteria: (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => number
+) {
   return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
-    const aString = formatter.convert(rowA[sortBy]);
-    const bString = formatter.convert(rowB[sortBy]);
-    return directionFactor * aString.localeCompare(bString);
+    const valueA = rowA[sortBy];
+    const valueB = rowB[sortBy];
+    if (valueA != null && valueB != null && !Number.isNaN(valueA) && !Number.isNaN(valueB)) {
+      return sortingCriteria(rowA, rowB);
+    }
+    if (valueA == null || Number.isNaN(valueA)) {
+      return 1;
+    }
+    if (valueB == null || Number.isNaN(valueB)) {
+      return -1;
+    }
+
+    return 0;
   };
 }

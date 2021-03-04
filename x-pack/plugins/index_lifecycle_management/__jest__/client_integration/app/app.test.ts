@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,8 +22,8 @@ const PERCENT_SIGN_NAME = 'test%';
 const PERCENT_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
 const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
-const createPolicyTitle = 'Create Policy';
-const editPolicyTitle = 'Edit Policy';
+const createPolicyTitle = 'Create policy';
+const editPolicyTitle = 'Edit policy';
 
 window.scrollTo = jest.fn();
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('../../layouts/layouts', () => {
@@ -12,7 +12,7 @@ jest.mock('../../layouts/layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock'),
+        type: schema.literal('mock'),
       }),
     },
   };
@@ -23,16 +23,16 @@ import { ConsoleAppender } from './console_appender';
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = ConsoleAppender.configSchema;
-  const validConfig = { kind: 'console', layout: { kind: 'mock' } };
+  const validConfig = { type: 'console', layout: { type: 'mock' } };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'console',
-    layout: { kind: 'mock' },
+    type: 'console',
+    layout: { type: 'mock' },
   });
 
-  const wrongConfig1 = { kind: 'not-console', layout: { kind: 'mock' } };
+  const wrongConfig1 = { type: 'not-console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 });
 

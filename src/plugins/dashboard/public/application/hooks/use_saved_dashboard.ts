@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import { useKibana } from '../../services/kibana_react';
 
 import { DashboardConstants } from '../..';
 import { DashboardSavedObject } from '../../saved_dashboards';
-import { getDashboard60Warning } from '../../dashboard_strings';
+import { getDashboard60Warning, getNewDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
 
 export const useSavedDashboard = (savedDashboardId: string | undefined, history: History) => {
@@ -43,12 +43,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
 
       try {
         const dashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
-        const { title, getFullPath } = dashboard;
-        if (savedDashboardId) {
-          recentlyAccessedPaths.add(getFullPath(), title, savedDashboardId);
-        }
-
-        docTitle.change(title);
+        docTitle.change(dashboard.title || getNewDashboardTitle());
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
@@ -58,13 +53,13 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
     })();
     return () => setSavedDashboard(null);
   }, [
+    toasts,
     docTitle,
     history,
     indexPatterns,
     recentlyAccessedPaths,
     savedDashboardId,
     savedDashboards,
-    toasts,
   ]);
 
   return savedDashboard;

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SeriesAgg as seriesAgg } from './_series_agg';
@@ -63,6 +63,44 @@ describe('seriesAgg', () => {
         [
           [0, 8 / 3],
           [1, 4 / 3],
+          [2, 3],
+        ],
+      ]);
+    });
+
+    test('returns the count of series', () => {
+      expect(seriesAgg.count(series)).toEqual([
+        [
+          [0, 3],
+          [1, 3],
+          [2, 3],
+        ],
+      ]);
+    });
+
+    test('returns the count of missing series', () => {
+      expect(
+        seriesAgg.count([
+          [
+            [0, null],
+            [1, null],
+            [2, 0],
+          ],
+          [
+            [0, 0],
+            [1, null],
+            [2, 3],
+          ],
+          [
+            [0, 2],
+            [1, null],
+            [2, 3],
+          ],
+        ])
+      ).toEqual([
+        [
+          [0, 2],
+          [1, 0],
           [2, 3],
         ],
       ]);

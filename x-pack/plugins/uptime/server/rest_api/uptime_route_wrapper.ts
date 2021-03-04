@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMKibanaRouteWrapper } from './types';
@@ -25,34 +26,22 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       esClient: esClient.asCurrentUser,
     });
 
-    try {
-      const res = await uptimeRoute.handler({
-        uptimeEsClient,
-        savedObjectsClient,
-        context,
-        request,
-        response,
-      });
+    const res = await uptimeRoute.handler({
+      uptimeEsClient,
+      savedObjectsClient,
+      context,
+      request,
+      response,
+    });
 
-      if (res instanceof KibanaResponse) {
-        return res;
-      }
-
-      return response.ok({
-        body: {
-          ...res,
-        },
-      });
-    } catch (e) {
-      // please don't remove this, this will be really helpful during debugging
-      /* eslint-disable-next-line no-console */
-      console.error(e);
-
-      return response.internalError({
-        body: {
-          message: e.message,
-        },
-      });
+    if (res instanceof KibanaResponse) {
+      return res;
     }
+
+    return response.ok({
+      body: {
+        ...res,
+      },
+    });
   },
 });

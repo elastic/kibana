@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
@@ -48,15 +49,6 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
                       },
                     },
                   },
-                  mac: {
-                    // @ts-expect-error
-                    popup: {
-                      malware: {
-                        message: '',
-                        enabled: false,
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -95,20 +87,9 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
-                    ransomware: ProtectionModes.off,
-                    popup: {
-                      malware: {
-                        message: '',
-                        enabled: false,
-                      },
-                      ransomware: {
-                        message: '',
-                        enabled: false,
-                      },
+                    ransomware: {
+                      mode: ProtectionModes.off,
                     },
-                  },
-                  mac: {
-                    ransomware: ProtectionModes.off,
                     popup: {
                       malware: {
                         message: '',

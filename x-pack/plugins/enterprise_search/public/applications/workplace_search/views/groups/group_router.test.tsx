@@ -1,30 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__';
-
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { Route, Switch } from 'react-router-dom';
-
 import { groups } from '../../__mocks__/groups.mock';
 
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
+
+import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-
-import { GroupRouter } from './group_router';
-
-import { FlashMessages } from '../../../shared/flash_messages';
-
 import { ManageUsersModal } from './components/manage_users_modal';
 import { SharedSourcesModal } from './components/shared_sources_modal';
+import { GroupRouter } from './group_router';
 
 describe('GroupRouter', () => {
   const initializeGroup = jest.fn();

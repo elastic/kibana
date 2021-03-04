@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -31,9 +30,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TextField, UseField, useForm, useFormData } from '../../../shared_imports';
+import { TextField, useForm, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
+import { createDocLink } from '../../services/documentation';
+
+import { UseField } from './form';
 
 import { savePolicy } from './save_policy';
 
@@ -44,6 +46,7 @@ import {
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
+  FormErrorsCallout,
 } from './components';
 
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
@@ -51,7 +54,6 @@ import { createPolicyNameValidations, createSerializer, deserializer, Form, sche
 import { useEditPolicyContext } from './edit_policy_context';
 
 import { FormInternal } from './types';
-import { createDocLink } from '../../services/documentation';
 
 export interface Props {
   history: RouteComponentProps['history'];
@@ -140,10 +142,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 <h1>
                   {isNewPolicy
                     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                        defaultMessage: 'Create Policy',
+                        defaultMessage: 'Create policy',
                       })
                     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                        defaultMessage: 'Edit Policy {originalPolicyName}',
+                        defaultMessage: 'Edit policy {originalPolicyName}',
                         values: { originalPolicyName },
                       })}
                 </h1>
@@ -237,50 +239,27 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer size="l" />
 
-            <HotPhase />
+            <div>
+              <HotPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <WarmPhase />
+              <WarmPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <ColdPhase />
+              <ColdPhase />
 
-            <EuiSpacer />
-
-            <DeletePhase />
+              <DeletePhase />
+            </div>
 
             <EuiHorizontalRule />
 
+            <FormErrorsCallout />
+
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
-                  {isShowingPolicyJsonFlyout ? (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
-                      defaultMessage="Hide request"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
-                      defaultMessage="Show request"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="savePolicyButton"
@@ -303,7 +282,32 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                       )}
                     </EuiButton>
                   </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
+                  {isShowingPolicyJsonFlyout ? (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                      defaultMessage="Hide request"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                      defaultMessage="Show request"
+                    />
+                  )}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
 

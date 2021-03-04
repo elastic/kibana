@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES, ALL_SPACES_ID } from './spaces';
@@ -51,6 +52,16 @@ export const SAVED_OBJECT_TEST_CASES: Record<string, CommonTestCase> = Object.fr
     type: 'sharedtype',
     id: 'only_space_2',
     expectedNamespaces: [SPACE_2_ID],
+  }),
+  MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE: Object.freeze({
+    type: 'sharecapabletype',
+    id: 'only_default_space',
+    expectedNamespaces: [DEFAULT_SPACE_ID],
+  }),
+  MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1: Object.freeze({
+    type: 'sharecapabletype',
+    id: 'only_space_1',
+    expectedNamespaces: [SPACE_1_ID],
   }),
   NAMESPACE_AGNOSTIC: Object.freeze({
     type: 'globaltype',

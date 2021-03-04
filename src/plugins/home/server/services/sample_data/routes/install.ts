@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -136,28 +136,34 @@ export function createInstallRoute(
           (counts as any)[index] = count;
         } catch (err) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
-          logger.warn(errMsg);
-          return res.internalError({ body: errMsg });
+          throw new Error(errMsg);
         }
       }
 
       let createResults;
       try {
-        createResults = await context.core.savedObjects.client.bulkCreate(
+        const { getClient, typeRegistry } = context.core.savedObjects;
+
+        const includedHiddenTypes = sampleDataset.savedObjects
+          .map((object) => object.type)
+          .filter((supportedType) => typeRegistry.isHidden(supportedType));
+
+        const client = getClient({ includedHiddenTypes });
+
+        createResults = await client.bulkCreate(
           sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
-        logger.warn(errMsg);
-        return res.internalError({ body: errMsg });
+        throw new Error(errMsg);
       }
       const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
         return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
-          ','
+        const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
+          errors
         )}`;
         logger.warn(errMsg);
         return res.customError({ body: errMsg, statusCode: 403 });

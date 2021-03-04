@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -32,14 +34,14 @@ describe('GET comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     const myPayload = mockCaseComments.find((s) => s.id === 'mock-comment-1');
     expect(myPayload).not.toBeUndefined();
@@ -57,13 +59,13 @@ describe('GET comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
   });
 });

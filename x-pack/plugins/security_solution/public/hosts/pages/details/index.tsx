@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
@@ -150,6 +151,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         docValueFields={docValueFields}
                         id={id}
                         inspect={inspect}
+                        isInDetailsSidePanel={false}
                         refetch={refetch}
                         setQuery={setQuery}
                         data={hostOverview as HostItem}

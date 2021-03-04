@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,6 +11,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface Props {
   component?: React.ComponentType<DocViewRenderProps>;
@@ -72,7 +74,9 @@ export class DocViewerTab extends React.Component<Props, State> {
     const Component = component as any;
     return (
       <I18nProvider>
-        <Component {...renderProps} />
+        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+          <Component {...renderProps} />
+        </KibanaContextProvider>
       </I18nProvider>
     );
   }

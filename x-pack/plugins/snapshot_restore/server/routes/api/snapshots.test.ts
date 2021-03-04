@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { addBasePath } from '../helpers';
@@ -143,8 +144,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         jest.fn().mockRejectedValueOnce(new Error('Error getting repository')),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -220,8 +220,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         mockSnapshotGetEsResponse,
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 

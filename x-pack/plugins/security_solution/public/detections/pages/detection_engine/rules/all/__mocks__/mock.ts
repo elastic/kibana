@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
@@ -140,8 +141,14 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   type: 'saved_query',
   threat: getThreatMock(),
   threshold: {
-    field: 'host.name',
+    field: ['host.name'],
     value: 50,
+    cardinality: [
+      {
+        field: 'process.name',
+        value: 2,
+      },
+    ],
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
@@ -189,8 +196,12 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   },
   threatIndex: [],
   threshold: {
-    field: [''],
+    field: [],
     value: '100',
+    cardinality: {
+      field: ['process.name'],
+      value: '2',
+    },
   },
 });
 

@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
-import {
-  Space,
-  ISpacesClient,
+
+import type { KibanaRequest } from 'src/core/server';
+
+import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  ISpacesClient,
+  Space,
 } from '../../../spaces/server';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import { AuthorizationServiceSetup } from '../authorization';
-import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
-import { SecurityPluginSetup } from '..';
+import type { AuditLogger } from '../audit';
+import { EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { SecurityPluginSetup } from '../plugin';
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,

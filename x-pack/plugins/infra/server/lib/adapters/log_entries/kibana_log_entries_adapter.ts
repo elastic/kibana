@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { timeMilliseconds } from 'd3-time';
@@ -215,6 +216,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
 
     return {
       id: hit._id,
+      index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},

@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy } from 'lodash';
-import { Observable, Subscription, BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
-import { CoreStart } from 'src/core/public';
-
-import ReactDOM from 'react-dom';
 import React from 'react';
+import ReactDOM from 'react-dom';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 
-import { SecurityLicense } from '../../common/licensing';
-import { SecurityNavControl, UserMenuLink } from './nav_control_component';
-import { AuthenticationServiceSetup } from '../authentication';
+import type { CoreStart } from 'src/core/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserMenuLink } from './nav_control_component';
+import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;

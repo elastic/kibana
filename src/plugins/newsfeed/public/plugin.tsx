@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -51,7 +51,10 @@ export class NewsfeedPublicPlugin
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {
         const config = Object.assign({}, this.config, {
-          service: { pathTemplate: `/${endpoint}/v{VERSION}.json` },
+          service: {
+            ...this.config.service,
+            pathTemplate: `/${endpoint}/v{VERSION}.json`,
+          },
         });
         return this.fetchNewsfeed(core, config);
       },

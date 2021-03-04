@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -32,22 +33,22 @@ export const WarmPhase: FunctionComponent = () => {
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
-    <Phase phase={'warm'}>
-      <ReplicasField phase={'warm'} />
+    <Phase phase="warm">
+      <ReplicasField phase="warm" />
 
-      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase={'warm'} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
-      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase={'warm'} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-      <ReadonlyField phase={'warm'} />
+      <ReadonlyField phase="warm" />
 
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase={'warm'}
+        phase="warm"
       />
 
-      <IndexPriorityField phase={'warm'} />
+      <IndexPriorityField phase="warm" />
     </Phase>
   );
 };

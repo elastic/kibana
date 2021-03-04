@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -15,9 +16,10 @@ import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
-import { AggCardinality } from '../../../common/types/fields';
+import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -181,7 +183,8 @@ const getAggIntervals = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ): Promise<NumericColumnStatsMap> => {
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
@@ -208,6 +211,7 @@ const getAggIntervals = async (
       query,
       aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
       size: 0,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -238,7 +242,8 @@ export const getHistogramsForFields = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ) => {
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
@@ -246,7 +251,8 @@ export const getHistogramsForFields = async (
     indexPatternTitle,
     query,
     fields,
-    samplerShardSize
+    samplerShardSize,
+    runtimeMappings
   );
 
   const chartDataAggs = fields.reduce((aggs, field) => {
@@ -291,6 +297,7 @@ export const getHistogramsForFields = async (
       query,
       aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
       size: 0,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -605,7 +612,7 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
-    const runtimeMappings: any = {};
+    const runtimeMappings: { runtime_mappings?: RuntimeMappings } = {};
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
@@ -637,7 +644,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
       ...runtimeMappings,
     };
 
@@ -647,6 +654,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+
     const aggregations = body.aggregations;
     const totalCount = body.hits.total.value;
     const stats = {

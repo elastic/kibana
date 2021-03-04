@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Just some helpers for kibana plugin devs.",
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "kibana": {
     "devOnly": true
   },

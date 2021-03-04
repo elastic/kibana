@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Legacy } from 'kibana';
 import { schema } from '@kbn/config-schema';
-import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
+import type { Legacy } from 'kibana';
+import type {
   CoreSetup,
   IBasePath,
   IRouter,
-} from '../../../../../../src/core/server';
-
-import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
+  KibanaRequest,
+  KibanaResponseFactory,
+} from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+
+import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FAILING: https://github.com/elastic/kibana/issues/58942
 describe.skip('onRequestInterceptor', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -30,14 +31,20 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { jobId, jobType } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
+  const [creationTriggered, setCreationTriggered] = useState<boolean>(false);
   const [showProgress, setShowProgress] = useState<boolean>(false);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
   const handleCreation = async () => {
-    await createAnalyticsJob();
+    setCreationTriggered(true);
+    const creationSuccess = await createAnalyticsJob();
 
-    if (checked) {
+    if (creationSuccess === false) {
+      setCreationTriggered(false);
+    }
+
+    if (checked && creationSuccess === true) {
       setShowProgress(true);
       startAnalyticsJob();
     }
@@ -74,6 +81,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
               disabled={!isValid || !isAdvancedEditorValidJson}
               onClick={handleCreation}
               fill
+              isLoading={creationTriggered}
               data-test-subj="mlAnalyticsCreateJobWizardCreateButton"
             >
               {i18n.translate('xpack.ml.dataframe.analytics.create.wizardCreateButton', {

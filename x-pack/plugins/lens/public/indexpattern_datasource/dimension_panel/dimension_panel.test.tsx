@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiListGroupItemProps,
+  EuiListGroup,
+  EuiRange,
+  EuiSelect,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import {
   IndexPatternDimensionEditorComponent,
@@ -23,8 +31,6 @@ import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { TimeScaling } from './time_scaling';
-import { EuiSelect } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
 import { DimensionEditor } from './dimension_editor';
 
 jest.mock('../loader');
@@ -105,9 +111,6 @@ const bytesColumn: IndexPatternColumn = {
  *
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
- *
- * - canHandleDrop: Tests for dropping of fields or other dimensions
- * - onDrop: Correct application of drop logic
  */
 describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
@@ -744,6 +747,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should leave error state when switching from incomplete state to fieldless operation', () => {
+      // @ts-expect-error
+      window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       wrapper

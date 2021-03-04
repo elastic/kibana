@@ -85,10 +85,10 @@ export class Plugin {
         // This defaults to what is configured at the task manager level.
         maxAttempts: 5,
 
-        // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-        // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
-        // overridden by the `override_num_workers` config value, if specified.
-        numWorkers: 2,
+        // The maximum number tasks of this type that can be run concurrently per Kibana instance.
+        // Setting this value will force Task Manager to poll for this task type seperatly from other task types which 
+        // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
+        maxConcurrency: 1,
 
         // The createTaskRunner function / method returns an object that is responsible for
         // performing the work of the task. context: { taskInstance }, is documented below.

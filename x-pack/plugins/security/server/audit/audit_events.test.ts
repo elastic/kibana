@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
+
+import { httpServerMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { AuthenticationResult } from '../authentication';
 import {
   EventOutcome,
+  httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
-  userLoginEvent,
-  httpRequestEvent,
-  spaceAuditEvent,
   SpaceAuditAction,
+  spaceAuditEvent,
+  userLoginEvent,
 } from './audit_events';
-import { AuthenticationResult } from '../authentication';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { httpServerMock } from 'src/core/server/mocks';
 
 describe('#savedObjectEvent', () => {
   test('creates event with `unknown` outcome', () => {

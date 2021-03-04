@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './toolbar_button.scss';
@@ -13,9 +13,9 @@ import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,
-  left: 'toolbarButton--groupLeft',
-  center: 'toolbarButton--groupCenter',
-  right: 'toolbarButton--groupRight',
+  left: 'kbnToolbarButton--groupLeft',
+  center: 'kbnToolbarButton--groupCenter',
+  right: 'kbnToolbarButton--groupRight',
 };
 
 type ButtonPositions = keyof typeof groupPositionToClassMap;
@@ -62,6 +62,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
     [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
     className
   );
+
   return (
     <EuiButton
       data-test-subj={dataTestSubj}

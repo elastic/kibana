@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,8 +19,9 @@ import { trackUserRequest } from './track_ui_metric';
 
 const apiPrefix = '/api/rollup';
 
-export async function loadJobs() {
-  const { jobs } = await getHttp().get(`${apiPrefix}/jobs`);
+export async function loadJobs({ asSystemRequest } = {}) {
+  const fetchOptions = { asSystemRequest };
+  const { jobs } = await getHttp().get(`${apiPrefix}/jobs`, fetchOptions);
   return jobs;
 }
 

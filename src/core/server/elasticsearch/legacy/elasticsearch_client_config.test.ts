@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { duration } from 'moment';
@@ -22,13 +22,13 @@ test('parses minimally specified config', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     )
   ).toMatchInlineSnapshot(`
     Object {
@@ -58,7 +58,6 @@ test('parses fully specified config', () => {
   const elasticsearchConfig: LegacyElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
     customHeaders: { xsrf: 'something' },
-    logQueries: true,
     sniffOnStart: true,
     sniffOnConnectionFault: true,
     hosts: [
@@ -84,7 +83,8 @@ test('parses fully specified config', () => {
 
   const elasticsearchClientConfig = parseElasticsearchClientConfig(
     elasticsearchConfig,
-    logger.get()
+    logger.get(),
+    'custom-type'
   );
 
   // Check that original references aren't used.
@@ -99,7 +99,6 @@ test('parses fully specified config', () => {
       "apiVersion": "v7.0.0",
       "hosts": Array [
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -111,7 +110,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -123,7 +121,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -135,6 +132,7 @@ test('parses fully specified config', () => {
           "query": null,
         },
       ],
+      "httpAuth": "elastic:changeme",
       "keepAlive": true,
       "log": [Function],
       "pingTimeout": 12345,
@@ -163,7 +161,6 @@ test('parses config timeouts of moment.Duration type', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         pingTimeout: duration(100, 'ms'),
@@ -172,7 +169,8 @@ test('parses config timeouts of moment.Duration type', () => {
         hosts: ['http://localhost:9200/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     )
   ).toMatchInlineSnapshot(`
     Object {
@@ -208,7 +206,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['http://user:password@localhost/elasticsearch', 'https://es.local'],
@@ -217,6 +214,7 @@ describe('#auth', () => {
           requestHeadersWhitelist: [],
         },
         logger.get(),
+        'custom-type',
         { auth: false }
       )
     ).toMatchInlineSnapshot(`
@@ -260,7 +258,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -268,6 +265,7 @@ describe('#auth', () => {
           password: 'changeme',
         },
         logger.get(),
+        'custom-type',
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
@@ -300,7 +298,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -308,6 +305,7 @@ describe('#auth', () => {
           username: 'elastic',
         },
         logger.get(),
+        'custom-type',
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
@@ -342,13 +340,13 @@ describe('#customHeaders', () => {
       {
         apiVersion: 'master',
         customHeaders: { [headerKey]: 'foo' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
     expect(parsedConfig.hosts[0].headers).toEqual({
       [headerKey]: 'foo',
@@ -357,62 +355,18 @@ describe('#customHeaders', () => {
 });
 
 describe('#log', () => {
-  test('default logger with #logQueries = false', () => {
+  test('default logger', () => {
     const parsedConfig = parseElasticsearchClientConfig(
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
-    );
-
-    const esLogger = new parsedConfig.log();
-    esLogger.error('some-error');
-    esLogger.warning('some-warning');
-    esLogger.trace('some-trace');
-    esLogger.info('some-info');
-    esLogger.debug('some-debug');
-
-    expect(typeof esLogger.close).toBe('function');
-
-    expect(loggingSystemMock.collect(logger)).toMatchInlineSnapshot(`
-      Object {
-        "debug": Array [],
-        "error": Array [
-          Array [
-            "some-error",
-          ],
-        ],
-        "fatal": Array [],
-        "info": Array [],
-        "log": Array [],
-        "trace": Array [],
-        "warn": Array [
-          Array [
-            "some-warning",
-          ],
-        ],
-      }
-    `);
-  });
-
-  test('default logger with #logQueries = true', () => {
-    const parsedConfig = parseElasticsearchClientConfig(
-      {
-        apiVersion: 'master',
-        customHeaders: { xsrf: 'something' },
-        logQueries: true,
-        sniffOnStart: false,
-        sniffOnConnectionFault: false,
-        hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
-      },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     const esLogger = new parsedConfig.log();
@@ -433,11 +387,6 @@ describe('#log', () => {
             "304
       METHOD /some-path
       ?query=2",
-            Object {
-              "tags": Array [
-                "query",
-              ],
-            },
           ],
         ],
         "error": Array [
@@ -465,14 +414,14 @@ describe('#log', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: true,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
         log: customLogger,
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     expect(parsedConfig.log).toBe(customLogger);
@@ -486,14 +435,14 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'none' },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -527,14 +476,14 @@ describe('#ssl', () => {
       {
         apiVersion: 'v7.0.0',
         customHeaders: {},
-        logQueries: true,
         sniffOnStart: true,
         sniffOnConnectionFault: true,
         hosts: ['https://es.local'],
         requestHeadersWhitelist: [],
         ssl: { verificationMode: 'certificate' },
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     // `checkServerIdentity` shouldn't check hostname when verificationMode is certificate.
@@ -576,14 +525,14 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'full' },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -618,14 +567,14 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'misspelled' as any },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: misspelled"`);
   });
@@ -636,7 +585,6 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -651,6 +599,7 @@ describe('#ssl', () => {
           },
         },
         logger.get(),
+        'custom-type',
         { ignoreCertAndKey: true }
       )
     ).toMatchInlineSnapshot(`

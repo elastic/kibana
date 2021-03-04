@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import { DashboardSavedObject } from 'src/plugins/dashboard/public';
 
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
@@ -17,11 +15,15 @@ export type DashboardsServiceFactory = KibanaPluginServiceFactory<
   PresentationUtilPluginStartDeps
 >;
 
+export interface PartialDashboardAttributes {
+  title: string;
+}
+
 export const dashboardsServiceFactory: DashboardsServiceFactory = ({ coreStart }) => {
   const findDashboards = async (query: string = '', fields: string[] = []) => {
     const { find } = coreStart.savedObjects.client;
 
-    const { savedObjects } = await find<DashboardSavedObject>({
+    const { savedObjects } = await find<PartialDashboardAttributes>({
       type: 'dashboard',
       search: `${query}*`,
       searchFields: fields,

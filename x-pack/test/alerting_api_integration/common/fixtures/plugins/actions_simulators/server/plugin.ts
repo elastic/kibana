@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import http from 'http';
@@ -38,6 +39,10 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
     getExternalServiceSimulatorPath(service)
   );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
+  allPaths.push(
+    `/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident/123`
+  );
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_choice`);
   allPaths.push(
     `/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_dictionary`
   );

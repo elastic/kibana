@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
@@ -39,7 +40,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -181,7 +182,7 @@ export class LensPlugin {
     };
 
     core.application.register({
-      id: 'lens',
+      id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {

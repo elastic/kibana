@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
@@ -13,7 +15,7 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
-interface LatencyChartData {
+export interface LatencyChartData {
   latencyTimeseries: Array<APMChartSpec<Coordinate>>;
   mlJobId?: string;
   anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };

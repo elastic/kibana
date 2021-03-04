@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { has, get } from 'lodash';
@@ -108,7 +108,32 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) 
     log(
       '"logging.events.ops" has been deprecated and will be removed ' +
         'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
-        '"metrics.ops" context in your logging configuration.'
+        '"metrics.ops" context in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
+const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
+    log(
+      '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
+        'in 8.0. To access request and/or response data moving forward, please enable debug logs for the ' +
+        '"http.server.response" context in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
+const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.timezone')) {
+    log(
+      '"logging.timezone" has been deprecated and will be removed ' +
+        'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
+        'in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
     );
   }
   return settings;
@@ -149,4 +174,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
   opsLoggingEventDeprecation,
+  requestLoggingEventDeprecation,
+  timezoneLoggingDeprecation,
 ];

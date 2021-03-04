@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
@@ -490,6 +491,15 @@ describe('helpers', () => {
     test('returns formatted object with detections exceptions_list', () => {
       const result = formatAboutStepData(mockData, [getListMock()]);
       expect(result.exceptions_list).toEqual([getListMock()]);
+    });
+
+    test('returns a threat indicator path', () => {
+      mockData = {
+        ...mockData,
+        threatIndicatorPath: 'my_custom.path',
+      };
+      const result = formatAboutStepData(mockData);
+      expect(result.threat_indicator_path).toEqual('my_custom.path');
     });
 
     test('returns formatted object with both exceptions_lists', () => {

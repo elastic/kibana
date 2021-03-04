@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
@@ -9,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
@@ -19,14 +20,14 @@ interface Props {
   mlJobId?: string;
 }
 
-const ShiftedIconWrapper = styled.span`
+const ShiftedIconWrapper = euiStyled.span`
   padding-right: 5px;
   position: relative;
   top: -1px;
   display: inline-block;
 `;
 
-const ShiftedEuiText = styled(EuiText)`
+const ShiftedEuiText = euiStyled(EuiText)`
   position: relative;
   top: 5px;
 `;

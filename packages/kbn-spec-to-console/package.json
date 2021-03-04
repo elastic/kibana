@@ -10,7 +10,7 @@
     "format": "../../node_modules/.bin/prettier **/*.js --write"
   },
   "author": "",
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "kibana": {
     "devOnly": true
   },

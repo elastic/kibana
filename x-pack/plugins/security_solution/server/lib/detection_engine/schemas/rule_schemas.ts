@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -13,6 +14,7 @@ import {
   threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
+  threatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
   authorOrUndefined,
@@ -115,6 +117,7 @@ const threatSpecificRuleParams = t.type({
   threatMapping: threat_mapping,
   threatLanguage: t.union([nonEqlLanguages, t.undefined]),
   threatIndex: threat_index,
+  threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
 });

@@ -1,12 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  SearchUsageCollector,
+} from '../../../../src/plugins/data/public';
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
@@ -18,6 +24,7 @@ import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -36,6 +43,8 @@ export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
   private config!: ConfigSchema;
+  private readonly storage = new Storage(window.localStorage);
+  private usageCollector?: SearchUsageCollector;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -67,8 +76,10 @@ export class DataEnhancedPlugin
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {
       const sessionsConfig = this.config.search.sessions;
-      registerSearchSessionsMgmt(core, sessionsConfig, { management });
+      registerSearchSessionsMgmt(core, sessionsConfig, { data, management });
     }
+
+    this.usageCollector = data.search.usageCollector;
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
@@ -81,7 +92,13 @@ export class DataEnhancedPlugin
             createConnectedSearchSessionIndicator({
               sessionService: plugins.data.search.session,
               application: core.application,
+              basePath: core.http.basePath,
               timeFilter: plugins.data.query.timefilter.timefilter,
+              storage: this.storage,
+              disableSaveAfterSessionCompletesTimeout: moment
+                .duration(this.config.search.sessions.notTouchedTimeout)
+                .asMilliseconds(),
+              usageCollector: this.usageCollector,
             })
           )
         ),
