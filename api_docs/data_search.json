@@ -1580,8 +1580,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L64"
+              "lineNumber": 82,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L82"
             }
           },
           {
@@ -1601,8 +1601,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L64"
+              "lineNumber": 82,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L82"
             }
           }
         ],
@@ -1610,8 +1610,8 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/data/server/search/collectors/usage.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L64"
+          "lineNumber": 82,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L82"
         },
         "initialIsOpen": false
       }
