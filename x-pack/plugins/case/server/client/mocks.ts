@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
+import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   AlertServiceContract,
@@ -45,6 +47,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     userActionService: jest.Mocked<CaseUserActionServiceSetup>;
     alertsService: jest.Mocked<AlertServiceContract>;
   };
+  esClient: DeeplyMockedKeys<ElasticsearchClient>;
 }> => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const log = loggingSystemMock.create().get('case');
@@ -82,5 +85,6 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   return {
     client: caseClient,
     services: { userActionService, alertsService },
+    esClient,
   };
 };
