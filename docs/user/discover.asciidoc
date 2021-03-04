@@ -3,7 +3,7 @@
 
 [partintro]
 --
-**_The window into your data in {es}._**
+**_Gain insight to your data._**
 
 *Discover* enables you to quickly search and filter your data, get information
 about structure of the fields, and visualize your data with *Lens* and *Maps*.
