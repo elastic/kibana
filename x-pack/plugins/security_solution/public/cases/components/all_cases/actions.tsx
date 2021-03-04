@@ -12,6 +12,7 @@ import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import * as i18n from './translations';
+import { isIndividual } from './helpers';
 
 interface GetActions {
   caseStatus: string;
@@ -19,24 +20,13 @@ interface GetActions {
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
-const hasSubCases = (subCases: SubCase[] | null | undefined) =>
-  subCases != null && subCases?.length > 0;
-
 export const getActions = ({
   caseStatus,
   dispatchUpdate,
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
-    description: i18n.DELETE_CASE,
-    icon: 'trash',
-    name: i18n.DELETE_CASE,
-    onClick: deleteCaseOnClick,
-    type: 'icon',
-    'data-test-subj': 'action-delete',
-  },
-  {
-    available: (item) => caseStatus === CaseStatuses.open && !hasSubCases(item.subCases),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.closed,
     description: i18n.CLOSE_CASE,
     icon: 'folderCheck',
     name: i18n.CLOSE_CASE,
@@ -51,9 +41,9 @@ export const getActions = ({
     'data-test-subj': 'action-close',
   },
   {
-    available: (item) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
+    enabled: (item: Case | SubCase) => isIndividual(item) && item.status !== CaseStatuses.open,
     description: i18n.REOPEN_CASE,
-    icon: 'folderExclamation',
+    icon: 'folderOpen',
     name: i18n.REOPEN_CASE,
     onClick: (theCase: Case) =>
       dispatchUpdate({
@@ -64,5 +54,13 @@ export const getActions = ({
       }),
     type: 'icon',
     'data-test-subj': 'action-open',
+  },
+  {
+    description: i18n.DELETE_CASE,
+    icon: 'trash',
+    name: i18n.DELETE_CASE,
+    onClick: deleteCaseOnClick,
+    type: 'icon',
+    'data-test-subj': 'action-delete',
   },
 ];
