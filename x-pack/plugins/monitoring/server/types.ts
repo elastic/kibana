@@ -25,7 +25,7 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerts/server';
 import { InfraPluginSetup } from '../../infra/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
@@ -47,7 +47,6 @@ export interface MonitoringElasticsearchConfig {
 export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
   alerts?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
