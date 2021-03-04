@@ -9,10 +9,16 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { CursorIcon } from './cursor_icon';
 import { EngineIcon } from './engine_icon';
 import { MetaEngineIcon } from './meta_engine_icon';
 
-describe('Engines icons', () => {
+describe('shared App Search icons', () => {
+  it('renders a cursor icon', () => {
+    const wrapper = shallow(<CursorIcon />);
+    expect(wrapper.hasClass('euiIcon')).toBe(true);
+  });
+
   it('renders an engine icon', () => {
     const wrapper = shallow(<EngineIcon />);
     expect(wrapper.hasClass('engineIcon')).toBe(true);

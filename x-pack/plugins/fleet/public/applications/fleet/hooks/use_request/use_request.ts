@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import type { HttpSetup } from 'src/core/public';
+
 import {
   UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
