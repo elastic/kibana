@@ -8,13 +8,13 @@
 import { Subscription } from 'rxjs';
 import { ILegacyCustomClusterClient } from 'kibana/server';
 import { ILicense, LicenseFeature } from '../../licensing/common/types';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginStart } from '../../licensing/server';
 import { MonitoringConfig } from './config';
 import { Logger } from '../../../../src/core/server';
 import { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   monitoringClient: ILegacyCustomClusterClient;
   config: MonitoringConfig;
   log: Logger;
