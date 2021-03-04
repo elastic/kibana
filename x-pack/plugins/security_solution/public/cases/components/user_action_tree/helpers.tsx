@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
 import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { SearchResponse } from 'elasticsearch';
 import {
@@ -409,14 +410,15 @@ export interface Alert {
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
+  const [alerts, setAlerts] = useState<Record<string, Ecs>>({});
 
   const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
     alertsQuery,
     selectedPatterns[0]
   );
 
-  const alerts = useMemo(
-    () =>
+  useEffect(() => {
+    const newAlerts =
       alertsData?.hits.hits.reduce<Record<string, Ecs>>(
         (acc, { _id, _index, _source }) => ({
           ...acc,
@@ -428,9 +430,9 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
           },
         }),
         {}
-      ) ?? {},
-    [alertsData?.hits.hits]
-  );
+      ) ?? {};
+    setAlerts((prevAlerts) => (!deepEqual(newAlerts, prevAlerts) ? newAlerts : prevAlerts));
+  }, [alertsData?.hits.hits]);
 
   return [isLoadingAlerts, alerts];
 };
