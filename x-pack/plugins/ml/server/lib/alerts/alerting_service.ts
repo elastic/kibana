@@ -27,8 +27,7 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
-import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
+import { ANOMALY_ALERT_INSTANCE_ID } from '../../../common/constants/alerts';
 import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**
@@ -249,20 +248,12 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
   };
 
   /**
-   * Provides unique key for the anomaly result.
+   * Provides a key for alert instance.
+   * Anomaly detection alert type creates only one
+   * alert instance per alert.
    */
-  const getAlertInstanceKey = (source: any): string => {
-    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
-    if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
-      alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
-    } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
-      const fieldName = getEntityFieldName(source);
-      const fieldValue = getEntityFieldValue(source);
-      const entity =
-        fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
-      alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
-    }
-    return alertInstanceKey;
+  const getAlertInstanceKey = (): string => {
+    return ANOMALY_ALERT_INSTANCE_ID;
   };
 
   /**
@@ -387,7 +378,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
 
           const topAnomaly = requestedAnomalies[0];
-          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+          const alertInstanceKey = getAlertInstanceKey();
 
           return {
             count: aggTypeResults.doc_count,
@@ -500,14 +491,12 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      *
      * @param params - Alert params
      * @param publicBaseUrl
-     * @param alertId - Alert ID
      * @param startedAt
      * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
       publicBaseUrl: string | undefined,
-      alertId: string,
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
@@ -532,57 +521,6 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
         anomalyExplorerUrl,
         kibanaBaseUrl: publicBaseUrl!,
       };
-
-      let kibanaEventLogCount = 0;
-      try {
-        // Check kibana-event-logs for presence of this alert instance
-        const kibanaLogResults = await esClient.count({
-          index: '.kibana-event-log-*',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'kibana.alerting.action_group_id': {
-                        value: ANOMALY_SCORE_MATCH_GROUP_ID,
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      'kibana.alerting.instance_id': {
-                        value: executionResult.name,
-                      },
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        term: {
-                          'kibana.saved_objects.id': {
-                            value: alertId,
-                          },
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-        kibanaEventLogCount = kibanaLogResults.body.count;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to check kibana event logs', e);
-      }
-
-      if (kibanaEventLogCount > 0) {
-        return;
-      }
 
       return executionResult;
     },

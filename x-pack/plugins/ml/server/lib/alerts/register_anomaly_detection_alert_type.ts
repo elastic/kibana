@@ -129,13 +129,7 @@ export function registerAnomalyDetectionAlertType({
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(
-        params,
-        publicBaseUrl,
-        alertId,
-        startedAt,
-        previousStartedAt
-      );
+      const executionResult = await execute(params, publicBaseUrl, startedAt, previousStartedAt);
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;
