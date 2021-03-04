@@ -25,6 +25,29 @@ const FEATURE_COLLECTION = {
   ],
 };
 
+const GEOMETRY_COLLECTION_FEATURE = {
+  type: 'Feature',
+  properties: {
+    population: 200,
+  },
+  geometry: {
+    type: 'GeometryCollection',
+    geometries: [
+      {
+        type: 'Point',
+        coordinates: [100.0, 0.0],
+      },
+      {
+        type: 'LineString',
+        coordinates: [
+          [101.0, 0.0],
+          [102.0, 1.0],
+        ],
+      },
+    ],
+  },
+};
+
 describe('previewFile', () => {
   const FILE_WITH_FEATURE_COLLECTION = new File(
     [JSON.stringify(FEATURE_COLLECTION)],
@@ -57,6 +80,27 @@ describe('previewFile', () => {
       hasPoints: true,
       hasShapes: false,
       features: FEATURE_COLLECTION.features,
+    });
+  });
+
+  test('should read GeometryCollection feature', async () => {
+    const fileWithGeometryCollectionFeature = new File(
+      [
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [GEOMETRY_COLLECTION_FEATURE],
+        }),
+      ],
+      'testfile.json',
+      { type: 'text/json' }
+    );
+    const importer = new GeoJsonImporter(fileWithGeometryCollectionFeature);
+    const results = await importer.previewFile();
+    expect(results).toEqual({
+      previewCoverage: 100,
+      hasPoints: false,
+      hasShapes: true,
+      features: [GEOMETRY_COLLECTION_FEATURE],
     });
   });
 
@@ -193,8 +237,33 @@ describe('toEsDocs', () => {
     expect(esDocs).toEqual([
       {
         coordinates: {
-          type: 'point',
+          type: 'Point',
           coordinates: [-112.0372, 46.608058],
+        },
+        population: 200,
+      },
+    ]);
+  });
+
+  test('should convert GeometryCollection feature to geo_shape ES documents', () => {
+    const esDocs = toEsDocs([GEOMETRY_COLLECTION_FEATURE], ES_FIELD_TYPES.GEO_SHAPE);
+    expect(esDocs).toEqual([
+      {
+        coordinates: {
+          type: 'GeometryCollection',
+          geometries: [
+            {
+              type: 'Point',
+              coordinates: [100.0, 0.0],
+            },
+            {
+              type: 'LineString',
+              coordinates: [
+                [101.0, 0.0],
+                [102.0, 1.0],
+              ],
+            },
+          ],
         },
         population: 200,
       },
