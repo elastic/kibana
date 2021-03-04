@@ -14,13 +14,11 @@ import { DescriptionListStyled } from '../../../common/components/page';
 export const OverviewDescriptionList = ({
   dataTestSubj,
   descriptionList,
-  isInDetailsSidePanel = false,
 }: {
   dataTestSubj?: string;
   descriptionList: DescriptionList[];
-  isInDetailsSidePanel: boolean;
 }) => (
-  <EuiFlexItem grow={!isInDetailsSidePanel}>
+  <EuiFlexItem grow={true}>
     <DescriptionListStyled data-test-subj={dataTestSubj} listItems={descriptionList} />
   </EuiFlexItem>
 );

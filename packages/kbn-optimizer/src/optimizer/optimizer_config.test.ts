@@ -427,6 +427,7 @@ describe('OptimizerConfig::create()', () => {
   it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
+      limitsPath: '/foo/limits.yml',
     });
 
     expect(config).toMatchInlineSnapshot(`
