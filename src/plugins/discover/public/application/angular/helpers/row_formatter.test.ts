@@ -13,10 +13,15 @@ import { fieldFormatsMock } from '../../../../../data/common/field_formats/mocks
 
 describe('Row formatter', () => {
   const hit = {
-    foo: 'bar',
-    number: 42,
-    hello: '<h1>World</h1>',
-    also: 'with "quotes" or \'single quotes\'',
+    _id: 'a',
+    _type: 'doc',
+    _score: 1,
+    _source: {
+      foo: 'bar',
+      number: 42,
+      hello: '<h1>World</h1>',
+      also: 'with "quotes" or \'single quotes\'',
+    },
   };
 
   const createIndexPattern = () => {
@@ -37,12 +42,17 @@ describe('Row formatter', () => {
 
   const indexPattern = createIndexPattern();
 
+  // Realistic response with alphabetical insertion order
   const formatHitReturnValue = {
     also: 'with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;',
-    number: '42',
     foo: 'bar',
+    number: '42',
     hello: '&lt;h1&gt;World&lt;/h1&gt;',
+    _id: 'a',
+    _type: 'doc',
+    _score: 1,
   };
+
   const formatHitMock = jest.fn().mockReturnValue(formatHitReturnValue);
 
   beforeEach(() => {
@@ -52,7 +62,7 @@ describe('Row formatter', () => {
 
   it('formats document properly', () => {
     expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>number:</dt><dd>42</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> </dl>"`
+      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
     );
   });
 
@@ -60,7 +70,7 @@ describe('Row formatter', () => {
     expect(
       formatRow({ ...hit, highlight: { number: '42' } }, indexPattern).trim()
     ).toMatchInlineSnapshot(
-      `"<dl class=\\"source truncate-by-height\\"><dt>number:</dt><dd>42</dd> <dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> </dl>"`
+      `"<dl class=\\"source truncate-by-height\\"><dt>number:</dt><dd>42</dd> <dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
     );
   });
 
@@ -86,6 +96,21 @@ describe('Row formatter', () => {
     ).toMatchInlineSnapshot(
       `"<dl class=\\"source truncate-by-height\\"><dt>object.value:</dt><dd>formatted, formatted</dd> </dl>"`
     );
+  });
+
+  it('formats top level objects in alphabetical order', () => {
+    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      name: 'subfield',
+    });
+    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+      convert: () => 'formatted',
+    });
+    const formatted = formatTopLevelObject(
+      { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
+      { 'a.zzz': [100], 'a.ccc': [50] },
+      indexPattern
+    ).trim();
+    expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
   });
 
   it('formats top level objects with subfields and highlights', () => {
