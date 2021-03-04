@@ -6,6 +6,7 @@
  */
 
 import { case1 } from '../../objects/case';
+import { COLLAPSED_ACTION_BTN } from '../../screens/alerts_detection_rules';
 
 import {
   ALL_CASES_CLOSE_ACTION,
@@ -47,6 +48,7 @@ import {
   backToCases,
   createCase,
   fillCasesMandatoryfields,
+  filterStatusOpen,
 } from '../../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
@@ -75,6 +77,7 @@ describe('Cases', () => {
     attachTimeline(this.mycase);
     createCase();
     backToCases();
+    filterStatusOpen();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
@@ -91,6 +94,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
     cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
+    cy.get(COLLAPSED_ACTION_BTN).click();
     cy.get(ALL_CASES_DELETE_ACTION).should('exist');
     cy.get(ALL_CASES_CLOSE_ACTION).should('exist');
 

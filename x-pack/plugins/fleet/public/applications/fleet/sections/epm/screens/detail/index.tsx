@@ -35,7 +35,8 @@ import { Error, Loading } from '../../../../components';
 import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
-import { useSetPackageInstallStatus } from '../../hooks';
+import { useGetPackageInstallStatus, useSetPackageInstallStatus } from '../../hooks';
+
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -74,6 +75,15 @@ export function Detail() {
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const packageInstallStatus = useMemo(() => {
+    if (packageInfo === null || !packageInfo.name) {
+      return undefined;
+    }
+    return getPackageInstallStatus(packageInfo.name).status;
+  }, [packageInfo, getPackageInstallStatus]);
+
   const updateAvailable =
     packageInfo &&
     'savedObject' in packageInfo &&
@@ -85,7 +95,6 @@ export function Detail() {
     pkgkey
   );
 
-  const packageInstallStatus = packageInfoData?.response.status;
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
