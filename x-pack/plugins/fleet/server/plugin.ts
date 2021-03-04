@@ -23,6 +23,7 @@ import {
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -97,12 +98,14 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
   elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
@@ -284,6 +287,7 @@ export class FleetPlugin
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
       elasticsearch: core.elasticsearch,
+      data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
