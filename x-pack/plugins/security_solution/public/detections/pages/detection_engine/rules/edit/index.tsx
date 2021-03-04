@@ -251,6 +251,7 @@ const EditRulePageComponent: FC = () => {
           rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
+        ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
     }
   }, [

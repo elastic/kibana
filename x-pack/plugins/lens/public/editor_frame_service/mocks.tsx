@@ -29,6 +29,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
         icon: 'empty',
         id: 'TEST_VIS',
         label: 'TEST',
+        groupLabel: 'TEST_VISGroup',
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),

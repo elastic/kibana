@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ConfirmModal } from '../../../components/confirm_modal';
-import { UserAPIClient } from '..';
+import { UserAPIClient } from '../user_api_client';
 
 export interface ConfirmDisableUsersProps {
   usernames: string[];

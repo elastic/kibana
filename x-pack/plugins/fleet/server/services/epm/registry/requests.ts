@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
+import fetch, { FetchError, Response } from 'node-fetch';
+import type { RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
+
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;

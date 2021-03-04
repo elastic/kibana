@@ -9,6 +9,7 @@ import { CoreStart, Plugin } from '../../../../src/core/public';
 import { FileUploadStartApi, getFileUploadComponent, importerFactory } from './api';
 import { setStartServices } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadSetupDependencies {}
@@ -34,6 +35,8 @@ export class FileUploadPlugin
     return {
       getFileUploadComponent,
       importerFactory,
+      getMaxBytes,
+      getMaxBytesFormatted,
     };
   }
 }

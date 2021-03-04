@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
@@ -34,6 +34,7 @@ import {
   CaseServiceSetup,
   CaseUserActionServiceSetup,
 } from '../../services';
+import { createCaseError } from '../../common/error';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -42,8 +43,12 @@ interface CreateCaseArgs {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
+  logger: Logger;
 }
 
+/**
+ * Creates a new case.
+ */
 export const create = async ({
   savedObjectsClient,
   caseService,
@@ -51,6 +56,7 @@ export const create = async ({
   userActionService,
   user,
   theCase,
+  logger,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
@@ -60,41 +66,45 @@ export const create = async ({
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = user;
-  const createdDate = new Date().toISOString();
-  const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
-  const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
+  try {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { username, full_name, email } = user;
+    const createdDate = new Date().toISOString();
+    const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
+    const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
-  const newCase = await caseService.postNewCase({
-    client: savedObjectsClient,
-    attributes: transformNewCase({
-      createdDate,
-      newCase: query,
-      username,
-      full_name,
-      email,
-      connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
-    }),
-  });
-
-  await userActionService.postUserActions({
-    client: savedObjectsClient,
-    actions: [
-      buildCaseUserActionItem({
-        action: 'create',
-        actionAt: createdDate,
-        actionBy: { username, full_name, email },
-        caseId: newCase.id,
-        fields: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
-        newValue: JSON.stringify(query),
+    const newCase = await caseService.postNewCase({
+      client: savedObjectsClient,
+      attributes: transformNewCase({
+        createdDate,
+        newCase: query,
+        username,
+        full_name,
+        email,
+        connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
       }),
-    ],
-  });
+    });
 
-  return CaseResponseRt.encode(
-    flattenCaseSavedObject({
-      savedObject: newCase,
-    })
-  );
+    await userActionService.postUserActions({
+      client: savedObjectsClient,
+      actions: [
+        buildCaseUserActionItem({
+          action: 'create',
+          actionAt: createdDate,
+          actionBy: { username, full_name, email },
+          caseId: newCase.id,
+          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
+          newValue: JSON.stringify(query),
+        }),
+      ],
+    });
+
+    return CaseResponseRt.encode(
+      flattenCaseSavedObject({
+        savedObject: newCase,
+      })
+    );
+  } catch (error) {
+    throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
+  }
 };

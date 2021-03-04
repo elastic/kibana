@@ -14,7 +14,7 @@ import { flattenCommentSavedObjects, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { defaultSortField } from '../../../../common';
 
-export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
+export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENTS_URL,
@@ -25,7 +25,7 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         query: schema.maybe(
           schema.object({
             includeSubCaseComments: schema.maybe(schema.boolean()),
-            subCaseID: schema.maybe(schema.string()),
+            subCaseId: schema.maybe(schema.string()),
           })
         ),
       },
@@ -35,10 +35,10 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         const client = context.core.savedObjects.client;
         let comments: SavedObjectsFindResponse<CommentAttributes>;
 
-        if (request.query?.subCaseID) {
+        if (request.query?.subCaseId) {
           comments = await caseService.getAllSubCaseComments({
             client,
-            id: request.query.subCaseID,
+            id: request.query.subCaseId,
             options: {
               sortField: defaultSortField,
             },
@@ -58,6 +58,9 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
           body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
         });
       } catch (error) {
+        logger.error(
+          `Failed to get all comments in route case id: ${request.params.case_id} include sub case comments: ${request.query?.includeSubCaseComments} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

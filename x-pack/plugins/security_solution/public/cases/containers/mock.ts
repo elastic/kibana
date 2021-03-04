@@ -103,6 +103,37 @@ export const basicCase: Case = {
   subCaseIds: [],
 };
 
+export const collectionCase: Case = {
+  type: CaseType.collection,
+  closedAt: null,
+  closedBy: null,
+  id: 'collection-id',
+  comments: [basicComment],
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  description: 'Security banana Issue',
+  externalService: null,
+  status: CaseStatuses.open,
+  tags,
+  title: 'Another horrible breach in a collection!!',
+  totalComment: 1,
+  totalAlerts: 0,
+  updatedAt: basicUpdatedAt,
+  updatedBy: elasticUser,
+  version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
+  subCases: [],
+  subCaseIds: [],
+};
+
 export const basicCasePost: Case = {
   ...basicCase,
   updatedAt: null,

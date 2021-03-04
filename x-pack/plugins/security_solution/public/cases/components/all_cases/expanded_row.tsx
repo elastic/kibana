@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { CasesColumns } from './columns';
 import { AssociationType } from '../../../../../case/common/api';
 
@@ -34,13 +34,24 @@ BasicTable.displayName = 'BasicTable';
 export const getExpandedRowMap = ({
   data,
   columns,
+  isModal,
+  onSubCaseClick,
 }: {
   data: Case[] | null;
   columns: CasesColumns[];
+  isModal: boolean;
+  onSubCaseClick?: (theSubCase: SubCase) => void;
 }): ExpandedRowMap => {
   if (data == null) {
     return {};
   }
+
+  const rowProps = (theSubCase: SubCase) => {
+    return {
+      ...(isModal && onSubCaseClick ? { onClick: () => onSubCaseClick(theSubCase) } : {}),
+      className: 'subCase',
+    };
+  };
 
   return data.reduce((acc, curr) => {
     if (curr.subCases != null) {
@@ -58,6 +69,7 @@ export const getExpandedRowMap = ({
             data-test-subj={`sub-cases-table-${curr.id}`}
             itemId="id"
             items={subCases}
+            rowProps={rowProps}
           />
         ),
       };
