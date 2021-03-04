@@ -1,42 +1,42 @@
 [role="xpack"]
 [[rule-types]]
-== Alerts
+== Rules
 
-Kibana provides two types of alerts:
+Kibana provides two types of rules:
 
-* Stack alerts, which are built into {kib}
-* Domain-specific alerts, which are registered by {kib} apps.
+* Stack rules, which are built into {kib}
+* Domain-specific rules, which are registered by {kib} apps.
 
 [float]
-==== Standard stack alerts
+==== Standard stack rules
 
-{kib} provides two stack alerts: 
+{kib} provides two stack rules: 
 
-* <<alert-type-index-threshold>>
-* <<alert-type-es-query>>
+* <<rule-type-index-threshold>>
+* <<rule-type-es-query>>
 
-Users require the `all` privilege to access the *Stack Alerts* feature and create and edit alerts.
+Users require the `all` privilege to access the *Stack Rules* feature and create and edit rules.
 See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [float]
-==== Domain-specific alerts
+==== Domain-specific rules
 
-For domain-specific alerts, refer to the documentation for that app.
-{kib} supports these alerts:
+For domain-specific rules, refer to the documentation for that app.
+{kib} supports these rules:
 
-* {observability-guide}/create-alerts.html[Observability alerts]
-* {security-guide}/prebuilt-rules.html[Security alerts]
-* <<geo-alerting, Maps alerts>>
-* {ml-docs}/ml-configuring-alerts.html[{ml-cap} alerts]
+* {observability-guide}/create-alerts.html[Observability rules]
+* {security-guide}/prebuilt-rules.html[Security rules]
+* <<geo-alerting, Maps rules>>
+* {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules]
 
 [NOTE]
 ==============================================
-Some alert types are subscription features, while others are free features.
+Some rule types are subscription features, while others are free features.
 For a comparison of the Elastic subscription levels,
 see {subscriptions}[the subscription page].
 ==============================================
 
 
-include::stack-alerts/index-threshold.asciidoc[]
-include::stack-alerts/es-query.asciidoc[]
-include::maps-alerts/geo-alert-types.asciidoc[]
+include::stack-rules/index-threshold.asciidoc[]
+include::stack-rules/es-query.asciidoc[]
+include::map-rules/geo-rule-types.asciidoc[]
