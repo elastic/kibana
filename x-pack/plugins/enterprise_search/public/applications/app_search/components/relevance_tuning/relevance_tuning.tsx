@@ -83,7 +83,7 @@ export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
     }
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
           <RelevanceTuningForm />
         </EuiFlexItem>
