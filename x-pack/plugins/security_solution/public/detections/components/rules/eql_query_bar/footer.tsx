@@ -191,7 +191,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                 isOpen={openEqlSettings}
                 closePopover={closeEqlSettingsHandler}
                 anchorPosition="downCenter"
-                ownFocus={true}
+                ownFocus={false}
               >
                 <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
                 <div style={{ width: '300px' }}>
