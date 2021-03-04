@@ -7,23 +7,19 @@
 
 import * as React from 'react';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
-import { CreateDrilldownForm } from '../create_drilldown_form';
-import { Tabs } from '../tabs';
-import { txtDrilldowns } from './i18n';
 import { useDrilldownManager } from '../context';
+import { CreateDrilldownFormWithState } from './create_drilldown_form_with_state';
+import { ActionFactoryPicker } from '../action_factory_picker';
 
-export const DrilldownManagerContent: React.FC = ({}) => {
+export const CreateDrilldownForm: React.FC = ({ children }) => {
   const drilldowns = useDrilldownManager();
-  const route = drilldowns.useRoute();
-
-  if (route[0] === 'new' && !!route[1]) {
-    return <CreateDrilldownForm />;
-  }
+  const drilldownState = drilldowns.getDrilldownState();
 
   return (
     <>
-      <DrilldownManagerTitle>{txtDrilldowns}</DrilldownManagerTitle>
-      <Tabs />
+      <DrilldownManagerTitle>Create Drilldown</DrilldownManagerTitle>
+      <ActionFactoryPicker />
+      {!!drilldownState && <CreateDrilldownFormWithState state={drilldownState} />}
     </>
   );
 };
