@@ -3,11 +3,10 @@
 
 [partintro]
 --
-**_Exploring and querying your data._**
+**_The window into your data in {es}._**
 
-*Discover* is your window into your data in {es}. *Discover* enables you to 
-quickly search and filter your data, get information about structure of the fields, 
-and navigate to *Visualize* and *Maps* to present your data.
+*Discover* enables you to quickly search and filter your data, get information
+about structure of the fields, and navigate to *Visualize* and *Maps* to present your data.
 You can also customize and save your searches and place them on a dashboard.
 
 ++++
@@ -24,7 +23,7 @@ data-type="inline"
 ++++
 
 [float]
-=== Select, explore, and present your data
+=== Exploring and querying your data
 
 You have questions about your data.
 What pages on your website contain a
@@ -213,12 +212,12 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 
 . Save your visualization for use on a dashboard.
 
-Given your documents contain fields of type geo point, you can visualize them in **Maps**.
+Given your documents contain geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]), you can visualize them in **Maps**.
 
-. Make sure the index pattern is set to **kibana_sample_data_flights**. And the configured time range 
+. Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range 
 contains data.
 
-. From the **Available fields** list, click `OriginLocation` and then click **Visualize**.
+. From the **Available fields** list, click `geoip.location` and then click **Visualize**.
 +
 [role="screenshot"]
 image:images/discover-maps.png[Map containing documents]
@@ -231,6 +230,8 @@ image:images/discover-maps.png[Map containing documents]
 
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
+* <<discover-search-for-relevance, Search for relevance>>.
+
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 In **Advanced Settings**, you can configure the number of documents to show,
 the table columns that display by default, and more.
@@ -238,8 +239,6 @@ the table columns that display by default, and more.
 * <<dashboard,Create a dashboard>> with even more visualizations of your findings, such as treemaps, metrics, and tables.
 
 * <<reporting-getting-started, Present your findings in a report>>.
-
-* <<discover-search-for-relevance, Search for relevance>>.
 
 --
 
