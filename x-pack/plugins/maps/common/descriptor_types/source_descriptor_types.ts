@@ -174,6 +174,8 @@ export type InlineFieldDescriptor = {
 export type GeojsonFileSourceDescriptor = {
   __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
+  areResultsTrimmed: boolean;
+  tooltipContent: string | null;
   name: string;
   type: string;
 };
