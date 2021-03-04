@@ -23,7 +23,7 @@ journey('uptime', async ({ page }) => {
     let isLoadingVisible = true;
 
     while (isLoadingVisible) {
-      const loading = await page.$(byTestId('kbnLoadingMessage'), false);
+      const loading = await page.$(byTestId('kbnLoadingMessage'));
       isLoadingVisible = loading !== null;
       await page.waitForTimeout(5 * 1000);
     }
@@ -33,7 +33,9 @@ journey('uptime', async ({ page }) => {
     await page.goto('http://localhost:5620/app/uptime?dateRangeStart=now-2y&dateRangeEnd=now', {
       waitUntil: 'networkidle',
     });
-    await page.waitForSelector(byTestId('kbnLoadingMessage'));
+    await page.waitForSelector(byTestId('kbnLoadingMessage'), {
+      timeout: 60 * 2000,
+    });
   });
 
   step('Login into kibana', async () => {
