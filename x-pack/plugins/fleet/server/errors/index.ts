@@ -21,8 +21,13 @@ export class IngestManagerError extends Error {
 }
 export class RegistryError extends IngestManagerError {}
 export class RegistryConnectionError extends RegistryError {}
-export class RegistryResponseError extends RegistryError {}
+export class RegistryResponseError extends RegistryError {
+  constructor(message?: string, public readonly status?: number) {
+    super(message);
+  }
+}
 export class PackageNotFoundError extends IngestManagerError {}
+export class PackageVersionInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class AgentPolicyError extends IngestManagerError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}

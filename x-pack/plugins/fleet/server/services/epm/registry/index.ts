@@ -30,7 +30,12 @@ import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
-import { PackageNotFoundError, PackageCacheError } from '../../../errors';
+import {
+  PackageVersionInvalidError,
+  PackageNotFoundError,
+  PackageCacheError,
+  RegistryResponseError,
+} from '../../../errors';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -56,7 +61,9 @@ export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: stri
   // this will return the entire string if `indexOf` return -1
   const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
   if (!semverValid(pkgVersion)) {
-    throw new Error('Package key parsing failed: package version was not a valid semver');
+    throw new PackageVersionInvalidError(
+      'Package key parsing failed: package version was not a valid semver'
+    );
   }
   return { pkgName, pkgVersion };
 }
@@ -109,7 +116,16 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
   const registryUrl = getRegistryUrl();
-  return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+  try {
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+
+    return res;
+  } catch (err) {
+    if (err instanceof RegistryResponseError && err.status === 404) {
+      throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
+    }
+    throw err;
+  }
 }
 
 export async function getFile(
