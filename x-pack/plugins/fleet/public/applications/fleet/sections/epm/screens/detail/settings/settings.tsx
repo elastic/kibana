@@ -8,6 +8,8 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverLt from 'semver/functions/lt';
+
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { InstallStatus, PackageInfo } from '../../../../../types';
@@ -57,7 +59,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
-  const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
+  const updateAvailable =
+    installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
+
   const isViewingOldPackage = version < latestVersion;
   // hide install/remove options if the user has version of the package is installed
   // and this package is out of date or if they do have a version installed but it's not this one
