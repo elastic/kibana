@@ -32,6 +32,8 @@ import {
   RollupSearchStrategy,
 } from './lib/search_strategies';
 
+import { registerTimeseriesUsageCollector } from './usage_collector';
+
 export interface LegacySetup {
   server: Server;
 }
@@ -95,6 +97,10 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     visDataRoutes(router, framework);
     fieldsRoutes(framework);
+
+    if (plugins.usageCollection) {
+      registerTimeseriesUsageCollector(plugins.usageCollection, globalConfig$);
+    }
 
     return {
       getVisData: async (

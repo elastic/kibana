@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+import { SharedGlobalConfig } from 'kibana/server';
 import type { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from '../../data/server';
+
+export type ConfigObservable = Observable<SharedGlobalConfig>;
 
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
