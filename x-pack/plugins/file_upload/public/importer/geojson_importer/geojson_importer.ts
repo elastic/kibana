@@ -35,7 +35,8 @@ export class GeoJsonImporter extends Importer {
   private _totalBytesRead = 0;
   private _totalBytesImported = 0;
   private _blockSizeInBytes = 0;
-  private _totalFeatures = 0;
+  private _totalFeaturesRead = 0;
+  private _totalFeaturesImported = 0;
   private _geometryTypesMap = new Map<string, boolean>();
   private _invalidFeatures: ImportFailure[] = [];
   private _prevBatchLastFeature?: Feature;
@@ -91,7 +92,7 @@ export class GeoJsonImporter extends Importer {
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
-    let importBlockPromise: Promise<ImportResponse> | undefined;
+    let importBlockPromise: Promise<ImportResults> | undefined;
 
     // Read file in blocks to avoid loading too much of file into memory at a time
     while ((this._features.length > 0 || this._hasNext) && this._isActive) {
@@ -100,7 +101,6 @@ export class GeoJsonImporter extends Importer {
         return {
           success: false,
           failures,
-          docCount: this._totalFeatures,
         };
       }
 
@@ -108,7 +108,9 @@ export class GeoJsonImporter extends Importer {
       if (importBlockPromise !== undefined) {
         const importBlockResults = await importBlockPromise;
         importBlockPromise = undefined;
-        failures.push(...importBlockResults.failures);
+        if (importBlockResults.failures) {
+          failures.push(...importBlockResults.failures);
+        }
 
         if (!importBlockResults.success) {
           success = false;
@@ -138,11 +140,13 @@ export class GeoJsonImporter extends Importer {
     // wait for last import call
     if (importBlockPromise) {
       const importBlockResults = await importBlockPromise;
-      failures.push(...importBlockResults.failures);
+      if (importBlockResults.failures) {
+        failures.push(...importBlockResults.failures);
+      }
 
       if (!importBlockResults.success) {
         success = false;
-        error = resp.error;
+        error = importBlockResults.error;
       }
     }
 
@@ -151,7 +155,7 @@ export class GeoJsonImporter extends Importer {
     return {
       success,
       failures,
-      docCount: this._totalFeatures,
+      docCount: this._totalFeaturesRead,
       error,
     };
   }
@@ -163,7 +167,7 @@ export class GeoJsonImporter extends Importer {
     chunks: ImportDoc[][],
     blockSizeInBytes: number,
     setImportProgress: (progress: number) => void
-  ): Promise<Omit<ImportResults, 'docCount'>> {
+  ): Promise<ImportResults> {
     let success = true;
     const failures: ImportFailure[] = [];
     let error;
@@ -208,10 +212,20 @@ export class GeoJsonImporter extends Importer {
         }
       }
 
-      // TODO update failure item number for chunk and stream block
-      failures.push(...resp.failures);
+      if (resp.failures && resp.failures.length) {
+        // failure.item is the document position in the chunk passed to import endpoint.
+        // Need to update failure.item to reflect the actual feature position in the file.
+        // e.g. item 3 in chunk is actually item 20003
+        for (let f = 0; f < resp.failures.length; f++) {
+          const failure = resp.failures[f];
+          failure.item += this._totalFeaturesImported;
+        }
+        failures.push(...resp.failures);
+      }
 
       if (resp.success) {
+        this._totalFeaturesImported += chunks[i].length;
+
         // Advance block percentage in equal increments
         // even though chunks are not identical in size.
         // Reason being that chunk size does not exactly correlate to bytes read from file
@@ -279,7 +293,7 @@ export class GeoJsonImporter extends Importer {
     const isLastBatch = batch.batchType === 'root-object-batch-complete';
     if (isLastBatch) {
       // Handle single feature geoJson
-      if (this._totalFeatures === 0) {
+      if (this._totalFeaturesRead === 0) {
         rawFeatures.push(batch.container);
       }
     } else {
@@ -294,10 +308,10 @@ export class GeoJsonImporter extends Importer {
         continue;
       }
 
-      this._totalFeatures++;
+      this._totalFeaturesRead++;
       if (!rawFeature.geometry || !rawFeature.geometry.type) {
         this._invalidFeatures.push({
-          item: this._totalFeatures,
+          item: this._totalFeaturesRead,
           reason: i18n.translate('xpack.fileUpload.geojsonImporter.noGeometry', {
             defaultMessage: 'Feature does not contain required field "geometry"',
           }),
