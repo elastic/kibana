@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -64,32 +62,20 @@ export const getThresholdSignalHistory = async ({
         return acc;
       }
 
-      const terms = bucketByFields.map((field) => {
-        let signalTerms = hit._source.signal?.threshold_result?.terms;
-
-        // Handle pre-7.12 signals
-        if (signalTerms == null) {
-          signalTerms = [
-            {
-              field: (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
-                field: string;
-              }).field,
-              value: ((hit._source.signal?.threshold_result as unknown) as { value: string }).value,
-            },
-          ];
-        } else if (isEmpty(signalTerms)) {
-          signalTerms = [];
-        }
-
-        const result = signalTerms.filter((resultField) => {
-          return resultField.field === field;
-        });
-
-        return {
-          field,
-          value: result[0].value,
-        };
-      });
+      const terms =
+        hit._source.signal?.threshold_result?.terms != null
+          ? hit._source.signal.threshold_result.terms
+          : [
+              // Pre-7.12 signals
+              {
+                field:
+                  (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
+                    field: string;
+                  }).field ?? '',
+                value: ((hit._source.signal?.threshold_result as unknown) as { value: string })
+                  .value,
+              },
+            ];
 
       const hash = getThresholdTermsHash(terms);
       const existing = acc[hash];
