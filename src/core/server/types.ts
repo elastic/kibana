@@ -7,7 +7,7 @@
  */
 
 /** This module is intended for consumption by public to avoid import issues with server-side code */
-export { PluginOpaqueId } from './plugins/types';
+export type { PluginOpaqueId } from './plugins/types';
 export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
