@@ -28,7 +28,7 @@ export const MoreLessSection: FunctionComponent<Props> = ({ align = 'left', chil
       <EuiFlexGroup gutterSize="s" justifyContent={align === 'right' ? 'flexEnd' : 'flexStart'}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType={isContentVisible ? 'minus' : 'plus'}
+            iconType={isContentVisible ? 'arrowUp' : 'arrowDown'}
             onClick={() => setIsContentVisible((prev) => !prev)}
           >
             {buttonLabel}

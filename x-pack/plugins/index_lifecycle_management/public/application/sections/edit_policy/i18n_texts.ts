@@ -217,7 +217,7 @@ export const i18nTexts = {
       frozen: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
         {
-          defaultMessage: 'Here will come the copy description of the frozen phase',
+          defaultMessage: 'HERE WILL COME THE COPY FOR FROZEN PHASE',
         }
       ),
       delete: i18n.translate(

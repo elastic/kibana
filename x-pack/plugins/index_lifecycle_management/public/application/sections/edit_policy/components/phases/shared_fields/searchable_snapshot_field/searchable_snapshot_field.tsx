@@ -248,7 +248,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             )}
 
             <EuiSpacer size="s" />
-            <MoreLessSection align="right">
+            <MoreLessSection>
               <UseField
                 key={searchableSnapshotStoragePath}
                 path={searchableSnapshotStoragePath}
