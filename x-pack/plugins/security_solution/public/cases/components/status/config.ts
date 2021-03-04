@@ -4,36 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from './translations';
+import { AllCaseStatus, Statuses, StatusAll } from './types';
 
-type Statuses = Record<
-  CaseStatuses,
-  {
-    color: string;
-    label: string;
-    icon: EuiIconType;
-    actions: {
-      bulk: {
-        title: string;
-      };
-      single: {
-        title: string;
-        description?: string;
-      };
-    };
-    actionBar: {
-      title: string;
-    };
-    button: {
-      label: string;
-    };
-    stats: {
-      title: string;
-    };
-  }
->;
+export const allCaseStatus: AllCaseStatus = {
+  [StatusAll]: { color: 'hollow', label: i18n.ALL },
+};
 
 export const statuses: Statuses = {
   [CaseStatuses.open]: {

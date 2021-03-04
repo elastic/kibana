@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   SavedObjectsExportByObjectOptions,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByTypeOptions,
@@ -14,5 +14,6 @@ export {
   SavedObjectsExportTransformContext,
   SavedObjectsExportTransform,
 } from './types';
-export { ISavedObjectsExporter, SavedObjectsExporter } from './saved_objects_exporter';
+export { SavedObjectsExporter } from './saved_objects_exporter';
+export type { ISavedObjectsExporter } from './saved_objects_exporter';
 export { SavedObjectsExportError } from './errors';
