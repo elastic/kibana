@@ -20,7 +20,7 @@ By default, each {kib} instance polls for work at three second intervals, and ca
 These tasks are then run on the {kib} server.
 
 Alerts are recurring background tasks which are rescheduled according to the <<defining-alerts-general-details, check interval>> on completion.
-Actions are non-recurring backgroundtasks which are deleted on completion.
+Actions are non-recurring background tasks which are deleted on completion.
 
 For more details on Task Manager, see <<task-manager-background-tasks>>.
 
