@@ -5955,8 +5955,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L112"
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L111"
             },
             "signature": [
               "Record<string, any>[]"
@@ -5987,8 +5987,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+                  "lineNumber": 115,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
                 }
               },
               {
@@ -6007,8 +6007,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+                  "lineNumber": 115,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
                 }
               }
             ],
@@ -6016,8 +6016,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 116,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+              "lineNumber": 115,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
             }
           },
           {
@@ -6041,8 +6041,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 134,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L134"
+                  "lineNumber": 133,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L133"
                 }
               }
             ],
@@ -6050,8 +6050,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L134"
+              "lineNumber": 133,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L133"
             }
           },
           {
@@ -6085,8 +6085,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+                  "lineNumber": 142,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
                 }
               },
               {
@@ -6108,8 +6108,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+                  "lineNumber": 142,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
                 }
               }
             ],
@@ -6117,8 +6117,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 143,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+              "lineNumber": 142,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
             }
           },
           {
@@ -6144,8 +6144,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 155,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L155"
+                  "lineNumber": 154,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L154"
                 }
               }
             ],
@@ -6153,8 +6153,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L155"
+              "lineNumber": 154,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L154"
             }
           },
           {
@@ -6194,8 +6194,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 166,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L166"
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L165"
                 }
               }
             ],
@@ -6205,8 +6205,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L166"
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L165"
             }
           },
           {
@@ -6224,8 +6224,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L174"
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L173"
             }
           },
           {
@@ -6250,8 +6250,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 181,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L181"
+              "lineNumber": 180,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L180"
             }
           },
           {
@@ -6283,8 +6283,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+                  "lineNumber": 187,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
                 }
               },
               {
@@ -6297,8 +6297,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+                  "lineNumber": 187,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
                 }
               }
             ],
@@ -6306,8 +6306,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 188,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+              "lineNumber": 187,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
             }
           },
           {
@@ -6339,8 +6339,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L199"
+                  "lineNumber": 198,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L198"
                 }
               }
             ],
@@ -6348,8 +6348,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L199"
+              "lineNumber": 198,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L198"
             }
           },
           {
@@ -6374,8 +6374,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 206,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L206"
+              "lineNumber": 205,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L205"
             }
           },
           {
@@ -6400,8 +6400,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L213"
+              "lineNumber": 212,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L212"
             }
           },
           {
@@ -6432,8 +6432,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 227,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L227"
+                  "lineNumber": 226,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L226"
                 }
               }
             ],
@@ -6441,8 +6441,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 227,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L227"
+              "lineNumber": 226,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L226"
             }
           },
           {
@@ -6492,8 +6492,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+                  "lineNumber": 238,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
                 }
               },
               {
@@ -6514,8 +6514,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+                  "lineNumber": 238,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
                 }
               }
             ],
@@ -6527,8 +6527,8 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+              "lineNumber": 238,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
             }
           },
           {
@@ -6556,8 +6556,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 249,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L249"
+              "lineNumber": 248,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L248"
             }
           },
           {
@@ -6599,8 +6599,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 257,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L257"
+                  "lineNumber": 256,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L256"
                 }
               }
             ],
@@ -6608,8 +6608,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 257,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L257"
+              "lineNumber": 256,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L256"
             }
           },
           {
@@ -6649,8 +6649,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 284,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L284"
+                  "lineNumber": 283,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L283"
                 }
               }
             ],
@@ -6660,8 +6660,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 284,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L284"
+              "lineNumber": 283,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L283"
             }
           },
           {
@@ -6717,8 +6717,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 294,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L294"
+                  "lineNumber": 293,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L293"
                 }
               }
             ],
@@ -6728,8 +6728,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 293,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L293"
+              "lineNumber": 292,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L292"
             }
           },
           {
@@ -6747,8 +6747,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 302,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L302"
+              "lineNumber": 301,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L301"
             }
           },
           {
@@ -6768,8 +6768,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 311,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L311"
+              "lineNumber": 310,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L310"
             }
           },
           {
@@ -6800,8 +6800,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 689,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+                  "lineNumber": 688,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L688"
                 }
               }
             ],
@@ -6809,8 +6809,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 689,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+              "lineNumber": 688,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L688"
             }
           },
           {
@@ -6838,15 +6838,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 718,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L718"
+              "lineNumber": 717,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L717"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 104,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L104"
+          "lineNumber": 103,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L103"
         },
         "initialIsOpen": false
       },
@@ -8239,8 +8239,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
+              "lineNumber": 63,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
             }
           },
           {
@@ -8251,8 +8251,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
             },
             "signature": [
               "Record<string, any>"
@@ -8266,8 +8266,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L65"
             },
             "signature": [
               "boolean | undefined"
@@ -8276,8 +8276,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 61,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L61"
+          "lineNumber": 62,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
         },
         "initialIsOpen": false
       },
@@ -12030,8 +12030,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L69"
+          "lineNumber": 70,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L70"
         },
         "signature": [
           "FieldFormat"
@@ -12101,8 +12101,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L67"
+          "lineNumber": 68,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L68"
         },
         "signature": [
           "(key: string, defaultOverride: T | undefined) => T"
@@ -12119,8 +12119,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L74"
+          "lineNumber": 75,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L75"
         },
         "signature": [
           "string"
@@ -13811,8 +13811,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L168"
+              "lineNumber": 169,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L169"
             },
             "signature": [
               "typeof ",
@@ -13833,8 +13833,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 169,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L169"
+              "lineNumber": 170,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L170"
             },
             "signature": [
               "typeof ",
@@ -13855,8 +13855,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 171,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L171"
+              "lineNumber": 172,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L172"
             },
             "signature": [
               "{ range: string; regex: string; text: string; background: string; }"
@@ -13870,8 +13870,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 172,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L172"
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L173"
             },
             "signature": [
               {
@@ -13891,8 +13891,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 173,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L173"
+              "lineNumber": 174,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L174"
             },
             "signature": [
               {
@@ -13912,8 +13912,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L174"
+              "lineNumber": 175,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L175"
             },
             "signature": [
               "typeof ",
@@ -13934,8 +13934,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 176,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L176"
+              "lineNumber": 177,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L177"
             },
             "signature": [
               "typeof ",
@@ -13956,8 +13956,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 177,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L177"
+              "lineNumber": 178,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L178"
             },
             "signature": [
               "typeof ",
@@ -13978,8 +13978,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 178,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L178"
+              "lineNumber": 179,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L179"
             },
             "signature": [
               "typeof ",
@@ -14000,8 +14000,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 179,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L179"
+              "lineNumber": 180,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L180"
             },
             "signature": [
               "typeof ",
@@ -14022,8 +14022,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 180,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L180"
+              "lineNumber": 181,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L181"
             },
             "signature": [
               "typeof ",
@@ -14044,8 +14044,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 181,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L181"
+              "lineNumber": 182,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L182"
             },
             "signature": [
               "typeof ",
@@ -14066,8 +14066,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 182,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L182"
+              "lineNumber": 183,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L183"
             },
             "signature": [
               "typeof ",
@@ -14088,8 +14088,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 183,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L183"
+              "lineNumber": 184,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L184"
             },
             "signature": [
               "typeof ",
@@ -14110,8 +14110,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 184,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L184"
+              "lineNumber": 185,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L185"
             },
             "signature": [
               "typeof ",
@@ -14132,8 +14132,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 185,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L185"
+              "lineNumber": 186,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L186"
             },
             "signature": [
               "typeof ",
@@ -14154,8 +14154,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 186,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L186"
+              "lineNumber": 187,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L187"
             },
             "signature": [
               "typeof ",
@@ -14176,8 +14176,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 187,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L187"
+              "lineNumber": 188,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L188"
             },
             "signature": [
               "typeof ",
@@ -14198,8 +14198,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 188,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L188"
+              "lineNumber": 189,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L189"
             },
             "signature": [
               "typeof ",
@@ -14220,8 +14220,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 189,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L189"
+              "lineNumber": 190,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L190"
             },
             "signature": [
               "typeof ",
@@ -14242,8 +14242,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 190,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L190"
+              "lineNumber": 191,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L191"
             },
             "signature": [
               "typeof ",
@@ -14255,14 +14255,36 @@
                 "text": "TruncateFormat"
               }
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.fieldFormats.HistogramFormat",
+            "type": "Object",
+            "label": "HistogramFormat",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/index.ts",
+              "lineNumber": 192,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L192"
+            },
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataFieldFormatsPluginApi",
+                "section": "def-common.HistogramFormat",
+                "text": "HistogramFormat"
+              }
+            ]
           }
         ],
         "description": [],
         "label": "fieldFormats",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 167,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L167"
+          "lineNumber": 168,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L168"
         },
         "initialIsOpen": false
       },
@@ -14279,8 +14301,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 210,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L210"
+              "lineNumber": 212,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L212"
             },
             "signature": [
               "typeof ",
@@ -14301,8 +14323,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 211,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L211"
+              "lineNumber": 213,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L213"
             }
           }
         ],
@@ -14310,8 +14332,8 @@
         "label": "exporters",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 209,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L209"
+          "lineNumber": 211,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L211"
         },
         "initialIsOpen": false
       },
@@ -14328,8 +14350,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 235,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L235"
+              "lineNumber": 237,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L237"
             }
           },
           {
@@ -14340,8 +14362,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 236,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L236"
+              "lineNumber": 238,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L238"
             }
           },
           {
@@ -14352,8 +14374,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 237,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L237"
+              "lineNumber": 239,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L239"
             },
             "signature": [
               "string[]"
@@ -14367,8 +14389,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 238,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L238"
+              "lineNumber": 240,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L240"
             },
             "signature": [
               "string[]"
@@ -14382,8 +14404,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L239"
+              "lineNumber": 241,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L241"
             },
             "signature": [
               "(indexPattern: ",
@@ -14405,8 +14427,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 240,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L240"
+              "lineNumber": 242,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L242"
             },
             "signature": [
               "typeof ",
@@ -14427,8 +14449,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 241,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L241"
+              "lineNumber": 243,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L243"
             },
             "signature": [
               "typeof ",
@@ -14449,8 +14471,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 242,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L242"
+              "lineNumber": 244,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L244"
             },
             "signature": [
               "typeof ",
@@ -14471,8 +14493,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 243,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L243"
+              "lineNumber": 245,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L245"
             },
             "signature": [
               "typeof ",
@@ -14493,8 +14515,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 244,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L244"
+              "lineNumber": 246,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L246"
             },
             "signature": [
               "typeof ",
@@ -14512,8 +14534,8 @@
         "label": "indexPatterns",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 234,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L234"
+          "lineNumber": 236,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L236"
         },
         "initialIsOpen": false
       },
@@ -14618,8 +14640,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 401,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L401"
+                  "lineNumber": 403,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L403"
                 },
                 "signature": [
                   "typeof ",
@@ -14640,8 +14662,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 402,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L402"
+                  "lineNumber": 404,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L404"
                 },
                 "signature": [
                   "typeof ",
@@ -14662,8 +14684,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 403,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L403"
+                  "lineNumber": 405,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L405"
                 },
                 "signature": [
                   "({ display: string; val: string; enabled(agg: ",
@@ -14685,8 +14707,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 404,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L404"
+                  "lineNumber": 406,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L406"
                 },
                 "signature": [
                   "typeof ",
@@ -14707,8 +14729,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 405,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L405"
+                  "lineNumber": 407,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L407"
                 },
                 "signature": [
                   "typeof ",
@@ -14729,8 +14751,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 406,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L406"
+                  "lineNumber": 408,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L408"
                 },
                 "signature": [
                   "typeof ",
@@ -14751,8 +14773,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 407,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L407"
+                  "lineNumber": 409,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L409"
                 },
                 "signature": [
                   "typeof ",
@@ -14773,8 +14795,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 408,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L408"
+                  "lineNumber": 410,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L410"
                 },
                 "signature": [
                   "(agg: ",
@@ -14796,8 +14818,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 409,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L409"
+                  "lineNumber": 411,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L411"
                 },
                 "signature": [
                   "(agg: ",
@@ -14819,8 +14841,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 410,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L410"
+                  "lineNumber": 412,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L412"
                 },
                 "signature": [
                   "(...types: string[]) => (agg: ",
@@ -14842,8 +14864,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 411,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L411"
+                  "lineNumber": 413,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L413"
                 },
                 "signature": [
                   "typeof ",
@@ -14864,8 +14886,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 412,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L412"
+                  "lineNumber": 414,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L414"
                 },
                 "signature": [
                   "typeof ",
@@ -14886,8 +14908,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 413,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L413"
+                  "lineNumber": 415,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L415"
                 }
               },
               {
@@ -14898,8 +14920,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 414,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L414"
+                  "lineNumber": 416,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L416"
                 },
                 "signature": [
                   "typeof ",
@@ -14920,8 +14942,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 415,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L415"
+                  "lineNumber": 417,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L417"
                 },
                 "signature": [
                   "typeof ",
@@ -14942,8 +14964,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 416,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L416"
+                  "lineNumber": 418,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L418"
                 },
                 "signature": [
                   "typeof ",
@@ -14964,8 +14986,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 417,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L417"
+                  "lineNumber": 419,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L419"
                 }
               },
               {
@@ -14976,8 +14998,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 418,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L418"
+                  "lineNumber": 420,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L420"
                 },
                 "signature": [
                   "string[]"
@@ -14991,8 +15013,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 419,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L419"
+                  "lineNumber": 421,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L421"
                 },
                 "signature": [
                   "typeof ",
@@ -15013,8 +15035,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 420,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L420"
+                  "lineNumber": 422,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L422"
                 },
                 "signature": [
                   "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
@@ -15028,8 +15050,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 421,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L421"
+                  "lineNumber": 423,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L423"
                 },
                 "signature": [
                   "(column: ",
@@ -15048,8 +15070,8 @@
             "label": "aggs",
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 400,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L400"
+              "lineNumber": 402,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L402"
             }
           },
           {
@@ -15060,8 +15082,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 423,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L423"
+              "lineNumber": 425,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L425"
             },
             "signature": [
               "typeof ",
@@ -15082,8 +15104,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 424,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L424"
+              "lineNumber": 426,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L426"
             },
             "signature": [
               "typeof ",
@@ -15104,8 +15126,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 425,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L425"
+              "lineNumber": 427,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L427"
             },
             "signature": [
               "typeof ",
@@ -15126,8 +15148,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 426,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L426"
+              "lineNumber": 428,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L428"
             },
             "signature": [
               "typeof ",
@@ -15145,8 +15167,8 @@
         "label": "search",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 399,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L399"
+          "lineNumber": 401,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/index.ts#L401"
         },
         "initialIsOpen": false
       }
@@ -19822,8 +19844,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
+              "lineNumber": 63,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
             }
           },
           {
@@ -19834,8 +19856,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L63"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
             },
             "signature": [
               "Record<string, any>"
@@ -19849,8 +19871,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/types.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L64"
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L65"
             },
             "signature": [
               "boolean | undefined"
@@ -19859,8 +19881,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 61,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L61"
+          "lineNumber": 62,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L62"
         },
         "initialIsOpen": false
       },
@@ -21406,8 +21428,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/field_formats/types.ts",
-          "lineNumber": 67,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L67"
+          "lineNumber": 68,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/types.ts#L68"
         },
         "signature": [
           "(key: string, defaultOverride: T | undefined) => T"
@@ -22365,8 +22387,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L101"
+              "lineNumber": 102,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L102"
             },
             "signature": [
               "typeof ",
@@ -22387,8 +22409,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L102"
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L103"
             },
             "signature": [
               "typeof ",
@@ -22409,8 +22431,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 103,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L103"
+              "lineNumber": 104,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L104"
             },
             "signature": [
               "typeof ",
@@ -22431,8 +22453,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L104"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L105"
             },
             "signature": [
               "typeof ",
@@ -22453,8 +22475,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L105"
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L106"
             },
             "signature": [
               "typeof ",
@@ -22475,8 +22497,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L106"
+              "lineNumber": 107,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L107"
             },
             "signature": [
               "typeof ",
@@ -22497,8 +22519,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L107"
+              "lineNumber": 108,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L108"
             },
             "signature": [
               "typeof ",
@@ -22519,8 +22541,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L108"
+              "lineNumber": 109,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L109"
             },
             "signature": [
               "typeof ",
@@ -22541,8 +22563,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L109"
+              "lineNumber": 110,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L110"
             },
             "signature": [
               "typeof ",
@@ -22563,8 +22585,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L110"
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L111"
             },
             "signature": [
               "typeof ",
@@ -22585,8 +22607,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L111"
+              "lineNumber": 112,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L112"
             },
             "signature": [
               "typeof ",
@@ -22607,8 +22629,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L112"
+              "lineNumber": 113,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L113"
             },
             "signature": [
               "typeof ",
@@ -22629,8 +22651,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L113"
+              "lineNumber": 114,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L114"
             },
             "signature": [
               "typeof ",
@@ -22651,8 +22673,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 114,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L114"
+              "lineNumber": 115,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L115"
             },
             "signature": [
               "typeof ",
@@ -22673,8 +22695,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L115"
+              "lineNumber": 116,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L116"
             },
             "signature": [
               "typeof ",
@@ -22686,14 +22708,36 @@
                 "text": "TruncateFormat"
               }
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.fieldFormats.HistogramFormat",
+            "type": "Object",
+            "label": "HistogramFormat",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/index.ts",
+              "lineNumber": 117,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L117"
+            },
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataFieldFormatsPluginApi",
+                "section": "def-common.HistogramFormat",
+                "text": "HistogramFormat"
+              }
+            ]
           }
         ],
         "description": [],
         "label": "fieldFormats",
         "source": {
           "path": "src/plugins/data/server/index.ts",
-          "lineNumber": 100,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L100"
+          "lineNumber": 101,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L101"
         },
         "initialIsOpen": false
       },
@@ -22710,8 +22754,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 127,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L127"
+              "lineNumber": 129,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L129"
             },
             "signature": [
               "typeof ",
@@ -22732,8 +22776,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 128,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L128"
+              "lineNumber": 130,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L130"
             },
             "signature": [
               "typeof ",
@@ -22751,8 +22795,8 @@
         "label": "indexPatterns",
         "source": {
           "path": "src/plugins/data/server/index.ts",
-          "lineNumber": 126,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L126"
+          "lineNumber": 128,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L128"
         },
         "initialIsOpen": false
       },
@@ -22857,8 +22901,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 243,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L243"
+                  "lineNumber": 245,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L245"
                 },
                 "signature": [
                   "typeof ",
@@ -22879,8 +22923,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 244,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L244"
+                  "lineNumber": 246,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L246"
                 },
                 "signature": [
                   "typeof ",
@@ -22901,8 +22945,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 245,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L245"
+                  "lineNumber": 247,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L247"
                 },
                 "signature": [
                   "({ display: string; val: string; enabled(agg: ",
@@ -22924,8 +22968,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 246,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L246"
+                  "lineNumber": 248,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L248"
                 },
                 "signature": [
                   "typeof ",
@@ -22946,8 +22990,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 247,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L247"
+                  "lineNumber": 249,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L249"
                 },
                 "signature": [
                   "typeof ",
@@ -22968,8 +23012,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 248,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L248"
+                  "lineNumber": 250,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L250"
                 },
                 "signature": [
                   "typeof ",
@@ -22990,8 +23034,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 249,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L249"
+                  "lineNumber": 251,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L251"
                 },
                 "signature": [
                   "(agg: ",
@@ -23013,8 +23057,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 250,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L250"
+                  "lineNumber": 252,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L252"
                 },
                 "signature": [
                   "(agg: ",
@@ -23036,8 +23080,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 251,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L251"
+                  "lineNumber": 253,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L253"
                 },
                 "signature": [
                   "(...types: string[]) => (agg: ",
@@ -23059,8 +23103,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 252,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L252"
+                  "lineNumber": 254,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L254"
                 },
                 "signature": [
                   "typeof ",
@@ -23081,8 +23125,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 253,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L253"
+                  "lineNumber": 255,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L255"
                 },
                 "signature": [
                   "typeof ",
@@ -23103,8 +23147,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 254,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L254"
+                  "lineNumber": 256,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L256"
                 }
               },
               {
@@ -23115,8 +23159,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 255,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L255"
+                  "lineNumber": 257,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L257"
                 },
                 "signature": [
                   "typeof ",
@@ -23137,8 +23181,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 256,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L256"
+                  "lineNumber": 258,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L258"
                 },
                 "signature": [
                   "typeof ",
@@ -23159,8 +23203,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 257,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L257"
+                  "lineNumber": 259,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L259"
                 },
                 "signature": [
                   "typeof ",
@@ -23181,8 +23225,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 258,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L258"
+                  "lineNumber": 260,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L260"
                 }
               },
               {
@@ -23193,8 +23237,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 259,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L259"
+                  "lineNumber": 261,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L261"
                 },
                 "signature": [
                   "string[]"
@@ -23208,8 +23252,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 260,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L260"
+                  "lineNumber": 262,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L262"
                 },
                 "signature": [
                   "typeof ",
@@ -23230,8 +23274,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 261,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L261"
+                  "lineNumber": 263,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L263"
                 },
                 "signature": [
                   "typeof ",
@@ -23249,8 +23293,8 @@
             "label": "aggs",
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 242,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L242"
+              "lineNumber": 244,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L244"
             }
           },
           {
@@ -23261,8 +23305,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 263,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L263"
+              "lineNumber": 265,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L265"
             },
             "signature": [
               "typeof ",
@@ -23283,8 +23327,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 264,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L264"
+              "lineNumber": 266,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L266"
             },
             "signature": [
               "typeof ",
@@ -23305,8 +23349,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 265,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L265"
+              "lineNumber": 267,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L267"
             },
             "signature": [
               "typeof ",
@@ -23327,8 +23371,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 266,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L266"
+              "lineNumber": 268,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L268"
             },
             "signature": [
               "typeof ",
@@ -23346,8 +23390,8 @@
         "label": "search",
         "source": {
           "path": "src/plugins/data/server/index.ts",
-          "lineNumber": 241,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L241"
+          "lineNumber": 243,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/index.ts#L243"
         },
         "initialIsOpen": false
       }
@@ -26205,104 +26249,6 @@
         },
         "tags": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.getConvertedValueForField",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "field",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldType",
-                "text": "IFieldType"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
-            }
-          },
-          {
-            "type": "Any",
-            "label": "value",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
-            }
-          }
-        ],
-        "signature": [
-          "(field: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-common.IFieldType",
-            "text": "IFieldType"
-          },
-          ", value: any) => any"
-        ],
-        "description": [],
-        "label": "getConvertedValueForField",
-        "source": {
-          "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-          "lineNumber": 102,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L102"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.buildInlineScriptForPhraseFilter",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Any",
-            "label": "scriptedField",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-              "lineNumber": 123,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L123"
-            }
-          }
-        ],
-        "signature": [
-          "(scriptedField: any) => string"
-        ],
-        "description": [
-          "\nTakes a scripted field and returns an inline script appropriate for use in a script query.\nHandles lucene expression and Painless scripts. Other langs aren't guaranteed to generate valid\nscripts.\n"
-        ],
-        "label": "buildInlineScriptForPhraseFilter",
-        "source": {
-          "path": "src/plugins/data/common/es_query/filters/phrase_filter.ts",
-          "lineNumber": 123,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/filters/phrase_filter.ts#L123"
-        },
-        "tags": [],
-        "returnComment": [
-          "The inline script string"
-        ],
         "initialIsOpen": false
       },
       {
