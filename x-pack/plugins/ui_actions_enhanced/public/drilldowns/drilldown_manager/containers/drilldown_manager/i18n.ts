@@ -7,14 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtDrilldowns = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.title',
-  {
-    defaultMessage: 'Drilldowns',
-    description: 'Drilldowns flyout title.',
-  }
-);
-
 export const txtCreateDrilldownButtonLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.createDrilldownButtonLabel',
   {

@@ -6,24 +6,14 @@
  */
 
 import * as React from 'react';
-import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { CreateDrilldownForm } from '../create_drilldown_form';
 import { Tabs } from '../tabs';
-import { txtDrilldowns } from './i18n';
 import { useDrilldownManager } from '../context';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 
-  if (route[0] === 'new' && !!route[1]) {
-    return <CreateDrilldownForm />;
-  }
-
-  return (
-    <>
-      <DrilldownManagerTitle>{txtDrilldowns}</DrilldownManagerTitle>
-      <Tabs />
-    </>
-  );
+  if (route[0] === 'new' && !!route[1]) return <CreateDrilldownForm />;
+  return <Tabs />;
 };
