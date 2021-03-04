@@ -15,7 +15,11 @@ import { i18n } from '@kbn/i18n';
 import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
-import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
+import {
+  SendAlertToTimelineActionProps,
+  ThresholdAggregationData,
+  UpdateAlertStatusActionProps,
+} from './types';
 import { Ecs } from '../../../../common/ecs';
 import { GetOneTimeline, TimelineResult } from '../../../graphql/types';
 import {
@@ -145,12 +149,6 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
       return acc;
     }
   }, [] as Filter[]);
-
-interface ThresholdAggregationData {
-  thresholdFrom: string;
-  thresholdTo: string;
-  dataProviders: DataProvider[];
-}
 
 export const getThresholdAggregationData = (
   ecsData: Ecs | Ecs[],
