@@ -6,7 +6,7 @@
 **_The window into your data in {es}._**
 
 *Discover* enables you to quickly search and filter your data, get information
-about structure of the fields, and navigate to *Visualize* and *Maps* to present your data.
+about structure of the fields, and visualize your data with *Lens* and *Maps*.
 You can also customize and save your searches and place them on a dashboard.
 
 ++++
