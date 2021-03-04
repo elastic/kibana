@@ -37,6 +37,8 @@ import { LANGUAGE_ID } from './math_tokenization';
 
 import './formula.scss';
 
+const defaultLabel = 'Formula';
+
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
   params: {
@@ -57,8 +59,8 @@ export const formulaOperation: OperationDefinition<
   'managedReference'
 > = {
   type: 'formula',
-  displayName: 'Formula',
-  getDefaultLabel: (column, indexPattern) => 'Formula',
+  displayName: defaultLabel,
+  getDefaultLabel: (column, indexPattern) => defaultLabel,
   input: 'managedReference',
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
@@ -86,7 +88,13 @@ export const formulaOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     const currentColumn = layer.columns[columnId] as FormulaIndexPatternColumn;
     const params = currentColumn.params;
-    const label = !params?.isFormulaBroken ? params?.formula : '';
+    // TODO: improve this logic
+    const useDisplayLabel = currentColumn.label !== defaultLabel;
+    const label = !params?.isFormulaBroken
+      ? useDisplayLabel
+        ? currentColumn.label
+        : params?.formula
+      : '';
     return [
       {
         type: 'function',
