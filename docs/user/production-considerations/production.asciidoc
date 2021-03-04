@@ -1,5 +1,9 @@
 [[production]]
-== Use {kib} in a production environment
+= Use {kib} in a production environment
+
+++++
+<titleabbrev>Production considerations</titleabbrev>
+++++
 
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>

@@ -46,7 +46,7 @@ describe('get_query_filter', () => {
                 minimum_should_match: 1,
                 should: [
                   {
-                    match: {
+                    match_phrase: {
                       list_id: 'list-123',
                     },
                   },
@@ -74,7 +74,7 @@ describe('get_query_filter', () => {
                       minimum_should_match: 1,
                       should: [
                         {
-                          match: {
+                          match_phrase: {
                             list_id: 'list-123',
                           },
                         },
