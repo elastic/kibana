@@ -62,7 +62,7 @@ image::images/lens_advanced_1_1.png[Added records to the workspace]
 
 .. Click *Add advanced options > Normalize by unit*.
 
-.. From the *Normalize by unit* dropdown, select *per day*, then click *Close*.
+.. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
 
 . To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then deselect *Show*.
 +
