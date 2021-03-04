@@ -362,23 +362,12 @@ export function toEsDoc(
   feature: Feature,
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
 ) {
-  const geometry = feature.geometry as
-    | Point
-    | MultiPoint
-    | LineString
-    | MultiLineString
-    | Polygon
-    | MultiPolygon;
-  const coordinates =
-    geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
-      ? {
-          type: geometry.type.toLowerCase(),
-          coordinates: geometry.coordinates,
-        }
-      : geometry.coordinates;
   const properties = feature.properties ? feature.properties : {};
   return {
-    coordinates,
+    coordinates:
+      geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
+        ? feature.geometry
+        : (feature.geometry as Point).coordinates,
     ...properties,
   };
 }
