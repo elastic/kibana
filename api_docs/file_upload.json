@@ -564,8 +564,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L11"
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L18"
             },
             "signature": [
               {
@@ -585,8 +585,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L12"
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L19"
             },
             "signature": [
               {
@@ -606,8 +606,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L13"
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L20"
             },
             "signature": [
               {
@@ -622,8 +622,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L10"
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L17"
         },
         "initialIsOpen": false
       },
@@ -642,8 +642,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L17"
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L24"
             }
           },
           {
@@ -654,11 +654,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L18"
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L25"
             },
             "signature": [
-              "any[] | undefined"
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[] | undefined"
             ]
           },
           {
@@ -669,8 +676,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L19"
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L26"
             },
             "signature": [
               "number | undefined"
@@ -679,82 +686,6 @@
           {
             "tags": [],
             "id": "def-public.ImportResults.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L20"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.CreateDocsResponse",
-        "type": "Interface",
-        "label": "CreateDocsResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L24"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.remainder",
-            "type": "number",
-            "label": "remainder",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L25"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.docs",
-            "type": "Array",
-            "label": "docs",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L26"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.error",
             "type": "Any",
             "label": "error",
             "description": [],
@@ -776,6 +707,82 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.CreateDocsResponse",
+        "type": "Interface",
+        "label": "CreateDocsResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L31"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.remainder",
+            "type": "number",
+            "label": "remainder",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L32"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.docs",
+            "type": "Array",
+            "label": "docs",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L33"
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L34"
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 30,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L30"
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ImportFactoryOptions",
         "type": "Interface",
         "label": "ImportFactoryOptions",
@@ -790,8 +797,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L31"
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L38"
             },
             "signature": [
               "string | undefined"
@@ -805,8 +812,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L32"
+              "lineNumber": 39,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L39"
             },
             "signature": [
               "string | undefined"
@@ -820,8 +827,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L33"
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L40"
             },
             "signature": [
               {
@@ -836,8 +843,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L30"
+          "lineNumber": 37,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L37"
         },
         "initialIsOpen": false
       },
@@ -867,8 +874,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L37"
+                  "lineNumber": 44,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L44"
                 }
               }
             ],
@@ -876,8 +883,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L37"
+              "lineNumber": 44,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L44"
             }
           },
           {
@@ -931,8 +938,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L39"
+                  "lineNumber": 46,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L46"
                 }
               },
               {
@@ -951,8 +958,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L40"
+                  "lineNumber": 47,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L47"
                 }
               },
               {
@@ -971,8 +978,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L41"
+                  "lineNumber": 48,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L48"
                 }
               },
               {
@@ -991,8 +998,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L42"
+                  "lineNumber": 49,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L49"
                 }
               }
             ],
@@ -1000,8 +1007,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L38"
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L45"
             }
           },
           {
@@ -1031,8 +1038,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L45"
+                  "lineNumber": 52,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L52"
                 }
               },
               {
@@ -1045,8 +1052,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L46"
+                  "lineNumber": 53,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L53"
                 }
               },
               {
@@ -1059,8 +1066,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L47"
+                  "lineNumber": 54,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L54"
                 }
               },
               {
@@ -1073,8 +1080,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L48"
+                  "lineNumber": 55,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L55"
                 }
               }
             ],
@@ -1082,15 +1089,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L44"
+              "lineNumber": 51,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L51"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L36"
+          "lineNumber": 43,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L43"
         },
         "initialIsOpen": false
       }
