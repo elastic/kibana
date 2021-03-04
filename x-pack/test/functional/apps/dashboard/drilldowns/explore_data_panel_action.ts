@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/84011
   // FLAKY: https://github.com/elastic/kibana/issues/84012
-  describe.skip('Explore underlying data - panel action', function () {
+  // eslint-disable-next-line
+  describe.only('Explore underlying data - panel action', function () {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
