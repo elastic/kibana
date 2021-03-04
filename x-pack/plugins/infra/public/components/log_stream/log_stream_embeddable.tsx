@@ -8,6 +8,7 @@
 import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Subscription } from 'rxjs';
 import { Query, TimeRange, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
@@ -31,6 +32,7 @@ export interface LogStreamEmbeddableInput extends EmbeddableInput {
 export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
   public readonly type = LOG_STREAM_EMBEDDABLE;
   private node?: HTMLElement;
+  private subscription: Subscription;
 
   constructor(
     private core: CoreStart,
@@ -40,7 +42,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
   ) {
     super(initialInput, {}, parent);
 
-    this.getInput$().subscribe(() => this.renderComponent());
+    this.subscription = this.getInput$().subscribe(() => this.renderComponent());
   }
 
   public render(node: HTMLElement) {
@@ -58,6 +60,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
 
   public destroy() {
     super.destroy();
+    this.subscription.unsubscribe();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
