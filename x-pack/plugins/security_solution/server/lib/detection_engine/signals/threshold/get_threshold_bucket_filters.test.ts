@@ -6,7 +6,6 @@
  */
 
 import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
-import { buildRuleMessageFactory } from '../rule_messages';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 
 describe('getThresholdBucketFilters', () => {
