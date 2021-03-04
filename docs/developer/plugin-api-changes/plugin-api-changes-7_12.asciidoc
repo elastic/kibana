@@ -13,7 +13,7 @@ your application to {kib} 7.12.
 ====
 
 The {kib} logging system uses a configuration schema inspired by `log4j` to
-provide {es}-compatible format. Several logging configuration keys were renamed
+provide {es} compatible format. Several logging configuration keys were renamed
 to align the naming schema with the {es} config:
 
 * `*.kind` is renamed to ``*.type`
@@ -29,8 +29,8 @@ Refer to https://github.com/elastic/kibana/pull/90764[#90764]
 ====
 
 Plugin IDs in the `kibana.json` manifest must be camelCase.
-This has always been a requirement in the {kib} Platform but,
-up until now, {kib} only logged the deprecation warning. Now it refuses to start.
+This has always been a requirement in the {kib} Platform.
+Previously, {kib} logged a deprecation warning. Now {kib} refuses to start.
 
 Refer to https://github.com/elastic/kibana/pull/90752[#90752]
 
@@ -44,8 +44,8 @@ Refer to https://github.com/elastic/kibana/pull/90752[#90752]
 The {kib} plugin system has a concept of
 https://www.elastic.co/guide/en/kibana/current/kibana-platform-plugin-api.html#plugin-lifecycles[asynchronous lifecycles] for
 all the {kib} plugins.
-The new timeout (30 sec. by default) ensures that `stop` lifecycle doesn't stop
-the shutdown process for the {kib} server. If a plugin doesn't complete the `stop` lifecycle in 30 sec.,
+The new timeout (30 seconds by default) ensures that the `stop` lifecycle doesn't stop
+the shutdown process for the {kib} server. If a plugin doesn't complete the `stop` lifecycle in 30 seconds,
 {kib} moves to the next plugin.
 
 Refer to https://github.com/elastic/kibana/pull/90432[#90432]
@@ -53,7 +53,7 @@ Refer to https://github.com/elastic/kibana/pull/90432[#90432]
 ====
 
 [[breaking_plugin_v7.12.0_89274]]
-.vis_type_timeseries_enhanced` plugin removed
+.`vis_type_timeseries_enhanced` plugin removed
 [%collapsible]
 ====
 
@@ -83,7 +83,7 @@ Refer to https://github.com/elastic/kibana/pull/89259[#89259]
 The data plugin search service `SearchSource` now provides a `fetch$`
 method. In addition to the existing `fetch` method that returns an
 `Observable`, an overall response is returned. This is useful when `_async_search`
-is used and the user needs to handle partial search responses.
+is used, and the user needs to handle partial search responses.
 
 Refer to https://github.com/elastic/kibana/pull/89211[#89211]
 
@@ -94,10 +94,10 @@ Refer to https://github.com/elastic/kibana/pull/89211[#89211]
 [%collapsible]
 ====
 
-Whenever {kib} needs access to data saved in {es}, it should perform a check whether
+Whenever {kib} needs access to data saved in {es}, it should check if
 the user has access to the data.
-On the server-side, APIs requiring impersonation with an incoming request,
-are exposed via context argument of request handler:
+On the server-side, APIs that require impersonation with an incoming request,
+are exposed by the `context` argument of request handler:
 
 ```typescript
 const router = core.http.createRouter();
@@ -107,8 +107,8 @@ router.get(
 )
 ```
 
-Starting from the current version, your plugin should declare an interface of
-this `context` parameter explicitly.
+Starting with the current version, your plugin should declare an interface of
+the `context` parameter explicitly.
 
 **Before**
 
@@ -141,26 +141,26 @@ Refer to https://github.com/elastic/kibana/pull/88718[#88718]
 ====
 
 [[breaking_plugin_v7.12.0_88317]]
-.Support for custom visualizations changed
+.Support changed for custom visualizations
 [%collapsible]
 ====
 
 You can no longer use a common `visualization expression function`
 and a common `visualization renderer` to retrieve data and render your custom visualization.
 
-To register a custom visualization you must:
+To register a custom visualization:
 
-. Register a **visualization type** using the `visualizations.createBaseVisualization( config )`
-function, where `config` is a type of `VisTypeDefinition`.
-`VisTypeDefinition` is documented (see `src/plugins/visualizations/public/vis_types/types.ts`) for usability.
+. Register a **visualization type** using the `visualizations.createBaseVisualization(config)`
+function, where `config` is a type of `VisTypeDefinition`. Refer to the
+https://github.com/elastic/kibana/blob/7.12/src/plugins/visualizations/public/vis_types/types.ts[`VisTypeDefinition` documentation].
 . Register an **expression function definition**  to handle your custom expression using
-`expressions.registerFunction( functionDefinition )`, where the `functionDefinition` describes your expression parameters.
-. Register an **explicit renderer** for your visualization using `expressions.registerRenderer( rendererDefinition )`,
-where the `rendererDefinition` is type of `ExpressionRenderDefinition`.
-+
+`expressions.registerFunction(functionDefinition)`, where `functionDefinition` describes your expression parameters.
+. Register an **explicit renderer** for your visualization using `expressions.registerRenderer(rendererDefinition)`,
+where the `rendererDefinition` is a type of `ExpressionRenderDefinition`.
+
 Your visualization is ready to be rendered in {kib} applications,
-such as *Visualize Library*, *Dashboard*, *Canvas*, and more.
-Refer the example of a custom vis in the custom created visualization.
+such as *Lens*, *Dashboard*, *Canvas*, and more.
+Refer to https://github.com/elastic/kibana/tree/7.12/test/plugin_functional/plugins/kbn_tp_custom_visualizations[custom visualizations].
 
 
 Refer to https://github.com/elastic/kibana/pull/88317[#88317]
@@ -245,7 +245,7 @@ logging:
 . Start {es} and {kib}.
 . Observe that the ops metrics are logged out (`std out`). For example:
 +
-```
+```ts
 [2021-01-20T22:30:06.974Z][DEBUG][metrics.ops]{"ecs":{"version":"1.7.0"},"kind":"metric","category":["process","host"],"process":{"uptime":640,"memory":{"heap":{"usedInBytes":232472872}},"eventLoopDelay":0.25925004482269287},"host":{"os":{"load":{"1m":8.0625,"5m":7.07470703125,"15m":13.32568359375}}}} memory: 221.7MB uptime: 0:10:40 load: [8.06,7.07,13.33] delay: 0.259
 ```
 
@@ -254,14 +254,14 @@ Refer to https://github.com/elastic/kibana/pull/88070[#88070]
 ====
 
 [[breaking_plugin_v7.12.0_87939]]
-.Add response logs to the KP logging system.
+.Response logs added to the KP logging system
 [%collapsible]
 ====
 
 We are deprecating the legacy response logs, which were enabled when
 `logging.verbose: true` or when using `logging.events.request` and `logging.events.response`.
 They will be removed in `8.0`, and have been replaced with new response logs,
-which are provided under the `http.server.response` context at the `debug` level:
+which are provided under the `http.server.response` context at the `debug` level.
 
 **Before**
 
@@ -290,11 +290,11 @@ Refer to https://github.com/elastic/kibana/pull/87939[#87939]
 ====
 
 [[breaking_plugin_v7.12.0_87356]]
-.Telemetry-related plugins' {es} client migrated to the new client.
+.Telemetry plugins {es} client migrated to the new client
 [%collapsible]
 ====
 
-This PR removes support for the legacy {es} client from the `usage collector`'s `fetch` context.
+Support for the legacy {es} client was removed from the `usage collector`'s `fetch` context.
 
 Refer to https://github.com/elastic/kibana/pull/87356[#87356]
 
@@ -305,8 +305,8 @@ Refer to https://github.com/elastic/kibana/pull/87356[#87356]
 [%collapsible]
 ====
 
-This PR deprecates the usage of `services.callCluster` in the alert and action
-type executors. Use the new `services.scopedClusterClient` instead.
+Usage of `services.callCluster` in the alert and action
+type executors is deprecated. Use the new `services.scopedClusterClient` instead.
 
 Refer to https://github.com/elastic/kibana/pull/86474[#86474]
 
