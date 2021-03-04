@@ -20,6 +20,7 @@ interface ThresholdAnnotationsProps {
   comparator: Comparator;
   color: Color;
   id: string;
+  formatter?: Function;
   firstTimestamp: number;
   lastTimestamp: number;
   domain: { min: number; max: number };
@@ -33,6 +34,7 @@ export const ThresholdAnnotations = ({
   comparator,
   color,
   id,
+  formatter = (value: any) => value,
   firstTimestamp,
   lastTimestamp,
   domain,
@@ -47,7 +49,7 @@ export const ThresholdAnnotations = ({
         domainType={AnnotationDomainTypes.YDomain}
         data-test-subj="threshold-line"
         dataValues={sortedThresholds.map((t) => ({
-          dataValue: t,
+          dataValue: formatter(t),
         }))}
         style={{
           line: {
@@ -71,8 +73,8 @@ export const ThresholdAnnotations = ({
                 coordinates: {
                   x0: firstTimestamp,
                   x1: lastTimestamp,
-                  y0: first(threshold),
-                  y1: last(threshold),
+                  y0: formatter(first(threshold)),
+                  y1: formatter(last(threshold)),
                 },
               },
             ]}
@@ -94,7 +96,7 @@ export const ThresholdAnnotations = ({
                   x0: firstTimestamp,
                   x1: lastTimestamp,
                   y0: domain.min,
-                  y1: first(threshold),
+                  y1: formatter(first(threshold)),
                 },
               },
             ]}
@@ -111,7 +113,7 @@ export const ThresholdAnnotations = ({
                 coordinates: {
                   x0: firstTimestamp,
                   x1: lastTimestamp,
-                  y0: last(threshold),
+                  y0: formatter(last(threshold)),
                   y1: domain.max,
                 },
               },
@@ -133,7 +135,7 @@ export const ThresholdAnnotations = ({
                 x0: firstTimestamp,
                 x1: lastTimestamp,
                 y0: domain.min,
-                y1: first(threshold),
+                y1: formatter(first(threshold)),
               },
             },
           ]}
@@ -152,7 +154,7 @@ export const ThresholdAnnotations = ({
               coordinates: {
                 x0: firstTimestamp,
                 x1: lastTimestamp,
-                y0: first(threshold),
+                y0: formatter(first(threshold)),
                 y1: domain.max,
               },
             },

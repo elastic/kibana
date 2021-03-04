@@ -72,10 +72,6 @@ import { validateMetricThreshold } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 import { ExpressionChart } from './expression_chart';
-import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
-import { InfraFormatterType } from '../../../lib/lib';
-
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
@@ -481,15 +477,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     warningComparator,
   } = expression;
 
-  const isMetricPct = useMemo(() => {
-    if (!expression.metric) {
-      return false;
-    }
-
-    const metricFormatter = METRIC_FORMATTERS[expression.metric];
-    return Boolean(metricFormatter?.formatter === InfraFormatterType.percent);
-  }, [expression.metric]);
-
   const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
     Boolean(warningThreshold?.length)
   );
@@ -526,20 +513,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     [expressionId, expression, setAlertParams]
   );
 
-  const convertThreshold = useCallback(
-    (enteredThreshold) =>
-      isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
-    [isMetricPct]
-  );
-
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
-      const t = convertThreshold(enteredThreshold);
+    (t) => {
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
     },
-    [expressionId, expression, convertThreshold, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateWarningThreshold = useCallback(
@@ -580,7 +560,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateThreshold={updateThreshold}
       errors={(errors.critical as IErrorObject) ?? {}}
       metric={metric}
-      isMetricPct={isMetricPct}
     />
   );
 
@@ -592,7 +571,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateThreshold={updateWarningThreshold}
       errors={(errors.warning as IErrorObject) ?? {}}
       metric={metric}
-      isMetricPct={isMetricPct}
     />
   );
 
@@ -740,30 +718,16 @@ const ThresholdElement: React.FC<{
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
   threshold: InventoryMetricConditions['threshold'];
-  isMetricPct: boolean;
   comparator: InventoryMetricConditions['comparator'];
   errors: IErrorObject;
   metric?: SnapshotMetricType;
-}> = ({
-  updateComparator,
-  updateThreshold,
-  threshold,
-  isMetricPct,
-  metric,
-  comparator,
-  errors,
-}) => {
-  const displayedThreshold = useMemo(() => {
-    if (isMetricPct) return threshold.map((v) => decimalToPct(v));
-    return threshold;
-  }, [threshold, isMetricPct]);
-
+}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
   return (
     <>
       <StyledExpression>
         <ThresholdExpression
           thresholdComparator={comparator || Comparator.GT}
-          threshold={displayedThreshold}
+          threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}
