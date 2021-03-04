@@ -15,7 +15,7 @@ import { RecentQuery } from '../../types';
 
 import {
   TERM_COLUMN_PROPS,
-  TAGS_COLUMN,
+  TAGS_LIST_COLUMN,
   COUNT_COLUMN_PROPS,
   ACTIONS_COLUMN,
 } from './shared_columns';
@@ -53,7 +53,9 @@ export const RecentQueriesTable: React.FC<Props> = ({ items }) => {
 
   return (
     <EuiBasicTable
-      columns={[TERM_COLUMN, TIME_COLUMN, TAGS_COLUMN, RESULTS_COLUMN, ACTIONS_COLUMN] as Columns}
+      columns={
+        [TERM_COLUMN, TIME_COLUMN, TAGS_LIST_COLUMN, RESULTS_COLUMN, ACTIONS_COLUMN] as Columns
+      }
       items={items}
       responsive
       hasActions

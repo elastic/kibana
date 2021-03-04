@@ -17,6 +17,7 @@
           "lineNumber": 9,
           "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts#L9"
         },
+        "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -28,6 +29,7 @@
         "id": "def-public.FooType",
         "type": "Type",
         "label": "FooType",
+        "tags": [],
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
@@ -57,6 +59,7 @@
     "enums": [],
     "misc": [
       {
+        "tags": [],
         "id": "def-common.commonFoo",
         "type": "string",
         "label": "commonFoo",

@@ -14,15 +14,12 @@ import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
 import { ConfigType } from '../index';
 
-import { Access } from './check_access';
-
 interface Params {
   request: KibanaRequest;
   config: ConfigType;
   log: Logger;
 }
 interface Return extends InitialAppData {
-  access?: Access;
   publicUrl?: string;
 }
 
