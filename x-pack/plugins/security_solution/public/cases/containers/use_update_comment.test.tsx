@@ -59,8 +59,7 @@ describe('useUpdateComment', () => {
         basicCase.comments[0].id,
         'updated comment',
         basicCase.comments[0].version,
-        abortCtrl.signal,
-        undefined
+        abortCtrl.signal
       );
     });
   });
