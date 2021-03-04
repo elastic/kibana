@@ -6,8 +6,15 @@
  */
 
 import * as React from 'react';
+import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { Tabs } from '../tabs';
+import { txtDrilldowns } from './i18n';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
-  return <Tabs />;
+  return (
+    <>
+      <DrilldownManagerTitle>{txtDrilldowns}</DrilldownManagerTitle>
+      <Tabs />
+    </>
+  );
 };

@@ -41,7 +41,7 @@ export class DrilldownManagerState {
   /**
    * Title displayed at the top of <DrilldownManager> flyout.
    */
-  public readonly title$ = new BehaviorSubject<string>(txtDefaultTitle);
+  public readonly title$ = new BehaviorSubject<React.ReactNode>(txtDefaultTitle);
 
   /**
    * Route inside Drilldown Manager flyout that is displayed to the user. Some
@@ -125,7 +125,7 @@ export class DrilldownManagerState {
    * Set flyout main heading text.
    * @param title New title.
    */
-  public setTitle(title: string) {
+  public setTitle(title: React.ReactNode) {
     this.title$.next(title);
   }
 

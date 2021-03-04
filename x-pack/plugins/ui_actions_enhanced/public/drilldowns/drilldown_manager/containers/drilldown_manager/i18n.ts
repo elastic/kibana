@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtDrilldowns = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.drilldownsFlyout.drilldowns',
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.title',
   {
     defaultMessage: 'Drilldowns',
     description: 'Drilldowns flyout title.',
@@ -16,28 +16,28 @@ export const txtDrilldowns = i18n.translate(
 );
 
 export const txtCreateDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.createDrilldownButtonLabel',
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.createDrilldownButtonLabel',
   {
     defaultMessage: 'Create drilldown',
   }
 );
 
 export const txtEditDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.editDrilldownButtonLabel',
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.editDrilldownButtonLabel',
   {
     defaultMessage: 'Save',
   }
 );
 
 export const txtCreateNew = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.createNew',
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.createNew',
   {
     defaultMessage: 'Create new',
   }
 );
 
 export const txtManage = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.manage',
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.manage',
   {
     defaultMessage: 'Manage',
   }
