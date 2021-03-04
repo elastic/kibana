@@ -56,7 +56,7 @@ describe('RelevanceTuningPreview', () => {
     expect(results.at(1).prop('result')).toBe(result2);
     expect(results.at(2).prop('result')).toBe(result3);
 
-    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="EmptyQueryPrompt"]').exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(false);
   });
 
@@ -92,7 +92,7 @@ describe('RelevanceTuningPreview', () => {
 
     const wrapper = shallow(<RelevanceTuningPreview />);
 
-    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="EmptyQueryPrompt"]').exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(false);
   });
 
@@ -104,7 +104,7 @@ describe('RelevanceTuningPreview', () => {
 
     const wrapper = shallow(<RelevanceTuningPreview />);
 
-    expect(wrapper.find('[data-test-subj="EnterAQueryPrompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="EmptyQueryPrompt"]').exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="NoResultsPrompt"]').exists()).toBe(true);
   });
 });
