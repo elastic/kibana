@@ -8,7 +8,7 @@ deprecated::[7.13.0]
 
 Please use the <<actions-and-connectors-api-create>> instead.
 
-Creates an connector.
+Creates a connector.
 
 [[actions-and-connectors-legacy-api-create-request]]
 ===== Request

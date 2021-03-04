@@ -4,7 +4,7 @@
 <titleabbrev>Get connector API</titleabbrev>
 ++++
 
-Retrieves an connector by ID.
+Retrieves a connector by ID.
 
 [[actions-and-connectors-api-get-request]]
 ==== Request

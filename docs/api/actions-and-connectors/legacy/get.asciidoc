@@ -8,7 +8,7 @@ deprecated::[7.13.0]
 
 Please use the <<actions-and-connectors-api-get>> instead.
 
-Retrieves an connector by ID.
+Retrieves a connector by ID.
 
 [[actions-and-connectors-legacy-api-get-request]]
 ===== Request

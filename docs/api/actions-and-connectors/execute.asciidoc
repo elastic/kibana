@@ -4,7 +4,7 @@
 <titleabbrev>Execute connector API</titleabbrev>
 ++++
 
-Executes an connector by ID.
+Executes a connector by ID.
 
 [[actions-and-connectors-api-execute-request]]
 ==== Request
