@@ -8,7 +8,7 @@ deprecated::[7.13.0]
 
 Please use the <<actions-and-connectors-api-delete>> instead.
 
-Deletes an connector by ID.
+Deletes a connector by ID.
 
 WARNING: When you delete an connector, _it cannot be recovered_.
 
