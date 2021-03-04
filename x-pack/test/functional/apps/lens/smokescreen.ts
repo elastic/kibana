@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const longLabel =
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
       await testSubjects.click('lnsXY_valueLabels_inside');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       let data = await PageObjects.lens.getCurrentChartDebugState();
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState();
@@ -256,14 +256,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
