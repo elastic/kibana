@@ -37,16 +37,54 @@ interface SingleSearchAfterParams {
   excludeDocsWithTimestampOverride: boolean;
 }
 
-export const executeSearchAfter = async (
-  query: Record<string, unknown>,
-  buildRuleMessage: BuildRuleMessage,
-  timestampOverride: TimestampOverrideOrUndefined,
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
-  logger: Logger
-) => {
+// utilize search_after for paging results into bulk.
+export const singleSearchAfter = async ({
+  aggregations,
+  searchAfterSortId,
+  index,
+  from,
+  to,
+  services,
+  filter,
+  logger,
+  pageSize,
+  sortOrder,
+  timestampOverride,
+  buildRuleMessage,
+  excludeDocsWithTimestampOverride,
+}: SingleSearchAfterParams): Promise<{
+  searchResult: SignalSearchResponse;
+  searchDuration: string;
+  searchErrors: string[];
+}> => {
   try {
-    const result = await services.callCluster('search', query);
-    return result;
+    const searchAfterQuery = buildEventsSearchQuery({
+      aggregations,
+      index,
+      from,
+      to,
+      filter,
+      size: pageSize,
+      sortOrder,
+      searchAfterSortId,
+      timestampOverride,
+      excludeDocsWithTimestampOverride,
+    });
+
+    const start = performance.now();
+    const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
+      'search',
+      searchAfterQuery
+    );
+    const end = performance.now();
+    const searchErrors = createErrorsFromShard({
+      errors: nextSearchAfterResult._shards.failures ?? [],
+    });
+    return {
+      searchResult: nextSearchAfterResult,
+      searchDuration: makeFloatString(end - start),
+      searchErrors,
+    };
   } catch (exc) {
     logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
 
@@ -78,15 +116,14 @@ export const executeSearchAfter = async (
       };
     } else if (exc.statusCode === 400) {
       // added this code to handle https://github.com/elastic/kibana/issues/93333
-      // risky to compute this in the catch but I'm not sure how else to handle this
-      if ('toJSON' in exc) {
+      try {
         const rootCause = JSON.parse(exc.response).error;
         if (rootCause != null) {
-          let thing = rootCause.caused_by;
+          let causedByObject = rootCause.caused_by;
           let reason;
-          while (thing != null) {
-            reason = thing.reason;
-            thing = thing.caused_by;
+          while (causedByObject != null) {
+            reason = causedByObject.reason;
+            causedByObject = causedByObject.caused_by;
           }
           if (
             reason != null &&
@@ -98,63 +135,11 @@ export const executeSearchAfter = async (
               `${reason} Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)`
             );
           }
-          throw exc;
         }
-        throw exc;
+      } catch (e) {
+        logger.error(buildRuleMessage(`[-] singleSearchAfter could not parse error: ${e.message}`));
       }
-      throw exc;
     }
+    throw exc;
   }
-};
-
-// utilize search_after for paging results into bulk.
-export const singleSearchAfter = async ({
-  aggregations,
-  searchAfterSortId,
-  index,
-  from,
-  to,
-  services,
-  filter,
-  logger,
-  pageSize,
-  sortOrder,
-  timestampOverride,
-  buildRuleMessage,
-  excludeDocsWithTimestampOverride,
-}: SingleSearchAfterParams): Promise<{
-  searchResult: SignalSearchResponse;
-  searchDuration: string;
-  searchErrors: string[];
-}> => {
-  const searchAfterQuery = buildEventsSearchQuery({
-    aggregations,
-    index,
-    from,
-    to,
-    filter,
-    size: pageSize,
-    sortOrder,
-    searchAfterSortId,
-    timestampOverride,
-    excludeDocsWithTimestampOverride,
-  });
-
-  const start = performance.now();
-  const nextSearchAfterResult: SignalSearchResponse = await executeSearchAfter(
-    searchAfterQuery,
-    buildRuleMessage,
-    timestampOverride,
-    services,
-    logger
-  );
-  const end = performance.now();
-  const searchErrors = createErrorsFromShard({
-    errors: nextSearchAfterResult._shards.failures ?? [],
-  });
-  return {
-    searchResult: nextSearchAfterResult,
-    searchDuration: makeFloatString(end - start),
-    searchErrors,
-  };
 };

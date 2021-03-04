@@ -132,8 +132,14 @@ export const useMatrixHistogram = ({
               }
             },
             error: (msg) => {
+              let causedByObject = msg?.attributes?.caused_by;
+              let reason;
+              while (causedByObject != null) {
+                reason = causedByObject.reason;
+                causedByObject = causedByObject.caused_by;
+              }
               setLoading(false);
-              notifications.toasts.addError(msg, {
+              notifications.toasts.addError(reason != null ? new Error(reason) : msg, {
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
               searchSubscription$.current.unsubscribe();
