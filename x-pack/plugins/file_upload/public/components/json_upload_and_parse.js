@@ -122,7 +122,6 @@ export class JsonUploadAndParse extends Component {
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
-    const startImport = Date.now();
     const importResp = await this._geojsonImporter.import(
       initializeImportResp.id,
       this.state.indexName,
@@ -135,8 +134,6 @@ export class JsonUploadAndParse extends Component {
         }
       }
     );
-    const millis = Date.now() - startImport;
-    console.log(`import seconds ${millis}`);
     if (!this._isMounted) {
       return;
     }
