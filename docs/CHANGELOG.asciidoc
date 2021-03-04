@@ -107,7 +107,7 @@ Alerting::
 APM::
 * Include *Services* with only metric documents {kibana-pull}92378[#92378]
 Canvas::
-* Removes custom plot plugins when Canvas is unmounted {kibana-pull}90722[#90722]
+* Removes custom plot plugins when *Canvas* is unmounted {kibana-pull}90722[#90722]
 Dashboard::
 * Use timestamp on brush event instead of iso dates {kibana-pull}91483[#91483]
 Lens and visualizations::
@@ -115,6 +115,9 @@ Lens and visualizations::
 Machine Learning::
 * Fixes geo_shape content causing *Data Visualizer* to not load correctly {kibana-pull}92052[#92052]
 * Fixes applying missing_bucket configuration to transform request payload {kibana-pull}91635[#91635]
+Management::
+* Fixes use of undefined value in JS import {kibana-pull}92791[#92791]
+* Fixes an issue where users were unable to configure replicas in the cold phase when searchable snapshots are enabled {kibana-pull}92782[#92782]
 Metrics::
 * Fixes `ignoreLookback` behavior for Snapshot API {kibana-pull}91169[#91169]
 Security::
