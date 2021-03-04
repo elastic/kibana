@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
-import React, { useEffect, useMemo, useCallback, useState, useRef, SyntheticEvent } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
