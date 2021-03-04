@@ -8,19 +8,19 @@
 import * as React from 'react';
 import { useDrilldownManager } from '../context';
 
-export const DrilldownManagerTitle: React.FC = ({ children }) => {
+export const DrilldownManagerFooter: React.FC = ({ children }) => {
   const drilldowns = useDrilldownManager();
   React.useEffect(() => {
-    drilldowns.setTitle(children);
+    drilldowns.setFooter(children);
     return () => {
-      drilldowns.resetTitle();
+      drilldowns.setFooter(null);
     };
   });
   return null;
 };
 
-export const RenderDrilldownManagerTitle: React.FC = () => {
+export const RenderDrilldownManagerFooter: React.FC = () => {
   const drilldowns = useDrilldownManager();
-  const title = drilldowns.useTitle();
-  return <>{title}</>;
+  const footer = drilldowns.useFooter();
+  return <>{footer}</>;
 };

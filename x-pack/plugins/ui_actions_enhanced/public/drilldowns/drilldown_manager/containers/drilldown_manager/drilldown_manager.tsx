@@ -10,11 +10,11 @@ import { useDrilldownManager } from '../context';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 import { DrilldownManagerContent } from './drilldown_manager_content';
+import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
+import { RenderDrilldownManagerFooter } from '../drilldown_manager_footer';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
-  const title = drilldowns.useTitle();
-  const footer = drilldowns.useFooter();
   const route = drilldowns.useRoute();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
@@ -30,9 +30,9 @@ export const DrilldownManager: React.FC = ({}) => {
 
   return (
     <FlyoutFrame
-      title={title}
+      title={<RenderDrilldownManagerTitle />}
       banner={banner}
-      footer={footer}
+      footer={<RenderDrilldownManagerFooter />}
       onClose={drilldowns.close}
       onBack={handleBack}
     >
