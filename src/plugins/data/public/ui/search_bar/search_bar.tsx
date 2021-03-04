@@ -19,7 +19,7 @@ import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/pu
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter } from '../../../common';
+import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
@@ -374,7 +374,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
-          query={this.state.query}
+          query={this.state.query!}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
@@ -432,7 +432,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               className="globalFilterGroup__filterBar"
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns!}
+              indexPatterns={this.props.indexPatterns! as IIndexPattern[]}
               appName={this.services.appName}
             />
           </div>
