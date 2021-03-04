@@ -7,6 +7,7 @@
 
 import { QueryContext } from './query_context';
 import { MonitorSummary, Ping } from '../../../../common/runtime_types';
+import { summaryByLocAggs } from './list_of_monitors';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.

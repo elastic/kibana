@@ -86,16 +86,16 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     12
   );
 
-  const histograms = await getHistogramForMonitors(
-    queryContext,
-    page.monitorSummaries.map((s) => s.monitor_id),
-    minInterval
-  );
-
-  page.monitorSummaries.forEach((s) => {
-    s.histogram = histograms[s.monitor_id];
-    s.minInterval = minInterval;
-  });
+  // const histograms = await getHistogramForMonitors(
+  //   queryContext,
+  //   page.monitorSummaries.map((s) => s.monitor_id),
+  //   minInterval
+  // );
+  //
+  // page.monitorSummaries.forEach((s) => {
+  //   s.histogram = histograms[s.monitor_id];
+  //   s.minInterval = minInterval;
+  // });
 
   return {
     summaries: page.monitorSummaries,
