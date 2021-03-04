@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  Feature,
-  Point,
-  MultiPoint,
-  LineString,
-  MultiLineString,
-  Polygon,
-  MultiPolygon,
-} from 'geojson';
+import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
@@ -72,7 +64,8 @@ export class GeoJsonImporter extends Importer {
         this._geometryTypesMap.has('LineString') ||
         this._geometryTypesMap.has('MultiLineString') ||
         this._geometryTypesMap.has('Polygon') ||
-        this._geometryTypesMap.has('MultiPolygon'),
+        this._geometryTypesMap.has('MultiPolygon') ||
+        this._geometryTypesMap.has('GeometryCollection'),
     };
   }
 

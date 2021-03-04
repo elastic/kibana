@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoJsonImporter, toEsDocs } from './geojson_importer';
+import { GeoJsonImporter, toEsDoc } from './geojson_importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import '@loaders.gl/polyfills';
 
@@ -221,52 +221,46 @@ describe('previewFile', () => {
   });
 });
 
-describe('toEsDocs', () => {
-  test('should convert features to geo_point ES documents', () => {
-    const esDocs = toEsDocs(FEATURE_COLLECTION.features, ES_FIELD_TYPES.GEO_POINT);
-    expect(esDocs).toEqual([
-      {
+describe('toEsDoc', () => {
+  test('should convert features to geo_point ES document', () => {
+    const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_POINT);
+    expect(esDoc).toEqual({
+      coordinates: [-112.0372, 46.608058],
+      population: 200,
+    });
+  });
+
+  test('should convert features to geo_shape ES document', () => {
+    const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_SHAPE);
+    expect(esDoc).toEqual({
+      coordinates: {
+        type: 'Point',
         coordinates: [-112.0372, 46.608058],
-        population: 200,
       },
-    ]);
+      population: 200,
+    });
   });
 
-  test('should convert features to geo_shape ES documents', () => {
-    const esDocs = toEsDocs(FEATURE_COLLECTION.features, ES_FIELD_TYPES.GEO_SHAPE);
-    expect(esDocs).toEqual([
-      {
-        coordinates: {
-          type: 'Point',
-          coordinates: [-112.0372, 46.608058],
-        },
-        population: 200,
+  test('should convert GeometryCollection feature to geo_shape ES document', () => {
+    const esDoc = toEsDoc(GEOMETRY_COLLECTION_FEATURE, ES_FIELD_TYPES.GEO_SHAPE);
+    expect(esDoc).toEqual({
+      coordinates: {
+        type: 'GeometryCollection',
+        geometries: [
+          {
+            type: 'Point',
+            coordinates: [100.0, 0.0],
+          },
+          {
+            type: 'LineString',
+            coordinates: [
+              [101.0, 0.0],
+              [102.0, 1.0],
+            ],
+          },
+        ],
       },
-    ]);
-  });
-
-  test('should convert GeometryCollection feature to geo_shape ES documents', () => {
-    const esDocs = toEsDocs([GEOMETRY_COLLECTION_FEATURE], ES_FIELD_TYPES.GEO_SHAPE);
-    expect(esDocs).toEqual([
-      {
-        coordinates: {
-          type: 'GeometryCollection',
-          geometries: [
-            {
-              type: 'Point',
-              coordinates: [100.0, 0.0],
-            },
-            {
-              type: 'LineString',
-              coordinates: [
-                [101.0, 0.0],
-                [102.0, 1.0],
-              ],
-            },
-          ],
-        },
-        population: 200,
-      },
-    ]);
+      population: 200,
+    });
   });
 });
