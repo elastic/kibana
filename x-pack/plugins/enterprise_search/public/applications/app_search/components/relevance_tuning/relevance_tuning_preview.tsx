@@ -60,7 +60,7 @@ export const RelevanceTuningPreview: React.FC = () => {
       <EuiFieldSearch
         onChange={(e) => updateSearchValue(e.target.value)}
         placeholder={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.textPlaceholder',
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.searchPlaceholder',
           {
             defaultMessage: 'Search {engineName}',
             values: {
