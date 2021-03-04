@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { ToastsService, ToastsSetup, ToastsStart } from './toasts_service';
-export {
+export { ToastsService } from './toasts_service';
+export type { ToastsSetup, ToastsStart } from './toasts_service';
+export type {
   ErrorToastOptions,
   ToastOptions,
   ToastsApi,

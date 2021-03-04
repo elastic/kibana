@@ -11,9 +11,11 @@ import {
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
   Logger,
+  SavedObjectsFindResponse,
+  SavedObject,
 } from 'kibana/server';
 import { ActionResult, ActionsClient } from '../../../../actions/server';
-import { flattenCaseSavedObject, getAlertIndicesAndIDs } from '../../routes/api/utils';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../routes/api/utils';
 
 import {
   ActionConnector,
@@ -25,6 +27,8 @@ import {
   CommentAttributes,
   CaseUserActionsResponse,
   User,
+  ESCasesConfigureAttributes,
+  CaseType,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
@@ -36,6 +40,22 @@ import {
 } from '../../services';
 import { CaseClientHandler } from '../client';
 import { createCaseError } from '../../common/error';
+
+/**
+ * Returns true if the case should be closed based on the configuration settings and whether the case
+ * is a collection. Collections are not closable because we aren't allowing their status to be changed.
+ * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
+ */
+function shouldCloseByPush(
+  configureSettings: SavedObjectsFindResponse<ESCasesConfigureAttributes>,
+  caseInfo: SavedObject<ESCaseAttributes>
+): boolean {
+  return (
+    configureSettings.total > 0 &&
+    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing' &&
+    caseInfo.attributes.type !== CaseType.collection
+  );
+}
 
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -88,12 +108,11 @@ export const push = async ({
     );
   }
 
-  const { ids, indices } = getAlertIndicesAndIDs(theCase?.comments);
+  const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
   try {
     alerts = await caseClient.getAlerts({
-      ids,
-      indices,
+      alertsInfo,
     });
   } catch (e) {
     throw createCaseError({
@@ -190,14 +209,15 @@ export const push = async ({
   let updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>;
   let updatedComments: SavedObjectsBulkUpdateResponse<CommentAttributes>;
 
+  const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure, myCase);
+
   try {
     [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         client: savedObjectsClient,
         caseId,
         updatedAttributes: {
-          ...(myCaseConfigure.total > 0 &&
-          myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+          ...(shouldMarkAsClosed
             ? {
                 status: CaseStatuses.closed,
                 closed_at: pushedDate,
@@ -228,8 +248,7 @@ export const push = async ({
       userActionService.postUserActions({
         client: savedObjectsClient,
         actions: [
-          ...(myCaseConfigure.total > 0 &&
-          myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+          ...(shouldMarkAsClosed
             ? [
                 buildCaseUserActionItem({
                   action: 'update',

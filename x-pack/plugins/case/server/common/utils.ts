@@ -6,8 +6,15 @@
  */
 
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
-import { CaseStatuses, CommentAttributes, CommentType, User } from '../../common/api';
-import { AlertInfo, getAlertIndicesAndIDs } from '../routes/api/utils';
+import {
+  CaseStatuses,
+  CommentAttributes,
+  CommentRequest,
+  CommentType,
+  User,
+} from '../../common/api';
+import { UpdateAlertRequest } from '../client/types';
+import { getAlertInfoFromComments } from '../routes/api/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -22,27 +29,14 @@ export const nullUser: User = { username: null, full_name: null, email: null };
 /**
  * Adds the ids and indices to a map of statuses
  */
-export function addAlertInfoToStatusMap({
+export function createAlertUpdateRequest({
   comment,
-  statusMap,
   status,
 }: {
-  comment: CommentAttributes;
-  statusMap: Map<CaseStatuses, AlertInfo>;
+  comment: CommentRequest;
   status: CaseStatuses;
-}) {
-  const newAlertInfo = getAlertIndicesAndIDs([comment]);
-
-  // combine the already accumulated ids and indices with the new ones from this alert comment
-  if (newAlertInfo.ids.length > 0 && newAlertInfo.indices.size > 0) {
-    const accAlertInfo = statusMap.get(status) ?? { ids: [], indices: new Set<string>() };
-    accAlertInfo.ids.push(...newAlertInfo.ids);
-    accAlertInfo.indices = new Set<string>([
-      ...accAlertInfo.indices.values(),
-      ...newAlertInfo.indices.values(),
-    ]);
-    statusMap.set(status, accAlertInfo);
-  }
+}): UpdateAlertRequest[] {
+  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 
 /**

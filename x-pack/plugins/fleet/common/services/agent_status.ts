@@ -6,7 +6,7 @@
  */
 
 import { AGENT_POLLING_THRESHOLD_MS, AGENT_SAVED_OBJECT_TYPE } from '../constants';
-import { Agent, AgentStatus } from '../types';
+import type { Agent, AgentStatus } from '../types';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;

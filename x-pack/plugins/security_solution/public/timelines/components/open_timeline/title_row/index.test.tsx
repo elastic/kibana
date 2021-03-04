@@ -11,10 +11,11 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { TitleRow } from '.';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
-const mockTheme = {
-  eui: { euiSizeS: '10px', euiLineHeight: '20px', euiBreakpoints: { s: '10px' }, euiSize: '10px' },
-};
+const mockTheme = getMockTheme({
+  eui: { euiSizeS: '10px', euiLineHeight: 10, euiBreakpoints: { s: '10px' }, euiSize: '10px' },
+});
 
 describe('TitleRow', () => {
   const title = 'All Timelines / Open Timelines';

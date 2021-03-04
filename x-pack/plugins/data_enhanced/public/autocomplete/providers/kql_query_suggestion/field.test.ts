@@ -78,6 +78,17 @@ describe('Kuery field suggestions', () => {
     expect(suggestions.find(({ text }) => text === 'machine.os ')).toBeDefined();
   });
 
+  test('should field names that match the search', async () => {
+    const prefix = 'machi';
+    const suffix = 'ne.os';
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ prefix, suffix })
+    );
+
+    expect(suggestions.find(({ text }) => text === 'machine.os ')).toBeDefined();
+  });
+
   test('should return field names that start with the query first', async () => {
     const prefix = 'e';
     const suffix = '';
