@@ -1,7 +1,6 @@
 - name: test kibana rpm package
   hosts: rpm
   roles:
-    - upgrade_yum_packages
     - install_kibana_rpm
     - assert_keystore
     - assert_kibana_listening
