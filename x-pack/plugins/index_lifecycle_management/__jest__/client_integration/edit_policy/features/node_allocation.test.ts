@@ -168,149 +168,126 @@ describe('<EditPolicy /> node allocation', () => {
     });
   });
 
-  describe('cold and frozen phase', () => {
-    test('shows spinner for node attributes input when loading', async () => {
-      server.respondImmediately = false;
+  (['cold', 'frozen'] as const).forEach((phase) => {
+    describe(`${phase} phase`, () => {
+      test('shows spinner for node attributes input when loading', async () => {
+        server.respondImmediately = false;
 
-      const { actions, component } = testBed;
-      await actions.cold.enable(true);
-      await actions.frozen.enable(true);
+        const { actions, component } = testBed;
+        await actions[phase].enable(true);
 
-      expect(component.find('.euiLoadingSpinner').exists()).toBeTruthy();
-      expect(actions.cold.hasDataTierAllocationControls()).toBeTruthy();
-      expect(actions.frozen.hasDataTierAllocationControls()).toBeTruthy();
+        expect(component.find('.euiLoadingSpinner').exists()).toBeTruthy();
+        expect(actions[phase].hasDataTierAllocationControls()).toBeTruthy();
 
-      expect(component.find('.euiCallOut--warning').exists()).toBeFalsy();
-      expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
-      expect(actions.frozen.hasNodeAttributesSelect()).toBeFalsy();
-    });
-
-    test('shows warning instead of node attributes input when none exist', async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
-        nodesByRoles: { data: ['node1'] },
-        isUsingDeprecatedDataRoleConfig: false,
+        expect(component.find('.euiCallOut--warning').exists()).toBeFalsy();
+        expect(actions[phase].hasNodeAttributesSelect()).toBeFalsy();
       });
 
-      await act(async () => {
-        testBed = await setup();
-      });
-      const { actions, component } = testBed;
+      test('shows warning instead of node attributes input when none exist', async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles: { data: ['node1'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
 
-      component.update();
-      await actions.cold.enable(true);
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component } = testBed;
 
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      await actions.cold.setDataAllocation('node_attrs');
-      expect(actions.cold.hasNoNodeAttrsWarning()).toBeTruthy();
-      expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
-
-      // For some reason we need to close the cold phase to be able to
-      // to test the frozen phase behaviour.
-      await actions.cold.enable(false);
-      await actions.frozen.enable(true);
-
-      await actions.frozen.setDataAllocation('node_attrs');
-      expect(actions.frozen.hasNoNodeAttrsWarning()).toBeTruthy();
-      expect(actions.frozen.hasNodeAttributesSelect()).toBeFalsy();
-    });
-
-    test('shows node attributes input when attributes exist', async () => {
-      const { actions, component } = testBed;
-      await actions.cold.enable(true);
-
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      await actions.cold.setDataAllocation('node_attrs');
-      expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
-      expect(actions.cold.hasNodeAttributesSelect()).toBeTruthy();
-      expect(actions.cold.getNodeAttributesSelectOptions().length).toBe(2);
-
-      await actions.frozen.enable(true);
-      await actions.frozen.setDataAllocation('node_attrs');
-      expect(actions.frozen.hasNoNodeAttrsWarning()).toBeFalsy();
-      expect(actions.frozen.hasNodeAttributesSelect()).toBeTruthy();
-      expect(actions.frozen.getNodeAttributesSelectOptions().length).toBe(2);
-    });
-
-    test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
-      const { actions, component } = testBed;
-
-      for (const phase of ['cold', 'frozen'] as const) {
-        const phaseActions = actions[phase];
-        await phaseActions.enable(true);
+        component.update();
+        await actions[phase].enable(true);
 
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        await phaseActions.setDataAllocation('node_attrs');
-        expect(phaseActions.hasNoNodeAttrsWarning()).toBeFalsy();
-        expect(phaseActions.hasNodeAttributesSelect()).toBeTruthy();
-
-        expect(phaseActions.hasNodeDetailsFlyout()).toBeFalsy();
-        expect(phaseActions.getNodeAttributesSelectOptions().length).toBe(2);
-        await phaseActions.setSelectedNodeAttribute('attribute:true');
-
-        await phaseActions.openNodeDetailsFlyout();
-        expect(phaseActions.hasNodeDetailsFlyout()).toBeTruthy();
-      }
-    });
-
-    test('shows default allocation warning when no node roles are found', async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
-        nodesByRoles: {},
-        isUsingDeprecatedDataRoleConfig: false,
+        await actions[phase].setDataAllocation('node_attrs');
+        expect(actions[phase].hasNoNodeAttrsWarning()).toBeTruthy();
+        expect(actions[phase].hasNodeAttributesSelect()).toBeFalsy();
       });
 
-      await act(async () => {
-        testBed = await setup();
-      });
-      const { actions, component } = testBed;
+      test('shows node attributes input when attributes exist', async () => {
+        const { actions, component } = testBed;
+        await actions[phase].enable(true);
 
-      component.update();
-      await actions.cold.enable(true);
-
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(actions.cold.hasDefaultAllocationWarning()).toBeTruthy();
-
-      await actions.cold.enable(false);
-      await actions.frozen.enable(true);
-      expect(actions.frozen.hasDefaultAllocationWarning()).toBeTruthy();
-    });
-
-    test('shows default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
-        nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
-        isUsingDeprecatedDataRoleConfig: false,
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        await actions[phase].setDataAllocation('node_attrs');
+        expect(actions[phase].hasNoNodeAttrsWarning()).toBeFalsy();
+        expect(actions[phase].hasNodeAttributesSelect()).toBeTruthy();
+        expect(actions[phase].getNodeAttributesSelectOptions().length).toBe(2);
       });
 
-      await act(async () => {
-        testBed = await setup();
+      test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
+        const { actions, component } = testBed;
+
+        await actions[phase].enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        await actions[phase].setDataAllocation('node_attrs');
+        expect(actions[phase].hasNoNodeAttrsWarning()).toBeFalsy();
+        expect(actions[phase].hasNodeAttributesSelect()).toBeTruthy();
+
+        expect(actions[phase].hasNodeDetailsFlyout()).toBeFalsy();
+        expect(actions[phase].getNodeAttributesSelectOptions().length).toBe(2);
+        await actions[phase].setSelectedNodeAttribute('attribute:true');
+
+        await actions[phase].openNodeDetailsFlyout();
+        expect(actions[phase].hasNodeDetailsFlyout()).toBeTruthy();
       });
-      const { actions, component } = testBed;
 
-      component.update();
-      await actions.cold.enable(true);
+      test('shows default allocation warning when no node roles are found', async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles: {},
+          isUsingDeprecatedDataRoleConfig: false,
+        });
 
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
-    });
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component } = testBed;
 
-    test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
-        nodesByRoles: { data: ['test'] },
-        isUsingDeprecatedDataRoleConfig: false,
+        component.update();
+        await actions[phase].enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(actions[phase].hasDefaultAllocationWarning()).toBeTruthy();
       });
-      await act(async () => {
-        testBed = await setup();
+
+      test('shows default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component } = testBed;
+
+        component.update();
+        await actions[phase].enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(actions[phase].hasDefaultAllocationNotice()).toBeTruthy();
       });
-      const { actions, component } = testBed;
 
-      component.update();
-      await actions.cold.enable(true);
+      test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles: { data: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component } = testBed;
 
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
+        component.update();
+        await actions[phase].enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(actions[phase].hasDefaultAllocationNotice()).toBeFalsy();
+      });
     });
   });
 
