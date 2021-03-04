@@ -475,7 +475,7 @@ export const getRuleRangeTuples = ({
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
+  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
 /**
