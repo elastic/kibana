@@ -14,7 +14,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('migrations', () => {
+  describe('wahoo migrations', () => {
     before(async () => {
       await esArchiver.load('alerts');
     });
@@ -100,6 +100,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       expect(response.body.notifyWhen).to.eql('onActiveAlert');
+    });
+
+    it('7.11.2 migrates alerts with case actions, case fields are nested in an incident object', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/99f3e6d7-b7bb-477d-ac28-92ee22726969`
+      );
+      expect(response.status).to.eql(200);
+      response.body.actions.forEach((a) => {
+        expect(a.params.subActionParams.hasOwnProperty('incident')).to.eql(true);
+      });
     });
   });
 }
