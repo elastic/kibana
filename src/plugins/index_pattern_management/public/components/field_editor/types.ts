@@ -10,8 +10,9 @@ import { ReactText } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { HttpStart } from 'src/core/public';
 
+export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;
 export interface Sample {
-  input: ReactText | ReactText[];
+  input: SampleInput;
   output: string;
 }
 

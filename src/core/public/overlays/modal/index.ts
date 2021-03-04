@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export {
-  ModalService,
+export { ModalService } from './modal_service';
+
+export type {
   OverlayModalStart,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,

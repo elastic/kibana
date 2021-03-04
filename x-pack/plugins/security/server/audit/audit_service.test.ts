@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import {
-  AuditService,
-  filterEvent,
-  createLoggingConfig,
-  RECORD_USAGE_INTERVAL,
-} from './audit_service';
-import { AuditEvent, EventCategory, EventType, EventOutcome } from './audit_events';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+
 import {
   coreMock,
-  loggingSystemMock,
-  httpServiceMock,
   httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
+
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { ConfigSchema, ConfigType } from '../config';
-import { SecurityLicenseFeatures } from '../../common/licensing';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import type { ConfigType } from '../config';
+import { ConfigSchema } from '../config';
+import type { AuditEvent } from './audit_events';
+import { EventCategory, EventOutcome, EventType } from './audit_events';
+import {
+  AuditService,
+  createLoggingConfig,
+  filterEvent,
+  RECORD_USAGE_INTERVAL,
+} from './audit_service';
 
 jest.useFakeTimers();
 
