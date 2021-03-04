@@ -8,12 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
-import { FleetPlugin } from './plugin';
+
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
+
+import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
 export {

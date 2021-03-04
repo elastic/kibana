@@ -10,8 +10,8 @@ import uuid from 'uuid/v4';
 import semverParse from 'semver/functions/parse';
 import semverDiff from 'semver/functions/diff';
 import semverLte from 'semver/functions/lte';
-
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import type { AgentType, Agent, FleetServerAgent } from '../../types';
 import { AGENTS_INDEX } from '../../constants';
 import { IngestManagerError } from '../../errors';

@@ -10,6 +10,7 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
 } from 'src/core/server';
+
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';

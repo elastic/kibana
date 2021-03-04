@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { getAgentStatusById } from './status';
 
 describe('Agent status service', () => {

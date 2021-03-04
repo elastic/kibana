@@ -7,7 +7,9 @@
 
 import { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
 import type { AgentStatus, Agent, EsAssetReference } from '../types';
+
 import { getAgent, listAgents } from './agents';
 import { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';

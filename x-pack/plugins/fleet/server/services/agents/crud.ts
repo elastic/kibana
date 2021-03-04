@@ -8,15 +8,17 @@
 import Boom from '@hapi/boom';
 import { SearchResponse } from 'elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
+
+import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;

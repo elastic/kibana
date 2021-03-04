@@ -14,7 +14,9 @@ import type {
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
 import { appContextService } from '../services';
+
 import {
   IngestManagerError,
   RegistryError,

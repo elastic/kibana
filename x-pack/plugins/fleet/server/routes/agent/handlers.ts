@@ -8,6 +8,7 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { AbortController } from 'abort-controller';
+
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,

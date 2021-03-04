@@ -19,9 +19,10 @@ Table of Contents
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
-		- [Licensing](#licensing)
-		- [Documentation](#documentation)
-		- [Tests](#tests)
+		- [Action variables](#action-variables)
+	- [Licensing](#licensing)
+	- [Documentation](#documentation)
+	- [Tests](#tests)
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
@@ -147,9 +148,9 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |createdBy|The userid that created this alert.|
 |updatedBy|The userid that last updated this alert.|
 
-### The `actionVariables` property
+### Action Variables
 
-This property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
 
 For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
 
@@ -167,7 +168,12 @@ Currently most of the alerts are free features. But some alert types are subscri
 
 ## Documentation
 
-You should create documentation for the new alert type. Make an entry in the alert type index [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) that points to a new document for the alert type that should be in the proper application directory.
+You should create asciidoc for the new alert type. 
+* For stack alerts, add an entry to the alert type index - [`docs/user/alerting/alert-types.asciidoc`](../../../docs/user/alerting/alert-types.asciidoc) which points to a new document for the alert type that should be in the directory [`docs/user/alerting/stack-alerts`](../../../docs/user/alerting/stack-alerts).
+
+* Solution specific alert documentation should live within the docs for the solution. 
+
+We suggest following the template provided in `docs/alert-type-template.asciidoc`. The [Index Threshold alert type](https://www.elastic.co/guide/en/kibana/master/alert-type-index-threshold.html) is an example of documentation created following the template.
 
 ## Tests
 

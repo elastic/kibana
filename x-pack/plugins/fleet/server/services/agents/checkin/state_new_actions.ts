@@ -7,7 +7,6 @@
 
 import semverParse from 'semver/functions/parse';
 import semverLt from 'semver/functions/lt';
-
 import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
@@ -24,6 +23,7 @@ import {
 } from 'rxjs/operators';
 import { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import type { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
@@ -38,8 +38,9 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
-import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 import { getAgent, updateAgent } from '../crud';
+
+import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({

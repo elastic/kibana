@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObject } from 'src/core/server';
+
 import type { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';

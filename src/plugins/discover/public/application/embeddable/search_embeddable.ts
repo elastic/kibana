@@ -389,6 +389,11 @@ export class SearchEmbeddable
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
+      if (this.input.query?.query || this.input.filters?.length) {
+        this.filtersSearchSource!.setField('highlightAll', true);
+      } else {
+        this.filtersSearchSource!.removeField('highlightAll');
+      }
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
