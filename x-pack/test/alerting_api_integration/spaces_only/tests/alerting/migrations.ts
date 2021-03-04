@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { AlertAction } from '../../../../../plugins/alerts/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('wahoo migrations', () => {
+  describe('migrations', () => {
     before(async () => {
       await esArchiver.load('alerts');
     });
@@ -107,8 +108,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerts/alert/99f3e6d7-b7bb-477d-ac28-92ee22726969`
       );
       expect(response.status).to.eql(200);
-      response.body.actions.forEach((a) => {
-        expect(a.params.subActionParams.hasOwnProperty('incident')).to.eql(true);
+      response.body.actions.forEach((a: AlertAction) => {
+        expect(a.params.subActionParams?.hasOwnProperty('incident')).to.eql(true);
       });
     });
   });
