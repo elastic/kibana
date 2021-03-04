@@ -55,8 +55,11 @@ export const FlyoutHeader: React.FC = () => {
 };
 
 export const FlyoutBody: React.FC = () => {
-  const { configuredLimits } = useValues(AppLogic);
-  const maxDocumentByteSize = configuredLimits?.engine?.maxDocumentByteSize;
+  const {
+    configuredLimits: {
+      engine: { maxDocumentByteSize },
+    },
+  } = useValues(AppLogic);
 
   const { textInput, errors } = useValues(DocumentCreationLogic);
   const { setTextInput } = useActions(DocumentCreationLogic);
