@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AppContext, useAppContext } from '../app_context';
+import { useAppContext } from '../app_context';
 import { ComingSoonPrompt } from './coming_soon_prompt';
 import { UpgradeAssistantTabs } from './tabs';
 
 export const PageContent: React.FunctionComponent = () => {
-  const { kibanaVersionInfo, isReadOnlyMode } = useAppContext();
+  const { kibanaVersionInfo, isReadOnlyMode, http } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   // Read-only mode will be enabled up until the last minor before the next major release
@@ -38,9 +38,7 @@ export const PageContent: React.FunctionComponent = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
 
-      <AppContext.Consumer>
-        {({ http }) => <UpgradeAssistantTabs http={http} />}
-      </AppContext.Consumer>
+      <UpgradeAssistantTabs http={http} />
     </>
   );
 };
