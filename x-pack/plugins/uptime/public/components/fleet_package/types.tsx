@@ -6,9 +6,9 @@
  */
 
 export enum DataStream {
-  HTTP = 'synthetics/http',
-  TCP = 'synthetics/tcp',
-  ICMP = 'synthetics/icmp',
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
 }
 
 // values must match keys in the integration package
@@ -19,24 +19,30 @@ export enum ConfigKeys {
   MONITOR_TYPE = 'type',
   NAME = 'name',
   PROXY_URL = 'proxy_url',
+  PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   SCHEDULE = 'schedule',
   SERVICE_NAME = 'service.name',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   URLS = 'urls',
+  WAIT = 'wait',
 }
 
-export type Config = Record<ConfigKeys, string | number | string[]>;
-
 export interface ICustomFields {
-  [ConfigKeys.PORTS]: string[];
+  [ConfigKeys.PORTS]: string;
   [ConfigKeys.HOSTS]: string;
   [ConfigKeys.MAX_REDIRECTS]: number;
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.PROXY_URL]: string;
+  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
   [ConfigKeys.SCHEDULE]: number;
   [ConfigKeys.SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];
+  [ConfigKeys.WAIT]: number;
 }
+
+export type Config = {
+  [ConfigKeys.NAME]: string;
+} & ICustomFields;

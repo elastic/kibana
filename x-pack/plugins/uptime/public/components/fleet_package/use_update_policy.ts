@@ -6,7 +6,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { ConfigKeys, Config } from './types';
+import { ConfigKeys, Config, DataStream } from './types';
 
 interface Props {
   defaultConfig: Config;
@@ -29,13 +29,11 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
     const configKeys = Object.keys(config) as ConfigKeys[]; // all keys for determining if the form has been changed
     const policyKeys = Object.keys(configWithoutType) as ConfigKeys[]; // only keys needed for data stream variables
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
+    // TO DO: Update validation
     const isValid =
-      !!newPolicy.name &&
-      !!config[ConfigKeys.URLS] &&
-      !!config[ConfigKeys.SCHEDULE] &&
-      config[ConfigKeys.SCHEDULE] > 1;
+      !!newPolicy.name && getIsValid({ requiredFieldList: requiredFields[type], input: config });
     const updatedPolicy = { ...newPolicy };
-    const currentInput = updatedPolicy.inputs.find((input) => input.type === type);
+    const currentInput = updatedPolicy.inputs.find((input) => input.type === `synthetics/${type}`);
     const dataStream = currentInput?.streams[0];
 
     // prevent an infinite loop of updating the policy
@@ -55,8 +53,12 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
             case ConfigKeys.TAGS:
               configItem.value = JSON.stringify(config[key]); // convert to yaml string
               break;
+            case ConfigKeys.WAIT:
+              configItem.value = `${config[key]}s`; // convert to cron
+              break;
             default:
-              configItem.value = config[key];
+              configItem.value =
+                !config[key] && typeof config[key] !== 'boolean' ? null : config[key];
           }
         }
       });
@@ -76,4 +78,28 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
   return {
     setConfig,
   };
+};
+
+const requiredFields = {
+  [DataStream.HTTP]: [ConfigKeys.URLS, ConfigKeys.SCHEDULE],
+  [DataStream.TCP]: [ConfigKeys.HOSTS, ConfigKeys.SCHEDULE],
+  [DataStream.ICMP]: [ConfigKeys.HOSTS, ConfigKeys.SCHEDULE],
+};
+
+// also ensure that optional fields are valid when filled in
+const getIsValid = ({
+  requiredFieldList,
+  input,
+}: {
+  requiredFieldList: ConfigKeys[];
+  input: Config;
+}) => {
+  return !requiredFieldList.some((field) => {
+    switch (typeof field) {
+      case 'number':
+        return input[field] < 1;
+      case 'string':
+        return !Boolean(input[field]);
+    }
+  });
 };

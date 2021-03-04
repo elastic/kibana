@@ -46,16 +46,18 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
 const defaultValues = {
-  [ConfigKeys.PORTS]: [],
+  [ConfigKeys.PORTS]: '',
   [ConfigKeys.HOSTS]: '',
   [ConfigKeys.MAX_REDIRECTS]: 0,
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKeys.PROXY_URL]: '',
+  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
   [ConfigKeys.SCHEDULE]: 5,
   [ConfigKeys.SERVICE_NAME]: '',
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 1600,
   [ConfigKeys.URLS]: '',
+  [ConfigKeys.WAIT]: 1,
 };
 
 const defaultConfig: Config = {
