@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
