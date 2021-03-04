@@ -5,67 +5,54 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { EqlQueryBarFooter } from './footer';
-import { Cancelable } from 'lodash';
 
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, useState: jest.fn() };
-});
-
-type DebounceFunc = (...args: unknown[]) => unknown;
-
-jest.mock('lodash', () => {
-  const r = jest.requireActual('lodash');
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
-    ...r,
-    debounce: jest.fn().mockImplementation((callback, timeout) => {
-      let timeoutId: NodeJS.Timeout;
-      const debounced = (jest.fn((...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => callback(...args), timeout);
-      }) as unknown) as DebounceFunc & Cancelable;
-
-      const cancel = jest.fn(() => clearTimeout(timeoutId));
-
-      debounced.cancel = cancel;
-      return debounced;
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        docLinks: { links: { query: { eql: 'url-eql_doc' } } },
+      },
     }),
   };
 });
 
-const useStateMock = useState as jest.Mock;
-
 describe('EQL footer', () => {
-  const setState = jest.fn();
-
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.resetAllMocks();
-    useStateMock.mockImplementation((init) => [init, setState]);
-  });
-
   describe('EQL Settings', () => {
-    it('only call setIsOpenEqlSettings once even if you click multiple times', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('EQL settings button is enable when popover is NOT open', () => {
       const wrapper = mount(
         <TestProviders>
           <EqlQueryBarFooter errors={[]} onOptionsChange={jest.fn()} />
         </TestProviders>
       );
-      const eqlSettingsButton = wrapper.find(`[data-test-subj="eql-settings-trigger"]`).first();
 
-      eqlSettingsButton.simulate('click');
-      jest.advanceTimersByTime(100);
-      eqlSettingsButton.simulate('click');
-      jest.advanceTimersByTime(100);
-      eqlSettingsButton.simulate('click');
-      jest.runOnlyPendingTimers();
+      expect(
+        wrapper.find(`[data-test-subj="eql-settings-trigger"]`).first().prop('isDisabled')
+      ).toBeFalsy();
+    });
 
-      expect(setState).toBeCalledTimes(1);
+    it('disable EQL settings button when popover is open', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EqlQueryBarFooter errors={[]} onOptionsChange={jest.fn()} />
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="eql-settings-trigger"]`).first().simulate('click');
+      wrapper.update();
+
+      expect(
+        wrapper.find(`[data-test-subj="eql-settings-trigger"]`).first().prop('isDisabled')
+      ).toBeTruthy();
     });
   });
 });
