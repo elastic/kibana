@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoJsonImporter, toEsDoc } from './geojson_importer';
+import { GeoJsonImporter, createChunks, toEsDoc } from './geojson_importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import '@loaders.gl/polyfills';
 
@@ -262,5 +262,38 @@ describe('toEsDoc', () => {
       },
       population: 200,
     });
+  });
+});
+
+describe('createChunks', () => {
+  const GEOMETRY_COLLECTION_DOC_CHARS = JSON.stringify(
+    toEsDoc(GEOMETRY_COLLECTION_FEATURE, ES_FIELD_TYPES.GEO_SHAPE)
+  ).length;
+
+  const features = [
+    GEOMETRY_COLLECTION_FEATURE,
+    GEOMETRY_COLLECTION_FEATURE,
+    GEOMETRY_COLLECTION_FEATURE,
+    GEOMETRY_COLLECTION_FEATURE,
+    GEOMETRY_COLLECTION_FEATURE,
+  ];
+
+  test('should break features into chunks', () => {
+    const maxChunkCharCount = GEOMETRY_COLLECTION_DOC_CHARS * 3.5;
+    const chunks = createChunks(features, ES_FIELD_TYPES.GEO_SHAPE, maxChunkCharCount);
+    expect(chunks.length).toBe(2);
+    expect(chunks[0].length).toBe(3);
+    expect(chunks[1].length).toBe(2);
+  });
+
+  test('should break features into chunks containing only single feature when feature size is greater then maxChunkCharCount', () => {
+    const maxChunkCharCount = GEOMETRY_COLLECTION_DOC_CHARS * 0.8;
+    const chunks = createChunks(features, ES_FIELD_TYPES.GEO_SHAPE, maxChunkCharCount);
+    expect(chunks.length).toBe(5);
+    expect(chunks[0].length).toBe(1);
+    expect(chunks[1].length).toBe(1);
+    expect(chunks[2].length).toBe(1);
+    expect(chunks[3].length).toBe(1);
+    expect(chunks[4].length).toBe(1);
   });
 });

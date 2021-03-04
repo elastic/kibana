@@ -120,7 +120,7 @@ export class GeoJsonImporter extends Importer {
       }
 
       // Import block in chunks to avoid sending too much data to Elasticsearch at a time.
-      const chunks = createChunks(this._features, this._geoFieldType);
+      const chunks = createChunks(this._features, this._geoFieldType, MAX_CHUNK_CHAR_COUNT);
       const blockSizeInBytes = this._blockSizeInBytes;
 
       // reset block for next read
@@ -338,9 +338,10 @@ export class GeoJsonImporter extends Importer {
   }
 }
 
-function createChunks(
+export function createChunks(
   features: Feature[],
-  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
+  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE,
+  maxChunkCharCount: number
 ): ImportDoc[][] {
   const chunks: ImportDoc[][] = [];
 
@@ -349,7 +350,7 @@ function createChunks(
   for (let i = 0; i < features.length; i++) {
     const doc = toEsDoc(features[i], geoFieldType);
     const docChars = JSON.stringify(doc).length + 1; // +1 adds CHAR for comma once document is in list
-    if (chunk.length === 0 || chunkChars + docChars < MAX_CHUNK_CHAR_COUNT) {
+    if (chunk.length === 0 || chunkChars + docChars < maxChunkCharCount) {
       // add ES document to current chunk
       chunk.push(doc);
       chunkChars += docChars;
