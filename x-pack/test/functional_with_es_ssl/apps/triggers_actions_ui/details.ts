@@ -355,7 +355,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
@@ -415,7 +415,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');

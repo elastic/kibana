@@ -51,13 +51,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function refreshAlertsList() {
-    await testSubjects.click('alertsTab');
+    await testSubjects.click('rulesTab');
   }
 
   describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     afterEach(async () => {
@@ -218,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 1 alert');
+        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
@@ -339,7 +339,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 1 alert');
+        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);

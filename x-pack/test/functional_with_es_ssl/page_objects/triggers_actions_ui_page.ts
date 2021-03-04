@@ -138,7 +138,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
     },
-    async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
+    async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
     },
     async toggleSwitch(testSubject: string) {
