@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.2>>
 * <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
 * <<release-notes-7.10.2>>
@@ -90,6 +91,35 @@ For detailed information about the n.n.n release, review the following sections.
 
 
 --
+
+[[release-notes-7.11.2]]
+== {kib} 7.11.2
+
+coming::[7.11.2]
+
+The 7.11.2 release includes the following bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+
+[float]
+[[bug-v7.11.2]]
+=== Bug fixes
+Alerting::
+* For simplistic email servers, set `rejectUnauthorized` to `false` {kibana-pull}91760[#91760]
+APM::
+* Include *Services* with only metric documents {kibana-pull}92378[#92378]
+Canvas::
+* Removes custom plot plugins when Canvas is unmounted {kibana-pull}90722[#90722]
+Dashboard::
+* Use timestamp on brush event instead of iso dates {kibana-pull}91483[#91483]
+Lens and visualizations::
+* Fixes *TSVB* chart scroll when legend has many items {kibana-pull}91394[#91394]
+Machine Learning::
+* Fixes geo_shape content causing *Data Visualizer* to not load correctly {kibana-pull}92052[#92052]
+* Fixes applying missing_bucket configuration to transform request payload {kibana-pull}91635[#91635]
+Metrics::
+* Fixes `ignoreLookback` behavior for Snapshot API {kibana-pull}91169[#91169]
+Security::
+* Fixes an issue where `elasticsearch.sniffInterval`, `elasticsearch.sniffOnConnectionFault`, or `elasticsearch.sniffOnStart` causes an authentication issue when performing requests against the sniffed nodes {kibana-pull}91276[#91276]
+* Fixes session idle timeout {kibana-pull}91070[#91070]
 
 [[release-notes-7.11.1]]
 == {kib} 7.11.1
