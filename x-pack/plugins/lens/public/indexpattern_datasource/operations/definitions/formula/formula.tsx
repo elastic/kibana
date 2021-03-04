@@ -24,6 +24,7 @@ import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { ErrorWrapper, runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import {
+  extractParamsForFormula,
   findVariables,
   getOperationParams,
   getSafeFieldName,
@@ -111,7 +112,7 @@ export const formulaOperation: OperationDefinition<
       },
     ];
   },
-  buildColumn({ previousColumn, layer }) {
+  buildColumn({ previousColumn, layer }, _, operationDefinitionMap) {
     let previousFormula = '';
     if (previousColumn) {
       if ('references' in previousColumn) {
@@ -119,15 +120,28 @@ export const formulaOperation: OperationDefinition<
         if (metric && 'sourceField' in metric) {
           const fieldName = getSafeFieldName(metric.sourceField);
           // TODO need to check the input type from the definition
-          previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName}))`;
+          previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName})`;
         }
       } else {
         if (previousColumn && 'sourceField' in previousColumn) {
           previousFormula += `${previousColumn.operationType}(${getSafeFieldName(
             previousColumn?.sourceField
-          )})`;
+          )}`;
         }
       }
+      const formulaNamedArgs = extractParamsForFormula(previousColumn, operationDefinitionMap);
+      if (formulaNamedArgs.length) {
+        previousFormula +=
+          ', ' + formulaNamedArgs.map(({ name, value }) => `${name}=${value}`).join(', ');
+      }
+      // close the formula at the end
+      previousFormula += ')';
+    }
+    // carry over the format settings from previous operation for seamless transfer
+    // NOTE: this works only for non-default formatters set in Lens
+    let prevFormat = {};
+    if (previousColumn?.params && 'format' in previousColumn.params) {
+      prevFormat = { format: previousColumn.params.format };
     }
     return {
       label: 'Formula',
@@ -135,7 +149,9 @@ export const formulaOperation: OperationDefinition<
       operationType: 'formula',
       isBucketed: false,
       scale: 'ratio',
-      params: previousFormula ? { formula: previousFormula, isFormulaBroken: false } : {},
+      params: previousFormula
+        ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
+        : { ...prevFormat },
       references: [],
     };
   },

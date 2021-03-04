@@ -13,6 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
@@ -47,6 +48,37 @@ export function getSafeFieldName(fieldName: string | undefined) {
     return '';
   }
   return fieldName;
+}
+
+// Just handle two levels for now
+type OeprationParams = Record<string, string | number | Record<string, string | number>>;
+
+export function extractParamsForFormula(
+  column: IndexPatternColumn | ReferenceBasedIndexPatternColumn,
+  operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
+) {
+  if (!operationDefinitionMap) {
+    return [];
+  }
+  const def = operationDefinitionMap[column.operationType];
+  if ('operationParams' in def && column.params) {
+    return (def.operationParams || []).flatMap(({ name, required }) => {
+      const value = (column.params as OeprationParams)![name];
+      if (isObject(value)) {
+        return Object.keys(value).map((subName) => ({
+          name: `${name}-${subName}`,
+          value: value[subName] as string | number,
+          required,
+        }));
+      }
+      return {
+        name,
+        value,
+        required,
+      };
+    });
+  }
+  return [];
 }
 
 export function getOperationParams(

@@ -303,7 +303,11 @@ export function replaceColumn({
     // if managed it has to look at the full picture to have a seamless transition
     if (operationDefinition.input === 'managedReference') {
       const newColumn = copyCustomLabel(
-        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer }),
+        operationDefinition.buildColumn(
+          { ...baseOptions, layer: tempLayer },
+          previousColumn.params,
+          operationDefinitionMap
+        ),
         previousColumn
       ) as FormulaIndexPatternColumn;
 

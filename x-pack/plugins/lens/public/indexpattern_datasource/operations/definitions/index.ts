@@ -442,7 +442,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     arg: BaseBuildColumnArgs & {
       previousColumn?: IndexPatternColumn | ReferenceBasedIndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params']
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'],
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
