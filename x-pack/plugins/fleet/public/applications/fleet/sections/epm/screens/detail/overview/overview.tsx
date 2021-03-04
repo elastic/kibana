@@ -7,7 +7,9 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { PackageInfo } from '../../../../../types';
+
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';

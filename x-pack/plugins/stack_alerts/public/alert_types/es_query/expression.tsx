@@ -287,10 +287,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/query-dsl.html`}
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
               defaultMessage="ES Query DSL documentation"

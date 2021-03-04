@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
+import type { CallESAsCurrentUser } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 
 export async function installILMPolicy(paths: string[], callCluster: CallESAsCurrentUser) {

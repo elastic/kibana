@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import React, { Fragment } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
+import type { ScopedHistory } from 'src/core/public';
+
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
 interface EmptyPromptProps {

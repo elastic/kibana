@@ -10,7 +10,7 @@ import { assertNever } from '@kbn/std';
 import { RewritePolicy } from './policy';
 import { MetaRewritePolicy, MetaRewritePolicyConfig, metaRewritePolicyConfigSchema } from './meta';
 
-export { RewritePolicy };
+export type { RewritePolicy };
 
 /**
  * Available rewrite policies which specify what part of a {@link LogRecord}
