@@ -1368,6 +1368,14 @@ module.exports = {
           },
         ],
         'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
       },
     },
 
