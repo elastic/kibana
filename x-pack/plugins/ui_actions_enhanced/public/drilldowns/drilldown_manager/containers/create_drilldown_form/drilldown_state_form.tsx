@@ -11,13 +11,11 @@ import { DrilldownForm } from '../../components/drilldown_form';
 import { DrilldownState } from '../../state';
 import { TriggerPickerProps } from '../../components/trigger_picker';
 
-export interface CreateDrilldownFormWithStateProps {
+export interface DrilldownStateFormProps {
   state: DrilldownState;
 }
 
-export const CreateDrilldownFormWithState: React.FC<CreateDrilldownFormWithStateProps> = ({
-  state,
-}) => {
+export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state }) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();

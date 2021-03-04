@@ -7,12 +7,14 @@
 
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButton } from '@elastic/eui';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownManager } from '../context';
-import { CreateDrilldownFormWithState } from './create_drilldown_form_with_state';
 import { ActionFactoryPicker } from '../action_factory_picker';
+import { DrilldownManagerFooter } from '../drilldown_manager_footer';
+import { DrilldownStateForm } from './drilldown_state_form';
 
-export const txtCreateDrilldown = i18n.translate(
+const txtCreateDrilldown = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.containers.createDrilldownForm.title',
   {
     defaultMessage: 'Create Drilldown',
@@ -20,7 +22,15 @@ export const txtCreateDrilldown = i18n.translate(
   }
 );
 
-export const CreateDrilldownForm: React.FC = ({ children }) => {
+const txtCreateDrilldownButtonLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.createDrilldownForm.primaryButton',
+  {
+    defaultMessage: 'Create drilldown',
+    description: 'Primary button on new drilldown creation form.',
+  }
+);
+
+export const CreateDrilldownForm: React.FC = () => {
   const drilldowns = useDrilldownManager();
   const drilldownState = drilldowns.getDrilldownState();
 
@@ -28,7 +38,19 @@ export const CreateDrilldownForm: React.FC = ({ children }) => {
     <>
       <DrilldownManagerTitle>{txtCreateDrilldown}</DrilldownManagerTitle>
       <ActionFactoryPicker />
-      {!!drilldownState && <CreateDrilldownFormWithState state={drilldownState} />}
+      {!!drilldownState && <DrilldownStateForm state={drilldownState} />}
+      {!!drilldownState && (
+        <DrilldownManagerFooter>
+          <EuiButton
+            onClick={drilldowns.onCreateDrilldown}
+            fill
+            // isDisabled={!isActionValid(wizardConfig)}
+            data-test-subj={'drilldownWizardSubmit'}
+          >
+            {txtCreateDrilldownButtonLabel}
+          </EuiButton>
+        </DrilldownManagerFooter>
+      )}
     </>
   );
 };
