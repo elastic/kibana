@@ -10,16 +10,9 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/config-schema';
 import { getKibanaVersion } from '../kibana_services';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
-import {
-  MapsEmsConfig,
-  TileMapConfig,
-  tileMapConfigOptionsSchema,
-  ORIGIN,
-  TMS_IN_YML_ID,
-} from '../../common';
+import { MapsEmsConfig, TileMapConfig, ORIGIN, TMS_IN_YML_ID } from '../../common';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
@@ -30,7 +23,7 @@ export class ServiceSettings implements IServiceSettings {
   private readonly _hasTmsConfigured: boolean;
   private _showZoomMessage: boolean;
   private readonly _emsClient: EMSClient;
-  private readonly tmsOptionsFromConfig: TypeOf<typeof tileMapConfigOptionsSchema>;
+  private readonly tmsOptionsFromConfig: any;
 
   constructor(mapConfig: MapsEmsConfig, tilemapsConfig: TileMapConfig) {
     this._mapConfig = mapConfig;

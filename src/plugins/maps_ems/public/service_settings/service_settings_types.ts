@@ -48,4 +48,9 @@ export interface IServiceSettings {
   setQueryParams(params: { [p: string]: string }): void;
   enableZoomMessage(): void;
   disableZoomMessage(): void;
+  getAttributesForTMSLayer(
+    tmsServiceConfig: TmsLayer,
+    isDesaturated: boolean,
+    isDarkMode: boolean
+  ): any;
 }

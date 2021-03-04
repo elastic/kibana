@@ -15,7 +15,7 @@ import {
   DEFAULT_EMS_FILE_API_URL,
 } from './common';
 
-export const tileMapConfigOptionsSchema = schema.object({
+const tileMapConfigOptionsSchema = schema.object({
   attribution: schema.string({ defaultValue: '' }),
   minZoom: schema.number({ defaultValue: 0, min: 0 }),
   maxZoom: schema.number({ defaultValue: 10 }),
@@ -53,7 +53,7 @@ const layerConfigSchema = schema.object({
 
 export type LayerConfig = TypeOf<typeof layerConfigSchema>;
 
-export const regionmapConfigSchema = schema.object({
+const regionmapConfigSchema = schema.object({
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),
 });
