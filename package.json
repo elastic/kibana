@@ -763,6 +763,7 @@
     "prettier": "^2.2.0",
     "pretty-ms": "5.0.0",
     "proxyquire": "1.8.0",
+    "q": "^1.5.1",
     "querystring": "^0.2.0",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
