@@ -135,8 +135,8 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('relative');
       });
 
-      test('Make Sure it is last 24 hours date', () => {
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now-24h');
+      test('Make Sure it is last 20 hours date', () => {
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now-20h');
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
@@ -206,7 +206,7 @@ describe('SIEM Super Date Picker', () => {
         expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe('Today');
       });
 
-      test('Today and Last 24 hours are in Recently used date ranges', () => {
+      test('Today and Last 20 hours are in Recently used date ranges', () => {
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
@@ -217,7 +217,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
 
         expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe(
-          'Last 24 hoursToday'
+          'Last 20 hoursToday'
         );
       });
 

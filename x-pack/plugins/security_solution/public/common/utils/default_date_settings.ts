@@ -51,8 +51,8 @@ export const getTimeRangeSettings = (uiSettings = true) => {
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
   const toStr = (isString(timeRange?.to) && timeRange?.to) || DEFAULT_TO;
   const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
-  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT).toISOString();
-
+  const roundUp = areDateMathEqual(fromStr, toStr);
+  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, roundUp).toISOString();
   return { from, fromStr, to, toStr };
 };
 
@@ -72,11 +72,28 @@ export const getIntervalSettings = (uiSettings = true): Policy => {
   return { kind, duration };
 };
 
+/**
+ * Return true if from and to both contain "now" which indicates they
+ * have date math within their queries and they are equal to each other.
+ * @param from The from string which might contain "now"
+ * @param to The to string which might contain "now"
+ */
+export const areDateMathEqual = (from: string, to: string) => {
+  return from.includes('now') && to.includes('now') && from === to;
+};
+
+/**
+ * Parses a date and returns the default if the date string is not valid.
+ * @param dateString The date string to parse
+ * @param defaultDate The defaultDate if we cannot parse the dateMath
+ * @returns The moment of the date time parsed
+ */
 export const parseDateWithDefault = (
   dateString: string,
-  defaultDate: moment.Moment
+  defaultDate: moment.Moment,
+  roundUp: boolean = false
 ): moment.Moment => {
-  const date = dateMath.parse(dateString);
+  const date = dateMath.parse(dateString, { roundUp });
   if (date != null && date.isValid()) {
     return date;
   } else {
