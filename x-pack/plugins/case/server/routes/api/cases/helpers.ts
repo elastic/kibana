@@ -28,7 +28,7 @@ export const addStatusFilter = ({
   appendFilter,
   type = CASE_SAVED_OBJECT,
 }: {
-  status: CaseStatuses | undefined;
+  status?: CaseStatuses;
   appendFilter?: string;
   type?: string;
 }) => {
