@@ -27,7 +27,7 @@ import { Phase } from '../phase';
 const i18nTexts = {
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.description', {
-      defaultMessage: 'Add copy to explain what the frozen phase is about.',
+      defaultMessage: 'HERE COMES THE COPY FOR FROZEN PHASE DATA ALLOCATION.',
     }),
   },
 };
