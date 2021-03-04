@@ -15,30 +15,19 @@ import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
 import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
-import * as legacy from './legacy';
+import { defineLegacyRoutes } from './legacy';
 
 export function defineRoutes(
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) {
-  legacy.createActionRoute(router, licenseState);
+  defineLegacyRoutes(router, licenseState);
+
   createActionRoute(router, licenseState);
-
-  legacy.deleteActionRoute(router, licenseState);
   deleteActionRoute(router, licenseState);
-
-  legacy.getActionRoute(router, licenseState);
   getActionRoute(router, licenseState);
-
-  legacy.getAllActionRoute(router, licenseState);
   getAllActionRoute(router, licenseState);
-
-  legacy.updateActionRoute(router, licenseState);
   updateActionRoute(router, licenseState);
-
-  legacy.listActionTypesRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
-
-  legacy.executeActionRoute(router, licenseState);
   executeActionRoute(router, licenseState);
 }
