@@ -217,7 +217,7 @@ If your documents contain geo point fields (image:images/geoip-icon.png[Geo poin
 . Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range 
 contains data.
 
-. From the **Available fields** list, click `geoip.location` and then click **Visualize**.
+. From the **Available fields** list, click `geoip.location`, and then click **Visualize**.
 +
 [role="screenshot"]
 image:images/discover-maps.png[Map containing documents]
