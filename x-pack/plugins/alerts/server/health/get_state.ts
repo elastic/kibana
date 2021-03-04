@@ -95,8 +95,10 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
 };
 
 export const getHealthStatusStream = (
-  taskManager: TaskManagerStartContract
+  taskManager: TaskManagerStartContract,
+  healthStatusInterval?: number,
+  retryDelay?: number
 ): Observable<ServiceStatus<unknown>> =>
-  interval(HEALTH_STATUS_INTERVAL).pipe(
-    switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(taskManager))
+  interval(healthStatusInterval ?? HEALTH_STATUS_INTERVAL).pipe(
+    switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(taskManager, retryDelay))
   );

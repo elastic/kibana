@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { interval } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { getHealthServiceStatusWithRetryAndErrorHandling, MAX_RETRY_ATTEMPTS } from './get_state';
+import {
+  getHealthStatusStream,
+  getHealthServiceStatusWithRetryAndErrorHandling,
+  MAX_RETRY_ATTEMPTS,
+} from './get_state';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { HealthStatus } from '../types';
 
@@ -45,9 +47,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    interval(pollInterval)
-      .pipe(switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(mockTaskManager)))
-      .subscribe();
+    getHealthStatusStream(mockTaskManager, pollInterval).subscribe();
 
     // shouldn't fire before poll interval passes
     // should fire once each poll interval
@@ -68,13 +68,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    interval(pollInterval)
-      .pipe(
-        switchMap(() =>
-          getHealthServiceStatusWithRetryAndErrorHandling(mockTaskManager, retryDelay)
-        )
-      )
-      .subscribe();
+    getHealthStatusStream(mockTaskManager, pollInterval, retryDelay).subscribe();
 
     jest.advanceTimersByTime(halfInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(0);
@@ -187,5 +181,6 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       await tick();
       jest.advanceTimersByTime(retryDelay);
     }
+    expect(mockTaskManager.get).toHaveBeenCalledTimes(MAX_RETRY_ATTEMPTS + 1);
   });
 });
