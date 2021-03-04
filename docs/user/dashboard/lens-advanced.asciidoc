@@ -43,9 +43,9 @@ The list of fields that appear depend on the <<index-patterns,index pattern>>, <
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]
-=== View the number of transactions per day
+=== View the number of transactions per hour
 
-To determine the number of orders made each day, create a bar chart, then add it to the dashboard.
+To determine the number of orders made per hour, create a bar chart, then add it to the dashboard.
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
@@ -69,7 +69,7 @@ image::images/lens_advanced_1_1.png[Added records to the workspace]
 [role="screenshot"]
 image::images/lens_advanced_1_1_2.png[Bottom axis menu]
 +
-You have a bar chart that shows you how many orders were made at your store each day.
+You have a bar chart that shows you how many orders were made at your store per hour.
 +
 [role="screenshot"]
 image::images/lens_advanced_1_2.png[Orders per day]
@@ -80,14 +80,14 @@ image::images/lens_advanced_1_2.png[Orders per day]
 [[view-the-cumulative-number-of-products-sold-over-time]]
 === View the cumulative number of products sold on weekends
 
-To determine the number of orders made only on Saturday and Sunday, create a line chart, then add it to the dashboard.
+To determine the number of orders made only on Saturday and Sunday, create an area chart, then add it to the dashboard.
 
 . Open *Lens*.
 
-. From the *Chart Type* dropdown, select *Line*.
+. From the *Chart Type* dropdown, select *Area*.
 +
 [role="screenshot"]
-image::images/lens_advanced_2_1_1.png[Chart type menu with Line selected]
+image::images/lens_advanced_2_1_1.png[Chart type menu with Area selected]
 
 . Configure the cumulative sum of the store orders.
 
@@ -117,7 +117,7 @@ image::images/lens_advanced_2_1.png[Filter aggregation to filter weekend days]
 [role="screenshot"]
 image::images/lens_advanced_2_2_1.png[Legend menu]
 +
-You have a line chart that shows you how many orders your store received during the weekend.
+You have an area chart that shows you how many orders your store received during the weekend.
 +
 [role="screenshot"]
 image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders made on the weekend]
