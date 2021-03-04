@@ -31,6 +31,7 @@ export const useKibana = jest.fn().mockReturnValue({
         })),
       },
     },
+    docLinks: { links: { query: { eql: 'no link' } } },
   },
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());

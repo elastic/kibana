@@ -40,7 +40,6 @@ export interface Props {
 }
 
 type SizeVoidFunc = (newSize: string) => void;
-type VoidFunc = () => void;
 
 const Container = styled(EuiPanel)`
   border-radius: 0;
@@ -76,17 +75,14 @@ export const EqlQueryBarFooter: FC<Props> = ({
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
   const debounceSize = useRef<Cancelable & SizeVoidFunc>();
-  const debounceOpenEqlSettings = useRef<Cancelable & VoidFunc>();
+
   const openEqlSettingsHandler = useCallback(() => {
-    if (debounceOpenEqlSettings.current?.cancel) {
-      debounceOpenEqlSettings.current?.cancel();
-    }
-    debounceOpenEqlSettings.current = debounce(() => setIsOpenEqlSettings(true), 500);
-    debounceOpenEqlSettings.current();
+    setIsOpenEqlSettings(true);
   }, []);
   const closeEqlSettingsHandler = useCallback(() => {
     setIsOpenEqlSettings(false);
   }, []);
+
   const handleEventCategoryField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
       if (onOptionsChange) {
@@ -184,6 +180,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                   <EuiButtonIcon
                     onClick={openEqlSettingsHandler}
                     iconType="controlsVertical"
+                    isDisabled={openEqlSettings}
                     aria-label="eql settings"
                     data-test-subj="eql-settings-trigger"
                   />
