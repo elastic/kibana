@@ -54,10 +54,6 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     this.renderComponent();
   }
 
-  public reload() {
-    this.renderComponent();
-  }
-
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
