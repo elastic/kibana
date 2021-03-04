@@ -6,13 +6,14 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, from, Observable, of, Subject } from 'rxjs';
+import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   map,
+  mergeMap,
   pluck,
   skipWhile,
   startWith,
@@ -34,6 +35,10 @@ import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public'
 import {
   AppStateSelectedCells,
   ExplorerJob,
+  getSelectionInfluencers,
+  getSelectionJobIds,
+  getSelectionTimeRange,
+  loadDataForCharts,
   OverallSwimlaneData,
 } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -42,10 +47,13 @@ import { isViewBySwimLaneData } from '../../application/explorer/swimlane_contai
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
+  AnomalyExplorerServices,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { AnomalyExplorerService } from '../../application/services/anomaly_explorer_service';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -251,7 +259,7 @@ export function useExplorerInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
   refresh: Observable<any>,
-  services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
+  services: [CoreStart, MlStartDependencies, AnomalyExplorerServices],
   chartWidth: number,
   fromPage: number,
   selectedCells: AppStateSelectedCells | undefined
@@ -264,8 +272,12 @@ export function useExplorerInputResolver(
   boolean,
   Error | null | undefined
 ] {
-  console.log('selectedCells', selectedCells);
-  const [{ uiSettings }, , { anomalyTimelineService, anomalyDetectorService }] = services;
+  const [
+    { uiSettings },
+    { data: dataServices },
+    { anomalyTimelineService, anomalyDetectorService, anomalyExplorerService },
+  ] = services;
+  const { timefilter } = dataServices.query.timefilter;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
@@ -276,6 +288,7 @@ export function useExplorerInputResolver(
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const fromPage$ = useMemo(() => new Subject<number>(), []);
   const perPage$ = useMemo(() => new Subject<number>(), []);
+  const selectedCells$ = useMemo(() => new Subject<AppStateSelectedCells | undefined>(), []);
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -299,105 +312,222 @@ export function useExplorerInputResolver(
           (prev, curr) => prev === undefined && curr === SWIM_LANE_DEFAULT_PAGE_SIZE
         )
       ),
+      selectedCells$,
       refresh.pipe(startWith(null)),
     ])
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
-          if (!jobs) {
-            // couldn't load the list of jobs
-            return of(undefined);
-          }
+        switchMap(
+          ([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState, selections]) => {
+            if (!jobs) {
+              // couldn't load the list of jobs
+              return of(undefined);
+            }
+            const {
+              viewBy,
+              swimlaneType: swimlaneTypeInput,
+              perPage: perPageInput,
+              timeRange,
+              filters,
+              query,
+              viewMode,
+            } = input;
 
-          const {
-            viewBy,
-            swimlaneType: swimlaneTypeInput,
-            perPage: perPageInput,
-            timeRange,
-            filters,
-            query,
-            viewMode,
-          } = input;
+            const viewBySwimlaneFieldName = viewBy;
 
-          anomalyTimelineService.setTimeRange(timeRange);
+            anomalyTimelineService.setTimeRange(timeRange);
 
-          if (!swimlaneType) {
-            setSwimlaneType(swimlaneTypeInput);
-          }
+            if (!swimlaneType) {
+              setSwimlaneType(swimlaneTypeInput);
+            }
 
-          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            return {
-              id: job.job_id,
-              selected: true,
-              bucketSpanSeconds: bucketSpan!.asSeconds(),
-            };
-          });
+            const explorerJobs: ExplorerJob[] = jobs.map((job) => {
+              const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+              return {
+                id: job.job_id,
+                selected: true,
+                bucketSpanSeconds: bucketSpan!.asSeconds(),
+              };
+            });
 
-          let appliedFilters: any;
-          try {
-            appliedFilters = processFilters(filters, query);
-          } catch (e) {
-            // handle query syntax errors
-            setError(e);
-            return of(undefined);
-          }
+            let appliedFilters: any;
+            try {
+              appliedFilters = processFilters(filters, query);
+            } catch (e) {
+              // handle query syntax errors
+              setError(e);
+              return of(undefined);
+            }
 
-          return from(
-            anomalyTimelineService.loadOverallData(explorerJobs, swimlaneContainerWidth)
-          ).pipe(
-            switchMap((overallSwimlaneData) => {
-              const { earliest, latest } = overallSwimlaneData;
+            // @TODO: change this to viewBySwimlaneFieldName !== undefined
+            if (true) {
+              const influencersFilterQuery = undefined;
 
-              if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
-                if (perPageFromState === undefined) {
-                  // set initial pagination from the input or default one
-                  setPerPage(perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE);
-                }
+              const selectionInfluencers = getSelectionInfluencers(
+                selections,
+                viewBySwimlaneFieldName!
+              );
 
-                if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
-                  // store per page value when the dashboard is in the edit mode
-                  onInputChange({ perPage: perPageFromState });
-                }
+              const jobIds = getSelectionJobIds(selections, explorerJobs);
 
-                return from(
-                  anomalyTimelineService.loadViewBySwimlane(
-                    [],
-                    { earliest, latest },
-                    explorerJobs,
-                    viewBy!,
-                    isViewBySwimLaneData(swimlaneData)
-                      ? swimlaneData.cardinality
-                      : ANOMALY_SWIM_LANE_HARD_LIMIT,
-                    perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
-                    fromPageInput,
+              const bounds = timefilter.getBounds();
+
+              const swimlaneBucketInterval = timeBuckets.getInterval();
+
+              const timerange = getSelectionTimeRange(
+                selections,
+                swimlaneBucketInterval.asSeconds(),
+                bounds
+              );
+              const explorer$ = forkJoin({
+                combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
+                anomalyChartRecords: loadDataForCharts(
+                  jobIds,
+                  timerange.earliestMs,
+                  timerange.latestMs,
+                  selectionInfluencers,
+                  selections,
+                  influencersFilterQuery
+                ),
+                overallSwimlaneData: anomalyTimelineService.loadOverallData(
+                  explorerJobs,
+                  swimlaneContainerWidth
+                ),
+              }).pipe(
+                mergeMap(({ combinedJobs, anomalyChartRecords, overallSwimlaneData }) => {
+                  const combinedJobRecords: Record<
+                    string,
+                    CombinedJob
+                  > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
+                    return { ...acc, [job.job_id]: job };
+                  }, {});
+
+                  // @TODO fix anomalyChartRecords type
+                  const processedData = anomalyExplorerService.getAnomalyData(
+                    combinedJobRecords,
                     swimlaneContainerWidth,
-                    appliedFilters
-                  )
-                ).pipe(
-                  map((viewBySwimlaneData) => {
-                    return {
-                      ...viewBySwimlaneData!,
-                      earliest,
-                      latest,
-                    };
-                  })
-                );
-              }
-              return of(overallSwimlaneData);
-            })
-          );
-        }),
+                    // @ts-ignore
+                    anomalyChartRecords,
+                    timerange.earliestMs,
+                    timerange.latestMs,
+                    timefilter
+                  );
+                  console.log('processedData', processedData);
+
+                  //
+                  // if (selections !== undefined && Array.isArray(anomalyChartRecords)) {
+                  //   const anomalyData = anomalyDataChange(
+                  //     swimlaneContainerWidth,
+                  //     anomalyChartRecords,
+                  //     timerange.earliestMs,
+                  //     timerange.latestMs
+                  //     // @TODO
+                  //     // tableSeverity
+                  //   );
+                  //   console.log('anomalyData', anomalyData);
+                  // }
+                  const { earliest, latest } = overallSwimlaneData;
+
+                  if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
+                    if (perPageFromState === undefined) {
+                      // set initial pagination from the input or default one
+                      setPerPage(perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE);
+                    }
+
+                    if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
+                      // store per page value when the dashboard is in the edit mode
+                      onInputChange({ perPage: perPageFromState });
+                    }
+
+                    return from(
+                      anomalyTimelineService.loadViewBySwimlane(
+                        [],
+                        { earliest, latest },
+                        explorerJobs,
+                        viewBy!,
+                        isViewBySwimLaneData(swimlaneData)
+                          ? swimlaneData.cardinality
+                          : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                        perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
+                        fromPageInput,
+                        swimlaneContainerWidth,
+                        appliedFilters
+                      )
+                    ).pipe(
+                      map((viewBySwimlaneData) => {
+                        return {
+                          ...viewBySwimlaneData!,
+                          earliest,
+                          latest,
+                        };
+                      })
+                    );
+                  }
+                  return of(overallSwimlaneData);
+                })
+              );
+              return explorer$;
+            } else {
+              return from(
+                anomalyTimelineService.loadOverallData(explorerJobs, swimlaneContainerWidth)
+              ).pipe(
+                switchMap((overallSwimlaneData) => {
+                  console.log('overallSwimlaneData 2', overallSwimlaneData);
+                  const { earliest, latest } = overallSwimlaneData;
+
+                  if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
+                    if (perPageFromState === undefined) {
+                      // set initial pagination from the input or default one
+                      setPerPage(perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE);
+                    }
+
+                    if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
+                      // store per page value when the dashboard is in the edit mode
+                      onInputChange({ perPage: perPageFromState });
+                    }
+
+                    return from(
+                      anomalyTimelineService.loadViewBySwimlane(
+                        [],
+                        { earliest, latest },
+                        explorerJobs,
+                        viewBy!,
+                        isViewBySwimLaneData(swimlaneData)
+                          ? swimlaneData.cardinality
+                          : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                        perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
+                        fromPageInput,
+                        swimlaneContainerWidth,
+                        appliedFilters
+                      )
+                    ).pipe(
+                      map((viewBySwimlaneData) => {
+                        return {
+                          ...viewBySwimlaneData!,
+                          earliest,
+                          latest,
+                        };
+                      })
+                    );
+                  }
+                  return of(overallSwimlaneData);
+                })
+              );
+            }
+          }
+        ),
         catchError((e) => {
+          console.log('e.body', e.body);
           setError(e.body);
           return of(undefined);
         })
       )
-      .subscribe((data) => {
-        if (data !== undefined) {
+      .subscribe((results) => {
+        console.log('results', results);
+        if (results !== undefined) {
           setError(null);
-          setSwimlaneData(data);
+          setSwimlaneData(results);
           setIsLoading(false);
         }
       });
@@ -415,6 +545,11 @@ export function useExplorerInputResolver(
     if (perPage === undefined) return;
     perPage$.next(perPage);
   }, [perPage]);
+
+  useEffect(() => {
+    if (selectedCells === undefined) return;
+    selectedCells$.next(selectedCells);
+  }, [selectedCells]);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);

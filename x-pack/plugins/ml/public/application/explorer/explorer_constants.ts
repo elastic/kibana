@@ -50,7 +50,7 @@ export const CHART_TYPE = {
   POPULATION_DISTRIBUTION: 'population_distribution',
   SINGLE_METRIC: 'single_metric',
   GEO_MAP: 'geo_map',
-};
+} as const;
 
 export const MAX_CATEGORY_EXAMPLES = 10;
 

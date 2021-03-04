@@ -23,6 +23,7 @@ import type { AnomalyDetectorService } from '../application/services/anomaly_det
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import { AnomalyExplorerService } from '../application/services/anomaly_explorer_service';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -91,12 +92,13 @@ export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEm
 export interface AnomalyExplorerServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyTimelineService: AnomalyTimelineService;
+  anomalyExplorerService: AnomalyExplorerService;
 }
 
 export type AnomalyExplorerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalyExplorerServices
 ];
 export interface AnomalyExplorerCustomOutput {
   perPage?: number;

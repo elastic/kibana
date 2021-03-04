@@ -5,4 +5,13 @@
  * 2.0.
  */
 
+import { CHART_TYPE } from '../explorer/explorer_constants';
+
 export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;
+export declare function getChartType(config: any): typeof CHART_TYPE[keyof typeof CHART_TYPE];
+export declare function chartLimits(
+  data: any[]
+): {
+  min: number;
+  max: number;
+};

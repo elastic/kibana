@@ -21,6 +21,7 @@ import {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableServices,
 } from '..';
+import { AnomalyExplorerService } from '../../application/services/anomaly_explorer_service';
 
 export class AnomalyExplorerEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalyExplorerEmbeddableInput> {
@@ -70,11 +71,16 @@ export class AnomalyExplorerEmbeddableFactory
       coreStart.uiSettings,
       mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
+    const anomalyExplorerService = new AnomalyExplorerService(
+      coreStart.uiSettings,
+      mlApiServicesProvider(httpService),
+      mlResultsServiceProvider(mlApiServicesProvider(httpService))
+    );
 
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyTimelineService },
+      { anomalyDetectorService, anomalyTimelineService, anomalyExplorerService },
     ];
   }
 

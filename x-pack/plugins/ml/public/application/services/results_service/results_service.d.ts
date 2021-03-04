@@ -6,7 +6,9 @@
  */
 
 import { MlApiServices } from '../ml_api_service';
+import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 
+type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
   mlApiServices: MlApiServices
 ): {
@@ -49,7 +51,7 @@ export function resultsServiceProvider(
     influencersFilterQuery: any
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
-  getRecordsForInfluencer(): Promise<any>;
+  getRecordsForInfluencer(): Promise<RecordForInfluencer[]>;
   getRecordsForDetector(): Promise<any>;
   getRecords(): Promise<any>;
   getEventRateData(

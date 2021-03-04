@@ -81,8 +81,7 @@ export const anomalyDataChange = function (
   const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
   const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
   const hasGeoData = recordsToPlot.find(
-    (record) =>
-      (record.function_description || recordsToPlot.function) === ML_JOB_AGGREGATION.LAT_LONG
+    (record) => (record.function_description || record.function) === ML_JOB_AGGREGATION.LAT_LONG
   );
 
   const seriesConfigs = recordsToPlot.map(buildConfig);
@@ -679,6 +678,7 @@ function calculateChartRange(
   // Look for the chart with the shortest bucket span as this determines
   // the length of the time range that can be plotted.
   const midpointMs = Math.ceil((selectedEarliestMs + selectedLatestMs) / 2);
+  console.log('seriesConfigs', seriesConfigs);
   const minBucketSpanMs = Math.min.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
   const maxBucketSpanMs = Math.max.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
