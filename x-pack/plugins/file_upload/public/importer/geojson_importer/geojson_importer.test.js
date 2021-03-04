@@ -222,7 +222,7 @@ describe('previewFile', () => {
 });
 
 describe('toEsDoc', () => {
-  test('should convert features to geo_point ES document', () => {
+  test('should convert feature to geo_point ES document', () => {
     const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_POINT);
     expect(esDoc).toEqual({
       coordinates: [-112.0372, 46.608058],
@@ -230,7 +230,7 @@ describe('toEsDoc', () => {
     });
   });
 
-  test('should convert features to geo_shape ES document', () => {
+  test('should convert feature to geo_shape ES document', () => {
     const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_SHAPE);
     expect(esDoc).toEqual({
       coordinates: {

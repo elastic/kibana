@@ -16,7 +16,7 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { ImportDoc, ImportFailure, ImportResponse, MB } from '../../../common';
 
-const IMPORT_CHUNK_SIZE_MB = 5 * MB;
+const BLOCK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export interface GeoJsonPreview {
@@ -96,7 +96,7 @@ export class GeoJsonImporter extends Importer {
 
     // Read file in blocks to avoid loading too much of file into memory at a time
     while ((this._features.length > 0 || this._hasNext) && this._isActive) {
-      await this._readUntil(undefined, IMPORT_CHUNK_SIZE_MB);
+      await this._readUntil(undefined, BLOCK_SIZE_MB);
       if (!this._isActive) {
         return {
           success: false,
