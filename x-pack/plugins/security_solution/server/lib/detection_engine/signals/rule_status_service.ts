@@ -55,6 +55,13 @@ export const buildRuleStatusAttributes: (
         lastSuccessMessage: message,
       };
     }
+    case 'partial failure': {
+      return {
+        ...baseAttributes,
+        lastSuccessAt: now,
+        lastSuccessMessage: message,
+      };
+    }
     case 'failed': {
       return {
         ...baseAttributes,
