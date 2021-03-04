@@ -194,10 +194,12 @@ Discover::
 * Adds "Hide chart" / "Show chart" persistence {kibana-pull}88603[#88603]
 {kib} Home & Add Data::
 * Adds custom global header banner {kibana-pull}87438[#87438]
+Elastic Security::
+For the Elastic Security 7.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Lens and visualizations::
 * Adds the counter rate, cumulative sum, differences and moving average functions to *Lens* {kibana-pull}84384[#84384]
 * Adds the percentile function to *Lens* {kibana-pull}86490[#86490]
-* Adds support for histogram mapping type for all numeric functions {kibana-pull}90357[#90357]
+* Adds support for histogram mapping type for all numeric functions in *Lens* {kibana-pull}90357[#90357]
 * Renames *Visualize* to *Visualize Library* {kibana-pull}91015[#91015]
 Logs::
 * Show anomalies across the log rate and categorization ML jobs in a swimlane visualization {kibana-pull}89589[#89589]
@@ -259,22 +261,24 @@ Discover::
 * Fixes values of `products.min_price` field in Kibana sample ecommerce data set {kibana-pull}90428[#90428]
 * Navigation search now implements keyword registration for applications, allowing you to search for applications by keywords as well as by title {kibana-pull}85686[#85686]
 * Updated favicons {kibana-pull}87271[#87271]
+Elastic Security::
+For the Elastic Security 7.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Lens and visualizations::
-* Adds more in-editor Advanced documentation {kibana-pull}86821[#86821]
-* Adds specific IP and Range/Interval sorting to datatable {kibana-pull}87006[#87006]
-* Use datagrid with resizable columns for datatable {kibana-pull}88069[#88069]
-* Use first decimal when required for data summaries {kibana-pull}88463[#88463]
-* Hide column in table {kibana-pull}88680[#88680]
-* Table column text alignment {kibana-pull}89300[#89300]
-* Allow custom label for fields via index pattern field management {kibana-pull}84612[#84612]
-* Align Lens & Visualize Top nav Buttons & Behaviour {kibana-pull}86922[#86922]
-* Align Lens & Visualize Breadcrumbs {kibana-pull}86941[#86941]
-* User should be able to set a specific tilemap service using the mapStyle property {kibana-pull}88440[#88440]
+* Adds more in-editor Advanced documentation in *Lens* {kibana-pull}86821[#86821]
+* Adds specific IP and Range/Interval sorting to datatable in *Lens* {kibana-pull}87006[#87006]
+* Use datagrid with resizable columns for datatable in *Lens* {kibana-pull}88069[#88069]
+* Use first decimal when required for data summaries in *Lens* {kibana-pull}88463[#88463]
+* Hide column in *Lens* table {kibana-pull}88680[#88680]
+* Table column text alignment in *Lens* {kibana-pull}89300[#89300]
+* Allow custom label for fields via index pattern field management in *TSVB* {kibana-pull}84612[#84612]
+* Align *Lens* and *Visualize Library* top nav buttons and behaviour {kibana-pull}86922[#86922]
+* Align *Lens* and *Visualize Library* breadcrumbs {kibana-pull}86941[#86941]
+* User should be able to set a specific tilemap service using the mapStyle property in *Vega* {kibana-pull}88440[#88440]
 * Leaflet (https://leafletjs.com/) map layer in *Vega* was replaced by MapBox (https://www.mapbox.com/) {kibana-pull}88605[#88605]
-* Communicate the index pattern to the dashboard {kibana-pull}90623[#90623]
-* Adds a new "Series Agg" to count the number of series {kibana-pull}91225[#91225]
-* Support min and max with histogram data types {kibana-pull}91581[#91581]
-* Adds possibility to folding in CodeEditor. Updates 'spec viewer' in vega and 'request/response code viewer' in inspector {kibana-pull}90152[#90152]
+* Communicate the index pattern to the dashboard for *Timelion* visualizations {kibana-pull}90623[#90623]
+* Adds a new "Series Agg" to count the number of series in *TSVB* {kibana-pull}91225[#91225]
+* Support min and max with histogram data types in *TSVB* {kibana-pull}91581[#91581]
+* Adds possibility to folding in CodeEditor. Updates 'spec viewer' in *Vega* and 'request/response code viewer' in inspector {kibana-pull}90152[#90152]
 Logs::
 * Adds sorting capabilities to categories page {kibana-pull}88051[#88051]
 * Display category in anomalies table {kibana-pull}88677[#88677]
@@ -372,7 +376,9 @@ Discover::
 * Adds icon for nested fields in sidebar {kibana-pull}85147[#85147]
 * Could not expand cell content in DiscoverGrid {kibana-pull}91289[#91289]
 * Fixes icon for conflicting fields {kibana-pull}90641[#90641]
-Lens::
+Elastic Security::
+For the Elastic Security 7.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
 * Make sure filter object is persistable {kibana-pull}87828[#87828]
 * Close popover on repeated button click {kibana-pull}87834[#87834]
 * Make Lens intervals default value adapt to histogram:maxBars Advanced Setting changes {kibana-pull}89305[#89305]
