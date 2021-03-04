@@ -30,7 +30,7 @@
     "enzyme-adapter-react-16": "^1.1.1"
   },
   "devDependencies": {
-    "@elastic/eui": "0.0.23",
+    "@elastic/eui": "6.10.9",
     "@kbn/babel-preset": "1.0.0",
     "autoprefixer": "6.5.4",
     "babel-core": "^6.26.3",
