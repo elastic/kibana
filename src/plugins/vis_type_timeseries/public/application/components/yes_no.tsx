@@ -6,23 +6,38 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import _ from 'lodash';
+import React, { useCallback } from 'react';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TimeseriesVisParams } from '../../types';
 
-export function YesNo(props) {
-  const { name, value, disabled, 'data-test-subj': dataTestSubj } = props;
-  const handleChange = (value) => {
-    const { name } = props;
-    return () => {
-      const parts = { [name]: value };
-      props.onChange(parts);
-    };
-  };
+interface YesNoProps<ParamName extends keyof TimeseriesVisParams> {
+  name: ParamName;
+  value: TimeseriesVisParams[ParamName];
+  disabled?: boolean;
+  'data-test-subj'?: string;
+  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
+}
+
+export function YesNo<ParamName extends keyof TimeseriesVisParams>({
+  name,
+  value,
+  disabled,
+  'data-test-subj': dataTestSubj,
+  onChange,
+}: YesNoProps<ParamName>) {
+  const handleChange = useCallback(
+    (val: number) => {
+      return () => {
+        const parts = { [name]: val };
+        onChange(parts);
+      };
+    },
+    [onChange, name]
+  );
   const htmlId = htmlIdGenerator();
-  const inputName = name + _.uniqueId();
+  const inputName = htmlId(name);
+
   return (
     <div>
       <EuiRadio
@@ -63,12 +78,3 @@ export function YesNo(props) {
     </div>
   );
 }
-
-YesNo.propTypes = {
-  name: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-};
-
-YesNo.defaultProps = {
-  disabled: false,
-};

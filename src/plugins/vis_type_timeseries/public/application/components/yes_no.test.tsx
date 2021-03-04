@@ -7,29 +7,29 @@
  */
 
 import React from 'react';
-import { expect } from 'chai';
-import { shallowWithIntl } from '@kbn/test/jest';
-import sinon from 'sinon';
+import { shallow } from 'enzyme';
 import { YesNo } from './yes_no';
 
 describe('YesNo', () => {
   it('call onChange={handleChange} on yes', () => {
-    const handleChange = sinon.spy();
-    const wrapper = shallowWithIntl(<YesNo name="test" onChange={handleChange} />);
+    const handleChange = jest.fn();
+    const wrapper = shallow(
+      <YesNo name="ignore_global_filters" onChange={handleChange} value={0} />
+    );
     wrapper.find('EuiRadio').first().simulate('change');
-    expect(handleChange.calledOnce).to.equal(true);
-    expect(handleChange.firstCall.args[0]).to.eql({
-      test: 1,
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledWith({
+      ignore_global_filters: 1,
     });
   });
 
   it('call onChange={handleChange} on no', () => {
-    const handleChange = sinon.spy();
-    const wrapper = shallowWithIntl(<YesNo name="test" onChange={handleChange} />);
+    const handleChange = jest.fn();
+    const wrapper = shallow(<YesNo name="show_legend" onChange={handleChange} value={1} />);
     wrapper.find('EuiRadio').last().simulate('change');
-    expect(handleChange.calledOnce).to.equal(true);
-    expect(handleChange.firstCall.args[0]).to.eql({
-      test: 0,
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledWith({
+      show_legend: 0,
     });
   });
 });
