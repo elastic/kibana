@@ -12,7 +12,12 @@ import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockPluginSetup,
+  createMockReportingCore,
+} from '../test_helpers';
 import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
@@ -41,7 +46,7 @@ describe('GET /api/reporting/jobs/download', () => {
       'reporting',
       () => ({})
     );
-    core = await createMockReportingCore(config, ({
+    const mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
@@ -65,7 +70,9 @@ describe('GET /api/reporting/jobs/download', () => {
           type: 'gold',
         }),
       },
-    } as unknown) as ReportingInternalSetup);
+    });
+
+    core = await createMockReportingCore(config, mockSetupDeps);
     // @ts-ignore
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({

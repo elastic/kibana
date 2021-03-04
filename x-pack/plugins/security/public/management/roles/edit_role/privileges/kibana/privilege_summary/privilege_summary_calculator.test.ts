@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Role } from '../../../../../../../common/model';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {

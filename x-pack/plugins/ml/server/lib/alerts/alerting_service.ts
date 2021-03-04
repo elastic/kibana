@@ -258,7 +258,9 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
       const fieldName = getEntityFieldName(source);
       const fieldValue = getEntityFieldValue(source);
-      alertInstanceKey += `_${source.detector_index}_${source.function}_${fieldName}_${fieldValue}`;
+      const entity =
+        fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
+      alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
     }
     return alertInstanceKey;
   };
