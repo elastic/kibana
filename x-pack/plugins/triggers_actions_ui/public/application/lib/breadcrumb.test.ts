@@ -17,7 +17,7 @@ describe('getAlertingSectionBreadcrumb', () => {
       }),
       href: `${routeToConnectors}`,
     });
-    expect(getAlertingSectionBreadcrumb('alerts')).toMatchObject({
+    expect(getAlertingSectionBreadcrumb('rules')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
         defaultMessage: 'Rules',
       }),
