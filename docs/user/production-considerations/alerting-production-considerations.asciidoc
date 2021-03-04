@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alerting-production-considerations]]
-== Alerting Production considerations
+== Alerting production considerations
 
 ++++
 <titleabbrev>Alerting</titleabbrev>
