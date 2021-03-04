@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './status';
-export * from './config';
-export * from './stats';
-export * from './types';
+export const escapeQuotes = (str: string): string => {
+  return str.replace(/[\\"]/g, '\\$&');
+};
