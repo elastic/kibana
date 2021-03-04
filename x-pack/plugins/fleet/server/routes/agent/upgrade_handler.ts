@@ -8,6 +8,7 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
+
 import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
 import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
