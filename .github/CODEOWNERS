@@ -57,6 +57,7 @@
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
+/x-pack/plugins/runtime_fields @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services
@@ -207,6 +208,7 @@
 #CC# /src/legacy/server/http/ @elastic/kibana-core
 #CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
+#CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /src/plugins/status_page/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
