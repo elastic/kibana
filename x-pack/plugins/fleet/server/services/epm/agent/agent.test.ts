@@ -188,7 +188,9 @@ my-package:
     numeric: {{numeric}}
     mixed: {{mixed}}
     concatenatedEnd: {{a}}{{b}}
-    concatenatedMiddle: {{c}}{{d}}`;
+    concatenatedMiddle: {{c}}{{d}}
+    mixedMultiline: |
+        {{{ search }}} | streamstats`;
 
     const vars = {
       asteriskOnly: { value: '"*"', type: 'string' },
@@ -199,6 +201,7 @@ my-package:
       b: { value: '/logs/my.log*', type: 'string' },
       c: { value: '/opt/*/package/', type: 'string' },
       d: { value: 'logs/*my.log', type: 'string' },
+      search: { value: 'search sourcetype="access*"', type: 'text' },
     };
 
     const targetOutput = {
@@ -209,6 +212,7 @@ my-package:
         mixed: '1s',
         concatenatedEnd: '/opt/package/*/logs/my.log*',
         concatenatedMiddle: '/opt/*/package/logs/*my.log',
+        mixedMultiline: 'search sourcetype="access*" | streamstats\n',
       },
     };
 
