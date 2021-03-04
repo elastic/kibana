@@ -32,7 +32,6 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelect } from './lib/index_pattern_select';
 
@@ -92,7 +91,6 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const defaultIndexPattern = this.props.model.default_index_pattern;
 
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
@@ -109,30 +107,11 @@ export class AnnotationsEditor extends Component {
           <EuiFlexItem className="tvbAggRow__children">
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('indexPattern')}
-                  label={
-                    <FormattedMessage
-                      id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern"
-                    />
-                  }
-                  helpText={
-                    defaultIndexPattern &&
-                    !model.index_pattern &&
-                    i18n.translate('visTypeTimeseries.annotationsEditor.searchByDefaultIndex', {
-                      defaultMessage: 'Default index pattern is used. To query all indexes use *',
-                    })
-                  }
-                  fullWidth
-                >
-                  <IndexPatternSelect
-                    value={model.index_pattern}
-                    indexPatternName={'index_pattern'}
-                    onChange={handleChange}
-                    defaultIndexPattern={model.default_index_pattern}
-                  />
-                </EuiFormRow>
+                <IndexPatternSelect
+                  value={model.index_pattern}
+                  indexPatternName={'index_pattern'}
+                  onChange={handleChange}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow

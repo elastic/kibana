@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -16,52 +16,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SelectIndexComponentProps } from './types';
-import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
-import { IndexPatternObject } from '../../../../../common/types';
-import { getDataStart } from '../../../../services';
+import { PopoverProps } from './types';
 
-type SwitchModePopoverProps = Assign<
-  Pick<SelectIndexComponentProps, 'onModeChange' | 'value'>,
-  {
-    useKibanaIndices: boolean;
-  }
->;
-
-export const SwitchModePopover = ({
-  onModeChange,
-  value,
-  useKibanaIndices,
-}: SwitchModePopoverProps) => {
+export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [matchedIndex, setMatchedIndex] = useState<IndexPatternObject>();
-
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
   const switchMode = useCallback(() => {
-    onModeChange(!useKibanaIndices, matchedIndex);
-  }, [onModeChange, matchedIndex, useKibanaIndices]);
-
-  useEffect(() => {
-    async function retrieveIndex() {
-      const { indexPatterns } = getDataStart();
-
-      if (isStringTypeIndexPattern(value)) {
-        const index = (await indexPatterns.find(value)).find((i) => i.title === value);
-
-        if (index) {
-          return setMatchedIndex({ id: index.id!, title: index.title });
-        }
-      }
-
-      setMatchedIndex(undefined);
-    }
-
-    retrieveIndex();
-  }, [value]);
+    onModeChange(!useKibanaIndices);
+  }, [onModeChange, useKibanaIndices]);
 
   return (
     <EuiPopover

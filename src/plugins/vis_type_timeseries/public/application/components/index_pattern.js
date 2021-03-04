@@ -165,27 +165,13 @@ export const IndexPattern = ({
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('indexPattern')}
-            label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
-            })}
-            helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
-            }
-          >
-            <IndexPatternSelect
-              value={model[indexPatternName]}
-              indexPatternName={indexPatternName}
-              onChange={onChange}
-              defaultIndexPattern={model.default_index_pattern}
-              disabled={disabled}
-              allowIndexSwitchingMode={allowIndexSwitchingMode}
-            />
-          </EuiFormRow>
+          <IndexPatternSelect
+            value={model[indexPatternName]}
+            indexPatternName={indexPatternName}
+            onChange={onChange}
+            disabled={disabled}
+            allowIndexSwitchingMode={allowIndexSwitchingMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
