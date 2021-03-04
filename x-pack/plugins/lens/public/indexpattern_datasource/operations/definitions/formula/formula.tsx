@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { TinymathAST, TinymathVariable } from '@kbn/tinymath';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
@@ -37,7 +38,9 @@ import { LANGUAGE_ID } from './math_tokenization';
 
 import './formula.scss';
 
-const defaultLabel = 'Formula';
+const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+  defaultMessage: 'Formula',
+});
 
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
@@ -62,6 +65,7 @@ export const formulaOperation: OperationDefinition<
   displayName: defaultLabel,
   getDefaultLabel: (column, indexPattern) => defaultLabel,
   input: 'managedReference',
+  hidden: true,
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
   },
