@@ -205,11 +205,23 @@ In the case of using a custom ES or SavedObjects client, it is up to the plugin 
 
 ##### Schema Field
 
-The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported (including optional fields) when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
+The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported (including optional fields) when registering the collector. The schema supports descriptions as simple strings that allow developers to document what the data represents. The `_meta` field only supports a description property.
+```
+schema: {
+  my_greeting: {
+    type: 'keyword',
+    _meta: {
+      description: 'The greeting keyword',
+    }
+  }
+}
+```
+
+Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
 
 ###### Allowed Schema Types
 
-The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
+The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported by the `fetch` method:
 
 ```
 'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
