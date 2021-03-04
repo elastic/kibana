@@ -374,12 +374,12 @@ function mockRouterProps(alert: Alert) {
   return {
     match: {
       isExact: false,
-      path: `/alert/${alert.id}`,
+      path: `/rule/${alert.id}`,
       url: '',
-      params: { alertId: alert.id },
+      params: { ruleId: alert.id },
     },
     history: createMemoryHistory(),
-    location: createLocation(`/alert/${alert.id}`),
+    location: createLocation(`/rule/${alert.id}`),
   };
 }
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
