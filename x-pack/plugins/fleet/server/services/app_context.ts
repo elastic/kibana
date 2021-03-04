@@ -15,6 +15,7 @@ import type {
   HttpServiceSetup,
   Logger,
 } from 'src/core/server';
+
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,

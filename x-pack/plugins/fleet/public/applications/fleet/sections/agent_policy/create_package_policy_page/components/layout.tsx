@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { WithHeaderLayout } from '../../../../layouts';
 import { AgentPolicy, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';

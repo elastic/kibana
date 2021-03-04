@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverLt from 'semver/functions/lt';
+
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
 import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
@@ -36,6 +38,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 import { useSetPackageInstallStatus } from '../../hooks';
+
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -78,7 +81,7 @@ export function Detail() {
     packageInfo &&
     'savedObject' in packageInfo &&
     packageInfo.savedObject &&
-    packageInfo.savedObject.attributes.version < packageInfo.latestVersion;
+    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
   // Fetch package info
   const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
