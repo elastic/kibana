@@ -35,7 +35,7 @@ export const ComingSoonPrompt: React.FunctionComponent = () => {
               <FormattedMessage
                 id="xpack.upgradeAssistant.emptyPrompt.upgradeAssistantDescription"
                 defaultMessage="The Upgrade Assistant identifies deprecated settings in your cluster and helps you
-                resolve issues before you upgrade. Check back here when it's time to upgrade your Elastic Stack to {nextMajor}."
+                resolve issues before you upgrade. Check back here when it's time to upgrade to Elastic {nextMajor}."
                 values={{ nextMajor: `${nextMajor}.0` }}
               />
             </p>
