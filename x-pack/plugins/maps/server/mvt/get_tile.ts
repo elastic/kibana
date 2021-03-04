@@ -158,7 +158,10 @@ export async function getTile({
       .toPromise();
 
     if (
-      isTotalHitsGreaterThan(countResponse.rawResponse.hits.total as TotalHits, requestBody.size)
+      isTotalHitsGreaterThan(
+        (countResponse.rawResponse.hits.total as unknown) as TotalHits,
+        requestBody.size
+      )
     ) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
