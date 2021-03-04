@@ -22,8 +22,7 @@ import { InventoryMetricConditions } from '../../../../server/lib/alerting/inven
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
-import { InfraFormatterType } from '../../../lib/lib';
+
 import {
   ChartContainer,
   LoadingState,

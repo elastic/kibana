@@ -482,6 +482,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   } = expression;
 
   const isMetricPct = useMemo(() => {
+    if (!expression.metric) {
+      return false;
+    }
+
     const metricFormatter = METRIC_FORMATTERS[expression.metric];
     return Boolean(metricFormatter?.formatter === InfraFormatterType.percent);
   }, [expression.metric]);
