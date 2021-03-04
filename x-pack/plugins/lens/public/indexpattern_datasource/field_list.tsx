@@ -53,7 +53,6 @@ export const FieldList = React.memo(function FieldList({
   dropOntoWorkspace,
   hasSuggestionForField,
   editField,
-  deleteField,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -69,7 +68,6 @@ export const FieldList = React.memo(function FieldList({
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   editField?: (name: string) => void;
-  deleteField?: (name: string) => void;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -146,7 +144,6 @@ export const FieldList = React.memo(function FieldList({
                   exists={exists(field)}
                   field={field}
                   editField={editField}
-                  deleteField={deleteField}
                   hideDetails={true}
                   key={field.name}
                   itemIndex={index}
@@ -172,7 +169,6 @@ export const FieldList = React.memo(function FieldList({
                 helpTooltip={fieldGroup.helpText}
                 exists={exists}
                 editField={editField}
-                deleteField={deleteField}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}

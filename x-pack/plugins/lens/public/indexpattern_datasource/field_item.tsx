@@ -74,7 +74,6 @@ export interface FieldItemProps {
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   editField?: (name: string) => void;
-  deleteField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
@@ -109,7 +108,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     groupIndex,
     dropOntoWorkspace,
     editField,
-    deleteField,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
@@ -123,17 +121,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           }
         : undefined,
     [editField, setOpen]
-  );
-
-  const closeAndDelete = useMemo(
-    () =>
-      deleteField
-        ? (name: string) => {
-            deleteField(name);
-            setOpen(false);
-          }
-        : undefined,
-    [deleteField, setOpen]
   );
 
   const dropOntoWorkspaceAndClose = useCallback(
@@ -283,7 +270,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           {...state}
           {...props}
           editField={closeAndEdit}
-          deleteField={closeAndDelete}
           dropOntoWorkspace={dropOntoWorkspaceAndClose}
         />
       </EuiPopover>
@@ -343,7 +329,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     data: { fieldFormats },
     dropOntoWorkspace,
     editField,
-    deleteField,
     hasSuggestionForField,
     hideDetails,
   } = props;
@@ -356,22 +341,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
   const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
 
-  const runtimeFieldControls = (
+  const runtimeFieldControls = editField && (
     <>
-      {editField && (
-        <EuiButtonEmpty onClick={() => editField(field.name)}>
-          {i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-            defaultMessage: 'Edit field',
-          })}
-        </EuiButtonEmpty>
-      )}
-      {deleteField && field.runtime && (
-        <EuiButtonEmpty onClick={() => deleteField(field.name)} color="danger">
-          {i18n.translate('xpack.lens.indexPattern.deleteFieldLabel', {
-            defaultMessage: 'Delete field',
-          })}
-        </EuiButtonEmpty>
-      )}
+      <EuiSpacer />
+      <EuiButtonEmpty
+        onClick={() => editField(field.name)}
+        size="xs"
+        data-test-subj="lnsFieldListPanelEdit"
+      >
+        {i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+          defaultMessage: 'Edit field in {pattern}',
+          values: {
+            pattern: indexPattern.title,
+          },
+        })}
+      </EuiButtonEmpty>
     </>
   );
 
@@ -430,7 +414,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   let title = <></>;
 
   if (props.isLoading) {
-    return <EuiLoadingSpinner />;
+    return (
+      <>
+        <EuiLoadingSpinner />
+        {runtimeFieldControls}
+      </>
+    );
   } else if (
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)

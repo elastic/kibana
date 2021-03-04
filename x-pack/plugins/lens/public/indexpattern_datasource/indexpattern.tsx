@@ -192,6 +192,7 @@ export function getIndexPatternDatasource({
             charts={charts}
             indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
+            core={core}
           />
         </I18nProvider>,
         domElement

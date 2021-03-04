@@ -20,10 +20,12 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
-  EuiButton,
+  EuiLink,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { CoreStart } from 'kibana/public';
 import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
@@ -39,9 +41,10 @@ import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { RedirectAppLinks, toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 
-export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
+export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
   changeIndexPattern: (
     id: string,
@@ -49,6 +52,7 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
     setState: StateSetter<IndexPatternPrivateState>
   ) => void;
   charts: ChartsPluginSetup;
+  core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
 import { LensFieldIcon } from './lens_field_icon';
@@ -279,8 +283,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   charts,
   dropOntoWorkspace,
   hasSuggestionForField,
-}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
+}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  core: CoreStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
@@ -490,15 +495,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
   }, []);
 
-  const reloadIndexPattern = useCallback(async () => {
-    const newlyMappedIndexPattern = await loadIndexPatterns({
-      indexPatternsService: data.indexPatterns,
-      cache: {},
-      patterns: [currentIndexPattern.id],
-    });
-    onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
-  }, [currentIndexPattern.id, data.indexPatterns, onUpdateIndexPattern]);
-
   const editField = useMemo(
     () =>
       editPermission
@@ -509,29 +505,54 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 indexPattern: indexPatternInstance,
               },
               fieldName,
-              onSave: reloadIndexPattern,
+              onSave: async () => {
+                const newlyMappedIndexPattern = await loadIndexPatterns({
+                  indexPatternsService: data.indexPatterns,
+                  cache: {},
+                  patterns: [currentIndexPattern.id],
+                });
+                onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+                core.notifications.toasts.add({
+                  text: toMountPoint(
+                    <RedirectAppLinks application={core.application}>
+                      <I18nProvider>
+                        <FormattedMessage
+                          id="xpack.lens.indexPatterns.fieldListEditSuccessMessage"
+                          defaultMessage="You can manage your field list in {managementLink}"
+                          values={{
+                            managementLink: (
+                              <EuiLink
+                                href={core.http.basePath.prepend(
+                                  `management/kibana/indexPatterns/patterns/${currentIndexPattern.id}`
+                                )}
+                              >
+                                {i18n.translate('xpack.lens.indexPatterns.indexPatternManagement', {
+                                  defaultMessage: 'index pattern management',
+                                })}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </I18nProvider>
+                    </RedirectAppLinks>
+                  ),
+                });
+              },
             });
           }
         : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern, editPermission]
+    [
+      data,
+      indexPatternFieldEditor,
+      currentIndexPattern,
+      editPermission,
+      onUpdateIndexPattern,
+      core.notifications.toasts,
+      core.http.basePath,
+      core.application,
+    ]
   );
 
-  const deleteField = useMemo(
-    () =>
-      editPermission
-        ? async (fieldName: string) => {
-            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
-              ctx: {
-                indexPattern: indexPatternInstance,
-              },
-              fieldNames: [fieldName],
-              onDelete: reloadIndexPattern,
-            });
-          }
-        : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern.id, reloadIndexPattern, editPermission]
-  );
   const addField = useMemo(() => (editPermission && editField ? () => editField() : undefined), [
     editField,
     editPermission,
@@ -708,16 +729,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
-            deleteField={deleteField}
           />
         </EuiFlexItem>
         {addField && (
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={addField}>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              size="xs"
+              iconType="plus"
+              iconSide="left"
+              onClick={addField}
+              data-test-subj="indexPattern-add-field"
+            >
               {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                defaultMessage: 'Add field',
+                defaultMessage: 'Add field to {pattern}',
+                values: {
+                  pattern: currentIndexPattern.title,
+                },
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
+            <EuiSpacer size="s" />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
