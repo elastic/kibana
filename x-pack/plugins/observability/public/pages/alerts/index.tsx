@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { AlertItem, AlertsTable } from './alerts_table';
 
 /**
  * This is just a placeholder for a working search bar.
@@ -49,18 +51,23 @@ function SearchBar() {
   );
 }
 
-function List() {
-  return <>No alerts</>;
+interface AlertsPageProps {
+  items?: AlertItem[];
 }
 
-export function AlertsPage() {
+export function AlertsPage({ items = [] }: AlertsPageProps) {
   return (
     <EuiPage>
       <EuiPageHeader
-        pageTitle={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
+        pageTitle={
+          <>
+            {i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}{' '}
+            <ExperimentalBadge />
+          </>
+        }
         rightSideItems={[
-          <EuiButton fill>
-            {i18n.translate('xpack.observability.manageDetectionRulesButtonLabel', {
+          <EuiButton fill iconType="gear">
+            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
               defaultMessage: 'Manage detection rules',
             })}
           </EuiButton>,
@@ -71,7 +78,7 @@ export function AlertsPage() {
             <SearchBar />
           </EuiFlexItem>
           <EuiFlexItem>
-            <List />
+            <AlertsTable items={items} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>

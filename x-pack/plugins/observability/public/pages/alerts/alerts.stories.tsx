@@ -18,6 +18,13 @@ export default {
   ],
 };
 
+export function Example() {
+  const items = [
+    { '@timestamp': new Date().toISOString(), severity: 'critical', reason: 'Some reason' },
+  ];
+  return <AlertsPage items={items} />;
+}
+
 export function EmptyState() {
   return <AlertsPage />;
 }
