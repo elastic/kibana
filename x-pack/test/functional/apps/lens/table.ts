@@ -34,9 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
       // Remove the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'none');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(0, 'none');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      });
     });
 
     it('should able to use filters cell actions in table', async () => {

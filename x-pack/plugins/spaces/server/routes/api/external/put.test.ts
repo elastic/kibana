@@ -6,25 +6,28 @@
  */
 
 import * as Rx from 'rxjs';
+
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import {
-  createSpaces,
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
   createMockSavedObjectsRepository,
+  createSpaces,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
-import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
-  coreMock,
-} from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
 import { initPutSpacesApi } from './put';
-import { spacesConfig } from '../../../lib/__fixtures__';
-import { ObjectType } from '@kbn/config-schema';
-import { SpacesClientService } from '../../../spaces_client';
-import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
