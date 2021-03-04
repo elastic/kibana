@@ -18,13 +18,13 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
 import { CreateDocsResponse, ImportResults } from '../types';
-import { callImportRoute, Importer, IMPORT_RETRIES } from '../importer';
+import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { ImportFailure, ImportResponse, MB } from '../../../common';
+import { ImportDoc, ImportFailure, ImportResponse, MB } from '../../../common';
 
-const IMPORT_CHUNK_SIZE_MB = 10 * MB;
+const IMPORT_CHUNK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export interface GeoJsonPreview {
@@ -40,8 +40,9 @@ export class GeoJsonImporter extends Importer {
   private _iterator?: Iterator<unknown>;
   private _hasNext = true;
   private _features: Feature[] = [];
-  private _totalBytesProcessed = 0;
-  private _unimportedBytesProcessed = 0;
+  private _totalBytesRead = 0;
+  private _totalBytesImported = 0;
+  private _blockSizeInBytes = 0;
   private _totalFeatures = 0;
   private _geometryTypesMap = new Map<string, boolean>();
   private _invalidFeatures: ImportFailure[] = [];
@@ -64,7 +65,7 @@ export class GeoJsonImporter extends Importer {
     return {
       features: [...this._features],
       previewCoverage: this._hasNext
-        ? Math.round((this._unimportedBytesProcessed / this._file.size) * 100)
+        ? Math.round((this._blockSizeInBytes / this._file.size) * 100)
         : 100,
       hasPoints: this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint'),
       hasShapes:
@@ -97,7 +98,9 @@ export class GeoJsonImporter extends Importer {
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
+    let importBlockPromise: Promise<ImportResponse> | undefined;
 
+    // Read file in blocks to avoid loading too much of file into memory at a time
     while ((this._features.length > 0 || this._hasNext) && this._isActive) {
       await this._readUntil(undefined, IMPORT_CHUNK_SIZE_MB);
       if (!this._isActive) {
@@ -108,6 +111,71 @@ export class GeoJsonImporter extends Importer {
         };
       }
 
+      // wait for previous import call to finish before starting next import
+      if (importBlockPromise !== undefined) {
+        const importBlockResults = await importBlockPromise;
+        importBlockPromise = undefined;
+        failures.push(...importBlockResults.failures);
+
+        if (!importBlockResults.success) {
+          success = false;
+          error = importBlockResults.error;
+          break;
+        }
+      }
+
+      // Import block in chunks to avoid sending too much data to Elasticsearch at a time.
+      const chunks = createChunks(this._features, this._geoFieldType);
+      const blockSizeInBytes = this._blockSizeInBytes;
+
+      // reset block for next read
+      this._features = [];
+      this._blockSizeInBytes = 0;
+
+      importBlockPromise = this._importBlock(
+        id,
+        index,
+        pipelineId,
+        chunks,
+        blockSizeInBytes,
+        setImportProgress
+      );
+    }
+
+    // wait for last import call
+    if (importBlockPromise) {
+      const importBlockResults = await importBlockPromise;
+      failures.push(...importBlockResults.failures);
+
+      if (!importBlockResults.success) {
+        success = false;
+        error = resp.error;
+      }
+    }
+
+    setImportProgress(100);
+
+    return {
+      success,
+      failures,
+      docCount: this._totalFeatures,
+      error,
+    };
+  }
+
+  private async _importBlock(
+    id: string,
+    index: string,
+    pipelineId: string,
+    chunks: ImportDoc[][],
+    blockSizeInBytes: number,
+    setImportProgress: (progress: number) => void
+  ): Promise<Omit<ImportResults, 'docCount'>> {
+    let success = true;
+    const failures: ImportFailure[] = [];
+    let error;
+
+    for (let i = 0; i < chunks.length; i++) {
       let retries = IMPORT_RETRIES;
       let resp: ImportResponse = {
         success: false,
@@ -117,23 +185,22 @@ export class GeoJsonImporter extends Importer {
         index: '',
         pipelineId: '',
       };
-      const data = toEsDocs(this._features, this._geoFieldType);
-      const progress = Math.round((this._totalBytesProcessed / this._file.size) * 100);
-      this._features = [];
-      this._unimportedBytesProcessed = 0;
-
       while (resp.success === false && retries > 0) {
         try {
           resp = await callImportRoute({
             id,
             index,
-            data,
+            data: chunks[i],
             settings: {},
             mappings: {},
             ingestPipeline: {
               id: pipelineId,
             },
           });
+
+          if (!this._isActive) {
+            break;
+          }
 
           if (retries < IMPORT_RETRIES) {
             // eslint-disable-next-line no-console
@@ -148,30 +215,32 @@ export class GeoJsonImporter extends Importer {
         }
       }
 
+      // TODO update failure item number for chunk and stream block
       failures.push(...resp.failures);
 
-      if (!resp.success) {
+      if (resp.success) {
+        // Advance block percentage in equal increments
+        // even though chunks are not identical in size.
+        // Reason being that chunk size does not exactly correlate to bytes read from file
+        // because features are converted to elasticsearch documents which changes the size.
+        const chunkProgress = (i + 1) / chunks.length;
+        const totalBytesImported = this._totalBytesImported + blockSizeInBytes * chunkProgress;
+        const progressPercent = (totalBytesImported / this._file.size) * 100;
+        setImportProgress(Math.round(progressPercent * 10) / 10);
+      } else {
         success = false;
         error = resp.error;
         break;
       }
-
-      setImportProgress(progress);
     }
 
-    const result: ImportResults = {
+    this._totalBytesImported += blockSizeInBytes;
+
+    return {
       success,
       failures,
-      docCount: this._totalFeatures,
+      error,
     };
-
-    if (success) {
-      setImportProgress(100);
-    } else {
-      result.error = error;
-    }
-
-    return result;
   }
 
   private async _readUntil(rowLimit?: number, sizeLimit?: number) {
@@ -179,7 +248,7 @@ export class GeoJsonImporter extends Importer {
       this._isActive &&
       this._hasNext &&
       (rowLimit === undefined || this._features.length < rowLimit) &&
-      (sizeLimit === undefined || this._unimportedBytesProcessed < sizeLimit)
+      (sizeLimit === undefined || this._blockSizeInBytes < sizeLimit)
     ) {
       await this._next();
     }
@@ -207,9 +276,9 @@ export class GeoJsonImporter extends Importer {
     }
 
     if ('bytesUsed' in batch) {
-      const bytesRead = batch.bytesUsed - this._totalBytesProcessed;
-      this._unimportedBytesProcessed += bytesRead;
-      this._totalBytesProcessed = batch.bytesUsed;
+      const bytesRead = batch.bytesUsed - this._totalBytesRead;
+      this._blockSizeInBytes += bytesRead;
+      this._totalBytesRead = batch.bytesUsed;
     }
 
     const rawFeatures: unknown[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
@@ -259,32 +328,57 @@ export class GeoJsonImporter extends Importer {
   }
 }
 
-export function toEsDocs(
+function createChunks(
   features: Feature[],
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
-) {
-  const esDocs = [];
+): ImportDoc[][] {
+  const chunks: ImportDoc[][] = [];
+
+  let chunk: ImportDoc[] = [];
+  let chunkChars = 0;
   for (let i = 0; i < features.length; i++) {
-    const feature = features[i];
-    const geometry = feature.geometry as
-      | Point
-      | MultiPoint
-      | LineString
-      | MultiLineString
-      | Polygon
-      | MultiPolygon;
-    const coordinates =
-      geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
-        ? {
-            type: geometry.type.toLowerCase(),
-            coordinates: geometry.coordinates,
-          }
-        : geometry.coordinates;
-    const properties = feature.properties ? feature.properties : {};
-    esDocs.push({
-      coordinates,
-      ...properties,
-    });
+    const doc = toEsDoc(features[i], geoFieldType);
+    const docChars = JSON.stringify(doc).length + 1; // +1 adds CHAR for comma once document is in list
+    if (chunk.length === 0 || chunkChars + docChars < MAX_CHUNK_CHAR_COUNT) {
+      // add ES document to current chunk
+      chunk.push(doc);
+      chunkChars += docChars;
+    } else {
+      // chunk boundary found, start new chunk
+      chunks.push(chunk);
+      chunk = [doc];
+      chunkChars = docChars;
+    }
   }
-  return esDocs;
+
+  if (chunk.length) {
+    chunks.push(chunk);
+  }
+
+  return chunks;
+}
+
+export function toEsDoc(
+  feature: Feature,
+  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
+) {
+  const geometry = feature.geometry as
+    | Point
+    | MultiPoint
+    | LineString
+    | MultiLineString
+    | Polygon
+    | MultiPolygon;
+  const coordinates =
+    geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
+      ? {
+          type: geometry.type.toLowerCase(),
+          coordinates: geometry.coordinates,
+        }
+      : geometry.coordinates;
+  const properties = feature.properties ? feature.properties : {};
+  return {
+    coordinates,
+    ...properties,
+  };
 }
