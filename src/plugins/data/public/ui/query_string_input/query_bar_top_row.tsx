@@ -186,6 +186,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           nonKqlModeHelpText={props.nonKqlModeHelpText}
           storageKey={props.storageKey}
           disableLanguageSwitcher={props.disableLanguageSwitcher}
+          isInvalid={props.isInvalid}
         />
       </EuiFlexItem>
     );

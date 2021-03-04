@@ -404,6 +404,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           autoSubmit={this.props.autoSubmit}
           storageKey={this.props.storageKey}
           disableLanguageSwitcher={this.props.disableLanguageSwitcher}
+          isInvalid={this.props.isInvalid}
         />
       );
     }

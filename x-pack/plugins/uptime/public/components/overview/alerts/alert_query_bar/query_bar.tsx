@@ -6,14 +6,13 @@
  */
 
 import React, { ComponentType, useContext, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
 import { StatefulSearchBarProps } from '../../../../../../../../src/plugins/data/public/ui/search_bar';
 import { DataPublicPluginStartUi } from '../../../../../../../../src/plugins/data/public';
 import { UptimeStartupPluginsContext } from '../../../../contexts';
-import { useQueryBar } from '../../query_bar/use_query_bar';
 import { useIndexPattern } from '../../query_bar/use_index_pattern';
+import * as labels from '../translations';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -23,10 +22,15 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const AlertQueryBar = () => {
+interface Props {
+  query: string;
+  onChange: (query: string) => void;
+}
+
+export const AlertQueryBar = ({ query, onChange }: Props) => {
   const { index_pattern: indexPattern, loading } = useIndexPattern();
 
-  const [query, setQuery] = useState('');
+  const [inputVal, setInputVal] = useState();
 
   const { data } = useContext(UptimeStartupPluginsContext);
 
@@ -46,18 +50,19 @@ export const AlertQueryBar = () => {
         iconType="search"
         isLoading={loading}
         isClearable={true}
-        onQueryChange={() => {}}
+        onQueryChange={({ query: queryN }) => {
+          setInputVal(queryN?.query);
+        }}
         onQuerySubmit={({ query: queryN }) => {
-          if (queryN) setQuery(queryN.query as string);
+          if (queryN) onChange(queryN.query as string);
         }}
         query={{ query, language: 'kuery' }}
-        aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
-          defaultMessage: 'Input filter criteria for the overview page',
-        })}
-        data-test-subj="xpack.uptime.filterBar"
+        aria-label={labels.ALERT_KUERY_BAR_ARIA}
+        data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
         useDefaultBehaviors={false}
         autoSubmit={true}
         disableLanguageSwitcher={true}
+        isInvalid={inputVal && !query}
       />
     </EuiFlexItemStyled>
   );

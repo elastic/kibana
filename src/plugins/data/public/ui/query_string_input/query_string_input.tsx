@@ -59,6 +59,7 @@ export interface QueryInputCommonProps {
   nonKqlModeHelpText?: string;
   autoSubmit?: boolean;
   storageKey?: string;
+  isInvalid?: boolean;
 }
 
 export type QueryStringInputProps = QueryInputCommonProps & {
@@ -71,7 +72,6 @@ export type QueryStringInputProps = QueryInputCommonProps & {
   onSubmit?: (query: Query) => void;
   size?: SuggestionsListSize;
   className?: string;
-  isInvalid?: boolean;
 };
 
 interface Props extends QueryStringInputProps {
@@ -737,6 +737,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     })}
                     onClick={() => {
                       this.onQueryStringChange('');
+                      if (this.props.autoSubmit) {
+                        this.onSubmit({ query: '', language: this.props.query.language });
+                      }
                     }}
                   >
                     <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
