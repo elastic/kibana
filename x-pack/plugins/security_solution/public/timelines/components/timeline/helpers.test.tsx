@@ -332,8 +332,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -350,8 +350,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -368,8 +368,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -386,8 +386,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 

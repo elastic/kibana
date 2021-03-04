@@ -1011,7 +1011,7 @@ describe('get_filter', () => {
                       should: [
                         {
                           bool: {
-                            should: [{ match: { 'suricata.eve.alert.signature_id': 2610182 } }],
+                            should: [{ match: { 'suricata.eve.alert.signature_id': '2610182' } }],
                             minimum_should_match: 1,
                           },
                         },
@@ -1021,7 +1021,7 @@ describe('get_filter', () => {
                               {
                                 bool: {
                                   should: [
-                                    { match: { 'suricata.eve.alert.signature_id': 2610183 } },
+                                    { match: { 'suricata.eve.alert.signature_id': '2610183' } },
                                   ],
                                   minimum_should_match: 1,
                                 },
@@ -1032,7 +1032,9 @@ describe('get_filter', () => {
                                     {
                                       bool: {
                                         should: [
-                                          { match: { 'suricata.eve.alert.signature_id': 2610184 } },
+                                          {
+                                            match: { 'suricata.eve.alert.signature_id': '2610184' },
+                                          },
                                         ],
                                         minimum_should_match: 1,
                                       },
@@ -1045,7 +1047,7 @@ describe('get_filter', () => {
                                               should: [
                                                 {
                                                   match: {
-                                                    'suricata.eve.alert.signature_id': 2610185,
+                                                    'suricata.eve.alert.signature_id': '2610185',
                                                   },
                                                 },
                                               ],
@@ -1060,7 +1062,8 @@ describe('get_filter', () => {
                                                     should: [
                                                       {
                                                         match: {
-                                                          'suricata.eve.alert.signature_id': 2610186,
+                                                          'suricata.eve.alert.signature_id':
+                                                            '2610186',
                                                         },
                                                       },
                                                     ],
@@ -1072,7 +1075,8 @@ describe('get_filter', () => {
                                                     should: [
                                                       {
                                                         match: {
-                                                          'suricata.eve.alert.signature_id': 2610187,
+                                                          'suricata.eve.alert.signature_id':
+                                                            '2610187',
                                                         },
                                                       },
                                                     ],
