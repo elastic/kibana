@@ -6,6 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
+
 import type { FleetConfigType } from '../';
 
 /**

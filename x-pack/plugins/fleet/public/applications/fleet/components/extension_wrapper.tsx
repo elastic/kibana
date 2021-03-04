@@ -7,6 +7,7 @@
 
 import React, { memo, ReactNode, Suspense } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
+
 import { Loading } from './loading';
 
 export const ExtensionWrapper = memo<{ children: ReactNode }>(({ children }) => {
