@@ -47,10 +47,3 @@ export const ML_ALERT_TYPES_CONFIG: Record<
 };
 
 export const ALERT_PREVIEW_SAMPLE_SIZE = 5;
-
-export const ANOMALY_ALERT_INSTANCE_ID = i18n.translate(
-  'xpack.ml.anomalyDetectionAlert.alertInstanceId',
-  {
-    defaultMessage: 'Anomaly instance',
-  }
-);

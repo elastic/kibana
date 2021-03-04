@@ -16,7 +16,7 @@ import {
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyResultType } from '../../../common/types/anomalies';
+import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -27,7 +27,6 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { ANOMALY_ALERT_INSTANCE_ID } from '../../../common/constants/alerts';
 import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**
@@ -249,11 +248,9 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
   /**
    * Provides a key for alert instance.
-   * Anomaly detection alert type creates only one
-   * alert instance per alert.
    */
-  const getAlertInstanceKey = (): string => {
-    return ANOMALY_ALERT_INSTANCE_ID;
+  const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
+    return source.job_id;
   };
 
   /**
@@ -378,7 +375,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
 
           const topAnomaly = requestedAnomalies[0];
-          const alertInstanceKey = getAlertInstanceKey();
+          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
 
           return {
             count: aggTypeResults.doc_count,
