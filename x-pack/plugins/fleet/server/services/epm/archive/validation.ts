@@ -7,6 +7,7 @@
 
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
+
 import type {
   ArchivePackage,
   RegistryPolicyTemplate,
@@ -17,8 +18,9 @@ import type {
   PackageSpecManifest,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
-import { unpackBufferEntries } from './index';
 import { pkgToPkgKey } from '../registry';
+
+import { unpackBufferEntries } from './index';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';

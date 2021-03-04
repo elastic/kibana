@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -20,6 +20,8 @@ import {
 import type { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { AckEventSchema } from '../../types/models';
 import type { AcksService } from '../../services/agents';
+
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
 
 describe('test acks schema', () => {
   it('validate that ack event schema expect action id', async () => {
