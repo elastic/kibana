@@ -184,7 +184,7 @@ When the rule triggers, you can send a notification to a system that is part of
 your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
 to name a few.
 
-A dedicated view for creating, searching, and editing rules is in <<rule-management,*Rules and Connectors*>>.
+A dedicated view for creating, searching, and editing rules is in <<alert-management,*Rules and Connectors*>>.
 
 [role="screenshot"]
 image::images/alerts-and-actions.png[Rules and Connectors view]
@@ -426,7 +426,7 @@ the <<get-started,{kib} Quick start>>.
 |<<manage-data,Stack Management > Data>>
 
 |Set up rules
-|<<rule-management,Stack Management > Rules and Connectors>>
+|<<alert-management,Stack Management > Rules and Connectors>>
 
 |Organize your workspace and users
 |<<xpack-spaces,Stack Management > Spaces>>

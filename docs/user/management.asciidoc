@@ -79,7 +79,7 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<managing-rules-and-connectors, Rules&nbsp;and Connectors>>
+| <<managing-alerts-and-actions, Rules&nbsp;and Connectors>>
 | Centrally manage your rules across {kib}. Create and manage reusable
 connectors for triggering actions.
 

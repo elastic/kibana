@@ -184,7 +184,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
         },
         alerting: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-rules-and-connectors.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
           actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
           emailAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
           emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html#configuring-email`,
