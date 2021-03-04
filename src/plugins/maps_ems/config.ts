@@ -13,7 +13,7 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
   DEFAULT_EMS_FILE_API_URL,
-} from './ems_defaults';
+} from './common';
 
 export const tileMapConfigOptionsSchema = schema.object({
   attribution: schema.string({ defaultValue: '' }),
