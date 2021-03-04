@@ -9327,6 +9327,13 @@
         }
       }
     },
+    "vis_type_timeseries": {
+      "properties": {
+        "timeseries_use_last_value_mode_total": {
+          "type": "long"
+        }
+      }
+    },
     "vis_type_vega": {
       "properties": {
         "vega_lib_specs_total": {
