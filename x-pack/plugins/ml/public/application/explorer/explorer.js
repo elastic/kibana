@@ -63,7 +63,7 @@ import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION } from './explorer_constants';
 
 // Explorer Charts
-import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
+import { ExplorerChartsContainer } from './explorer_charts/embeddable_explorer_charts_container';
 
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';

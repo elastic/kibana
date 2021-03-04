@@ -12,7 +12,6 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  map,
   mergeMap,
   pluck,
   skipWhile,
@@ -23,12 +22,7 @@ import {
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIM_LANE_DEFAULT_PAGE_SIZE,
-  SWIMLANE_TYPE,
-  SwimlaneType,
-} from '../../application/explorer/explorer_constants';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
@@ -39,18 +33,14 @@ import {
   getSelectionJobIds,
   getSelectionTimeRange,
   loadDataForCharts,
-  OverallSwimlaneData,
 } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
+  AnomalyExplorerEmbeddableInput,
+  AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerServices,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
-  AnomalySwimlaneServices,
 } from '..';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { AnomalyChartData } from '../../application/services/anomaly_explorer_service';
@@ -58,7 +48,7 @@ import type { AnomalyChartData } from '../../application/services/anomaly_explor
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 function getJobsObservable(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
+  embeddableInput: Observable<AnomalyExplorerEmbeddableInput>,
   anomalyDetectorService: AnomalyDetectorService,
   setErrorHandler: (e: Error) => void
 ) {
@@ -73,198 +63,16 @@ function getJobsObservable(
   );
 }
 
-export function useSwimlaneInputResolver(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
-  refresh: Observable<any>,
-  services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
-  chartWidth: number,
-  fromPage: number
-): [
-  string | undefined,
-  OverallSwimlaneData | undefined,
-  number,
-  (perPage: number) => void,
-  TimeBuckets,
-  boolean,
-  Error | null | undefined
-] {
-  const [{ uiSettings }, , { anomalyTimelineService, anomalyDetectorService }] = services;
-
-  const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
-  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
-  const [error, setError] = useState<Error | null>();
-  const [perPage, setPerPage] = useState<number | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  const fromPage$ = useMemo(() => new Subject<number>(), []);
-  const perPage$ = useMemo(() => new Subject<number>(), []);
-
-  const timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, []);
-
-  useEffect(() => {
-    const subscription = combineLatest([
-      getJobsObservable(embeddableInput, anomalyDetectorService, setError),
-      embeddableInput,
-      chartWidth$.pipe(skipWhile((v) => !v)),
-      fromPage$,
-      perPage$.pipe(
-        startWith(undefined),
-        // no need to emit when the initial value has been set
-        distinctUntilChanged(
-          (prev, curr) => prev === undefined && curr === SWIM_LANE_DEFAULT_PAGE_SIZE
-        )
-      ),
-      refresh.pipe(startWith(null)),
-    ])
-      .pipe(
-        tap(setIsLoading.bind(null, true)),
-        debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
-          if (!jobs) {
-            // couldn't load the list of jobs
-            return of(undefined);
-          }
-
-          const {
-            viewBy,
-            swimlaneType: swimlaneTypeInput,
-            perPage: perPageInput,
-            timeRange,
-            filters,
-            query,
-            viewMode,
-          } = input;
-
-          anomalyTimelineService.setTimeRange(timeRange);
-
-          if (!swimlaneType) {
-            setSwimlaneType(swimlaneTypeInput);
-          }
-
-          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            return {
-              id: job.job_id,
-              selected: true,
-              bucketSpanSeconds: bucketSpan!.asSeconds(),
-            };
-          });
-
-          let appliedFilters: any;
-          try {
-            appliedFilters = processFilters(filters, query);
-          } catch (e) {
-            // handle query syntax errors
-            setError(e);
-            return of(undefined);
-          }
-
-          return from(
-            anomalyTimelineService.loadOverallData(explorerJobs, swimlaneContainerWidth)
-          ).pipe(
-            switchMap((overallSwimlaneData) => {
-              const { earliest, latest } = overallSwimlaneData;
-
-              if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
-                if (perPageFromState === undefined) {
-                  // set initial pagination from the input or default one
-                  setPerPage(perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE);
-                }
-
-                if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
-                  // store per page value when the dashboard is in the edit mode
-                  onInputChange({ perPage: perPageFromState });
-                }
-
-                return from(
-                  anomalyTimelineService.loadViewBySwimlane(
-                    [],
-                    { earliest, latest },
-                    explorerJobs,
-                    viewBy!,
-                    isViewBySwimLaneData(swimlaneData)
-                      ? swimlaneData.cardinality
-                      : ANOMALY_SWIM_LANE_HARD_LIMIT,
-                    perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
-                    fromPageInput,
-                    swimlaneContainerWidth,
-                    appliedFilters
-                  )
-                ).pipe(
-                  map((viewBySwimlaneData) => {
-                    return {
-                      ...viewBySwimlaneData!,
-                      earliest,
-                      latest,
-                    };
-                  })
-                );
-              }
-              return of(overallSwimlaneData);
-            })
-          );
-        }),
-        catchError((e) => {
-          setError(e.body);
-          return of(undefined);
-        })
-      )
-      .subscribe((data) => {
-        if (data !== undefined) {
-          setError(null);
-          setSwimlaneData(data);
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    fromPage$.next(fromPage);
-  }, [fromPage]);
-
-  useEffect(() => {
-    if (perPage === undefined) return;
-    perPage$.next(perPage);
-  }, [perPage]);
-
-  useEffect(() => {
-    chartWidth$.next(chartWidth);
-  }, [chartWidth]);
-
-  return [
-    swimlaneType,
-    swimlaneData,
-    perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
-    setPerPage,
-    timeBuckets,
-    isLoading,
-    error,
-  ];
-}
-
 export function useExplorerInputResolver(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
+  embeddableInput: Observable<AnomalyExplorerEmbeddableInput>,
+  onInputChange: (output: Partial<AnomalyExplorerEmbeddableOutput>) => void,
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalyExplorerServices],
   chartWidth: number,
   fromPage: number,
   selectedCells: AppStateSelectedCells | undefined,
   severity: number
-): { chartsData: AnomalyChartData; isLoading: boolean } {
+): { chartsData: AnomalyChartData; isLoading: boolean; error: Error | null | undefined } {
   const [
     { uiSettings },
     { data: dataServices },
@@ -275,12 +83,9 @@ export function useExplorerInputResolver(
   const [chartsData, setChartsData] = useState<any>();
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
   const [error, setError] = useState<Error | null>();
-  const [perPage, setPerPage] = useState<number | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  const fromPage$ = useMemo(() => new Subject<number>(), []);
-  const perPage$ = useMemo(() => new Subject<number>(), []);
   const selectedCells$ = useMemo(() => new Subject<AppStateSelectedCells | undefined>(), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
 
@@ -298,14 +103,6 @@ export function useExplorerInputResolver(
       getJobsObservable(embeddableInput, anomalyDetectorService, setError),
       embeddableInput,
       chartWidth$.pipe(skipWhile((v) => !v)),
-      fromPage$,
-      perPage$.pipe(
-        startWith(undefined),
-        // no need to emit when the initial value has been set
-        distinctUntilChanged(
-          (prev, curr) => prev === undefined && curr === SWIM_LANE_DEFAULT_PAGE_SIZE
-        )
-      ),
       selectedCells$,
       severity$,
       refresh.pipe(startWith(null)),
@@ -313,113 +110,102 @@ export function useExplorerInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(
-          ([
-            jobs,
-            input,
-            swimlaneContainerWidth,
-            fromPageInput,
-            perPageFromState,
-            selections,
-            severityValue,
-          ]) => {
-            if (!jobs) {
-              // couldn't load the list of jobs
-              return of(undefined);
-            }
-            const {
-              viewBy,
-              swimlaneType: swimlaneTypeInput,
-              // perPage: perPageInput,
-              timeRange,
-              // filters,
-              // query,
-              // viewMode,
-            } = input;
-
-            const viewBySwimlaneFieldName = viewBy;
-
-            anomalyTimelineService.setTimeRange(timeRange);
-
-            if (!swimlaneType) {
-              setSwimlaneType(swimlaneTypeInput);
-            }
-
-            const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-              const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-              return {
-                id: job.job_id,
-                selected: true,
-                bucketSpanSeconds: bucketSpan!.asSeconds(),
-              };
-            });
-
-            // @TODO: change this to viewBySwimlaneFieldName !== undefined
-            if (viewBySwimlaneFieldName !== undefined) {
-              const influencersFilterQuery = undefined;
-
-              const selectionInfluencers = getSelectionInfluencers(
-                selections,
-                viewBySwimlaneFieldName!
-              );
-
-              const jobIds = getSelectionJobIds(selections, explorerJobs);
-
-              const bounds = timefilter.getBounds();
-
-              const swimlaneBucketInterval = timeBuckets.getInterval();
-
-              const timerange = getSelectionTimeRange(
-                selections,
-                swimlaneBucketInterval.asSeconds(),
-                bounds
-              );
-              const explorer$ = forkJoin({
-                combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
-                anomalyChartRecords: loadDataForCharts(
-                  jobIds,
-                  timerange.earliestMs,
-                  timerange.latestMs,
-                  selectionInfluencers,
-                  selections,
-                  influencersFilterQuery
-                ),
-              }).pipe(
-                mergeMap(({ combinedJobs, anomalyChartRecords }) => {
-                  const combinedJobRecords: Record<
-                    string,
-                    CombinedJob
-                  > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
-                    return { ...acc, [job.job_id]: job };
-                  }, {});
-
-                  return forkJoin({
-                    chartsData: from(
-                      anomalyExplorerService.getAnomalyData(
-                        combinedJobRecords,
-                        swimlaneContainerWidth,
-                        // @ts-ignore
-                        anomalyChartRecords,
-                        timerange.earliestMs,
-                        timerange.latestMs,
-                        timefilter,
-                        severityValue
-                      )
-                    ),
-                  });
-                })
-              );
-              return explorer$;
-            }
+        switchMap(([jobs, input, swimlaneContainerWidth, selections, severityValue]) => {
+          if (!jobs) {
+            // couldn't load the list of jobs
+            return of(undefined);
           }
-        ),
+          const {
+            viewBy,
+            swimlaneType: swimlaneTypeInput,
+            // perPage: perPageInput,
+            timeRange,
+            // filters,
+            // query,
+            // viewMode,
+          } = input;
+
+          const viewBySwimlaneFieldName = viewBy;
+
+          anomalyTimelineService.setTimeRange(timeRange);
+
+          if (!swimlaneType) {
+            setSwimlaneType(swimlaneTypeInput);
+          }
+
+          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
+            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+            return {
+              id: job.job_id,
+              selected: true,
+              bucketSpanSeconds: bucketSpan!.asSeconds(),
+            };
+          });
+
+          // @TODO: change this to viewBySwimlaneFieldName !== undefined
+          if (viewBySwimlaneFieldName !== undefined) {
+            const influencersFilterQuery = undefined;
+
+            const selectionInfluencers = getSelectionInfluencers(
+              selections,
+              viewBySwimlaneFieldName!
+            );
+
+            const jobIds = getSelectionJobIds(selections, explorerJobs);
+
+            const bounds = timefilter.getBounds();
+
+            const swimlaneBucketInterval = timeBuckets.getInterval();
+
+            const timerange = getSelectionTimeRange(
+              selections,
+              swimlaneBucketInterval.asSeconds(),
+              bounds
+            );
+            const explorer$ = forkJoin({
+              combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
+              anomalyChartRecords: loadDataForCharts(
+                jobIds,
+                timerange.earliestMs,
+                timerange.latestMs,
+                selectionInfluencers,
+                selections,
+                influencersFilterQuery
+              ),
+            }).pipe(
+              mergeMap(({ combinedJobs, anomalyChartRecords }) => {
+                const combinedJobRecords: Record<
+                  string,
+                  CombinedJob
+                > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
+                  return { ...acc, [job.job_id]: job };
+                }, {});
+
+                return forkJoin({
+                  chartsData: from(
+                    anomalyExplorerService.getAnomalyData(
+                      combinedJobRecords,
+                      swimlaneContainerWidth,
+                      // @ts-ignore
+                      anomalyChartRecords,
+                      timerange.earliestMs,
+                      timerange.latestMs,
+                      timefilter,
+                      severityValue
+                    )
+                  ),
+                });
+              })
+            );
+            return explorer$;
+          }
+        }),
         catchError((e) => {
           setError(e.body);
           return of(undefined);
         })
       )
       .subscribe((results) => {
-        console.log('results', results);
         if (results !== undefined) {
           setError(null);
           setChartsData(results.chartsData);
@@ -431,15 +217,6 @@ export function useExplorerInputResolver(
       subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    fromPage$.next(fromPage);
-  }, [fromPage]);
-
-  useEffect(() => {
-    if (perPage === undefined) return;
-    perPage$.next(perPage);
-  }, [perPage]);
 
   useEffect(() => {
     if (selectedCells === undefined) return;
@@ -454,7 +231,7 @@ export function useExplorerInputResolver(
     severity$.next(severity);
   }, [severity]);
 
-  return { chartsData, isLoading };
+  return { chartsData, isLoading, error };
 }
 
 export function processFilters(filters: Filter[], query: Query) {

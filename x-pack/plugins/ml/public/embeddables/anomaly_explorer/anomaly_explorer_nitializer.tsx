@@ -9,7 +9,6 @@ import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
@@ -21,7 +20,6 @@ import {
   EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalyExplorerEmbeddableInput } from '..';
 
@@ -47,25 +45,8 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
   initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType, setExplorerType] = useState(
-    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
-  );
+  const [swimlaneType] = useState(initialInput?.swimlaneType ?? SWIMLANE_TYPE.VIEW_BY);
   const [viewByExplorerFieldName, setViewByExplorerFieldName] = useState(initialInput?.viewBy);
-
-  const swimlaneTypeOptions = [
-    {
-      id: SWIMLANE_TYPE.OVERALL,
-      label: i18n.translate('xpack.ml.explorer.overallLabel', {
-        defaultMessage: 'Overall',
-      }),
-    },
-    {
-      id: SWIMLANE_TYPE.VIEW_BY,
-      label: i18n.translate('xpack.ml.explorer.viewByLabel', {
-        defaultMessage: 'View by',
-      }),
-    },
-  ];
 
   const viewByExplorerOptions = ['', ...influencers].map((influencer) => {
     return {
@@ -87,7 +68,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.title"
-            defaultMessage="Anomaly swim lane configuration"
+            defaultMessage="Anomaly explorer configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -113,44 +94,18 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           </EuiFormRow>
 
           <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
-                defaultMessage="Swim lane type"
-              />
-            }
+            label={<FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />}
           >
-            <EuiButtonGroup
-              id="selectExplorerType"
-              name="selectExplorerType"
-              color="primary"
-              isFullWidth
-              legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
-                defaultMessage: 'Swim lane type',
-              })}
-              options={swimlaneTypeOptions}
-              idSelected={swimlaneType}
-              onChange={(id) => setExplorerType(id as SwimlaneType)}
+            <EuiSelect
+              id="selectViewBy"
+              name="selectViewBy"
+              options={viewByExplorerOptions}
+              value={viewByExplorerFieldName}
+              onChange={(e) => setViewByExplorerFieldName(e.target.value)}
             />
           </EuiFormRow>
 
-          {swimlaneType === SWIMLANE_TYPE.VIEW_BY && (
-            <>
-              <EuiFormRow
-                label={
-                  <FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />
-                }
-              >
-                <EuiSelect
-                  id="selectViewBy"
-                  name="selectViewBy"
-                  options={viewByExplorerOptions}
-                  value={viewByExplorerFieldName}
-                  onChange={(e) => setViewByExplorerFieldName(e.target.value)}
-                />
-              </EuiFormRow>
-            </>
-          )}
+          <></>
         </EuiForm>
       </EuiModalBody>
 

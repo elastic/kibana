@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import './_index.scss';
 
 import React, { useEffect, useState } from 'react';
 
@@ -33,7 +34,6 @@ import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
-
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',

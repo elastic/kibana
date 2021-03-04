@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { chartLimits } from '../../util/chart_utils';
 
 import { getDefaultChartsData } from './explorer_charts_container_service';
-import { ExplorerChartsContainer } from './explorer_charts_container';
+import { ExplorerChartsContainer } from './embeddable_explorer_charts_container';
 
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';

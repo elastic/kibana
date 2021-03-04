@@ -200,7 +200,7 @@ const loadExplorerDataProvider = (
       // and pass on the data we already fetched.
       tap(explorerService.setViewBySwimlaneLoading),
       // Trigger a side-effect to update the charts.
-      tap(({ anomalyChartRecords }) => {
+      tap(({ anomalyChartRecords, topFieldValues }) => {
         if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
           memoizedAnomalyDataChange(
             lastRefresh,

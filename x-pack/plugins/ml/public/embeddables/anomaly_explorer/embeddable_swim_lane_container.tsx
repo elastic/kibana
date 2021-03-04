@@ -11,11 +11,8 @@ import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  IAnomalyExplorerEmbeddable,
-  IAnomalySwimlaneEmbeddable,
-} from './anomaly_explorer_embeddable';
-import { useSwimlaneInputResolver } from './explorer_input_resolver';
+import { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
+import { useSwimlaneInputResolver } from '../anomaly_swimlane/swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   isViewBySwimLaneData,

@@ -6,25 +6,23 @@
  */
 
 import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-
-import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
-import { useExplorerInputResolver, useSwimlaneInputResolver } from './explorer_input_resolver';
+import { useExplorerInputResolver } from './explorer_input_resolver';
+import { useSwimlaneInputResolver } from '../anomaly_swimlane/swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
 import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
-  AnomalyExplorerServices,
+  AnomalyExplorerEmbeddableServices,
 } from '..';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
@@ -35,8 +33,7 @@ export interface ExplorerSwimlaneContainerProps {
   id: string;
   embeddableContext: InstanceType<IAnomalyExplorerEmbeddable>;
   embeddableInput: Observable<AnomalyExplorerEmbeddableInput>;
-  // @TODO:replace with AnomalyExplorerEmbeddableServices
-  services: [CoreStart, MlDependencies, AnomalyExplorerServices];
+  services: AnomalyExplorerEmbeddableServices;
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalyExplorerEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyExplorerEmbeddableOutput>) => void;
@@ -120,7 +117,6 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     },
     [swimlaneData, perPage, fromPage, setSelectedCells]
   );
-
   if (error) {
     return (
       <EuiCallOut
@@ -177,7 +173,20 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
           />
         }
       />
-      {chartsData && (
+      {isExplorerLoading && (
+        <EuiText
+          textAlign={'center'}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%,-50%)',
+          }}
+        >
+          <EuiLoadingChart size="xl" mono={true} data-test-subj="mlSwimLaneLoadingIndicator" />
+        </EuiText>
+      )}
+      {chartsData !== undefined && isExplorerLoading === false && (
         <>
           <EuiSpacer />
           <ExplorerAnomaliesContainer
