@@ -140,12 +140,10 @@ describe('formula', () => {
         params: {
           isFormulaBroken: false,
           formula: 'terms(category)',
-          params: {
-            format: {
-              id: 'number',
-              params: {
-                decimals: 2,
-              },
+          format: {
+            id: 'number',
+            params: {
+              decimals: 2,
             },
           },
         },
