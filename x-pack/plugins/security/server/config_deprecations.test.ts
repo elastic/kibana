@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
-import { securityConfigDeprecationProvider } from './config_deprecations';
 import { cloneDeep } from 'lodash';
+
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+
+import { securityConfigDeprecationProvider } from './config_deprecations';
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);

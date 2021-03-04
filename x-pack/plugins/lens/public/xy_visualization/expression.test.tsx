@@ -551,7 +551,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('it does not use date range if the x is not a time scale', () => {
+    test('it has xDomain undefined if the x is not a time scale or a histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -571,15 +571,10 @@ describe('xy_expression', () => {
         />
       );
       const xDomain = component.find(Settings).prop('xDomain');
-      expect(xDomain).toEqual(
-        expect.objectContaining({
-          min: undefined,
-          max: undefined,
-        })
-      );
+      expect(xDomain).toEqual(undefined);
     });
 
-    test('it uses min interval if passed in', () => {
+    test('it uses min interval if interval is passed in and visualization is histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -589,7 +584,9 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+            layers: [
+              { ...args.layers[0], seriesType: 'line', xScaleType: 'linear', isHistogram: true },
+            ],
           }}
         />
       );
