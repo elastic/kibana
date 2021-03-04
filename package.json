@@ -314,6 +314,7 @@
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
     "ui-select": "0.19.8",
+    "unified": "^9.2.1",
     "utility-types": "^3.10.0",
     "uuid": "3.3.2",
     "vinyl": "^2.2.0",
