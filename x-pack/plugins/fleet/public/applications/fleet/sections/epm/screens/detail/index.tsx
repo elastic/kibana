@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverLt from 'semver/functions/lt';
 
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PAGE_ROUTING_PATHS, PLUGIN_ID } from '../../../../constants';
@@ -36,7 +37,7 @@ import { Error, Loading } from '../../../../components';
 import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
-import { useSetPackageInstallStatus } from '../../hooks';
+import { useGetPackageInstallStatus, useSetPackageInstallStatus } from '../../hooks';
 
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
@@ -76,18 +77,26 @@ export function Detail() {
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const packageInstallStatus = useMemo(() => {
+    if (packageInfo === null || !packageInfo.name) {
+      return undefined;
+    }
+    return getPackageInstallStatus(packageInfo.name).status;
+  }, [packageInfo, getPackageInstallStatus]);
+
   const updateAvailable =
     packageInfo &&
     'savedObject' in packageInfo &&
     packageInfo.savedObject &&
-    packageInfo.savedObject.attributes.version < packageInfo.latestVersion;
+    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
   // Fetch package info
   const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
     pkgkey
   );
 
-  const packageInstallStatus = packageInfoData?.response.status;
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
