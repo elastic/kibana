@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   PackageInfo,
   RegistryStream,
@@ -21,6 +22,7 @@ import {
   NewPackagePolicyInput,
 } from '../../../types';
 import { Loading } from '../../../components';
+
 import { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
 import { CreatePackagePolicyFrom } from './types';

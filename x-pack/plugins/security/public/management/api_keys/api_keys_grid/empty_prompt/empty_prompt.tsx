@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
-import { EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {

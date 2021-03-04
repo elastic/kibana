@@ -20,7 +20,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-export { RetryableEsClientError };
+export type { RetryableEsClientError };
 
 export const isRetryableEsClientResponse = (
   res: Either.Either<any, unknown>

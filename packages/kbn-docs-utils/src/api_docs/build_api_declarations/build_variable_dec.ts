@@ -15,8 +15,8 @@ import {
   PropertySignature,
   ShorthandPropertyAssignment,
 } from 'ts-morph';
-import { getApiSectionId } from '../utils';
-import { getCommentsFromNode } from './js_doc_utils';
+import { getApiSectionId, isInternal } from '../utils';
+import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
@@ -45,15 +45,15 @@ export function buildVariableDec(
   anchorLink: AnchorLink,
   log: ToolingLog
 ): ApiDeclaration {
-  log.debug('buildVariableDec for ' + node.getName());
   const initializer = node.getInitializer();
   // Recusively list object properties as children.
   if (initializer && Node.isObjectLiteralExpression(initializer)) {
     return {
       id: getApiSectionId(anchorLink),
       type: TypeKind.ObjectKind,
-      children: initializer.getProperties().map((prop) => {
-        return buildApiDeclaration(
+      tags: getJSDocTagNames(node),
+      children: initializer.getProperties().reduce((acc, prop) => {
+        const child = buildApiDeclaration(
           prop,
           plugins,
           log,
@@ -61,7 +61,11 @@ export function buildVariableDec(
           anchorLink.scope,
           anchorLink.apiName
         );
-      }),
+        if (!isInternal(child)) {
+          acc.push(child);
+        }
+        return acc;
+      }, [] as ApiDeclaration[]),
       description: getCommentsFromNode(node),
       label: node.getName(),
       source: getSourceForNode(node),
@@ -72,6 +76,7 @@ export function buildVariableDec(
 
   // Otherwise return it just as a single entry.
   return {
+    tags: getJSDocTagNames(node),
     id: getApiSectionId(anchorLink),
     type: getTypeKind(node),
     label: node.getName(),

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -37,9 +37,14 @@ export const EngineOverviewMetrics: React.FC = () => {
         <UnavailablePrompt />
       ) : (
         <>
-          <TotalStats />
-          <EuiSpacer size="xl" />
-          <TotalCharts />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <TotalStats />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <TotalCharts />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="xl" />
           <RecentApiLogs />
         </>

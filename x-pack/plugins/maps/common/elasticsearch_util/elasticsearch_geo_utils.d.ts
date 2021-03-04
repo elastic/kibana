@@ -47,8 +47,7 @@ export interface ESPolygonFilter {
 
 export function createExtentFilter(
   mapExtent: MapExtent,
-  geoFieldName: string,
-  geoFieldType: ES_GEO_FIELD_TYPE
+  geoFieldName: string
 ): ESPolygonFilter | ESGeoBoundingBoxFilter;
 
 export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBox;
