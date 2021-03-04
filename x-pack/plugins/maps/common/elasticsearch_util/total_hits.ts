@@ -29,5 +29,5 @@ export function isTotalHitsGreaterThan(totalHits: TotalHits, value: number) {
     );
   }
 
-  return totalHits.value >= value;
+  return true;
 }
