@@ -202,5 +202,14 @@ All supported operating systems support using systemd service files.  Any system
 *Impact:*
 Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
 
+[float]
+=== {es} inline scripts are required
+
+*Details:*
+{es} must be configured to support inline {ref}/modules-scripting-security.html#allowed-script-types-setting[scripts]. Otherwise, {kib} will not behave correctly.
+
+*Impact:*
+{kib} will not work correctly when {es} is configured with `script.allowed_types: none`.
+
 
 // end::notable-breaking-changes[]
