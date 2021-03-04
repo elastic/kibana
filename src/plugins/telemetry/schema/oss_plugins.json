@@ -5321,7 +5321,7 @@
     },
     "vis_type_timelion": {
       "properties": {
-        "timelion_use_scripted_fields_total": {
+        "timelion_use_scripted_fields_90_days_total": {
           "type": "long"
         }
       }

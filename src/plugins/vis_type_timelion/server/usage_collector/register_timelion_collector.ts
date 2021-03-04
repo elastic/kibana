@@ -19,7 +19,7 @@ export function registerTimelionUsageCollector(
     type: 'vis_type_timelion',
     isReady: () => true,
     schema: {
-      timelion_use_scripted_fields_total: { type: 'long' },
+      timelion_use_scripted_fields_90_days_total: { type: 'long' },
     },
     fetch: async ({ esClient, soClient }) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;

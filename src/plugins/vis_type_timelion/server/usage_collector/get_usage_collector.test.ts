@@ -100,7 +100,7 @@ describe('Timelion visualization usage collector', () => {
     expect(result).toBeUndefined();
   });
 
-  test('Returns undefined when no vega saved objects found', async () => {
+  test('Returns undefined when no timelion saved objects found', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext([
       {
         _id: 'visualization:myvis-123',
@@ -119,34 +119,6 @@ describe('Timelion visualization usage collector', () => {
     expect(result).toBeUndefined();
   });
 
-  test('Should ingnore sample data visualizations', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext([
-      {
-        _id: 'visualization:sampledata-123',
-        _source: {
-          type: 'visualization',
-          visualization: {
-            visState: JSON.stringify({
-              type: 'timelion',
-              title: 'sample timelion visualization',
-              params: {
-                expression: '.es(*)',
-              },
-            }),
-          },
-        },
-      },
-    ]);
-
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
-
-    expect(result).toBeUndefined();
-  });
-
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
     const result = await getStats(
@@ -156,7 +128,7 @@ describe('Timelion visualization usage collector', () => {
     );
 
     expect(result).toMatchObject({
-      timelion_use_scripted_fields_total: 1,
+      timelion_use_scripted_fields_90_days_total: 1,
     });
   });
 });

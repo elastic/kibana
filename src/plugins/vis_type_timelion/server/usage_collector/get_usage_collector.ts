@@ -21,7 +21,7 @@ interface IndexPatternSavedObjectAttrs {
 }
 
 export interface TimelionUsage {
-  timelion_use_scripted_fields_total: number;
+  timelion_use_scripted_fields_90_days_total: number;
 }
 
 const getPastDays = (dateString: string): number => {
@@ -41,7 +41,7 @@ export const getStats = async (
   });
 
   const timelionUsage = {
-    timelion_use_scripted_fields_total: 0,
+    timelion_use_scripted_fields_90_days_total: 0,
   };
 
   const searchParams = {
@@ -90,12 +90,12 @@ export const getStats = async (
               const scriptedFields = JSON.parse(foundIndexPattern.attributes.fields).filter(
                 (field: IFieldType) => field.scripted
               );
-              const isScriptedFieldinExpession = scriptedFields.some((field: IFieldType) =>
+              const isScriptedFieldInExpression = scriptedFields.some((field: IFieldType) =>
                 visState.params.expression.includes(field.name)
               );
 
-              if (isScriptedFieldinExpession) {
-                timelionUsage.timelion_use_scripted_fields_total++;
+              if (isScriptedFieldInExpression) {
+                timelionUsage.timelion_use_scripted_fields_90_days_total++;
                 break;
               }
             }
@@ -105,5 +105,5 @@ export const getStats = async (
     }
   }
 
-  return timelionUsage.timelion_use_scripted_fields_total ? timelionUsage : undefined;
+  return timelionUsage.timelion_use_scripted_fields_90_days_total ? timelionUsage : undefined;
 };
