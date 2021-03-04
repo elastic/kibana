@@ -34,11 +34,14 @@ Dashboards support many types of panels, and provide several editors that you ca
 | <<enhance-dashboards,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
-| <<save-your-search,Saved search table>>
-| Display a previously saved search table from <<discover, *Discover*>>. The table results are not aggregated.
+| <<save-your-search,Saved search from *Discover*>>
+| Display a saved search table from <<discover, *Discover*>>. The table results are not aggregated.
 
-| <<xpack-ml-anomalies,Machine Learning>>
-| Display a previously saved visualization of <<xpack-ml, machine learning>> anomaly detection data.
+| <<logs-app,*Log stream*>>
+| Display a table of live streaming logs.
+
+| <<xpack-ml-anomalies,*ML Anomaly Swim Lane*>>
+| Display the results from <<xpack-ml, machine learning>> anomaly detection jobs.
 
 |===
 
@@ -80,27 +83,46 @@ Begin with an empty dashboard, or open an existing dashboard.
 
 [float]
 [[create-panels-with-lens]]
-=== Create panels
+=== Add panels
 
-Choose the type of panel you want to create, then save the panel to the dashboard.
+To add panels to the dashboard, use one of the editors to create the panel, or add an existing panel.
 
-. From the dashboard, choose one of the following options:
+[float]
+[[create-panels-with-lens]]
+==== Create panels
 
-* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window. *Lens* is recommended for most users. 
+To create panels, use one of the editors, then add the panel to the dashboard.
 
-* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
+. On the dashboard, click *Create panel*.
 
-. To save the panel, click *Save* in the toolbar, then configure the *Save visualization* options.
+. On the *New visualization* window, click the editor you want to use. 
 
-.. Enter the *Title* and optional *Description*.
+. To create the panel, configure the options in the editor.
 
-.. From the *Tags* drop down, select any applicable tags. 
+. To add the panel to the dashboard, choose one of the following options:
 
-.. Select *Add to Dashboard after saving*.
+* To save the panel in the *Visualize Library*, click *Save to Library*, configure the options, then click *Save and return*.
 
-.. Click *Save and return*.
+* To add the panel to the dashboard without saving to the *Visualize Library*, click *Save and return*.
 
-TIP: To access your saved panels, open the main menu, then click *Visualize*.
+[float]
+[[add-panels-from-the-library]]
+==== Add panels from the library
+
+Add panels that you've already created.
+
+. On the dashboard, click *Add from library*.
+
+. On the *Add from library* flyout, then use one of the following options:
+
+* Click the panel you want to add to the dashboard, then click *X* to close the flyout.
++
+When a panel contains a stored query, both queries are applied.
+
+* To add a table of live streaming logs, click *Create new*, then select *Log stream*.
+
+. To add 
+
 
 [float]
 [[arrange-panels]]
