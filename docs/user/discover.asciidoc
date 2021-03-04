@@ -7,7 +7,7 @@
 
 *Discover* enables you to quickly search and filter your data, get information
 about structure of the fields, and visualize your data with *Lens* and *Maps*.
-You can also customize and save your searches and place them on a dashboard.
+You can customize and save your searches and place them on a dashboard.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
