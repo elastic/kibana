@@ -11,7 +11,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
 } from '../../../../../src/core/server';
-import { RawAlert } from '../types';
+import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 const SIEM_APP_ID = 'securitySolution';
@@ -21,6 +21,13 @@ export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 type AlertMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ) => SavedObjectUnsanitizedDoc<RawAlert>;
+
+const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
+
+const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+  doc.attributes.actions.some((action) =>
+    SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
+  );
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
@@ -46,9 +53,15 @@ export function getMigrations(
     pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
+  const migrationActions7112 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isAnyActionSupportIncidents(doc),
+    pipeMigrations(restructureConnectorsThatSupportIncident)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
+    '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
   };
 }
 
@@ -163,6 +176,146 @@ function initializeExecutionStatus(
         lastExecutionDate: new Date().toISOString(),
         error: null,
       },
+    },
+  };
+}
+
+function restructureConnectorsThatSupportIncident(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { actions } = doc.attributes;
+  const newActions = actions.reduce((acc, action) => {
+    if (action.params.subAction !== 'pushToService') {
+      return [...acc, action];
+    }
+
+    if (action.actionTypeId === '.servicenow') {
+      const {
+        title,
+        comments,
+        comment,
+        description,
+        externalId,
+        severity,
+        urgency,
+        impact,
+      } = action.params.subActionParams as {
+        title: string;
+        description?: string;
+        externalId?: string;
+        severity?: string;
+        urgency?: string;
+        impact?: string;
+        comment?: string;
+        comments?: Array<{ commentId: string; comment: string }>;
+      };
+      return [
+        ...acc,
+        {
+          ...action,
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                short_description: title,
+                description,
+                externalId,
+                severity,
+                urgency,
+                impact,
+              },
+              comments: [
+                ...(comments ?? []),
+                ...(comment != null ? [{ commentId: '1', comment }] : []),
+              ],
+            },
+          },
+        },
+      ] as RawAlertAction[];
+    }
+
+    if (action.actionTypeId === '.jira') {
+      const {
+        title,
+        comments,
+        description,
+        externalId,
+        issueType,
+        priority,
+        labels,
+        parent,
+      } = action.params.subActionParams as {
+        title: string;
+        description: string;
+        externalId?: string;
+        issueType: string;
+        priority?: string;
+        labels?: string[];
+        parent?: string;
+        comments?: unknown[];
+      };
+      return [
+        ...acc,
+        {
+          ...action,
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                summary: title,
+                description,
+                externalId,
+                issueType,
+                priority,
+                labels,
+                parent,
+              },
+              comments,
+            },
+          },
+        },
+      ] as RawAlertAction[];
+    }
+
+    if (action.actionTypeId === '.resilient') {
+      const { title, comments, description, externalId, incidentTypes, severityCode } = action
+        .params.subActionParams as {
+        title: string;
+        description: string;
+        externalId?: string;
+        incidentTypes?: number[];
+        severityCode?: number;
+        comments?: unknown[];
+      };
+      return [
+        ...acc,
+        {
+          ...action,
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                name: title,
+                description,
+                externalId,
+                incidentTypes,
+                severityCode,
+              },
+              comments,
+            },
+          },
+        },
+      ] as RawAlertAction[];
+    }
+
+    return acc;
+  }, [] as RawAlertAction[]);
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      actions: newActions,
     },
   };
 }
