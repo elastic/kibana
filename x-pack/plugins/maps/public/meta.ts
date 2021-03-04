@@ -25,7 +25,7 @@ import {
   getEMSSettings,
 } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { LayerConfig } from '../../../../src/plugins/maps_ems/config';
+import { LayerConfig } from '../../../../src/plugins/maps_ems/public';
 
 export function getKibanaRegionList(): LayerConfig[] {
   return getRegionmapLayers();

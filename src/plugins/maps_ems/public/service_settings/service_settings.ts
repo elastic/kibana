@@ -14,7 +14,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { getKibanaVersion } from '../kibana_services';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
-import { MapsEmsConfig, TileMapConfig, tileMapConfigOptionsSchema } from '../../config';
+import { MapsEmsConfig, TileMapConfig, tileMapConfigOptionsSchema } from '../../common/config';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.

@@ -8,7 +8,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
-import { tilemapConfigSchema } from '../../maps_ems/config';
+import { tilemapConfigSchema } from '../../maps_ems/common';
 
 export type TilemapConfig = TypeOf<typeof tilemapConfigSchema>;
 

@@ -17,8 +17,7 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { IServiceSettings } from '../../../../maps_ems/public';
-import type { MapsEmsConfig } from '../../../../maps_ems/config';
+import type { IServiceSettings, MapsEmsConfig } from '../../../../maps_ems/public';
 import { MapServiceSettings } from './map_service_settings';
 import { userConfiguredLayerId } from './constants';
 import {

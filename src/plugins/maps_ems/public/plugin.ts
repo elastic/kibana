@@ -12,7 +12,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
 // @ts-ignore
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
-import { MapsEmsConfig } from '../config';
+import { MapsEmsConfig } from '../common';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 
 /**

@@ -9,7 +9,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
-import { regionmapConfigSchema } from '../../maps_ems/config';
+import { regionmapConfigSchema } from '../../maps_ems/common';
 import { getUiSettings } from './ui_settings';
 
 export type RegionmapConfig = TypeOf<typeof regionmapConfigSchema>;
