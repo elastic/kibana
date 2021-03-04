@@ -1,166 +1,7 @@
 {
   "id": "core.http",
   "client": {
-    "classes": [
-      {
-        "id": "def-public.HttpFetchError",
-        "type": "Class",
-        "label": "HttpFetchError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpFetchError",
-            "text": "HttpFetchError"
-          },
-          " extends Error implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          }
-        ],
-        "children": [
-          {
-            "id": "def-public.HttpFetchError.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/core/public/http/http_fetch_error.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L13"
-            }
-          },
-          {
-            "id": "def-public.HttpFetchError.req",
-            "type": "Object",
-            "label": "req",
-            "description": [],
-            "source": {
-              "path": "src/core/public/http/http_fetch_error.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L14"
-            },
-            "signature": [
-              "Request"
-            ]
-          },
-          {
-            "id": "def-public.HttpFetchError.res",
-            "type": "Object",
-            "label": "res",
-            "description": [],
-            "source": {
-              "path": "src/core/public/http/http_fetch_error.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L15"
-            },
-            "signature": [
-              "Response | undefined"
-            ]
-          },
-          {
-            "id": "def-public.HttpFetchError.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "message",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/http/http_fetch_error.ts",
-                  "lineNumber": 18,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L18"
-                }
-              },
-              {
-                "type": "string",
-                "label": "name",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/http/http_fetch_error.ts",
-                  "lineNumber": 19,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L19"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "request",
-                "isRequired": true,
-                "signature": [
-                  "Request"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/http/http_fetch_error.ts",
-                  "lineNumber": 20,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L20"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "response",
-                "isRequired": false,
-                "signature": [
-                  "Response | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/http/http_fetch_error.ts",
-                  "lineNumber": 21,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L21"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "body",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/http/http_fetch_error.ts",
-                  "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L22"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/http/http_fetch_error.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L17"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/public/http/http_fetch_error.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/public/http/http_fetch_error.ts#L12"
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [],
     "interfaces": [
       {
@@ -170,11 +11,15 @@
         "description": [
           "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.HttpHeadersInit.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
@@ -200,8 +45,13 @@
         "description": [
           "\nFetch API options available to {@link HttpHandler}s.\n"
         ],
+        "tags": [
+          "internalRemarks",
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.body",
             "type": "CompoundType",
             "label": "body",
@@ -218,6 +68,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.cache",
             "type": "CompoundType",
             "label": "cache",
@@ -234,6 +85,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.credentials",
             "type": "CompoundType",
             "label": "credentials",
@@ -250,6 +102,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.headers",
             "type": "Object",
             "label": "headers",
@@ -273,6 +126,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.integrity",
             "type": "string",
             "label": "integrity",
@@ -289,6 +143,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.keepalive",
             "type": "CompoundType",
             "label": "keepalive",
@@ -305,6 +160,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.method",
             "type": "string",
             "label": "method",
@@ -321,6 +177,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.mode",
             "type": "CompoundType",
             "label": "mode",
@@ -337,6 +194,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.redirect",
             "type": "CompoundType",
             "label": "redirect",
@@ -353,6 +211,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.referrer",
             "type": "string",
             "label": "referrer",
@@ -369,6 +228,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.referrerPolicy",
             "type": "CompoundType",
             "label": "referrerPolicy",
@@ -385,6 +245,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.signal",
             "type": "CompoundType",
             "label": "signal",
@@ -401,6 +262,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpRequestInit.window",
             "type": "Uncategorized",
             "label": "window",
@@ -448,8 +310,12 @@
         "description": [
           "\nAll options that may be used with a {@link HttpHandler}."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptions.query",
             "type": "Object",
             "label": "query",
@@ -473,6 +339,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptions.prependBasePath",
             "type": "CompoundType",
             "label": "prependBasePath",
@@ -489,6 +356,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptions.headers",
             "type": "Object",
             "label": "headers",
@@ -512,6 +380,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptions.asSystemRequest",
             "type": "CompoundType",
             "label": "asSystemRequest",
@@ -528,6 +397,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptions.asResponse",
             "type": "CompoundType",
             "label": "asResponse",
@@ -575,8 +445,12 @@
         "description": [
           "\nSimilar to {@link HttpFetchOptions} but with the URL path included."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpFetchOptionsWithPath.path",
             "type": "string",
             "label": "path",
@@ -600,11 +474,15 @@
         "type": "Interface",
         "label": "HttpFetchQuery",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.HttpFetchQuery.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
@@ -648,8 +526,12 @@
           "<any>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpInterceptorResponseError.request",
             "type": "Object",
             "label": "request",
@@ -664,6 +546,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpInterceptorResponseError.error",
             "type": "CompoundType",
             "label": "error",
@@ -697,8 +580,12 @@
         "type": "Interface",
         "label": "HttpInterceptorRequestError",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpInterceptorRequestError.fetchOptions",
             "type": "Object",
             "label": "fetchOptions",
@@ -721,6 +608,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpInterceptorRequestError.error",
             "type": "Object",
             "label": "error",
@@ -748,6 +636,9 @@
         "label": "HttpInterceptor",
         "description": [
           "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
+        ],
+        "tags": [
+          "public"
         ],
         "children": [
           {
@@ -1155,8 +1046,12 @@
           "<TResponseBody>"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpResponse.fetchOptions",
             "type": "Object",
             "label": "fetchOptions",
@@ -1181,6 +1076,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpResponse.request",
             "type": "Object",
             "label": "request",
@@ -1197,6 +1093,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpResponse.response",
             "type": "Object",
             "label": "response",
@@ -1213,6 +1110,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpResponse.body",
             "type": "Uncategorized",
             "label": "body",
@@ -1243,11 +1141,16 @@
         "description": [
           "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
         ],
+        "tags": [
+          "link",
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
@@ -1262,6 +1165,7 @@
             "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
@@ -1276,6 +1180,7 @@
             "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
@@ -1290,6 +1195,7 @@
             "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/public/http/types.ts",
@@ -1315,8 +1221,12 @@
         "description": [
           "\nAPIs for manipulating the basePath on URL segments."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IBasePath.get",
             "type": "Function",
             "label": "get",
@@ -1333,6 +1243,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IBasePath.prepend",
             "type": "Function",
             "label": "prepend",
@@ -1349,6 +1260,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IBasePath.remove",
             "type": "Function",
             "label": "remove",
@@ -1365,6 +1277,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IBasePath.serverBasePath",
             "type": "string",
             "label": "serverBasePath",
@@ -1378,6 +1291,9 @@
             }
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-public.IBasePath.publicBaseUrl",
             "type": "string",
             "label": "publicBaseUrl",
@@ -1408,6 +1324,7 @@
         "description": [
           "\nAPIs for denoting paths as not requiring authentication"
         ],
+        "tags": [],
         "children": [
           {
             "id": "def-public.IAnonymousPaths.isAnonymous",
@@ -1492,6 +1409,9 @@
         "description": [
           "\nAPIs for working with external URLs.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
             "id": "def-public.IExternalUrl.validateUrl",
@@ -1542,8 +1462,12 @@
         "description": [
           "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IHttpInterceptController.halted",
             "type": "boolean",
             "label": "halted",
@@ -1598,8 +1522,12 @@
           " extends Error"
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IHttpFetchError.name",
             "type": "string",
             "label": "name",
@@ -1611,6 +1539,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.IHttpFetchError.request",
             "type": "Object",
             "label": "request",
@@ -1625,6 +1554,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IHttpFetchError.response",
             "type": "Object",
             "label": "response",
@@ -1639,6 +1569,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-public.IHttpFetchError.req",
             "type": "Object",
             "label": "req",
@@ -1653,6 +1586,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-public.IHttpFetchError.res",
             "type": "Object",
             "label": "res",
@@ -1667,6 +1603,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IHttpFetchError.body",
             "type": "Any",
             "label": "body",
@@ -1705,8 +1642,12 @@
         "description": [
           "\nProperties that can be returned by HttpInterceptor.request to override the response."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.IHttpResponseInterceptorOverrides.response",
             "type": "Object",
             "label": "response",
@@ -1723,6 +1664,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.IHttpResponseInterceptorOverrides.body",
             "type": "Uncategorized",
             "label": "body",
@@ -1751,8 +1693,12 @@
         "type": "Interface",
         "label": "HttpSetup",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-public.HttpSetup.basePath",
             "type": "Object",
             "label": "basePath",
@@ -1775,6 +1721,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.anonymousPaths",
             "type": "Object",
             "label": "anonymousPaths",
@@ -1797,6 +1744,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.externalUrl",
             "type": "Object",
             "label": "externalUrl",
@@ -1869,6 +1817,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.fetch",
             "type": "Function",
             "label": "fetch",
@@ -1891,6 +1840,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.delete",
             "type": "Function",
             "label": "delete",
@@ -1913,6 +1863,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.get",
             "type": "Function",
             "label": "get",
@@ -1935,6 +1886,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.head",
             "type": "Function",
             "label": "head",
@@ -1957,6 +1909,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.options",
             "type": "Function",
             "label": "options",
@@ -1979,6 +1932,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.patch",
             "type": "Function",
             "label": "patch",
@@ -2001,6 +1955,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.post",
             "type": "Function",
             "label": "post",
@@ -2023,6 +1978,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-public.HttpSetup.put",
             "type": "Function",
             "label": "put",
@@ -2119,6 +2075,9 @@
         "id": "def-public.HttpStart",
         "type": "Type",
         "label": "HttpStart",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link HttpSetup}"
         ],
@@ -2140,12 +2099,16 @@
       {
         "id": "def-server.BasePath",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "BasePath",
         "description": [
           "\nAccess or manipulate the Kibana base path\n"
         ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.BasePath.serverBasePath",
             "type": "string",
             "label": "serverBasePath",
@@ -2159,6 +2122,9 @@
             }
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.BasePath.publicBaseUrl",
             "type": "string",
             "label": "publicBaseUrl",
@@ -2173,54 +2139,6 @@
             "signature": [
               "string | undefined"
             ]
-          },
-          {
-            "id": "def-server.BasePath.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "serverBasePath",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L37"
-                }
-              },
-              {
-                "type": "string",
-                "label": "publicBaseUrl",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/base_path_service.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L37"
-                }
-              }
-            ],
-            "tags": [
-              "internal"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/http/base_path_service.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L37"
-            }
           },
           {
             "id": "def-server.BasePath.get",
@@ -2283,6 +2201,7 @@
               "lineNumber": 45,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L45"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2360,6 +2279,9 @@
               "lineNumber": 55,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L55"
             },
+            "tags": [
+              "privateRemarks"
+            ],
             "returnComment": []
           },
           {
@@ -2393,6 +2315,7 @@
               "lineNumber": 69,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L69"
             },
+            "tags": [],
             "returnComment": []
           },
           {
@@ -2426,6 +2349,7 @@
               "lineNumber": 81,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/base_path_service.ts#L81"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -2439,6 +2363,9 @@
       {
         "id": "def-server.RouteValidationError",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "RouteValidationError",
         "description": [
           "\nError to return when the validation is not successful."
@@ -2512,6 +2439,9 @@
       {
         "id": "def-server.KibanaRequest",
         "type": "Class",
+        "tags": [
+          "public"
+        ],
         "label": "KibanaRequest",
         "description": [
           "\nKibana specific abstraction for an incoming request."
@@ -2528,93 +2458,9 @@
         ],
         "children": [
           {
-            "id": "def-server.KibanaRequest.from",
-            "type": "Function",
-            "label": "from",
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              ".from"
-            ],
-            "description": [
-              "\nFactory for creating requests. Validates the request before creating an\ninstance of a KibanaRequest."
-            ],
-            "children": [
-              {
-                "type": "Object",
-                "label": "req",
-                "isRequired": true,
-                "signature": [
-                  "Request"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 102,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/request.ts#L102"
-                }
-              },
-              {
-                "type": "CompoundType",
-                "label": "routeSchemas",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.RouteValidator",
-                    "text": "RouteValidator"
-                  },
-                  "<P, Q, B> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.RouteValidatorFullConfig",
-                    "text": "RouteValidatorFullConfig"
-                  },
-                  "<P, Q, B>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 103,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/request.ts#L103"
-                }
-              },
-              {
-                "type": "boolean",
-                "label": "withoutSecretHeaders",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/http/router/request.ts",
-                  "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/request.ts#L104"
-                }
-              }
-            ],
             "tags": [
-              "internal"
+              "remarks"
             ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/request.ts#L101"
-            }
-          },
-          {
             "id": "def-server.KibanaRequest.id",
             "type": "string",
             "label": "id",
@@ -2628,6 +2474,9 @@
             }
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.KibanaRequest.uuid",
             "type": "string",
             "label": "uuid",
@@ -2641,6 +2490,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.url",
             "type": "Object",
             "label": "url",
@@ -2657,6 +2507,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.route",
             "type": "Object",
             "label": "route",
@@ -2685,6 +2536,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.KibanaRequest.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -2707,6 +2561,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.isSystemRequest",
             "type": "boolean",
             "label": "isSystemRequest",
@@ -2720,6 +2575,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.socket",
             "type": "Object",
             "label": "socket",
@@ -2742,6 +2598,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.events",
             "type": "Object",
             "label": "events",
@@ -2764,6 +2621,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.auth",
             "type": "Object",
             "label": "auth",
@@ -2778,6 +2636,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequest.rewrittenUrl",
             "type": "Object",
             "label": "rewrittenUrl",
@@ -2792,20 +2651,6 @@
             "signature": [
               "URL",
               " | undefined"
-            ]
-          },
-          {
-            "id": "def-server.KibanaRequest.[requestSymbol]",
-            "type": "Object",
-            "label": "[requestSymbol]",
-            "description": [],
-            "source": {
-              "path": "src/core/server/http/router/request.ts",
-              "lineNumber": 184,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/request.ts#L184"
-            },
-            "signature": [
-              "Request"
             ]
           },
           {
@@ -2914,8 +2759,12 @@
         "description": [
           "\nResult of successful authentication."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthResultParams.state",
             "type": "Object",
             "label": "state",
@@ -2932,6 +2781,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthResultParams.requestHeaders",
             "type": "Object",
             "label": "requestHeaders",
@@ -2948,6 +2798,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthResultParams.responseHeaders",
             "type": "Object",
             "label": "responseHeaders",
@@ -2976,8 +2827,12 @@
         "type": "Interface",
         "label": "AuthToolkit",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthToolkit.authenticated",
             "type": "Function",
             "label": "authenticated",
@@ -3009,6 +2864,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthToolkit.notHandled",
             "type": "Function",
             "label": "notHandled",
@@ -3032,6 +2888,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.AuthToolkit.redirected",
             "type": "Function",
             "label": "redirected",
@@ -3084,8 +2941,12 @@
           }
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthRedirected.type",
             "type": "string",
             "label": "type",
@@ -3121,8 +2982,12 @@
         "description": [
           "\nResult of auth redirection."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthRedirectedParams.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -3168,8 +3033,12 @@
           }
         ],
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.Authenticated.type",
             "type": "string",
             "label": "type",
@@ -3203,8 +3072,12 @@
         "type": "Interface",
         "label": "AuthNotHandled",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.AuthNotHandled.type",
             "type": "string",
             "label": "type",
@@ -3250,8 +3123,12 @@
         "description": [
           "\nHTTP response parameters for a response with adjustable status code."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.CustomHttpResponseOptions.body",
             "type": "Uncategorized",
             "label": "body",
@@ -3268,6 +3145,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomHttpResponseOptions.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -3284,6 +3162,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.CustomHttpResponseOptions.statusCode",
             "type": "number",
             "label": "statusCode",
@@ -3307,8 +3186,12 @@
         "type": "Interface",
         "label": "HttpAuth",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.HttpAuth.get",
             "type": "Function",
             "label": "get",
@@ -3331,6 +3214,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpAuth.isAuthenticated",
             "type": "Function",
             "label": "isAuthenticated",
@@ -3367,8 +3251,12 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.HttpResponseOptions.body",
             "type": "CompoundType",
             "label": "body",
@@ -3391,6 +3279,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpResponseOptions.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -3421,8 +3310,12 @@
         "description": [
           "\nInformation about what hostname, port, and protocol the server process is\nrunning on. Note that this may not match the URL that end-users access\nKibana at. For the public URL, see {@link BasePath.publicBaseUrl}."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.HttpServerInfo.name",
             "type": "string",
             "label": "name",
@@ -3436,6 +3329,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.HttpServerInfo.hostname",
             "type": "string",
             "label": "hostname",
@@ -3449,6 +3343,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.HttpServerInfo.port",
             "type": "number",
             "label": "port",
@@ -3462,6 +3357,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.HttpServerInfo.protocol",
             "type": "CompoundType",
             "label": "protocol",
@@ -3492,8 +3388,17 @@
         "description": [
           "\nKibana HTTP Service provides own abstraction for work with HTTP stack.\nPlugins don't have direct access to `hapi` server and its primitives anymore. Moreover,\nplugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.\nThis gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.\nIf the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.\n"
         ],
+        "tags": [
+          "example",
+          "kbn",
+          "kbn",
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.createCookieSessionStorageFactory",
             "type": "Function",
             "label": "createCookieSessionStorageFactory",
@@ -3526,6 +3431,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.registerOnPreRouting",
             "type": "Function",
             "label": "registerOnPreRouting",
@@ -3550,6 +3459,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.registerOnPreAuth",
             "type": "Function",
             "label": "registerOnPreAuth",
@@ -3574,6 +3487,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.registerAuth",
             "type": "Function",
             "label": "registerAuth",
@@ -3598,6 +3515,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.registerOnPostAuth",
             "type": "Function",
             "label": "registerOnPostAuth",
@@ -3622,6 +3543,10 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "link"
+            ],
             "id": "def-server.HttpServiceSetup.registerOnPreResponse",
             "type": "Function",
             "label": "registerOnPreResponse",
@@ -3646,6 +3571,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpServiceSetup.basePath",
             "type": "Object",
             "label": "basePath",
@@ -3670,6 +3596,9 @@
             ]
           },
           {
+            "tags": [
+              "deprecated"
+            ],
             "id": "def-server.HttpServiceSetup.auth",
             "type": "Object",
             "label": "auth",
@@ -3692,6 +3621,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpServiceSetup.csp",
             "type": "Object",
             "label": "csp",
@@ -3714,6 +3644,11 @@
             ]
           },
           {
+            "tags": [
+              "remarks",
+              "example",
+              "public"
+            ],
             "id": "def-server.HttpServiceSetup.createRouter",
             "type": "Function",
             "label": "createRouter",
@@ -3754,6 +3689,10 @@
             ]
           },
           {
+            "tags": [
+              "example",
+              "public"
+            ],
             "id": "def-server.HttpServiceSetup.registerRouteHandlerContext",
             "type": "Function",
             "label": "registerRouteHandlerContext",
@@ -3793,6 +3732,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpServiceSetup.getServerInfo",
             "type": "Function",
             "label": "getServerInfo",
@@ -3828,8 +3768,12 @@
         "type": "Interface",
         "label": "HttpServiceStart",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.HttpServiceStart.basePath",
             "type": "Object",
             "label": "basePath",
@@ -3854,6 +3798,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpServiceStart.auth",
             "type": "Object",
             "label": "auth",
@@ -3876,6 +3821,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.HttpServiceStart.getServerInfo",
             "type": "Function",
             "label": "getServerInfo",
@@ -3913,8 +3859,12 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.ErrorHttpResponseOptions.body",
             "type": "CompoundType",
             "label": "body",
@@ -3931,6 +3881,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.ErrorHttpResponseOptions.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -3960,6 +3911,9 @@
         "label": "IKibanaSocket",
         "description": [
           "\nA tiny abstraction for TCP socket."
+        ],
+        "tags": [
+          "public"
         ],
         "children": [
           {
@@ -4122,9 +4076,11 @@
                 "id": "def-server.IKibanaSocket.renegotiate.options",
                 "type": "Object",
                 "label": "options",
+                "tags": [],
                 "description": [],
                 "children": [
                   {
+                    "tags": [],
                     "id": "def-server.IKibanaSocket.renegotiate.options.rejectUnauthorized",
                     "type": "CompoundType",
                     "label": "rejectUnauthorized",
@@ -4139,6 +4095,7 @@
                     ]
                   },
                   {
+                    "tags": [],
                     "id": "def-server.IKibanaSocket.renegotiate.options.requestCert",
                     "type": "CompoundType",
                     "label": "requestCert",
@@ -4171,6 +4128,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.IKibanaSocket.authorized",
             "type": "CompoundType",
             "label": "authorized",
@@ -4187,6 +4145,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.IKibanaSocket.authorizationError",
             "type": "Object",
             "label": "authorizationError",
@@ -4217,8 +4176,12 @@
         "description": [
           "\nRequest events."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.KibanaRequestEvents.aborted$",
             "type": "Object",
             "label": "aborted$",
@@ -4236,6 +4199,9 @@
             ]
           },
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.KibanaRequestEvents.completed$",
             "type": "Object",
             "label": "completed$",
@@ -4277,8 +4243,12 @@
         "description": [
           "\nRequest specific route information exposed to a handler."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.KibanaRequestRoute.path",
             "type": "string",
             "label": "path",
@@ -4290,6 +4260,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequestRoute.method",
             "type": "Uncategorized",
             "label": "method",
@@ -4304,6 +4275,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.KibanaRequestRoute.options",
             "type": "Uncategorized",
             "label": "options",
@@ -4349,8 +4321,12 @@
         "description": [
           "\nA response data object, expected to returned as a result of {@link RequestHandler} execution"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.IKibanaResponse.status",
             "type": "number",
             "label": "status",
@@ -4362,6 +4338,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.IKibanaResponse.payload",
             "type": "Uncategorized",
             "label": "payload",
@@ -4376,6 +4353,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.IKibanaResponse.options",
             "type": "Object",
             "label": "options",
@@ -4419,6 +4397,10 @@
           "Request"
         ],
         "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
         "children": [],
         "source": {
           "path": "src/core/server/http/router/request.ts",
@@ -4432,8 +4414,12 @@
         "type": "Interface",
         "label": "OnPreAuthToolkit",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreAuthToolkit.next",
             "type": "Function",
             "label": "next",
@@ -4462,8 +4448,12 @@
         "type": "Interface",
         "label": "OnPreRoutingToolkit",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreRoutingToolkit.next",
             "type": "Function",
             "label": "next",
@@ -4480,6 +4470,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.OnPreRoutingToolkit.rewriteUrl",
             "type": "Function",
             "label": "rewriteUrl",
@@ -4508,8 +4499,12 @@
         "type": "Interface",
         "label": "OnPostAuthToolkit",
         "description": [],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPostAuthToolkit.next",
             "type": "Function",
             "label": "next",
@@ -4540,8 +4535,12 @@
         "description": [
           "\nA tool set defining an outcome of OnPreResponse interceptor for incoming request."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreResponseToolkit.render",
             "type": "Function",
             "label": "render",
@@ -4566,6 +4565,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.OnPreResponseToolkit.next",
             "type": "Function",
             "label": "next",
@@ -4604,8 +4604,12 @@
         "description": [
           "\nAdditional data to extend a response when rendering a new body"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreResponseRender.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -4622,6 +4626,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.OnPreResponseRender.body",
             "type": "string",
             "label": "body",
@@ -4649,8 +4654,12 @@
         "description": [
           "\nAdditional data to extend a response."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreResponseExtensions.headers",
             "type": "CompoundType",
             "label": "headers",
@@ -4681,8 +4690,12 @@
         "description": [
           "\nResponse status code."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.OnPreResponseInfo.statusCode",
             "type": "number",
             "label": "statusCode",
@@ -4718,8 +4731,14 @@
         "description": [
           "\nRoute specific configuration."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "remarks"
+            ],
             "id": "def-server.RouteConfig.path",
             "type": "string",
             "label": "path",
@@ -4733,6 +4752,11 @@
             }
           },
           {
+            "tags": [
+              "remarks",
+              "example",
+              "kbn"
+            ],
             "id": "def-server.RouteConfig.validate",
             "type": "CompoundType",
             "label": "validate",
@@ -4757,6 +4781,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfig.options",
             "type": "Object",
             "label": "options",
@@ -4804,8 +4829,12 @@
         "description": [
           "\nRegisters route handlers for specified resource path and method.\nSee {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.IRouter.routerPath",
             "type": "string",
             "label": "routerPath",
@@ -4819,6 +4848,10 @@
             }
           },
           {
+            "tags": [
+              "link",
+              "link"
+            ],
             "id": "def-server.IRouter.get",
             "type": "Function",
             "label": "get",
@@ -4842,6 +4875,10 @@
             ]
           },
           {
+            "tags": [
+              "link",
+              "link"
+            ],
             "id": "def-server.IRouter.post",
             "type": "Function",
             "label": "post",
@@ -4865,6 +4902,10 @@
             ]
           },
           {
+            "tags": [
+              "link",
+              "link"
+            ],
             "id": "def-server.IRouter.put",
             "type": "Function",
             "label": "put",
@@ -4888,6 +4929,10 @@
             ]
           },
           {
+            "tags": [
+              "link",
+              "link"
+            ],
             "id": "def-server.IRouter.patch",
             "type": "Function",
             "label": "patch",
@@ -4911,6 +4956,10 @@
             ]
           },
           {
+            "tags": [
+              "link",
+              "link"
+            ],
             "id": "def-server.IRouter.delete",
             "type": "Function",
             "label": "delete",
@@ -4934,6 +4983,9 @@
             ]
           },
           {
+            "tags": [
+              "link"
+            ],
             "id": "def-server.IRouter.handleLegacyErrors",
             "type": "Function",
             "label": "handleLegacyErrors",
@@ -4953,22 +5005,6 @@
                 "section": "def-server.RequestHandlerWrapper",
                 "text": "RequestHandlerWrapper"
               }
-            ]
-          },
-          {
-            "id": "def-server.IRouter.getRoutes",
-            "type": "Function",
-            "label": "getRoutes",
-            "description": [
-              "\nReturns all routes registered with this router."
-            ],
-            "source": {
-              "path": "src/core/server/http/router/router.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/router.ts#L113"
-            },
-            "signature": [
-              "() => RouterRoute[]"
             ]
           }
         ],
@@ -4996,8 +5032,12 @@
         "description": [
           "\nAdditional route options."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptions.authRequired",
             "type": "CompoundType",
             "label": "authRequired",
@@ -5014,6 +5054,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptions.xsrfRequired",
             "type": "Uncategorized",
             "label": "xsrfRequired",
@@ -5030,6 +5071,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptions.tags",
             "type": "Object",
             "label": "tags",
@@ -5046,6 +5088,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptions.body",
             "type": "Uncategorized",
             "label": "body",
@@ -5078,6 +5121,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptions.timeout",
             "type": "Object",
             "label": "timeout",
@@ -5116,8 +5160,12 @@
         "description": [
           "\nAdditional body options for a route"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptionsBody.accepts",
             "type": "CompoundType",
             "label": "accepts",
@@ -5142,6 +5190,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptionsBody.maxBytes",
             "type": "number",
             "label": "maxBytes",
@@ -5158,6 +5207,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptionsBody.output",
             "type": "CompoundType",
             "label": "output",
@@ -5174,6 +5224,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteConfigOptionsBody.parse",
             "type": "CompoundType",
             "label": "parse",
@@ -5214,8 +5265,14 @@
         "description": [
           "\nThe configuration object to the RouteValidator class.\nSet `params`, `query` and/or `body` to specify the validation logic to follow for that property.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-server.RouteValidatorConfig.params",
             "type": "CompoundType",
             "label": "params",
@@ -5243,6 +5300,9 @@
             ]
           },
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-server.RouteValidatorConfig.query",
             "type": "CompoundType",
             "label": "query",
@@ -5270,6 +5330,9 @@
             ]
           },
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-server.RouteValidatorConfig.body",
             "type": "CompoundType",
             "label": "body",
@@ -5311,8 +5374,14 @@
         "description": [
           "\nAdditional options for the RouteValidator class to modify its default behaviour.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [
+              "public"
+            ],
             "id": "def-server.RouteValidatorOptions.unsafe",
             "type": "Object",
             "label": "unsafe",
@@ -5343,8 +5412,12 @@
         "description": [
           "\nValidation result factory to be used in the custom validation function to return the valid data or validation errors\n\nSee {@link RouteValidationFunction}.\n"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.RouteValidationResultFactory.ok",
             "type": "Function",
             "label": "ok",
@@ -5359,6 +5432,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.RouteValidationResultFactory.badRequest",
             "type": "Function",
             "label": "badRequest",
@@ -5404,6 +5478,9 @@
         ],
         "description": [
           "\nProvides an interface to store and retrieve data across requests."
+        ],
+        "tags": [
+          "public"
         ],
         "children": [
           {
@@ -5505,8 +5582,12 @@
         "description": [
           "\nConfiguration used to create HTTP session storage based on top of cookie mechanism."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SessionStorageCookieOptions.name",
             "type": "string",
             "label": "name",
@@ -5520,6 +5601,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SessionStorageCookieOptions.encryptionKey",
             "type": "string",
             "label": "encryptionKey",
@@ -5533,6 +5615,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SessionStorageCookieOptions.validate",
             "type": "Function",
             "label": "validate",
@@ -5556,6 +5639,7 @@
             ]
           },
           {
+            "tags": [],
             "id": "def-server.SessionStorageCookieOptions.isSecure",
             "type": "boolean",
             "label": "isSecure",
@@ -5569,6 +5653,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SessionStorageCookieOptions.sameSite",
             "type": "CompoundType",
             "label": "sameSite",
@@ -5599,8 +5684,12 @@
         "description": [
           "\nReturn type from a function to validate cookie contents."
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SessionCookieValidationResult.isValid",
             "type": "boolean",
             "label": "isValid",
@@ -5614,6 +5703,7 @@
             }
           },
           {
+            "tags": [],
             "id": "def-server.SessionCookieValidationResult.path",
             "type": "string",
             "label": "path",
@@ -5654,8 +5744,12 @@
         "description": [
           "\nSessionStorage factory to bind one to an incoming request"
         ],
+        "tags": [
+          "public"
+        ],
         "children": [
           {
+            "tags": [],
             "id": "def-server.SessionStorageFactory.asScoped",
             "type": "Function",
             "label": "asScoped",
@@ -5699,6 +5793,9 @@
         "id": "def-server.AuthStatus",
         "type": "Enum",
         "label": "AuthStatus",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nStatus indicating an outcome of the authentication."
         ],
@@ -5713,6 +5810,9 @@
         "id": "def-server.AuthResultType",
         "type": "Enum",
         "label": "AuthResultType",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/core/server/http/lifecycle/auth.ts",
@@ -5727,6 +5827,9 @@
         "id": "def-server.AuthenticationHandler",
         "type": "Type",
         "label": "AuthenticationHandler",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link AuthToolkit}."
         ],
@@ -5777,6 +5880,9 @@
         "id": "def-server.AuthHeaders",
         "type": "Type",
         "label": "AuthHeaders",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAuth Headers map"
         ],
@@ -5794,6 +5900,9 @@
         "id": "def-server.AuthResult",
         "type": "Type",
         "label": "AuthResult",
+        "tags": [
+          "public"
+        ],
         "description": [],
         "source": {
           "path": "src/core/server/http/lifecycle/auth.ts",
@@ -5831,6 +5940,9 @@
         "id": "def-server.IBasePath",
         "type": "Type",
         "label": "IBasePath",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAccess or manipulate the Kibana base path\n\n{@link BasePath}"
         ],
@@ -5848,6 +5960,11 @@
         "id": "def-server.GetAuthHeaders",
         "type": "Type",
         "label": "GetAuthHeaders",
+        "tags": [
+          "link",
+          "return",
+          "public"
+        ],
         "description": [
           "\nGet headers to authenticate a user against Elasticsearch."
         ],
@@ -5881,6 +5998,10 @@
         "id": "def-server.GetAuthState",
         "type": "Type",
         "label": "GetAuthState",
+        "tags": [
+          "link",
+          "public"
+        ],
         "description": [
           "\nGets authentication state for a request. Returned by `auth` interceptor."
         ],
@@ -5922,6 +6043,9 @@
         "id": "def-server.Headers",
         "type": "Type",
         "label": "Headers",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nHttp request headers to read."
         ],
@@ -5939,6 +6063,9 @@
         "id": "def-server.HttpResponsePayload",
         "type": "Type",
         "label": "HttpResponsePayload",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nData send to the client as a response payload."
         ],
@@ -5957,6 +6084,10 @@
         "id": "def-server.IsAuthenticated",
         "type": "Type",
         "label": "IsAuthenticated",
+        "tags": [
+          "link",
+          "public"
+        ],
         "description": [
           "\nReturns authentication status for a request."
         ],
@@ -5990,6 +6121,9 @@
         "id": "def-server.KibanaRequestRouteOptions",
         "type": "Type",
         "label": "KibanaRequestRouteOptions",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRoute options: If 'GET' or 'OPTIONS' method, body options won't be returned."
         ],
@@ -6015,6 +6149,9 @@
         "id": "def-server.LifecycleResponseFactory",
         "type": "Type",
         "label": "LifecycleResponseFactory",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nCreates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client."
         ],
@@ -6032,6 +6169,9 @@
         "id": "def-server.KnownHeaders",
         "type": "Type",
         "label": "KnownHeaders",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSet of well-known HTTP headers."
         ],
@@ -6049,6 +6189,9 @@
         "id": "def-server.OnPreAuthHandler",
         "type": "Type",
         "label": "OnPreAuthHandler",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link OnPreAuthToolkit}."
         ],
@@ -6099,6 +6242,9 @@
         "id": "def-server.OnPreRoutingHandler",
         "type": "Type",
         "label": "OnPreRoutingHandler",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link OnPreRoutingToolkit}."
         ],
@@ -6149,6 +6295,9 @@
         "id": "def-server.OnPostAuthHandler",
         "type": "Type",
         "label": "OnPostAuthHandler",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link OnPostAuthToolkit}."
         ],
@@ -6199,6 +6348,9 @@
         "id": "def-server.OnPreResponseHandler",
         "type": "Type",
         "label": "OnPreResponseHandler",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSee {@link OnPreRoutingToolkit}."
         ],
@@ -6240,6 +6392,9 @@
         "id": "def-server.RedirectResponseOptions",
         "type": "Type",
         "label": "RedirectResponseOptions",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nHTTP response parameters for redirection response"
         ],
@@ -6257,6 +6412,13 @@
         "id": "def-server.RequestHandler",
         "type": "Type",
         "label": "RequestHandler",
+        "tags": [
+          "link",
+          "link",
+          "link",
+          "example",
+          "public"
+        ],
         "description": [
           "\nA function executed when route path matched requested resource path.\nRequest handler is expected to return a result of one of {@link KibanaResponseFactory} functions.\nIf anything else is returned, or an error is thrown, the HTTP service will automatically log the error\nand respond `500 - Internal Server Error`."
         ],
@@ -6298,6 +6460,10 @@
         "id": "def-server.RequestHandlerWrapper",
         "type": "Type",
         "label": "RequestHandlerWrapper",
+        "tags": [
+          "example",
+          "public"
+        ],
         "description": [
           "\nType-safe wrapper for {@link RequestHandler} function."
         ],
@@ -6331,6 +6497,9 @@
         "id": "def-server.RequestHandlerContextContainer",
         "type": "Type",
         "label": "RequestHandlerContextContainer",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAn object that handles registration of http request context providers."
         ],
@@ -6369,6 +6538,9 @@
         "id": "def-server.RequestHandlerContextProvider",
         "type": "Type",
         "label": "RequestHandlerContextProvider",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nContext provider for request handler.\nExtends request context object with provided functionality or data.\n"
         ],
@@ -6413,6 +6585,9 @@
         "id": "def-server.ResponseError",
         "type": "Type",
         "label": "ResponseError",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nError message and optional data send to the client in case of error."
         ],
@@ -6430,6 +6605,9 @@
         "id": "def-server.ResponseErrorAttributes",
         "type": "Type",
         "label": "ResponseErrorAttributes",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAdditional data to provide error details."
         ],
@@ -6447,6 +6625,9 @@
         "id": "def-server.ResponseHeaders",
         "type": "Type",
         "label": "ResponseHeaders",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nHttp response headers to set."
         ],
@@ -6464,6 +6645,9 @@
         "id": "def-server.KibanaResponseFactory",
         "type": "Type",
         "label": "KibanaResponseFactory",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nCreates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client."
         ],
@@ -6481,6 +6665,9 @@
         "id": "def-server.RouteRegistrar",
         "type": "Type",
         "label": "RouteRegistrar",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRoute handler common definition\n"
         ],
@@ -6525,6 +6712,9 @@
         "id": "def-server.RouteMethod",
         "type": "Type",
         "label": "RouteMethod",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nThe set of common HTTP methods supported by Kibana routing."
         ],
@@ -6542,6 +6732,9 @@
         "id": "def-server.RouteContentType",
         "type": "Type",
         "label": "RouteContentType",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nThe set of supported parseable Content-Types"
         ],
@@ -6559,6 +6752,9 @@
         "id": "def-server.RouteValidationSpec",
         "type": "Type",
         "label": "RouteValidationSpec",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
@@ -6587,6 +6783,10 @@
         "id": "def-server.RouteValidationFunction",
         "type": "Type",
         "label": "RouteValidationFunction",
+        "tags": [
+          "example",
+          "public"
+        ],
         "description": [
           "\nThe custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.\n"
         ],
@@ -6620,6 +6820,9 @@
         "id": "def-server.RouteValidatorFullConfig",
         "type": "Type",
         "label": "RouteValidatorFullConfig",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nRoute validations config and options merged into one object"
         ],
@@ -6637,6 +6840,9 @@
         "id": "def-server.DestructiveRouteMethod",
         "type": "Type",
         "label": "DestructiveRouteMethod",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSet of HTTP methods changing the state of the server."
         ],
@@ -6654,6 +6860,9 @@
         "id": "def-server.SafeRouteMethod",
         "type": "Type",
         "label": "SafeRouteMethod",
+        "tags": [
+          "public"
+        ],
         "description": [
           "\nSet of HTTP methods not changing the state of the server."
         ],
@@ -6672,11 +6881,16 @@
       {
         "id": "def-server.kibanaResponseFactory",
         "type": "Object",
+        "tags": [
+          "example",
+          "public"
+        ],
         "children": [
           {
             "id": "def-server.kibanaResponseFactory.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/server/http/router/response.ts",
@@ -6691,6 +6905,7 @@
             "id": "def-server.kibanaResponseFactory.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/server/http/router/response.ts",
@@ -6705,6 +6920,7 @@
             "id": "def-server.kibanaResponseFactory.Unnamed",
             "type": "Any",
             "label": "Unnamed",
+            "tags": [],
             "description": [],
             "source": {
               "path": "src/core/server/http/router/response.ts",
@@ -6771,6 +6987,7 @@
               "lineNumber": 297,
               "link": "https://github.com/elastic/kibana/tree/7.xsrc/core/server/http/router/response.ts#L297"
             },
+            "tags": [],
             "returnComment": []
           }
         ],
@@ -6786,6 +7003,9 @@
         "initialIsOpen": false
       },
       {
+        "tags": [
+          "public"
+        ],
         "id": "def-server.validBodyOutput",
         "type": "Object",
         "label": "validBodyOutput",

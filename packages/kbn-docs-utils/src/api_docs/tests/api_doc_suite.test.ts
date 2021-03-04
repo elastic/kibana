@@ -170,9 +170,19 @@ describe('functions', () => {
     expect(fn2).toBeDefined();
     expect(fn2?.type).toBe(TypeKind.FunctionKind);
   });
+
+  it('Fn with internal tag is not exported', () => {
+    const fn = doc.client.find((c) => c.label === 'iShouldBeInternalFn');
+    expect(fn).toBeUndefined();
+  });
 });
 
 describe('objects', () => {
+  it('Object with internal tag is not exported', () => {
+    const obj = doc.client.find((c) => c.label === 'iShouldBeInternalObj');
+    expect(obj).toBeUndefined();
+  });
+
   it('Object exported correctly', () => {
     const obj = doc.client.find((c) => c.label === 'aPretendNamespaceObj');
     expect(obj).toBeDefined();
@@ -297,6 +307,11 @@ describe('Misc types', () => {
     expect(linkCount(type?.signature!)).toBe(3);
     expect((type!.signature![1] as Reference).docId).toBe('kibPluginAFooPluginApi');
   });
+
+  it('types with internal tags are not exported', () => {
+    const internal = doc.client.find((c) => c.label === 'IShouldBeInternal');
+    expect(internal).toBeUndefined();
+  });
 });
 
 describe('interfaces and classes', () => {
@@ -393,5 +408,22 @@ describe('interfaces and classes', () => {
     const fnWithGeneric = exampleInterface?.children?.find((c) => c.label === 'aFnWithGen');
     expect(fnWithGeneric).toBeDefined();
     expect(fnWithGeneric?.type).toBe(TypeKind.FunctionKind);
+  });
+
+  it('interfaces with internal tags are not exported', () => {
+    const internal = doc.client.find((c) => c.label === 'IShouldBeInternalInterface');
+    expect(internal).toBeUndefined();
+  });
+
+  it('classes with internal tags are not exported', () => {
+    const clss = doc.client.find((c) => c.label === 'IShouldBeInternalClass');
+    expect(clss).toBeUndefined();
+  });
+
+  it('interface property marked as internal not exported', () => {
+    const start = doc.client.find((c) => c.label === 'Start');
+
+    const internal = start?.children?.find((c) => c.label === 'anInternalStartFn');
+    expect(internal).toBeUndefined();
   });
 });
