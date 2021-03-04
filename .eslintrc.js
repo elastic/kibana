@@ -1366,7 +1366,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['lodash/*', '!lodash/fp'],
+            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
           },
         ],
       },

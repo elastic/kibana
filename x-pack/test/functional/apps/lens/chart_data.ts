@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
     });
 
     const expectedData = [
@@ -63,28 +63,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // https://github.com/elastic/elastic-charts/issues/917 gets fixed
     it.skip('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
     it.skip('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
     it.skip('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
     it('should render datatable', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const terms = await Promise.all(
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 0))
       );
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render metric', async () => {
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
     });
   });
