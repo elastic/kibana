@@ -25,7 +25,7 @@ kibanaPipeline(timeoutMinutes: 210) {
                 withEnv([
                   'BUILD_TS_REFS_CACHE_ENABLE=true',
                   'BUILD_TS_REFS_CACHE_CAPTURE=true',
-                  'DISABLE_BOOTSTRAP_VALIDATIONS=true',
+                  'DISABLE_BOOTSTRAP_VALIDATION=true',
                 ]) {
                   kibanaPipeline.doSetup()
                 }

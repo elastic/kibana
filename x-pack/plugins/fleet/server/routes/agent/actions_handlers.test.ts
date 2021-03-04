@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NewAgentActionSchema } from '../../types/models';
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -17,13 +16,17 @@ import {
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
+
+import { NewAgentActionSchema } from '../../types/models';
 import type { ActionsService } from '../../services/agents';
 import type { AgentAction } from '../../../common/types/models';
-import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+
 import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../../common/types/rest_spec';
+
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {

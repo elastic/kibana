@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+
 import {
   isPackageLimited,
   installationStatuses,
@@ -22,10 +23,11 @@ import { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
 import * as Registry from '../registry';
-import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+
+import { createInstallableFrom, isRequiredPackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 
