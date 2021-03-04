@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiShowFor,
   EuiPanel,
-  EuiTextColor,
 } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -63,15 +62,11 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
-          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-            <EuiFlexItem>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
               <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
             </EuiFlexItem>
-            {osRestriction && (
-              <EuiFlexItem>
-                <EuiTextColor color="subdued">{osRestriction}</EuiTextColor>
-              </EuiFlexItem>
-            )}
+            {osRestriction && <EuiFlexItem grow={false}>{osRestriction}</EuiFlexItem>}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
