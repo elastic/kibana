@@ -3,6 +3,383 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.SimpleSavedObject",
+        "type": "Class",
+        "tags": [
+          "public"
+        ],
+        "label": "SimpleSavedObject",
+        "description": [
+          "\nThis class is a very simple wrapper for SavedObjects loaded from the server\nwith the {@link SavedObjectsClient}.\n\nIt provides basic functionality for creating/saving/deleting saved objects,\nbut doesn't include any type-specific implementations.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SimpleSavedObject",
+            "text": "SimpleSavedObject"
+          },
+          "<T>"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.attributes",
+            "type": "Uncategorized",
+            "label": "attributes",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L24"
+            },
+            "signature": [
+              "T"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject._version",
+            "type": "string",
+            "label": "_version",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L26"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L27"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L28"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.migrationVersion",
+            "type": "Object",
+            "label": "migrationVersion",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L29"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.coreMigrationVersion",
+            "type": "string",
+            "label": "coreMigrationVersion",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L30"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.error",
+            "type": "Object",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L31"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SimpleSavedObject.references",
+            "type": "Array",
+            "label": "references",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L32"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[]"
+            ]
+          },
+          {
+            "id": "def-public.SimpleSavedObject.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "client",
+                "isRequired": true,
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsClient",
+                    "text": "SavedObjectsClient"
+                  },
+                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 35,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L35"
+                }
+              },
+              {
+                "type": "Object",
+                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "common",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
+                  "<T>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 36,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L36"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L34"
+            }
+          },
+          {
+            "id": "def-public.SimpleSavedObject.get",
+            "type": "Function",
+            "label": "get",
+            "signature": [
+              "(key: string) => any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 59,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L59"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 59,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L59"
+            }
+          },
+          {
+            "id": "def-public.SimpleSavedObject.set",
+            "type": "Function",
+            "label": "set",
+            "signature": [
+              "(key: string, value: any) => T"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 63,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
+                }
+              },
+              {
+                "type": "Any",
+                "label": "value",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 63,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 63,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
+            }
+          },
+          {
+            "id": "def-public.SimpleSavedObject.has",
+            "type": "Function",
+            "label": "has",
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
+                  "lineNumber": 67,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L67"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L67"
+            }
+          },
+          {
+            "id": "def-public.SimpleSavedObject.save",
+            "type": "Function",
+            "label": "save",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<T>>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L71"
+            }
+          },
+          {
+            "id": "def-public.SimpleSavedObject.delete",
+            "type": "Function",
+            "label": "delete",
+            "signature": [
+              "() => Promise<{}>"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/saved_objects/simple_saved_object.ts",
+              "lineNumber": 86,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L86"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/public/saved_objects/simple_saved_object.ts",
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L23"
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.SavedObjectsClient",
         "type": "Class",
         "tags": [
@@ -602,383 +979,6 @@
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
           "lineNumber": 165,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/saved_objects_client.ts#L165"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SimpleSavedObject",
-        "type": "Class",
-        "tags": [
-          "public"
-        ],
-        "label": "SimpleSavedObject",
-        "description": [
-          "\nThis class is a very simple wrapper for SavedObjects loaded from the server\nwith the {@link SavedObjectsClient}.\n\nIt provides basic functionality for creating/saving/deleting saved objects,\nbut doesn't include any type-specific implementations.\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SimpleSavedObject",
-            "text": "SimpleSavedObject"
-          },
-          "<T>"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.attributes",
-            "type": "Uncategorized",
-            "label": "attributes",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L24"
-            },
-            "signature": [
-              "T"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject._version",
-            "type": "string",
-            "label": "_version",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L26"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L27"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L28"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.migrationVersion",
-            "type": "Object",
-            "label": "migrationVersion",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L29"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.coreMigrationVersion",
-            "type": "string",
-            "label": "coreMigrationVersion",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L30"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.error",
-            "type": "Object",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L31"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SimpleSavedObject.references",
-            "type": "Array",
-            "label": "references",
-            "description": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L32"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[]"
-            ]
-          },
-          {
-            "id": "def-public.SimpleSavedObject.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "client",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L35"
-                }
-              },
-              {
-                "type": "Object",
-                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "common",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
-                  "<T>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 36,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L36"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L34"
-            }
-          },
-          {
-            "id": "def-public.SimpleSavedObject.get",
-            "type": "Function",
-            "label": "get",
-            "signature": [
-              "(key: string) => any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 59,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L59"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L59"
-            }
-          },
-          {
-            "id": "def-public.SimpleSavedObject.set",
-            "type": "Function",
-            "label": "set",
-            "signature": [
-              "(key: string, value: any) => T"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "value",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L63"
-            }
-          },
-          {
-            "id": "def-public.SimpleSavedObject.has",
-            "type": "Function",
-            "label": "has",
-            "signature": [
-              "(key: string) => boolean"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/public/saved_objects/simple_saved_object.ts",
-                  "lineNumber": 67,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L67"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L67"
-            }
-          },
-          {
-            "id": "def-public.SimpleSavedObject.save",
-            "type": "Function",
-            "label": "save",
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<T>>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L71"
-            }
-          },
-          {
-            "id": "def-public.SimpleSavedObject.delete",
-            "type": "Function",
-            "label": "delete",
-            "signature": [
-              "() => Promise<{}>"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L86"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/public/saved_objects/simple_saved_object.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/saved_objects/simple_saved_object.ts#L23"
         },
         "initialIsOpen": false
       }
@@ -4754,6 +4754,648 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.SavedObjectTypeRegistry",
+        "type": "Class",
+        "tags": [
+          "public"
+        ],
+        "label": "SavedObjectTypeRegistry",
+        "description": [
+          "\nRegistry holding information about all the registered {@link SavedObjectsType | saved object types}.\n"
+        ],
+        "children": [
+          {
+            "id": "def-server.SavedObjectTypeRegistry.registerType",
+            "type": "Function",
+            "label": "registerType",
+            "signature": [
+              "(type: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              ") => void"
+            ],
+            "description": [
+              "\nRegister a {@link SavedObjectsType | type} inside the registry.\nA type can only be registered once. subsequent calls with the same type name will throw an error."
+            ],
+            "children": [
+              {
+                "type": "Object",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsType",
+                    "text": "SavedObjectsType"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 31,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L31"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L31"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.getType",
+            "type": "Function",
+            "label": "getType",
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              " | undefined"
+            ],
+            "description": [
+              "\nReturn the {@link SavedObjectsType | type} definition for given type name."
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 42,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L42"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L42"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.getVisibleTypes",
+            "type": "Function",
+            "label": "getVisibleTypes",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "[]"
+            ],
+            "description": [
+              "\nReturns all visible {@link SavedObjectsType | types}.\n\nA visible type is a type that doesn't explicitly define `hidden=true` during registration."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 51,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L51"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.getAllTypes",
+            "type": "Function",
+            "label": "getAllTypes",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "[]"
+            ],
+            "description": [
+              "\nReturn all {@link SavedObjectsType | types} currently registered, including the hidden ones.\n\nTo only get the visible types (which is the most common use case), use `getVisibleTypes` instead."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L60"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.getImportableAndExportableTypes",
+            "type": "Function",
+            "label": "getImportableAndExportableTypes",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "[]"
+            ],
+            "description": [
+              "\nReturn all {@link SavedObjectsType | types} currently registered that are importable/exportable."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L67"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isNamespaceAgnostic",
+            "type": "Function",
+            "label": "isNamespaceAgnostic",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns whether the type is namespace-agnostic (global);\nresolves to `false` if the type is not registered"
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 75,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L75"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L75"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isSingleNamespace",
+            "type": "Function",
+            "label": "isSingleNamespace",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns whether the type is single-namespace (isolated);\nresolves to `true` if the type is not registered"
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 83,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L83"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 83,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L83"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isMultiNamespace",
+            "type": "Function",
+            "label": "isMultiNamespace",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns whether the type is multi-namespace (shareable *or* isolated);\nresolves to `false` if the type is not registered"
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 92,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L92"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 92,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L92"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isShareable",
+            "type": "Function",
+            "label": "isShareable",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns whether the type is multi-namespace (shareable);\nresolves to `false` if the type is not registered"
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 101,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L101"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L101"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isHidden",
+            "type": "Function",
+            "label": "isHidden",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns the `hidden` property for given type, or `false` if\nthe type is not registered."
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 109,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L109"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 109,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L109"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.getIndex",
+            "type": "Function",
+            "label": "getIndex",
+            "signature": [
+              "(type: string) => string | undefined"
+            ],
+            "description": [
+              "\nReturns the `indexPattern` property for given type, or `undefined` if\nthe type is not registered."
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 117,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L117"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 117,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L117"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectTypeRegistry.isImportableAndExportable",
+            "type": "Function",
+            "label": "isImportableAndExportable",
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "description": [
+              "\nReturns the `management.importableAndExportable` property for given type, or\n`false` if the type is not registered or does not define a management section."
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "type",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+                  "lineNumber": 125,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L125"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+              "lineNumber": 125,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L125"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
+          "lineNumber": 24,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L24"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.SavedObjectsUtils",
+        "type": "Class",
+        "tags": [
+          "public"
+        ],
+        "label": "SavedObjectsUtils",
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.SavedObjectsUtils.namespaceIdToString",
+            "type": "Function",
+            "children": [
+              {
+                "type": "string",
+                "label": "namespace",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                  "lineNumber": 29,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L29"
+                }
+              }
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string"
+            ],
+            "description": [
+              "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
+            ],
+            "label": "namespaceIdToString",
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/utils.ts",
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L29"
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-server.SavedObjectsUtils.namespaceStringToId",
+            "type": "Function",
+            "children": [
+              {
+                "type": "string",
+                "label": "namespace",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                  "lineNumber": 43,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L43"
+                }
+              }
+            ],
+            "signature": [
+              "(namespace: string) => string | undefined"
+            ],
+            "description": [
+              "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
+            ],
+            "label": "namespaceStringToId",
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/utils.ts",
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L43"
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-server.SavedObjectsUtils.createEmptyFindResponse",
+            "type": "Function",
+            "children": [
+              {
+                "type": "Object",
+                "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsFindOptions",
+                    "text": "SavedObjectsFindOptions"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                  "lineNumber": 54,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L54"
+                }
+              }
+            ],
+            "signature": [
+              "<T>({ page, perPage, }: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<T>"
+            ],
+            "description": [
+              "\nCreates an empty response for a find operation. This is only intended to be used by saved objects client wrappers."
+            ],
+            "label": "createEmptyFindResponse",
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/utils.ts",
+              "lineNumber": 54,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L54"
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-server.SavedObjectsUtils.generateId",
+            "type": "Function",
+            "label": "generateId",
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUtils",
+                "text": "SavedObjectsUtils"
+              },
+              ".generateId"
+            ],
+            "description": [
+              "\nGenerates a random ID for a saved objects."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/utils.ts",
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L67"
+            }
+          },
+          {
+            "id": "def-server.SavedObjectsUtils.isRandomId",
+            "type": "Function",
+            "label": "isRandomId",
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUtils",
+                "text": "SavedObjectsUtils"
+              },
+              ".isRandomId"
+            ],
+            "description": [
+              "\nValidates that a saved object ID has been randomly generated.\n"
+            ],
+            "children": [
+              {
+                "type": "string",
+                "label": "id",
+                "isRequired": false,
+                "signature": [
+                  "string | undefined"
+                ],
+                "description": [
+                  "The ID of a saved object."
+                ],
+                "source": {
+                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                  "lineNumber": 77,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L77"
+                }
+              }
+            ],
+            "tags": [
+              "todo"
+            ],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/utils.ts",
+              "lineNumber": 77,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L77"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/lib/utils.ts",
+          "lineNumber": 22,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L22"
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.SavedObjectsRepository",
         "type": "Class",
         "tags": [
@@ -6274,648 +6916,6 @@
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
           "lineNumber": 143,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/repository.ts#L143"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.SavedObjectTypeRegistry",
-        "type": "Class",
-        "tags": [
-          "public"
-        ],
-        "label": "SavedObjectTypeRegistry",
-        "description": [
-          "\nRegistry holding information about all the registered {@link SavedObjectsType | saved object types}.\n"
-        ],
-        "children": [
-          {
-            "id": "def-server.SavedObjectTypeRegistry.registerType",
-            "type": "Function",
-            "label": "registerType",
-            "signature": [
-              "(type: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              ") => void"
-            ],
-            "description": [
-              "\nRegister a {@link SavedObjectsType | type} inside the registry.\nA type can only be registered once. subsequent calls with the same type name will throw an error."
-            ],
-            "children": [
-              {
-                "type": "Object",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsType",
-                    "text": "SavedObjectsType"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L31"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L31"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.getType",
-            "type": "Function",
-            "label": "getType",
-            "signature": [
-              "(type: string) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              " | undefined"
-            ],
-            "description": [
-              "\nReturn the {@link SavedObjectsType | type} definition for given type name."
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L42"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L42"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.getVisibleTypes",
-            "type": "Function",
-            "label": "getVisibleTypes",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              "[]"
-            ],
-            "description": [
-              "\nReturns all visible {@link SavedObjectsType | types}.\n\nA visible type is a type that doesn't explicitly define `hidden=true` during registration."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L51"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.getAllTypes",
-            "type": "Function",
-            "label": "getAllTypes",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              "[]"
-            ],
-            "description": [
-              "\nReturn all {@link SavedObjectsType | types} currently registered, including the hidden ones.\n\nTo only get the visible types (which is the most common use case), use `getVisibleTypes` instead."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L60"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.getImportableAndExportableTypes",
-            "type": "Function",
-            "label": "getImportableAndExportableTypes",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              "[]"
-            ],
-            "description": [
-              "\nReturn all {@link SavedObjectsType | types} currently registered that are importable/exportable."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L67"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isNamespaceAgnostic",
-            "type": "Function",
-            "label": "isNamespaceAgnostic",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns whether the type is namespace-agnostic (global);\nresolves to `false` if the type is not registered"
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 75,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L75"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L75"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isSingleNamespace",
-            "type": "Function",
-            "label": "isSingleNamespace",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns whether the type is single-namespace (isolated);\nresolves to `true` if the type is not registered"
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 83,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L83"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L83"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isMultiNamespace",
-            "type": "Function",
-            "label": "isMultiNamespace",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns whether the type is multi-namespace (shareable *or* isolated);\nresolves to `false` if the type is not registered"
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 92,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L92"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L92"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isShareable",
-            "type": "Function",
-            "label": "isShareable",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns whether the type is multi-namespace (shareable);\nresolves to `false` if the type is not registered"
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 101,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L101"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L101"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isHidden",
-            "type": "Function",
-            "label": "isHidden",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns the `hidden` property for given type, or `false` if\nthe type is not registered."
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 109,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L109"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L109"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.getIndex",
-            "type": "Function",
-            "label": "getIndex",
-            "signature": [
-              "(type: string) => string | undefined"
-            ],
-            "description": [
-              "\nReturns the `indexPattern` property for given type, or `undefined` if\nthe type is not registered."
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 117,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L117"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 117,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L117"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectTypeRegistry.isImportableAndExportable",
-            "type": "Function",
-            "label": "isImportableAndExportable",
-            "signature": [
-              "(type: string) => boolean"
-            ],
-            "description": [
-              "\nReturns the `management.importableAndExportable` property for given type, or\n`false` if the type is not registered or does not define a management section."
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "type",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-                  "lineNumber": 125,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L125"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-              "lineNumber": 125,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L125"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/saved_objects_type_registry.ts#L24"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.SavedObjectsUtils",
-        "type": "Class",
-        "tags": [
-          "public"
-        ],
-        "label": "SavedObjectsUtils",
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.SavedObjectsUtils.namespaceIdToString",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "namespace",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
-                  "lineNumber": 29,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L29"
-                }
-              }
-            ],
-            "signature": [
-              "(namespace?: string | undefined) => string"
-            ],
-            "description": [
-              "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
-            ],
-            "label": "namespaceIdToString",
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/utils.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L29"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-server.SavedObjectsUtils.namespaceStringToId",
-            "type": "Function",
-            "children": [
-              {
-                "type": "string",
-                "label": "namespace",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
-                  "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L43"
-                }
-              }
-            ],
-            "signature": [
-              "(namespace: string) => string | undefined"
-            ],
-            "description": [
-              "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
-            ],
-            "label": "namespaceStringToId",
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/utils.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L43"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-server.SavedObjectsUtils.createEmptyFindResponse",
-            "type": "Function",
-            "children": [
-              {
-                "type": "Object",
-                "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
-                  "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L54"
-                }
-              }
-            ],
-            "signature": [
-              "<T>({ page, perPage, }: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T>"
-            ],
-            "description": [
-              "\nCreates an empty response for a find operation. This is only intended to be used by saved objects client wrappers."
-            ],
-            "label": "createEmptyFindResponse",
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/utils.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L54"
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-server.SavedObjectsUtils.generateId",
-            "type": "Function",
-            "label": "generateId",
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUtils",
-                "text": "SavedObjectsUtils"
-              },
-              ".generateId"
-            ],
-            "description": [
-              "\nGenerates a random ID for a saved objects."
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/utils.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L67"
-            }
-          },
-          {
-            "id": "def-server.SavedObjectsUtils.isRandomId",
-            "type": "Function",
-            "label": "isRandomId",
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUtils",
-                "text": "SavedObjectsUtils"
-              },
-              ".isRandomId"
-            ],
-            "description": [
-              "\nValidates that a saved object ID has been randomly generated.\n"
-            ],
-            "children": [
-              {
-                "type": "string",
-                "label": "id",
-                "isRequired": false,
-                "signature": [
-                  "string | undefined"
-                ],
-                "description": [
-                  "The ID of a saved object."
-                ],
-                "source": {
-                  "path": "src/core/server/saved_objects/service/lib/utils.ts",
-                  "lineNumber": 77,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L77"
-                }
-              }
-            ],
-            "tags": [
-              "todo"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/saved_objects/service/lib/utils.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L77"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/server/saved_objects/service/lib/utils.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/saved_objects/service/lib/utils.ts#L22"
         },
         "initialIsOpen": false
       },

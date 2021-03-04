@@ -15,6 +15,7 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+
 import {
   PackageInfo,
   PackageSpecCategory,
