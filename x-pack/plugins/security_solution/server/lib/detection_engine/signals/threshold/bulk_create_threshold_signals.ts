@@ -139,6 +139,8 @@ const getTransformedHits = (
     }, []);
   };
 
+  // Recurse through the nested buckets and collect each unique combination of terms. Collect the
+  // cardinality and document count from the leaf buckets and return a signal for each set of terms.
   return getCombinations(results.aggregations[aggParts.name].buckets, 0, aggParts.field).reduce(
     (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
@@ -165,6 +167,10 @@ const getTransformedHits = (
           terms: bucket.terms,
           cardinality: bucket.cardinality,
           count: bucket.docCount,
+          // Store `from` in the signal so that we know the lower bound for the
+          // threshold set in the timeline search. The upper bound will always be
+          // the `original_time` of the signal (the timestamp of the latest event
+          // in the set).
           from:
             signalHit?.lastSignalTimestamp != null
               ? new Date(signalHit!.lastSignalTimestamp)

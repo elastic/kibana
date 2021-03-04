@@ -193,6 +193,8 @@ export const getThresholdAggregationData = (
       const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
       return {
+        // Use `threshold_result.from` if available (it will always be available for new signals). Otherwise, use a calculated
+        // lower bound, which could result in the timeline showing a superset of the events that made up the threshold set.
         thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
         thresholdTo: originalTime.toISOString(),
         dataProviders: [

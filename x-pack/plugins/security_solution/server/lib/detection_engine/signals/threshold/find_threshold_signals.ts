@@ -49,6 +49,7 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
+  // Leaf aggregations used below
   const leafAggs = {
     top_threshold_hits: {
       top_hits: {
@@ -89,6 +90,11 @@ export const findThresholdSignals = async ({
 
   const thresholdFields = normalizeThresholdField(threshold.field);
 
+  // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
+  // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
+  // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
+  // `original_time` of the signal. This will be used for dupe mitigation purposes by the detection
+  // engine.
   const aggregations = thresholdFields.length
     ? thresholdFields.reduce((acc, field, i) => {
         const aggPath = [...Array(i + 1).keys()]

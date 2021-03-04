@@ -51,6 +51,7 @@ export const findPreviousThresholdSignals = async ({
             'signal.rule.rule_id': ruleId,
           },
         },
+        // We might find a signal that was generated on the interval for old data... make sure to exclude those.
         {
           range: {
             'signal.original_time': {
