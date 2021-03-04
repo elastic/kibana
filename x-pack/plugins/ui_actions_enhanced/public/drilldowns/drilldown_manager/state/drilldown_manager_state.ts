@@ -69,7 +69,7 @@ export class DrilldownManagerState {
   /**
    * Currently selected action factory (drilldown type).
    */
-  public readonly actionFactory$ = new BehaviorSubject<undefined | ActionFactory>(undefined);
+  public readonly actionFactory$: BehaviorSubject<undefined | ActionFactory>;
 
   private readonly mapEventToDrilldownItem = (event: SerializedEvent): DrilldownListItem => {
     const actionFactory = this.deps.actionFactories.find(
@@ -124,6 +124,11 @@ export class DrilldownManagerState {
     if (!initialRoute) initialRoute = 'manage';
     else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
     this.route$ = new BehaviorSubject(initialRoute.split('/'));
+
+    this.actionFactory$ = new BehaviorSubject<undefined | ActionFactory>(
+      this.getActiveActionFactory()
+    );
+    this.route$.pipe(map(() => this.getActiveActionFactory())).subscribe(this.actionFactory$);
   }
 
   /**
@@ -171,12 +176,14 @@ export class DrilldownManagerState {
    */
   public setActionFactory(actionFactory: undefined | ActionFactory): void {
     if (!actionFactory) {
-      this.actionFactory$.next(undefined);
+      // this.actionFactory$.next(undefined);
+      const route = this.route$.getValue();
+      if (route[0] === 'new' && route.length > 1) this.setRoute(['new']);
       return;
     }
 
     if (!this.drilldownStateByFactoryId.has(actionFactory.id)) {
-      const oldActionFactory = this.actionFactory$.getValue();
+      const oldActionFactory = this.getActiveActionFactory();
       const oldDrilldownState = !!oldActionFactory
         ? this.drilldownStateByFactoryId.get(oldActionFactory.id)
         : undefined;
@@ -192,7 +199,14 @@ export class DrilldownManagerState {
       this.drilldownStateByFactoryId.set(actionFactory.id, drilldownState);
     }
 
-    this.actionFactory$.next(actionFactory);
+    // this.actionFactory$.next(actionFactory);
+    this.route$.next(['new', actionFactory.id]);
+  }
+
+  public getActiveActionFactory(): undefined | ActionFactory {
+    const [step1, id] = this.route$.getValue();
+    if (step1 !== 'new' || !id) return undefined;
+    return this.deps.actionFactories.find((factory) => factory.id === id);
   }
 
   /**
@@ -220,7 +234,7 @@ export class DrilldownManagerState {
    * Get state object of the drilldown which is currently being created.
    */
   public getDrilldownState(): undefined | DrilldownState {
-    const actionFactory = this.actionFactory$.getValue();
+    const actionFactory = this.getActiveActionFactory();
     if (!actionFactory) return undefined;
     const drilldownState = this.drilldownStateByFactoryId.get(actionFactory.id);
     return drilldownState;
