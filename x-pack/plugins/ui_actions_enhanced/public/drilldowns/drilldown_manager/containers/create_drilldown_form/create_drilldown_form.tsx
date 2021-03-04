@@ -22,7 +22,7 @@ const txtCreateDrilldown = i18n.translate(
   }
 );
 
-const txtCreateDrilldownButtonLabel = i18n.translate(
+const txtCreateDrilldownButton = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.containers.createDrilldownForm.primaryButton',
   {
     defaultMessage: 'Create drilldown',
@@ -47,7 +47,7 @@ export const CreateDrilldownForm: React.FC = () => {
             // isDisabled={!isActionValid(wizardConfig)}
             data-test-subj={'drilldownWizardSubmit'}
           >
-            {txtCreateDrilldownButtonLabel}
+            {txtCreateDrilldownButton}
           </EuiButton>
         </DrilldownManagerFooter>
       )}
