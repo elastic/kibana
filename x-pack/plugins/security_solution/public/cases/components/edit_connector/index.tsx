@@ -34,7 +34,6 @@ import * as i18n from './translations';
 interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
-  disabled?: boolean;
   isLoading: boolean;
   onSubmit: (
     connectorId: string,
@@ -44,6 +43,8 @@ interface EditConnectorProps {
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
+  disabled?: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -105,6 +106,7 @@ export const EditConnector = React.memo(
     caseFields,
     connectors,
     disabled = false,
+    hideConnectorServiceNowSir = false,
     isLoading,
     onSubmit,
     selectedConnector,
@@ -234,6 +236,7 @@ export const EditConnector = React.memo(
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
                       disabled,
+                      hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,

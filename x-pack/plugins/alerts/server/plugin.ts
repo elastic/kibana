@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first, map } from 'rxjs/operators';
+import { first, map, share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
@@ -251,7 +251,8 @@ export class AlertingPlugin {
             } else {
               return derivedStatus;
             }
-          })
+          }),
+          share()
         )
       );
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, merge } from 'lodash/fp';
+import { cloneDeep, merge, unionBy } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
@@ -13,11 +13,13 @@ import {
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsItem,
+  EventSource,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromSourceHits } from './helpers';
+import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -29,11 +31,10 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
-    const { _source, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
+    const { _source, fields, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-
     if (response.isRunning) {
       return {
         ...response,
@@ -41,12 +42,19 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
         inspect,
       };
     }
+    const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
+      getDataFromSourceHits,
+      _source
+    );
+    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
+      getDataFromFieldsHits,
+      merge(fields, hitsData)
+    );
 
-    const sourceData = getDataFromSourceHits(merge(_source, hitsData));
-
+    const data = unionBy('field', fieldsData, sourceData);
     return {
       ...response,
-      data: sourceData,
+      data,
       inspect,
     };
   },
