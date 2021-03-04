@@ -19,12 +19,25 @@ journey('uptime', async ({ page }) => {
     }
   }
 
+  async function waitForLoadingToFinish() {
+    let isLoadingVisible = true;
+
+    while (isLoadingVisible) {
+      const loading = await page.$(byTestId('kbnLoadingMessage'), false);
+      isLoadingVisible = loading !== null;
+      await page.waitForTimeout(5 * 1000);
+    }
+  }
+
   step('Go to  Kibana', async () => {
-    await page.goto('http://localhost:5620/app/uptime?dateRangeStart=now-2y&dateRangeEnd=now');
-    await page.waitForTimeout(60 * 1000);
+    await page.goto('http://localhost:5620/app/uptime?dateRangeStart=now-2y&dateRangeEnd=now', {
+      waitUntil: 'networkidle',
+    });
+    await page.waitForSelector(byTestId('kbnLoadingMessage'));
   });
 
   step('Login into kibana', async () => {
+    await waitForLoadingToFinish();
     await page.fill('[data-test-subj=loginUsername]', 'elastic', {
       timeout: 60 * 1000,
     });
@@ -35,6 +48,7 @@ journey('uptime', async ({ page }) => {
   });
 
   step('dismiss synthetics notice', async () => {
+    await waitForLoadingToFinish();
     await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
       timeout: 60 * 1000,
     });

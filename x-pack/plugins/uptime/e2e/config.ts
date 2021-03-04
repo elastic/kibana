@@ -43,6 +43,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--migrations.enableV2=false',
+        '--xpack.reporting.enabled=false',
       ],
     },
   };
