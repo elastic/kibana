@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
-} from 'src/core/server/mocks';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { licensingMock } from '../../../plugins/licensing/server/mocks';
-import type { FleetAppContext } from './plugin';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../security/server/mocks';
-import type { PackagePolicyServiceInterface } from './services/package_policy';
-import type { AgentPolicyServiceInterface, AgentService } from './services';
+  coreMock,
+} from '../../../../../src/core/server/mocks';
+import { licensingMock } from '../../../../plugins/licensing/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
+import type { PackagePolicyServiceInterface } from '../services/package_policy';
+import type { AgentPolicyServiceInterface, AgentService } from '../services';
+import type { FleetAppContext } from '../plugin';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {

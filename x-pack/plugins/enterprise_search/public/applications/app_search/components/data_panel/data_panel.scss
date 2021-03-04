@@ -1,0 +1,8 @@
+.dataPanel {
+  // TODO: This CSS can be removed once EUI supports tables in `subdued` panels
+  &--filled {
+    .euiTable {
+      background-color: transparent;
+    }
+  }
+}
