@@ -7,6 +7,7 @@
 
 import type { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+
 import {
   getArchiveEntry,
   setArchiveEntry,
