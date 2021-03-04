@@ -21,14 +21,14 @@ export const getAlertingSectionBreadcrumb = (type: string): { text: string; href
     case 'rules':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
-          defaultMessage: 'Alerting Rules',
+          defaultMessage: 'Rules',
         }),
         href: `${routeToRules}`,
       };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerting Rules and Connectors',
+          defaultMessage: 'Rules and Connectors',
         }),
         href: `${routeToHome}`,
       };

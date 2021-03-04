@@ -18,12 +18,12 @@ export const getCurrentDocTitle = (page: string): string => {
       break;
     case 'rules':
       updatedTitle = i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
-        defaultMessage: 'Alerting Rules',
+        defaultMessage: 'Rules',
       });
       break;
     default:
       updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-        defaultMessage: 'Alerting Rules and Connectors',
+        defaultMessage: 'Rules and Connectors',
       });
   }
   return updatedTitle;

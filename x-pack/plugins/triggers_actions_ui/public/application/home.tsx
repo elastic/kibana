@@ -93,7 +93,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerting Rules and Connectors"
+                  defaultMessage="Rules and Connectors"
                 />
               </h1>
             </EuiFlexItem>

@@ -95,7 +95,7 @@ export class Plugin
     const alertTypeRegistry = this.alertTypeRegistry;
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Alerting Rules and Connectors',
+      defaultMessage: 'Rules and Connectors',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
