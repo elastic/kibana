@@ -23,7 +23,7 @@ data-type="inline"
 ++++
 
 [float]
-=== Exploring and querying your data
+=== Explore and query your data
 
 You have questions about your data.
 What pages on your website contain a
