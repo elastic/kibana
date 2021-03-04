@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
-import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, useRef, SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -30,6 +30,8 @@ interface OwnProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
+type VoidFunc = () => void;
+
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -38,23 +40,43 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   );
 
   const [focusOwnership, setFocusOwnership] = useState(true);
-  const searchListener = useRef(new AbortController());
+  const [triggerOnBlur, setTriggerOnBlur] = useState(true);
+  const callbackRef = useRef<VoidFunc | null>(null);
+  const searchRef = useRef<HTMLElement | null>(null);
 
+  const handleSearch = useCallback(() => {
+    if (show && focusOwnership === false) {
+      setFocusOwnership(true);
+    }
+  }, [show, focusOwnership]);
   const onOutsideClick = useCallback((event) => {
     setFocusOwnership(false);
     const classes = event.target.classList;
     if (classes.contains('euiFieldSearch')) {
-      window.setTimeout(() => event.target.focus(), 0);
-      searchListener.current = new AbortController();
-      event.target.addEventListener(
-        'blur',
-        () => {
-          setFocusOwnership(true);
-        },
-        { signal: searchListener.current.signal }
-      );
+      searchRef.current = event.target;
+      setTriggerOnBlur((prev) => !prev);
+      window.setTimeout(() => {
+        if (searchRef.current !== null) {
+          searchRef.current.focus();
+        }
+      }, 0);
     }
   }, []);
+
+  useEffect(() => {
+    if (searchRef.current != null) {
+      if (callbackRef.current !== null) {
+        searchRef.current.removeEventListener('blur', callbackRef.current);
+      }
+      searchRef.current.addEventListener('blur', handleSearch);
+      callbackRef.current = handleSearch;
+    }
+    return () => {
+      if (searchRef.current != null && callbackRef.current !== null) {
+        searchRef.current.removeEventListener('blur', callbackRef.current);
+      }
+    };
+  }, [handleSearch, triggerOnBlur]);
 
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {
@@ -96,11 +118,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
         return actions.default();
       }
     });
-    return () => {
-      if (searchListener.current) {
-        searchListener.current.abort();
-      }
-    };
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
 
   return (
