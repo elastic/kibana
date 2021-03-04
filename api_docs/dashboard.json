@@ -1389,15 +1389,15 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L89"
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L90"
             }
           }
         ],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 88,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L88"
+          "lineNumber": 89,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L89"
         },
         "initialIsOpen": false
       },
@@ -1939,8 +1939,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 86,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L86"
+          "lineNumber": 87,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L87"
         },
         "signature": [
           "UrlGeneratorContract<\"DASHBOARD_APP_URL_GENERATOR\">"
@@ -2103,8 +2103,8 @@
       "description": [],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 118,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L118"
+        "lineNumber": 120,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L120"
       },
       "signature": [
         "void"
@@ -2127,8 +2127,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 121,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L121"
+            "lineNumber": 123,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L123"
           },
           "signature": [
             "() => ",
@@ -2149,8 +2149,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 122,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L122"
+            "lineNumber": 124,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L124"
           },
           "signature": [
             {
@@ -2171,8 +2171,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 123,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L123"
+            "lineNumber": 125,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L125"
           },
           "signature": [
             {
@@ -2192,8 +2192,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 124,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L124"
+            "lineNumber": 126,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L126"
           },
           "signature": [
             "React.FC<Props>"
@@ -2202,8 +2202,8 @@
       ],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 120,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L120"
+        "lineNumber": 122,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/dashboard/public/plugin.tsx#L122"
       },
       "lifecycle": "start",
       "initialIsOpen": true
