@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtCreateDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.createDrilldownButtonLabel',
-  {
-    defaultMessage: 'Create drilldown',
-  }
-);
-
-export const txtEditDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.editDrilldownButtonLabel',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
 export const txtCreateNew = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.components.drilldownManager.createNew',
   {
