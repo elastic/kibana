@@ -5,10 +5,37 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { isErrorWithMeta } from './utils';
+
 export class ArtifactAccessDeniedError extends Error {
   constructor(deniedPackageName: string, allowedPackageName: string) {
     super(
       `Access denied. Artifact package name (${deniedPackageName}) does not match ${allowedPackageName}`
     );
+  }
+}
+
+export class ArtifactsElasticsearchError extends Error {
+  readonly requestDetails: string;
+
+  constructor(public readonly meta: Error) {
+    super(
+      `${
+        isErrorWithMeta(meta) && meta.meta.body?.error?.reason
+          ? meta.meta.body?.error?.reason
+          : `Elasticsearch error while working with artifacts: ${meta.message}`
+      }`
+    );
+
+    if (isErrorWithMeta(meta)) {
+      const { method, path, querystring = '', body = '' } = meta.meta.meta.request.params;
+      this.requestDetails = `${method} ${path}${querystring ? `?${querystring}` : ''}${
+        body ? `\n${body}` : ''
+      }`;
+    } else {
+      this.requestDetails = 'unable to determine request details';
+    }
   }
 }

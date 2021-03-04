@@ -12,15 +12,21 @@ import uuid from 'uuid';
 import {
   Artifact,
   ArtifactCreateOptions,
+  ArtifactElasticsearchProperties,
   ArtifactEncodedMetadata,
   ArtifactsInterface,
 } from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { esSearchHitToArtifact, relativeDownloadUrlFromArtifact } from './mappings';
-import { ArtifactAccessDeniedError } from './errors';
+import { SearchResponse } from '../../../../../../src/core/server';
+import {
+  esSearchHitToArtifact,
+  kueryToArtifactsElasticsearchQuery,
+  relativeDownloadUrlFromArtifact,
+} from './mappings';
+import { ArtifactAccessDeniedError, ArtifactsElasticsearchError } from './errors';
 import { ListWithKuery } from '../../types';
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { isElasticsearchItemNotFoundError } from './utils';
 
 const deflateAsync = promisify(deflate);
 
@@ -36,12 +42,21 @@ export class FleetArtifactsClient implements ArtifactsInterface {
   }
 
   async getArtifact(id: string): Promise<Artifact | undefined> {
-    const esData = await this.esClient.get<ESSearchHit<Artifact>>({
-      index: FLEET_SERVER_ARTIFACTS_INDEX,
-      id,
-    });
-    const response = esSearchHitToArtifact(esData.body);
-    return this.validate(response);
+    try {
+      const esData = await this.esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        id,
+      });
+
+      const response = esSearchHitToArtifact(esData.body);
+      return this.validate(response);
+    } catch (e) {
+      if (isElasticsearchItemNotFoundError(e)) {
+        return;
+      }
+
+      throw new ArtifactsElasticsearchError(e);
+    }
   }
 
   /**
@@ -96,28 +111,30 @@ export class FleetArtifactsClient implements ArtifactsInterface {
       sortOrder = 'asc',
     } = options;
 
-    const filters = kuery ? [esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kuery))] : [];
-
-    const searchResult = this.esClient.search({
-      index: FLEET_SERVER_ARTIFACTS_INDEX,
-      body: {
-        query: {
-          bool: {
-            must: {
-              match: {
-                packageName: this.packageName,
-              },
-              filters,
-            },
+    try {
+      const searchResult = await this.esClient.search<
+        SearchResponse<ArtifactElasticsearchProperties>
+      >({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        body: {
+          query: {
+            ...kueryToArtifactsElasticsearchQuery(this.packageName, kuery),
           },
+          sort: [{ [sortField]: sortOrder }],
         },
-        sort: [{ [sortField]: sortOrder }],
-      },
-      from: (page - 1) * perPage,
-      size: perPage,
-    });
+        from: (page - 1) * perPage,
+        size: perPage,
+      });
 
-    return searchResult;
+      return {
+        items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+        page,
+        perPage,
+        total: searchResult.body.hits.total,
+      };
+    } catch (e) {
+      throw new ArtifactsElasticsearchError(e);
+    }
   }
 
   generateHash(content: string): string {

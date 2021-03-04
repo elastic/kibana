@@ -32,6 +32,11 @@ export interface Artifact {
   type?: string;
 }
 
+/**
+ * The set of Properties in Artifact that are actually stored in the Artifact document defined by the schema
+ */
+export type ArtifactElasticsearchProperties = Omit<Artifact, 'id'>;
+
 export type ArtifactEncodedMetadata = Pick<
   Artifact,
   | 'decodedSha256'
