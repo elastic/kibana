@@ -6,7 +6,8 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import {
+
+import type {
   PackagePolicy,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -15,10 +16,8 @@ import {
 import { agentPolicyRouteService } from '../../../../../services';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { useGetPackagePolicies } from '../../../../../hooks';
-import {
-  SendConditionalRequestConfig,
-  useConditionalRequest,
-} from '../../../../../hooks/use_request/use_request';
+import { useConditionalRequest } from '../../../../../hooks/use_request/use_request';
+import type { SendConditionalRequestConfig } from '../../../../../hooks/use_request/use_request';
 
 export interface PackagePolicyEnriched extends PackagePolicy {
   _agentPolicy: GetAgentPoliciesResponseItem | undefined;
