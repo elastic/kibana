@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -11,18 +12,18 @@ import { UserRT } from '../user';
 /* To the next developer, if you add/removed fields here
  * make sure to check this file (x-pack/plugins/case/server/services/user_actions/helpers.ts) too
  */
-const UserActionFieldRt = rt.array(
-  rt.union([
-    rt.literal('comment'),
-    rt.literal('connector'),
-    rt.literal('description'),
-    rt.literal('pushed'),
-    rt.literal('tags'),
-    rt.literal('title'),
-    rt.literal('status'),
-    rt.literal('settings'),
-  ])
-);
+const UserActionFieldTypeRt = rt.union([
+  rt.literal('comment'),
+  rt.literal('connector'),
+  rt.literal('description'),
+  rt.literal('pushed'),
+  rt.literal('tags'),
+  rt.literal('title'),
+  rt.literal('status'),
+  rt.literal('settings'),
+  rt.literal('sub_case'),
+]);
+const UserActionFieldRt = rt.array(UserActionFieldTypeRt);
 const UserActionRt = rt.union([
   rt.literal('add'),
   rt.literal('create'),
@@ -48,6 +49,7 @@ const CaseUserActionResponseRT = rt.intersection([
     case_id: rt.string,
     comment_id: rt.union([rt.string, rt.null]),
   }),
+  rt.partial({ sub_case_id: rt.string }),
 ]);
 
 export const CaseUserActionAttributesRt = CaseUserActionBasicRT;
@@ -59,3 +61,4 @@ export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt
 
 export type UserAction = rt.TypeOf<typeof UserActionRt>;
 export type UserActionField = rt.TypeOf<typeof UserActionFieldRt>;
+export type UserActionFieldType = rt.TypeOf<typeof UserActionFieldTypeRt>;

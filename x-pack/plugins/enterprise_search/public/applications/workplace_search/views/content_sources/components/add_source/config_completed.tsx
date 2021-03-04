@@ -1,13 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -19,15 +17,16 @@ import {
   EuiText,
   EuiTextAlign,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import {
   getSourcesPath,
   ADD_SOURCE_PATH,
   SECURITY_PATH,
   PRIVATE_SOURCES_DOCS_URL,
 } from '../../../../routes';
-
-import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import {
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,

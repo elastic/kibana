@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 
-import { createInputFieldProps, validateInputFieldNotEmpty } from './input_fields';
+import {
+  createInputFieldProps,
+  createInputRangeFieldProps,
+  validateInputFieldNotEmpty,
+} from './input_fields';
 
 interface FormState {
   name: string;
@@ -19,6 +24,7 @@ interface FormState {
   podField: string;
   tiebreakerField: string;
   timestampField: string;
+  anomalyThreshold: number;
 }
 
 type FormStateChanges = Partial<FormState>;
@@ -123,6 +129,17 @@ export const useIndicesConfigurationFormState = ({
       }),
     [formState.timestampField]
   );
+  const anomalyThresholdFieldProps = useMemo(
+    () =>
+      createInputRangeFieldProps({
+        errors: validateInputFieldNotEmpty(formState.anomalyThreshold),
+        name: 'anomalyThreshold',
+        onChange: (anomalyThreshold) =>
+          setFormStateChanges((changes) => ({ ...changes, anomalyThreshold })),
+        value: formState.anomalyThreshold,
+      }),
+    [formState.anomalyThreshold]
+  );
 
   const fieldProps = useMemo(
     () => ({
@@ -134,6 +151,7 @@ export const useIndicesConfigurationFormState = ({
       podField: podFieldFieldProps,
       tiebreakerField: tiebreakerFieldFieldProps,
       timestampField: timestampFieldFieldProps,
+      anomalyThreshold: anomalyThresholdFieldProps,
     }),
     [
       nameFieldProps,
@@ -144,6 +162,7 @@ export const useIndicesConfigurationFormState = ({
       podFieldFieldProps,
       tiebreakerFieldFieldProps,
       timestampFieldFieldProps,
+      anomalyThresholdFieldProps,
     ]
   );
 
@@ -182,4 +201,5 @@ const defaultFormState: FormState = {
   podField: '',
   tiebreakerField: '',
   timestampField: '',
+  anomalyThreshold: 0,
 };

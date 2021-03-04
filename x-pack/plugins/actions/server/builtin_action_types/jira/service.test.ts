@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -11,6 +12,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -28,6 +30,7 @@ jest.mock('../lib/axios_utils', () => {
 
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
+const configurationUtilities = actionsConfigMock.create();
 
 const issueTypesResponse = {
   data: {
@@ -116,7 +119,8 @@ describe('Jira service', () => {
         config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -132,7 +136,8 @@ describe('Jira service', () => {
             config: { apiUrl: null, projectKey: 'CK' },
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -144,7 +149,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com', projectKey: null },
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -156,7 +162,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { apiToken: '', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -168,7 +175,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { apiToken: '', email: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -193,6 +201,7 @@ describe('Jira service', () => {
         axios,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
         logger,
+        configurationUtilities,
       });
     });
 
@@ -293,6 +302,7 @@ describe('Jira service', () => {
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
         logger,
         method: 'post',
+        configurationUtilities,
         data: {
           fields: {
             summary: 'title',
@@ -331,6 +341,7 @@ describe('Jira service', () => {
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
         logger,
         method: 'post',
+        configurationUtilities,
         data: {
           fields: {
             summary: 'title',
@@ -424,6 +435,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'put',
+        configurationUtilities,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
         data: {
           fields: {
@@ -510,6 +522,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'post',
+        configurationUtilities,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },
       });
@@ -568,6 +581,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'get',
+        configurationUtilities,
         url: 'https://siem-kibana.atlassian.net/rest/capabilities',
       });
     });
@@ -642,6 +656,7 @@ describe('Jira service', () => {
           axios,
           logger,
           method: 'get',
+          configurationUtilities,
           url:
             'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
         });
@@ -724,6 +739,7 @@ describe('Jira service', () => {
           axios,
           logger,
           method: 'get',
+          configurationUtilities,
           url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes',
         });
       });
@@ -807,6 +823,7 @@ describe('Jira service', () => {
           axios,
           logger,
           method: 'get',
+          configurationUtilities,
           url:
             'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
         });
@@ -928,6 +945,7 @@ describe('Jira service', () => {
           axios,
           logger,
           method: 'get',
+          configurationUtilities,
           url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
         });
       });
@@ -988,6 +1006,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'get',
+        configurationUtilities,
         url: `https://siem-kibana.atlassian.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
       });
     });
@@ -1032,6 +1051,7 @@ describe('Jira service', () => {
         axios,
         logger,
         method: 'get',
+        configurationUtilities,
         url: `https://siem-kibana.atlassian.net/rest/api/2/issue/RJ-107`,
       });
     });

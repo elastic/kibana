@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
@@ -18,10 +19,7 @@ export class AlertingBuiltinsPlugin
     this.logger = ctx.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup<StackAlertsStartDeps>,
-    { alerts, features }: StackAlertsDeps
-  ): Promise<void> {
+  public setup(core: CoreSetup<StackAlertsStartDeps>, { alerts, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
@@ -33,6 +31,6 @@ export class AlertingBuiltinsPlugin
     });
   }
 
-  public async start(): Promise<void> {}
-  public async stop(): Promise<void> {}
+  public start() {}
+  public stop() {}
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -239,14 +240,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -262,14 +264,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -285,14 +288,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

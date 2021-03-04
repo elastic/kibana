@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink } from '@elastic/eui';
@@ -10,9 +11,12 @@ import { ExternalLinkIcon } from '../../../../common/components/external_link_ic
 
 import { RowRendererId } from '../../../../../common/types/timeline';
 import {
+  AlertsExample,
   AuditdExample,
   AuditdFileExample,
+  LibraryExample,
   NetflowExample,
+  RegistryExample,
   SuricataExample,
   SystemExample,
   SystemDnsExample,
@@ -47,6 +51,13 @@ export interface RowRendererOption {
 
 export const renderers: RowRendererOption[] = [
   {
+    id: RowRendererId.alerts,
+    name: i18n.ALERTS_NAME,
+    description: i18n.ALERTS_DESCRIPTION,
+    example: AlertsExample,
+    searchableDescription: i18n.ALERTS_DESCRIPTION,
+  },
+  {
     id: RowRendererId.auditd,
     name: i18n.AUDITD_NAME,
     description: (
@@ -73,6 +84,13 @@ export const renderers: RowRendererOption[] = [
     ),
     example: AuditdFileExample,
     searchableDescription: `${i18n.AUDITD_FILE_NAME} ${i18n.AUDITD_FILE_DESCRIPTION_PART1}`,
+  },
+  {
+    id: RowRendererId.library,
+    name: i18n.LIBRARY_NAME,
+    description: i18n.LIBRARY_DESCRIPTION,
+    example: LibraryExample,
+    searchableDescription: i18n.LIBRARY_DESCRIPTION,
   },
   {
     id: RowRendererId.system_security_event,
@@ -138,6 +156,13 @@ export const renderers: RowRendererOption[] = [
     ),
     example: SystemEndgameProcessExample,
     searchableDescription: `${i18n.PROCESS_DESCRIPTION_PART1} ${i18n.PROCESS_DESCRIPTION_PART2}`,
+  },
+  {
+    id: RowRendererId.registry,
+    name: i18n.REGISTRY_NAME,
+    description: i18n.REGISTRY_DESCRIPTION,
+    example: RegistryExample,
+    searchableDescription: i18n.REGISTRY_DESCRIPTION,
   },
   {
     id: RowRendererId.system_fim,

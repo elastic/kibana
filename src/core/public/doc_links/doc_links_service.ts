@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -20,6 +20,7 @@ export class DocLinksService {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -39,6 +40,7 @@ export class DocLinksService {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
           installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
           configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
+          elasticsearchModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`,
           elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
           startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
           exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
@@ -46,8 +48,17 @@ export class DocLinksService {
         auditbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
         },
+        enterpriseSearch: {
+          base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
+          appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
+          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
+        },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
+          configure: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/configuring-howto-metricbeat.html`,
+          httpEndpoint: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/http-endpoint.html`,
+          install: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`,
+          start: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`,
         },
         heartbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
@@ -62,6 +73,8 @@ export class DocLinksService {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
         },
         aggs: {
+          composite: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-composite-aggregation.html`,
+          composite_missing_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-composite-aggregation.html#_missing_bucket`,
           date_histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
           date_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
           date_format_pattern: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`,
@@ -100,17 +113,22 @@ export class DocLinksService {
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
+          painlessLangSpec: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
+          painlessWalkthrough: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-walkthrough.html`,
           painlessLanguage: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
           loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         elasticsearch: {
+          indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
+          mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
@@ -129,6 +147,7 @@ export class DocLinksService {
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
+          dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
         },
         management: {
           kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
@@ -156,7 +175,7 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/create-panels-with-timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
@@ -168,15 +187,17 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
           actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
           emailAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
+          emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html#configuring-email`,
           generalSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html`,
-          indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-types.html#alert-type-index-threshold`,
+          esQuery: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-type-es-query.html`,
+          indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-type-index-threshold.html#index-action-configuration`,
           pagerDutyAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pagerduty-action-type.html`,
           preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`,
-          serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html`,
+          serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`,
           setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`,
-          slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html`,
-          teamsAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/teams-action-type.html`,
+          slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`,
+          teamsAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/teams-action-type.html#configuring-teams`,
         },
         maps: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
@@ -188,8 +209,11 @@ export class DocLinksService {
           alertsKibanaDiskThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`,
           alertsKibanaJvmThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-jvm-memory-threshold`,
           alertsKibanaMissingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-missing-monitoring-data`,
+          metricbeatBlog: `${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
           monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
           monitorKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`,
+          monitorLogstash: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`,
+          troubleshootKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitor-troubleshooting.html`,
         },
         security: {
           apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
@@ -220,13 +244,33 @@ export class DocLinksService {
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
+          cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
+          indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
+          painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
           putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
+          putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}/watcher-api-put-watch.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
+        },
+        plugins: {
+          azureRepo: `${PLUGIN_DOCS}repository-azure.html`,
+          gcsRepo: `${PLUGIN_DOCS}repository-gcs.html`,
+          hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+          s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
+          snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+        },
+        snapshotRestore: {
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
+          changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
+          createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
+          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
+          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
+          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
+          restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
         },
       },
     });
@@ -251,6 +295,7 @@ export interface DocLinksStart {
       readonly installation: string;
       readonly configuration: string;
       readonly elasticsearchOutput: string;
+      readonly elasticsearchModule: string;
       readonly startup: string;
       readonly exportedFields: string;
     };
@@ -259,6 +304,15 @@ export interface DocLinksStart {
     };
     readonly metricbeat: {
       readonly base: string;
+      readonly configure: string;
+      readonly httpEndpoint: string;
+      readonly install: string;
+      readonly start: string;
+    };
+    readonly enterpriseSearch: {
+      readonly base: string;
+      readonly appSearchBase: string;
+      readonly workplaceSearchBase: string;
     };
     readonly heartbeat: {
       readonly base: string;
@@ -273,6 +327,8 @@ export interface DocLinksStart {
       readonly base: string;
     };
     readonly aggs: {
+      readonly composite: string;
+      readonly composite_missing_bucket: string;
       readonly date_histogram: string;
       readonly date_range: string;
       readonly date_format_pattern: string;
@@ -311,7 +367,9 @@ export interface DocLinksStart {
       readonly scriptAggs: string;
       readonly painless: string;
       readonly painlessApi: string;
+      readonly painlessLangSpec: string;
       readonly painlessSyntax: string;
+      readonly painlessWalkthrough: string;
       readonly luceneExpressions: string;
     };
     readonly indexPatterns: {
@@ -333,6 +391,7 @@ export interface DocLinksStart {
     };
     readonly date: {
       readonly dateMath: string;
+      readonly dateMathIndexNames: string;
     };
     readonly management: Record<string, string>;
     readonly ml: Record<string, string>;
@@ -346,11 +405,15 @@ export interface DocLinksStart {
       createApiKey: string;
       createPipeline: string;
       createTransformRequest: string;
+      cronExpressions: string;
       executeWatchActionModes: string;
+      indexExists: string;
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
+      painlessExecuteAPIContexts: string;
       putComponentTemplateMetadata: string;
+      putSnapshotLifecyclePolicy: string;
       putWatch: string;
       updateTransform: string;
     }>;
@@ -372,5 +435,7 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
+    readonly plugins: Record<string, string>;
+    readonly snapshotRestore: Record<string, string>;
   };
 }

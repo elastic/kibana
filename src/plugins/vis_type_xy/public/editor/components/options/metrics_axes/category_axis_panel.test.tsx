@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { CategoryAxis } from '../../../../types';
 import { LabelOptions } from './label_options';
-import { categoryAxis, vis } from './mocks';
+import { categoryAxis } from './mocks';
 import { Position } from '@elastic/charts';
 
 describe('CategoryAxisPanel component', () => {
@@ -27,7 +27,6 @@ describe('CategoryAxisPanel component', () => {
 
     defaultProps = {
       axis,
-      vis,
       onPositionChanged,
       setCategoryAxis,
     };

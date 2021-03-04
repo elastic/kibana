@@ -1,16 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  BASE_PATH,
-  StaticPage,
-  DynamicPage,
-  DynamicPagePathValues,
-  pagePathGetters,
-} from '../constants';
+import { BASE_PATH, pagePathGetters } from '../constants';
+import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
+
 import { useStartServices } from './';
 
 const getPath = (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -119,6 +120,6 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
 const createLogEntryFromHit = (hit: LogEntryHit) => ({
   id: hit._id,
   index: hit._index,
-  key: getLogEntryCursorFromHit(hit),
+  cursor: getLogEntryCursorFromHit(hit),
   fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
 });

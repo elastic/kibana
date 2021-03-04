@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,15 @@ import {
   ALERT_DETAILS,
 } from '../common/constants';
 
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
+import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
+
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
@@ -39,7 +49,7 @@ export class MonitoringPlugin
     Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -72,7 +82,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlertsAsync(plugins);
+    this.registerAlerts(plugins);
 
     const app: App = {
       id,
@@ -135,19 +145,7 @@ export class MonitoringPlugin
     ];
   }
 
-  private registerAlertsAsync = async (plugins: MonitoringSetupPluginDependencies) => {
-    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
-    const { createMissingMonitoringDataAlertType } = await import(
-      './alerts/missing_monitoring_data_alert'
-    );
-    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
-    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
-    const { createThreadPoolRejectionsAlertType } = await import(
-      './alerts/thread_pool_rejections_alert'
-    );
-    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
-    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
-
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies) {
     const {
       triggersActionsUi: { alertTypeRegistry },
     } = plugins;
@@ -168,9 +166,10 @@ export class MonitoringPlugin
       )
     );
     alertTypeRegistry.register(createCCRReadExceptionsAlertType());
+    alertTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);
     }
-  };
+  }
 }

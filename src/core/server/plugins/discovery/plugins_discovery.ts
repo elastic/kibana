@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { readdir, stat } from 'fs';
@@ -179,7 +179,7 @@ function createPlugin$(
   coreContext: CoreContext,
   instanceInfo: InstanceInfo
 ) {
-  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);

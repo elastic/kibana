@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { QuerySuggestion } from '../../autocomplete';
+import { SuggestionOnClick } from './types';
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -29,9 +30,10 @@ function getEuiIconType(type: string) {
 }
 
 interface Props {
-  onClick: (suggestion: QuerySuggestion) => void;
+  onClick: SuggestionOnClick;
   onMouseEnter: () => void;
   selected: boolean;
+  index: number;
   suggestion: QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
@@ -48,7 +50,7 @@ export function SuggestionComponent(props: Props) {
         active: props.selected,
       })}
       role="option"
-      onClick={() => props.onClick(props.suggestion)}
+      onClick={() => props.onClick(props.suggestion, props.index)}
       onMouseEnter={props.onMouseEnter}
       ref={props.innerRef}
       id={props.ariaId}

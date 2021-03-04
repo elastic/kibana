@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
@@ -189,6 +190,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
     return [
       {
         id: 'overview',
+        'data-test-subj': 'upgradeAssistantOverviewTab',
         name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
           defaultMessage: 'Overview',
         }),
@@ -196,6 +198,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       },
       {
         id: 'cluster',
+        'data-test-subj': 'upgradeAssistantClusterTab',
         name: i18n.translate('xpack.upgradeAssistant.checkupTab.clusterTabLabel', {
           defaultMessage: 'Cluster',
         }),
@@ -212,6 +215,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       },
       {
         id: 'indices',
+        'data-test-subj': 'upgradeAssistantIndicesTab',
         name: i18n.translate('xpack.upgradeAssistant.checkupTab.indicesTabLabel', {
           defaultMessage: 'Indices',
         }),

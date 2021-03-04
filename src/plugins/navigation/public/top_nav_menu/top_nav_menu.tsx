@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { ReactElement } from 'react';
-import { EuiHeaderLinks } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
@@ -23,6 +23,7 @@ import { TopNavMenuItem } from './top_nav_menu_item';
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
+    badges?: Array<EuiBadgeProps & { badgeText: string }>;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
@@ -61,10 +62,26 @@ export type TopNavMenuProps = StatefulSearchBarProps &
  **/
 
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
-  const { config, showSearchBar, ...searchBarProps } = props;
+  const { config, badges, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
     return null;
+  }
+
+  function renderBadges(): ReactElement | null {
+    if (!badges || badges.length === 0) return null;
+    return (
+      <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
+        {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
+          const { badgeText, ...badgeProps } = badge;
+          return (
+            <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+              {badgeText}
+            </EuiBadge>
+          );
+        })}
+      </EuiBadgeGroup>
+    );
   }
 
   function renderItems(): ReactElement[] | null {
@@ -98,7 +115,10 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
-            <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
+            <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
+              {renderBadges()}
+              {renderMenu(menuClassName)}
+            </span>
           </MountPointPortal>
           <span className={wrapperClassName}>{renderSearchBar()}</span>
         </>

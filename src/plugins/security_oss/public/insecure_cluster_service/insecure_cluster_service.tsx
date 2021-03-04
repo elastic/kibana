@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import { CoreSetup, CoreStart, MountPoint, Toast } from 'kibana/public';
 
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+
+import type { CoreSetup, CoreStart, MountPoint, Toast } from 'src/core/public';
+
 import type { ConfigType } from '../config';
 import type { AppStateServiceStart } from '../app_state';
 import { defaultAlertText, defaultAlertTitle } from './components';

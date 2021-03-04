@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "./target/index.js",
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "build": "node ./scripts/build.js",
     "kbn:bootstrap": "yarn build --dev"

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -18,12 +19,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { Loading } from '../../../../shared/loading';
-import { SourceIcon } from '../../../components/shared/source_icon';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { LicenseCallout } from '../../../components/shared/license_callout';
+import { SourceIcon } from '../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import {
   CONFIGURE_BUTTON,
   CONNECTORS_HEADER_TITLE,
@@ -35,9 +35,7 @@ import {
 } from '../../../constants';
 import { getSourcesPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
-
 import { staticSourceData } from '../../content_sources/source_data';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {

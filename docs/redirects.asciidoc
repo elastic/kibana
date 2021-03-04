@@ -194,10 +194,89 @@ This page has moved. Refer to <<url_templating-language>>.
 
 This page has moved. Refer to <<url-template-variables>>.
 
+[float]
+[[time-series-visual-builder]]
+=== Time Series Visual Builder
+
+This page was deleted. Refer to <<dashboard>>.
+
+[float]
+[[kibana-keystore-has-moved-from-the-data-folder-to-the-config-folder]]
+=== Kibana Keystore has moved from the Data Folder to the Config Folder
+
+This page has been deleted. Refer to link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html#user-facing-changes-79[Breaking changes in 7.9].
+
+[float]
+[[createvis]]
+=== Create Visualization
+
+This page has been deleted. Refer to <<dashboard>>.
+
+[float]
+[[data-table]]
+=== Data Table
+
+This page has been deleted. Refer to <<dashboard>>.
+
+
+[float]
+[[xy-chart]]
+=== Line, Area, and Bar Chart
+
+This page has been deleted. Refer to <<dashboard>>.
+
+[float]
+[[add-canvas-events]]
+=== Add Canvas Elements
+
+This page has been moved. Refer to <<canvas>>.
+
+[float]
+[[vega-lite-tutorial]]
+=== Vega-Lite Tutorial
+
+This page has been moved. Refer to <<vega-tutorial-create-a-stacked-area-chart>>.
+
+[float]
+[[heatmap-chart]]
+=== Heatmap Chart
+
+This page has been moved. Refer to <<types-of-visualization-panels>>.
+
+[float]
+[[interface-overview]]
+=== Interface Overview
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[time-series-visualizations]]
+=== Featured Visualizations
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[timelion-customize]]
+=== Customize and format visualizations
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[dashboard-drilldown]]
+=== Dashboard Drilldowns
+
+This page has been moved. Refer to <<dashboard-drilldowns>>.
+
+[float]
+[[development-plugin-localization]]
+=== Localization for plugins
+
+This page has been moved. PRefer to <<external-plugin-localization>>.
+
 [role="exclude",id="visualize"]
 == Visualize
 
-This content has moved. See <<dashboard, **Dashboard**>>.
+This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="explore-dashboard-data"]
-This content has moved. See <<dashboard, **Dashboard**>>.
+This content has moved. Refer to <<dashboard, **Dashboard**>>.

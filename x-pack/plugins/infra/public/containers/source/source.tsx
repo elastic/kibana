@@ -1,27 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  CreateSourceConfigurationMutation,
-  SourceQuery,
-  UpdateSourceInput,
-  UpdateSourceMutation,
-} from '../../graphql/types';
-import { DependencyError, useApolloClient } from '../../utils/apollo_context';
+  InfraSavedSourceConfiguration,
+  InfraSource,
+  SourceResponse,
+} from '../../../common/http_api/source_api';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { createSourceMutation } from './create_source.gql_query';
-import { sourceQuery } from './query_source.gql_query';
-import { updateSourceMutation } from './update_source.gql_query';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-type Source = SourceQuery.Query['source'];
-
-export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+export const pickIndexPattern = (
+  source: InfraSource | undefined,
+  type: 'logs' | 'metrics' | 'both'
+) => {
   if (!source) {
     return 'unknown-index';
   }
@@ -34,96 +32,79 @@ export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'met
   return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
 };
 
+const DEPENDENCY_ERROR_MESSAGE = 'Failed to load source: No fetch client available.';
+
 export const useSource = ({ sourceId }: { sourceId: string }) => {
-  const apolloClient = useApolloClient();
-  const [source, setSource] = useState<Source | undefined>(undefined);
+  const kibana = useKibana();
+  const fetchService = kibana.services.http?.fetch;
+  const API_URL = `/api/metrics/source/${sourceId}`;
+
+  const [source, setSource] = useState<InfraSource | undefined>(undefined);
 
   const [loadSourceRequest, loadSource] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        if (!apolloClient) {
-          throw new DependencyError('Failed to load source: No apollo client available.');
+        if (!fetchService) {
+          throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
-          fetchPolicy: 'no-cache',
-          query: sourceQuery,
-          variables: {
-            sourceId,
-          },
+        return await fetchService<SourceResponse>(`${API_URL}/metrics`, {
+          method: 'GET',
         });
       },
       onResolve: (response) => {
-        setSource(response.data.source);
+        setSource(response.source);
       },
     },
-    [apolloClient, sourceId]
+    [fetchService, sourceId]
   );
 
   const [createSourceConfigurationRequest, createSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (sourceProperties: UpdateSourceInput) => {
-        if (!apolloClient) {
-          throw new DependencyError(
-            'Failed to create source configuration: No apollo client available.'
-          );
+      createPromise: async (sourceProperties: InfraSavedSourceConfiguration) => {
+        if (!fetchService) {
+          throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await apolloClient.mutate<
-          CreateSourceConfigurationMutation.Mutation,
-          CreateSourceConfigurationMutation.Variables
-        >({
-          mutation: createSourceMutation,
-          fetchPolicy: 'no-cache',
-          variables: {
-            sourceId,
-            sourceProperties,
-          },
+        return await fetchService<SourceResponse>(API_URL, {
+          method: 'PATCH',
+          body: JSON.stringify(sourceProperties),
         });
       },
       onResolve: (response) => {
-        if (response.data) {
-          setSource(response.data.createSource.source);
+        if (response) {
+          setSource(response.source);
         }
       },
     },
-    [apolloClient, sourceId]
+    [fetchService, sourceId]
   );
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (sourceProperties: UpdateSourceInput) => {
-        if (!apolloClient) {
-          throw new DependencyError(
-            'Failed to update source configuration: No apollo client available.'
-          );
+      createPromise: async (sourceProperties: InfraSavedSourceConfiguration) => {
+        if (!fetchService) {
+          throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await apolloClient.mutate<
-          UpdateSourceMutation.Mutation,
-          UpdateSourceMutation.Variables
-        >({
-          mutation: updateSourceMutation,
-          fetchPolicy: 'no-cache',
-          variables: {
-            sourceId,
-            sourceProperties,
-          },
+        return await fetchService<SourceResponse>(API_URL, {
+          method: 'PATCH',
+          body: JSON.stringify(sourceProperties),
         });
       },
       onResolve: (response) => {
-        if (response.data) {
-          setSource(response.data.updateSource.source);
+        if (response) {
+          setSource(response.source);
         }
       },
     },
-    [apolloClient, sourceId]
+    [fetchService, sourceId]
   );
 
   const createDerivedIndexPattern = (type: 'logs' | 'metrics' | 'both') => {
     return {
-      fields: source ? source.status.indexFields : [],
+      fields: source?.status ? source.status.indexFields : [],
       title: pickIndexPattern(source, type),
     };
   };

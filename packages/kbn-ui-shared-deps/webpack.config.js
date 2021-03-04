@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
@@ -12,6 +12,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
+const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./index');
 
@@ -85,6 +86,13 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
+      {
+        test: /\.(ttf)(\?|$)/,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+        },
+      },
     ],
   },
 
@@ -138,6 +146,36 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             test: /\.(js|css)$/,
             cache: false,
           }),
+          new (class MetricsPlugin {
+            apply(compiler) {
+              compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
+                const metrics = [
+                  {
+                    group: '@kbn/ui-shared-deps asset size',
+                    id: 'kbn-ui-shared-deps.js',
+                    value: compilation.assets['kbn-ui-shared-deps.js'].size(),
+                  },
+                  {
+                    group: '@kbn/ui-shared-deps asset size',
+                    id: 'kbn-ui-shared-deps.@elastic.js',
+                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
+                  },
+                  {
+                    group: '@kbn/ui-shared-deps asset size',
+                    id: 'css',
+                    value:
+                      compilation.assets['kbn-ui-shared-deps.css'].size() +
+                      compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+                  },
+                ];
+
+                compilation.emitAsset(
+                  'metrics.json',
+                  new RawSource(JSON.stringify(metrics, null, 2))
+                );
+              });
+            }
+          })(),
         ]),
   ],
 });

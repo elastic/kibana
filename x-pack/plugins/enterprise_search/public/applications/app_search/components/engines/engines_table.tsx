@@ -1,47 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { generatePath } from 'react-router-dom';
+import React, { ReactNode } from 'react';
+
 import { useActions } from 'kea';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
+
+import { EuiBasicTable, EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 
-import { TelemetryLogic } from '../../../shared/telemetry';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { ENGINE_PATH } from '../../routes';
-
-import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
+import { ENGINE_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { EngineDetails } from '../engine/types';
 
-interface EnginesTablePagination {
-  totalEngines: number;
-  pageIndex: number;
-  onPaginate(pageIndex: number): void;
-}
 interface EnginesTableProps {
-  data: EngineDetails[];
-  pagination: EnginesTablePagination;
-}
-interface OnChange {
-  page: {
-    index: number;
+  items: EngineDetails[];
+  loading: boolean;
+  noItemsMessage?: ReactNode;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+    totalItemCount: number;
+    hidePerPageOptions: boolean;
   };
+  onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
 }
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
-  data,
-  pagination: { totalEngines, pageIndex, onPaginate },
+  items,
+  loading,
+  noItemsMessage,
+  pagination,
+  onChange,
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const engineLinkProps = (engineName: string) => ({
-    to: generatePath(ENGINE_PATH, { engineName }),
+    to: generateEncodedPath(ENGINE_PATH, { engineName }),
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',
@@ -80,10 +83,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (dateString: string) => (
-        // e.g., Jan 1, 1970
-        <FormattedDate value={new Date(dateString)} year="numeric" month="short" day="numeric" />
-      ),
+      render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
       field: 'language',
@@ -145,18 +145,12 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 
   return (
     <EuiBasicTable
-      items={data}
+      items={items}
       columns={columns}
-      pagination={{
-        pageIndex,
-        pageSize: ENGINES_PAGE_SIZE,
-        totalItemCount: totalEngines,
-        hidePerPageOptions: true,
-      }}
-      onChange={({ page }: OnChange) => {
-        const { index } = page;
-        onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
-      }}
+      loading={loading}
+      pagination={pagination}
+      onChange={onChange}
+      noItemsMessage={noItemsMessage}
     />
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiImage, EuiPopover, EuiText } from '@elastic/eui';
@@ -98,7 +99,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
           closePopover={() => setIsImagePopoverOpen(false)}
           isOpen={isImagePopoverOpen}
         >
-          <img
+          <EuiImage
             alt={
               stepName
                 ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText', {
@@ -114,7 +115,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                     }
                   )
             }
-            src={imgSrc}
+            url={imgSrc}
             style={{ width: POPOVER_IMG_WIDTH, height: POPOVER_IMG_HEIGHT, objectFit: 'contain' }}
           />
         </EuiPopover>

@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import moment from 'moment';
-import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
+import { useValues } from 'kea';
+import moment from 'moment';
 
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { TruncatedContent } from '../../../../shared/truncate';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
-
-import { Group } from '../../../types';
-
+import { TruncatedContent } from '../../../../shared/truncate';
 import { AppLogic } from '../../../app_logic';
 import { getGroupPath } from '../../../routes';
+import { Group } from '../../../types';
 import { MAX_NAME_LENGTH } from '../group_logic';
+
 import { GroupSources } from './group_sources';
 import { GroupUsers } from './group_users';
 

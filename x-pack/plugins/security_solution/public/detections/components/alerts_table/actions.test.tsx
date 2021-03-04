@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -152,10 +153,17 @@ describe('alert actions', () => {
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            eqlOptions: {
+              eventCategoryField: 'event.category',
+              query: '',
+              size: 100,
+              tiebreakerField: 'event.sequence',
+              timestampField: '@timestamp',
+            },
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedEvent: {},
+            expandedDetail: {},
             filters: [
               {
                 $state: {
@@ -413,7 +421,7 @@ describe('alert actions', () => {
         ...mockEcsDataWithAlert,
         timestamp: '2020-03-20T17:59:46.349Z',
       };
-      const result = determineToAndFrom({ ecsData: ecsDataMock });
+      const result = determineToAndFrom({ ecs: ecsDataMock });
 
       expect(result.from).toEqual('2020-03-20T17:54:46.349Z');
       expect(result.to).toEqual('2020-03-20T17:59:46.349Z');
@@ -423,7 +431,7 @@ describe('alert actions', () => {
       const { timestamp, ...ecsDataMock } = {
         ...mockEcsDataWithAlert,
       };
-      const result = determineToAndFrom({ ecsData: ecsDataMock });
+      const result = determineToAndFrom({ ecs: ecsDataMock });
 
       expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
       expect(result.to).toEqual('2020-03-01T17:59:46.349Z');

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, ReactNode, memo } from 'react';
@@ -58,7 +59,7 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
         </EuiFlexItem>

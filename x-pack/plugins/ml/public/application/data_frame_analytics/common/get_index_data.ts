@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
@@ -27,6 +28,7 @@ export const getIndexData = async (
       pagination,
       setErrorMessage,
       setRowCount,
+      setRowCountRelation,
       setStatus,
       setTableItems,
       sortingColumns,
@@ -63,6 +65,7 @@ export const getIndexData = async (
 
       if (!options.didCancel) {
         setRowCount(resp.hits.total.value);
+        setRowCountRelation(resp.hits.total.relation);
         setTableItems(
           resp.hits.hits.map((d) =>
             getProcessedFields(d.fields, (key: string) =>

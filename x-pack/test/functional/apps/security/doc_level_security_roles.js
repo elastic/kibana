@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        '_id:doc1 _type: - _index:dlstest _score:0 region.keyword:EAST name:ABC Company name.keyword:ABC Company region:EAST'
+        'name:ABC Company name.keyword:ABC Company region:EAST region.keyword:EAST _id:doc1 _index:dlstest _score:0 _type: -'
       );
     });
     after('logout', async () => {

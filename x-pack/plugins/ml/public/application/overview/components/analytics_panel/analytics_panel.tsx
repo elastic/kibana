@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -28,8 +29,9 @@ import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -52,6 +54,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    setLazyJobCount,
     false,
     false
   );

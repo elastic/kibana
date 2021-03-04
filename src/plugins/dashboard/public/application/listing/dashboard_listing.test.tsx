@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mount } from 'enzyme';
@@ -29,6 +29,7 @@ import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';
+import { DashboardPanelStorage } from '../lib';
 
 function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -48,6 +49,12 @@ function makeDefaultServices(): DashboardAppServices {
       hits,
     });
   };
+  const dashboardPanelStorage = ({
+    getDashboardIdsWithUnsavedChanges: jest
+      .fn()
+      .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+  } as unknown) as DashboardPanelStorage;
+
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
@@ -65,6 +72,8 @@ function makeDefaultServices(): DashboardAppServices {
     uiSettings: {} as IUiSettingsClient,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
+    allowByValueEmbeddables: true,
+    dashboardPanelStorage,
     savedDashboards,
     core,
   };

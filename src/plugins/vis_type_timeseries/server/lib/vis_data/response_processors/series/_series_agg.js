@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -46,6 +46,16 @@ export const SeriesAgg = {
       const key = row[0][0];
       const values = row.map(extractValue);
       data.push([key, mean(values)]);
+    });
+    return [data];
+  },
+  count(targetSeries) {
+    const data = [];
+    _.zip(...targetSeries).forEach((row) => {
+      const key = row[0][0];
+      // Filter out undefined or null values
+      const values = row.map((r) => r && r[1]).filter((v) => v || typeof v === 'number');
+      data.push([key, values.length]);
     });
     return [data];
   },

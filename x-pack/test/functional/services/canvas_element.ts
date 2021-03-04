@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { rgb, nest } from 'd3';
@@ -43,9 +44,13 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
     public async getImageData(selector: string): Promise<number[]> {
       return await driver.executeScript(
         `
-        const el = document.querySelector('${selector}');
-        const ctx = el.getContext('2d');
-        return ctx.getImageData(0, 0, el.width, el.height).data;
+        try {
+          const el = document.querySelector('${selector}');
+          const ctx = el.getContext('2d');
+          return ctx.getImageData(0, 0, el.width, el.height).data;
+        } catch(e) {
+          return [];
+        }
         `
       );
     }

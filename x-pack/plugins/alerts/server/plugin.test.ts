@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
@@ -24,7 +25,7 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
-    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+    it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
           interval: '5m',
@@ -39,7 +40,7 @@ describe('Alerting Plugin', () => {
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
       const setupMocks = coreMock.createSetup();
-      // need await to test number of calls of setupMocks.status.set, becuase it is under async function which awaiting core.getStartServices()
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
       await plugin.setup(setupMocks, {
         licensing: licensingMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsSetup,
@@ -50,9 +51,9 @@ describe('Alerting Plugin', () => {
       });
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
-      expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
+      expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
@@ -109,7 +110,7 @@ describe('Alerting Plugin', () => {
 
   describe('start()', () => {
     describe('getAlertsClientWithRequest()', () => {
-      it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
+      it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
             interval: '5m',
@@ -140,15 +141,15 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
+        expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
         expect(() =>
           startContract.getAlertsClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
 
-      it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
+      it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
             interval: '5m',
@@ -162,7 +163,7 @@ describe('Alerting Plugin', () => {
 
         const encryptedSavedObjectsSetup = {
           ...encryptedSavedObjectsMock.createSetup(),
-          usingEphemeralEncryptionKey: false,
+          canEncrypt: true,
         };
         plugin.setup(coreMock.createSetup(), {
           licensing: licensingMock.createSetup(),

@@ -1,20 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect, useReducer, useCallback } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
+import { useEffect, useReducer, useCallback, useRef } from 'react';
 
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { getCase } from './api';
-import { getNoneConnector } from '../components/configure_cases/utils';
+import { getCase, getSubCase } from './api';
 
 interface CaseState {
-  data: Case;
+  data: Case | null;
   isLoading: boolean;
   isError: boolean;
 }
@@ -55,80 +54,63 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       return state;
   }
 };
-export const initialData: Case = {
-  id: '',
-  closedAt: null,
-  closedBy: null,
-  createdAt: '',
-  comments: [],
-  connector: { ...getNoneConnector(), fields: null },
-  createdBy: {
-    username: '',
-  },
-  description: '',
-  externalService: null,
-  status: CaseStatuses.open,
-  tags: [],
-  title: '',
-  totalComment: 0,
-  updatedAt: null,
-  updatedBy: null,
-  version: '',
-  settings: {
-    syncAlerts: true,
-  },
-};
 
 export interface UseGetCase extends CaseState {
   fetchCase: () => void;
   updateCase: (newCase: Case) => void;
 }
 
-export const useGetCase = (caseId: string): UseGetCase => {
+export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: true,
+    isLoading: false,
     isError: false,
-    data: initialData,
+    data: null,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const updateCase = useCallback((newCase: Case) => {
     dispatch({ type: 'UPDATE_CASE', payload: newCase });
   }, []);
 
   const callFetch = useCallback(async () => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-
-    const fetchData = async () => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
-      try {
-        const response = await getCase(caseId, true, abortCtrl.signal);
-        if (!didCancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response });
-        }
-      } catch (error) {
-        if (!didCancel) {
+
+      const response = await (subCaseId
+        ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
+        : getCase(caseId, true, abortCtrlRef.current.signal));
+
+      if (!isCancelledRef.current) {
+        dispatch({ type: 'FETCH_SUCCESS', payload: response });
+      }
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, subCaseId]);
 
   useEffect(() => {
     callFetch();
+
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, subCaseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };

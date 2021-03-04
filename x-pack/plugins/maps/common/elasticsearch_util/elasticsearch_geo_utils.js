@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -279,33 +280,11 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
   return esBbox;
 }
 
-function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
-  const boundingBox = makeESBbox({ maxLat, maxLon, minLat, minLon });
+export function createExtentFilter(mapExtent, geoFieldName) {
+  const boundingBox = makeESBbox(mapExtent);
   return {
     geo_bounding_box: {
       [geoFieldName]: boundingBox,
-    },
-  };
-}
-
-export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
-  ensureGeoField(geoFieldType);
-
-  // Extent filters are used to dynamically filter data for the current map view port.
-  // Continue to use geo_bounding_box queries for extent filters
-  // 1) geo_bounding_box queries are faster than polygon queries
-  // 2) geo_shape benefits of pre-indexed shapes and
-  // compatability across multi-indices with geo_point and geo_shape do not apply to this use case.
-  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    return createGeoBoundBoxFilter(mapExtent, geoFieldName);
-  }
-
-  return {
-    geo_shape: {
-      [geoFieldName]: {
-        shape: formatEnvelopeAsPolygon(mapExtent),
-        relation: ES_SPATIAL_RELATIONS.INTERSECTS,
-      },
     },
   };
 }

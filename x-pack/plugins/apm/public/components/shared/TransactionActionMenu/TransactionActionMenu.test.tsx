@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
@@ -52,7 +53,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  fireEvent.click(rendered.getByText('Actions'));
+  fireEvent.click(rendered.getByText('Investigate'));
 
   return rendered;
 };
@@ -289,7 +290,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -313,7 +314,7 @@ describe('TransactionActionMenu component', () => {
         { wrapper: Wrapper }
       );
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -330,7 +331,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -347,7 +348,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -364,7 +365,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
       act(() => {

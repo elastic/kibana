@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -50,9 +50,6 @@ test('editor mount setup', () => {
       suggestions: [],
     }),
   };
-  const signatureProvider = {
-    provideSignatureHelp: () => ({ signatures: [], activeParameter: 0, activeSignature: 0 }),
-  };
   const hoverProvider = {
     provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
       contents: [],
@@ -82,7 +79,6 @@ test('editor mount setup', () => {
       onChange={() => {}}
       editorWillMount={editorWillMount}
       suggestionProvider={suggestionProvider}
-      signatureProvider={signatureProvider}
       hoverProvider={hoverProvider}
     />
   );
@@ -99,6 +95,5 @@ test('editor mount setup', () => {
   // Verify our language features have been registered
   expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 });

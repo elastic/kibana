@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ConnectableObservable, Subscription, of } from 'rxjs';
@@ -36,7 +36,7 @@ export class Root {
 
   public async setup() {
     try {
-      await this.server.setupCoreConfig();
+      this.server.setupCoreConfig();
       await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();

@@ -1,11 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+
+// Tests are executed in a jsdom environment who does not have sizing methods,
+// thus the AutoSizer will always compute a 0x0 size space
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+  }) {
+    const { children, ...otherProps } = props;
+    return <div {...otherProps}>{children({ width: 100, height: 100 })}</div>;
+  };
+});
+
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
@@ -82,6 +96,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -93,6 +108,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
@@ -1322,7 +1338,10 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: 'draggedField' },
+                    });
                   }
                 },
               },
@@ -1338,10 +1357,15 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: { label: 'draggedField' },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1363,6 +1387,7 @@ describe('editor_frame', () => {
             icon: 'empty',
             id: 'testVis3',
             label: 'TEST3',
+            groupLabel: 'testVis3Group',
           },
         ],
         getSuggestions: () => [
@@ -1419,7 +1444,10 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: '1' },
+                    });
                   }
                 },
               },
@@ -1435,10 +1463,17 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: {
+              label: 'label',
+            },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

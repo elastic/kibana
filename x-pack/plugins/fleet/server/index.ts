@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
-import { FleetPlugin } from './plugin';
+
+import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
+
+import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
 export {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
@@ -10,8 +11,12 @@ import { API_BASE_PATH, ROLLUP_INDEX_NAME, INDEX_TO_ROLLUP_MAPPINGS } from './co
 const jobsCreated = [];
 const jobsStarted = [];
 
-export const registerHelpers = ({ supertest, es }) => {
-  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(es);
+export const registerHelpers = (getService) => {
+  const supertest = getService('supertest');
+
+  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(
+    getService
+  );
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });

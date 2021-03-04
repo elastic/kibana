@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const PLUGIN_ID = 'reporting';
@@ -56,14 +57,19 @@ export const LAYOUT_TYPES = {
 };
 
 // Export Type Definitions
-export const CSV_REPORT_TYPE = 'CSV';
 export const PDF_REPORT_TYPE = 'printablePdf';
-export const PNG_REPORT_TYPE = 'PNG';
-
 export const PDF_JOB_TYPE = 'printable_pdf';
+
+export const PNG_REPORT_TYPE = 'PNG';
 export const PNG_JOB_TYPE = 'PNG';
-export const CSV_JOB_TYPE = 'csv';
+
 export const CSV_FROM_SAVEDOBJECT_JOB_TYPE = 'csv_from_savedobject';
+
+// This is deprecated because it lacks support for runtime fields
+// but the extension points are still needed for pre-existing scripted automation, until 8.0
+export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
+export const CSV_JOB_TYPE_DEPRECATED = 'csv';
+
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 
 // Licenses

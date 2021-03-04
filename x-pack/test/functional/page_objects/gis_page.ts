@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -170,6 +171,10 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await testSubjects.click('mapSaveAndReturnButton');
     }
 
+    async expectMissingSaveAndReturnButton() {
+      await testSubjects.missingOrFail('mapSaveAndReturnButton');
+    }
+
     async expectMissingSaveButton() {
       await testSubjects.missingOrFail('mapSaveButton');
     }
@@ -330,6 +335,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
     }
 
+    async getNumberOfLayers() {
+      const tocEntries = await find.allByCssSelector('.mapTocEntry');
+      return tocEntries.length;
+    }
+
     async doesLayerExist(layerName: string) {
       return await testSubjects.exists(
         `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
@@ -413,7 +423,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async importLayerReadyForAdd() {
       log.debug(`Wait until import complete`);
-      await testSubjects.find('indexRespCodeBlock', 5000);
+      await testSubjects.find('indexRespCopyButton', 5000);
       let layerAddReady = false;
       await retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
         layerAddReady = await this.importFileButtonEnabled();
@@ -444,21 +454,20 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       );
     }
 
-    async getCodeBlockParsedJson(dataTestSubjName: string) {
-      log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
-      const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
-      return JSON.parse(indexRespJson);
+    async clickCopyButton(dataTestSubj: string): Promise<string> {
+      log.debug(`Click ${dataTestSubj} copy button`);
+
+      await testSubjects.click(dataTestSubj);
+
+      return await browser.getClipboardValue();
     }
 
     async getIndexResults() {
-      log.debug('Get index results');
-      return await this.getCodeBlockParsedJson('indexRespCodeBlock');
+      return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
     }
 
     async getIndexPatternResults() {
-      log.debug('Get index pattern results');
-      return await this.getCodeBlockParsedJson('indexPatternRespCodeBlock');
+      return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
     }
 
     async setLayerQuery(layerName: string, query: string) {

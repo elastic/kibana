@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('../../export', () => ({
@@ -40,9 +40,13 @@ describe('POST /api/saved_objects/_export', () => {
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
-    exporter = handlerContext.savedObjects.exporter;
+    exporter = handlerContext.savedObjects.getExporter();
 
     const router = httpSetup.createRouter('/api/saved_objects/');
+    handlerContext.savedObjects.getExporter = jest
+      .fn()
+      .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);
+
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
@@ -77,6 +81,7 @@ describe('POST /api/saved_objects/_export', () => {
         ],
       },
     ];
+
     exporter.exportByTypes.mockResolvedValueOnce(createListStream(sortedObjects));
 
     const result = await supertest(httpSetup.server.listener)

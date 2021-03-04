@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('Users', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/default'));
-      after(() => esArchiver.unload('auditbeat/default'));
+      before(() => esArchiver.load('auditbeat/users'));
+      after(() => esArchiver.unload('auditbeat/users'));
 
       it('Ensure data is returned from auditbeat', async () => {
         const { body: users } = await supertest
@@ -38,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-users'],
             docValueFields: [],
             ip: IP,
             flowTarget: FlowTarget.destination,
@@ -50,9 +51,12 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 10,
             },
             inspect: false,
+            /* We need a very long timeout to avoid returning just partial data.
+             ** https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/search/search.ts#L18
+             */
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
-
         expect(users.edges.length).to.be(1);
         expect(users.totalCount).to.be(1);
         expect(users.edges[0].node.user!.id).to.eql(['0']);

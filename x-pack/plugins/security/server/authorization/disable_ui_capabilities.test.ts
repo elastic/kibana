@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Actions } from '.';
-import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { ElasticsearchFeature, KibanaFeature } from '../../../features/server';
+import type { AuthenticatedUser } from '../../common/model';
+import { Actions } from './actions';
+import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationMock } from './index.mock';
-import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
-import { AuthenticatedUser } from '..';
-import { CheckPrivilegesResponse } from './types';
+import type { CheckPrivilegesResponse } from './types';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }

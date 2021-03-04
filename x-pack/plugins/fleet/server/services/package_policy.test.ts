@@ -1,20 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackagePolicyMock } from '../../common/mocks';
-import { packagePolicyService } from './package_policy';
-import { PackageInfo, PackagePolicySOAttributes } from '../types';
-import { SavedObjectsUpdateResponse } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
+
+import type { SavedObjectsUpdateResponse } from 'src/core/server';
 import { KibanaRequest } from 'kibana/server';
-import { xpackMocks } from '../../../../mocks';
-import { ExternalCallback } from '..';
+
+import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+import { createPackagePolicyMock } from '../../common/mocks';
+import type { ExternalCallback } from '..';
+
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
+import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
-import { createAppContextStartContractMock } from '../mocks';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {

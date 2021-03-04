@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
@@ -10,7 +12,7 @@ import {
   CoreStart,
   ElasticsearchServiceStart,
   Logger,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -19,6 +21,7 @@ import {
   KibanaRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -27,6 +30,14 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
+import { CloudSetup } from '../../cloud/server';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -54,12 +65,6 @@ import {
   registerAppRoutes,
 } from './routes';
 import {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
-import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
@@ -76,12 +81,11 @@ import {
   listAgents,
   getAgent,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
-import { runFleetServerMigration } from './services/fleet_server_migration';
+import { startFleetServerSetup } from './services/fleet_server';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -93,7 +97,7 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
@@ -167,7 +171,7 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private cloud: CloudSetup | undefined;
@@ -253,11 +257,11 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey = !deps.encryptedSavedObjects;
-        if (isESOUsingEphemeralEncryptionKey) {
+        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
+        if (!isESOCanEncrypt) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
             );
           }
         } else {
@@ -295,11 +299,9 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
-    if (fleetServerEnabled) {
-      // We need licence to be initialized before using the SO service.
-      await this.licensing$.pipe(first()).toPromise();
-      await runFleetServerMigration();
+    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+      // Break the promise chain, the error handling is done in startFleetServerSetup
+      startFleetServerSetup();
     }
 
     return {

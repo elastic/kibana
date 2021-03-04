@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -13,11 +14,8 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
-  createMockedReferenceOperation,
-} from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
+import { createMockedReferenceOperation } from './operations/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -602,6 +600,55 @@ describe('IndexPattern Data Source', () => {
           "type": "function",
         }
       `);
+    });
+
+    it('should put column formatters after calculated columns', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['bucket', 'metric', 'calculated'],
+            columns: {
+              bucket: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              calculated: {
+                label: 'Moving average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'moving_average',
+                references: ['metric'],
+                params: {
+                  window: 5,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
+      const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
+      expect(calculationIndex).toBeLessThan(formatIndex);
     });
 
     it('should rename the output from esaggs when using flat query', () => {

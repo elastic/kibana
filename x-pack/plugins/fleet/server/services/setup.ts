@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { CallESAsCurrentUser } from '../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import type { CallESAsCurrentUser } from '../types';
+
+import {
+  packageToPackagePolicy,
+  DEFAULT_AGENT_POLICIES_PACKAGES,
+  FLEET_SERVER_PACKAGE,
+} from '../../common';
+
+import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
+
+import { SO_SEARCH_LIMIT } from '../constants';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
   ensureInstalledDefaultPackages,
+  ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import {
-  packageToPackagePolicy,
-  PackagePolicy,
-  AgentPolicy,
-  Installation,
-  Output,
-  DEFAULT_AGENT_POLICIES_PACKAGES,
-} from '../../common';
-import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
@@ -29,6 +34,8 @@ import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
+import { appContextService } from './app_context';
+import { awaitIfFleetServerSetupPending } from './fleet_server';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -50,15 +57,20 @@ async function createSetupSideEffects(
   esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
+  const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
   const [
     installedPackages,
     defaultOutput,
     { created: defaultAgentPolicyCreated, defaultAgentPolicy },
+    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    isFleetServerEnabled
+      ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
+      : {},
     updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -77,6 +89,29 @@ async function createSetupSideEffects(
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
+
+  if (isFleetServerEnabled) {
+    await awaitIfFleetServerSetupPending();
+
+    const fleetServerPackage = await ensureInstalledPackage({
+      savedObjectsClient: soClient,
+      pkgName: FLEET_SERVER_PACKAGE,
+      callCluster,
+    });
+
+    if (defaultFleetServerPolicyCreated) {
+      await addPackageToAgentPolicy(
+        soClient,
+        esClient,
+        callCluster,
+        fleetServerPackage,
+        defaultFleetServerPolicy,
+        defaultOutput
+      );
+    }
+  }
+
+  // If we just created the default fleet server policy add the fleet server package
 
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
@@ -152,17 +187,8 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: [
-            'logs-*',
-            'metrics-*',
-            'traces-*',
-            '.ds-logs-*',
-            '.ds-metrics-*',
-            '.ds-traces-*',
-            '.logs-endpoint.diagnostic.collection-*',
-            '.ds-.logs-endpoint.diagnostic.collection-*',
-          ],
-          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useMemo } from 'react';
@@ -62,7 +63,7 @@ export function UXMetrics() {
 
   return (
     <EuiPanel>
-      <EuiFlexGroup justifyContent="spaceBetween" wrap>
+      <EuiFlexGroup justifyContent="spaceBetween" wrap responsive={false}>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="xs">
             <h3>

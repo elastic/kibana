@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -28,23 +29,17 @@ export const initMetricsAPIRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const options = pipe(
-          MetricsAPIRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const options = pipe(
+        MetricsAPIRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const metricsApiResponse = await query(client, options);
+      const client = createSearchClient(requestContext, framework);
+      const metricsApiResponse = await query(client, options);
 
-        return response.ok({
-          body: MetricsAPIResponseRT.encode(metricsApiResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: MetricsAPIResponseRT.encode(metricsApiResponse),
+      });
     }
   );
 };

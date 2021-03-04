@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC } from 'react';
@@ -80,6 +80,7 @@ export const OverviewPageHeader: FC<Props> = ({
                 <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                   <RedirectAppLinks application={application}>
                     <EuiButtonEmpty
+                      data-test-subj="homeAddData"
                       className="kbnOverviewPageHeader__actionButton"
                       flush="both"
                       href={addBasePath('/app/home#/tutorial_directory')}
@@ -96,6 +97,7 @@ export const OverviewPageHeader: FC<Props> = ({
                   <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
+                        data-test-subj="homeManage"
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
@@ -116,6 +118,7 @@ export const OverviewPageHeader: FC<Props> = ({
                   <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
+                        data-test-subj="homeDevTools"
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="wrench"

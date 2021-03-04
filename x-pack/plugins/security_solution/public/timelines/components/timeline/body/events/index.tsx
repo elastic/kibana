@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 
 import { inputsModel } from '../../../../../common/store';
 import { BrowserFields } from '../../../../../common/containers/source';
@@ -80,7 +82,9 @@ const EventsComponent: React.FC<Props> = ({
         eventIdToNoteIds={eventIdToNoteIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        key={`${id}_${tabType}_${event._id}_${event._index}`}
+        key={`${id}_${tabType}_${event._id}_${event._index}_${
+          !isEmpty(event.ecs.eql?.sequenceNumber) ? event.ecs.eql?.sequenceNumber : ''
+        }`}
         lastFocusedAriaColindex={lastFocusedAriaColindex}
         loadingEventIds={loadingEventIds}
         onRowSelected={onRowSelected}

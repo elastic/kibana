@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
@@ -119,7 +120,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1'])]);
   });
 
   test('it returns two matched sets as a JSON.stringify() set from the "events"', async () => {
@@ -132,7 +133,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
   });
 
   test('it returns an array as a set as a JSON.stringify() array from the "events"', async () => {
@@ -281,7 +282,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet1]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
-    expect([...matchedSet2]).toEqual([JSON.stringify('3.3.3.3'), JSON.stringify('5.5.5.5')]);
+    expect([...matchedSet1]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
+    expect([...matchedSet2]).toEqual([JSON.stringify(['3.3.3.3']), JSON.stringify(['5.5.5.5'])]);
   });
 });

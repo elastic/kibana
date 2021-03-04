@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -93,7 +93,27 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       type: 'json',
       schema: schema.object({
+        default_field: schema.nullable(schema.string()),
+        allow_leading_wildcard: schema.nullable(schema.boolean()),
         analyze_wildcard: schema.boolean(),
+        analyzer: schema.nullable(schema.string()),
+        auto_generate_synonyms_phrase_query: schema.nullable(schema.boolean()),
+        boost: schema.nullable(schema.number()),
+        default_operator: schema.nullable(schema.string()),
+        enable_position_increments: schema.nullable(schema.boolean()),
+        fields: schema.nullable(schema.arrayOf<string>(schema.string())),
+        fuzziness: schema.nullable(schema.string()),
+        fuzzy_max_expansions: schema.nullable(schema.number()),
+        fuzzy_prefix_length: schema.nullable(schema.number()),
+        fuzzy_transpositions: schema.nullable(schema.boolean()),
+        lenient: schema.nullable(schema.boolean()),
+        max_determinized_states: schema.nullable(schema.number()),
+        minimum_should_match: schema.nullable(schema.string()),
+        quote_analyzer: schema.nullable(schema.string()),
+        phrase_slop: schema.nullable(schema.number()),
+        quote_field_suffix: schema.nullable(schema.string()),
+        rewrite: schema.nullable(schema.string()),
+        time_zone: schema.nullable(schema.string()),
       }),
     },
     [UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: {
@@ -335,6 +355,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
+  "histogram": { "id": "histogram", "params": {} },
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }
 }`,
@@ -366,6 +387,10 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           params: schema.object({}),
         }),
         boolean: schema.object({
+          id: schema.string(),
+          params: schema.object({}),
+        }),
+        histogram: schema.object({
           id: schema.string(),
           params: schema.object({}),
         }),

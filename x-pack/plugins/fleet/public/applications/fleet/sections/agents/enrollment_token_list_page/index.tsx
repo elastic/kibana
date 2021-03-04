@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -19,7 +20,11 @@ import {
   HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
+
+import {
+  ENROLLMENT_API_KEYS_INDEX,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 import {
   useBreadcrumbs,
   usePagination,
@@ -28,9 +33,11 @@ import {
   sendGetOneEnrollmentAPIKey,
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
+  useConfig,
 } from '../../../hooks';
 import { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
+
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
@@ -153,6 +160,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('fleet_enrollment_tokens');
+  const config = useConfig();
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -280,7 +288,13 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            fieldPrefix={ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}
+            {...(config.agents.fleetServerEnabled
+              ? {
+                  indexPattern: ENROLLMENT_API_KEYS_INDEX,
+                }
+              : {
+                  fieldPrefix: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+                })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

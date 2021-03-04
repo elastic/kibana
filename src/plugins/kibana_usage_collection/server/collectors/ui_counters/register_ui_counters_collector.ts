@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -52,12 +52,27 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
       dailyEvents: {
         type: 'array',
         items: {
-          appName: { type: 'keyword' },
-          eventName: { type: 'keyword' },
-          lastUpdatedAt: { type: 'date' },
-          fromTimestamp: { type: 'date' },
-          counterType: { type: 'keyword' },
-          total: { type: 'integer' },
+          appName: {
+            type: 'keyword',
+            _meta: { description: 'Name of the app reporting ui counts.' },
+          },
+          eventName: {
+            type: 'keyword',
+            _meta: { description: 'Name of the event that happened.' },
+          },
+          lastUpdatedAt: {
+            type: 'date',
+            _meta: { description: 'Time at which the metric was last updated.' },
+          },
+          fromTimestamp: {
+            type: 'date',
+            _meta: { description: 'Time at which the metric was captured.' },
+          },
+          counterType: { type: 'keyword', _meta: { description: 'The type of counter used.' } },
+          total: {
+            type: 'integer',
+            _meta: { description: 'The total number of times the event happened.' },
+          },
         },
       },
     },

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
@@ -92,14 +92,15 @@ describe('#setup', () => {
       // reset all mocks called during setup phase
       MockLegacyClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
       const clusterClient = setupContract.legacy.createClient('some-custom-type', customConfig);
 
       expect(clusterClient).toBe(mockLegacyClusterClientInstance);
 
       expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
+        expect.objectContaining({ context: ['elasticsearch'] }),
+        'some-custom-type',
         expect.any(Function)
       );
     });
@@ -267,7 +268,7 @@ describe('#start', () => {
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
       const clusterClient = startContract.createClient('custom-type', customConfig);
 
       expect(clusterClient).toBe(mockClusterClientInstance);
@@ -275,7 +276,8 @@ describe('#start', () => {
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
       expect(MockClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch', 'custom-type'] }),
+        expect.objectContaining({ context: ['elasticsearch'] }),
+        'custom-type',
         expect.any(Function)
       );
     });
@@ -286,7 +288,7 @@ describe('#start', () => {
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
 
       startContract.createClient('custom-type', customConfig);
       startContract.createClient('another-type', customConfig);

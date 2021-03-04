@@ -35,7 +35,6 @@
       { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
       { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
       { "path": "../../../src/plugins/embeddable/tsconfig.json"},
-      { "path": "../../../src/plugins/lens_oss/tsconfig.json"},
       { "path": "../../../src/plugins/presentation_util/tsconfig.json"},
     ]
   }

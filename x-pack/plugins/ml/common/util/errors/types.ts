@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpFetchError } from 'kibana/public';
@@ -10,6 +11,7 @@ import Boom from '@hapi/boom';
 export interface EsErrorRootCause {
   type: string;
   reason: string;
+  caused_by?: EsErrorRootCause;
 }
 
 export interface EsErrorBody {
@@ -36,6 +38,7 @@ export interface ErrorMessage {
 }
 
 export interface MLErrorObject {
+  causedBy?: string;
   message: string;
   statusCode?: number;
   fullError?: EsErrorBody;

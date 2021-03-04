@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
+import type { SavedObjectsClientContract, SavedObject } from 'src/core/server';
+
+import type { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { normalizeKuery } from '../saved_object';
+import { normalizeKuery, escapeSearchQueryPhrase } from '../saved_object';
+
+import { createAPIKey, invalidateAPIKeys } from './security';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -156,6 +159,25 @@ async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agent
     }
     throw e;
   }
+}
+
+export async function getEnrollmentAPIKeyById(
+  soClient: SavedObjectsClientContract,
+  apiKeyId: string
+) {
+  const [enrollmentAPIKey] = (
+    await soClient.find<EnrollmentAPIKeySOAttributes>({
+      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+      searchFields: ['api_key_id'],
+      search: escapeSearchQueryPhrase(apiKeyId),
+    })
+  ).saved_objects.map(savedObjectToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
+
+  return enrollmentAPIKey;
 }
 
 function savedObjectToEnrollmentApiKey({

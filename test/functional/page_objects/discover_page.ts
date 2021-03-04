@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -136,12 +136,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickHistogramBar() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
       await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
@@ -192,11 +194,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+    public async getDocTableField(index: number, cellIndex = 0) {
+      const fields = await find.allByCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
       );
-      return await field.getVisibleText();
+      return await fields[cellIndex].getVisibleText();
     }
 
     public async skipToEndOfDocTable() {
@@ -218,6 +220,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickDocSortUp() {
       await find.clickByCssSelector('.fa-sort-up');
+    }
+
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
     }
 
     public async getMarks() {

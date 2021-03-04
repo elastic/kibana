@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getActionLicense } from './api';
@@ -23,54 +24,62 @@ export const initialData: ActionLicenseState = {
   isError: false,
 };
 
+const MINIMUM_LICENSE_REQUIRED_CONNECTOR = '.jira';
+
 export const useGetActionLicense = (): ActionLicenseState => {
   const [actionLicenseState, setActionLicensesState] = useState<ActionLicenseState>(initialData);
-
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
-  const fetchActionLicense = useCallback(() => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-    const fetchData = async () => {
+  const fetchActionLicense = useCallback(async () => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
       setActionLicensesState({
-        ...actionLicenseState,
+        ...initialData,
         isLoading: true,
       });
-      try {
-        const response = await getActionLicense(abortCtrl.signal);
-        if (!didCancel) {
-          setActionLicensesState({
-            actionLicense: response.find((l) => l.id === '.servicenow') ?? null,
-            isLoading: false,
-            isError: false,
-          });
-        }
-      } catch (error) {
-        if (!didCancel) {
+
+      const response = await getActionLicense(abortCtrlRef.current.signal);
+
+      if (!isCancelledRef.current) {
+        setActionLicensesState({
+          actionLicense: response.find((l) => l.id === MINIMUM_LICENSE_REQUIRED_CONNECTOR) ?? null,
+          isLoading: false,
+          isError: false,
+        });
+      }
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          setActionLicensesState({
-            actionLicense: null,
-            isLoading: false,
-            isError: true,
-          });
         }
+
+        setActionLicensesState({
+          actionLicense: null,
+          isLoading: false,
+          isError: true,
+        });
       }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicenseState]);
 
   useEffect(() => {
     fetchActionLicense();
+
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return { ...actionLicenseState };
 };

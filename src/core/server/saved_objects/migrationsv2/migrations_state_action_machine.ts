@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { performance } from 'perf_hooks';
 import { Logger, LogMeta } from '../../logging';
+import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { State } from './types';
 
@@ -153,12 +154,27 @@ export async function migrationStateActionMachine({
       logger.error(
         logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
       );
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      throw new Error(
+        `Unable to complete saved object migrations for the [${
+          initialState.indexPrefix
+        }] index. Please check the health of your Elasticsearch cluster and try again. Error: [${
+          e.body?.error?.type
+        }]: ${e.body?.error?.reason ?? e.message}`
+      );
     } else {
       logger.error(e);
+
+      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      if (e instanceof CorruptSavedObjectError) {
+        throw new Error(
+          `${e.message} To allow migrations to proceed, please delete this document from the [${initialState.indexPrefix}_${initialState.kibanaVersion}_001] index.`
+        );
+      }
+
+      throw new Error(
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
+      );
     }
-    dumpExecutionLog(logger, logMessagePrefix, executionLog);
-    throw new Error(
-      `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${e}`
-    );
   }
 }

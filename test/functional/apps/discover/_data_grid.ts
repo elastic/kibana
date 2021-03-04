@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -38,7 +38,7 @@ export default function ({
       const getTitles = async () =>
         (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
 
-      expect(await getTitles()).to.be('Time (@timestamp) _source');
+      expect(await getTitles()).to.be('Time (@timestamp) Document');
 
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       expect(await getTitles()).to.be('Time (@timestamp) bytes');
@@ -50,7 +50,7 @@ export default function ({
       expect(await getTitles()).to.be('Time (@timestamp) agent');
 
       await PageObjects.discover.clickFieldListItemAdd('agent');
-      expect(await getTitles()).to.be('Time (@timestamp) _source');
+      expect(await getTitles()).to.be('Time (@timestamp) Document');
     });
   });
 }

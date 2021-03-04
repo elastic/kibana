@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -58,5 +59,20 @@ export const VIEW_CASE = i18n.translate(
   'xpack.securitySolution.case.timeline.actions.caseCreatedSuccessToastViewCaseLink',
   {
     defaultMessage: 'View Case',
+  }
+);
+
+export const PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.permissionsMessage',
+  {
+    defaultMessage:
+      'You are currently missing the required permissions to attach alerts to cases. Please contact your administrator for further assistance.',
+  }
+);
+
+export const UNSUPPORTED_EVENTS_MSG = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.unsupportedEventsMessage',
+  {
+    defaultMessage: 'This event cannot be attached to a case',
   }
 );

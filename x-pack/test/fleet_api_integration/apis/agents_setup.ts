@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -59,17 +60,8 @@ export default function (providerContext: FtrProviderContext) {
         cluster: ['monitor', 'manage_api_key'],
         indices: [
           {
-            names: [
-              'logs-*',
-              'metrics-*',
-              'traces-*',
-              '.ds-logs-*',
-              '.ds-metrics-*',
-              '.ds-traces-*',
-              '.logs-endpoint.diagnostic.collection-*',
-              '.ds-.logs-endpoint.diagnostic.collection-*',
-            ],
-            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+            names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+            privileges: ['auto_configure', 'create_doc'],
             allow_restricted_indices: false,
           },
         ],

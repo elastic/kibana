@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,13 +19,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'home',
     'timePicker',
+    'maps',
+    'searchSessionsManagement',
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const pieChart = getService('pieChart');
   const find = getService('find');
   const dashboardExpect = getService('dashboardExpect');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
 
   describe('send to background with relative time', () => {
@@ -58,23 +60,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await checkSampleDashboardLoaded();
 
       await searchSessions.expectState('completed');
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
-      const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        '[Flights] Airline Carrier'
-      );
-      const resolvedTimeRange = await getResolvedTimeRangeFromPanel('[Flights] Airline Carrier');
+
+      await checkSampleDashboardLoaded();
 
       // load URL to restore a saved session
-      const url = await browser.getCurrentUrl();
-      const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`
-        .replace('now-24h', `'${resolvedTimeRange.gte}'`)
-        .replace('now', `'${resolvedTimeRange.lte}'`);
-      log.debug('Trying to restore session by URL:', savedSessionId);
-      await browser.get(savedSessionURL);
+      await PageObjects.searchSessionsManagement.goTo();
+      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+
+      // navigate to dashboard
+      await searchSessionList[0].view();
+
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded();
@@ -85,16 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 
   // HELPERS
-
-  async function getResolvedTimeRangeFromPanel(
-    panelTitle: string
-  ): Promise<{ gte: string; lte: string }> {
-    await dashboardPanelActions.openInspectorByTitle(panelTitle);
-    await inspector.openInspectorRequestsView();
-    await (await inspector.getOpenRequestDetailRequestButton()).click();
-    const request = JSON.parse(await inspector.getCodeEditorValue());
-    return request.query.bool.filter.find((f: any) => f.range).range.timestamp;
-  }
 
   async function checkSampleDashboardLoaded() {
     log.debug('Checking no error labels');
@@ -112,5 +101,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking vega chart rendered');
     const tsvb = await find.existsByCssSelector('.vgaVis__view');
     expect(tsvb).to.be(true);
+    log.debug('Checking map rendered');
+    await dashboardPanelActions.openInspectorByTitle(
+      '[Flights] Origin and Destination Flight Time'
+    );
+    await testSubjects.click('inspectorRequestChooser');
+    await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
+    const requestStats = await inspector.getTableData();
+    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+    expect(totalHits).to.equal('0');
+    await inspector.close();
   }
 }

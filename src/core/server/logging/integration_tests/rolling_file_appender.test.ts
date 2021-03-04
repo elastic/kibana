@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -25,7 +25,7 @@ function createRoot(appenderConfig: any) {
       },
       loggers: [
         {
-          context: 'test.rolling.file',
+          name: 'test.rolling.file',
           appenders: ['rolling-file'],
           level: 'debug',
         },
@@ -48,11 +48,10 @@ describe('RollingFileAppender', () => {
   });
 
   afterEach(async () => {
-    try {
-      await rmdir(testDir);
-    } catch (e) {
-      /* trap */
+    if (testDir) {
+      await rmdir(testDir, { recursive: true });
     }
+
     if (root) {
       await root.shutdown();
     }
@@ -64,18 +63,18 @@ describe('RollingFileAppender', () => {
   describe('`size-limit` policy with `numeric` strategy', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '100b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 5,
           pattern: '.%i',
         },
@@ -109,18 +108,18 @@ describe('RollingFileAppender', () => {
 
     it('only keep the correct number of files', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '60b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },
@@ -158,19 +157,19 @@ describe('RollingFileAppender', () => {
   describe('`time-interval` policy with `numeric` strategy', () => {
     it('rolls the log file at the given interval', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'time-interval',
+          type: 'time-interval',
           interval: '1s',
           modulate: true,
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },

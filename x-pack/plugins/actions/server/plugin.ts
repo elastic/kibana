@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable } from 'rxjs';
 import {
   PluginInitializerContext,
   Plugin,
@@ -134,11 +134,9 @@ const includedHiddenTypes = [
   ALERT_SAVED_OBJECT_TYPE,
 ];
 
-export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
-  private readonly config: Promise<ActionsConfig>;
-
+export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private readonly logger: Logger;
-  private actionsConfig?: ActionsConfig;
+  private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
@@ -146,30 +144,29 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private security?: SecurityPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOCanEncrypt?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
-  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
+    this.actionsConfig = initContext.config.get<ActionsConfig>();
     this.logger = initContext.logger.get('actions');
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
-    this.kibanaIndexConfig = initContext.config.legacy.globalConfig$;
+    this.kibanaIndexConfig = initContext.config.legacy.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
-  ): Promise<PluginSetupContract> {
+  ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOCanEncrypt) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -183,12 +180,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     const actionExecutor = new ActionExecutor({
-      isESOUsingEphemeralEncryptionKey: this.isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt: this.isESOCanEncrypt,
     });
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    this.actionsConfig = (await this.config) as ActionsConfig;
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
@@ -227,20 +223,18 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    this.kibanaIndexConfig.subscribe((config) => {
-      core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
-        'actions',
-        this.createRouteHandlerContext(core, config.kibana.index)
+    core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
+      'actions',
+      this.createRouteHandlerContext(core, this.kibanaIndexConfig.kibana.index)
+    );
+    if (usageCollection) {
+      initializeActionsTelemetry(
+        this.telemetryLogger,
+        plugins.taskManager,
+        core,
+        this.kibanaIndexConfig.kibana.index
       );
-      if (usageCollection) {
-        initializeActionsTelemetry(
-          this.telemetryLogger,
-          plugins.taskManager,
-          core,
-          config.kibana.index
-        );
-      }
-    });
+    }
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
@@ -275,7 +269,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionTypeRegistry,
       taskRunnerFactory,
       kibanaIndexConfig,
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       preconfiguredActions,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
@@ -291,9 +285,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       request: KibanaRequest,
       authorizationContext?: ActionExecutionSource<unknown>
     ) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (isESOCanEncrypt !== true) {
         throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
 
@@ -302,7 +296,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request
       );
 
-      const kibanaIndex = (await kibanaIndexConfig.pipe(first()).toPromise()).kibana.index;
+      const kibanaIndex = kibanaIndexConfig.kibana.index;
 
       return new ActionsClient({
         unsecuredSavedObjectsClient,
@@ -319,7 +313,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
-          isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+          isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
@@ -357,15 +351,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
-      proxySettings:
-        this.actionsConfig && this.actionsConfig.proxyUrl
-          ? {
-              proxyUrl: this.actionsConfig.proxyUrl,
-              proxyHeaders: this.actionsConfig.proxyHeaders,
-              proxyRejectUnauthorizedCertificates: this.actionsConfig
-                .proxyRejectUnauthorizedCertificates,
-            }
-          : undefined,
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -451,7 +436,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       preconfiguredActions,
       actionExecutor,
       instantiateAuthorization,
@@ -462,9 +447,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       const [{ savedObjects }, { taskManager }] = await core.getStartServices();
       return {
         getActionsClient: () => {
-          if (isESOUsingEphemeralEncryptionKey === true) {
+          if (isESOCanEncrypt !== true) {
             throw new Error(
-              `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+              `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
             );
           }
           return new ActionsClient({
@@ -482,7 +467,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
-              isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+              isESOCanEncrypt: isESOCanEncrypt!,
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),

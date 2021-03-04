@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { SavedObjectAttributes } from '../../../../core/public';
+import { extractSearchSourceReferences } from '../../../data/public';
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
@@ -235,5 +237,43 @@ export class VisualizeEmbeddableFactory
         overlays,
       }
     );
+  }
+
+  public extract(_state: EmbeddableStateWithType) {
+    const state = (_state as unknown) as VisualizeInput;
+    const references = [];
+
+    if (state.savedVis?.data.searchSource) {
+      const [, searchSourceReferences] = extractSearchSourceReferences(
+        state.savedVis.data.searchSource
+      );
+
+      references.push(...searchSourceReferences);
+    }
+
+    if (state.savedVis?.data.savedSearchId) {
+      references.push({
+        name: 'search_0',
+        type: 'search',
+        id: String(state.savedVis.data.savedSearchId),
+      });
+    }
+
+    if (state.savedVis?.params.controls) {
+      const controls = state.savedVis.params.controls;
+      controls.forEach((control: Record<string, string>, i: number) => {
+        if (!control.indexPattern) {
+          return;
+        }
+        control.indexPatternRefName = `control_${i}_index_pattern`;
+        references.push({
+          name: control.indexPatternRefName,
+          type: 'index-pattern',
+          id: control.indexPattern,
+        });
+      });
+    }
+
+    return { state: _state, references };
   }
 }

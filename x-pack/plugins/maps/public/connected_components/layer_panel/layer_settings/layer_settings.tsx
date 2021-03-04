@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, Fragment } from 'react';
@@ -21,7 +22,7 @@ import { AlphaSlider } from '../../../components/alpha_slider';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 import { ILayer } from '../../../classes/layers/layer';
 
-interface Props {
+export interface Props {
   layer: ILayer;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;

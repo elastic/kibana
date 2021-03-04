@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { KibanaRequest } from 'src/core/server';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { AuthenticatedUser } from '../../../common/model';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
-
-import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
-import { AuthenticatedUser } from '../../../common/model';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import type { ProviderLoginAttempt } from './oidc';
+import { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;

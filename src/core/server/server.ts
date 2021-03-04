@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import apm from 'elastic-apm-node';
@@ -300,7 +300,7 @@ export class Server {
     );
   }
 
-  public async setupCoreConfig() {
+  public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
@@ -325,7 +325,7 @@ export class Server {
       if (descriptor.deprecations) {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
-      await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

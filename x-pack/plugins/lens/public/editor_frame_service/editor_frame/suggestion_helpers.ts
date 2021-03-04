@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -19,7 +20,7 @@ import {
   DatasourcePublicAPI,
 } from '../../types';
 import { Action } from './state_management';
-import { Dragging } from '../../drag_drop';
+import { DragDropIdentifier } from '../../drag_drop';
 
 export interface Suggestion {
   visualizationId: string;
@@ -231,7 +232,7 @@ export function getTopSuggestionForField(
   visualizationState: unknown,
   datasource: Datasource,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  field: Dragging
+  field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
     (datasourceLayer) => datasourceLayer.getTableSpec().length > 0

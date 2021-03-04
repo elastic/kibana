@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -71,6 +72,7 @@ describe('ConfigPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -84,12 +86,21 @@ describe('ConfigPanel', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
 
     mockVisualization.getLayerIds.mockReturnValue(Object.keys(frame.datasourceLayers));
     mockDatasource = createMockDatasource('ds1');
+  });
+
+  // in what case is this test needed?
+  it('should fail to render layerPanels if the public API is out of date', () => {
+    const props = getDefaultProps();
+    props.framePublicAPI.datasourceLayers = {};
+    const component = mountWithIntl(<LayerPanels {...props} />);
+    expect(component.find(LayerPanel).exists()).toBe(false);
   });
 
   describe('focus behavior when adding or removing layers', () => {

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { AuthenticationResult } from '../authentication/authentication_result';
+import type { KibanaRequest } from 'src/core/server';
+
+import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
  * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html
@@ -189,6 +191,8 @@ export enum SavedObjectAction {
   ADD_TO_SPACES = 'saved_object_add_to_spaces',
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
+  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
+  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
 }
 
 type VerbsTuple = [string, string, string];
@@ -202,6 +206,16 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
+  saved_object_open_point_in_time: [
+    'open point-in-time',
+    'opening point-in-time',
+    'opened point-in-time',
+  ],
+  saved_object_close_point_in_time: [
+    'close point-in-time',
+    'closing point-in-time',
+    'closed point-in-time',
+  ],
   saved_object_remove_references: [
     'remove references to',
     'removing references to',
@@ -218,6 +232,8 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EventType> = {
   saved_object_find: EventType.ACCESS,
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
+  saved_object_open_point_in_time: EventType.CREATION,
+  saved_object_close_point_in_time: EventType.DELETION,
   saved_object_remove_references: EventType.CHANGE,
 };
 

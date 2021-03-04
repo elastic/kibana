@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -67,6 +67,20 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
+  // When migrating from the outdated index we use a read query which excludes
+  // saved objects which are no longer used. These saved objects will still be
+  // kept in the outdated index for backup purposes, but won't be availble in
+  // the upgraded index.
+  const excludeUnusedTypes = {
+    bool: {
+      must_not: {
+        term: {
+          type: 'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
+        },
+      },
+    },
+  };
+
   const nextBatch = () =>
     scrollId !== undefined
       ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
@@ -74,7 +88,10 @@ export function reader(
           scroll_id: scrollId,
         })
       : client.search<SearchResponse<SavedObjectsRawDocSource>>({
-          body: { size: batchSize },
+          body: {
+            size: batchSize,
+            query: excludeUnusedTypes,
+          },
           index,
           scroll,
         });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './datapanel.scss';
@@ -56,7 +57,15 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
+const supportedFieldTypes = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+  'ip',
+  'histogram',
+  'document',
+]);
 
 const fieldTypeNames: Record<DataType, string> = {
   document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
@@ -65,6 +74,7 @@ const fieldTypeNames: Record<DataType, string> = {
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
 };
 
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
@@ -426,6 +436,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
+  const checkFieldExists = useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
+
   const fieldProps = useMemo(
     () => ({
       core,
@@ -586,17 +613,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}

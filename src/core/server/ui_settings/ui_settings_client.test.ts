@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Chance from 'chance';
@@ -641,6 +641,38 @@ describe('ui settings', () => {
           ],
         ]
       `);
+    });
+  });
+
+  describe('#isSensitive()', () => {
+    it('returns false if sensitive config is not set', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(false);
+    });
+
+    it('returns false if key is not in the settings', () => {
+      const { uiSettings } = setup();
+      expect(uiSettings.isSensitive('baz')).toBe(false);
+    });
+
+    it('returns true if overrides defined and key is overridden', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          sensitive: true,
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(true);
     });
   });
 

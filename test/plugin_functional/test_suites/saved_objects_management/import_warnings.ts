@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import path from 'path';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getPageObjects, getService }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
+  const esArchiver = getService('esArchiver');
 
   describe('import warnings', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
     beforeEach(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();

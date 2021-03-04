@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -15,6 +16,23 @@ import {
 } from './queries/log_entry_data_sets';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+
+export interface MappedAnomalyHit {
+  id: string;
+  anomalyScore: number;
+  typical: number;
+  actual: number;
+  jobId: string;
+  startTime: number;
+  duration: number;
+  influencers: string[];
+  categoryId?: string;
+}
+
+export interface InfluencerFilter {
+  fieldName: string;
+  fieldValue: string;
+}
 
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
   const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');

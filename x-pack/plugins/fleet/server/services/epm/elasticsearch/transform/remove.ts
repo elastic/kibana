@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
+import type { SavedObjectsClientContract } from 'kibana/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type { CallESAsCurrentUser, EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
@@ -25,7 +28,9 @@ export const deleteTransforms = async (
   transformIds: string[]
 ) => {
   const logger = appContextService.getLogger();
-  logger.info(`Deleting currently installed transform ids ${transformIds}`);
+  if (transformIds.length) {
+    logger.info(`Deleting currently installed transform ids ${transformIds}`);
+  }
   await Promise.all(
     transformIds.map(async (transformId) => {
       // get the index the transform

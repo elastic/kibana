@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -69,7 +70,9 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
       return normalizeJiraFields(theData as JiraGetFieldsResponse);
     case ConnectorTypes.resilient:
       return normalizeResilientFields(theData as ResilientGetFieldsResponse);
-    case ConnectorTypes.servicenow:
+    case ConnectorTypes.serviceNowITSM:
+      return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
+    case ConnectorTypes.serviceNowSIR:
       return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
     default:
       return [];
@@ -96,10 +99,14 @@ const getPreferredFields = (theType: string) => {
   } else if (theType === ConnectorTypes.resilient) {
     title = 'name';
     description = 'description';
-  } else if (theType === ConnectorTypes.servicenow) {
+  } else if (
+    theType === ConnectorTypes.serviceNowITSM ||
+    theType === ConnectorTypes.serviceNowSIR
+  ) {
     title = 'short_description';
     description = 'description';
   }
+
   return { title, description };
 };
 

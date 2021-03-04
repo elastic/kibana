@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,10 +46,6 @@ interface VisCardProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visType: BaseVisType | VisTypeAlias;
   showExperimental?: boolean | undefined;
-}
-
-function isVisTypeAlias(type: BaseVisType | VisTypeAlias): type is VisTypeAlias {
-  return 'aliasPath' in type;
 }
 
 function GroupSelection(props: GroupSelectionProps) {
@@ -185,29 +181,8 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  const shouldDisableCard = isVisTypeAlias(visType) && visType.disabled;
-  const betaBadgeContent =
-    shouldDisableCard && 'promoTooltip' in visType ? (
-      <EuiLink
-        href={visType?.promoTooltip?.link}
-        target="_blank"
-        color="text"
-        className="visNewVisDialog__groupsCardLink"
-        external={false}
-      >
-        <EuiBetaBadge
-          data-test-subj="visTypeBadge"
-          className="visNewVisDialog__groupsCardBetaBadge"
-          label={i18n.translate('visualizations.newVisWizard.basicTitle', {
-            defaultMessage: 'Basic',
-          })}
-          tooltipContent={visType?.promoTooltip?.description}
-        />
-      </EuiLink>
-    ) : undefined;
   return (
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
-      {betaBadgeContent}
       <EuiCard
         titleSize="xs"
         title={
@@ -218,7 +193,6 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </span>
         }
         onClick={onClick}
-        isDisabled={shouldDisableCard}
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}

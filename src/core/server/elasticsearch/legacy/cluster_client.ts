@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Client } from 'elasticsearch';
@@ -121,9 +121,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   constructor(
     private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
+    private readonly type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.client = new Client(parseElasticsearchClientConfig(config, log));
+    this.client = new Client(parseElasticsearchClientConfig(config, log, type));
   }
 
   /**
@@ -186,7 +187,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     // between all scoped client instances.
     if (this.scopedClient === undefined) {
       this.scopedClient = new Client(
-        parseElasticsearchClientConfig(this.config, this.log, {
+        parseElasticsearchClientConfig(this.config, this.log, this.type, {
           auth: false,
           ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
         })

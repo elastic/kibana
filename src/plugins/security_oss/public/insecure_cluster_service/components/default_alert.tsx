@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -14,11 +14,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { MountPoint } from 'kibana/public';
 import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import type { MountPoint } from 'src/core/public';
 
 export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
   defaultMessage: 'Your data is not secure',

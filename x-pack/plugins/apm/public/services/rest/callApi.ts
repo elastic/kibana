@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpSetup } from 'kibana/public';
@@ -87,5 +88,6 @@ function isCachable(fetchOptions: FetchOptions) {
 // order the options object to make sure that two objects with the same arguments, produce produce the
 // same cache key regardless of the order of properties
 function getCacheKey(options: FetchOptions) {
-  return hash(options);
+  const { pathname, method, body, query, headers } = options;
+  return hash({ pathname, method, body, query, headers });
 }

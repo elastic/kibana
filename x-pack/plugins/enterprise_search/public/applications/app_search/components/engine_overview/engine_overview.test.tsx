@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
+
 import { EmptyEngineOverview } from './engine_overview_empty';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
+
 import { EngineOverview } from './';
 
 describe('EngineOverview', () => {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable, fromEvent } from 'rxjs';
@@ -18,7 +18,10 @@ const DO_NOT_REPORT = ['kibana'];
 
 export function trackApplicationUsageChange(
   currentAppId$: Observable<string | undefined>,
-  applicationUsageTracker: ApplicationUsageTracker
+  applicationUsageTracker: Pick<
+    ApplicationUsageTracker,
+    'updateViewClickCounter' | 'setCurrentAppId' | 'trackApplicationViewUsage'
+  >
 ) {
   const windowClickSubscrition = fromEvent(window, 'click').subscribe(() => {
     applicationUsageTracker.updateViewClickCounter(MAIN_APP_DEFAULT_VIEW_ID);

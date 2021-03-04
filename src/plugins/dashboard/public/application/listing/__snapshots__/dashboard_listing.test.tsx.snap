@@ -6,8 +6,15 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -146,8 +153,15 @@ exports[`after fetch hideWriteControls 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -239,8 +253,15 @@ exports[`after fetch initialFilter 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -378,8 +399,15 @@ exports[`after fetch renders all table rows 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -517,8 +545,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -656,8 +691,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }

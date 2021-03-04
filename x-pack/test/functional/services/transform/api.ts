@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
@@ -22,6 +24,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     async createIndices(indices: string) {
@@ -102,7 +105,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
       // Delete all transform related notifications to clear messages tabs
       // in the transforms list expanded rows.
-      await this.deleteIndices('.transform-notifications-*');
+      await esDeleteAllIndices('.transform-notifications-*');
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {

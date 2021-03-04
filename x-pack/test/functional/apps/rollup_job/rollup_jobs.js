@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
@@ -13,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('rollup job', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -68,8 +70,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       //Delete all data indices that were created.
-      await es.indices.delete({ index: targetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexPattern });
+      await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
       await esArchiver.load('empty_kibana');
       await security.testUser.restoreDefaults();
     });

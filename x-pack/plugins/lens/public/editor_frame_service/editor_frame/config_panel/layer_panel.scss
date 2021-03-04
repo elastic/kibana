@@ -76,6 +76,7 @@
 
 .lnsLayerPanel__dimensionContainer {
   margin: 0 $euiSizeS $euiSizeS;
+  position: relative;
 
   &:last-child {
     margin-bottom: 0;
@@ -127,12 +128,13 @@
   }
 }
 
-.lnsLayerPanel__dimensionLink {
+// Added .lnsLayerPanel__dimension specificity required for animation style override
+.lnsLayerPanel__dimension .lnsLayerPanel__dimensionLink {
   width: 100%;
 
   &:focus {
-    background-color: transparent !important; // sass-lint:disable-line no-important
-    outline: none !important; // sass-lint:disable-line no-important
+    background-color: transparent;
+    animation: none !important; // sass-lint:disable-line no-important
   }
 
   &:focus .lnsLayerPanel__triggerTextLabel,

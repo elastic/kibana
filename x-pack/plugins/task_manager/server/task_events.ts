@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Option } from 'fp-ts/lib/Option';
@@ -20,6 +21,12 @@ export enum TaskEventType {
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
+}
+
+export enum TaskClaimErrorType {
+  CLAIMED_BY_ID_OUT_OF_CAPACITY = 'CLAIMED_BY_ID_OUT_OF_CAPACITY',
+  CLAIMED_BY_ID_NOT_RETURNED = 'CLAIMED_BY_ID_NOT_RETURNED',
+  CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS = 'CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS',
 }
 
 export interface TaskTiming {
@@ -46,14 +53,18 @@ export interface RanTask {
 export type ErroredTask = RanTask & {
   error: Error;
 };
+export interface ClaimTaskErr {
+  task: Option<ConcreteTaskInstance>;
+  errorType: TaskClaimErrorType;
+}
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
-export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
-export type TaskManagerStats = 'load' | 'pollingDelay';
+export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -91,7 +102,7 @@ export function asTaskRunEvent(
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>,
+  event: Result<ConcreteTaskInstance, ClaimTaskErr>,
   timing?: TaskTiming
 ): TaskClaim {
   return {

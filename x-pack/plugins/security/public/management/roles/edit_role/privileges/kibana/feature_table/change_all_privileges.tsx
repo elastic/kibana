@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './change_all_privileges.scss';
@@ -9,16 +10,19 @@ import './change_all_privileges.scss';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { KibanaPrivilege } from '../../../../model';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { KibanaPrivilege } from '../../../../model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
+
 interface Props {
   onChange: (privilege: string) => void;
   privileges: KibanaPrivilege[];

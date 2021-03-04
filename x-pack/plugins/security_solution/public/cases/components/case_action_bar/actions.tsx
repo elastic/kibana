@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -41,7 +42,9 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
         isModalVisible={isDisplayConfirmDeleteModal}
         isPlural={false}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [
+          { id: caseData.id, title: caseData.title, type: caseData.type },
+        ])}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

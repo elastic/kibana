@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiPanel } from '@elastic/eui';
 
-import { ResultField } from './result_field';
-import { ResultHeader } from './result_header';
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
 import { SchemaTypes } from '../../../shared/types';
 
 import { Result } from './result';
+import { ResultField } from './result_field';
+import { ResultHeader } from './result_header';
 
 describe('Result', () => {
   const props = {
@@ -61,7 +64,7 @@ describe('Result', () => {
   });
 
   it('passes showScore, resultMeta, and isMetaEngine to ResultHeader', () => {
-    const wrapper = shallow(<Result {...props} showScore={true} isMetaEngine={true} />);
+    const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
     expect(wrapper.find(ResultHeader).props()).toEqual({
       isMetaEngine: true,
       showScore: true,
@@ -75,7 +78,7 @@ describe('Result', () => {
 
   describe('document detail link', () => {
     it('will render a link if shouldLinkToDetailPage is true', () => {
-      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage={true} />);
+      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
       wrapper.find(ReactRouterHelper).forEach((link) => {
         expect(link.prop('to')).toEqual('/engines/my-engine/documents/1');
       });
@@ -95,7 +98,7 @@ describe('Result', () => {
 
   it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
     const wrapper = shallow(
-      <Result {...props} shouldLinkToDetailPage={true} schemaForTypeHighlights={schema} />
+      <Result {...props} shouldLinkToDetailPage schemaForTypeHighlights={schema} />
     );
     expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
       'text',

@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import {
-  ElasticsearchAssetType,
+import type { SavedObjectsClientContract } from 'kibana/server';
+
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type {
   EsAssetReference,
   InstallablePackage,
   RegistryDataStream,
 } from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
+import type { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
-import { deleteIlmRefs, deleteIlms } from './remove';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
+
+import { deleteIlmRefs, deleteIlms } from './remove';
 
 interface IlmInstallation {
   installationName: string;

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -81,9 +81,11 @@ export function DiscoverGridFlyout({
               <EuiButtonEmpty
                 size="xs"
                 iconType="document"
-                href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                  hit._id as string
-                )}`}
+                href={services.addBasePath(
+                  `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                    hit._id as string
+                  )}`
+                )}
                 data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
@@ -96,7 +98,13 @@ export function DiscoverGridFlyout({
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
-                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
+                  href={getContextUrl(
+                    hit._id,
+                    indexPattern.id,
+                    columns,
+                    services.filterManager,
+                    services.addBasePath
+                  )}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {

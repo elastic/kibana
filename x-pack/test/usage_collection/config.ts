@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { resolve } from 'path';
 import fs from 'fs';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -24,7 +26,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     // list paths to the files that contain your plugins tests
-    testFiles: [resolve(__dirname, './test_suites/application_usage')],
+    testFiles: [
+      resolve(__dirname, './test_suites/application_usage'),
+      resolve(__dirname, './test_suites/stack_management_usage'),
+    ],
 
     services,
     pageObjects,

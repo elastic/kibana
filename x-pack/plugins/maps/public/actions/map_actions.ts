@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -19,6 +21,8 @@ import {
   getQuery,
   getTimeFilters,
   getLayerList,
+  getSearchSessionId,
+  getSearchSessionMapBuffer,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -225,11 +229,15 @@ export function setQuery({
   timeFilters,
   filters = [],
   forceRefresh = false,
+  searchSessionId,
+  searchSessionMapBuffer,
 }: {
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   forceRefresh?: boolean;
+  searchSessionId?: string;
+  searchSessionMapBuffer?: MapExtent;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -249,12 +257,16 @@ export function setQuery({
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
+      searchSessionId,
+      searchSessionMapBuffer,
     };
 
     const prevQueryContext = {
       timeFilters: getTimeFilters(getState()),
       query: getQuery(getState()),
       filters: getFilters(getState()),
+      searchSessionId: getSearchSessionId(getState()),
+      searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
     };
 
     if (_.isEqual(nextQueryContext, prevQueryContext)) {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -60,11 +60,12 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
-
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
   'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 
-  '.teamcity/**/*',
+  // Bazel default files
+  '**/WORKSPACE.bazel',
+  '**/BUILD.bazel',
 ];
 
 /**
@@ -123,7 +124,6 @@ export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ej
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
   'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
   'src/core/server/core_app/assets/favicons/android-chrome-512x512.png',

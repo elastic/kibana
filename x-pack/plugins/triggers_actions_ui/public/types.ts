@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
@@ -59,6 +61,11 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+}
+
+export enum AlertFlyoutCloseReason {
+  SAVED,
+  CANCELED,
 }
 
 export interface ActionParamsProps<TParams> {
@@ -196,6 +203,7 @@ export interface AlertTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,

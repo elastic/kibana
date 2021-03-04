@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
+import { useDecodedParams } from '../../../utils/encode_path_params';
 
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
+import { AnalyticsSection, QueryClicksTable } from '../components';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
 const QUERY_DETAIL_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.title',
@@ -26,12 +29,15 @@ interface Props {
   breadcrumbs: BreadcrumbTrail;
 }
 export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
-  const { query } = useParams() as { query: string };
+  const { query } = useDecodedParams();
+  const queryTitle = query === '""' ? query : `"${query}"`;
 
-  const { totalQueriesForQuery, queriesPerDayForQuery, startDate } = useValues(AnalyticsLogic);
+  const { totalQueriesForQuery, queriesPerDayForQuery, startDate, topClicksForQuery } = useValues(
+    AnalyticsLogic
+  );
 
   return (
-    <AnalyticsLayout isQueryView title={`"${query}"`}>
+    <AnalyticsLayout isQueryView title={queryTitle}>
       <SetPageChrome trail={[...breadcrumbs, QUERY_DETAIL_TITLE, query]} />
 
       <AnalyticsCards
@@ -63,7 +69,18 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
       />
       <EuiSpacer />
 
-      <p>TODO: Query detail page</p>
+      <AnalyticsSection
+        title={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.tableTitle',
+          { defaultMessage: 'Top clicks' }
+        )}
+        subtitle={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.tableDescription',
+          { defaultMessage: 'The documents with the most clicks resulting from this query.' }
+        )}
+      >
+        <QueryClicksTable items={topClicksForQuery} />
+      </AnalyticsSection>
     </AnalyticsLayout>
   );
 };

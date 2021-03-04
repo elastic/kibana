@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
@@ -10,7 +11,7 @@ import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 
 import { IField } from '../fields/field';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';

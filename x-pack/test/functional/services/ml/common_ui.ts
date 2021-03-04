@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 
@@ -160,6 +162,55 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
 
       // escape popover
       await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async setSliderValue(testDataSubj: string, value: number) {
+      const slider = await testSubjects.find(testDataSubj);
+
+      let currentValue = await slider.getAttribute('value');
+      let currentDiff = +currentValue - +value;
+
+      await retry.tryForTime(60 * 1000, async () => {
+        if (currentDiff === 0) {
+          return true;
+        } else {
+          if (currentDiff > 0) {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_DOWN);
+            } else {
+              slider.type(browser.keys.ARROW_LEFT);
+            }
+          } else {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_UP);
+            } else {
+              slider.type(browser.keys.ARROW_RIGHT);
+            }
+          }
+          await retry.tryForTime(1000, async () => {
+            const newValue = await slider.getAttribute('value');
+            if (newValue !== currentValue) {
+              currentValue = newValue;
+              currentDiff = +currentValue - +value;
+              return true;
+            } else {
+              throw new Error(`slider value should have changed, but is still ${currentValue}`);
+            }
+          });
+
+          throw new Error(`slider value should be '${value}' (got '${currentValue}')`);
+        }
+      });
+
+      await this.assertSliderValue(testDataSubj, value);
+    },
+
+    async assertSliderValue(testDataSubj: string, expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(testDataSubj, 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
+      );
     },
   };
 }

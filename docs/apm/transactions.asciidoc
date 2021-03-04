@@ -17,10 +17,10 @@ If there's a weird spike that you'd like to investigate,
 you can simply zoom in on the graph - this will adjust the specific time range,
 and all of the data on the page will update accordingly.
 
-*Transactions per minute*::
-Visualize response codes: `2xx`, `3xx`, `4xx`, etc.,
-and is useful for determining if you're serving more of one code than you typically do.
-Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
+*Throughput*::
+Visualize response codes: `2xx`, `3xx`, `4xx`, etc.
+Useful for determining if more responses than usual are being served with a particular response code.
+Like in the latency graph, you can zoom in on anomalies to further investigate them.
 
 *Error rate*::
 Visualize the total number of transactions with errors divided by the total number of transactions.

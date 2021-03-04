@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
@@ -23,7 +25,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
   const esArchiver = getService('esArchiver');
-
+  const find = getService('find');
+  const browser = getService('browser');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -115,8 +118,22 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       }
     }
 
+    async eraseInput(maxChars: number) {
+      const keys = [
+        ...Array(maxChars).fill(Key.ARROW_RIGHT),
+        ...Array(maxChars).fill(Key.BACK_SPACE),
+      ];
+      await browser
+        .getActions()
+        .sendKeys(...keys)
+        .perform();
+    }
+
     async fillInURLTemplate(destinationURLTemplate: string) {
-      await testSubjects.setValue('urlInput', destinationURLTemplate);
+      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
+      await monaco.clickMouseButton();
+      await this.eraseInput(300);
+      await browser.pressKeys(destinationURLTemplate);
     }
 
     async saveChanges() {

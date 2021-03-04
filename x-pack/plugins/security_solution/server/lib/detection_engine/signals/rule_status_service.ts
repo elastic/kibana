@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { assertUnreachable } from '../../../../common/utility_types';
@@ -23,7 +24,7 @@ interface Attributes {
 export interface RuleStatusService {
   goingToRun: () => Promise<void>;
   success: (message: string, attributes?: Attributes) => Promise<void>;
-  partialFailure: (message: string, attributes?: Attributes) => Promise<void>;
+  warning: (message: string, attributes?: Attributes) => Promise<void>;
   error: (message: string, attributes?: Attributes) => Promise<void>;
 }
 
@@ -47,7 +48,7 @@ export const buildRuleStatusAttributes: (
         lastSuccessMessage: message,
       };
     }
-    case 'partial failure': {
+    case 'warning': {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
@@ -101,7 +102,7 @@ export const ruleStatusServiceFactory = async ({
       });
     },
 
-    partialFailure: async (message, attributes) => {
+    warning: async (message, attributes) => {
       const [currentStatus] = await getOrCreateRuleStatuses({
         alertId,
         ruleStatusClient,
@@ -109,7 +110,7 @@ export const ruleStatusServiceFactory = async ({
 
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('partial failure', message, attributes),
+        ...buildRuleStatusAttributes('warning', message, attributes),
       });
     },
 

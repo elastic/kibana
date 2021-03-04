@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import {
   BooleanContent,
   DateContent,
-  GeoPointContent,
   IpContent,
   KeywordContent,
   OtherContent,
   TextContent,
   NumberContent,
 } from '../../../stats_table/components/field_data_expanded_row';
+import { GeoPointContent } from './geo_point_content/geo_point_content';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
 

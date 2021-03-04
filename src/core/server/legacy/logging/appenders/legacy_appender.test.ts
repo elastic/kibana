@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('@kbn/legacy-logging');
@@ -16,13 +16,13 @@ afterEach(() => (LegacyLoggingServer as any).mockClear());
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = LegacyAppender.configSchema;
-  const validConfig = { kind: 'legacy-appender', legacyLoggingConfig: { verbose: true } };
+  const validConfig = { type: 'legacy-appender', legacyLoggingConfig: { verbose: true } };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'legacy-appender',
+    type: 'legacy-appender',
     legacyLoggingConfig: { verbose: true },
   });
 
-  const wrongConfig = { kind: 'not-legacy-appender' };
+  const wrongConfig = { type: 'not-legacy-appender' };
   expect(() => appenderSchema.validate(wrongConfig)).toThrow();
 });
 

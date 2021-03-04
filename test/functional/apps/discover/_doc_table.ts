@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -105,6 +106,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(surroundingActionEl).to.be.ok();
           expect(singleActionEl).to.be.ok();
           // TODO: test something more meaninful here?
+        });
+      });
+
+      it('should not close the detail panel actions when data is re-requested', async function () {
+        await retry.try(async function () {
+          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+          await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+          const detailsEl = await docTable.getDetailsRows();
+          const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+          expect(defaultMessageEl).to.be.ok();
+          await queryBar.submitQuery();
+          const nrOfFetchesResubmit = await PageObjects.discover.getNrOfFetches();
+          expect(nrOfFetchesResubmit).to.be.above(nrOfFetches);
+          const defaultMessageElResubmit = await detailsEl[0].findByTestSubject(
+            'docTableRowDetailsTitle'
+          );
+
+          expect(defaultMessageElResubmit).to.be.ok();
         });
       });
     });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { of, Subject } from 'rxjs';
@@ -30,11 +30,11 @@ describe('LoggingService', () => {
     it('forwards configuration changes to logging system', () => {
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
       const config2: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+        loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
       };
 
       setup.configure(['test', 'context'], of(config1, config2));
@@ -54,11 +54,11 @@ describe('LoggingService', () => {
       const updates$ = new Subject<LoggerContextConfigType>();
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
       const config2: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['default'], level: 'all' }],
+        loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
       };
 
       setup.configure(['test', 'context'], updates$);
@@ -78,7 +78,7 @@ describe('LoggingService', () => {
       const updates$ = new Subject<LoggerContextConfigType>();
       const config1: LoggerContextConfigType = {
         appenders: new Map(),
-        loggers: [{ context: 'subcontext', appenders: ['console'], level: 'warn' }],
+        loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
       };
 
       setup.configure(['test', 'context'], updates$);

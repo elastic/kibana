@@ -1,28 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
+import { first } from 'rxjs/operators';
+
+import { nextTick } from '@kbn/test/jest';
 import type { Writable } from '@kbn/utility-types';
-import {
-  DefaultSpaceService,
-  RETRY_SCALE_DURATION,
-  RETRY_DURATION_MAX,
-} from './default_space_service';
-import {
-  ServiceStatusLevels,
-  ServiceStatusLevel,
-  CoreStatus,
-  SavedObjectsRepository,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src/core/server';
+import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import type { ILicense } from '../../../licensing/server';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
-import { ILicense } from '../../../licensing/server';
-import { nextTick } from '@kbn/test/jest';
-import { first } from 'rxjs/operators';
+import {
+  DefaultSpaceService,
+  RETRY_DURATION_MAX,
+  RETRY_SCALE_DURATION,
+} from './default_space_service';
 
 const advanceRetry = async (initializeCount: number) => {
   await Promise.resolve();

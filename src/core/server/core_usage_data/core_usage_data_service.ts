@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject } from 'rxjs';
@@ -57,6 +57,19 @@ export interface StartDeps {
  */
 const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
+};
+
+/**
+ * This is incredibly hacky... The config service doesn't allow you to determine
+ * whether or not a config value has been changed from the default value, and the
+ * default value is defined in legacy code.
+ *
+ * This will be going away in 8.0, so please look away for a few months
+ *
+ * @param index The `kibana.index` setting from the `kibana.yml`
+ */
+const isCustomIndex = (index: string) => {
+  return index !== '.kibana';
 };
 
 export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
@@ -213,13 +226,14 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         logging: {
           appendersTypesUsed: Array.from(
             Array.from(this.loggingConfig?.appenders.values() ?? [])
-              .reduce((acc, a) => acc.add(a.kind), new Set<string>())
+              .reduce((acc, a) => acc.add(a.type), new Set<string>())
               .values()
           ),
           loggersConfiguredCount: this.loggingConfig?.loggers.length ?? 0,
         },
 
         savedObjects: {
+          customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
         },

@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, ResponseHeaders } from 'src/core/server';
+
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { listAgents } from '../../services/agents';
@@ -18,10 +21,10 @@ import {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
-  AgentPolicy,
-  NewPackagePolicy,
 } from '../../types';
-import {
+import type { AgentPolicy, NewPackagePolicy } from '../../types';
+import { defaultPackages } from '../../../common';
+import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetOneAgentPolicyResponse,
@@ -30,7 +33,6 @@ import {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
-  defaultPackages,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 

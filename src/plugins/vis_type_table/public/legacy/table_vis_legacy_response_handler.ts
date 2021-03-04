@@ -1,16 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Required } from '@kbn/utility-types';
 
+import { SchemaConfig } from 'src/plugins/visualizations/public';
 import { getFormatService } from '../services';
-import { Dimensions } from '../types';
 import { Input } from './table_vis_legacy_fn';
+
+interface Dimensions {
+  buckets: SchemaConfig[];
+  metrics: SchemaConfig[];
+  splitColumn?: SchemaConfig[];
+  splitRow?: SchemaConfig[];
+}
 
 export interface TableContext {
   tables: Array<TableGroup | Table>;

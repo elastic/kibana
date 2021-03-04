@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -36,7 +36,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
+import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -187,7 +187,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: JsonCodeBlock,
+      component: JsonCodeEditor,
     });
 
     const {

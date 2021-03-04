@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { get, startsWith } from 'lodash';
+import { startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import {
+  parseTimelionExpression,
+  ParsedExpression,
+  TimelionExpressionArgument,
+  ExpressionLocation,
+} from '../../common/parser';
 
-import { Parser } from 'pegjs';
-
-// @ts-ignore
-import { parse } from '../_generated_/chain';
-
-import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
+import { ArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 export enum SUGGESTION_TYPE {
@@ -24,13 +25,13 @@ export enum SUGGESTION_TYPE {
   FUNCTIONS = 'functions',
 }
 
-function inLocation(cursorPosition: number, location: Location) {
+function inLocation(cursorPosition: number, location: ExpressionLocation) {
   return cursorPosition >= location.min && cursorPosition <= location.max;
 }
 
 function getArgumentsHelp(
   functionHelp: ITimelionFunction | undefined,
-  functionArgs: FunctionArg[] = []
+  functionArgs: TimelionExpressionArgument[] = []
 ) {
   if (!functionHelp) {
     return [];
@@ -45,14 +46,12 @@ function getArgumentsHelp(
 }
 
 async function extractSuggestionsFromParsedResult(
-  result: ReturnType<Parser['parse']>,
+  result: ParsedExpression,
   cursorPosition: number,
   functionList: ITimelionFunction[],
   argValueSuggestions: ArgValueSuggestions
 ) {
-  const activeFunc = result.functions.find(({ location }: { location: Location }) =>
-    inLocation(cursorPosition, location)
-  );
+  const activeFunc = result.functions.find(({ location }) => inLocation(cursorPosition, location));
 
   if (!activeFunc) {
     return;
@@ -72,7 +71,7 @@ async function extractSuggestionsFromParsedResult(
   }
 
   // return argument value suggestions when cursor is inside argument value
-  const activeArg = activeFunc.arguments.find((argument: FunctionArg) => {
+  const activeArg = activeFunc.arguments.find((argument) => {
     return inLocation(cursorPosition, argument.location);
   });
   if (
@@ -112,7 +111,7 @@ async function extractSuggestionsFromParsedResult(
   // return argument suggestions
   const argsHelp = getArgumentsHelp(functionHelp, activeFunc.arguments);
   const argumentSuggestions = argsHelp.filter((arg) => {
-    if (get(activeArg, 'type') === 'namedArg') {
+    if (activeArg?.type === 'namedArg') {
       return startsWith(arg.name, activeArg.name);
     } else if (activeArg) {
       return startsWith(arg.name, activeArg.text);
@@ -129,7 +128,7 @@ export async function suggest(
   argValueSuggestions: ArgValueSuggestions
 ) {
   try {
-    const result = await parse(expression);
+    const result = parseTimelionExpression(expression);
 
     return await extractSuggestionsFromParsedResult(
       result,

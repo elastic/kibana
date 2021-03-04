@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -36,6 +37,7 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+import uuid from 'uuid';
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
   name: 'My test alert',
@@ -95,6 +97,7 @@ describe('Task Runner', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry,
+    kibanaBaseUrl: 'https://localhost:5601',
   };
 
   const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
@@ -1065,6 +1068,86 @@ describe('Task Runner', () => {
         },
       ]
     `);
+  });
+
+  test('should skip alertInstances which werent active on the previous execution', async () => {
+    const alertId = uuid.v4();
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    alertType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+
+        // create an instance, but don't schedule any actions, so it doesn't go active
+        executorServices.alertInstanceFactory('3');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
+          },
+        },
+        params: {
+          alertId,
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: alertId,
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "lastScheduledActions": Object {
+              "date": 1970-01-01T00:00:00.000Z,
+              "group": "default",
+              "subgroup": undefined,
+            },
+          },
+          "state": Object {
+            "bar": false,
+          },
+        },
+      }
+    `);
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledWith(
+      `alert test:${alertId}: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      `alert test:${alertId}: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+    );
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.enqueueExecution.mock.calls[1][0].id).toEqual('1');
+    expect(actionsClient.enqueueExecution.mock.calls[0][0].id).toEqual('2');
   });
 
   test('fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state', async () => {

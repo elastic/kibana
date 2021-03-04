@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './field_item.scss';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
@@ -47,11 +48,10 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DraggedField } from './indexpattern';
-import { DragDrop, Dragging } from '../drag_drop';
+import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
-import { IndexPattern, IndexPatternField } from './types';
+import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -69,6 +69,8 @@ export interface FieldItemProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
   hideDetails?: boolean;
+  itemIndex: number;
+  groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
@@ -100,13 +102,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dateRange,
     filters,
     hideDetails,
+    itemIndex,
+    groupIndex,
     dropOntoWorkspace,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
 
   const dropOntoWorkspaceAndClose = useCallback(
-    (droppedField: Dragging) => {
+    (droppedField: DragDropIdentifier) => {
       dropOntoWorkspace(droppedField);
       setOpen(false);
     },
@@ -118,14 +122,14 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading) {
+    if (state.isLoading || field.type === 'document') {
       return;
     }
 
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern as IIndexPattern,
@@ -135,8 +139,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
-          timeFieldName: indexPattern.timeFieldName,
-          field,
+          fieldName: field.name,
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {
@@ -163,10 +166,20 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
-  const value = React.useMemo(
-    () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
-    [field, indexPattern.id]
+  const value = useMemo(
+    () => ({
+      field,
+      indexPatternId: indexPattern.id,
+      id: field.name,
+      humanData: {
+        label: field.displayName,
+        position: itemIndex + 1,
+      },
+    }),
+    [field, indexPattern.id, itemIndex]
   );
+  const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
+
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
     <EuiIconTip
@@ -200,10 +213,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
-            label={field.displayName}
-            value={value}
-            data-test-subj={`lnsFieldListPanelField-${field.name}`}
             draggable
+            order={order}
+            value={value}
+            dataTestSubj={`lnsFieldListPanelField-${field.name}`}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
@@ -215,7 +228,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                 ['aria-label']: i18n.translate(
                   'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
                   {
-                    defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+                    defaultMessage: 'Preview {fieldName}: {fieldType}',
                     values: {
                       fieldName: field.displayName,
                       fieldType: field.type,
@@ -266,13 +279,16 @@ function FieldPanelHeader({
     indexPatternId,
     id: field.name,
     field,
+    humanData: {
+      label: field.displayName,
+    },
   };
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -636,11 +652,7 @@ const DragToWorkspaceButton = ({
   dropOntoWorkspace,
   isEnabled,
 }: {
-  field: {
-    indexPatternId: string;
-    id: string;
-    field: IndexPatternField;
-  };
+  field: DraggedField;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   isEnabled: boolean;
 }) => {

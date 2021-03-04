@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from '../../../../../src/core/server';
-import { ConfigSchema, createConfig } from '../config';
-import { getSessionIndexTemplate, SessionIndex } from './session_index';
 
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { ElasticsearchClient } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
+import { getSessionIndexTemplate, SessionIndex } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {

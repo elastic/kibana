@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
+import { compact, pickBy } from 'lodash';
+import moment from 'moment';
 import { IUrlParams } from './types';
 
-export function getParsedDate(rawDate?: string, opts = {}) {
+function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
-    const parsed = datemath.parse(rawDate, opts);
-    if (parsed) {
-      return parsed.toISOString();
+    const parsed = datemath.parse(rawDate, options);
+    if (parsed && parsed.isValid()) {
+      return parsed.toDate();
     }
   }
 }
@@ -26,13 +28,26 @@ export function getDateRange({
   rangeFrom?: string;
   rangeTo?: string;
 }) {
+  // If the previous state had the same range, just return that instead of calculating a new range.
   if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
     return { start: state.start, end: state.end };
   }
 
+  const start = getParsedDate(rangeFrom);
+  const end = getParsedDate(rangeTo, { roundUp: true });
+
+  // `getParsedDate` will return undefined for invalid or empty dates. We return
+  // the previous state if either date is undefined.
+  if (!start || !end) {
+    return { start: state.start, end: state.end };
+  }
+
+  // rounds down start to minute
+  const roundedStart = moment(start).startOf('minute');
+
   return {
-    start: getParsedDate(rangeFrom),
-    end: getParsedDate(rangeTo, { roundUp: true }),
+    start: roundedStart.toISOString(),
+    end: end.toISOString(),
   };
 }
 

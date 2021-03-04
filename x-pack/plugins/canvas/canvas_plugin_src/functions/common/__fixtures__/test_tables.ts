@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Datatable } from '../../../../types';
@@ -204,4 +205,34 @@ const stringTable: Datatable = {
   ],
 };
 
-export { emptyTable, testTable, stringTable };
+const relationalTable: Datatable = {
+  type: 'datatable',
+  columns: [
+    {
+      id: 'id',
+      name: 'id',
+      meta: { type: 'string' },
+    },
+    {
+      id: 'name',
+      name: 'name',
+      meta: { type: 'string' },
+    },
+  ],
+  rows: [
+    {
+      id: '1',
+      name: 'One',
+    },
+    {
+      id: '2',
+      name: 'Two',
+    },
+    {
+      id: '3',
+      name: 'Three',
+    },
+  ],
+};
+
+export { emptyTable, testTable, stringTable, relationalTable };

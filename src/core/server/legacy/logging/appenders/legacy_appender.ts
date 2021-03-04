@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -12,7 +12,7 @@ import { DisposableAppender, LogRecord } from '@kbn/logging';
 import { LegacyVars } from '../../types';
 
 export interface LegacyAppenderConfig {
-  kind: 'legacy-appender';
+  type: 'legacy-appender';
   legacyLoggingConfig?: any;
 }
 
@@ -22,7 +22,7 @@ export interface LegacyAppenderConfig {
  */
 export class LegacyAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('legacy-appender'),
+    type: schema.literal('legacy-appender'),
     legacyLoggingConfig: schema.any(),
   });
 

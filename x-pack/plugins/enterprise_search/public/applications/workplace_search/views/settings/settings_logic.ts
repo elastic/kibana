@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -13,13 +15,11 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
-
-import { Connector } from '../../types';
+import { KibanaLogic } from '../../../shared/kibana';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
-
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
+import { Connector } from '../../types';
 
 interface IOauthApplication {
   name: string;

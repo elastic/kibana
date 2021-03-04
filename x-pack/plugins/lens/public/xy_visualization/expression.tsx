@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expression.scss';
@@ -198,13 +199,20 @@ export async function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
-
-  if (!isTimeViz) return;
-  const dateColumn = data.tables[filteredLayers[0].layerId].columns.find(
+  const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
-  if (!dateColumn) return;
-  const dateMetaData = await getIntervalByColumn(dateColumn);
+
+  if (!xColumn) return;
+  if (!isTimeViz) {
+    const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
+    if (typeof histogramInterval === 'number') {
+      return histogramInterval;
+    } else {
+      return undefined;
+    }
+  }
+  const dateMetaData = await getIntervalByColumn(xColumn);
   if (!dateMetaData) return;
   const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
   if (!intervalDuration) return;
@@ -386,6 +394,8 @@ export function XYChart({
         max: data.dateRange?.toDate.getTime(),
         minInterval,
       }
+    : isHistogramViz
+    ? { minInterval }
     : undefined;
 
   const getYAxesTitles = (

@@ -1,29 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  LoggerFactory,
+  HttpServiceSetup,
+  HttpServiceStart,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  IClusterClient,
-  HttpServiceStart,
-} from '../../../../../src/core/server';
+  LoggerFactory,
+} from 'src/core/server';
+
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
-import type { DeauthenticationResult } from './deauthentication_result';
-import type { AuthenticationResult } from './authentication_result';
-import { getErrorStatusCode } from '../errors';
 import { APIKeys } from './api_keys';
-import { Authenticator, ProviderLoginAttempt } from './authenticator';
+import type { AuthenticationResult } from './authentication_result';
+import type { ProviderLoginAttempt } from './authenticator';
+import { Authenticator } from './authenticator';
+import type { DeauthenticationResult } from './deauthentication_result';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'registerAuth'>;
@@ -92,13 +95,7 @@ export class AuthenticationService {
         });
       }
 
-      let authenticationResult;
-      try {
-        authenticationResult = await this.authenticator.authenticate(request);
-      } catch (err) {
-        this.logger.error(err);
-        return response.internalError();
-      }
+      const authenticationResult = await this.authenticator.authenticate(request);
 
       if (authenticationResult.succeeded()) {
         return t.authenticated({

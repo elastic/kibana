@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -75,7 +75,26 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
       }
     });
 
-    return flattened;
+    // Force all usage of Object.keys to use a predefined sort order,
+    // instead of using insertion order
+    return new Proxy(flattened, {
+      ownKeys: (target) => {
+        return Reflect.ownKeys(target).sort((a, b) => {
+          const aIsMeta = _.includes(metaFields, a);
+          const bIsMeta = _.includes(metaFields, b);
+          if (aIsMeta && bIsMeta) {
+            return String(a).localeCompare(String(b));
+          }
+          if (aIsMeta) {
+            return 1;
+          }
+          if (bIsMeta) {
+            return -1;
+          }
+          return String(a).localeCompare(String(b));
+        });
+      },
+    });
   };
 }
 

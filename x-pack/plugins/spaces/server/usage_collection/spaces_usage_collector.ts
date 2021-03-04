@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import type { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable } from 'rxjs';
-import { PluginsSetup } from '../plugin';
-import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
+
+import type { ElasticsearchClient } from 'src/core/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from 'src/plugins/usage_collection/server';
+
+import type { PluginsSetup } from '../plugin';
+import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 interface SpacesAggregationResponse {
   hits: {
@@ -125,6 +131,14 @@ export interface UsageData extends UsageStats {
   count?: number;
   usesFeatureControls?: boolean;
   disabledFeatures: {
+    // "feature": number;
+    [key: string]: number | undefined;
+    // Known registered features
+    stackAlerts?: number;
+    actions?: number;
+    enterpriseSearch?: number;
+    fleet?: number;
+    savedObjectsTagging?: number;
     indexPatterns?: number;
     discover?: number;
     canvas?: number;
@@ -167,6 +181,14 @@ export function getSpacesUsageCollector(
     schema: {
       usesFeatureControls: { type: 'boolean' },
       disabledFeatures: {
+        // "feature": number;
+        DYNAMIC_KEY: { type: 'long' },
+        // Known registered features
+        stackAlerts: { type: 'long' },
+        actions: { type: 'long' },
+        enterpriseSearch: { type: 'long' },
+        fleet: { type: 'long' },
+        savedObjectsTagging: { type: 'long' },
         indexPatterns: { type: 'long' },
         discover: { type: 'long' },
         canvas: { type: 'long' },

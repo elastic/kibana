@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -56,6 +57,8 @@ export class Project {
   public readonly devDependencies: IPackageDependencies;
   /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+  /** states if this project is a Bazel package */
+  public readonly bazelPackage: boolean;
 
   public isSinglePackageJsonProject = false;
 
@@ -77,6 +80,9 @@ export class Project {
     this.isSinglePackageJsonProject = this.json.name === 'kibana';
 
     this.scripts = this.json.scripts || {};
+
+    this.bazelPackage =
+      !this.isSinglePackageJsonProject && Fs.existsSync(Path.resolve(this.path, 'BUILD.bazel'));
   }
 
   public get name(): string {
@@ -85,21 +91,27 @@ export class Project {
 
   public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(
+      Path.relative(this.path, `bazel/bin/packages/${Path.basename(project.path)}`)
+    );
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`;
 
-    // TODO: after introduce bazel to build packages do not allow child projects
-    // to hold dependencies
-
-    if (versionInPackageJson === expectedVersionInPackageJson) {
+    // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
+    //  do not allow child projects to hold dependencies
+    if (
+      versionInPackageJson === expectedVersionInPackageJson ||
+      versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg
+    ) {
       return;
     }
 
     const updateMsg = 'Update its package.json to the expected value below.';
     const meta = {
       actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
       package: `${this.name} (${this.packageJsonLocation})`,
     };
 
@@ -131,6 +143,10 @@ export class Project {
 
   public getCleanConfig(): CleanConfig {
     return (this.json.kibana && this.json.kibana.clean) || {};
+  }
+
+  public isBazelPackage() {
+    return this.bazelPackage;
   }
 
   public isFlaggedAsDevOnly() {
@@ -197,11 +213,11 @@ export class Project {
     return Object.values(this.allDependencies).every((dep) => isLinkDependency(dep));
   }
 
-  public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+  public async installDependencies(options: { extraArgs?: string[] } = {}) {
     log.info(`[${this.name}] running yarn`);
 
     log.write('');
-    await installInDir(this.path, extraArgs);
+    await installInDir(this.path, options?.extraArgs);
     log.write('');
   }
 }

@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { IRouter, KibanaRequest, RequestHandler, RouteConfig } from 'kibana/server';
-import { registerRoutes } from './index';
+import { KibanaRequest } from 'kibana/server';
+import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { xpackMocks } from '../../../../../mocks';
-import { appContextService } from '../../services';
-import { createAppContextStartContractMock } from '../../mocks';
-import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
+import { appContextService, packagePolicyService } from '../../services';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
+import type { PackagePolicyServiceInterface, ExternalCallback } from '../..';
 import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import { packagePolicyService } from '../../services';
+
+import { registerRoutes } from './index';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
@@ -47,6 +49,7 @@ jest.mock('../../services/package_policy', (): {
       get: jest.fn(),
       getByIDs: jest.fn(),
       list: jest.fn(),
+      listIds: jest.fn(),
       update: jest.fn(),
       runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
         Promise.resolve(newPackagePolicy)

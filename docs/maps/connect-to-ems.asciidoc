@@ -86,7 +86,7 @@ endif::[]
 
 [cols="2*<"]
 |===
-| [[ems-hostname]]`hostname`
+| [[ems-host]]`host`
  | Specifies the host of the backend server. To allow remote users to connect, set the value to the IP address or DNS name of the {hosted-ems} container. *Default: _your-hostname_*. <<server-host,Equivalent {kib} setting>>.
 
 | `port`
@@ -199,7 +199,7 @@ TIP: The available basemaps and boundaries can be explored from the `/maps` endp
 [[elastic-maps-server-kibana]]
 ==== Kibana configuration
 
-With {hosted-ems} running, add the `map.emsUrl` configuration key in your <<settings, kibana.yml>> file pointing to the root of the service. This setting will point {kib} to request EMS basemaps and boundaries from {hosted-ems}. Typically this will be the URL to the <<ems-hostname,hostname and port>> of {hosted-ems}. For example, `map.emsUrl: https://my-ems-server:8080`. 
+With {hosted-ems} running, add the `map.emsUrl` configuration key in your <<settings, kibana.yml>> file pointing to the root of the service. This setting will point {kib} to request EMS basemaps and boundaries from {hosted-ems}. Typically this will be the URL to the <<ems-host,host and port>> of {hosted-ems}. For example, `map.emsUrl: https://my-ems-server:8080`. 
 
 
 [float]

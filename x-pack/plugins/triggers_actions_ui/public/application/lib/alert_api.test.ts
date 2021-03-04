@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Alert, AlertType, AlertUpdates } from '../../types';
@@ -25,7 +26,7 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
-  health,
+  alertingFrameworkHealth,
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
@@ -801,9 +802,9 @@ describe('unmuteAlerts', () => {
   });
 });
 
-describe('health', () => {
-  test('should call health API', async () => {
-    const result = await health({ http });
+describe('alertingFrameworkHealth', () => {
+  test('should call alertingFrameworkHealth API', async () => {
+    const result = await alertingFrameworkHealth({ http });
     expect(result).toEqual(undefined);
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [

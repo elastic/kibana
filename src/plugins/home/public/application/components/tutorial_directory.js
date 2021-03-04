@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -140,6 +140,7 @@ class TutorialDirectoryUi extends React.Component {
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
       id: 'sample_data',
+
       name: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataTitle',
         defaultMessage: 'Sample Data',
@@ -178,6 +179,7 @@ class TutorialDirectoryUi extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
+        data-test-subj={`homeTab-${tab.id}`}
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -203,7 +205,7 @@ class TutorialDirectoryUi extends React.Component {
           })
           .map((tutorial) => {
             return (
-              <EuiFlexItem key={tutorial.name}>
+              <EuiFlexItem data-test-subj={`homeTab-${tutorial.name}`} key={tutorial.name}>
                 <Synopsis
                   id={tutorial.id}
                   iconType={tutorial.icon}

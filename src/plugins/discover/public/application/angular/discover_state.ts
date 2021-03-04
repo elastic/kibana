@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -30,6 +30,7 @@ import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 import { SavedSearch } from '../../saved_searches';
+import { handleSourceColumnState } from './helpers';
 
 export interface AppState {
   /**
@@ -44,6 +45,10 @@ export interface AppState {
    * Data Grid related state
    */
   grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
   /**
    * id of the used index pattern
    */
@@ -86,6 +91,11 @@ interface GetStateParams {
    * kbnUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
+
+  /**
+   * core ui settings service
+   */
+  uiSettings: IUiSettingsClient;
 }
 
 export interface GetStateReturn {
@@ -145,6 +155,7 @@ export function getState({
   storeInSessionStorage = false,
   history,
   toasts,
+  uiSettings,
 }: GetStateParams): GetStateReturn {
   const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
@@ -159,10 +170,14 @@ export function getState({
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 
-  let initialAppState = {
-    ...defaultAppState,
-    ...appStateFromUrl,
-  };
+  let initialAppState = handleSourceColumnState(
+    {
+      ...defaultAppState,
+      ...appStateFromUrl,
+    },
+    uiSettings
+  );
+  // todo filter source depending on fields fetchinbg flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 
@@ -200,7 +215,7 @@ export function getState({
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
 }

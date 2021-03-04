@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import type from 'type-detect';
-import { KibanaRequest } from '../../../../../../src/core/server';
+
+import type { KibanaRequest } from 'src/core/server';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
-import {
-  AuthenticationProviderOptions,
-  BaseAuthenticationProvider,
-  AuthenticationProviderSpecificOptions,
-} from './base';
+import type { RefreshTokenResult, TokenPair } from '../tokens';
+import { Tokens } from '../tokens';
+import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes possible OpenID Connect login flows.

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -17,6 +17,12 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.createIndexPattern();
+    });
+
+    after(async function () {
+      return await PageObjects.settings.removeIndexPattern();
     });
 
     const columns = [
@@ -31,8 +37,8 @@ export default function ({ getService, getPageObjects }) {
       },
       {
         heading: 'Type',
-        first: '_source',
-        last: 'string',
+        first: '',
+        last: 'text',
         selector: async function () {
           const tableRow = await PageObjects.settings.getTableRow(0, 1);
           return await tableRow.getVisibleText();
@@ -42,16 +48,11 @@ export default function ({ getService, getPageObjects }) {
 
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
-        before(async function () {
-          await PageObjects.settings.createIndexPattern();
-        });
-
-        after(async function () {
-          return await PageObjects.settings.removeIndexPattern();
-        });
-
         it('should sort ascending', async function () {
-          await PageObjects.settings.sortBy(col.heading);
+          console.log('col.heading', col.heading);
+          if (col.heading !== 'Name') {
+            await PageObjects.settings.sortBy(col.heading);
+          }
           const rowText = await col.selector();
           expect(rowText).to.be(col.first);
         });
@@ -65,15 +66,6 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('field list pagination', function () {
       const EXPECTED_FIELD_COUNT = 86;
-
-      before(async function () {
-        await PageObjects.settings.createIndexPattern();
-      });
-
-      after(async function () {
-        return await PageObjects.settings.removeIndexPattern();
-      });
-
       it('makelogs data should have expected number of fields', async function () {
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();

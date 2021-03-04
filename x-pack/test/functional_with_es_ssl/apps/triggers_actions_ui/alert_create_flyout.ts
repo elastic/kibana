@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   async function getAlertsByName(name: string) {
     const {
@@ -29,14 +31,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
-  async function defineAlert(alertName: string) {
+  async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('selectIndexExpression');
-    const comboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await comboBox.click();
-    await comboBox.type('k');
+    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
+    await indexComboBox.click();
+    await indexComboBox.type('k');
     const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
     await filterSelectItem.click();
     await testSubjects.click('thresholdAlertTimeFieldSelect');
@@ -49,6 +51,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // need this two out of popup clicks to close them
     const nameInput = await testSubjects.find('alertNameInput');
     await nameInput.click();
+  }
+
+  async function defineIndexThresholdAlert(alertName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.click(`.index-threshold-SelectOption`);
+    await testSubjects.click('selectIndexExpression');
+    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
+    await indexComboBox.click();
+    await indexComboBox.type('k');
+    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+    await filterSelectItem.click();
+    await testSubjects.click('thresholdAlertTimeFieldSelect');
+    await retry.try(async () => {
+      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+      expect(fieldOptions[1]).not.to.be(undefined);
+      await fieldOptions[1].click();
+    });
+    await testSubjects.click('closePopover');
+    // need this two out of popup clicks to close them
+    const nameInput = await testSubjects.find('alertNameInput');
+    await nameInput.click();
+
+    await testSubjects.click('whenExpression');
+    await testSubjects.click('whenExpressionSelect');
+    await retry.try(async () => {
+      const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
+      expect(aggTypeOptions[1]).not.to.be(undefined);
+      await aggTypeOptions[1].click();
+    });
+
+    await testSubjects.click('ofExpressionPopover');
+    const ofComboBox = await find.byCssSelector('#ofField');
+    await ofComboBox.click();
+    const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+    const ofOptions = ofOptionsString.trim().split('\n');
+    expect(ofOptions.length > 0).to.be(true);
+    await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
   }
 
   async function defineAlwaysFiringAlert(alertName: string) {
@@ -65,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineIndexThresholdAlert(alertName);
 
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
@@ -216,6 +256,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmAlertCloseModal');
       await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmAlertCloseModal');
+    });
+
+    it('should successfully test valid es_query alert', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.existOrFail('testQuerySuccess');
+      await testSubjects.missingOrFail('testQueryError');
+
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
     });
   });
 };

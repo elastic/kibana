@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -19,7 +19,7 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
 
@@ -120,4 +120,5 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }

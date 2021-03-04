@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -12,11 +13,13 @@ interface MetricFieldVisConfig extends FieldVisConfig {
   statsMaxDecimalPlaces: number;
   docCountFormatted: string;
   topValuesCount: number;
+  viewableInLens: boolean;
 }
 
 interface NonMetricFieldVisConfig extends FieldVisConfig {
   docCountFormatted: string;
   exampleCount: number;
+  viewableInLens: boolean;
 }
 
 interface TestData {
@@ -24,6 +27,11 @@ interface TestData {
   sourceIndexOrSavedSearch: string;
   fieldNameFilters: string[];
   fieldTypeFilters: string[];
+  rowsPerPage?: 10 | 25 | 50;
+  sampleSizeValidations: Array<{
+    size: number;
+    expected: { field: string; docCountFormatted: string };
+  }>;
   expected: {
     totalDocCountFormatted: string;
     metricFields?: MetricFieldVisConfig[];
@@ -47,6 +55,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote',
     fieldNameFilters: ['airline', '@timestamp'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '86,274',
       metricFields: [
@@ -59,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -70,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -79,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -88,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -97,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 10,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -106,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -115,6 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -132,6 +151,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
     fieldNameFilters: ['@version'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.DATE, ML_JOB_FIELD_TYPES.TEXT],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '34,415',
       metricFields: [
@@ -144,6 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -155,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -164,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -173,6 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -182,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 5,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -191,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -200,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -217,6 +247,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
     fieldNameFilters: ['@version.keyword', 'type'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '34,416',
       metricFields: [
@@ -229,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -240,6 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -249,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -258,6 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -267,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 5,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -276,6 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -285,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -295,6 +336,42 @@ export default function ({ getService }: FtrProviderContext) {
       fieldNameFiltersResultCount: 2,
       fieldTypeFiltersResultCount: 1,
     },
+  };
+
+  const sampleLogTestData: TestData = {
+    suiteTitle: 'geo point field',
+    sourceIndexOrSavedSearch: 'ft_module_sample_logs',
+    fieldNameFilters: ['geo.coordinates'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+    rowsPerPage: 50,
+    expected: {
+      totalDocCountFormatted: '408',
+      metricFields: [],
+      // only testing the geo_point fields
+      nonMetricFields: [
+        {
+          fieldName: 'geo.coordinates',
+          type: ML_JOB_FIELD_TYPES.GEO_POINT,
+          existsInDocs: true,
+          aggregatable: true,
+          loading: false,
+          docCountFormatted: '408 (100%)',
+          exampleCount: 10,
+          viewableInLens: false,
+        },
+      ],
+      emptyFields: [],
+      visibleMetricFieldsCount: 4,
+      totalMetricFieldsCount: 5,
+      populatedFieldsCount: 35,
+      totalFieldsCount: 36,
+      fieldNameFiltersResultCount: 1,
+      fieldTypeFiltersResultCount: 1,
+    },
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'geo.coordinates', docCountFormatted: '408 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '408 (100%)' } },
+    ],
   };
 
   function runTests(testData: TestData) {
@@ -332,6 +409,10 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
+      if (testData.rowsPerPage) {
+        await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.rowsPerPage);
+      }
+
       await ml.dataVisualizerTable.assertSearchPanelExist();
       await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
@@ -360,7 +441,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizerTable.assertNumberFieldContents(
           fieldRow.fieldName,
           fieldRow.docCountFormatted,
-          fieldRow.topValuesCount
+          fieldRow.topValuesCount,
+          fieldRow.viewableInLens
         );
       }
 
@@ -369,15 +451,22 @@ export default function ({ getService }: FtrProviderContext) {
           fieldRow.type,
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
-          fieldRow.exampleCount
+          fieldRow.exampleCount,
+          fieldRow.viewableInLens
         );
       }
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} sample size control changes non-metric fields`
       );
-      await ml.dataVisualizerTable.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');
+      for (const sampleSizeCase of testData.sampleSizeValidations) {
+        const { size, expected } = sampleSizeCase;
+        await ml.dataVisualizerTable.setSampleSizeInputValue(
+          size,
+          expected.field,
+          expected.docCountFormatted
+        );
+      }
 
       await ml.testExecution.logTestStep('sets and resets field type filter correctly');
       await ml.dataVisualizerTable.setFieldTypeFilter(
@@ -411,7 +500,10 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/module_sample_logs');
+
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -446,6 +538,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+    });
+
+    describe('with module_sample_logs ', function () {
+      // Run tests on full farequote index.
+      it(`${sampleLogTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+      runTests(sampleLogTestData);
     });
   });
 }

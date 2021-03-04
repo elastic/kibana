@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
-
-export {
+export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+export { SavedObjectsClientProvider } from './scoped_client_provider';
+export type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
