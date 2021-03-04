@@ -45,4 +45,31 @@ describe('getSearchParams', () => {
       query: 123,
     });
   });
+
+  test('extracts routing', () => {
+    const getConfig = getConfigStub({});
+    expect(
+      getSearchParamsFromRequest(
+        {
+          index: 'abc',
+          body: {
+            query: 123,
+          },
+        },
+        { getConfig }
+      ).routing
+    ).toBeUndefined();
+    expect(
+      getSearchParamsFromRequest(
+        {
+          index: 'abc',
+          routing: 'shard',
+          body: {
+            query: 123,
+          },
+        },
+        { getConfig }
+      ).routing
+    ).toBe('shard');
+  });
 });

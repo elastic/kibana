@@ -43,6 +43,7 @@ export function getSearchParamsFromRequest(
     index: searchRequest.index.title || searchRequest.index,
     body,
     track_total_hits,
+    routing: searchRequest.routing,
     ...searchParams,
   };
 }
