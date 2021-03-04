@@ -6522,8 +6522,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L112"
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L111"
             },
             "signature": [
               "Record<string, any>[]"
@@ -6554,8 +6554,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+                  "lineNumber": 115,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
                 }
               },
               {
@@ -6574,8 +6574,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+                  "lineNumber": 115,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
                 }
               }
             ],
@@ -6583,8 +6583,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 116,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L116"
+              "lineNumber": 115,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L115"
             }
           },
           {
@@ -6608,8 +6608,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 134,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L134"
+                  "lineNumber": 133,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L133"
                 }
               }
             ],
@@ -6617,8 +6617,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L134"
+              "lineNumber": 133,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L133"
             }
           },
           {
@@ -6652,8 +6652,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+                  "lineNumber": 142,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
                 }
               },
               {
@@ -6675,8 +6675,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+                  "lineNumber": 142,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
                 }
               }
             ],
@@ -6684,8 +6684,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 143,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L143"
+              "lineNumber": 142,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L142"
             }
           },
           {
@@ -6711,8 +6711,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 155,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L155"
+                  "lineNumber": 154,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L154"
                 }
               }
             ],
@@ -6720,8 +6720,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L155"
+              "lineNumber": 154,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L154"
             }
           },
           {
@@ -6761,8 +6761,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 166,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L166"
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L165"
                 }
               }
             ],
@@ -6772,8 +6772,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 166,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L166"
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L165"
             }
           },
           {
@@ -6791,8 +6791,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 174,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L174"
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L173"
             }
           },
           {
@@ -6817,8 +6817,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 181,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L181"
+              "lineNumber": 180,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L180"
             }
           },
           {
@@ -6850,8 +6850,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+                  "lineNumber": 187,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
                 }
               },
               {
@@ -6864,8 +6864,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+                  "lineNumber": 187,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
                 }
               }
             ],
@@ -6873,8 +6873,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 188,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L188"
+              "lineNumber": 187,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L187"
             }
           },
           {
@@ -6906,8 +6906,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L199"
+                  "lineNumber": 198,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L198"
                 }
               }
             ],
@@ -6915,8 +6915,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L199"
+              "lineNumber": 198,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L198"
             }
           },
           {
@@ -6941,8 +6941,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 206,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L206"
+              "lineNumber": 205,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L205"
             }
           },
           {
@@ -6967,8 +6967,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L213"
+              "lineNumber": 212,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L212"
             }
           },
           {
@@ -6999,8 +6999,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 227,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L227"
+                  "lineNumber": 226,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L226"
                 }
               }
             ],
@@ -7008,8 +7008,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 227,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L227"
+              "lineNumber": 226,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L226"
             }
           },
           {
@@ -7059,8 +7059,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+                  "lineNumber": 238,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
                 }
               },
               {
@@ -7081,8 +7081,8 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+                  "lineNumber": 238,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
                 }
               }
             ],
@@ -7094,8 +7094,8 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 239,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L239"
+              "lineNumber": 238,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L238"
             }
           },
           {
@@ -7123,8 +7123,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 249,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L249"
+              "lineNumber": 248,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L248"
             }
           },
           {
@@ -7166,8 +7166,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 257,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L257"
+                  "lineNumber": 256,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L256"
                 }
               }
             ],
@@ -7175,8 +7175,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 257,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L257"
+              "lineNumber": 256,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L256"
             }
           },
           {
@@ -7216,8 +7216,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 284,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L284"
+                  "lineNumber": 283,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L283"
                 }
               }
             ],
@@ -7227,8 +7227,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 284,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L284"
+              "lineNumber": 283,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L283"
             }
           },
           {
@@ -7284,8 +7284,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 294,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L294"
+                  "lineNumber": 293,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L293"
                 }
               }
             ],
@@ -7295,8 +7295,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 293,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L293"
+              "lineNumber": 292,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L292"
             }
           },
           {
@@ -7314,8 +7314,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 302,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L302"
+              "lineNumber": 301,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L301"
             }
           },
           {
@@ -7335,8 +7335,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 311,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L311"
+              "lineNumber": 310,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L310"
             }
           },
           {
@@ -7367,8 +7367,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 689,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+                  "lineNumber": 688,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L688"
                 }
               }
             ],
@@ -7376,8 +7376,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 689,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L689"
+              "lineNumber": 688,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L688"
             }
           },
           {
@@ -7405,15 +7405,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 718,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L718"
+              "lineNumber": 717,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L717"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 104,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L104"
+          "lineNumber": 103,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L103"
         },
         "initialIsOpen": false
       },
@@ -16484,8 +16484,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L100"
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L99"
             },
             "signature": [
               {
@@ -16500,8 +16500,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L99"
+          "lineNumber": 98,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/search/search_source/search_source.ts#L98"
         },
         "initialIsOpen": false
       },
