@@ -66,7 +66,7 @@
     }
 
     .area.bounds {
-      fill: transparentize($euiColorPrimary, 0.8);
+      fill: transparentize($euiColorPrimary, .8);
       pointer-events: none;
     }
 
@@ -87,7 +87,7 @@
     }
 
     .area.forecast {
-      fill: transparentize($euiColorVis5, 0.7);
+      fill: transparentize($euiColorVis5, .7);
       pointer-events: none;
     }
 
