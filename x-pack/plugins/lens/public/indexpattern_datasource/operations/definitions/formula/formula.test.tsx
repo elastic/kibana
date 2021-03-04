@@ -30,6 +30,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       timeScale: false,
     }),
   } as unknown) as GenericOperationDefinition,
+  terms: { input: 'field' } as GenericOperationDefinition,
   sum: { input: 'field' } as GenericOperationDefinition,
   last_value: { input: 'field' } as GenericOperationDefinition,
   max: { input: 'field' } as GenericOperationDefinition,
@@ -44,7 +45,6 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
 
 describe('formula', () => {
   let layer: IndexPatternLayer;
-  //   const InlineOptions = formulaOperation.paramEditor!;
 
   beforeEach(() => {
     layer = {
@@ -65,6 +65,151 @@ describe('formula', () => {
         },
       },
     };
+  });
+
+  describe('buildColumn', () => {
+    let indexPattern: IndexPattern;
+
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+    });
+
+    it('should start with an empty formula if no previous column is detected', () => {
+      expect(
+        formulaOperation.buildColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {},
+        references: [],
+      });
+    });
+
+    it('should move into Formula previous operation', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: layer.columns.col1,
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: { isFormulaBroken: false, formula: 'terms(category)' },
+        references: [],
+      });
+    });
+
+    it('it should move over explicit format param if set', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            params: {
+              ...layer.columns.col1.params,
+              format: {
+                id: 'number',
+                params: {
+                  decimals: 2,
+                },
+              },
+            },
+          } as IndexPatternColumn,
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {
+          isFormulaBroken: false,
+          formula: 'terms(category)',
+          params: {
+            format: {
+              id: 'number',
+              params: {
+                decimals: 2,
+              },
+            },
+          },
+        },
+        references: [],
+      });
+    });
+
+    it('should move over previous operation parameter if set', () => {
+      expect(
+        formulaOperation.buildColumn(
+          {
+            previousColumn: {
+              label: 'Moving Average',
+              dataType: 'number',
+              operationType: 'moving_average',
+              isBucketed: false,
+              scale: 'ratio',
+              references: ['col2'],
+              timeScale: 'd',
+              params: { window: 3 },
+            },
+            layer: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  label: 'Moving Average',
+                  dataType: 'number',
+                  operationType: 'moving_average',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  references: ['col2'],
+                  timeScale: 'd',
+                  params: { window: 3 },
+                },
+                col2: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'col1X0',
+                  operationType: 'avg',
+                  scale: 'ratio',
+                  sourceField: 'bytes',
+                  timeScale: 'd',
+                },
+              },
+            },
+            indexPattern,
+          },
+          {},
+          operationDefinitionMap
+        )
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {
+          isFormulaBroken: false,
+          formula: 'moving_average(avg(bytes), window=3)',
+        },
+        references: [],
+      });
+    });
   });
 
   describe('regenerateLayerFromAst()', () => {
