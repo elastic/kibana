@@ -8,13 +8,14 @@
 import * as React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
-import { txtDrilldowns, txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
+import { txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 import { DrilldownManagerContent } from './drilldown_manager_content';
 
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
+  const title = drilldowns.useTitle();
   const route = drilldowns.useRoute();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
@@ -39,7 +40,7 @@ export const DrilldownManager: React.FC = ({}) => {
 
   return (
     <FlyoutFrame
-      title={txtDrilldowns}
+      title={title}
       banner={banner}
       footer={footer}
       onClose={drilldowns.close}

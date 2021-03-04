@@ -107,3 +107,11 @@ export const invalidDrilldownType = (type: string) =>
       },
     }
   );
+
+export const txtDefaultTitle = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.drilldownManager.state.defaultTitle',
+  {
+    defaultMessage: 'Drilldowns',
+    description: 'Drilldowns flyout title.',
+  }
+);

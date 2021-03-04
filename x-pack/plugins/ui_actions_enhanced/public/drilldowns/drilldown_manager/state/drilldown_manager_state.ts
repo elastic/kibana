@@ -16,6 +16,7 @@ import {
   toastDrilldownsCRUDError,
   insufficientLicenseLevel,
   invalidDrilldownType,
+  txtDefaultTitle,
 } from './i18n';
 import { DrilldownListItem } from '../components/list_manage_drilldowns';
 
@@ -37,6 +38,11 @@ export interface DrilldownManagerStateDeps
  * ```
  */
 export class DrilldownManagerState {
+  /**
+   * Title displayed at the top of <DrilldownManager> flyout.
+   */
+  public readonly title$ = new BehaviorSubject<string>(txtDefaultTitle);
+
   /**
    * Route inside Drilldown Manager flyout that is displayed to the user. Some
    * available routes are:
@@ -113,6 +119,21 @@ export class DrilldownManagerState {
     if (!initialRoute) initialRoute = 'manage';
     else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
     this.route$ = new BehaviorSubject(initialRoute.split('/'));
+  }
+
+  /**
+   * Set flyout main heading text.
+   * @param title New title.
+   */
+  public setTitle(title: string) {
+    this.title$.next(title);
+  }
+
+  /**
+   * Set the flyout main heading back to its default state.
+   */
+  public resetTitle() {
+    this.setTitle(txtDefaultTitle);
   }
 
   /**
@@ -224,6 +245,7 @@ export class DrilldownManagerState {
   // React components.
 
   /* eslint-disable react-hooks/rules-of-hooks */
+  public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
   public readonly useWelcomeMessage = () =>
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
