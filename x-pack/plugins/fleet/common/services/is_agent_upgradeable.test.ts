@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Agent } from '../types/models/agent';
+
 import { isAgentUpgradeable } from './is_agent_upgradeable';
-import { Agent } from '../types/models/agent';
 
 const getAgent = ({
   version,

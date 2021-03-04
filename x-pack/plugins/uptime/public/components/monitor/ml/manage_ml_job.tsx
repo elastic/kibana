@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,6 +14,7 @@ import {
   canDeleteMLJobSelector,
   hasMLJobSelector,
   isMLJobCreatingSelector,
+  mlCapabilitiesSelector,
 } from '../../../state/selectors';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
@@ -49,6 +50,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const isAlertDeleting = useSelector(isAnomalyAlertDeleting);
 
   const { loading: isMLJobLoading } = useSelector(hasMLJobSelector);
+  const { loading: isCapbilityLoading } = useSelector(mlCapabilitiesSelector);
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -63,7 +65,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const deleteAnomalyAlert = () =>
     dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
-  const showLoading = isMLJobCreating || isMLJobLoading || isAlertDeleting;
+  const showLoading = isMLJobCreating || isMLJobLoading || isAlertDeleting || isCapbilityLoading;
 
   const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
 
@@ -149,6 +151,11 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
     },
   ];
 
+  const onCloseFlyout = useCallback(() => {
+    setIsFlyoutOpen(false);
+    dispatch(getAnomalyAlertAction.get({ monitorId }));
+  }, [dispatch, monitorId]);
+
   return (
     <>
       <EuiPopover
@@ -174,14 +181,13 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           }}
         />
       )}
-      <UptimeEditAlertFlyoutComponent
-        initialAlert={anomalyAlert!}
-        alertFlyoutVisible={isFlyoutOpen}
-        setAlertFlyoutVisibility={() => {
-          setIsFlyoutOpen(false);
-          dispatch(getAnomalyAlertAction.get({ monitorId }));
-        }}
-      />
+      {isFlyoutOpen && (
+        <UptimeEditAlertFlyoutComponent
+          initialAlert={anomalyAlert!}
+          alertFlyoutVisible={isFlyoutOpen}
+          setAlertFlyoutVisibility={onCloseFlyout}
+        />
+      )}
     </>
   );
 };
