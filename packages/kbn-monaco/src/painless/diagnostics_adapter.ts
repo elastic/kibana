@@ -29,6 +29,9 @@ export class DiagnosticsAdapter {
       let handle: any;
 
       if (model.getModeId() === ID) {
+        // add new model id to errors object and initialize with empty array
+        this.errors[model.id] = [];
+
         model.onDidChangeContent(() => {
           // Do not validate if the language ID has changed
           if (model.getModeId() !== ID) {
@@ -50,8 +53,15 @@ export class DiagnosticsAdapter {
         this.validate(model.uri);
       }
     };
+
+    const onModelDispose = (model: monaco.editor.IModel): void => {
+      // remove model id from errors object when it has been disposed
+      delete this.errors[model.id];
+    };
+
     monaco.editor.onDidCreateModel(onModelAdd);
     monaco.editor.getModels().forEach(onModelAdd);
+    monaco.editor.onWillDisposeModel(onModelDispose);
   }
 
   private async validate(resource: monaco.Uri): Promise<void> {
@@ -60,10 +70,7 @@ export class DiagnosticsAdapter {
 
     if (errorMarkers) {
       const model = monaco.editor.getModel(resource);
-      this.errors = {
-        ...this.errors,
-        [model!.id]: errorMarkers,
-      };
+      this.errors[model!.id] = errorMarkers;
       // Set the error markers and underline them with "Error" severity
       monaco.editor.setModelMarkers(model!, ID, errorMarkers.map(toDiagnostics));
     }
