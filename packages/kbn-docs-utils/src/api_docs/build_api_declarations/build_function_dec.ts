@@ -39,7 +39,7 @@ export function buildFunctionDec(
   const label = Node.isConstructorDeclaration(node)
     ? 'Constructor'
     : node.getName() || '(WARN: Missing name)';
-  return {
+  const fn = {
     id: getApiSectionId(anchorLink),
     type: TypeKind.FunctionKind,
     label,
@@ -56,4 +56,7 @@ export function buildFunctionDec(
     returnComment: getJSDocReturnTagComment(node),
     source: getSourceForNode(node),
   };
+
+  log.warning(`fn ${label} has tags: ${fn.tags.join(', ')}`);
+  return fn;
 }

@@ -1,6 +1,9 @@
 [role="xpack"]
 [[server-log-action-type]]
 === Server log action
+++++
+<titleabbrev>Server log</titleabbrev>
+++++
 
 This action type writes an entry to the {kib} server log.
 
@@ -8,7 +11,7 @@ This action type writes an entry to the {kib} server log.
 [[server-log-connector-configuration]]
 ==== Connector configuration
 
-Server log connectors have the following configuration properties:
+Server log connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 
@@ -27,7 +30,7 @@ Name::      The name of the connector. The name is used to identify a  connector
 [[server-log-action-configuration]]
 ==== Action configuration
 
-Server log actions have the following properties:
+Server log actions have the following properties.
 
 Message::   The message to log.
 Level::     The log level of the message: `trace`, `debug`, `info`, `warn`, `error` or `fatal`. Defaults to `info`.

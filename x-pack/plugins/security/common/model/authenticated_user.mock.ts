@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from './authenticated_user';
+import type { AuthenticatedUser } from './authenticated_user';
 
 export function mockAuthenticatedUser(user: Partial<AuthenticatedUser> = {}) {
   return {
