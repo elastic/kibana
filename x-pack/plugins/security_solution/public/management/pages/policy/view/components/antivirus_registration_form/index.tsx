@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
@@ -62,35 +53,14 @@ export const AntivirusRegistrationForm = memo(() => {
     [dispatch]
   );
 
-  const OsRestrictions = useMemo(() => {
-    return (
-      <EuiFlexGroup direction="row" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
-              defaultMessage="Restrictions"
-            />
-          </EuiTextColor>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type="iInCircle"
-            content={i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
-              { defaultMessage: 'Windows Server operating systems unsupported' }
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, []);
-
   return (
     <ConfigForm
       type={TRANSLATIONS.title}
       supportedOss={[OperatingSystem.WINDOWS]}
-      osRestriction={OsRestrictions}
+      osRestriction={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
+        { defaultMessage: 'Windows Server operating systems unsupported' }
+      )}
     >
       <EuiText size="s">{TRANSLATIONS.description}</EuiText>
       <EuiSpacer size="s" />

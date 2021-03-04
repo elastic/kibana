@@ -7,6 +7,7 @@
 
 import React, { FC, ReactNode, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,8 @@ import {
   EuiText,
   EuiShowFor,
   EuiPanel,
+  EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -66,7 +69,23 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
             <EuiFlexItem grow={false}>
               <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
             </EuiFlexItem>
-            {osRestriction && <EuiFlexItem grow={false}>{osRestriction}</EuiFlexItem>}
+            {osRestriction && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="row" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
+                        defaultMessage="Restrictions"
+                      />
+                    </EuiTextColor>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip type="iInCircle" content={osRestriction} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
