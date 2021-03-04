@@ -1,7 +1,8 @@
 # Drilldown Manager
 
 Drilldown Manager is the flyout that opens where drilldowns can be managed using
-a CRUD UI.
+a CRUD UI. (It does not necessarily need to be a flyout, you can also embed it
+directly on a page.)
 
 The main React component that this folder exports is `<DrilldownManager>`, which
 should normally be rendered in a flyout.
