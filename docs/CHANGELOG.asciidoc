@@ -12,7 +12,7 @@ This section summarizes the changes in each release.
 
 * <<release-notes-7.12.0>>
 * <<release-notes-7.11.1>>
-* <<release-notes-7.11.0>>
+* <<release-notes-7.11.0>> 
 * <<release-notes-7.10.2>>
 * <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
@@ -96,7 +96,7 @@ For detailed information about the n.n.n release, review the following sections.
 
 coming::[7.12.0]
 
-For detailed information about the {kib} 7.12.0 release, review the following information.
+For information about the {kib} 7.12.0 release, review the following information.
 
 [float]
 [[breaking-changes-7.12.0]]
@@ -115,12 +115,10 @@ impact to your application.
 [%collapsible]
 ====
 *Details:* +
-Geo containment alerts and the Geo threshold alert type have similar functionality, so the Geo threshold alert type has been removed.
+Geo containment alerts and the Geo threshold alert type have similar functionality, so the Geo threshold alert type has been removed. For more information, refer to {kibana-pull}89632[#89632].
 
 *Impact* +
 Use Geo containment alerts.
-
-For more information, refer to {kibana-pull}89632[#89632].
 ====
 
 // end::notable-breaking-changes[]
@@ -181,8 +179,7 @@ logging:
 [[feaatures-v7.12.0]]
 === Features
 
-{kib} 7.12.0 adds the following new and notable features. For more information about the features introduced in 7.12.0, refer to 
-//{kibana-ref-all}/7.12/whats-new.html[What's new in 7.12].
+{kib} 7.12.0 adds the following new and notable features.
 
 Alerting::
 * Adds Search alert {kibana-pull}88528[#88528]
@@ -220,6 +217,9 @@ Platform::
 * Enforce camelCase plugin IDs {kibana-pull}90752[#90752]
 Uptime::
 * ServiceNow SIR Connector {kibana-pull}88190[#88190]
+
+For more information about the new features introduced in 7.12.0, refer to 
+//{kibana-ref-all}/7.12/whats-new.html[What's new in 7.12].
 
 For detailed information about the 7.12.0 release, refer to <<enhancements-and-bug-fixes,Enhancements and bug fixes>>.
 
