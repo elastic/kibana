@@ -11,6 +11,7 @@ import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../com
 import { QueryContext, MonitorSummaryIterator } from './search';
 import { HistogramPoint, Histogram } from '../../../common/runtime_types';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
+import { getListOfMonitors } from './search/list_of_monitors';
 
 export interface CursorPagination {
   cursorKey?: any;
@@ -54,21 +55,30 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
 
+  const parsedFilters = filters && filters !== '' ? JSON.parse(filters) : null;
+
   const queryContext = new QueryContext(
     uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     pagination,
-    filters && filters !== '' ? JSON.parse(filters) : null,
+    parsedFilters,
     pageSize,
     statusFilter,
     query
   );
 
-  const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
+  let page;
 
-  const iterator = new MonitorSummaryIterator(queryContext);
-  const page = await iterator.nextPage(size);
+  if (parsedFilters === null && !statusFilter) {
+    page = await getListOfMonitors(queryContext);
+  } else {
+    const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
+
+    const iterator = new MonitorSummaryIterator(queryContext);
+
+    page = await iterator.nextPage(size);
+  }
 
   const minInterval = getHistogramInterval(
     queryContext.dateRangeStart,

@@ -49,7 +49,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
         filters,
         pageSize,
         pagination,
-        statusFilter,
+        statusFilter: statusFilter || undefined,
         query,
       })
     );
