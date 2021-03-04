@@ -12,23 +12,23 @@ import React from 'react';
 import { EMPTY, Subscription, timer } from 'rxjs';
 import { debounce } from 'rxjs/operators';
 import deepEqual from 'fast-deep-equal';
-import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
+import { Action, buildContextMenuForActions, UiActionsService } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {
   CONTEXT_MENU_TRIGGER,
+  contextMenuTrigger,
+  EmbeddableContext,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  EmbeddableContext,
-  contextMenuTrigger,
 } from '../triggers';
 import {
-  IEmbeddable,
-  EmbeddableOutput,
   EmbeddableError,
   EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
 } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
@@ -252,35 +252,42 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
+            this.setState({
+              error: output.error,
+            });
+          },
+          (error) => {
+            if (this.embeddableRoot.current) {
+              const errorEmbeddable = new ErrorEmbeddable(error, {
+                id: this.props.embeddable.id,
+              });
+              errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ errorEmbeddable });
+            }
+          }
+        )
+      );
+
+      this.subscription.add(
         this.props.embeddable
           .getOutput$()
           .pipe(
-            // This observable is needed to apply loading or error state to embeddable panel
-            // To avoid unnecessary flickering we debounce output updates when transitioning into error or loading state,
-            // This skips loading or error state when quickly switching back to loaded state.
+            // This observable is needed to apply loading to embeddable panel
+            // To avoid unnecessary flickering we debounce output updates when transitioning into loading state,
+            // This skips loading state when quickly switching back to loaded state.
             // This is useful in case of frequent auto refresh interval.
             debounce((output: EmbeddableOutput) => {
-              if (!output.error && !output.loading) return EMPTY; // don't debounce in case we are in "regular" state
-              return timer(1000); // debounce "loading" or "error" state
+              if (!output.loading) return EMPTY; // don't debounce in case we are in "regular" state
+              return timer(2500); // debounce "loading" state
             })
           )
-          .subscribe(
-            (output: EmbeddableOutput) => {
-              this.setState({
-                error: output.error,
-                loading: output.loading,
-              });
-            },
-            (error) => {
-              if (this.embeddableRoot.current) {
-                const errorEmbeddable = new ErrorEmbeddable(error, {
-                  id: this.props.embeddable.id,
-                });
-                errorEmbeddable.render(this.embeddableRoot.current);
-                this.setState({ errorEmbeddable });
-              }
-            }
-          )
+          .subscribe((output: EmbeddableOutput) => {
+            this.setState({
+              loading: output.loading,
+            });
+          })
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
