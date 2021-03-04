@@ -24,7 +24,7 @@ async function startRunner(
   getService: FtrProviderContext['getService'],
   runnerExecution: typeof run
 ) {
-  await runnerExecution({ journeyName: 'uptime', headless: true });
+  await runnerExecution({ journeyName: 'uptime', headless: true, sandbox: false });
 }
 async function waitForKibana() {
   log('Waiting for kibana server to start');
