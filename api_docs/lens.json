@@ -715,8 +715,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L35"
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L41"
             },
             "signature": [
               {
@@ -737,8 +737,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L36"
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L42"
             }
           },
           {
@@ -749,8 +749,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L37"
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L43"
             },
             "signature": [
               {
@@ -766,8 +766,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L34"
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L40"
         },
         "initialIsOpen": false
       },
