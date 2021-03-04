@@ -115,8 +115,12 @@ export const ExpressionChart: React.FC<Props> = ({
     return <LoadingState />;
   }
 
-  const criticalThresholds = expression.threshold.slice().sort();
-  const warningThresholds = expression.warningThreshold?.slice().sort() ?? [];
+  const convertThreshold = (threshold: number) => convertMetricValue(expression.metric, threshold);
+  const convertedThresholds = expression.threshold.map(convertThreshold);
+  const convertedWarningThresholds = expression.warningThreshold?.map(convertThreshold) ?? [];
+
+  const criticalThresholds = convertedThresholds.slice().sort();
+  const warningThresholds = convertedWarningThresholds.slice().sort();
   const thresholds = [...criticalThresholds, ...warningThresholds].sort();
 
   // Creating a custom series where the ID is changed to 0
@@ -126,30 +130,13 @@ export const ExpressionChart: React.FC<Props> = ({
     return <NoDataState />;
   }
 
-  const thresholdFormatter = (value: number | undefined) => {
-    const metricFormatter = METRIC_FORMATTERS[expression.metric];
-
-    if (!value || !metricFormatter) {
-      return value;
-    }
-
-    switch (metricFormatter.formatter) {
-      case InfraFormatterType.percent:
-        return value / 100;
-      case InfraFormatterType.bits:
-        return value / 1000;
-      default:
-        return value;
-    }
-  };
-
   const series = {
     ...firstSeries,
     id: nodes[0]?.name,
     rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
-        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdFormatter(thresholdValue);
+        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
       });
       return newRow;
     }),
@@ -159,11 +146,11 @@ export const ExpressionChart: React.FC<Props> = ({
   const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
-    max: Math.max(dataDomain.max, thresholdFormatter(last(thresholds)) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, thresholdFormatter(first(thresholds)) || dataDomain.min) * 0.9, // add 10% floor
+    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor
   };
 
-  if (domain.min === thresholdFormatter(first(expression.threshold))) {
+  if (domain.min === first(convertedThresholds)) {
     domain.min = domain.min * 0.9;
   }
 
@@ -183,11 +170,10 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           <ThresholdAnnotations
             comparator={expression.comparator}
-            threshold={expression.threshold}
+            threshold={convertedThresholds}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
             id="critical"
-            formatter={thresholdFormatter}
             firstTimestamp={firstTimestamp}
             lastTimestamp={lastTimestamp}
             domain={domain}
@@ -195,11 +181,10 @@ export const ExpressionChart: React.FC<Props> = ({
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
               comparator={expression.warningComparator}
-              threshold={expression.warningThreshold}
+              threshold={convertedWarningThresholds}
               sortedThresholds={warningThresholds}
               color={Color.color5}
               id="warning"
-              formatter={thresholdFormatter}
               firstTimestamp={firstTimestamp}
               lastTimestamp={lastTimestamp}
               domain={domain}
@@ -236,4 +221,16 @@ export const ExpressionChart: React.FC<Props> = ({
       </div>
     </>
   );
+};
+
+const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
+  if (converters[metric]) {
+    return converters[metric](value);
+  } else {
+    return value;
+  }
+};
+const converters: Record<string, (n: number) => number> = {
+  cpu: (n) => Number(n) / 100,
+  memory: (n) => Number(n) / 100,
 };
