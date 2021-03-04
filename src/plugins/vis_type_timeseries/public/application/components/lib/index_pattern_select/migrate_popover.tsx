@@ -34,7 +34,7 @@ const getReadyToMigrateCallOut = (value: PopoverProps['value'], onModeChange: ()
       <p>
         <FormattedMessage
           id="visTypeTimeseries.indexPatternSelect.migrationPopover.readyToMigrateText"
-          defaultMessage="We found that you have already have '{index}' index on your instance."
+          defaultMessage="We found that you already have '{index}' index on your instance."
           values={{
             index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
           }}
