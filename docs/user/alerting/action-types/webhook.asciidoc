@@ -1,11 +1,11 @@
 [role="xpack"]
 [[webhook-action-type]]
-=== Webhook action
+=== Webhook action and connector
 ++++
 <titleabbrev>Webhook</titleabbrev>
 ++++
 
-The Webhook action type uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
+The Webhook connector uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
 
 [float]
 [[webhook-connector-configuration]]
@@ -23,12 +23,12 @@ Password::  Password for HTTP basic authentication.
 
 [float]
 [[Preconfigured-webhook-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-webhook:
-   name: preconfigured-webhook-action-type
+   name: preconfigured-webhook-connector-type
    actionTypeId: .webhook
    config:
      url: https://test.host
@@ -40,14 +40,14 @@ Password::  Password for HTTP basic authentication.
      password: passwordkeystorevalue
 --
 
-Config defines information for the action type.
+Config defines information for the connector type.
 
 `url`:: A URL string that corresponds to *URL*.
 `method`:: A string that corresponds to *Method*.
 `headers`:: A record<string, string> that corresponds to *Headers*.
 `hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
@@ -71,4 +71,4 @@ Body::      A JSON payload sent to the request URL. For example:
 
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
 their values escaped, so that the final JSON will be valid (escaping double quote characters).
-For more information on Mustache template variables, refer to <<defining-alerts-actions-details>>.
+For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.

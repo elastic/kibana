@@ -1,11 +1,11 @@
 [role="xpack"]
 [[resilient-action-type]]
-=== IBM Resilient action
+=== IBM Resilient action and connector
 ++++
 <titleabbrev>IBM Resilient</titleabbrev>
 ++++
 
-The IBM Resilient action type uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
+The IBM Resilient connector uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
 
 [float]
 [[resilient-connector-configuration]]
@@ -21,12 +21,12 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 [float]
 [[Preconfigured-resilient-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-resilient:
-   name: preconfigured-resilient-action-type
+   name: preconfigured-resilient-connector-type
    actionTypeId: .resilient
    config:
      apiUrl: https://elastic.resilient.net
@@ -36,12 +36,12 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
      apiKeySecret: tokenkeystorevalue
 --
 
-Config defines information for the action type.
+Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
 `orgId`:: An ID that corresponds to *Organization ID*.
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `apiKeyId`:: A string that corresponds to *API key ID*.
 `apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.

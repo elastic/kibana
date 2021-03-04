@@ -1,11 +1,11 @@
 [role="xpack"]
 [[pagerduty-action-type]]
-=== PagerDuty action
+=== PagerDuty action and connector
 ++++
 <titleabbrev>PagerDuty</titleabbrev>
 ++++
 
-The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
+The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
 [float]
 [[pagerduty-connector-configuration]]
@@ -19,12 +19,12 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
 
 [float]
 [[Preconfigured-pagerduty-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-pagerduty:
-   name: preconfigured-pagerduty-action-type
+   name: preconfigured-pagerduty-connector-type
    actionTypeId: .pagerduty
    config:
      apiUrl: https://test.host
@@ -32,11 +32,11 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
      routingKey: testroutingkey
 --
 
-Config defines information for the action type.
+Config defines information for the connector type.
 
 `apiURL`:: A URL string that corresponds to *API URL*.
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `routingKey`:: A string that corresponds to *Integration Key*.
 
@@ -62,11 +62,11 @@ For more details on these properties, see https://v2.developer.pagerduty.com/v2/
 [[pagerduty-benefits]]
 ==== Configure PagerDuty
 
-By integrating PagerDuty with alerts, you can:
+By integrating PagerDuty with rules, you can:
 
-* Route your alerts to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
-* Automatically generate incidents of different types and severity based on each alert’s context.
-* Tailor the incident data to match your needs by easily passing the alerting context from Kibana to PagerDuty.
+* Route your rules to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
+* Automatically generate incidents of different types and severity based on each rule’s context.
+* Tailor the incident data to match your needs by easily passing the rule context from Kibana to PagerDuty.
 
 [float]
 [[pagerduty-support]]
@@ -110,10 +110,9 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 
 . Create a PagerDuty Connector in Kibana.  You can:
 +
-* Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
-section of the alert configuration and selecting *Add new*.
-* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management* >
-Alerts and Actions*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
+* Create a connector as part of creating an rule by selecting PagerDuty in the *Actions*
+section of the rule configuration and selecting *Add new*.
+* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management > Rules and Connectors*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
 
 . Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
@@ -122,15 +121,15 @@ See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and 
 
 . Save the Connector.
 
-. To create an alert, open the main menu, then click *Stack Management > Alerts and Actions* or the application of your choice.
+. To create a rule, open the main menu, then click *Stack Management > Rules and Connectors* or the application of your choice.
 
 . Set up an action using your PagerDuty connector, by determining:
 +
 * The action’s type: Trigger, Resolve, or Acknowledge.
 * The event’s severity: Info, warning, error, or critical.
-* An array of different fields, including the timestamp, group, class, component, and your dedup key. By default, the dedup is configured to create a new PagerDuty incident for each alert instance and reuse the incident when a recovered alert instance reactivates.
-Depending on your custom needs, assign them variables from the alerting context.
-To see the available context variables, click on the *Add alert variable* icon next
+* An array of different fields, including the timestamp, group, class, component, and your dedup key. By default, the dedup is configured to create a new PagerDuty incident for each alert and reuse the incident when a recovered alert reactivates.
+Depending on your custom needs, assign them variables from the rule context.
+To see the available context variables, click on the *Add variable* icon next
 to each corresponding field. For more details on these parameters, see the
 <<pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
 https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 documentation].

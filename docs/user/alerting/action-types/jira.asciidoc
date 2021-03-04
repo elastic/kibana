@@ -1,11 +1,11 @@
 [role="xpack"]
 [[jira-action-type]]
-=== Jira action
+=== Jira action and connector
 ++++
 <titleabbrev>Jira</titleabbrev>
 ++++
 
-The Jira action type uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
+The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
 
 [float]
 [[jira-connector-configuration]]
@@ -21,12 +21,12 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 [float]
 [[Preconfigured-jira-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-jira:
-   name: preconfigured-jira-action-type
+   name: preconfigured-jira-connector-type
    actionTypeId: .jira
    config:
      apiUrl: https://elastic.atlassian.net
@@ -36,12 +36,12 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
      apiToken: tokenkeystorevalue
 --
 
-Config defines information for the action type.
+Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
 `projectKey`:: A key that corresponds to *Project Key*.
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `email`:: A string that corresponds to *Email*.
 `apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.

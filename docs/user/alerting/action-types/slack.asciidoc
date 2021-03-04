@@ -5,7 +5,7 @@
 <titleabbrev>Slack</titleabbrev>
 ++++
 
-The Slack action type uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
+The Slack connector uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
 
 [float]
 [[slack-connector-configuration]]
@@ -18,18 +18,18 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
 
 [float]
 [[Preconfigured-slack-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-slack:
-   name: preconfigured-slack-action-type
+   name: preconfigured-slack-connector-type
    actionTypeId: .slack
    secrets:
      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `webhookUrl`:: A string that corresponds to *Webhook URL*.
 

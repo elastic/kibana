@@ -1,11 +1,11 @@
 [role="xpack"]
 [[server-log-action-type]]
-=== Server log action
+=== Server log action and connector
 ++++
 <titleabbrev>Server log</titleabbrev>
 ++++
 
-This action type writes an entry to the {kib} server log.
+This connector writes an entry to the {kib} server log.
 
 [float]
 [[server-log-connector-configuration]]
@@ -17,12 +17,12 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 [float]
 [[Preconfigured-server-log-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 [source,text]
 --
  my-server-log:
-   name: test
+   name: preconfigured-server-log-connector-type
    actionTypeId: .server-log
 --
 
