@@ -168,18 +168,21 @@ describe('<EditPolicy /> node allocation', () => {
     });
   });
 
-  describe('cold phase', () => {
+  describe('cold and frozen phase', () => {
     test('shows spinner for node attributes input when loading', async () => {
       server.respondImmediately = false;
 
       const { actions, component } = testBed;
       await actions.cold.enable(true);
+      await actions.frozen.enable(true);
 
       expect(component.find('.euiLoadingSpinner').exists()).toBeTruthy();
       expect(actions.cold.hasDataTierAllocationControls()).toBeTruthy();
+      expect(actions.frozen.hasDataTierAllocationControls()).toBeTruthy();
 
       expect(component.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
+      expect(actions.frozen.hasNodeAttributesSelect()).toBeFalsy();
     });
 
     test('shows warning instead of node attributes input when none exist', async () => {
@@ -201,6 +204,15 @@ describe('<EditPolicy /> node allocation', () => {
       await actions.cold.setDataAllocation('node_attrs');
       expect(actions.cold.hasNoNodeAttrsWarning()).toBeTruthy();
       expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
+
+      // For some reason we need to close the cold phase to be able to
+      // to test the frozen phase behaviour.
+      await actions.cold.enable(false);
+      await actions.frozen.enable(true);
+
+      await actions.frozen.setDataAllocation('node_attrs');
+      expect(actions.frozen.hasNoNodeAttrsWarning()).toBeTruthy();
+      expect(actions.frozen.hasNodeAttributesSelect()).toBeFalsy();
     });
 
     test('shows node attributes input when attributes exist', async () => {
@@ -212,23 +224,33 @@ describe('<EditPolicy /> node allocation', () => {
       expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
       expect(actions.cold.hasNodeAttributesSelect()).toBeTruthy();
       expect(actions.cold.getNodeAttributesSelectOptions().length).toBe(2);
+
+      await actions.frozen.enable(true);
+      await actions.frozen.setDataAllocation('node_attrs');
+      expect(actions.frozen.hasNoNodeAttrsWarning()).toBeFalsy();
+      expect(actions.frozen.hasNodeAttributesSelect()).toBeTruthy();
+      expect(actions.frozen.getNodeAttributesSelectOptions().length).toBe(2);
     });
 
     test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
       const { actions, component } = testBed;
-      await actions.cold.enable(true);
 
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      await actions.cold.setDataAllocation('node_attrs');
-      expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
-      expect(actions.cold.hasNodeAttributesSelect()).toBeTruthy();
+      for (const phase of ['cold', 'frozen'] as const) {
+        const phaseActions = actions[phase];
+        await phaseActions.enable(true);
 
-      expect(actions.cold.hasNodeDetailsFlyout()).toBeFalsy();
-      expect(actions.cold.getNodeAttributesSelectOptions().length).toBe(2);
-      await actions.cold.setSelectedNodeAttribute('attribute:true');
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        await phaseActions.setDataAllocation('node_attrs');
+        expect(phaseActions.hasNoNodeAttrsWarning()).toBeFalsy();
+        expect(phaseActions.hasNodeAttributesSelect()).toBeTruthy();
 
-      await actions.cold.openNodeDetailsFlyout();
-      expect(actions.cold.hasNodeDetailsFlyout()).toBeTruthy();
+        expect(phaseActions.hasNodeDetailsFlyout()).toBeFalsy();
+        expect(phaseActions.getNodeAttributesSelectOptions().length).toBe(2);
+        await phaseActions.setSelectedNodeAttribute('attribute:true');
+
+        await phaseActions.openNodeDetailsFlyout();
+        expect(phaseActions.hasNodeDetailsFlyout()).toBeTruthy();
+      }
     });
 
     test('shows default allocation warning when no node roles are found', async () => {
@@ -248,6 +270,10 @@ describe('<EditPolicy /> node allocation', () => {
 
       expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(actions.cold.hasDefaultAllocationWarning()).toBeTruthy();
+
+      await actions.cold.enable(false);
+      await actions.frozen.enable(true);
+      expect(actions.frozen.hasDefaultAllocationWarning()).toBeTruthy();
     });
 
     test('shows default allocation notice when warm or hot tiers exists, but not cold tier', async () => {

@@ -275,21 +275,21 @@ export const setup = async (arg?: {
     const dataTierSelector = `${controlsSelector}.dataTierSelect`;
     const nodeAttrsSelector = `${phase}-selectedNodeAttrs`;
 
+    const openNodeAttributesSection = async () => {
+      await act(async () => {
+        find(dataTierSelector).simulate('click');
+      });
+      component.update();
+    };
+
     return {
       hasDataTierAllocationControls: () => exists(controlsSelector),
-      openNodeAttributesSection: async () => {
-        await act(async () => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
-      },
+      openNodeAttributesSection,
       hasNodeAttributesSelect: (): boolean => exists(nodeAttrsSelector),
       getNodeAttributesSelectOptions: () => find(nodeAttrsSelector).find('option'),
       setDataAllocation: async (value: DataTierAllocationType) => {
-        act(() => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
+        await openNodeAttributesSection();
+
         await act(async () => {
           switch (value) {
             case 'node_roles':
@@ -359,6 +359,7 @@ export const setup = async (arg?: {
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasFrozenPhase: () => exists('ilmTimelineFrozenPhase'),
         hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
       },
       hot: {
@@ -396,6 +397,17 @@ export const setup = async (arg?: {
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
         ...createNodeAllocationActions('cold'),
+      },
+      frozen: {
+        enable: enable('frozen'),
+        ...createMinAgeActions('frozen'),
+        setReplicas: setReplicas('frozen'),
+        setFreeze,
+        freezeExists,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-frozen'),
+        ...createIndexPriorityActions('frozen'),
+        ...createSearchableSnapshotActions('frozen'),
+        ...createNodeAllocationActions('frozen'),
       },
       delete: {
         isShown: () => exists('delete-phaseContent'),

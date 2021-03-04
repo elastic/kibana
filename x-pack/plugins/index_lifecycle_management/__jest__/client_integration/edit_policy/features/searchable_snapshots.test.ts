@@ -94,6 +94,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         ).toBe(true);
       });
     });
+
     describe('existing policy', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -124,6 +125,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       });
     });
   });
+
   describe('on non-enterprise license', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -145,19 +147,25 @@ describe('<EditPolicy /> searchable snapshots', () => {
       const { component } = testBed;
       component.update();
     });
+
     test('disable setting searchable snapshots', async () => {
       const { actions } = testBed;
 
-      expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.frozen.searchableSnapshotsExists()).toBeFalsy();
 
       await actions.cold.enable(true);
+      await actions.frozen.enable(true);
 
       // Still hidden in hot
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
       expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
       expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
+
+      expect(actions.frozen.searchableSnapshotsExists()).toBeTruthy();
+      expect(actions.frozen.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
     });
   });
 });
