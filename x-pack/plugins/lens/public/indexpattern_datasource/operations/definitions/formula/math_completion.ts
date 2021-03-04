@@ -79,7 +79,7 @@ export async function suggest(
       );
     }
     if (tokenInfo && word) {
-      return getFunctionSuggestions(word, operationDefinitionMap);
+      return getFunctionSuggestions(word, indexPattern);
     }
   } catch (e) {
     // Fail silently
@@ -87,14 +87,25 @@ export async function suggest(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
-function getFunctionSuggestions(
-  word: monaco.editor.IWordAtPosition,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-) {
-  const list = Object.keys(operationDefinitionMap)
-    .filter((func) => startsWith(func, word.word))
-    .map((key) => operationDefinitionMap[key]);
-  return { list, type: SUGGESTION_TYPE.FUNCTIONS };
+export function getPossibleFunctions(indexPattern: IndexPattern) {
+  const available = getAvailableOperationsByMetadata(indexPattern);
+  const possibleOperationNames: string[] = [];
+  available.forEach((a) => {
+    if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
+      possibleOperationNames.push(
+        ...a.operations.filter((o) => o.type !== 'managedReference').map((o) => o.operationType)
+      );
+    }
+  });
+
+  return uniq(possibleOperationNames);
+}
+
+function getFunctionSuggestions(word: monaco.editor.IWordAtPosition, indexPattern: IndexPattern) {
+  return {
+    list: uniq(getPossibleFunctions(indexPattern).filter((func) => startsWith(func, word.word))),
+    type: SUGGESTION_TYPE.FUNCTIONS,
+  };
 }
 
 function getArgumentSuggestions(

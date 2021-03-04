@@ -9,7 +9,15 @@ import React, { useCallback, useState } from 'react';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { TinymathAST, TinymathVariable } from '@kbn/tinymath';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiText,
+  EuiSpacer,
+  EuiPanel,
+} from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -33,7 +41,13 @@ import {
   hasMathNode,
 } from './util';
 import { useDebounceWithOptions } from '../helpers';
-import { LensMathSuggestion, SUGGESTION_TYPE, suggest, getSuggestion } from './math_completion';
+import {
+  LensMathSuggestion,
+  SUGGESTION_TYPE,
+  suggest,
+  getSuggestion,
+  getPossibleFunctions,
+} from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
 import './formula.scss';
@@ -311,6 +325,49 @@ function FormulaEditor({
 
   return (
     <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText>
+            {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
+              defaultMessage: 'Function reference',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <div style={{ height: 100, overflow: 'auto' }}>
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.lens.formula.basicFunctions', {
+                  defaultMessage: 'Basic functions',
+                })}
+              </p>
+
+              <p>
+                <strong>+, -, /, *</strong>
+              </p>
+
+              <p>
+                <strong>pow()</strong>
+              </p>
+            </EuiText>
+
+            <EuiSpacer />
+
+            <EuiText>
+              {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
+                defaultMessage: 'Elasticsearch aggregations',
+                description: 'Do not translate Elasticsearch',
+              })}
+            </EuiText>
+            <EuiDescriptionList
+              compressed
+              listItems={getPossibleFunctions(indexPattern).map((key) => ({
+                title: `${key}: ${operationDefinitionMap[key].displayName}`,
+                description: getHelpText(key, operationDefinitionMap),
+              }))}
+            />
+          </div>
+        </EuiPanel>
+      </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <CodeEditor
           height={200}
@@ -345,6 +402,9 @@ function FormulaEditor({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton
+          disabled={currentColumn.params.formula === text}
+          color={currentColumn.params.formula !== text ? 'primary' : 'text'}
+          fill={currentColumn.params.formula !== text}
           onClick={() => {
             updateLayer(
               regenerateLayerFromAst(
@@ -357,8 +417,11 @@ function FormulaEditor({
               )
             );
           }}
+          iconType="play"
         >
-          Submit
+          {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
+            defaultMessage: 'Submit',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -552,4 +615,38 @@ function extractColumns(
   mathColumn.label = newColId;
   columns.push(mathColumn);
   return columns;
+}
+
+// TODO: i18n this whole thing, or move examples into the operation definitions with i18n
+function getHelpText(
+  type: string,
+  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
+) {
+  const definition = operationDefinitionMap[type];
+
+  if (type === 'count') {
+    return (
+      <EuiText size="s">
+        <p>Example: count()</p>
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiText size="s">
+      {definition.input === 'field' ? <p>Example: {type}(bytes)</p> : null}
+      {definition.input === 'fullReference' && !('operationParams' in definition) ? (
+        <p>Example: {type}(sum(bytes))</p>
+      ) : null}
+
+      {'operationParams' in definition && definition.operationParams ? (
+        <p>
+          <p>
+            Example: {type}(sum(bytes),{' '}
+            {definition.operationParams.map((p) => `${p.name}=5`).join(', ')})
+          </p>
+        </p>
+      ) : null}
+    </EuiText>
+  );
 }
