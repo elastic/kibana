@@ -189,7 +189,7 @@ my-package:
     mixed: {{mixed}}
     concatenatedEnd: {{a}}{{b}}
     concatenatedMiddle: {{c}}{{d}}
-    mixedMultiline: |
+    mixedMultiline: |-
         {{{ search }}} | streamstats`;
 
     const vars = {
@@ -212,7 +212,7 @@ my-package:
         mixed: '1s',
         concatenatedEnd: '/opt/package/*/logs/my.log*',
         concatenatedMiddle: '/opt/*/package/logs/*my.log',
-        mixedMultiline: 'search sourcetype="access*" | streamstats\n',
+        mixedMultiline: 'search sourcetype="access*" | streamstats',
       },
     };
 
