@@ -1396,8 +1396,6 @@
     "devTools.devToolsTitle": "开发工具",
     "devTools.k7BreadcrumbsDevToolsLabel": "开发工具",
     "devTools.pageTitle": "开发工具",
-    "discover.advancedSettings.aggsTermsSizeText": "确定在单击“可视化”按钮时将在发现侧边栏的字段下拉列表中可视化多少个词。",
-    "discover.advancedSettings.aggsTermsSizeTitle": "词数目",
     "discover.advancedSettings.context.defaultSizeText": "要在上下文视图中显示的周围条目数目",
     "discover.advancedSettings.context.defaultSizeTitle": "上下文大小",
     "discover.advancedSettings.context.sizeStepText": "递增或递减上下文大小的步进大小",

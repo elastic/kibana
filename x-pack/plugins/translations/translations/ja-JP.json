@@ -1396,8 +1396,6 @@
     "devTools.devToolsTitle": "開発ツール",
     "devTools.k7BreadcrumbsDevToolsLabel": "開発ツール",
     "devTools.pageTitle": "開発ツール",
-    "discover.advancedSettings.aggsTermsSizeText": "「可視化」ボタンをクリックした際に、フィールドドロップダウンやディスカバリサイドバーに可視化される用語の数を設定します。",
-    "discover.advancedSettings.aggsTermsSizeTitle": "用語数",
     "discover.advancedSettings.context.defaultSizeText": "コンテキストビューに表示される周りのエントリーの数",
     "discover.advancedSettings.context.defaultSizeTitle": "コンテキストサイズ",
     "discover.advancedSettings.context.sizeStepText": "コンテキストサイズを増減させる際の最低単位です",
