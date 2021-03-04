@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import qs from 'query-string';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,6 +17,10 @@ import {
   EuiFlexItem,
   EuiAccordion,
   EuiIcon,
+  EuiIconTip,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 
 import { RollupAction } from '../../../../../../../common/types';
@@ -113,7 +118,61 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                   </EuiButtonEmpty>
                 }
               >
-                Some details...
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList textStyle="reverse">
+                      <EuiDescriptionListTitle>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.rollup.summary.itemTimeFieldLabel"
+                          data-test-subj="rollupDetailDateHistogramTimeFieldTitle"
+                          defaultMessage="Time field"
+                        />
+                      </EuiDescriptionListTitle>
+
+                      <EuiDescriptionListDescription
+                        className="eui-textBreakWord"
+                        data-test-subj="rollupDetailDateHistogramTimeFieldDescription"
+                      >
+                        {field.value.config.groups.date_histogram.field}
+                      </EuiDescriptionListDescription>
+                      <EuiDescriptionListTitle>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalLabel"
+                          data-test-subj="rollupDetailDateHistogramIntervalTitle"
+                          defaultMessage="Interval"
+                        />{' '}
+                        <EuiIconTip
+                          content={
+                            <FormattedMessage
+                              id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalTip"
+                              defaultMessage="The time bucket interval into which data is rolled up"
+                            />
+                          }
+                        />
+                      </EuiDescriptionListTitle>
+
+                      <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramIntervalDescription">
+                        {field.value.config.groups.date_histogram.calendar_interval ||
+                          field.value.config.groups.date_histogram.fixed_interval}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiDescriptionList textStyle="reverse">
+                      <EuiDescriptionListTitle>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.rollup.summary.itemTimezoneLabel"
+                          data-test-subj="rollupDetailDateHistogramTimezoneTitle"
+                          defaultMessage="Timezone"
+                        />
+                      </EuiDescriptionListTitle>
+
+                      <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramTimezoneDescription">
+                        {field.value.config.groups.date_histogram.time_zone}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiAccordion>
             );
           }
