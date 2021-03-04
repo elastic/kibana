@@ -9,7 +9,14 @@ import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiAccordion } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiAccordion,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { RollupAction } from '../../../../../../../common/types';
 
@@ -43,6 +50,8 @@ const i18nTexts = {
 export const RollupField: FunctionComponent<Props> = ({ phase }) => {
   const history = useHistory();
 
+  const path = `phases.${phase}.actions.rollup`;
+
   return (
     <ToggleFieldWithDescribedFormRow
       title={<h3>{globalI18nTexts.editPolicy.rollupLabel}</h3>}
@@ -57,13 +66,20 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
       }}
       fullWidth
     >
-      <UseField<RollupAction> path={`phases.${phase}.actions.rollup`}>
+      <UseField<RollupAction> path={path}>
         {(field) => {
           if (!field.value) {
             return (
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiText>{i18nTexts.states.activeNotConfigured.heading}</EuiText>
+                  <EuiText>
+                    {!field.isValid && (
+                      <>
+                        <EuiIcon type="alert" color="danger" />{' '}
+                      </>
+                    )}
+                    {i18nTexts.states.activeNotConfigured.heading}
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonEmpty

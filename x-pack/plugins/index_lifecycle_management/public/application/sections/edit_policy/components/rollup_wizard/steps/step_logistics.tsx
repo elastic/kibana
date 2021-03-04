@@ -26,12 +26,14 @@ import { loadPolicies } from '../../../../../services/api';
 
 import { DescribedFormRow } from '../../../../components';
 
+import { StepFields } from '../rollup_wizard';
+
 // @ts-ignore
 import { StepError } from './components';
 
 interface Props {
   fields: Record<string, any>;
-  onFieldsChange: (arg: unknown) => void;
+  onFieldsChange: (arg: StepFields['STEP_LOGISTICS']) => void;
   hasErrors: boolean;
   areStepErrorsVisible: boolean;
 }
@@ -142,7 +144,7 @@ export class StepLogistics extends Component<Props, State> {
                   onChange={(e) => {
                     this.setState({ useCustomPolicy: e.target.checked });
                     if (!e.target.checked) {
-                      onFieldsChange({ rollupIlmPolicy: undefined });
+                      onFieldsChange({ rollupIndexIlmPolicy: undefined });
                     }
                   }}
                 />

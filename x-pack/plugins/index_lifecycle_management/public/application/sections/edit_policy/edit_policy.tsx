@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useMemo, useState, useEffect } from 'react';
-import { get } from 'lodash';
+import { get, set, cloneDeep } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -82,12 +82,16 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
 
-  const { form } = useForm({
-    schema,
-    defaultValue: {
+  const defaultFormValue = useMemo(() => {
+    return {
       ...currentPolicy,
       name: originalPolicyName,
-    },
+    };
+  }, [currentPolicy, originalPolicyName]);
+
+  const { form } = useForm({
+    schema,
+    defaultValue: defaultFormValue,
     deserializer,
     serializer,
   });
@@ -355,7 +359,20 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           }
           phase={currentView.phase}
           onDone={(rollupAction) => {
-            const rollupField = form.getFields()[`phases.${currentView.phase}.actions.rollup`];
+            const fieldPath = `phases.${currentView.phase}.actions.rollup`;
+            const rollupField = form.getFields()[fieldPath];
+            const defaultValue = cloneDeep({
+              ...currentPolicy,
+              name: originalPolicyName,
+            });
+
+            set(defaultValue, fieldPath, rollupAction);
+
+            form.reset({
+              resetValues: false,
+              defaultValue,
+            });
+
             rollupField.setValue(rollupAction);
             const { search } = history.location;
             const newQueryParams = qs.parse(search);
