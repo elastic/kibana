@@ -217,7 +217,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
+      return recentQueryString !== '' && recentQueryString.includes(query);
     });
     return matchingRecentSearches.map((recentSearch) => {
       const text = toUser(recentSearch);
