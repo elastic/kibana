@@ -74,17 +74,24 @@ export function getResponseInspectorStats(
     };
   }
 
-  if (resp && resp.hits) {
+  if (resp && resp.hits?.total !== undefined) {
     stats.hitsTotal = {
       label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
         defaultMessage: 'Hits (total)',
       }),
-      value: `${resp.hits.total}`,
+      value:
+        typeof resp.hits.total === 'number'
+          ? `${resp.hits.total}`
+          : resp.hits.total.relation === 'eq'
+          ? `${resp.hits.total.value}`
+          : `> ${resp.hits.total.value}`,
       description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
         defaultMessage: 'The number of documents that match the query.',
       }),
     };
+  }
 
+  if (resp && resp.hits) {
     stats.hits = {
       label: i18n.translate('data.search.searchSource.hitsLabel', {
         defaultMessage: 'Hits',
