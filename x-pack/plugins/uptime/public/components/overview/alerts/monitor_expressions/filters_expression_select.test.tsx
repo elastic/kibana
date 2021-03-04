@@ -36,13 +36,7 @@ describe('FiltersExpressionSelect', () => {
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiSpacer
-          size="xs"
-        />
-      </Fragment>
-    `);
+    expect(component).toMatchInlineSnapshot(`<Fragment />`);
   });
 
   it.each([

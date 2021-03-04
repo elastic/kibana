@@ -37,15 +37,9 @@ describe('alert monitor status component', () => {
           <OldAlertCallOut
             isOldAlert={true}
           />
-          <EuiSpacer
-            size="m"
-          />
-          <Component
-            aria-label="Input that allows filtering criteria for the monitor status alert"
-            data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
-            defaultKuery="monitor.id: foo"
-            shouldUpdateUrl={false}
-            updateDefaultKuery={[Function]}
+          <AlertQueryBar
+            onChange={[Function]}
+            query="monitor.id: foo"
           />
           <EuiSpacer
             size="s"
