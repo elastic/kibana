@@ -7,6 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+
 import { RequirementVersion } from '../../../types';
 
 const CodeText = styled.span`

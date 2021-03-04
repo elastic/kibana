@@ -18,6 +18,10 @@ const alwaysImportedTests = [
   require.resolve('../test/functional_embedded/config.ts'),
   require.resolve('../test/functional_cors/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
+  require.resolve('../test/functional_vis_wizard/config.ts'),
+  require.resolve('../test/saved_object_tagging/functional/config.ts'),
+  require.resolve('../test/usage_collection/config.ts'),
+  require.resolve('../test/fleet_functional/config.ts'),
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),
@@ -69,13 +73,9 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/fleet_api_integration/config.ts'),
-  require.resolve('../test/functional_vis_wizard/config.ts'),
   require.resolve('../test/send_search_to_background_integration/config.ts'),
-  require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
-  require.resolve('../test/usage_collection/config.ts'),
-  require.resolve('../test/fleet_functional/config.ts'),
 ];
 
 require('../../src/setup_node_env');
