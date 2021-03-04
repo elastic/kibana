@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ConfigType } from '../config';
-import { SecurityLicense } from '../../common/licensing';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { ConfigType } from '../config';
 
 interface Usage {
   auditLoggingEnabled: boolean;

@@ -8,12 +8,7 @@
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import {
-  CaseResponse,
-  CaseType,
-  CollectionWithSubCaseResponse,
-  ConnectorTypes,
-} from '../../../common/api';
+import { CaseResponse, CaseType, ConnectorTypes } from '../../../common/api';
 import { CommentType } from '../../../common/api/cases/comment';
 import { CASES_URL } from '../../../common/constants';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
@@ -119,9 +114,7 @@ async function handleGenGroupAlerts(argv: any) {
       ),
     };
 
-    const executeResp = await client.request<
-      ActionTypeExecutorResult<CollectionWithSubCaseResponse>
-    >({
+    const executeResp = await client.request<ActionTypeExecutorResult<CaseResponse>>({
       path: `/api/actions/action/${createdAction.data.id}/_execute`,
       method: 'POST',
       body: {

@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('create_threat_matching', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/93152
+  describe.skip('create_threat_matching', () => {
     describe('validation errors', () => {
       it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
         const { body } = await supertest
@@ -307,6 +308,8 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -327,6 +330,8 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -388,6 +393,8 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
+                    id: '978785',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.ip',
                     type: 'url',
                   },
@@ -401,6 +408,8 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
+                    id: '978787',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.ip',
                     type: 'ip',
                   },
@@ -468,24 +477,14 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
+                    id: '978785',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.ip',
                     type: 'url',
                   },
                   port: 57324,
                   provider: 'geenensp',
                   type: 'url',
-                },
-                {
-                  description: 'this should match auditbeat/hosts on ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'ip',
-                  },
-                  provider: 'other_provider',
-                  type: 'ip',
                 },
                 // We do not merge matched indicators during enrichment, so in
                 // certain circumstances a given indicator document could appear
@@ -498,12 +497,28 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: 57324,
+                    id: '978785',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.port',
                     type: 'url',
                   },
                   port: 57324,
                   provider: 'geenensp',
                   type: 'url',
+                },
+                {
+                  description: 'this should match auditbeat/hosts on ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    id: '978787',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
+                    field: 'source.ip',
+                    type: 'ip',
+                  },
+                  provider: 'other_provider',
+                  type: 'ip',
                 },
               ],
             },
@@ -570,6 +585,8 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -590,6 +607,8 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -606,6 +625,8 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
+                    id: '978785',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.ip',
                     type: 'url',
                   },
@@ -619,6 +640,8 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: 57324,
+                    id: '978785',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'source.port',
                     type: 'url',
                   },

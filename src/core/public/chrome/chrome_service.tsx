@@ -24,7 +24,6 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 import {
   ChromeBadge,
   ChromeBrand,
@@ -34,6 +33,8 @@ import {
   InternalChromeStart,
   ChromeUserBanner,
 } from './types';
+
+export type { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 
