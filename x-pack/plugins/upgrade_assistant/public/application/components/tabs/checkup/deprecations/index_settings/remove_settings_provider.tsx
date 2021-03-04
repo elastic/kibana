@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiConfirmModal } from '@elastic/eui';
-// import { HttpSetup } from 'src/core/public';
+import { useAppContext } from '../../../../../app_context';
 
 interface Props {
-  children: (removeIndexSettings: any) => React.ReactNode;
+  children: (
+    removeIndexSettings: any,
+    successfulRequests: { [key: string]: boolean }
+  ) => React.ReactNode;
 }
 
 const i18nTexts = {
@@ -27,79 +30,102 @@ const i18nTexts = {
       defaultMessage: 'Cancel',
     }
   ),
-  modalTitle: i18n.translate(
-    'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.title',
-    {
-      defaultMessage: 'Remove deprecated index settings?',
-    }
-  ),
   modalDescription: i18n.translate(
     'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.description',
     {
-      defaultMessage: 'The following deprecated index settings were detected and will be deleted:',
+      defaultMessage: 'The following deprecated index settings were detected and will be removed:',
+    }
+  ),
+  successNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.successNotificationText',
+    {
+      defaultMessage: 'Index settings removed',
+    }
+  ),
+  errorNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.errorNotificationText',
+    {
+      defaultMessage: 'Error removing index settings',
     }
   ),
 };
 
 export const RemoveIndexSettingsProvider = ({ children }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [deprecatedSettings, setDeprecatedSettings] = useState<string[]>([]);
+  const [successfulRequests, setSuccessfulRequests] = useState<{ [key: string]: boolean }>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const removeIndexSettings = () => {
-    // try {
-    //   await this.props.http.post(
-    //     `/api/upgrade_assistant/add_query_default_field/${this.props.indexName}`,
-    //     {
-    //       body: JSON.stringify({
-    //         fieldTypes: [...BEAT_DEFAULT_FIELD_TYPES],
-    //         otherFields: [...BEAT_OTHER_DEFAULT_FIELDS],
-    //       }),
-    //     }
-    //   );
+  const deprecatedSettings = useRef<string[]>([]);
+  const indexName = useRef<string | undefined>(undefined);
 
-    //   this.setState({
-    //     fixLoadingState: LoadingState.Success,
-    //   });
-    // } catch (e) {
-    //   this.setState({
-    //     fixLoadingState: LoadingState.Error,
-    //   });
-    // }
+  const { http, notifications } = useAppContext();
 
-    setIsModalOpen(false);
+  const removeIndexSettings = async () => {
+    setIsLoading(true);
+    try {
+      await http.post(`/api/upgrade_assistant/${indexName.current}/index_settings`, {
+        body: JSON.stringify({
+          settings: deprecatedSettings.current,
+        }),
+      });
+
+      setIsLoading(false);
+      setSuccessfulRequests({
+        [indexName.current!]: true,
+        ...successfulRequests,
+      });
+      closeModal();
+      notifications.toasts.addSuccess(i18nTexts.successNotificationText);
+    } catch (e) {
+      setIsLoading(false);
+      closeModal();
+      notifications.toasts.addError(e, {
+        title: i18nTexts.errorNotificationText,
+      });
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const confirmDelete = () => {
-    closeModal();
-  };
-
-  const removeSettingsPrompt = (settings: string[]) => {
+  const removeSettingsPrompt = (index: string, settings: string[]) => {
     setIsModalOpen(true);
-    setDeprecatedSettings(settings);
+    setSuccessfulRequests({
+      index: false,
+      ...successfulRequests,
+    });
+    indexName.current = index;
+    deprecatedSettings.current = settings;
   };
 
   return (
     <>
-      {children(removeSettingsPrompt)}
+      {children(removeSettingsPrompt, successfulRequests)}
 
       {isModalOpen && (
         <EuiConfirmModal
-          title={i18nTexts.modalTitle}
+          title={i18n.translate(
+            'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.title',
+            {
+              defaultMessage: `Remove deprecated settings for '{indexName}'?`,
+              values: {
+                indexName: indexName.current,
+              },
+            }
+          )}
           data-test-subj="indexSettingsDeleteConfirmModal"
           onCancel={closeModal}
-          onConfirm={confirmDelete}
+          onConfirm={removeIndexSettings}
           cancelButtonText={i18nTexts.cancelButtonLabel}
           buttonColor="danger"
           confirmButtonText={i18nTexts.removeButtonLabel}
+          isLoading={isLoading}
         >
           <>
             <p>{i18nTexts.modalDescription}</p>
             <ul>
-              {deprecatedSettings.map((setting, index) => (
+              {deprecatedSettings.current.map((setting, index) => (
                 <li key={`${setting}-${index}`}>
                   <EuiCode>{setting}</EuiCode>
                 </li>

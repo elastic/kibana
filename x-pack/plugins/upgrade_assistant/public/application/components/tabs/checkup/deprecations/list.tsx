@@ -21,9 +21,9 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
 /**
  * Used to show a single deprecation message with any detailed information.
  */
-const MessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
-  deprecation,
-}) => {
+const MessageDeprecation: FunctionComponent<{
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ deprecation }) => {
   const items = [];
 
   if (deprecation.details) {
@@ -75,10 +75,7 @@ interface IndexDeprecationProps {
  */
 const IndexDeprecation: FunctionComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
   return (
-    <DeprecationCell
-      docUrl={deprecation.url}
-      deprecatedIndexSettings={deprecation?.deprecatedIndexSettings}
-    >
+    <DeprecationCell docUrl={deprecation.url}>
       <IndexDeprecationTable indices={indices} />
     </DeprecationCell>
   );

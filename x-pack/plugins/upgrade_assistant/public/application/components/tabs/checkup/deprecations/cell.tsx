@@ -98,11 +98,11 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* {deprecatedIndexSettings?.length && (
+      {deprecatedIndexSettings?.length && (
         <EuiFlexItem grow={false}>
-          <FixIndexSettingsButton settings={deprecatedIndexSettings} />
+          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={indexName!} />
         </EuiFlexItem>
-      )} */}
+      )}
     </EuiFlexGroup>
 
     <EuiSpacer size="s" />

@@ -20,6 +20,6 @@ export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
 export const indexSettingDeprecations = {
   translog: {
     deprecationMessage: 'translog retention settings are ignored',
-    settings: ['translog.retention.size', 'translog.retention.age', 'index.soft_deletes.enabled'],
+    settings: ['translog.retention.size', 'translog.retention.age'],
   },
 };

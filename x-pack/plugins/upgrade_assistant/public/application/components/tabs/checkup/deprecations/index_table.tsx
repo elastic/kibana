@@ -177,7 +177,12 @@ export class IndexDeprecationTable extends React.Component<
               );
             }
 
-            return <FixIndexSettingsButton settings={indexDep.deprecatedIndexSettings} />;
+            return (
+              <FixIndexSettingsButton
+                settings={indexDep.deprecatedIndexSettings!}
+                index={indexDep.index}
+              />
+            );
           },
         },
       ],
