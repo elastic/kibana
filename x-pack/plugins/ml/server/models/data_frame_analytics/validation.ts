@@ -11,7 +11,7 @@ import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   INCLUDED_FIELDS_THRESHOLD,
   MINIMUM_NUM_FIELD_FOR_CHECK,
-  PERCENT_EMPTY_LIMIT,
+  FRACTION_EMPTY_LIMIT,
   TRAINING_DOCS_LOWER,
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
@@ -116,7 +116,7 @@ async function getValidationCheckMessages(
 ) {
   const messages = [];
   const emptyFields: string[] = [];
-  const percentEmptyLimit = PERCENT_EMPTY_LIMIT * 100;
+  const percentEmptyLimit = FRACTION_EMPTY_LIMIT * 100;
   let depVarValid = true;
   let analysisFieldsNumHigh = false;
   let analysisFieldsEmpty = false;
@@ -173,7 +173,7 @@ async function getValidationCheckMessages(
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
         const empty = docCount / totalDocs;
 
-        if (docCount > 0 && empty > PERCENT_EMPTY_LIMIT) {
+        if (docCount > 0 && empty > FRACTION_EMPTY_LIMIT) {
           emptyFields.push(aggName);
 
           if (aggName === depVar) {

@@ -23,4 +23,4 @@ export const TRAINING_DOCS_UPPER = 200000;
 export const TRAINING_DOCS_LOWER = 200;
 export const INCLUDED_FIELDS_THRESHOLD = 100;
 export const MINIMUM_NUM_FIELD_FOR_CHECK = 25;
-export const PERCENT_EMPTY_LIMIT = 0.3;
+export const FRACTION_EMPTY_LIMIT = 0.3;
