@@ -62,6 +62,8 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     }
   }
 
+  public async reload() {}
+
   private renderComponent() {
     if (!this.node) {
       return;
