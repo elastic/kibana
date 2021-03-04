@@ -41,7 +41,12 @@ export class DrilldownManagerState {
   /**
    * Title displayed at the top of <DrilldownManager> flyout.
    */
-  public readonly title$ = new BehaviorSubject<React.ReactNode>(txtDefaultTitle);
+  private readonly title$ = new BehaviorSubject<React.ReactNode>(txtDefaultTitle);
+
+  /**
+   * Footer displayed at the bottom of <DrilldownManager> flyout.
+   */
+  private readonly footer$ = new BehaviorSubject<React.ReactNode>(null);
 
   /**
    * Route inside Drilldown Manager flyout that is displayed to the user. Some
@@ -127,6 +132,15 @@ export class DrilldownManagerState {
    */
   public setTitle(title: React.ReactNode) {
     this.title$.next(title);
+  }
+
+  /**
+   * Set the new flyout footer that renders at the very bottom of the Drilldown
+   * Manager flyout.
+   * @param footer New title.
+   */
+  public setFooter(footer: React.ReactNode) {
+    this.footer$.next(footer);
   }
 
   /**
@@ -246,6 +260,7 @@ export class DrilldownManagerState {
 
   /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
+  public readonly useFooter = () => useObservable(this.footer$, this.footer$.getValue());
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
   public readonly useWelcomeMessage = () =>
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());

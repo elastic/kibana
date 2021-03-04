@@ -6,9 +6,7 @@
  */
 
 import * as React from 'react';
-import { EuiButton } from '@elastic/eui';
 import { useDrilldownManager } from '../context';
-import { txtCreateDrilldownButtonLabel, txtEditDrilldownButtonLabel } from './i18n';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 import { DrilldownManagerContent } from './drilldown_manager_content';
@@ -16,20 +14,20 @@ import { DrilldownManagerContent } from './drilldown_manager_content';
 export const DrilldownManager: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const title = drilldowns.useTitle();
-  const route = drilldowns.useRoute();
+  const footer = drilldowns.useFooter();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
-  const footer =
-    route[0] === 'create' ? (
-      <EuiButton
-        onClick={drilldowns.onCreateDrilldown}
-        fill
-        // isDisabled={!isActionValid(wizardConfig)}
-        data-test-subj={'drilldownWizardSubmit'}
-      >
-        {route[0] === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
-      </EuiButton>
-    ) : null;
+  // const footer =
+  //   route[0] === 'create' ? (
+  //     <EuiButton
+  //       onClick={drilldowns.onCreateDrilldown}
+  //       fill
+  //       // isDisabled={!isActionValid(wizardConfig)}
+  //       data-test-subj={'drilldownWizardSubmit'}
+  //     >
+  //       {route[0] === 'create' ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
+  //     </EuiButton>
+  //   ) : null;
 
   const banner = !hideWelcomeMessage && (
     <DrilldownHelloBar
