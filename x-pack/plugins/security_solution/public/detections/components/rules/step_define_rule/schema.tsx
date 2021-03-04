@@ -41,7 +41,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fiedIndexPatternsLabel',
       {
         defaultMessage: 'Index patterns',
       }
@@ -173,13 +173,13 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   timeline: {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldTimelineTemplateLabel',
       {
         defaultMessage: 'Timeline template',
       }
     ),
     helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldTimelineTemplateHelpText',
       {
         defaultMessage: 'Select which timeline to use when investigating generated alerts.',
       }
@@ -195,22 +195,44 @@ export const schema: FormSchema<DefineStepRule> = {
     field: {
       type: FIELD_TYPES.COMBO_BOX,
       label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldLabel',
         {
           defaultMessage: 'Group by',
         }
       ),
       helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldHelpText',
         {
           defaultMessage: "Select fields to group by. Fields are joined together with 'AND'",
         }
       ),
+      validations: [
+        {
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            return fieldValidators.maxLengthField({
+              length: 3,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
+                {
+                  defaultMessage: 'Number of fields must be 3 or less.',
+                }
+              ),
+            })(...args);
+          },
+        },
+      ],
     },
     value: {
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdValueLabel',
         {
           defaultMessage: 'Threshold',
         }
@@ -245,7 +267,7 @@ export const schema: FormSchema<DefineStepRule> = {
         fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityFieldLabel',
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel',
           {
             defaultMessage: 'Count',
           }
@@ -277,7 +299,7 @@ export const schema: FormSchema<DefineStepRule> = {
           },
         ],
         helpText: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldCardinalityFieldHelpText',
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText',
           {
             defaultMessage: 'Select a field to check cardinality',
           }
@@ -287,7 +309,7 @@ export const schema: FormSchema<DefineStepRule> = {
         fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
         type: FIELD_TYPES.NUMBER,
         label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityValueFieldLabel',
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel',
           {
             defaultMessage: 'Unique values',
           }

@@ -59,6 +59,7 @@ export interface ThresholdResult {
     value: number;
   }>;
   count: number;
+  from: string;
 }
 
 export interface ThresholdSignalHistoryRecord {
