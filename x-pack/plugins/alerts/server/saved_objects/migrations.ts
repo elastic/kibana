@@ -24,7 +24,7 @@ type AlertMigration = (
 
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
 
-const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.actions.some((action) =>
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
@@ -195,14 +195,14 @@ function restructureConnectorsThatSupportIncident(
         comments,
         comment,
         description,
-        externalId,
+        savedObjectId,
         severity,
         urgency,
         impact,
       } = action.params.subActionParams as {
         title: string;
         description?: string;
-        externalId?: string;
+        savedObjectId?: string;
         severity?: string;
         urgency?: string;
         impact?: string;
@@ -219,7 +219,7 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 short_description: title,
                 description,
-                externalId,
+                savedObjectId,
                 severity,
                 urgency,
                 impact,
@@ -239,7 +239,7 @@ function restructureConnectorsThatSupportIncident(
         title,
         comments,
         description,
-        externalId,
+        savedObjectId,
         issueType,
         priority,
         labels,
@@ -247,7 +247,7 @@ function restructureConnectorsThatSupportIncident(
       } = action.params.subActionParams as {
         title: string;
         description: string;
-        externalId?: string;
+        savedObjectId?: string;
         issueType: string;
         priority?: string;
         labels?: string[];
@@ -264,7 +264,7 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 summary: title,
                 description,
-                externalId,
+                savedObjectId,
                 issueType,
                 priority,
                 labels,
@@ -278,11 +278,11 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.resilient') {
-      const { title, comments, description, externalId, incidentTypes, severityCode } = action
+      const { title, comments, description, savedObjectId, incidentTypes, severityCode } = action
         .params.subActionParams as {
         title: string;
         description: string;
-        externalId?: string;
+        savedObjectId?: string;
         incidentTypes?: number[];
         severityCode?: number;
         comments?: unknown[];
@@ -297,7 +297,7 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 name: title,
                 description,
-                externalId,
+                savedObjectId,
                 incidentTypes,
                 severityCode,
               },
