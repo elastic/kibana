@@ -165,6 +165,16 @@ export class DrilldownState {
     return uiTriggers;
   }
 
+  public isValid(): boolean {
+    if (!this.name$.getValue()) return false;
+    const config = this.config$.getValue();
+    if (!config) return false;
+    const triggers = this.triggers$.getValue();
+    if (triggers.length < 1) return false;
+    if (!this.factory.isConfigValid(config, this.getFactoryContext())) return false;
+    return true;
+  }
+
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
