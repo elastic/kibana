@@ -13,7 +13,7 @@ import { deleteActionRoute } from './delete';
 import { executeActionRoute } from './execute';
 import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
-import { listActionTypesRoute } from './list_action_types';
+import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
 import * as legacy from './legacy';
 
@@ -37,7 +37,7 @@ export function defineRoutes(
   updateActionRoute(router, licenseState);
 
   legacy.listActionTypesRoute(router, licenseState);
-  listActionTypesRoute(router, licenseState);
+  connectorTypesRoute(router, licenseState);
 
   legacy.executeActionRoute(router, licenseState);
   executeActionRoute(router, licenseState);

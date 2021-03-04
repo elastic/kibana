@@ -21,7 +21,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
   }));
 };
 
-export const listActionTypesRoute = (
+export const connectorTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {

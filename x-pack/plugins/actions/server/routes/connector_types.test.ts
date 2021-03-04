@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { listActionTypesRoute } from './list_action_types';
+import { connectorTypesRoute } from './connector_types';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
@@ -22,12 +22,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('listActionTypesRoute', () => {
+describe('connectorTypesRoute', () => {
   it('lists action types with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listActionTypesRoute(router, licenseState);
+    connectorTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -81,7 +81,7 @@ describe('listActionTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    listActionTypesRoute(router, licenseState);
+    connectorTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -122,7 +122,7 @@ describe('listActionTypesRoute', () => {
       throw new Error('OMG');
     });
 
-    listActionTypesRoute(router, licenseState);
+    connectorTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
