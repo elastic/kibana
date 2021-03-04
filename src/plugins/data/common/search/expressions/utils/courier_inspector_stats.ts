@@ -75,16 +75,18 @@ export function getResponseInspectorStats(
   }
 
   if (resp && resp.hits?.total !== undefined) {
+    let value: string | undefined;
+    if (typeof resp.hits.total === 'number') {
+      value = `${resp.hits.total}`;
+    } else {
+      const total = resp.hits.total as { relation: string; value: number };
+      value = total.relation === 'eq' ? `${total.value}` : `> ${total.value}`;
+    }
     stats.hitsTotal = {
       label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
         defaultMessage: 'Hits (total)',
       }),
-      value:
-        typeof resp.hits.total === 'number'
-          ? `${resp.hits.total}`
-          : resp.hits.total.relation === 'eq'
-          ? `${resp.hits.total.value}`
-          : `> ${resp.hits.total.value}`,
+      value,
       description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
         defaultMessage: 'The number of documents that match the query.',
       }),
