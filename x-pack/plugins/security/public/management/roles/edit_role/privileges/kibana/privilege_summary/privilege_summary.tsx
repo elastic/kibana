@@ -5,21 +5,32 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiOverlayMask,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiOverlayMask, EuiButton } from '@elastic/eui';
-import { EuiFlyout } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
-import { Space } from '../../../../../../../../spaces/public';
-import { Role } from '../../../../../../../common/model';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
+  spacesApiUi: SpacesApiUi;
 }
 export const PrivilegeSummary = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +65,7 @@ export const PrivilegeSummary = (props: Props) => {
                 spaces={props.spaces}
                 kibanaPrivileges={props.kibanaPrivileges}
                 canCustomizeSubFeaturePrivileges={props.canCustomizeSubFeaturePrivileges}
+                spacesApiUi={props.spacesApiUi}
               />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

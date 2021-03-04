@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
-import { getOneOuputHandler, getOutputsHandler, putOuputHandler } from './handler';
 import {
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+
+import { getOneOuputHandler, getOutputsHandler, putOuputHandler } from './handler';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
