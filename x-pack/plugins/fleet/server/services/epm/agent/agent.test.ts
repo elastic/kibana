@@ -187,7 +187,8 @@ my-package:
     startsWithAsterisk: {{startsWithAsterisk}}
     numeric: {{numeric}}
     mixed: {{mixed}}
-    concatenated: {{a}}{{b}}`;
+    concatenatedEnd: {{a}}{{b}}
+    concatenatedMiddle: {{c}}{{d}}`;
 
     const vars = {
       asteriskOnly: { value: '"*"', type: 'string' },
@@ -196,6 +197,8 @@ my-package:
       mixed: { value: '1s', type: 'string' },
       a: { value: '/opt/package/*', type: 'string' },
       b: { value: '/logs/my.log*', type: 'string' },
+      c: { value: '/opt/*/package/', type: 'string' },
+      d: { value: 'logs/*my.log', type: 'string' },
     };
 
     const targetOutput = {
@@ -204,7 +207,8 @@ my-package:
         startsWithAsterisk: '*lala',
         numeric: '100',
         mixed: '1s',
-        concatenated: '/opt/package/*/logs/my.log*',
+        concatenatedEnd: '/opt/package/*/logs/my.log*',
+        concatenatedMiddle: '/opt/*/package/logs/*my.log',
       },
     };
 
