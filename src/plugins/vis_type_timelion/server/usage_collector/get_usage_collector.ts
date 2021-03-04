@@ -11,13 +11,18 @@ import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
 import { IFieldType } from '../../../data/common';
-import { getIndexArgs } from '../../common/parser';
+import { extractIndexesFromExpression } from '../../common/parser';
 
 type ESResponse = SearchResponse<{ visualization: { visState: string }; updated_at: string }>;
 
 interface IndexPatternSavedObjectAttrs {
   title: string;
   fields: string;
+}
+
+interface VisState {
+  type?: string;
+  params?: any;
 }
 
 export interface TimelionUsage {
@@ -72,33 +77,32 @@ export const getStats = async (
   for (const hit of esResponse.hits.hits) {
     const visualization = hit._source?.visualization;
     const lastUpdated = hit._source?.updated_at;
-    const visState = JSON.parse(visualization?.visState ?? '{}');
+    let visState: VisState = {};
+    try {
+      visState = JSON.parse(visualization?.visState ?? '{}');
+    } catch (e) {
+      // invalid visState
+    }
 
     if (visState.type === 'timelion' && getPastDays(lastUpdated) <= 90) {
-      const indexArgs = getIndexArgs(visState.params.expression);
+      const indexes = extractIndexesFromExpression(visState.params.expression);
 
-      for (const arrayIndex in indexArgs) {
-        if (indexArgs.hasOwnProperty(arrayIndex)) {
-          const indexPatternId = indexArgs[arrayIndex]?.value.text;
+      for (const indexPatternTitle of indexes) {
+        const foundIndexPattern = indexPatterns.saved_objects.find(
+          (indexPattern) => indexPattern.attributes.title === indexPatternTitle
+        );
 
-          if (indexPatternId) {
-            const foundIndexPattern = indexPatterns.saved_objects.find(
-              (indexPattern) => indexPattern.attributes.title === indexPatternId
-            );
+        if (foundIndexPattern) {
+          const scriptedFields = JSON.parse(foundIndexPattern.attributes.fields).filter(
+            (field: IFieldType) => field.scripted
+          );
+          const isScriptedFieldInExpression = scriptedFields.some((field: IFieldType) =>
+            visState.params.expression.includes(field.name)
+          );
 
-            if (foundIndexPattern) {
-              const scriptedFields = JSON.parse(foundIndexPattern.attributes.fields).filter(
-                (field: IFieldType) => field.scripted
-              );
-              const isScriptedFieldInExpression = scriptedFields.some((field: IFieldType) =>
-                visState.params.expression.includes(field.name)
-              );
-
-              if (isScriptedFieldInExpression) {
-                timelionUsage.timelion_use_scripted_fields_90_days_total++;
-                break;
-              }
-            }
+          if (isScriptedFieldInExpression) {
+            timelionUsage.timelion_use_scripted_fields_90_days_total++;
+            break;
           }
         }
       }
