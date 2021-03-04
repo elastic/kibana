@@ -35,14 +35,14 @@ interface AggregationParams {
   environment?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  maxNumServices: number;
 }
-
-const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServiceTransactionStats({
   environment,
   setup,
   searchAggregatedTransactions,
+  maxNumServices,
 }: AggregationParams) {
   return withApmSpan('get_service_transaction_stats', async () => {
     const { apmEventClient, start, end, esFilter } = setup;
@@ -86,7 +86,7 @@ export async function getServiceTransactionStats({
           services: {
             terms: {
               field: SERVICE_NAME,
-              size: MAX_NUMBER_OF_SERVICES,
+              size: maxNumServices,
             },
             aggs: {
               transactionType: {
@@ -98,7 +98,6 @@ export async function getServiceTransactionStats({
                   environments: {
                     terms: {
                       field: SERVICE_ENVIRONMENT,
-                      missing: '',
                     },
                   },
                   sample: {
@@ -141,9 +140,9 @@ export async function getServiceTransactionStats({
         return {
           serviceName: bucket.key as string,
           transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets
-            .map((environmentBucket) => environmentBucket.key as string)
-            .filter(Boolean),
+          environments: topTransactionTypeBucket.environments.buckets.map(
+            (environmentBucket) => environmentBucket.key as string
+          ),
           agentName: topTransactionTypeBucket.sample.top[0].metrics[
             AGENT_NAME
           ] as AgentName,
