@@ -40,6 +40,7 @@ export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const CREATE_INDEX_API_PATH = `${GIS_API_PATH}/index/create`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
@@ -295,3 +296,16 @@ export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 export type RawValue = string | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
+
+export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
+
+export const MB = Math.pow(2, 20);
+export const MAX_FILE_SIZE = '100MB';
+export const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
+
+export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
+export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
+
+// Value to use in the Elasticsearch index mapping meta data to identify the
+// index as having been created by the ML File Data Visualizer.
+export const INDEX_META_DATA_CREATED_BY = 'ml-file-data-visualizer';

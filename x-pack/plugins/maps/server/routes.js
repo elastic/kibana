@@ -23,7 +23,7 @@ import {
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
-  API_ROOT_PATH,
+  API_ROOT_PATH, CREATE_INDEX_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -33,6 +33,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { importDataProvider } from './import_data';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -583,6 +584,70 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
           body: 'Error loading index settings',
           statusCode: 400,
         });
+      }
+    }
+  );
+
+  function importData(client, id, index, settings, mappings, ingestPipeline, data) {
+    const { importData: importDataFunc } = importDataProvider(client);
+    return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
+  }
+
+  router.post(
+    {
+      path: `/${CREATE_INDEX_API_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+        body: schema.object({
+          index: schema.string(),
+          data: schema.arrayOf(schema.any()),
+          settings: schema.maybe(schema.any()),
+          /** Mappings */
+          mappings: schema.any(),
+          /** Ingest pipeline definition */
+          ingestPipeline: schema.object({
+            id: schema.maybe(schema.string()),
+            pipeline: schema.maybe(schema.any()),
+          }),
+        }),
+      },
+      options: {
+        body: {
+          accepts: ['application/json'],
+          maxBytes: 104857600,
+        },
+        tags: ['access:maps:index'],
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { id } = request.query;
+        const { index, data, settings, mappings, ingestPipeline } = request.body;
+
+        // `id` being `undefined` tells us that this is a new import due to create a new index.
+        // follow-up import calls to just add additional data will include the `id` of the created
+        // index, we'll ignore those and don't increment the counter.
+
+        // if (id === undefined) {
+        //   await updateTelemetry();
+        // }
+
+        const result = await importData(
+          context.core.elasticsearch.client,
+          id,
+          index,
+          settings,
+          mappings,
+          // @ts-expect-error
+          ingestPipeline,
+          data
+        );
+        return response.ok({ body: result });
+      } catch (e) {
+        // return response.customError(wrapError(e));
+        console.log(e.message);
       }
     }
   );
