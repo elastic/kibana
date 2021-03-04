@@ -19,13 +19,13 @@ describe('getAlertingSectionBreadcrumb', () => {
     });
     expect(getAlertingSectionBreadcrumb('alerts')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
-        defaultMessage: 'Rules',
+        defaultMessage: 'Alerting Rules',
       }),
       href: `${routeToAlerts}`,
     });
     expect(getAlertingSectionBreadcrumb('home')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-        defaultMessage: 'Rules and Connectors',
+        defaultMessage: 'Alerting Rules and Connectors',
       }),
       href: `${routeToHome}`,
     });

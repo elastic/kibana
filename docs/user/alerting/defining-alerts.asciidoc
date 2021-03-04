@@ -112,4 +112,4 @@ Actions are not required on alerts. You can run an alert without actions to unde
 [float]
 === Manage alerts
 
-To modify an alert after it was created, including muting or disabling it, use the <<alert-management, alert listing in the Management UI>>.
+To modify an alert after it was created, including muting or disabling it, use the <<rule-management, rule listing in the Management UI>>.
