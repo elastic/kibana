@@ -398,6 +398,7 @@ export const signalRulesAlertType = ({
               thresholdSignalHistory,
               timestampOverride,
             });
+
             const esFilter = await getFilter({
               type,
               filters: filters ? filters.concat(bucketFilters) : bucketFilters,
@@ -439,6 +440,7 @@ export const signalRulesAlertType = ({
               inputIndexPattern: inputIndex,
               signalsIndex: outputIndex,
               timestampOverride,
+              startedAt,
               from: tuple.from.toDate(),
               name,
               createdBy,

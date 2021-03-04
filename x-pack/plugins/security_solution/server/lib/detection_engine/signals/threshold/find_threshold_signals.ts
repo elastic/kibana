@@ -122,8 +122,6 @@ export const findThresholdSignals = async ({
         },
       };
 
-  // console.log(JSON.stringify(aggregations));
-
   return singleSearchAfter({
     aggregations,
     searchAfterSortId: undefined,

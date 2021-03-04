@@ -57,6 +57,7 @@ interface BulkCreateThresholdSignalsParams {
   refresh: RefreshTypes;
   tags: string[];
   throttle: string;
+  startedAt: Date;
   from: Date;
   thresholdSignalHistory: ThresholdSignalHistory;
   buildRuleMessage: BuildRuleMessage;
@@ -65,6 +66,7 @@ interface BulkCreateThresholdSignalsParams {
 const getTransformedHits = (
   results: SignalSearchResponse,
   inputIndex: string,
+  startedAt: Date,
   from: Date,
   logger: Logger,
   threshold: ThresholdNormalized,
@@ -154,30 +156,19 @@ const getTransformedHits = (
         return acc;
       }
 
-      // TODO: is this necessary?
-      const terms = bucket.terms.map((term) => {
-        return {
-          field: term.field,
-          value: term.value,
-        };
-      });
-
-      const termsHash = getThresholdTermsHash(terms);
+      const termsHash = getThresholdTermsHash(bucket.terms);
       const signalHit = thresholdSignalHistory[termsHash];
 
       const source = {
         '@timestamp': timestamp,
         threshold_result: {
-          terms,
-          // TODO: is this necessary?
-          cardinality: bucket.cardinality?.map((cardinality) => {
-            return {
-              field: cardinality.field,
-              value: cardinality.value,
-            };
-          }),
+          terms: bucket.terms,
+          cardinality: bucket.cardinality,
           count: bucket.docCount,
-          from: signalHit?.lastSignalTimestamp,
+          from:
+            signalHit?.lastSignalTimestamp != null
+              ? new Date(signalHit!.lastSignalTimestamp)
+              : from,
         },
       };
 
@@ -185,9 +176,12 @@ const getTransformedHits = (
         _index: inputIndex,
         _id: calculateThresholdSignalUuid(
           ruleId,
-          from,
+          startedAt,
           threshold.field,
-          bucket.terms.map((term) => term.value).join(',')
+          bucket.terms
+            .map((term) => term.value)
+            .sort()
+            .join(',')
         ),
         _source: source,
       });
@@ -201,6 +195,7 @@ const getTransformedHits = (
 export const transformThresholdResultsToEcs = (
   results: SignalSearchResponse,
   inputIndex: string,
+  startedAt: Date,
   from: Date,
   filter: unknown,
   logger: Logger,
@@ -212,6 +207,7 @@ export const transformThresholdResultsToEcs = (
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
+    startedAt,
     from,
     logger,
     threshold,
@@ -243,6 +239,7 @@ export const bulkCreateThresholdSignals = async (
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
+    params.startedAt,
     params.from,
     params.filter,
     params.logger,

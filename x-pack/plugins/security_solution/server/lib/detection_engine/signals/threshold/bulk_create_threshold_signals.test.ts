@@ -12,6 +12,7 @@ import {
   ThresholdNormalized,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
+import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
 
@@ -21,6 +22,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       field: 'source.ip',
       value: 1,
     };
+    const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
@@ -43,6 +45,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       },
       'test',
       startedAt,
+      from,
       undefined,
       loggingSystemMock.createLogger(),
       {
@@ -50,7 +53,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         field: normalizeThresholdField(threshold.field),
       },
       '1234',
-      undefined
+      undefined,
+      sampleThresholdSignalHistory()
     );
     const _id = calculateThresholdSignalUuid('1234', startedAt, ['source.ip'], '127.0.0.1');
     expect(transformedResults).toEqual({
@@ -77,6 +81,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
+                from: new Date('2020-12-17T16:27:00.000Z'),
                 terms: [
                   {
                     field: 'source.ip',
@@ -98,6 +103,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       field: '',
       value: 1,
     };
+    const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
@@ -120,6 +126,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       },
       'test',
       startedAt,
+      from,
       undefined,
       loggingSystemMock.createLogger(),
       {
@@ -127,7 +134,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         field: normalizeThresholdField(threshold.field),
       },
       '1234',
-      undefined
+      undefined,
+      sampleThresholdSignalHistory()
     );
     const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
     expect(transformedResults).toEqual({
@@ -154,6 +162,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
+                from: new Date('2020-12-17T16:27:00.000Z'),
                 terms: [],
                 cardinality: undefined,
                 count: 15,
@@ -176,6 +185,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         },
       ],
     };
+    const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
@@ -209,11 +219,13 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       },
       'test',
       startedAt,
+      from,
       undefined,
       loggingSystemMock.createLogger(),
       threshold,
       '1234',
-      undefined
+      undefined,
+      sampleThresholdSignalHistory()
     );
     const _id = calculateThresholdSignalUuid(
       '1234',
@@ -245,14 +257,15 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
+                from: new Date('2020-12-17T16:28:00.000Z'), // from threshold signal history
                 terms: [
-                  {
-                    field: 'source.ip',
-                    value: '127.0.0.1',
-                  },
                   {
                     field: 'host.name',
                     value: 'garden-gnomes',
+                  },
+                  {
+                    field: 'source.ip',
+                    value: '127.0.0.1',
                   },
                 ],
                 cardinality: [
@@ -281,6 +294,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         },
       ],
     };
+    const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
@@ -301,11 +315,13 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       },
       'test',
       startedAt,
+      from,
       undefined,
       loggingSystemMock.createLogger(),
       threshold,
       '1234',
-      undefined
+      undefined,
+      sampleThresholdSignalHistory()
     );
     expect(transformedResults).toEqual({
       took: 10,
@@ -340,6 +356,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         },
       ],
     };
+    const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
@@ -365,11 +382,13 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       },
       'test',
       startedAt,
+      from,
       undefined,
       loggingSystemMock.createLogger(),
       threshold,
       '1234',
-      undefined
+      undefined,
+      sampleThresholdSignalHistory()
     );
     const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
     expect(transformedResults).toEqual({
@@ -396,6 +415,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
+                from: new Date('2020-12-17T16:27:00.000Z'),
                 terms: [],
                 cardinality: [
                   {
