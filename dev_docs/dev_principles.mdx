@@ -9,6 +9,10 @@ tags: ['kibana','onboarding', 'dev', 'architecture']
 
 Over time, the Kibana project has been shaped by certain principles. Like Kibana itself, some of these principles were formed by intention while others were the result of evolution and circumstance, but today all are important for the continued success and maintainability of Kibana.
 
+This document is inspired by and at times reflects points already covered in the [Elasticsearch Development Constitution](https://github.com/elastic/engineering/blob/master/development_constitution.md). When this happens it is either to reframe a principle from the development constitution in terms that are more clearly relevant to Kibana or to emphasize principles that are underrepresented in the Kibana project today.
+
+While the Elasticsearch Development Constitution is written with Elasticsearch in mind, its principles are broadly relevant throughout Elastic's engineering culture and especially for the Kibana project. For that reason, Kibana developers should read and internalize that document as well.
+
 ## Don't compromise on quality
 
 Kibana is a mission-critical piece of software, but it's not a service we deploy and manage. When we ship a bug that causes instability, regression, or vulnerability, the issue will significantly impact production deployments for our users, and we will not be able to rollback the deployment to fix it. Even if an issue is severe enough to warrant an emergency patch, it will continue to hurt users in production until we release a fix (at least a week) and users upgrade to it (days to weeks).
