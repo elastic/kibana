@@ -29,6 +29,13 @@ const isTypeFailure = (error: any) =>
 export async function runBuildRefsCli() {
   run(
     async ({ log, flags }) => {
+      if (process.env.BUILD_TS_REFS_DISABLE === 'true' && !flags.force) {
+        log.info(
+          'Building ts refs is disabled because the BUILD_TS_REFS_DISABLE environment variable is set to "true". Pass `--force` to run the build anyway.'
+        );
+        return;
+      }
+
       const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
@@ -82,11 +89,12 @@ export async function runBuildRefsCli() {
     {
       description: 'Build TypeScript projects',
       flags: {
-        boolean: ['clean', 'cache', 'ignore-type-failures'],
+        boolean: ['clean', 'force', 'cache', 'ignore-type-failures'],
         default: {
           cache: true,
         },
         help: `
+          --force            Run the build even if the BUILD_TS_REFS_DISABLE is set to "true"
           --clean            Delete outDirs for each ts project before building
           --no-cache         Disable fetching/extracting outDir caches based on the mergeBase with upstream
           --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning.
