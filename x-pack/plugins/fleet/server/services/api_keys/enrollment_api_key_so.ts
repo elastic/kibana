@@ -108,17 +108,18 @@ export async function generateEnrollmentAPIKey(
     name?: string;
     expiration?: string;
     agentPolicyId?: string;
+    forceRecreate?: boolean;
   }
 ) {
   const id = uuid.v4();
-  const { name: providedKeyName } = data;
+  const { name: providedKeyName, forceRecreate } = data;
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
   const agentPolicyId =
     data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
 
-  if (providedKeyName) {
+  if (providedKeyName && !forceRecreate) {
     let hasMore = true;
     let page = 1;
     let keys: EnrollmentAPIKey[] = [];

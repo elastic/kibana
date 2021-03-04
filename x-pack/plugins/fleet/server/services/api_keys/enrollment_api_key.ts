@@ -73,6 +73,7 @@ export async function generateEnrollmentAPIKey(
     name?: string;
     expiration?: string;
     agentPolicyId?: string;
+    forceRecreate?: boolean;
   }
 ) {
   if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
