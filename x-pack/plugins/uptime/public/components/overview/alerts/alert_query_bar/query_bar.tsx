@@ -8,7 +8,7 @@
 import React, { ComponentType, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import { StatefulSearchBarProps } from '../../../../../../../../src/plugins/data/public/ui/search_bar';
+import { StatefulSearchBarProps } from '../../../../../../../../src/plugins/data/public';
 import { DataPublicPluginStartUi } from '../../../../../../../../src/plugins/data/public';
 import { UptimeStartupPluginsContext } from '../../../../contexts';
 import { useIndexPattern } from '../../query_bar/use_index_pattern';
