@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(body).not.to.be(undefined);
-          expect(body.length).to.eql(testConfig.jobType === 'outlier_detection' ? 1 : 4);
+          expect(body.length).to.eql(testConfig.jobType === 'outlier_detection' ? 1 : 3);
           expect(Object.keys(body[0])).to.eql(['id', 'text', 'status', 'heading']);
         });
       });

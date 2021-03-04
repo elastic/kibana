@@ -44,12 +44,6 @@ const trainingPercentHeading = i18n.translate(
     defaultMessage: 'Training percent',
   }
 );
-const numberOfFieldsHeading = i18n.translate(
-  'xpack.ml.models.dfaValidation.messages.numberAnalysisFieldsHeading',
-  {
-    defaultMessage: 'Number of analysis fields',
-  }
-);
 const analysisFieldsHeading = i18n.translate(
   'xpack.ml.models.dfaValidation.messages.analysisFieldsHeading',
   {
@@ -62,22 +56,21 @@ const dependentVarHeading = i18n.translate(
     defaultMessage: 'Dependent variable',
   }
 );
-const dependentVarMissingValHeading = i18n.translate(
-  'xpack.ml.models.dfaValidation.messages.dependentVarHeading',
-  {
-    defaultMessage: 'Dependent variable missing values',
-  }
-);
-const dependentVarConstantHeading = i18n.translate(
-  'xpack.ml.models.dfaValidation.messages.dependentVarHeading',
-  {
-    defaultMessage: 'Dependent variable constant',
-  }
-);
+const dependentVarWarningMessage = {
+  id: 'dep_var_check',
+  text: '',
+  status: VALIDATION_STATUS.WARNING,
+  heading: dependentVarHeading,
+};
+const analysisFieldsWarningMessage = {
+  id: 'analysis_fields',
+  text: '',
+  status: VALIDATION_STATUS.WARNING,
+  heading: analysisFieldsHeading,
+};
 
-function getTrainingPercentAndNumFieldsMessages(trainingDocs: number, numIncludedFields: number) {
+function getTrainingPercentMessage(trainingDocs: number) {
   let trainingPercentMessage;
-  let fieldsMessage;
 
   if (trainingDocs >= TRAINING_DOCS_UPPER) {
     trainingPercentMessage = {
@@ -110,26 +103,7 @@ function getTrainingPercentAndNumFieldsMessages(trainingDocs: number, numInclude
     };
   }
 
-  if (numIncludedFields && numIncludedFields > INCLUDED_FIELDS_THRESHOLD) {
-    fieldsMessage = {
-      id: 'included_fields',
-      text: i18n.translate('xpack.ml.models.dfaValidation.messages.highAnalysisFieldsWarning', {
-        defaultMessage: 'High number of analysis fields may result in long-running jobs.',
-      }),
-      status: VALIDATION_STATUS.WARNING,
-      heading: numberOfFieldsHeading,
-    };
-  } else {
-    fieldsMessage = {
-      id: 'included_fields',
-      text: i18n.translate('xpack.ml.models.dfaValidation.messages.numberAnalysisFieldsSuccess', {
-        defaultMessage: 'Number of analysis fields is sufficient for analysis.',
-      }),
-      status: VALIDATION_STATUS.SUCCESS,
-      heading: numberOfFieldsHeading,
-    };
-  }
-  return [trainingPercentMessage, fieldsMessage];
+  return trainingPercentMessage;
 }
 
 async function getValidationCheckMessages(
@@ -142,7 +116,10 @@ async function getValidationCheckMessages(
 ) {
   const messages = [];
   const emptyFields: string[] = [];
+  const percentEmptyLimit = PERCENT_EMPTY_LIMIT * 100;
   let depVarValid = true;
+  let analysisFieldsNumHigh = false;
+  let analysisFieldsEmpty = false;
 
   const fieldLimit =
     analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
@@ -182,48 +159,46 @@ async function getValidationCheckMessages(
 
     if (trainingPercent) {
       const trainingDocs = totalDocs * (trainingPercent / 100);
-      const trainingPercentAndNumFieldsMessages = getTrainingPercentAndNumFieldsMessages(
-        trainingDocs,
-        analyzedFields.length
-      );
-      if (trainingPercentAndNumFieldsMessages.length) {
-        messages.push(...trainingPercentAndNumFieldsMessages);
+      const trainingPercentMessage = getTrainingPercentMessage(trainingDocs);
+      if (trainingPercentMessage) {
+        messages.push(trainingPercentMessage);
+      }
+
+      if (analyzedFields.length && analyzedFields.length > INCLUDED_FIELDS_THRESHOLD) {
+        analysisFieldsNumHigh = true;
       }
     }
 
     if (body.aggregations) {
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
-        const percentEmpty = docCount / totalDocs;
-        if (docCount > 0 && percentEmpty > PERCENT_EMPTY_LIMIT) {
+        const empty = docCount / totalDocs;
+
+        if (docCount > 0 && empty > PERCENT_EMPTY_LIMIT) {
           emptyFields.push(aggName);
 
           if (aggName === depVar) {
             depVarValid = false;
-            messages.push({
-              id: 'dep_var_empty_check',
-              text: i18n.translate('xpack.ml.models.dfaValidation.messages.depVarEmptyWarning', {
+            dependentVarWarningMessage.text = i18n.translate(
+              'xpack.ml.models.dfaValidation.messages.depVarEmptyWarning',
+              {
                 defaultMessage:
-                  'Dependent variable has at least {percentEmpty}% empty values and may be unsuitable for analysis.',
-                values: { percentEmpty: PERCENT_EMPTY_LIMIT * 100 },
-              }),
-              status: VALIDATION_STATUS.WARNING,
-              heading: dependentVarMissingValHeading,
-            });
+                  'Dependent variable has at least {percentEmpty}% empty values. It may be unsuitable for analysis.',
+                values: { percentEmpty: percentEmptyLimit },
+              }
+            );
           }
         }
 
         if (aggName === `${depVar}_const`) {
           if (value === 1) {
             depVarValid = false;
-            messages.push({
-              id: 'dep_var_constant_check',
-              text: i18n.translate('xpack.ml.models.dfaValidation.messages.depVarConstantWarning', {
+            dependentVarWarningMessage.text = i18n.translate(
+              'xpack.ml.models.dfaValidation.messages.depVarContsWarning',
+              {
                 defaultMessage:
-                  'Dependent variable is a constant value and may be unsuitable for analysis.',
-              }),
-              status: VALIDATION_STATUS.WARNING,
-              heading: dependentVarConstantHeading,
-            });
+                  'Dependent variable is a constant value. It may be unsuitable for analysis.',
+              }
+            );
           }
           if (depVarValid === true) {
             messages.push({
@@ -234,25 +209,49 @@ async function getValidationCheckMessages(
               status: VALIDATION_STATUS.SUCCESS,
               heading: dependentVarHeading,
             });
+          } else {
+            messages.push(dependentVarWarningMessage);
           }
         }
       });
     }
 
     if (emptyFields.length) {
-      messages.push({
-        id: 'empty_fields',
-        text: i18n.translate('xpack.ml.models.dfaValidation.messages.analysisFieldsWarningText', {
-          defaultMessage:
-            'Some fields included for analysis have at least {percentEmpty}% empty values.',
-          values: { percentEmpty: PERCENT_EMPTY_LIMIT * 100 },
-        }),
-        status: VALIDATION_STATUS.WARNING,
-        heading: analysisFieldsHeading,
-      });
+      analysisFieldsEmpty = true;
+    }
+
+    if (analysisFieldsEmpty || analysisFieldsNumHigh) {
+      if (analysisFieldsEmpty && analysisFieldsNumHigh) {
+        analysisFieldsWarningMessage.text = i18n.translate(
+          'xpack.ml.models.dfaValidation.messages.analysisFieldsWarningText',
+          {
+            defaultMessage:
+              'Some fields included for analysis have at least {percentEmpty}% empty values. The number of selected fields is high and may result in increased resource usage and long-running jobs.',
+            values: { percentEmpty: percentEmptyLimit },
+          }
+        );
+      } else if (analysisFieldsEmpty && !analysisFieldsNumHigh) {
+        analysisFieldsWarningMessage.text = i18n.translate(
+          'xpack.ml.models.dfaValidation.messages.analysisFieldsEmptyWarningText',
+          {
+            defaultMessage:
+              'Some fields included for analysis have at least {percentEmpty}% empty values and may not be suitable for analysis.',
+            values: { percentEmpty: percentEmptyLimit },
+          }
+        );
+      } else {
+        analysisFieldsWarningMessage.text = i18n.translate(
+          'xpack.ml.models.dfaValidation.messages.analysisFieldsHighWarningText',
+          {
+            defaultMessage:
+              'The number of selected fields is high and may result in increased resource usage and long-running jobs.',
+          }
+        );
+      }
+      messages.push(analysisFieldsWarningMessage);
     } else {
       messages.push({
-        id: 'empty_fields',
+        id: 'analysis_fields',
         text: i18n.translate('xpack.ml.models.dfaValidation.messages.analysisFieldsSuccessText', {
           defaultMessage:
             'Selected analysis fields values are sufficiently populated and contain useful data for analysis.',
