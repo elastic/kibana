@@ -33,20 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async () => {
       appContextService.start({
         // @ts-ignore
-        elasticsearch: {},
-        // @ts-ignore
-        encryptedSavedObjectsStart: {},
-        // @ts-ignore
-        savedObjects: {},
-        // @ts-ignore
-        security: {},
+        elasticsearch: { client: {} },
         // @ts-ignore
         logger: {
           warn: () => {},
         },
-        isProductionMode: true,
-        kibanaVersion: '8.0.0',
-        kibanaBranch: 'master',
       });
     });
 
