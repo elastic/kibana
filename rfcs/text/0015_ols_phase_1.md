@@ -204,6 +204,19 @@ We are sending a more complex query to Elasticsearch for any find request which 
 Since we are only requesting saved objects that the user is authorized to see, there is no additional overhead for Kibana once Elasticsearch has returned the results of the query.
 
 
+## 3.3 Behavior with various plugin configurations
+Kibana can run with and without security enabled. When security is disabled,
+`private` saved objects will be accessible to all users.
+
+| **Plugin Configuration** | Security | Security & Spaces | Spaces |
+| ---- | ------ | ------ | --- |
+|| ✅ Enforced | ✅ Enforced | 🚫 Not enforced: objects will be accessible to all
+
+### Alternative
+If this behavior is not desired, we can prevent `private` saved objects from being accessed whenever security is disabled.
+
+See [unresolved question 3](#83-behavior-when-security-is-disabled)
+
 # 4. Drawbacks
 
 As outlined above, this approach introduces additional overhead to many of the saved object APIs. We minimize this by denoting which saved object types require this additional authorization.
@@ -237,6 +250,9 @@ The user identified by `acl.owner` will be authorized for all operations against
 In addition to the object owner, we also need to allow administrators to manage these saved objects. This is beneficial if they need to perform a bulk import/export of private objects, or if they wish to remove private objects from users that no longer exist. The open question is: **who counts as an administrator?**
 
 We have historically used the `Saved Objects Management` feature for these administrative tasks. This feature grants access to all saved objects, even if you're not authorized to access the "owning" application. Do we consider this privilege sufficient to see and potentially manipulate private saved objects?
+
+## 8.3 Behavior when security is disabled
+When security is disabled, should `private` saved objects still be accessible via the Saved Objects Client?
 
 
 
