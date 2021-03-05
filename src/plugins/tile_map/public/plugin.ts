@@ -33,10 +33,6 @@ import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { getTileMapRenderer } from './tile_map_renderer';
 
-export interface TileMapConfigType {
-  tilemap: any;
-}
-
 /** @private */
 export interface TileMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
@@ -93,10 +89,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
 
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
 
-    const config = this.initializerContext.config.get<TileMapConfigType>();
-    return {
-      config,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: TileMapPluginStartDependencies) {
