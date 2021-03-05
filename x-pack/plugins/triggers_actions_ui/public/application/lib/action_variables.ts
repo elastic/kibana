@@ -42,8 +42,6 @@ export enum LegacyAlertProvidedActionVariables {
   alertActionSubGroup = 'alertActionSubGroup',
 }
 
-const deprecationMessage = 'This has been deprecated in favor of {variable}.';
-
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
     return { ...actionVariable, name: `${prefix}${actionVariable.name}` };
@@ -140,7 +138,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: LegacyAlertProvidedActionVariables.alertId,
     deprecated: true,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertIdLabel', {
-      defaultMessage: deprecationMessage,
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleId,
       },
@@ -151,7 +149,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: LegacyAlertProvidedActionVariables.alertName,
     deprecated: true,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertNameLabel', {
-      defaultMessage: deprecationMessage,
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleName,
       },
@@ -164,7 +162,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertInstanceIdLabel',
       {
-        defaultMessage: deprecationMessage,
+        defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
           variable: AlertProvidedActionVariables.ruleAlertId,
         },
@@ -178,7 +176,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertActionGroupLabel',
       {
-        defaultMessage: deprecationMessage,
+        defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
           variable: AlertProvidedActionVariables.ruleAlertActionGroup,
         },
@@ -192,7 +190,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertActionGroupNameLabel',
       {
-        defaultMessage: deprecationMessage,
+        defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
           variable: AlertProvidedActionVariables.ruleAlertActionGroupName,
         },
@@ -206,7 +204,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertActionSubGroupLabel',
       {
-        defaultMessage: deprecationMessage,
+        defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
           variable: AlertProvidedActionVariables.ruleAlertSubActionGroup,
         },
