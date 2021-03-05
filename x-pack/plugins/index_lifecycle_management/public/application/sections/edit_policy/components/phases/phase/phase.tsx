@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { useLocation } from 'react-router-dom';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import {
   EuiFlexGroup,
@@ -43,8 +44,18 @@ interface Props {
   topLevelSettings?: React.ReactNode;
 }
 
+/**
+ * To re-orient the user about their place in the form after returning from somewhere else,
+ * like the rollup wizard, we want to scroll them back to a specific field. Fields are often hidden
+ * inside of an accordion which has an animation when it opens. We need to wait for this animation
+ * to complete so that the field is in it's final position before we can start scrolling to it.
+ */
+const EUI_ACCORDION_EXPAND_DELAY = 500;
+
 export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const { hash } = useLocation();
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
   });
@@ -93,6 +104,18 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
   // @ts-ignore
   const minAge = !isHotPhase && enabled ? <MinAgeField phase={phase} /> : null;
 
+  useEffect(() => {
+    if (hash && hash.startsWith(`#${phase}`)) {
+      setIsAccordionOpen(true);
+      setTimeout(() => {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, EUI_ACCORDION_EXPAND_DELAY);
+    }
+  }, [hash, phase]);
+
   return (
     <EuiComment
       username={phaseTitle}
@@ -117,6 +140,8 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
 
           <EuiAccordion
             id={`${phase}-settingsSwitch`}
+            forceState={isAccordionOpen ? 'open' : 'closed'}
+            onToggle={() => setIsAccordionOpen((v) => !v)}
             buttonContent={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"

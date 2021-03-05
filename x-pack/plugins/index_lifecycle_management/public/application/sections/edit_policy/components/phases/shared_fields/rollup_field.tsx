@@ -58,126 +58,131 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
   const path = `phases.${phase}.actions.rollup`;
 
   return (
-    <ToggleFieldWithDescribedFormRow
-      title={<h3>{globalI18nTexts.editPolicy.rollupLabel}</h3>}
-      // TODO: Copy required
-      description={i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldDescription', {
+    <>
+      <ToggleFieldWithDescribedFormRow
+        title={<h3 id={`${phase}-rollup`}>{globalI18nTexts.editPolicy.rollupLabel}</h3>}
         // TODO: Copy required
-        defaultMessage: '[Brief description of rollups in the context of ILM]',
-      })}
-      switchProps={{
-        'data-test-subj': `${phase}-configureRollupSwitch`,
-        path: `_meta.${phase}.rollupEnabled`,
-      }}
-      fullWidth
-    >
-      <UseField<RollupAction> path={path}>
-        {(field) => {
-          if (!field.value) {
-            return (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiText>
-                    {!field.isValid && (
-                      <>
-                        <EuiIcon type="alert" color="danger" />{' '}
-                      </>
-                    )}
-                    {i18nTexts.states.activeNotConfigured.heading}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    iconType="exit"
-                    iconSide="right"
-                    onClick={() => {
-                      history.push({ search: qs.stringify({ rollup: phase }) });
-                    }}
-                  >
-                    {i18nTexts.states.activeNotConfigured.buttonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          } else {
-            return (
-              <EuiAccordion
-                id={`${phase}RollupActionDetailsAccordion`}
-                buttonContent={i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldSummaryLabel', {
-                  defaultMessage: 'Rollup summary',
-                })}
-                extraAction={
-                  <EuiButtonEmpty
-                    iconType="exit"
-                    iconSide="right"
-                    onClick={() => {
-                      history.push({ search: qs.stringify({ rollup: phase }) });
-                    }}
-                  >
-                    {i18nTexts.states.activeNotConfigured.buttonLabel}
-                  </EuiButtonEmpty>
-                }
-              >
+        description={i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldDescription', {
+          // TODO: Copy required
+          defaultMessage: '[Brief description of rollups in the context of ILM]',
+        })}
+        switchProps={{
+          'data-test-subj': `${phase}-configureRollupSwitch`,
+          path: `_meta.${phase}.rollupEnabled`,
+        }}
+        fullWidth
+      >
+        <UseField<RollupAction> path={path}>
+          {(field) => {
+            if (!field.value) {
+              return (
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionList textStyle="reverse">
-                      <EuiDescriptionListTitle>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.rollup.summary.itemTimeFieldLabel"
-                          data-test-subj="rollupDetailDateHistogramTimeFieldTitle"
-                          defaultMessage="Time field"
-                        />
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription
-                        className="eui-textBreakWord"
-                        data-test-subj="rollupDetailDateHistogramTimeFieldDescription"
-                      >
-                        {field.value.config.groups.date_histogram.field}
-                      </EuiDescriptionListDescription>
-                      <EuiDescriptionListTitle>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalLabel"
-                          data-test-subj="rollupDetailDateHistogramIntervalTitle"
-                          defaultMessage="Interval"
-                        />{' '}
-                        <EuiIconTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalTip"
-                              defaultMessage="The time bucket interval into which data is rolled up"
-                            />
-                          }
-                        />
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramIntervalDescription">
-                        {field.value.config.groups.date_histogram.calendar_interval ||
-                          field.value.config.groups.date_histogram.fixed_interval}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
+                    <EuiText>
+                      {!field.isValid && (
+                        <>
+                          <EuiIcon type="alert" color="danger" />{' '}
+                        </>
+                      )}
+                      {i18nTexts.states.activeNotConfigured.heading}
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiDescriptionList textStyle="reverse">
-                      <EuiDescriptionListTitle>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.rollup.summary.itemTimezoneLabel"
-                          data-test-subj="rollupDetailDateHistogramTimezoneTitle"
-                          defaultMessage="Timezone"
-                        />
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramTimezoneDescription">
-                        {field.value.config.groups.date_histogram.time_zone}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
+                    <EuiButtonEmpty
+                      iconType="exit"
+                      iconSide="right"
+                      onClick={() => {
+                        history.push({ search: qs.stringify({ rollup: phase }) });
+                      }}
+                    >
+                      {i18nTexts.states.activeNotConfigured.buttonLabel}
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiAccordion>
-            );
-          }
-        }}
-      </UseField>
-    </ToggleFieldWithDescribedFormRow>
+              );
+            } else {
+              return (
+                <EuiAccordion
+                  id={`${phase}RollupActionDetailsAccordion`}
+                  buttonContent={i18n.translate(
+                    'xpack.indexLifecycleMgmt.rollup.fieldSummaryLabel',
+                    {
+                      defaultMessage: 'Rollup summary',
+                    }
+                  )}
+                  extraAction={
+                    <EuiButtonEmpty
+                      iconType="exit"
+                      iconSide="right"
+                      onClick={() => {
+                        history.push({ search: qs.stringify({ rollup: phase }) });
+                      }}
+                    >
+                      {i18nTexts.states.activeNotConfigured.buttonLabel}
+                    </EuiButtonEmpty>
+                  }
+                >
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiDescriptionList textStyle="reverse">
+                        <EuiDescriptionListTitle>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.rollup.summary.itemTimeFieldLabel"
+                            data-test-subj="rollupDetailDateHistogramTimeFieldTitle"
+                            defaultMessage="Time field"
+                          />
+                        </EuiDescriptionListTitle>
+
+                        <EuiDescriptionListDescription
+                          className="eui-textBreakWord"
+                          data-test-subj="rollupDetailDateHistogramTimeFieldDescription"
+                        >
+                          {field.value.config.groups.date_histogram.field}
+                        </EuiDescriptionListDescription>
+                        <EuiDescriptionListTitle>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalLabel"
+                            data-test-subj="rollupDetailDateHistogramIntervalTitle"
+                            defaultMessage="Interval"
+                          />{' '}
+                          <EuiIconTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.indexLifecycleMgmt.rollup.summary.itemIntervalTip"
+                                defaultMessage="The time bucket interval into which data is rolled up"
+                              />
+                            }
+                          />
+                        </EuiDescriptionListTitle>
+
+                        <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramIntervalDescription">
+                          {field.value.config.groups.date_histogram.calendar_interval ||
+                            field.value.config.groups.date_histogram.fixed_interval}
+                        </EuiDescriptionListDescription>
+                      </EuiDescriptionList>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiDescriptionList textStyle="reverse">
+                        <EuiDescriptionListTitle>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.rollup.summary.itemTimezoneLabel"
+                            data-test-subj="rollupDetailDateHistogramTimezoneTitle"
+                            defaultMessage="Timezone"
+                          />
+                        </EuiDescriptionListTitle>
+
+                        <EuiDescriptionListDescription data-test-subj="rollupDetailDateHistogramTimezoneDescription">
+                          {field.value.config.groups.date_histogram.time_zone}
+                        </EuiDescriptionListDescription>
+                      </EuiDescriptionList>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiAccordion>
+              );
+            }
+          }}
+        </UseField>
+      </ToggleFieldWithDescribedFormRow>
+    </>
   );
 };

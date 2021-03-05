@@ -361,7 +361,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           }
           phase={currentView.phase}
           onDone={(rollupAction) => {
-            const fieldPath = `phases.${currentView.phase}.actions.rollup`;
+            const { phase } = currentView;
+            const fieldPath = `phases.${phase}.actions.rollup`;
             const rollupField = form.getFields()[fieldPath];
             const newCurrentPolicy = cloneDeep({
               ...currentPolicy,
@@ -376,7 +377,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
             const { search } = history.location;
             const newQueryParams = qs.parse(search);
             delete newQueryParams.rollup;
-            history.push({ search: qs.stringify(newQueryParams) });
+            history.push({
+              search: qs.stringify(newQueryParams),
+              hash: `#${phase}-rollup`,
+            });
           }}
           onCancel={() => {}}
         />
