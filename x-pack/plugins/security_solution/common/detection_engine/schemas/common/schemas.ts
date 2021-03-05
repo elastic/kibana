@@ -90,7 +90,7 @@ export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursio
 
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerts/common/alert.ts
+ * @see x-pack/plugins/alerting/common/alert.ts
  */
 export const action_group = t.string;
 export const action_id = t.string;

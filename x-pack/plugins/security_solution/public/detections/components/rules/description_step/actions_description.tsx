@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { startCase } from 'lodash/fp';
-import { AlertAction } from '../../../../../../alerts/common';
+import { AlertAction } from '../../../../../../alerting/common';
 
 const ActionsDescription = ({ actions }: { actions: AlertAction[] }) => {
   if (!actions.length) return null;
