@@ -531,7 +531,13 @@ export function App({
 
   const { TopNavMenu } = navigation.ui;
 
-  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    state.isSaveable && application.capabilities.visualize.save
+  );
+  const savingToDashboardPermitted =
+    Boolean(state.isSaveable && application.capabilities.dashboard?.showWriteControls) &&
+    !(initialInput as LensByReferenceInput)?.savedObjectId; // saving to dashboard is permitted when lens is new or by value
+
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -545,8 +551,10 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
+    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingPermitted,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -577,7 +585,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingPermitted && lastKnownDoc) {
+        if (savingToDashboardPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -597,7 +605,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingPermitted) {
+        if (savingToDashboardPermitted || savingToLibraryPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },

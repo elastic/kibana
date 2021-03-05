@@ -53,7 +53,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
-    return capabilities.visualize.save as boolean;
+    return Boolean(capabilities.visualize.save || capabilities.dashboard?.showWriteControls);
   };
 
   canCreateNew() {
@@ -86,6 +86,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       coreHttp,
       attributeService,
       indexPatternService,
+      capabilities,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../../async_services');
@@ -96,11 +97,14 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         indexPatternService,
         timefilter,
         expressionRenderer,
-        editable: await this.isEditable(),
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        capabilities: {
+          dashboardSave: Boolean(capabilities.dashboard?.showWriteControls),
+          visualizeSave: Boolean(capabilities.visualize.save),
+        },
       },
       input,
       parent

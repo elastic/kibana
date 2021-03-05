@@ -29,13 +29,20 @@ export interface SaveModalDashboardSelectorProps {
   copyOnSave: boolean;
   documentId?: string;
   onSelectDashboard: DashboardPickerProps['onChange'];
-
+  canSaveVisualizations: boolean;
   dashboardOption: 'new' | 'existing' | null;
   onChange: (dashboardOption: 'new' | 'existing' | null) => void;
 }
 
 export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProps) {
-  const { documentId, onSelectDashboard, dashboardOption, onChange, copyOnSave } = props;
+  const {
+    documentId,
+    onSelectDashboard,
+    dashboardOption,
+    onChange,
+    copyOnSave,
+    canSaveVisualizations,
+  } = props;
   const isDisabled = !copyOnSave && !!documentId;
 
   return (
@@ -112,7 +119,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 defaultMessage: 'No dashboard, but add to library',
               })}
               onChange={() => onChange(null)}
-              disabled={isDisabled}
+              disabled={isDisabled || !canSaveVisualizations}
             />
           </div>
         </EuiPanel>

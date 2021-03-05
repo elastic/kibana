@@ -40,7 +40,11 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
+  const {
+    canAccessDashboards,
+    canCreateNewDashboards,
+    canSaveVisualizations,
+  } = capabilities.useService();
 
   // Disable the dashboard options if the user can't access dashboards or if they're read-only
   const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
@@ -62,6 +66,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
           onChange={(option) => {
             setDashboardOption(option);
           }}
+          canSaveVisualizations={canSaveVisualizations()}
           {...{ copyOnSave, documentId, dashboardOption }}
         />
       )
