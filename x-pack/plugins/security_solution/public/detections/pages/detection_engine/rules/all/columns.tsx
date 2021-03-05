@@ -201,7 +201,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {value === 'partial failure' ? 'warning' : value != null ? value : getEmptyTagValue()}
             </EuiHealth>
           </>
         );
