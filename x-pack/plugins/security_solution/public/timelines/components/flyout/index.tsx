@@ -52,7 +52,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const onOutsideClick = useCallback((event) => {
     setFocusOwnership(false);
     const classes = event.target.classList;
-    if (classes.contains('euiFieldSearch')) {
+    if (classes.contains('kbnSearchBar')) {
       searchRef.current = event.target;
       setTriggerOnBlur((prev) => !prev);
       window.setTimeout(() => {
