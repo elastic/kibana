@@ -285,8 +285,10 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      */
     const lookBackTimeInterval = `${Math.max(
       // Double the max bucket span
-      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2,
-      checkIntervalGap ? checkIntervalGap.asSeconds() : 0
+      Math.round(
+        resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2
+      ),
+      checkIntervalGap ? Math.round(checkIntervalGap.asSeconds()) : 0
     )}s`;
 
     const jobIds = jobsResponse.map((v) => v.job_id);
