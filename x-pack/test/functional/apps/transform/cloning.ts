@@ -159,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
 
           await transform.testExecution.logTestStep('should show the actions popover');
-          await transform.table.assertTransformRowActions(false);
+          await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
           await transform.table.clickTransformRowAction('Clone');

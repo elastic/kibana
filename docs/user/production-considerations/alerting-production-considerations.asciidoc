@@ -1,0 +1,51 @@
+[role="xpack"]
+[[alerting-production-considerations]]
+== Alerting production considerations
+
+++++
+<titleabbrev>Alerting</titleabbrev>
+++++
+
+Alerting runs both alert checks and actions as persistent background tasks managed by the Task Manager.
+
+When relying on alerts and actions as mission critical services, make sure you follow the <<task-manager-production-considerations, production considerations>> for Task Manager.
+
+[float]
+[[alerting-background-tasks]]
+=== Running background alert checks and actions
+
+{kib} uses background tasks to run alerts and actions, distributed across all {kib} instances in the cluster.
+
+By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
+These tasks are then run on the {kib} server.
+
+Alerts are recurring background tasks which are rescheduled according to the <<defining-alerts-general-details, check interval>> on completion.
+Actions are non-recurring background tasks which are deleted on completion.
+
+For more details on Task Manager, see <<task-manager-background-tasks>>.
+
+[IMPORTANT]
+==============================================
+Alert and action tasks can run late or at an inconsistent schedule.
+This is typically a symptom of the specific usage of the cluster in question.
+
+You can address such issues by tweaking the <<task-manager-settings,Task Manager settings>> or scaling the deployment to better suit your use case.
+
+For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>>.
+==============================================
+
+[float]
+[[alerting-scaling-guidance]]
+=== Scaling Guidance
+
+As alerts and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
+
+When estimating the required task throughput, keep the following in mind:
+
+* Each alert uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-alerts-general-details,check interval>>.
+* Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
+
+It is difficult to predict how much throughput is needed to ensure all alerts and actions are executed at consistent schedules.
+By counting alerts as recurring tasks and actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurement.
+
+Predicting the buffer required to account for actions depends heavily on the alert types you use, the amount of alert Instances they might detect, and the number of actions you might choose to assign to action groups. With that in mind, regularly <<task-manager-health-monitoring,monitor the health>> of your Task Manager instances.

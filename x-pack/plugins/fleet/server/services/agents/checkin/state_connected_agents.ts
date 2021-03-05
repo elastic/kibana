@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+
 import { appContextService } from '../../app_context';
 import { bulkUpdateAgents } from '../crud';
 

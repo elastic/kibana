@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { countBy } from 'lodash';
 import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -49,7 +50,26 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
           const { body } = await getJobs();
           expect(body.hasLegacyJobs).to.be(false);
-          expect(body.jobs.map((job: any) => job.environment)).to.eql(['production', 'staging']);
+          expect(countBy(body.jobs, 'environment')).to.eql({
+            production: 1,
+            staging: 1,
+          });
+        });
+
+        describe('with existing ML jobs', () => {
+          before(async () => {
+            await createJobs(['production', 'staging']);
+          });
+          it('skips duplicate job creation', async () => {
+            await createJobs(['production', 'test']);
+
+            const { body } = await getJobs();
+            expect(countBy(body.jobs, 'environment')).to.eql({
+              production: 1,
+              staging: 1,
+              test: 1,
+            });
+          });
         });
       });
     });

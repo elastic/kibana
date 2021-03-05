@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, Logger } from 'kibana/server';
-import { combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
+
+import type { IRouter, Logger } from 'src/core/server';
+
 import type { AppState } from '../../common';
-import { createClusterDataCheck } from '../check_cluster_data';
+import type { createClusterDataCheck } from '../check_cluster_data';
 import type { ConfigType } from '../config';
 import type { AnonymousAccessService } from '../plugin';
 

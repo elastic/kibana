@@ -41,7 +41,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
           onCloseFlyout();
         },
         // Callback for successful save
-        reloadAlerts: async () => {
+        onSave: async () => {
           if (onSave) {
             onSave();
           }

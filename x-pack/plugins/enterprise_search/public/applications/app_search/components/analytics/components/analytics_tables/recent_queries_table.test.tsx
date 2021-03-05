@@ -48,9 +48,9 @@ describe('RecentQueriesTable', () => {
     expect(tableContent).toContain('""');
 
     expect(tableContent).toContain('Time');
-    expect(tableContent).toContain('1/3/1970');
-    expect(tableContent).toContain('1/2/1970');
-    expect(tableContent).toContain('1/1/1970');
+    expect(tableContent).toContain('Jan 3, 1970');
+    expect(tableContent).toContain('Jan 2, 1970');
+    expect(tableContent).toContain('Jan 1, 1970');
 
     expect(tableContent).toContain('Analytics tags');
     expect(tableContent).toContain('tagA');

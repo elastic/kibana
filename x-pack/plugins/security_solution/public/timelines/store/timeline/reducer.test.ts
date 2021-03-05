@@ -79,7 +79,7 @@ const basicTimeline: TimelineModel = {
   description: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
-    tiebreakerField: 'event.sequence',
+    tiebreakerField: '',
     timestampField: '@timestamp',
   },
   eventIdToNoteIds: {},
