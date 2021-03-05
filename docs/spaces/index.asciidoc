@@ -134,4 +134,4 @@ by setting `xpack.spaces.enabled` to `false` in your
 `kibana.yml` configuration file.
 
 If you are upgrading your
-version of {kib}, the default space will contain all of your existing saved objects.
+version of {kib} from a Kibana without space feature enabled or available (6.4 or lower), the default space will contain all of your existing saved objects.
