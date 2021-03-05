@@ -7,13 +7,13 @@
 
 import { listActionTypesRoute } from './list_action_types';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { verifyApiAccess } from '../../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { LicenseType } from '../../../../plugins/licensing/server';
-import { actionsClientMock } from '../mocks';
+import { LicenseType } from '../../../../../plugins/licensing/server';
+import { actionsClientMock } from '../../mocks';
 
-jest.mock('../lib/verify_api_access.ts', () => ({
+jest.mock('../../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
