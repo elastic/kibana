@@ -21,22 +21,12 @@ import {
   waitForAllHostsToBeLoaded,
 } from '../../tasks/hosts/all_hosts';
 
-import { loginAndWaitForPage, loginAndWaitForTimeline } from '../../tasks/login';
+import { loginAndWaitForPage } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import {
-  addDataProvider,
-  addFilter,
-  closeTimeline,
-  createNewTimeline,
-  openTimelineById,
-  waitForEventsPanelToBeLoaded,
-} from '../../tasks/timeline';
+import { addDataProvider, closeTimeline, createNewTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
-import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
-import { createTimeline } from '../../tasks/api_calls/timelines';
-import { timeline } from '../../objects/timeline';
 
 describe('timeline data providers', () => {
   beforeEach(() => {
