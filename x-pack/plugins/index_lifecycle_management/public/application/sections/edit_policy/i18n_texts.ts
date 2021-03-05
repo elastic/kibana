@@ -217,7 +217,7 @@ export const i18nTexts = {
       frozen: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
         {
-          defaultMessage: 'HERE WILL COME THE COPY FOR FROZEN PHASE',
+          defaultMessage: 'Archive data in the frozen tier, which is optimized for maximum cost savings. Data in the frozen tier is rarely accessed and never updated.',
         }
       ),
       delete: i18n.translate(

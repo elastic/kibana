@@ -63,7 +63,7 @@ export const searchableSnapshotFields = {
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText',
       {
         defaultMessage:
-          'Specifies the type of snapshot that should be mounted for a searchable snapshot. Warning: this is an advanced settings, only change it if you know what you do.',
+          "Type of snapshot mounted for the searchable snapshot. This is an advanced option. Only change it if you know what you're doing.",
       }
     ),
   },
