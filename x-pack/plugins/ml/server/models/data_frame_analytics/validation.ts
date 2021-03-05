@@ -77,7 +77,7 @@ function getTrainingPercentMessage(trainingDocs: number) {
       id: 'training_percent_high',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.highTrainingPercentWarning', {
         defaultMessage:
-          'High number of training docs may result in long running jobs. Try reducing the training percent.',
+          'A high number of training docs may result in long running jobs. Try reducing the training percent.',
       }),
       status: VALIDATION_STATUS.WARNING,
       heading: trainingPercentHeading,
@@ -87,7 +87,7 @@ function getTrainingPercentMessage(trainingDocs: number) {
       id: 'training_percent_low',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.lowTrainingPercentWarning', {
         defaultMessage:
-          'Low number of training docs may result in inaccurate models. Try increasing the training percent or using a larger dataset.',
+          'A low number of training docs may result in inaccurate models. Try increasing the training percent or using a larger data set.',
       }),
       status: VALIDATION_STATUS.WARNING,
       heading: trainingPercentHeading,
@@ -96,7 +96,7 @@ function getTrainingPercentMessage(trainingDocs: number) {
     trainingPercentMessage = {
       id: 'training_percent',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.trainingPercentSuccess', {
-        defaultMessage: 'Training percent is high enough to model patterns in the data.',
+        defaultMessage: 'The training percent is high enough to model patterns in the data.',
       }),
       status: VALIDATION_STATUS.SUCCESS,
       heading: trainingPercentHeading,
@@ -182,7 +182,7 @@ async function getValidationCheckMessages(
               'xpack.ml.models.dfaValidation.messages.depVarEmptyWarning',
               {
                 defaultMessage:
-                  'Dependent variable has at least {percentEmpty}% empty values. It may be unsuitable for analysis.',
+                  'The dependent variable has at least {percentEmpty}% empty values. It may be unsuitable for analysis.',
                 values: { percentEmpty: percentEmptyLimit },
               }
             );
@@ -196,7 +196,7 @@ async function getValidationCheckMessages(
               'xpack.ml.models.dfaValidation.messages.depVarContsWarning',
               {
                 defaultMessage:
-                  'Dependent variable is a constant value. It may be unsuitable for analysis.',
+                  'The dependent variable is a constant value. It may be unsuitable for analysis.',
               }
             );
           }
@@ -204,7 +204,7 @@ async function getValidationCheckMessages(
             messages.push({
               id: 'dep_var_check',
               text: i18n.translate('xpack.ml.models.dfaValidation.messages.depVarSuccess', {
-                defaultMessage: 'Dependent variable field contains useful values for analysis.',
+                defaultMessage: 'The dependent variable field contains useful values for analysis.',
               }),
               status: VALIDATION_STATUS.SUCCESS,
               heading: dependentVarHeading,
@@ -254,7 +254,7 @@ async function getValidationCheckMessages(
         id: 'analysis_fields',
         text: i18n.translate('xpack.ml.models.dfaValidation.messages.analysisFieldsSuccessText', {
           defaultMessage:
-            'Selected analysis fields values are sufficiently populated and contain useful data for analysis.',
+            'The selected analysis fields are sufficiently populated and contain useful data for analysis.',
         }),
         status: VALIDATION_STATUS.SUCCESS,
         heading: analysisFieldsHeading,
@@ -270,7 +270,7 @@ async function getValidationCheckMessages(
       }),
       status: VALIDATION_STATUS.ERROR,
       heading: i18n.translate('xpack.ml.models.dfaValidation.messages.validationErrorHeading', {
-        defaultMessage: 'Unable to validate job',
+        defaultMessage: 'Unable to validate job.',
       }),
     });
   }
