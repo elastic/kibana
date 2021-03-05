@@ -17,7 +17,7 @@ import {
 import {
   AlertExecutionStatuses,
   AlertExecutionStatusValues,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { alertsStatusesTranslationsMapping } from '../translations';
 
 interface AlertStatusFilterProps {

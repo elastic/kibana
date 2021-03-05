@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
-import { ActionGroupIdsOf } from '../../../../alerts/common';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
