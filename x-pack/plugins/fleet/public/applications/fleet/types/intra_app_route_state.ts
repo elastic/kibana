@@ -6,6 +6,7 @@
  */
 
 import type { ApplicationStart } from 'kibana/public';
+
 import type { PackagePolicy } from './';
 
 /**

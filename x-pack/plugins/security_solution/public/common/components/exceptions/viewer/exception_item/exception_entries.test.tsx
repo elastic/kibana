@@ -12,8 +12,11 @@ import { mount } from 'enzyme';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = { eui: { euiSize: '10px', euiColorPrimary: '#ece', euiColorDanger: '#ece' } };
+const mockTheme = getMockTheme({
+  eui: { euiSize: '10px', euiColorPrimary: '#ece', euiColorDanger: '#ece' },
+});
 
 describe('ExceptionEntries', () => {
   test('it does NOT render the and badge if only one exception item entry exists', () => {

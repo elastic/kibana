@@ -7,11 +7,13 @@
 
 import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import {
   QueryStringInput,
   IFieldType,
 } from '../../../../../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../../../../../hooks';
+
 import {
   AGENT_LOG_INDEX_PATTERN,
   AGENT_ID_FIELD,

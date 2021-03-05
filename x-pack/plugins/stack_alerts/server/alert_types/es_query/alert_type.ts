@@ -29,7 +29,7 @@ export function getAlertType(
   logger: Logger
 ): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
-    defaultMessage: 'ES query',
+    defaultMessage: 'Elasticsearch query',
   });
 
   const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
@@ -81,7 +81,7 @@ export function getAlertType(
   const actionVariableContextQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
     {
-      defaultMessage: 'The string representation of the ES query.',
+      defaultMessage: 'The string representation of the Elasticsearch query.',
     }
   );
 

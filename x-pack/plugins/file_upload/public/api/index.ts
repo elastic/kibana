@@ -12,6 +12,8 @@ import type { IImporter, ImportFactoryOptions } from '../importer';
 export interface FileUploadStartApi {
   getFileUploadComponent(): Promise<React.ComponentType<FileUploadComponentProps>>;
   importerFactory(format: string, options: ImportFactoryOptions): Promise<IImporter | undefined>;
+  getMaxBytes(): number;
+  getMaxBytesFormatted(): string;
 }
 
 export async function getFileUploadComponent(): Promise<
