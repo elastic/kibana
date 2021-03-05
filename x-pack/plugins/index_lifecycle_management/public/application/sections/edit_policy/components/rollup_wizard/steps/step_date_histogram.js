@@ -278,6 +278,7 @@ export class StepDateHistogram extends Component {
                         <EuiText size="s" color="subdued">
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.fixedHelpText"
+                            // TODO: Copy required
                             defaultMessage="Each time interval is the same size."
                           />
                         </EuiText>
@@ -293,6 +294,7 @@ export class StepDateHistogram extends Component {
                         <EuiText size="s" color="subdued">
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.calendarHelpText"
+                            // TODO: Copy required
                             defaultMessage="Takes varying day, month and year lengths into account."
                           />
                         </EuiText>
