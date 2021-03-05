@@ -7,7 +7,7 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 interface Props {
   setAlertParams: (key: string, value: any) => void;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function ServiceAlertTrigger(props: Props) {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
 
   const { fields, setAlertParams, defaults, chartPreview } = props;
 

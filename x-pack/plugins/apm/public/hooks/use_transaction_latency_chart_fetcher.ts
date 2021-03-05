@@ -6,15 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
+import { useServiceName } from './use_service_name';
 
 export function useTransactionLatencyChartsFetcher() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {

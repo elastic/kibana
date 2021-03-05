@@ -8,7 +8,7 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useServiceName } from '../../hooks/use_service_name';
 import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
@@ -17,7 +17,7 @@ import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 export function ActionMenu() {
   const { core, plugins } = useApmPluginContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;

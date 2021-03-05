@@ -16,7 +16,6 @@ import {
   Settings,
 } from '@elastic/charts';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -48,7 +47,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SelectedSignificantTerm | null>(null);
 
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams } = useUrlParams();
   const {
     environment,

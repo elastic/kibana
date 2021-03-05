@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 type TransactionsAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups'>;
 
@@ -22,7 +22,7 @@ export function useTransactionListFetcher() {
   const {
     urlParams: { environment, kuery, transactionType, start, end },
   } = useUrlParams();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {

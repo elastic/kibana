@@ -6,9 +6,9 @@
  */
 
 import React, { createContext } from 'react';
-import { useParams } from 'react-router-dom';
 import { Annotation } from '../../../common/annotations';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useServiceName } from '../../hooks/use_service_name';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {
@@ -22,7 +22,7 @@ export function AnnotationsContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const {
     urlParams: { environment, start, end },
   } = useUrlParams();

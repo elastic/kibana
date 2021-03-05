@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
@@ -24,6 +23,7 @@ import {
   TransactionTypeField,
 } from '../fields';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 interface Params {
   windowSize: number;
@@ -48,7 +48,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
   const { transactionTypes } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName,

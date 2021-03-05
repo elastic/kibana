@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertType } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
+import { useServiceName } from '../../../hooks/use_service_name';
+
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,7 +24,7 @@ interface KibanaDeps {
 
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const {
     services: { triggersActionsUi },
   } = useKibana<KibanaDeps>();

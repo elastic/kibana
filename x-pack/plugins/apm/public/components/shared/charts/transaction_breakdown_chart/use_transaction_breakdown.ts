@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useServiceName } from '../../../../hooks/use_service_name';
 
 export function useTransactionBreakdown() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const {
     urlParams: { environment, kuery, start, end, transactionName },
   } = useUrlParams();

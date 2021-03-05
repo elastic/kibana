@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceName } from '../../../hooks/use_service_name';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
@@ -35,7 +35,7 @@ interface Props {
 
 export function ErrorCountAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({

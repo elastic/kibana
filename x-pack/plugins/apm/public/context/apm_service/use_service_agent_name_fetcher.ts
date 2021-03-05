@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useServiceName } from '../../hooks/use_service_name';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
 export function useServiceAgentNameFetcher() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { data, error, status } = useFetcher(

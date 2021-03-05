@@ -6,15 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { getThroughputChartSelector } from '../selectors/throughput_chart_selectors';
 import { useTheme } from './use_theme';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useServiceName } from './use_service_name';
 
 export function useTransactionThroughputChartsFetcher() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {

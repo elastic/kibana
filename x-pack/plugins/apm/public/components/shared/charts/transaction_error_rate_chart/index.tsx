@@ -8,13 +8,13 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useServiceName } from '../../../../hooks/use_service_name';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -30,7 +30,7 @@ export function TransactionErrorRateChart({
   showAnnotations = true,
 }: Props) {
   const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const {
     urlParams: { environment, kuery, start, end, transactionName },
   } = useUrlParams();

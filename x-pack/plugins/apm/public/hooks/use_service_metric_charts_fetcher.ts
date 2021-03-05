@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useFetcher } from './use_fetcher';
+import { useServiceName } from './use_service_name';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: [],
@@ -25,7 +25,7 @@ export function useServiceMetricChartsFetcher({
     urlParams: { environment, kuery, start, end },
   } = useUrlParams();
   const { agentName } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
 
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {
