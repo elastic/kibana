@@ -108,8 +108,8 @@ describe('#getPlatformArchivePath()', () => {
     );
   });
 
-  describe('#getPlatformArchivePath()', () => {
-    it('creates correct path for different platforms', () => {
+  describe('#getRootDirectory()', () => {
+    it('creates correct root directory name', () => {
       expect(ossBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-oss-8.0.0"`);
       expect(defaultBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-8.0.0"`);
     });
