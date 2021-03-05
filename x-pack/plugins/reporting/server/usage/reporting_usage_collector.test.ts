@@ -497,6 +497,14 @@ describe('Ready for collection observable', () => {
               "type": "long",
             },
           },
+          "csv_searchsource": Object {
+            "available": Object {
+              "type": "boolean",
+            },
+            "total": Object {
+              "type": "long",
+            },
+          },
           "enabled": Object {
             "type": "boolean",
           },
@@ -513,6 +521,14 @@ describe('Ready for collection observable', () => {
               "type": "long",
             },
             "csv": Object {
+              "available": Object {
+                "type": "boolean",
+              },
+              "total": Object {
+                "type": "long",
+              },
+            },
+            "csv_searchsource": Object {
               "available": Object {
                 "type": "boolean",
               },
@@ -591,6 +607,17 @@ describe('Ready for collection observable', () => {
                     "type": "long",
                   },
                 },
+                "csv_searchsource": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
                 "printable_pdf": Object {
                   "canvas workpad": Object {
                     "type": "long",
@@ -616,6 +643,17 @@ describe('Ready for collection observable', () => {
                   },
                 },
                 "csv": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
+                "csv_searchsource": Object {
                   "canvas workpad": Object {
                     "type": "long",
                   },
@@ -661,6 +699,17 @@ describe('Ready for collection observable', () => {
                     "type": "long",
                   },
                 },
+                "csv_searchsource": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
                 "printable_pdf": Object {
                   "canvas workpad": Object {
                     "type": "long",
@@ -686,6 +735,17 @@ describe('Ready for collection observable', () => {
                   },
                 },
                 "csv": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
+                "csv_searchsource": Object {
                   "canvas workpad": Object {
                     "type": "long",
                   },
@@ -731,6 +791,17 @@ describe('Ready for collection observable', () => {
                     "type": "long",
                   },
                 },
+                "csv_searchsource": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
                 "printable_pdf": Object {
                   "canvas workpad": Object {
                     "type": "long",
@@ -756,6 +827,17 @@ describe('Ready for collection observable', () => {
                   },
                 },
                 "csv": Object {
+                  "canvas workpad": Object {
+                    "type": "long",
+                  },
+                  "dashboard": Object {
+                    "type": "long",
+                  },
+                  "visualization": Object {
+                    "type": "long",
+                  },
+                },
+                "csv_searchsource": Object {
                   "canvas workpad": Object {
                     "type": "long",
                   },
@@ -851,6 +933,17 @@ describe('Ready for collection observable', () => {
                   "type": "long",
                 },
               },
+              "csv_searchsource": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
               "printable_pdf": Object {
                 "canvas workpad": Object {
                   "type": "long",
@@ -876,6 +969,17 @@ describe('Ready for collection observable', () => {
                 },
               },
               "csv": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
+              "csv_searchsource": Object {
                 "canvas workpad": Object {
                   "type": "long",
                 },
@@ -921,6 +1025,17 @@ describe('Ready for collection observable', () => {
                   "type": "long",
                 },
               },
+              "csv_searchsource": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
               "printable_pdf": Object {
                 "canvas workpad": Object {
                   "type": "long",
@@ -946,6 +1061,17 @@ describe('Ready for collection observable', () => {
                 },
               },
               "csv": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
+              "csv_searchsource": Object {
                 "canvas workpad": Object {
                   "type": "long",
                 },
@@ -991,6 +1117,17 @@ describe('Ready for collection observable', () => {
                   "type": "long",
                 },
               },
+              "csv_searchsource": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
               "printable_pdf": Object {
                 "canvas workpad": Object {
                   "type": "long",
@@ -1016,6 +1153,17 @@ describe('Ready for collection observable', () => {
                 },
               },
               "csv": Object {
+                "canvas workpad": Object {
+                  "type": "long",
+                },
+                "dashboard": Object {
+                  "type": "long",
+                },
+                "visualization": Object {
+                  "type": "long",
+                },
+              },
+              "csv_searchsource": Object {
                 "canvas workpad": Object {
                   "type": "long",
                 },
