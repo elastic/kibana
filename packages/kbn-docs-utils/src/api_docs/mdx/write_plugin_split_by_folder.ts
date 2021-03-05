@@ -45,7 +45,7 @@ function addSection(
   serviceFolders: readonly string[]
 ) {
   const scopeFolder = scope === 'client' ? 'public' : scope;
-  const matchGroup = dec.source.match(`.*?\/${scopeFolder}\/([^\/]*?)\/`);
+  const matchGroup = dec.source.path.match(`.*?\/${scopeFolder}\/([^\/]*?)\/`);
   const serviceFolderName = matchGroup ? matchGroup[1] : undefined;
 
   if (serviceFolderName && serviceFolders.find((f) => f === serviceFolderName)) {

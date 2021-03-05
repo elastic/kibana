@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 import Path from 'path';
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
+import { SourceLink } from '../types';
 
 export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolean {
   return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
@@ -20,8 +21,11 @@ export function getRelativePath(fullPath: string): string {
   return Path.relative(REPO_ROOT, fullPath);
 }
 
-export function getSourceForNode(node: Node): string {
+export function getSourceForNode(node: Node): SourceLink {
   const path = getRelativePath(node.getSourceFile().getFilePath());
   const lineNumber = node.getStartLineNumber();
-  return `https://github.com/elastic/kibana/tree/${kibanaPackageJson.branch}/${path}#L${lineNumber}`;
+  return {
+    path,
+    lineNumber,
+  };
 }
