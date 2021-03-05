@@ -70,5 +70,10 @@ export interface FormInternal extends SerializedPolicy {
     warm: WarmPhaseMetaFields;
     cold: ColdPhaseMetaFields;
     delete: DeletePhaseMetaFields;
+    globalFields: {
+      searchableSnapshot: {
+        repository: string;
+      };
+    };
   };
 }

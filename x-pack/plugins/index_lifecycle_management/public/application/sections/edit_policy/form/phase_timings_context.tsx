@@ -8,7 +8,7 @@
 import React, { createContext, FunctionComponent, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
-import { UseField } from './index';
+import { useGlobalFields } from './index';
 
 export interface PhaseTimingConfiguration {
   /**
@@ -43,26 +43,21 @@ export interface PhaseTimings {
 const PhaseTimingsContext = createContext<PhaseTimings>(null as any);
 
 export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
+  const { deleteEnabled } = useGlobalFields();
   const [formData] = useFormData<FormInternal>({
     watch: ['_meta.warm.enabled', '_meta.cold.enabled', '_meta.delete.enabled'],
   });
 
   return (
-    <UseField path="_meta.delete.enabled">
-      {(field) => {
-        return (
-          <PhaseTimingsContext.Provider
-            value={{
-              ...getPhaseTimingConfiguration(formData),
-              isDeletePhaseEnabled: formData?._meta?.delete?.enabled,
-              setDeletePhaseEnabled: field.setValue,
-            }}
-          >
-            {children}
-          </PhaseTimingsContext.Provider>
-        );
+    <PhaseTimingsContext.Provider
+      value={{
+        ...getPhaseTimingConfiguration(formData),
+        isDeletePhaseEnabled: deleteEnabled.value,
+        setDeletePhaseEnabled: deleteEnabled.setValue,
       }}
-    </UseField>
+    >
+      {children}
+    </PhaseTimingsContext.Provider>
   );
 };
 export const usePhaseTimings = () => {

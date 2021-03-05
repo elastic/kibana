@@ -122,6 +122,16 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: 'd',
       },
     },
+    globalFields: {
+      searchableSnapshot: {
+        repository: {
+          label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+          validations: [
+            { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+          ],
+        },
+      },
+    },
   },
   phases: {
     hot: {
