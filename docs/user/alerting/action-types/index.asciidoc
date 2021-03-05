@@ -1,6 +1,6 @@
 [role="xpack"]
 [[index-action-type]]
-=== Index action and connector
+=== Index connector and action
 ++++
 <titleabbrev>Index</titleabbrev>
 ++++

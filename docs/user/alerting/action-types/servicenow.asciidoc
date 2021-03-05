@@ -1,6 +1,6 @@
 [role="xpack"]
 [[servicenow-action-type]]
-=== ServiceNow action and connector
+=== ServiceNow connector and action
 ++++
 <titleabbrev>ServiceNow</titleabbrev>
 ++++

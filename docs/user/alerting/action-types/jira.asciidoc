@@ -1,6 +1,6 @@
 [role="xpack"]
 [[jira-action-type]]
-=== Jira action and connector
+=== Jira connector and action
 ++++
 <titleabbrev>Jira</titleabbrev>
 ++++

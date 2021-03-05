@@ -1,6 +1,6 @@
 [role="xpack"]
 [[slack-action-type]]
-=== Slack action
+=== Slack connector and action
 ++++
 <titleabbrev>Slack</titleabbrev>
 ++++

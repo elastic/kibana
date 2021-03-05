@@ -1,10 +1,10 @@
 [[<ACTION-TYPE>-action-type]]
-=== <ACTION-TYPE> action
+=== <ACTION-TYPE> connector and action
 ++++
 <titleabbrev><ACTION-TYPE></titleabbrev>
 ++++
 
-Include a short description of the action type.
+Include a short description of the connector type.
 
 [float]
 [[<ACTION-TYPE>-connector-configuration]]
@@ -13,7 +13,7 @@ Include a short description of the action type.
 <ACTION-TYPE> connectors have the following configuration properties.
 
 ////
-List of user-facing connector configurations. This should align with the fields available in the Create connector flyout form for this action type.
+List of user-facing connector configurations. This should align with the fields available in the Create connector flyout form for this connector type.
 ////
 
 Property1:: A short description of this property.
@@ -21,16 +21,16 @@ Property2:: A short description of this property with format hints. This can be 
 
 [float]
 [[Preconfigured-<ACTION-TYPE>-configuration]]
-==== Preconfigured action type
+==== Preconfigured connector type
 
 ////
-Example preconfigured format for this action type
+Example preconfigured format for this connector type
 ////
 
 [source,text]
 --
  my-<ACTION-TYPE>:
-   name: preconfigured-<ACTION-TYPE>-action-type
+   name: preconfigured-<ACTION-TYPE>-connector-type
    actionTypeId: .<ACTION-TYPE>
    config:
      property1: value1
@@ -39,17 +39,15 @@ Example preconfigured format for this action type
      property3: value3
 --
 
-[float]
-[[<ACTION-TYPE>-connector-config-properties]]
 ////
 List of properties from the ConfigSchema and SecretsSchema for this action type.
 ////
-Config defines information for the action type.
+Config defines information for the connector type.
 
 `property1`:: A short description of this property.
 `property2`:: A short descriptionn of this property.
 
-Secrets defines sensitive information for the action type.
+Secrets defines sensitive information for the connector type.
 
 `property3`:: A short descriptionn of this property.
 
@@ -57,7 +55,7 @@ Secrets defines sensitive information for the action type.
 [[<ACTION-TYPE>-action-configuration]]
 ==== Action configuration
 
-<ACTION-TYPE> actions have the following configuration properties.
+<ACTION-TYPE> actions have the following properties.
 
 ////
 List of user-facing action configurations. This should align with the fields available in the Action section of the Create/Update alert flyout.

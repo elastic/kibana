@@ -1,8 +1,8 @@
 [role="xpack"]
 [[action-types]]
-== Actions and connectors
+== Connectors and actions
 
-Actions are {kib} services or integrations with third-party systems that run as background tasks on the {kib} server when rule conditions are met. Actions use connectors, which provide a central place to store connection information for reusable services and third party integrations. {kib} provides the following types of actions and connectors:
+Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
 [cols="2"]
 |===

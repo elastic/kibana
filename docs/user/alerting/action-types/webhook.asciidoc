@@ -1,6 +1,6 @@
 [role="xpack"]
 [[webhook-action-type]]
-=== Webhook action and connector
+=== Webhook connector and action
 ++++
 <titleabbrev>Webhook</titleabbrev>
 ++++

@@ -1,24 +1,13 @@
 [role="xpack"]
-<<<<<<< HEAD:docs/user/alerting/stack-rules/es-query.asciidoc
 [[rule-type-es-query]]
-=== ES query
-
-The ES query rule type runs a user-configured {es} query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
-=======
-[[alert-type-es-query]]
 === {es} query
 
-The {es} query alert type runs a user-configured {es} query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
->>>>>>> d0b6891abf13a9cd806f923ccc9c0db1f7f040cb:docs/user/alerting/stack-alerts/es-query.asciidoc
+The {es} query rule type runs a user-configured {es} query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
 
 [float]
 ==== Create the rule
 
-<<<<<<< HEAD:docs/user/alerting/stack-rules/es-query.asciidoc
-Fill in the <<defining-alerts-general-details, rule details>>, then select *ES query*.
-=======
-Fill in the <<defining-alerts-general-details, alert details>>, then select *{es} query*.
->>>>>>> d0b6891abf13a9cd806f923ccc9c0db1f7f040cb:docs/user/alerting/stack-alerts/es-query.asciidoc
+Fill in the <<defining-alerts-general-details, rule details>>, then select *{es} query*.
 
 [float]
 ==== Define the conditions

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[pagerduty-action-type]]
-=== PagerDuty action and connector
+=== PagerDuty connector and action
 ++++
 <titleabbrev>PagerDuty</titleabbrev>
 ++++

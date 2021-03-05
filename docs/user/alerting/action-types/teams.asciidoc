@@ -1,6 +1,6 @@
 [role="xpack"]
 [[teams-action-type]]
-=== Microsoft Teams action and connector
+=== Microsoft Teams connector and action
 ++++
 <titleabbrev>Microsoft Teams</titleabbrev>
 ++++

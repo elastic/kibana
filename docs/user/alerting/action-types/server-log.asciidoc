@@ -1,6 +1,6 @@
 [role="xpack"]
 [[server-log-action-type]]
-=== Server log action and connector
+=== Server log connector and action
 ++++
 <titleabbrev>Server log</titleabbrev>
 ++++

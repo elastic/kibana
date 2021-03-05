@@ -1,6 +1,6 @@
 [role="xpack"]
 [[email-action-type]]
-=== Email action and connector
+=== Email connector and action
 ++++
 <titleabbrev>Email</titleabbrev>
 ++++

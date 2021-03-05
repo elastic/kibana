@@ -1,6 +1,6 @@
 [role="xpack"]
 [[resilient-action-type]]
-=== IBM Resilient action and connector
+=== IBM Resilient connector and action
 ++++
 <titleabbrev>IBM Resilient</titleabbrev>
 ++++
