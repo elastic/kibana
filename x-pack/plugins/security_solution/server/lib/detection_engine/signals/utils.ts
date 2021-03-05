@@ -475,7 +475,7 @@ export const getRuleRangeTuples = ({
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
+  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
 /**
@@ -792,4 +792,22 @@ export const getThresholdAggregationParts = (
       };
     }
   }
+};
+
+export const getThresholdTermsHash = (
+  terms: Array<{
+    field: string;
+    value: string;
+  }>
+): string => {
+  return createHash('sha256')
+    .update(
+      terms
+        .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
+        .map((field) => {
+          return field.value;
+        })
+        .join(',')
+    )
+    .digest('hex');
 };

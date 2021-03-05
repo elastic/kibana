@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
-import { mockLogger } from './__mocks__/es_results';
+import { alertsMock, AlertServicesMock } from '../../../../../../alerts/server/mocks';
+import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { mockLogger } from '../__mocks__/es_results';
+import { buildRuleMessageFactory } from '../rule_messages';
+import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
-import { buildRuleMessageFactory } from './rule_messages';
-import * as single_search_after from './single_search_after';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
