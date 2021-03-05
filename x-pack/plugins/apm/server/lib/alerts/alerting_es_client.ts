@@ -9,7 +9,7 @@ import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../../typings/elasticsearch';
 import {
   AlertInstanceContext,
   AlertInstanceState,

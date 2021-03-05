@@ -31,7 +31,7 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
+import { ESSearchResponse, ESSearchBody } from '../../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;

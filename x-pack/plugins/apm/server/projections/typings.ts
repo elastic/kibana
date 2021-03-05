@@ -9,7 +9,7 @@ import {
   AggregationOptionsByType,
   AggregationInputMap,
   ESSearchBody,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {

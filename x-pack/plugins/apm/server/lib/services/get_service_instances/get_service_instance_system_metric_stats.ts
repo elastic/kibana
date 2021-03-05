@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,

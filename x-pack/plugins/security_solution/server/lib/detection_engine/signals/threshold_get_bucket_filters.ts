@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { isEmpty } from 'lodash';
 
 import { Filter } from 'src/plugins/data/common';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';

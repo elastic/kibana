@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SortOptions } from '../../../../../typings/elasticsearch';
+import { SortOptions } from '../../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,

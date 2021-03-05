@@ -6,7 +6,7 @@
  */
 
 import { esKuery } from '../../../../../src/plugins/data/server';
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,

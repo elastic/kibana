@@ -11,7 +11,7 @@ import type { GetResponse } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import type { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';

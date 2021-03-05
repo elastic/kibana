@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,

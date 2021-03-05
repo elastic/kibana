@@ -16,7 +16,7 @@ import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;

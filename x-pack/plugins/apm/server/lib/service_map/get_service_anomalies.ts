@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';

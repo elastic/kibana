@@ -11,8 +11,8 @@ import {
   processSignificantTermAggs,
   TopSigTerm,
 } from '../process_significant_term_aggs';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch/aggregations';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,

@@ -6,7 +6,7 @@
  */
 
 import { Overwrite, Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
