@@ -25,6 +25,7 @@ import {
   FONTS_API_PATH,
   API_ROOT_PATH,
   CREATE_INDEX_API_PATH,
+  MAX_DRAWING_SIZE_BYTES,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -590,7 +591,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     }
   );
 
-  async function importData(core, id, index, settings, mappings, data) {
+  async function importData(core, id, index, mappings, data) {
     const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
       core.savedObjects.client,
       core.elasticsearch.client.asCurrentUser
@@ -600,7 +601,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
       indexPatternsService,
       logger
     );
-    return importDataFunc(id, index, settings, mappings, data);
+    return importDataFunc(id, index, mappings, data);
   }
 
   router.post(
@@ -613,22 +614,21 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         body: schema.object({
           index: schema.string(),
           data: schema.arrayOf(schema.any()),
-          settings: schema.maybe(schema.any()),
           mappings: schema.any(),
         }),
       },
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: 1048576,
+          maxBytes: MAX_DRAWING_SIZE_BYTES,
         },
       },
     },
     async (context, request, response) => {
       try {
         const { id } = request.query;
-        const { index, data, settings, mappings } = request.body;
-        const result = await importData(context.core, id, index, settings, mappings, data);
+        const { index, data, mappings } = request.body;
+        const result = await importData(context.core, id, index, mappings, data);
         return response.ok({ body: result });
       } catch (error) {
         logger.error(`Error processing geo point/shape request: ${error.message}.`);
