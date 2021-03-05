@@ -168,7 +168,7 @@ export class SearchEmbeddable
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(
-      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+      this.services.uiSettings.get('doc_table:legacy') ? searchTemplate : searchTemplateGrid
     )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
