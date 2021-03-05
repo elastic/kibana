@@ -235,16 +235,16 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
-        for (const [, expected] of expectedHistogramCharts.entries()) {
-          const index = expected.id;
-          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+        for (const expected of expectedHistogramCharts.values()) {
+          const id = expected.id;
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
 
           if (expected.chartAvailable) {
-            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
 
             if (expected.colorStats !== undefined) {
               const actualColorStats = await canvasElement.getColorStats(
-                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`,
+                `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
                 expected.colorStats
               );
 
@@ -258,23 +258,21 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
               );
             }
           } else {
-            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.missingOrFail(`mlDataGridChart-${id}-histogram`);
           }
 
           if (expected.legend !== undefined) {
-            const actualLegend = await testSubjects.getVisibleText(
-              `mlDataGridChart-${index}-legend`
-            );
+            const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
             expect(actualLegend).to.eql(
               expected.legend,
               `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
             );
           }
 
-          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
           expect(actualId).to.eql(
             expected.id,
-            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+            `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
           );
         }
       });
