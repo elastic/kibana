@@ -4345,8 +4345,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 208,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L208"
+              "lineNumber": 207,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L207"
             },
             "signature": [
               {
@@ -4368,8 +4368,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L210"
+              "lineNumber": 209,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L209"
             },
             "signature": [
               {
@@ -4391,8 +4391,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L212"
+              "lineNumber": 211,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L211"
             },
             "signature": [
               {
@@ -4414,8 +4414,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L214"
+              "lineNumber": 213,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L213"
             },
             "signature": [
               {
@@ -4437,8 +4437,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 216,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L216"
+              "lineNumber": 215,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L215"
             },
             "signature": [
               {
@@ -4462,8 +4462,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 223,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L223"
+              "lineNumber": 222,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L222"
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -4479,8 +4479,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 227,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L227"
+              "lineNumber": 226,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L226"
             },
             "signature": [
               {
@@ -4496,8 +4496,8 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 206,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L206"
+          "lineNumber": 205,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L205"
         },
         "initialIsOpen": false
       },
@@ -4524,8 +4524,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 253,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L253"
+              "lineNumber": 252,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L252"
             },
             "signature": [
               {
@@ -4547,8 +4547,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L255"
+              "lineNumber": 254,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L254"
             },
             "signature": [
               {
@@ -4570,8 +4570,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L257"
+              "lineNumber": 256,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L256"
             },
             "signature": [
               {
@@ -4593,8 +4593,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L259"
+              "lineNumber": 258,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L258"
             },
             "signature": [
               {
@@ -4616,8 +4616,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L261"
+              "lineNumber": 260,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L260"
             },
             "signature": [
               {
@@ -4639,8 +4639,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L263"
+              "lineNumber": 262,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L262"
             },
             "signature": [
               {
@@ -4662,8 +4662,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L265"
+              "lineNumber": 264,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L264"
             },
             "signature": [
               {
@@ -4685,8 +4685,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L267"
+              "lineNumber": 266,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L266"
             },
             "signature": [
               {
@@ -4708,8 +4708,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L269"
+              "lineNumber": 268,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L268"
             },
             "signature": [
               {
@@ -4731,8 +4731,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L271"
+              "lineNumber": 270,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L270"
             },
             "signature": [
               {
@@ -4756,8 +4756,8 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 278,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L278"
+              "lineNumber": 277,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L277"
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -4766,8 +4766,8 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 251,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L251"
+          "lineNumber": 250,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L250"
         },
         "initialIsOpen": false
       },
@@ -6287,8 +6287,8 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 237,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L237"
+          "lineNumber": 236,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/index.ts#L236"
         },
         "signature": [
           "() => Promise<[",
@@ -6495,6 +6495,300 @@
           "path": "src/core/server/csp/csp_config.ts",
           "lineNumber": 46,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/csp/csp_config.ts#L46"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ElasticsearchConfig",
+        "type": "Class",
+        "tags": [
+          "public"
+        ],
+        "label": "ElasticsearchConfig",
+        "description": [
+          "\nWrapper of config schema."
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.healthCheckDelay",
+            "type": "Object",
+            "label": "healthCheckDelay",
+            "description": [
+              "\nThe interval between health check requests Kibana sends to the Elasticsearch."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 192,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L192"
+            },
+            "signature": [
+              "moment.Duration"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.ignoreVersionMismatch",
+            "type": "boolean",
+            "label": "ignoreVersionMismatch",
+            "description": [
+              "\nWhether to allow kibana to connect to a non-compatible elasticsearch node."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 197,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L197"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.apiVersion",
+            "type": "string",
+            "label": "apiVersion",
+            "description": [
+              "\nVersion of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 202,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L202"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.hosts",
+            "type": "Array",
+            "label": "hosts",
+            "description": [
+              "\nHosts that the client will connect to. If sniffing is enabled, this list will\nbe used as seeds to discover the rest of your cluster."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 208,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L208"
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.requestHeadersWhitelist",
+            "type": "Array",
+            "label": "requestHeadersWhitelist",
+            "description": [
+              "\nList of Kibana client-side headers to send to Elasticsearch when request\nscoped cluster client is used. If this is an empty array then *no* client-side\nwill be sent."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 215,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L215"
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.pingTimeout",
+            "type": "Object",
+            "label": "pingTimeout",
+            "description": [
+              "\nTimeout after which PING HTTP request will be aborted and retried."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 220,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L220"
+            },
+            "signature": [
+              "moment.Duration"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.requestTimeout",
+            "type": "Object",
+            "label": "requestTimeout",
+            "description": [
+              "\nTimeout after which HTTP request will be aborted and retried."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 225,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L225"
+            },
+            "signature": [
+              "moment.Duration"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.shardTimeout",
+            "type": "Object",
+            "label": "shardTimeout",
+            "description": [
+              "\nTimeout for Elasticsearch to wait for responses from shards. Set to 0 to disable."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 230,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L230"
+            },
+            "signature": [
+              "moment.Duration"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.sniffOnStart",
+            "type": "boolean",
+            "label": "sniffOnStart",
+            "description": [
+              "\nSpecifies whether the client should attempt to detect the rest of the cluster\nwhen it is first instantiated."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 236,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L236"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.sniffInterval",
+            "type": "CompoundType",
+            "label": "sniffInterval",
+            "description": [
+              "\nInterval to perform a sniff operation and make sure the list of nodes is complete.\nIf `false` then sniffing is disabled."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 242,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L242"
+            },
+            "signature": [
+              "false | moment.Duration"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.sniffOnConnectionFault",
+            "type": "boolean",
+            "label": "sniffOnConnectionFault",
+            "description": [
+              "\nSpecifies whether the client should immediately sniff for a more current list\nof nodes when a connection dies."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 248,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L248"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.username",
+            "type": "string",
+            "label": "username",
+            "description": [
+              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe username that the Kibana server uses to perform its administrative functions."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 254,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L254"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.password",
+            "type": "string",
+            "label": "password",
+            "description": [
+              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe password that the Kibana server uses to perform its administrative functions."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 260,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L260"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.ssl",
+            "type": "CompoundType",
+            "label": "ssl",
+            "description": [
+              "\nSet of settings configure SSL connection between Kibana and Elasticsearch that\nare required when `xpack.ssl.verification_mode` in Elasticsearch is set to\neither `certificate` or `full`."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 267,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L267"
+            },
+            "signature": [
+              "Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ElasticsearchConfig.customHeaders",
+            "type": "Object",
+            "label": "customHeaders",
+            "description": [
+              "\nHeader names and values to send to Elasticsearch with every request. These\nheaders cannot be overwritten by client-side headers and aren't affected by\n`requestHeadersWhitelist` configuration."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 277,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L277"
+            },
+            "signature": [
+              "Record<string, string>"
+            ]
+          },
+          {
+            "id": "def-server.ElasticsearchConfig.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "rawConfig",
+                "isRequired": true,
+                "signature": [
+                  "Readonly<{ password?: string | undefined; username?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; hosts: string | string[]; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; }>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+                  "lineNumber": 279,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L279"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+              "lineNumber": 279,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L279"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+          "lineNumber": 188,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L188"
         },
         "initialIsOpen": false
       },
@@ -7099,300 +7393,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ElasticsearchConfig",
-        "type": "Class",
-        "tags": [
-          "public"
-        ],
-        "label": "ElasticsearchConfig",
-        "description": [
-          "\nWrapper of config schema."
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.healthCheckDelay",
-            "type": "Object",
-            "label": "healthCheckDelay",
-            "description": [
-              "\nThe interval between health check requests Kibana sends to the Elasticsearch."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 192,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L192"
-            },
-            "signature": [
-              "moment.Duration"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.ignoreVersionMismatch",
-            "type": "boolean",
-            "label": "ignoreVersionMismatch",
-            "description": [
-              "\nWhether to allow kibana to connect to a non-compatible elasticsearch node."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 197,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L197"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.apiVersion",
-            "type": "string",
-            "label": "apiVersion",
-            "description": [
-              "\nVersion of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 202,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L202"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.hosts",
-            "type": "Array",
-            "label": "hosts",
-            "description": [
-              "\nHosts that the client will connect to. If sniffing is enabled, this list will\nbe used as seeds to discover the rest of your cluster."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 208,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L208"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.requestHeadersWhitelist",
-            "type": "Array",
-            "label": "requestHeadersWhitelist",
-            "description": [
-              "\nList of Kibana client-side headers to send to Elasticsearch when request\nscoped cluster client is used. If this is an empty array then *no* client-side\nwill be sent."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 215,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L215"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.pingTimeout",
-            "type": "Object",
-            "label": "pingTimeout",
-            "description": [
-              "\nTimeout after which PING HTTP request will be aborted and retried."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 220,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L220"
-            },
-            "signature": [
-              "moment.Duration"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.requestTimeout",
-            "type": "Object",
-            "label": "requestTimeout",
-            "description": [
-              "\nTimeout after which HTTP request will be aborted and retried."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 225,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L225"
-            },
-            "signature": [
-              "moment.Duration"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.shardTimeout",
-            "type": "Object",
-            "label": "shardTimeout",
-            "description": [
-              "\nTimeout for Elasticsearch to wait for responses from shards. Set to 0 to disable."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 230,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L230"
-            },
-            "signature": [
-              "moment.Duration"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.sniffOnStart",
-            "type": "boolean",
-            "label": "sniffOnStart",
-            "description": [
-              "\nSpecifies whether the client should attempt to detect the rest of the cluster\nwhen it is first instantiated."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 236,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L236"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.sniffInterval",
-            "type": "CompoundType",
-            "label": "sniffInterval",
-            "description": [
-              "\nInterval to perform a sniff operation and make sure the list of nodes is complete.\nIf `false` then sniffing is disabled."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 242,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L242"
-            },
-            "signature": [
-              "false | moment.Duration"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.sniffOnConnectionFault",
-            "type": "boolean",
-            "label": "sniffOnConnectionFault",
-            "description": [
-              "\nSpecifies whether the client should immediately sniff for a more current list\nof nodes when a connection dies."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 248,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L248"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.username",
-            "type": "string",
-            "label": "username",
-            "description": [
-              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe username that the Kibana server uses to perform its administrative functions."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 254,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L254"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.password",
-            "type": "string",
-            "label": "password",
-            "description": [
-              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe password that the Kibana server uses to perform its administrative functions."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 260,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L260"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.ssl",
-            "type": "CompoundType",
-            "label": "ssl",
-            "description": [
-              "\nSet of settings configure SSL connection between Kibana and Elasticsearch that\nare required when `xpack.ssl.verification_mode` in Elasticsearch is set to\neither `certificate` or `full`."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 267,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L267"
-            },
-            "signature": [
-              "Pick<Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"certificate\" | \"verificationMode\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchConfig.customHeaders",
-            "type": "Object",
-            "label": "customHeaders",
-            "description": [
-              "\nHeader names and values to send to Elasticsearch with every request. These\nheaders cannot be overwritten by client-side headers and aren't affected by\n`requestHeadersWhitelist` configuration."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 277,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L277"
-            },
-            "signature": [
-              "Record<string, string>"
-            ]
-          },
-          {
-            "id": "def-server.ElasticsearchConfig.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "rawConfig",
-                "isRequired": true,
-                "signature": [
-                  "Readonly<{ password?: string | undefined; username?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; hosts: string | string[]; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; }>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-                  "lineNumber": 279,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L279"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-              "lineNumber": 279,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L279"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-          "lineNumber": 188,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/elasticsearch_config.ts#L188"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.LegacyElasticsearchErrorHelpers",
         "type": "Class",
         "tags": [
@@ -7985,22 +7985,11 @@
         "id": "def-server.IContextContainer",
         "type": "Interface",
         "label": "IContextContainer",
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
-          "<THandler>"
-        ],
         "description": [
           "\nAn object that handles registration of context providers and configuring handlers with context.\n"
         ],
         "tags": [
           "remarks",
-          "typeParam",
           "public"
         ],
         "children": [
@@ -8043,8 +8032,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 154,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L154"
+                  "lineNumber": 151,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L151"
                 }
               },
               {
@@ -8059,8 +8048,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 155,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L155"
+                  "lineNumber": 152,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L152"
                 }
               },
               {
@@ -8082,8 +8071,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 156,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L156"
+                  "lineNumber": 153,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L153"
                 }
               }
             ],
@@ -8095,8 +8084,8 @@
             ],
             "source": {
               "path": "src/core/server/context/container/context.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L153"
+              "lineNumber": 150,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L150"
             }
           },
           {
@@ -8104,17 +8093,40 @@
             "type": "Function",
             "label": "createHandler",
             "signature": [
-              "(pluginOpaqueId: symbol, handler: THandler) => (...rest: ",
+              "(pluginOpaqueId: symbol, handler: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<unknown, unknown, unknown, ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.HandlerParameters",
-                "text": "HandlerParameters"
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
               },
-              "<THandler>) => ",
-              "ShallowPromise",
-              "<ReturnType<THandler>>"
+              ", any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+              "Stream",
+              " | undefined>(options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<T>) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaResponse",
+                "text": "KibanaResponse"
+              }
             ],
             "description": [
               "\nCreate a new handler function pre-wired to context for the plugin.\n"
@@ -8132,8 +8144,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 168,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L168"
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L165"
                 }
               },
               {
@@ -8141,33 +8153,65 @@
                 "label": "handler",
                 "isRequired": true,
                 "signature": [
-                  "THandler"
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  },
+                  ", any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+                  "Stream",
+                  " | undefined>(options: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.CustomHttpResponseOptions",
+                    "text": "CustomHttpResponseOptions"
+                  },
+                  "<T>) => ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaResponse",
+                    "text": "KibanaResponse"
+                  }
                 ],
                 "description": [
                   "- Handler function to pass context object to."
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 169,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L169"
+                  "lineNumber": 166,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L166"
                 }
               }
             ],
             "tags": [],
             "returnComment": [
-              "A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of\nthe `handler` return value."
+              "A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of\nthe `handler` return value."
             ],
             "source": {
               "path": "src/core/server/context/container/context.ts",
-              "lineNumber": 167,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L167"
+              "lineNumber": 164,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L164"
             }
           }
         ],
         "source": {
           "path": "src/core/server/context/container/context.ts",
-          "lineNumber": 138,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L138"
+          "lineNumber": 135,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L135"
         },
         "initialIsOpen": false
       },
@@ -10993,69 +11037,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.Explanation",
-        "type": "Interface",
-        "label": "Explanation",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.Explanation.value",
-            "type": "number",
-            "label": "value",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/client/types.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/client/types.ts#L53"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Explanation.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/client/types.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/client/types.ts#L54"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.Explanation.details",
-            "type": "Array",
-            "label": "details",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/client/types.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/client/types.ts#L55"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.Explanation",
-                "text": "Explanation"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/client/types.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/client/types.ts#L52"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.GetResponse",
         "type": "Interface",
         "label": "GetResponse",
@@ -11318,6 +11299,435 @@
           "path": "src/core/server/elasticsearch/client/types.ts",
           "lineNumber": 124,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/client/types.ts#L124"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.LegacyCallAPIOptions",
+        "type": "Interface",
+        "label": "LegacyCallAPIOptions",
+        "description": [
+          "\nThe set of options that defines how API call should be made and result be\nprocessed.\n"
+        ],
+        "tags": [
+          "public",
+          "deprecated"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.LegacyCallAPIOptions.wrap401Errors",
+            "type": "CompoundType",
+            "label": "wrap401Errors",
+            "description": [
+              "\nIndicates whether `401 Unauthorized` errors returned from the Elasticsearch API\nshould be wrapped into `Boom` error instances with properly set `WWW-Authenticate`\nheader that could have been returned by the API itself. If API didn't specify that\nthen `Basic realm=\"Authorization Required\"` is used as `WWW-Authenticate`."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 151,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L151"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.LegacyCallAPIOptions.signal",
+            "type": "Object",
+            "label": "signal",
+            "description": [
+              "\nA signal object that allows you to abort the request via an AbortController object."
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 155,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L155"
+            },
+            "signature": [
+              "AbortSignal | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 144,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L144"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.AssistantAPIClientParams",
+        "type": "Interface",
+        "label": "AssistantAPIClientParams",
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.AssistantAPIClientParams",
+            "text": "AssistantAPIClientParams"
+          },
+          " extends ",
+          "GenericParams"
+        ],
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.AssistantAPIClientParams.path",
+            "type": "string",
+            "label": "path",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 318,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L318"
+            },
+            "signature": [
+              "\"/_migration/assistance\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.AssistantAPIClientParams.method",
+            "type": "string",
+            "label": "method",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 319,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L319"
+            },
+            "signature": [
+              "\"GET\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 317,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L317"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.AssistanceAPIResponse",
+        "type": "Interface",
+        "label": "AssistanceAPIResponse",
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.AssistanceAPIResponse.indices",
+            "type": "Object",
+            "label": "indices",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 338,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L338"
+            },
+            "signature": [
+              "{ [indexName: string]: { action_required: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.MIGRATION_ASSISTANCE_INDEX_ACTION",
+                "text": "MIGRATION_ASSISTANCE_INDEX_ACTION"
+              },
+              "; }; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 337,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L337"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.DeprecationAPIClientParams",
+        "type": "Interface",
+        "label": "DeprecationAPIClientParams",
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.DeprecationAPIClientParams",
+            "text": "DeprecationAPIClientParams"
+          },
+          " extends ",
+          "GenericParams"
+        ],
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIClientParams.path",
+            "type": "string",
+            "label": "path",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 350,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L350"
+            },
+            "signature": [
+              "\"/_migration/deprecations\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIClientParams.method",
+            "type": "string",
+            "label": "method",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 351,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L351"
+            },
+            "signature": [
+              "\"GET\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 349,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L349"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.DeprecationInfo",
+        "type": "Interface",
+        "label": "DeprecationInfo",
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DeprecationInfo.level",
+            "type": "CompoundType",
+            "label": "level",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 359,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L359"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.MIGRATION_DEPRECATION_LEVEL",
+                "text": "MIGRATION_DEPRECATION_LEVEL"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationInfo.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 360,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L360"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationInfo.url",
+            "type": "string",
+            "label": "url",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 361,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L361"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationInfo.details",
+            "type": "string",
+            "label": "details",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 362,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L362"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 358,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L358"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.IndexSettingsDeprecationInfo",
+        "type": "Interface",
+        "label": "IndexSettingsDeprecationInfo",
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "id": "def-server.IndexSettingsDeprecationInfo.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 370,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L370"
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 369,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L369"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.DeprecationAPIResponse",
+        "type": "Interface",
+        "label": "DeprecationAPIResponse",
+        "description": [],
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIResponse.cluster_settings",
+            "type": "Array",
+            "label": "cluster_settings",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 378,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L378"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationInfo",
+                "text": "DeprecationInfo"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIResponse.ml_settings",
+            "type": "Array",
+            "label": "ml_settings",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 379,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L379"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationInfo",
+                "text": "DeprecationInfo"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIResponse.node_settings",
+            "type": "Array",
+            "label": "node_settings",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 380,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L380"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationInfo",
+                "text": "DeprecationInfo"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.DeprecationAPIResponse.index_settings",
+            "type": "Object",
+            "label": "index_settings",
+            "description": [],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 381,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L381"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IndexSettingsDeprecationInfo",
+                "text": "IndexSettingsDeprecationInfo"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 377,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L377"
         },
         "initialIsOpen": false
       },
@@ -15519,8 +15929,8 @@
             "description": [],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 415,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L415"
+              "lineNumber": 425,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L425"
             },
             "signature": [
               "{ savedObjects: { client: Pick<",
@@ -15568,8 +15978,8 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 414,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L414"
+          "lineNumber": 424,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L424"
         },
         "initialIsOpen": false
       },
@@ -15606,8 +16016,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 449,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L449"
+              "lineNumber": 459,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L459"
             },
             "signature": [
               {
@@ -15629,8 +16039,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 451,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L451"
+              "lineNumber": 461,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L461"
             },
             "signature": [
               {
@@ -15652,8 +16062,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 453,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L453"
+              "lineNumber": 463,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L463"
             },
             "signature": [
               {
@@ -15675,8 +16085,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 455,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L455"
+              "lineNumber": 465,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L465"
             },
             "signature": [
               {
@@ -15707,8 +16117,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 460,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L460"
+              "lineNumber": 470,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L470"
             },
             "signature": [
               {
@@ -15730,8 +16140,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 462,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L462"
+              "lineNumber": 472,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L472"
             },
             "signature": [
               {
@@ -15753,8 +16163,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 464,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L464"
+              "lineNumber": 474,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L474"
             },
             "signature": [
               {
@@ -15776,8 +16186,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 466,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L466"
+              "lineNumber": 476,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L476"
             },
             "signature": [
               {
@@ -15799,8 +16209,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 468,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L468"
+              "lineNumber": 478,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L478"
             },
             "signature": [
               {
@@ -15822,8 +16232,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 470,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L470"
+              "lineNumber": 480,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L480"
             },
             "signature": [
               {
@@ -15845,8 +16255,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 472,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L472"
+              "lineNumber": 482,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L482"
             },
             "signature": [
               {
@@ -15862,8 +16272,8 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 447,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L447"
+          "lineNumber": 457,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L457"
         },
         "initialIsOpen": false
       },
@@ -15888,8 +16298,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 495,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L495"
+              "lineNumber": 505,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L505"
             },
             "signature": [
               {
@@ -15911,8 +16321,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 497,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L497"
+              "lineNumber": 507,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L507"
             },
             "signature": [
               {
@@ -15934,8 +16344,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 499,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L499"
+              "lineNumber": 509,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L509"
             },
             "signature": [
               {
@@ -15957,8 +16367,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 501,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L501"
+              "lineNumber": 511,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L511"
             },
             "signature": [
               {
@@ -15980,8 +16390,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 503,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L503"
+              "lineNumber": 513,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L513"
             },
             "signature": [
               {
@@ -16003,8 +16413,8 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 505,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L505"
+              "lineNumber": 515,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L515"
             },
             "signature": [
               {
@@ -16019,8 +16429,8 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 493,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L493"
+          "lineNumber": 503,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L503"
         },
         "initialIsOpen": false
       },
@@ -16265,23 +16675,14 @@
             "type": "Function",
             "label": "createContextContainer",
             "signature": [
-              "<THandler extends ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HandlerFunction",
-                "text": "HandlerFunction"
-              },
-              "<any>>() => ",
+              "() => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
                 "section": "def-server.IContextContainer",
                 "text": "IContextContainer"
-              },
-              "<THandler>"
+              }
             ],
             "description": [
               "\nCreates a new {@link IContextContainer} for a service owner."
@@ -16369,435 +16770,6 @@
           "path": "src/core/server/http_resources/types.ts",
           "lineNumber": 99,
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http_resources/types.ts#L99"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LegacyCallAPIOptions",
-        "type": "Interface",
-        "label": "LegacyCallAPIOptions",
-        "description": [
-          "\nThe set of options that defines how API call should be made and result be\nprocessed.\n"
-        ],
-        "tags": [
-          "public",
-          "deprecated"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LegacyCallAPIOptions.wrap401Errors",
-            "type": "CompoundType",
-            "label": "wrap401Errors",
-            "description": [
-              "\nIndicates whether `401 Unauthorized` errors returned from the Elasticsearch API\nshould be wrapped into `Boom` error instances with properly set `WWW-Authenticate`\nheader that could have been returned by the API itself. If API didn't specify that\nthen `Basic realm=\"Authorization Required\"` is used as `WWW-Authenticate`."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 151,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L151"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyCallAPIOptions.signal",
-            "type": "Object",
-            "label": "signal",
-            "description": [
-              "\nA signal object that allows you to abort the request via an AbortController object."
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L155"
-            },
-            "signature": [
-              "AbortSignal | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 144,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L144"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.AssistantAPIClientParams",
-        "type": "Interface",
-        "label": "AssistantAPIClientParams",
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.AssistantAPIClientParams",
-            "text": "AssistantAPIClientParams"
-          },
-          " extends ",
-          "GenericParams"
-        ],
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.AssistantAPIClientParams.path",
-            "type": "string",
-            "label": "path",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 318,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L318"
-            },
-            "signature": [
-              "\"/_migration/assistance\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.AssistantAPIClientParams.method",
-            "type": "string",
-            "label": "method",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 319,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L319"
-            },
-            "signature": [
-              "\"GET\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 317,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L317"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.AssistanceAPIResponse",
-        "type": "Interface",
-        "label": "AssistanceAPIResponse",
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.AssistanceAPIResponse.indices",
-            "type": "Object",
-            "label": "indices",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 338,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L338"
-            },
-            "signature": [
-              "{ [indexName: string]: { action_required: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MIGRATION_ASSISTANCE_INDEX_ACTION",
-                "text": "MIGRATION_ASSISTANCE_INDEX_ACTION"
-              },
-              "; }; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 337,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L337"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.DeprecationAPIClientParams",
-        "type": "Interface",
-        "label": "DeprecationAPIClientParams",
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.DeprecationAPIClientParams",
-            "text": "DeprecationAPIClientParams"
-          },
-          " extends ",
-          "GenericParams"
-        ],
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIClientParams.path",
-            "type": "string",
-            "label": "path",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 350,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L350"
-            },
-            "signature": [
-              "\"/_migration/deprecations\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIClientParams.method",
-            "type": "string",
-            "label": "method",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 351,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L351"
-            },
-            "signature": [
-              "\"GET\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 349,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L349"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.DeprecationInfo",
-        "type": "Interface",
-        "label": "DeprecationInfo",
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.DeprecationInfo.level",
-            "type": "CompoundType",
-            "label": "level",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 359,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L359"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MIGRATION_DEPRECATION_LEVEL",
-                "text": "MIGRATION_DEPRECATION_LEVEL"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationInfo.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 360,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L360"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationInfo.url",
-            "type": "string",
-            "label": "url",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 361,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L361"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationInfo.details",
-            "type": "string",
-            "label": "details",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 362,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L362"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 358,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L358"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.IndexSettingsDeprecationInfo",
-        "type": "Interface",
-        "label": "IndexSettingsDeprecationInfo",
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "id": "def-server.IndexSettingsDeprecationInfo.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 370,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L370"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 369,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L369"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.DeprecationAPIResponse",
-        "type": "Interface",
-        "label": "DeprecationAPIResponse",
-        "description": [],
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIResponse.cluster_settings",
-            "type": "Array",
-            "label": "cluster_settings",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 378,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L378"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationInfo",
-                "text": "DeprecationInfo"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIResponse.ml_settings",
-            "type": "Array",
-            "label": "ml_settings",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 379,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L379"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationInfo",
-                "text": "DeprecationInfo"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIResponse.node_settings",
-            "type": "Array",
-            "label": "node_settings",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 380,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L380"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationInfo",
-                "text": "DeprecationInfo"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DeprecationAPIResponse.index_settings",
-            "type": "Object",
-            "label": "index_settings",
-            "description": [],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 381,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L381"
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IndexSettingsDeprecationInfo",
-                "text": "IndexSettingsDeprecationInfo"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 377,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L377"
         },
         "initialIsOpen": false
       }
@@ -17268,6 +17240,44 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.MIGRATION_ASSISTANCE_INDEX_ACTION",
+        "type": "Type",
+        "label": "MIGRATION_ASSISTANCE_INDEX_ACTION",
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 326,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L326"
+        },
+        "signature": [
+          "\"upgrade\" | \"reindex\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.MIGRATION_DEPRECATION_LEVEL",
+        "type": "Type",
+        "label": "MIGRATION_DEPRECATION_LEVEL",
+        "tags": [
+          "deprecated",
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+          "lineNumber": 331,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L331"
+        },
+        "signature": [
+          "\"warning\" | \"none\" | \"info\" | \"critical\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.HttpResourcesResponseOptions",
         "type": "Type",
         "label": "HttpResourcesResponseOptions",
@@ -17639,7 +17649,7 @@
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/status/types.ts#L103"
         },
         "signature": [
-          "Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>"
+          "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
         "initialIsOpen": false
       },
@@ -17655,8 +17665,8 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 483,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L483"
+          "lineNumber": 493,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/index.ts#L493"
         },
         "signature": [
           "() => Promise<[",
@@ -17686,44 +17696,6 @@
         },
         "signature": [
           "symbol"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.MIGRATION_ASSISTANCE_INDEX_ACTION",
-        "type": "Type",
-        "label": "MIGRATION_ASSISTANCE_INDEX_ACTION",
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 326,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L326"
-        },
-        "signature": [
-          "\"upgrade\" | \"reindex\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.MIGRATION_DEPRECATION_LEVEL",
-        "type": "Type",
-        "label": "MIGRATION_DEPRECATION_LEVEL",
-        "tags": [
-          "deprecated",
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 331,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/elasticsearch/legacy/api_types.ts#L331"
-        },
-        "signature": [
-          "\"warning\" | \"none\" | \"info\" | \"critical\""
         ],
         "initialIsOpen": false
       }

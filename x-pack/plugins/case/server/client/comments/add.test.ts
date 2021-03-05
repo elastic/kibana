@@ -15,6 +15,8 @@ import {
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
 
+type AlertComment = CommentType.alert | CommentType.generatedAlert;
+
 describe('addComment', () => {
   beforeEach(async () => {
     jest.restoreAllMocks();
@@ -248,9 +250,7 @@ describe('addComment', () => {
       });
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
-        ids: ['test-alert'],
-        status: 'open',
-        indices: new Set<string>(['test-index']),
+        alerts: [{ id: 'test-alert', index: 'test-index', status: 'open' }],
       });
     });
 
@@ -516,6 +516,78 @@ describe('addComment', () => {
           expect(boomErr.isBoom).toBe(true);
           expect(boomErr.output.statusCode).toBe(400);
         });
+    });
+
+    describe('alert format', () => {
+      it.each([
+        ['1', ['index1', 'index2'], CommentType.alert],
+        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], CommentType.generatedAlert],
+        [['1', '2'], 'index', CommentType.generatedAlert],
+      ])(
+        'throws an error with an alert comment with contents id: %p indices: %p type: %s',
+        async (alertId, index, type) => {
+          expect.assertions(1);
+
+          const savedObjectsClient = createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          });
+
+          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+            savedObjectsClient,
+          });
+          await expect(
+            caseClient.client.addComment({
+              caseId: 'mock-id-4',
+              comment: {
+                // casting because type must be either alert or generatedAlert but type is CommentType
+                type: type as AlertComment,
+                alertId,
+                index,
+                rule: {
+                  id: 'test-rule1',
+                  name: 'test-rule',
+                },
+              },
+            })
+          ).rejects.toThrow();
+        }
+      );
+
+      it.each([
+        ['1', ['index1'], CommentType.alert],
+        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+      ])(
+        'does not throw an error with an alert comment with contents id: %p indices: %p type: %s',
+        async (alertId, index, type) => {
+          expect.assertions(1);
+
+          const savedObjectsClient = createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          });
+
+          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+            savedObjectsClient,
+          });
+          await expect(
+            caseClient.client.addComment({
+              caseId: 'mock-id-1',
+              comment: {
+                // casting because type must be either alert or generatedAlert but type is CommentType
+                type: type as AlertComment,
+                alertId,
+                index,
+                rule: {
+                  id: 'test-rule1',
+                  name: 'test-rule',
+                },
+              },
+            })
+          ).resolves.not.toBeUndefined();
+        }
+      );
     });
   });
 });
