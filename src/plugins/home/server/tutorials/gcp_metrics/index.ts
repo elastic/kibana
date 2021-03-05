@@ -18,25 +18,25 @@ import {
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function googlecloudMetricsSpecProvider(context: TutorialContext): TutorialSchema {
-  const moduleName = 'googlecloud';
+export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'gcp';
   return {
-    id: 'googlecloudMetrics',
-    name: i18n.translate('home.tutorials.googlecloudMetrics.nameTitle', {
+    id: 'gcpMetrics',
+    name: i18n.translate('home.tutorials.gcpMetrics.nameTitle', {
       defaultMessage: 'Google Cloud metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('home.tutorials.googlecloudMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.gcpMetrics.shortDescription', {
       defaultMessage:
         'Fetch monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API.',
     }),
-    longDescription: i18n.translate('home.tutorials.googlecloudMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.gcpMetrics.longDescription', {
       defaultMessage:
-        'The `googlecloud` Metricbeat module fetches monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API. \
+        'The `gcp` Metricbeat module fetches monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-googlecloud.html',
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-gcp.html',
       },
     }),
     euiIconType: 'logoGCP',
@@ -46,7 +46,7 @@ export function googlecloudMetricsSpecProvider(context: TutorialContext): Tutori
         {
           id: 'f40ee870-5e4a-11ea-a4f6-717338406083',
           linkLabel: i18n.translate(
-            'home.tutorials.googlecloudMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.gcpMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'Google Cloud metrics dashboard',
             }
@@ -55,11 +55,11 @@ export function googlecloudMetricsSpecProvider(context: TutorialContext): Tutori
         },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-googlecloud.html',
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-gcp.html',
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/googlecloud_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/gcp_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
