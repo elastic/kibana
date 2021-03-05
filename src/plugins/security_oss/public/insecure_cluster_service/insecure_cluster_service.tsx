@@ -11,8 +11,8 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import type { CoreSetup, CoreStart, MountPoint, Toast } from 'src/core/public';
 
-import type { ConfigType } from '../config';
 import type { AppStateServiceStart } from '../app_state';
+import type { ConfigType } from '../config';
 import { defaultAlertText, defaultAlertTitle } from './components';
 
 interface SetupDeps {

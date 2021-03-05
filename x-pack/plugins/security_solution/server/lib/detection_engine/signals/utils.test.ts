@@ -9,7 +9,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -662,8 +662,8 @@ describe('utils', () => {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
