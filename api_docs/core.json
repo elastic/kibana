@@ -7985,22 +7985,11 @@
         "id": "def-server.IContextContainer",
         "type": "Interface",
         "label": "IContextContainer",
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
-          "<THandler>"
-        ],
         "description": [
           "\nAn object that handles registration of context providers and configuring handlers with context.\n"
         ],
         "tags": [
           "remarks",
-          "typeParam",
           "public"
         ],
         "children": [
@@ -8043,8 +8032,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 154,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L154"
+                  "lineNumber": 151,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L151"
                 }
               },
               {
@@ -8059,8 +8048,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 155,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L155"
+                  "lineNumber": 152,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L152"
                 }
               },
               {
@@ -8082,8 +8071,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 156,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L156"
+                  "lineNumber": 153,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L153"
                 }
               }
             ],
@@ -8095,8 +8084,8 @@
             ],
             "source": {
               "path": "src/core/server/context/container/context.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L153"
+              "lineNumber": 150,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L150"
             }
           },
           {
@@ -8104,17 +8093,40 @@
             "type": "Function",
             "label": "createHandler",
             "signature": [
-              "(pluginOpaqueId: symbol, handler: THandler) => (...rest: ",
+              "(pluginOpaqueId: symbol, handler: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<unknown, unknown, unknown, ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.HandlerParameters",
-                "text": "HandlerParameters"
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
               },
-              "<THandler>) => ",
-              "ShallowPromise",
-              "<ReturnType<THandler>>"
+              ", any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+              "Stream",
+              " | undefined>(options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<T>) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaResponse",
+                "text": "KibanaResponse"
+              }
             ],
             "description": [
               "\nCreate a new handler function pre-wired to context for the plugin.\n"
@@ -8132,8 +8144,8 @@
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 168,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L168"
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L165"
                 }
               },
               {
@@ -8141,33 +8153,65 @@
                 "label": "handler",
                 "isRequired": true,
                 "signature": [
-                  "THandler"
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  },
+                  ", any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+                  "Stream",
+                  " | undefined>(options: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.CustomHttpResponseOptions",
+                    "text": "CustomHttpResponseOptions"
+                  },
+                  "<T>) => ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaResponse",
+                    "text": "KibanaResponse"
+                  }
                 ],
                 "description": [
                   "- Handler function to pass context object to."
                 ],
                 "source": {
                   "path": "src/core/server/context/container/context.ts",
-                  "lineNumber": 169,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L169"
+                  "lineNumber": 166,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L166"
                 }
               }
             ],
             "tags": [],
             "returnComment": [
-              "A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of\nthe `handler` return value."
+              "A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of\nthe `handler` return value."
             ],
             "source": {
               "path": "src/core/server/context/container/context.ts",
-              "lineNumber": 167,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L167"
+              "lineNumber": 164,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L164"
             }
           }
         ],
         "source": {
           "path": "src/core/server/context/container/context.ts",
-          "lineNumber": 138,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L138"
+          "lineNumber": 135,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/context/container/context.ts#L135"
         },
         "initialIsOpen": false
       },
@@ -16631,23 +16675,14 @@
             "type": "Function",
             "label": "createContextContainer",
             "signature": [
-              "<THandler extends ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HandlerFunction",
-                "text": "HandlerFunction"
-              },
-              "<any>>() => ",
+              "() => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
                 "section": "def-server.IContextContainer",
                 "text": "IContextContainer"
-              },
-              "<THandler>"
+              }
             ],
             "description": [
               "\nCreates a new {@link IContextContainer} for a service owner."
