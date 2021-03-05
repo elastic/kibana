@@ -361,9 +361,8 @@ security and spaces filtering as well as performing audit logging.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
-|The purpose of this plugin is to provide a way to persist a history of events
-occuring in Kibana, initially just for the Make It Action project - alerts
-and actions.
+|The event log plugin provides a persistent history of alerting and action
+actitivies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
