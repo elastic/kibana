@@ -13,9 +13,13 @@ import { useMlApiContext } from '../../../../../contexts/kibana';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
+import {
+  CalloutMessage,
+  ValidateAnalyticsJobResponse,
+  VALIDATION_STATUS,
+} from '../../../../../../../common/constants/validation';
 import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { Callout, CalloutMessage } from '../../../../../components/callout';
+import { Callout } from '../../../../../components/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { ValidationSummary } from './validation_step_wrapper';
@@ -39,7 +43,7 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
       const analyticsJobConfig = (isAdvancedEditorEnabled
         ? jobConfig
         : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
-      const validationResults: CalloutMessage[] = await validateDataFrameAnalytics(
+      const validationResults: ValidateAnalyticsJobResponse = await validateDataFrameAnalytics(
         analyticsJobConfig
       );
 

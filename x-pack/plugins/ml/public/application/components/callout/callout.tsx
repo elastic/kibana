@@ -8,17 +8,9 @@
 import React, { FC } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import { CalloutMessage, VALIDATION_STATUS } from '../../../../common/constants/validation';
 
 export const defaultIconType = 'questionInCircle';
-
-export interface CalloutMessage {
-  id?: string;
-  heading?: string;
-  status?: VALIDATION_STATUS;
-  text: string;
-  url?: string;
-}
 
 const statusToEuiColor = (status: VALIDATION_STATUS) => {
   switch (status) {
@@ -52,7 +44,7 @@ const Link: FC<{ url: string }> = ({ url }) => (
   </EuiLink>
 );
 
-const Message: FC<CalloutMessage> = ({ text, url }) => (
+const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
   <>
     {text} {url && <Link url={url} />}
   </>

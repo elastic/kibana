@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export interface CalloutMessage {
+  id: string;
+  heading: string;
+  status: VALIDATION_STATUS;
+  text: string;
+  url?: string;
+}
+
+export type ValidateAnalyticsJobResponse = CalloutMessage[];
+
 export enum VALIDATION_STATUS {
   ERROR = 'error',
   INFO = 'info',

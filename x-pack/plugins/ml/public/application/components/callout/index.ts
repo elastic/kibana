@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Callout, CalloutMessage, statusToEuiIconType } from './callout';
+export { Callout, statusToEuiIconType } from './callout';
