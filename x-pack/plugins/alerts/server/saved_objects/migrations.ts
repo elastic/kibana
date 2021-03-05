@@ -190,19 +190,10 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.servicenow') {
-      const {
-        title,
-        comments,
-        comment,
-        description,
-        savedObjectId,
-        severity,
-        urgency,
-        impact,
-      } = action.params.subActionParams as {
+      const { title, comments, comment, description, severity, urgency, impact } = action.params
+        .subActionParams as {
         title: string;
         description?: string;
-        savedObjectId?: string;
         severity?: string;
         urgency?: string;
         impact?: string;
@@ -219,7 +210,6 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 short_description: title,
                 description,
-                savedObjectId,
                 severity,
                 urgency,
                 impact,
@@ -235,19 +225,10 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.jira') {
-      const {
-        title,
-        comments,
-        description,
-        savedObjectId,
-        issueType,
-        priority,
-        labels,
-        parent,
-      } = action.params.subActionParams as {
+      const { title, comments, description, issueType, priority, labels, parent } = action.params
+        .subActionParams as {
         title: string;
         description: string;
-        savedObjectId?: string;
         issueType: string;
         priority?: string;
         labels?: string[];
@@ -264,7 +245,6 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 summary: title,
                 description,
-                savedObjectId,
                 issueType,
                 priority,
                 labels,
@@ -278,11 +258,10 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.resilient') {
-      const { title, comments, description, savedObjectId, incidentTypes, severityCode } = action
-        .params.subActionParams as {
+      const { title, comments, description, incidentTypes, severityCode } = action.params
+        .subActionParams as {
         title: string;
         description: string;
-        savedObjectId?: string;
         incidentTypes?: number[];
         severityCode?: number;
         comments?: unknown[];
@@ -297,7 +276,6 @@ function restructureConnectorsThatSupportIncident(
               incident: {
                 name: title,
                 description,
-                savedObjectId,
                 incidentTypes,
                 severityCode,
               },

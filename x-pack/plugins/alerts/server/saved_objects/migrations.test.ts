@@ -418,7 +418,6 @@ describe('7.11.2', () => {
                   priority: 'Highest',
                   parent: 'CASES-78',
                   labels: ['test'],
-                  savedObjectId: '{{alertId}}',
                 },
                 comments: [
                   {
@@ -439,7 +438,6 @@ describe('7.11.2', () => {
                 incident: {
                   name: 'IBM name',
                   description: 'IBM description',
-                  savedObjectId: '{{alertId}}',
                   incidentTypes: ['17', '21'],
                   severityCode: '5',
                 },
@@ -465,7 +463,6 @@ describe('7.11.2', () => {
                   severity: '2',
                   impact: '2',
                   urgency: '2',
-                  savedObjectId: '{{alertId}}',
                 },
                 comments: [{ commentId: '1', comment: 'sn comment' }],
               },
@@ -547,7 +544,6 @@ describe('7.11.2', () => {
                   severity: '2',
                   impact: '2',
                   urgency: '2',
-                  savedObjectId: '{{alertId}}',
                 },
                 comments: [{ commentId: '1', comment: 'sn comment' }],
               },
