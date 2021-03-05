@@ -102,6 +102,8 @@ test(`passes browserTimezone to generatePng`, async () => {
             "get": [MockFunction],
           },
           "_tags": Array [
+            "PNG",
+            "execute",
             "pngJobId",
           ],
           "warning": [Function],
