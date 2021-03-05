@@ -213,7 +213,6 @@ export class MlServerPlugin
         alerting: plugins.alerting,
         logger: this.log,
         mlSharedServices: sharedServices,
-        publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
       });
     }
 

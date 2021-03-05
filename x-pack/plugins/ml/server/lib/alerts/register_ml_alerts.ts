@@ -14,7 +14,6 @@ export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
   logger: Logger;
   mlSharedServices: SharedServices;
-  publicBaseUrl: string | undefined;
 }
 
 export function registerMlAlerts(params: RegisterAlertParams) {
