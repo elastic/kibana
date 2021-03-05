@@ -6,7 +6,7 @@
  */
 
 import { EntriesArray } from '../shared_imports';
-import { Type } from './schemas/common/schemas';
+import { Type, JobStatus } from './schemas/common/schemas';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
@@ -31,3 +31,6 @@ export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType
 export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type): boolean => ruleType === 'threat_match';
+
+export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
+  value === 'partial failure' ? 'warning' : value != null ? value : null;
