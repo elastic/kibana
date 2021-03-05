@@ -262,6 +262,51 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
+    'APM Services Overview with a basic license when data is loaded excluding transaction events',
+    { config: 'basic', archives: [archiveName] },
+    () => {
+      it('includes services that only report metric data', async () => {
+        interface Response {
+          status: number;
+          body: APIReturnType<'GET /api/apm/services'>;
+        }
+
+        const [unfilteredResponse, filteredResponse] = await Promise.all([
+          supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&uiFilters={}`
+          ) as Promise<Response>,
+          supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
+              '{ "kuery": "not (processor.event:transaction)" }'
+            )}`
+          ) as Promise<Response>,
+        ]);
+
+        expect(unfilteredResponse.body.items.length).to.be.greaterThan(0);
+
+        const unfilteredServiceNames = unfilteredResponse.body.items
+          .map((item) => item.serviceName)
+          .sort();
+
+        const filteredServiceNames = filteredResponse.body.items
+          .map((item) => item.serviceName)
+          .sort();
+
+        expect(unfilteredServiceNames).to.eql(filteredServiceNames);
+
+        expect(
+          filteredResponse.body.items.every((item) => {
+            // make sure it did not query transaction data
+            return isEmpty(item.avgResponseTime);
+          })
+        ).to.be(true);
+
+        expect(filteredResponse.body.items.every((item) => !!item.agentName)).to.be(true);
+      });
+    }
+  );
+
+  registry.when(
     'APM Services overview with a trial license when data is loaded',
     { config: 'trial', archives: [archiveName] },
     () => {
