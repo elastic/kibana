@@ -7,9 +7,15 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "storybook/**/*", "../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "storybook/**/*",
+    "../../../node_modules/@types/react-syntax-highlighter/**/*",
+    "../../../typings/**/*"
+  ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" }
   ]
 }
