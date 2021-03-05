@@ -82,8 +82,8 @@ describe('QueryBar ', () => {
 
     expect(searchBarProps).toEqual({
       dataTestSubj: undefined,
-      dateRangeFrom: 'now/d',
-      dateRangeTo: 'now/d',
+      dateRangeFrom: 'now-24h',
+      dateRangeTo: 'now',
       filters: [],
       indexPatterns: [
         {
