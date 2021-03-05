@@ -367,7 +367,7 @@ export class StepMetrics extends Component<Props, State> {
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepMetricsTitle"
-                  defaultMessage="Metrics (optional)"
+                  defaultMessage="Metrics"
                 />
               </h2>
             </EuiTitle>

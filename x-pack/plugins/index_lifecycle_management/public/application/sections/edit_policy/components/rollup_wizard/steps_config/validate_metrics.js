@@ -9,6 +9,16 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateMetrics(metrics) {
+  if (!metrics.length) {
+    return [
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.rollup.create.errors.oneMetricRequired"
+        key="xpack.indexLifecycleMgmt.rollup.create.errors.oneMetricRequired"
+        defaultMessage="At least one metric is required."
+      />,
+    ];
+  }
+
   const missingTypes = metrics.reduce((accumMissingTypes, { name, types }) => {
     if (!types.length) {
       accumMissingTypes.push(name);
