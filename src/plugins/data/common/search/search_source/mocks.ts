@@ -18,7 +18,6 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),
-  flatten: jest.fn().mockImplementation(() => ({ body: {}, index: {} })),
   getId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),
