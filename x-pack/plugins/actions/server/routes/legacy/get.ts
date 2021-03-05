@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import { ILicenseState, verifyApiAccess } from '../../lib';
+import { BASE_ACTION_API_PATH } from '../../../common';
+import { ActionsRequestHandlerContext } from '../../types';
 
-export const listActionTypesRoute = (
+const paramSchema = schema.object({
+  id: schema.string(),
+});
+
+export const getActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/list_action_types`,
-      validate: {},
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
+      validate: {
+        params: paramSchema,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
@@ -25,8 +32,9 @@ export const listActionTypesRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
       const actionsClient = context.actions.getActionsClient();
+      const { id } = req.params;
       return res.ok({
-        body: await actionsClient.listTypes(),
+        body: await actionsClient.get({ id }),
       });
     })
   );
