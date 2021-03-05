@@ -46,12 +46,9 @@ export function gcpLogsSpecProvider(context: TutorialContext): TutorialSchema {
       dashboards: [
         {
           id: '6576c480-73a2-11ea-a345-f985c61fe654',
-          linkLabel: i18n.translate(
-            'home.tutorials.gcpLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Audit Logs Dashbaord',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.gcpLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Audit Logs Dashbaord',
+          }),
           isOverview: true,
         },
       ],

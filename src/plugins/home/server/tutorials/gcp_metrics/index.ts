@@ -45,12 +45,9 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
       dashboards: [
         {
           id: 'f40ee870-5e4a-11ea-a4f6-717338406083',
-          linkLabel: i18n.translate(
-            'home.tutorials.gcpMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Google Cloud metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.gcpMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Google Cloud metrics dashboard',
+          }),
           isOverview: true,
         },
       ],
