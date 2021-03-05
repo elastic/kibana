@@ -3725,9 +3725,9 @@
               {
                 "pluginId": "core",
                 "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.RequestHandlerContextContainer",
-                "text": "RequestHandlerContextContainer"
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IContextContainer",
+                "text": "IContextContainer"
               }
             ]
           },
@@ -6509,28 +6509,7 @@
           "link": "https://github.com/elastic/kibana/tree/mastersrc/core/server/http/types.ts#L30"
         },
         "signature": [
-          "IContextContainer<RequestHandler<unknown, unknown, unknown, RequestHandlerContext, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
-          "Stream",
-          " | undefined>(options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
-          "<T>) => ",
-          "KibanaResponse",
-          "<T>; badRequest: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse"
+          "IContextContainer"
         ],
         "initialIsOpen": false
       },
