@@ -54,7 +54,7 @@ export const stepIdToStepConfigMap = {
   [STEP_DATE_HISTOGRAM]: {
     getDefaultFields: (overrides = {}) => {
       const defaults = {
-        dateHistogramIntervalType: 'fixed',
+        dateHistogramIntervalType: 'calendar',
         dateHistogramField: '@timestamp',
         dateHistogramInterval: null,
         dateHistogramTimeZone: 'UTC',
