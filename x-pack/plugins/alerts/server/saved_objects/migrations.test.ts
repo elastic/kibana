@@ -400,7 +400,7 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual({
+    expect(migration7112(alert, { log })).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
@@ -490,7 +490,7 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual(alert);
+    expect(migration7112(alert, { log })).toEqual(alert);
   });
 
   test('it does not transforms other connectors', () => {
@@ -526,7 +526,7 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual({
+    expect(migration7112(alert, { log })).toEqual({
       ...alert,
       attributes: {
         ...alert.attributes,
