@@ -12,6 +12,14 @@ import { EuiAccordion, EuiPagination } from '@elastic/eui';
 
 const PAGE_SIZE = 100;
 
+export interface DocFailure {
+  item: number;
+  reason: string;
+  doc: {
+    message: string;
+  };
+}
+
 interface Props {
   failedDocs: DocFailure[];
 }

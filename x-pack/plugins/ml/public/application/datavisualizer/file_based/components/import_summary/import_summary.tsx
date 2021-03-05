@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
-import { Failures } from './failures';
+import { DocFailure, Failures } from './failures';
 
 interface Props {
   index: string;
@@ -19,14 +19,6 @@ interface Props {
   importFailures: DocFailure[];
   createIndexPattern: boolean;
   createPipeline: boolean;
-}
-
-interface DocFailure {
-  item: number;
-  reason: string;
-  doc: {
-    message: string;
-  };
 }
 
 export const ImportSummary: FC<Props> = ({
