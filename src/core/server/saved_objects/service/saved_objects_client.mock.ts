@@ -8,9 +8,10 @@
 
 import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
 
-const create = () =>
-  (({
+const create = () => {
+  const mock = ({
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -28,6 +29,13 @@ const create = () =>
     addToNamespaces: jest.fn(),
     deleteFromNamespaces: jest.fn(),
     removeReferencesTo: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>);
+  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+
+  mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
+    savedObjectsMock: mock,
+  });
+
+  return mock;
+};
 
 export const savedObjectsClientMock = { create };
