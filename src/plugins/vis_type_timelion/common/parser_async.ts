@@ -8,7 +8,7 @@
 
 import { ParsedExpression } from './parser';
 
-/** Build optimization we want to exclude parser from main bundle **/
+/** Build optimizations, we want to exclude the parser from the main bundle **/
 export const parseTimelionExpressionAsync = async (input: string): Promise<ParsedExpression> => {
   const { parseTimelionExpression } = await import('../common/parser');
   return parseTimelionExpression(input);
