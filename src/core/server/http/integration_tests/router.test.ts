@@ -900,7 +900,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
           },
         });
       });
@@ -910,7 +910,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('supports configuring non-standard headers', async () => {
@@ -921,7 +921,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
             'x-kibana': 'key',
           },
         });
@@ -932,7 +932,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
       expect(result.header['x-kibana']).toBe('key');
     });
 
@@ -944,7 +944,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            ETag: '1234',
+            AgE: '42',
           },
         });
       });
@@ -953,7 +953,7 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('accept array of headers', async () => {
@@ -1790,7 +1790,9 @@ describe('ETag', () => {
       (context, req, res) =>
         res.ok({
           body: { foo: 'bar' },
-          etag: 'etag-1',
+          headers: {
+            etag: 'etag-1',
+          },
         })
     );
 
@@ -1813,7 +1815,9 @@ describe('ETag', () => {
       (context, req, res) =>
         res.ok({
           body: { foo: 'bar' },
-          etag: 'etag-1',
+          headers: {
+            etag: 'etag-1',
+          },
         })
     );
 

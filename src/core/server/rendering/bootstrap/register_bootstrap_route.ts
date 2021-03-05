@@ -31,8 +31,8 @@ export const registerBootstrapRoute = ({
 
       return res.ok({
         body,
-        etag,
         headers: {
+          etag,
           'content-type': 'application/javascript',
           'cache-control': 'must-revalidate',
         },

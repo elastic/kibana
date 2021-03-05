@@ -28,6 +28,7 @@ function setHeaders(response: HapiResponseObject, headers: Record<string, string
       response.header(header, value as any);
     }
   });
+  applyEtag(response, headers);
   return response;
 }
 
@@ -88,9 +89,6 @@ export class HapiResponseAdapter {
       .response(kibanaResponse.payload)
       .code(kibanaResponse.status);
     setHeaders(response, kibanaResponse.options.headers);
-    if (kibanaResponse.options.etag) {
-      response.etag(kibanaResponse.options.etag);
-    }
     return response;
   }
 
@@ -119,9 +117,7 @@ export class HapiResponseAdapter {
         .response(kibanaResponse.payload)
         .code(kibanaResponse.status);
       setHeaders(response, kibanaResponse.options.headers);
-      if (kibanaResponse.options.etag) {
-        response.etag(kibanaResponse.options.etag);
-      }
+
       return response;
     }
 
@@ -156,4 +152,11 @@ function getErrorMessage(payload?: ResponseError): string {
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
   return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
+}
+
+function applyEtag(response: HapiResponseObject, headers: Record<string, string | string[]>) {
+  const etagHeader = Object.keys(headers).find((header) => header.toLowerCase() === 'etag');
+  if (etagHeader) {
+    response.etag(headers[etagHeader] as string);
+  }
 }
