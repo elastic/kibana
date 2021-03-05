@@ -19865,7 +19865,6 @@
     "xpack.snapshotRestore.policyValidation.invalidNegativeDeleteAfterErrorMessage": "次の期間後削除は負数にすることができません。",
     "xpack.snapshotRestore.policyValidation.invalidNegativeMaxCountErrorMessage": "最大カウントは負数にすることができません。",
     "xpack.snapshotRestore.policyValidation.invalidNegativeMinCountErrorMessage": "最小カウントは負数にすることができません。",
-    "xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage": "ポリシー\"{policyName}\"は既にこのリポジトリに関連付けられています。",
     "xpack.snapshotRestore.policyValidation.nameRequiredErroMessage": "ポリシー名が必要です。",
     "xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage": "レポジトリが必要です。",
     "xpack.snapshotRestore.policyValidation.scheduleRequiredErrorMessage": "スケジュールが必要です。",
