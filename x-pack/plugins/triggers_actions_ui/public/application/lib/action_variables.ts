@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ActionVariables } from '../../types';
-import { ActionVariable } from '../../../../alerts/common';
+import { ActionVariable } from '../../../../alerting/common';
 
 // return a "flattened" list of action variables for an alertType
 export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {

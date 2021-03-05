@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { templateActionVariable } from '../lib';
-import { ActionVariable } from '../../../../alerts/common';
+import { ActionVariable } from '../../../../alerting/common';
 
 interface Props {
   messageVariables?: ActionVariable[];
