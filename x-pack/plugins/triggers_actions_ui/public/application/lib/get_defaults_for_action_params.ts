@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertActionParam } from '../../../../alerts/common';
+import { AlertActionParam } from '../../../../alerting/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 

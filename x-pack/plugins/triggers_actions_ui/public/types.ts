@@ -12,7 +12,6 @@ import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { ActionVariable, AlertType as CommonAlertType } from '../../alerts/common';
 import {
   ActionGroup,
   AlertActionParam,
@@ -26,7 +25,9 @@ import {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
-} from '../../alerts/common';
+  ActionVariable,
+  AlertType as CommonAlertType,
+} from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
