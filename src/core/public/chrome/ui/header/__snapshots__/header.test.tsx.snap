@@ -4076,24 +4076,52 @@ exports[`Header renders 1`] = `
                               aria-label="Help menu"
                               onClick={[Function]}
                             >
-                              <button
+                              <EuiButtonEmpty
                                 aria-expanded={false}
                                 aria-haspopup="true"
                                 aria-label="Help menu"
                                 className="euiHeaderSectionItem__button"
+                                color="text"
                                 onClick={[Function]}
-                                type="button"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  type="help"
+                                <button
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItem__button"
+                                  disabled={false}
+                                  onClick={[Function]}
+                                  type="button"
                                 >
-                                  <span
-                                    data-euiicon-type="help"
-                                    size="m"
-                                  />
-                                </EuiIcon>
-                              </button>
+                                  <EuiButtonContent
+                                    className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        <EuiIcon
+                                          size="m"
+                                          type="help"
+                                        >
+                                          <span
+                                            data-euiicon-type="help"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </span>
+                                  </EuiButtonContent>
+                                </button>
+                              </EuiButtonEmpty>
                             </EuiHeaderSectionItemButton>
                           </div>
                         </div>
@@ -4194,26 +4222,56 @@ exports[`Header renders 1`] = `
                     data-test-subj="toggleNavButton"
                     onClick={[Function]}
                   >
-                    <button
+                    <EuiButtonEmpty
                       aria-controls="mockId"
                       aria-expanded={false}
                       aria-label="Toggle primary navigation"
                       aria-pressed={false}
                       className="euiHeaderSectionItem__button"
+                      color="text"
                       data-test-subj="toggleNavButton"
                       onClick={[Function]}
-                      type="button"
                     >
-                      <EuiIcon
-                        size="m"
-                        type="menu"
+                      <button
+                        aria-controls="mockId"
+                        aria-expanded={false}
+                        aria-label="Toggle primary navigation"
+                        aria-pressed={false}
+                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItem__button"
+                        data-test-subj="toggleNavButton"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <span
-                          data-euiicon-type="menu"
-                          size="m"
-                        />
-                      </EuiIcon>
-                    </button>
+                        <EuiButtonContent
+                          className="euiButtonEmpty__content"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButtonEmpty__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              className="euiButtonEmpty__text"
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="menu"
+                              >
+                                <span
+                                  data-euiicon-type="menu"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonEmpty>
                   </EuiHeaderSectionItemButton>
                 </div>
               </EuiHeaderSectionItem>

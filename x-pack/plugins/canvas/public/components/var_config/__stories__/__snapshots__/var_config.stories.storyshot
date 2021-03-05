@@ -59,7 +59,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           >
             <button
               aria-label="Add a variable"
-              className="euiButtonIcon euiButtonIcon--primary"
+              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
               disabled={false}
               onBlur={[Function]}
               onClick={[Function]}

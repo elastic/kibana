@@ -133,12 +133,12 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
@@ -232,12 +232,12 @@ exports[`after fetch hideWriteControls 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
@@ -379,12 +379,12 @@ exports[`after fetch initialFilter 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
@@ -525,12 +525,12 @@ exports[`after fetch renders all table rows 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
@@ -671,12 +671,12 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
@@ -817,12 +817,12 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
+        className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-default itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
           <main
-            className="euiPageBody"
+            className="euiPageBody euiPageBody--borderRadiusNone"
           />
         </EuiPageBody>
       </div>
