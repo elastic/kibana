@@ -11,6 +11,7 @@ import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { NoteResult } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
@@ -72,3 +73,9 @@ export interface CreateTimelineProps {
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+
+export interface ThresholdAggregationData {
+  thresholdFrom: string;
+  thresholdTo: string;
+  dataProviders: DataProvider[];
+}
