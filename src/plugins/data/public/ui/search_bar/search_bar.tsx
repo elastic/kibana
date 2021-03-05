@@ -75,6 +75,10 @@ export interface SearchBarOwnProps {
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  storageKey?: string;
+  disableLanguageSwitcher?: boolean;
+  isInvalid?: boolean;
+  autoSubmit?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;

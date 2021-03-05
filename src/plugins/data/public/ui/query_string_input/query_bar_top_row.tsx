@@ -63,6 +63,10 @@ export interface QueryBarTopRowProps {
   isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  storageKey?: string;
+  disableLanguageSwitcher?: boolean;
+  isInvalid?: boolean;
+  autoSubmit?: boolean;
 }
 
 // Needed for React.lazy

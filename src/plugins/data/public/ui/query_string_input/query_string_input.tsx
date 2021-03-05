@@ -66,6 +66,14 @@ export interface QueryStringInputProps {
    */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  /**
+   * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
+   */
+  autoSubmit?: boolean;
+  /**
+   * @param storageKey this key is used to use user preference between kql and non-kql mode
+   */
+  storageKey?: string;
 }
 
 interface Props extends QueryStringInputProps {

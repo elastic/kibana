@@ -29,7 +29,7 @@ import {
 import { alertTypeInitializers } from '../lib/alert_types';
 import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
-import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public/storage';
+import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
