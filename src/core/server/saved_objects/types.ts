@@ -12,7 +12,7 @@ import { SavedObjectMigrationMap } from './migrations';
 import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
 
-export {
+export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -31,7 +31,7 @@ import { SavedObject } from '../../types';
 
 type KueryNode = any;
 
-export {
+export type {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,

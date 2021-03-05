@@ -118,6 +118,7 @@ export class IndexSettings extends Component {
               text: indexType,
               value: indexType,
             }))}
+            value={this.props.selectedIndexType}
             onChange={({ target }) => setSelectedIndexType(target.value)}
           />
         </EuiFormRow>

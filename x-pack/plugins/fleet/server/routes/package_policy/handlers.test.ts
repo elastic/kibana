@@ -6,14 +6,16 @@
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { IRouter, KibanaRequest, RequestHandler, RouteConfig } from 'kibana/server';
-import { registerRoutes } from './index';
+import { KibanaRequest } from 'kibana/server';
+import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { appContextService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
+import type { PackagePolicyServiceInterface, ExternalCallback } from '../..';
 import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import { packagePolicyService } from '../../services';
+
+import { registerRoutes } from './index';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
