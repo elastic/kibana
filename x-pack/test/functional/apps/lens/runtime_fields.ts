@@ -14,16 +14,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
 
-  describe.only('lens runtime fields', () => {
+  describe('lens runtime fields', () => {
     it('should be able to add runtime field and use it', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
       await fieldEditor.setName('runtimefield');
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
+      await PageObjects.lens.searchField('runtime');
+      await PageObjects.lens.waitForField('runtimefield');
       await PageObjects.lens.dragFieldToWorkspace('runtimefield');
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
@@ -47,13 +50,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editField();
       await fieldEditor.setName('runtimefield2');
       await fieldEditor.save();
+      await PageObjects.lens.searchField('runtime');
+      await PageObjects.lens.waitForField('runtimefield2');
       await PageObjects.lens.dragFieldToDimensionTrigger(
         'runtimefield2',
         'lnsDatatable_column > lns-dimensionTrigger'
       );
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
-        'Top values of runtimefield'
+        'Top values of runtimefield2'
       );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
     });

@@ -8,8 +8,10 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function FieldEditorProvider({ getService }: FtrProviderContext) {
+export function FieldEditorProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   class FieldEditor {
@@ -30,9 +32,13 @@ export function FieldEditorProvider({ getService }: FtrProviderContext) {
 
       await textarea.click();
       await browser.pressKeys(script);
+      await PageObjects.common.sleep(1000);
     }
     public async save() {
-      await testSubjects.click('fieldSaveButton');
+      await retry.try(async () => {
+        await testSubjects.click('fieldSaveButton');
+        await testSubjects.missingOrFail('fieldSaveButton', { timeout: 2000 });
+      });
     }
   }
 

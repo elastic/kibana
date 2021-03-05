@@ -184,6 +184,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async editField() {
       await retry.try(async () => {
         await testSubjects.click('lnsFieldListPanelEdit');
+        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+      });
+    },
+
+    async searchField(name: string) {
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+    },
+
+    async waitForField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
       });
     },
 
