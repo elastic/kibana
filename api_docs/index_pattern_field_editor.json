@@ -302,14 +302,14 @@
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L28"
             },
             "signature": [
-              "(() => void) | undefined"
+              "((fieldNames: string[]) => void) | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.OpenFieldDeleteModalOptions.fieldNames",
-            "type": "Array",
-            "label": "fieldNames",
+            "id": "def-public.OpenFieldDeleteModalOptions.fieldName",
+            "type": "CompoundType",
+            "label": "fieldName",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
@@ -317,7 +317,7 @@
               "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L29"
             },
             "signature": [
-              "string[]"
+              "string | string[]"
             ]
           }
         ],
