@@ -51,7 +51,7 @@ export function enqueueJobFactory(
       new Report({
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
-        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: changing the capture.maxAttempts config setting does not affect existing pending reports
+        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: since max attempts is stored in the document, changing the capture.maxAttempts setting does not affect existing pending reports
         payload: job,
         meta: {
           objectType: jobParams.objectType,
@@ -63,7 +63,9 @@ export function enqueueJobFactory(
 
     // 2. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
-    logger.info(`Scheduled ${exportType.name} reporting task: ${task.id}`);
+    logger.info(
+      `Scheduled ${exportType.name} reporting task. Task ID: ${task.id}. Report ID: ${report._id}`
+    );
 
     return report;
   };

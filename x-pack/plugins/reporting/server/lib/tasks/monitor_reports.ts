@@ -74,19 +74,16 @@ export class MonitorReportsTask implements ReportingTask {
     return () => {
       return {
         run: async () => {
-          if (!this.config.queue.pollEnabled) {
-            this.logger.debug(
-              `This instance is configured to not poll for pending reports. Exiting from the monitoring task.`
-            );
-            return;
-          }
-
           const reportingStore = await this.getStore();
 
           try {
-            const results = await reportingStore.findLongPendingReports();
+            const results = await reportingStore.findZombieReportDocuments();
             if (results && results.length) {
-              this.logger.info(`Found ${results.length} pending reports to reschedule.`);
+              this.logger.info(
+                `Found ${results.length} reports to reschedule: ${results
+                  .map((pending) => pending._id)
+                  .join(',')}`
+              );
             } else {
               this.logger.debug(`Found 0 pending reports.`);
               return;
@@ -97,7 +94,7 @@ export class MonitorReportsTask implements ReportingTask {
                 _id: jobId,
                 _source: { process_expiration: processExpiration, status },
               } = pending;
-              const expirationTime = moment(processExpiration);
+              const expirationTime = moment(processExpiration); // If it is the start of the Epoch, something went wrong
               const timeWaitValue = moment().valueOf() - expirationTime.valueOf();
               const timeWaitTime = moment.duration(timeWaitValue);
               this.logger.info(
@@ -134,19 +131,29 @@ export class MonitorReportsTask implements ReportingTask {
     };
   }
 
+  // reschedule the task with TM and update the report document status to "Pending"
   private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
     if (!this.taskManagerStart) {
       throw new Error('Reporting task runner has not been initialized!');
     }
-
     logger.info(`Rescheduling ${task.id} to retry after timeout expiration.`);
+
+    const store = await this.getStore();
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE, // schedule a task to EXECUTE
       state: {},
       params: task,
     };
-    return await this.taskManagerStart.schedule(oldTaskInstance);
+
+    const [report, newTask] = await Promise.all([
+      await store.findReportFromTask(task),
+      await this.taskManagerStart.schedule(oldTaskInstance),
+    ]);
+
+    await store.setReportPending(report);
+
+    return newTask;
   }
 
   public getStatus() {

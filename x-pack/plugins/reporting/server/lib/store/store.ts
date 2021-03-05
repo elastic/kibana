@@ -185,6 +185,27 @@ export class ReportingStore {
     }
   }
 
+  public async setReportPending(report: Report) {
+    const doc = { status: statuses.JOB_STATUS_PENDING };
+
+    try {
+      checkReportIsEditable(report);
+
+      return await this.client.callAsInternalUser('update', {
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
+    } catch (err) {
+      this.logger.error('Error in setting report pending status!');
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
   public async setReportClaimed(report: Report, stats: Partial<Report>): Promise<ReportDocument> {
     const doc = {
       ...stats,
@@ -283,9 +304,17 @@ export class ReportingStore {
   }
 
   /*
-   * Finds jobs stuck in pending status, or timed-out jobs stuck in processing status
+   * A zombie report document is one that isn't completed or failed, isn't
+   * being executed, and isn't scheduled to run. They arise:
+   * - when the cluster has processing documents in ESQueue before upgrading to v7.13 when ESQueue was removed
+   * - if Kibana crashes while a report task is executing and it couldn't be rescheduled on its own
+   *
+   * Pending reports are not included in this search: they may be scheduled in TM just not run yet.
+   * TODO Should we get a list of the reports that are pending and scheduled in TM so we can exclude them from this query?
    */
-  public async findLongPendingReports(logger = this.logger): Promise<ReportRecordTimeout[] | null> {
+  public async findZombieReportDocuments(
+    logger = this.logger
+  ): Promise<ReportRecordTimeout[] | null> {
     const searchParams: SearchParams = {
       index: this.indexPrefix + '-*',
       filterPath: 'hits.hits',
@@ -298,11 +327,7 @@ export class ReportingStore {
                 bool: {
                   must: [
                     { range: { process_expiration: { lt: `now-${this.queueTimeoutMins}m` } } },
-                    {
-                      terms: {
-                        status: [statuses.JOB_STATUS_PENDING, statuses.JOB_STATUS_PROCESSING],
-                      },
-                    },
+                    { terms: { status: [statuses.JOB_STATUS_PROCESSING] } },
                   ],
                 },
               },

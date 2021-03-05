@@ -91,14 +91,9 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
 
     const { taskManager } = startDeps;
-    if (this.getConfig().get('queue', 'pollEnabled')) {
-      const { executeTask, monitorTask } = this;
-      // enable this instance to generate reports and to monitor for pending reports
-      await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
-    } else {
-      // enable this instance to request other instances to generate reports
-      await this.executeTask.init(taskManager);
-    }
+    const { executeTask, monitorTask } = this;
+    // enable this instance to generate reports and to monitor for pending reports
+    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
   }
 
   /*

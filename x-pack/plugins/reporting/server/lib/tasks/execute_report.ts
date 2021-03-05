@@ -108,14 +108,21 @@ export class ExecuteReportTask implements ReportingTask {
       // if this is an ad-hoc report, there is a corresponding "pending" record in ReportingStore in need of updating
       report = await store.findReportFromTask(task); // update seq_no
     } else {
-      // if this is a scheduled report, the report object needs to be instantiated
+      // if this is a scheduled report (not implemented), the report object needs to be instantiated
       throw new Error('scheduled reports are not supported!');
+    }
+
+    // Check if this is a completed job. This may happen if the `reports:monitor`
+    // task detected it to be a zombie job and rescheduled it, but it
+    // eventually completed on its own.
+    if (report.status === 'completed') {
+      throw new Error(`Can not claim the report job: it is already completed!`);
     }
 
     const m = moment();
 
     // check if job has exceeded maxAttempts (stored in job params) and somehow hasn't been marked as failed yet
-    // NOTE: changing the capture.maxAttempts config setting does not affect existing pending reports
+    // NOTE: the max attempts value comes from the stored document, so changing the capture.maxAttempts config setting does not affect existing pending reports
     const maxAttempts = task.max_attempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
@@ -231,7 +238,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     try {
       await store.setReportCompleted(report, doc);
-      this.logger.info(`Saved ${report.jobtype} job ${docId}`);
+      this.logger.debug(`Saved ${report.jobtype} job ${docId}`);
     } catch (err) {
       if (err.statusCode === 409) return false;
       errorLogger(this.logger, `Failure saving completed job ${docId}!`);
@@ -267,13 +274,16 @@ export class ExecuteReportTask implements ReportingTask {
             if (!jobId) {
               throw new Error('Invalid report data provided in scheduled task!');
             }
-
             this.reporting.trackReport(jobId);
-            this.logger.info(`Starting ${task.jobtype} report ${jobId}.`);
-            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
             // Update job status to claimed
             report = await this._claimJob(task);
+
+            const { jobtype: jobType, attempts: attempt, max_attempts: maxAttempts } = task;
+            this.logger.info(
+              `Starting ${jobType} report ${jobId}: attempt ${attempt + 1} of ${maxAttempts}.`
+            );
+            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or no longer connected to ES
@@ -294,7 +304,7 @@ export class ExecuteReportTask implements ReportingTask {
             }
 
             // untrack the report for concurrency awareness
-            this.logger.info(`Stopping ${jobId}.`);
+            this.logger.debug(`Stopping ${jobId}.`);
             this.reporting.untrackReport(jobId);
             this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           } catch (failedToExecuteErr) {
@@ -375,7 +385,9 @@ export class ExecuteReportTask implements ReportingTask {
       state: {},
       params: task,
     };
-    return await this.getTaskManagerStart().schedule(oldTaskInstance);
+    const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
+    logger.debug(`Rescheduled ${task.id}`);
+    return newTask;
   }
 
   public getStatus() {
