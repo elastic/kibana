@@ -18,9 +18,9 @@ You can add text labels to your Point features by configuring label style proper
 |The text color.
 |*Label size*
 |The size of the text, in pixels.
-|*Label border color*
+|*Label&nbsp;border&nbsp;color*
 |The color of the label border.
-|*Label border width*
+|*Label&nbsp;border&nbsp;width*
 |The width of the label border.
 |===
 
@@ -80,9 +80,9 @@ image::maps/images/maki-icons.png[]
 |The text color.
 |*Label size*
 |The size of the text, in pixels.
-|*Label border color*
+|*Label&nbsp;border&nbsp;color*
 |The color of the label border.
-|*Label border width*
+|*Label&nbsp;border&nbsp;width*
 |The width of the label border.
 |===
 
@@ -103,8 +103,8 @@ image::maps/images/maki-icons.png[]
 |The text color.
 |*Label size*
 |The size of the text, in pixels.
-|*Label border color*
+|*Label&nbsp;border&nbsp;color*
 |The color of the label border.
-|*Label border width*
+|*Label&nbsp;border&nbsp;width*
 |The width of the label border.
 |===
