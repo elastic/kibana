@@ -12,7 +12,8 @@ import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-c
 import { i18n } from '@kbn/i18n';
 import { getKibanaVersion } from '../kibana_services';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
-import { MapsEmsConfig, TileMapConfig, ORIGIN, TMS_IN_YML_ID } from '../../common';
+import { TileMapConfig, ORIGIN, TMS_IN_YML_ID } from '../../common';
+import type { MapsEmsConfig } from '../../config';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.

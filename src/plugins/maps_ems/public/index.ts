@@ -9,7 +9,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
 import { IServiceSettings } from './service_settings';
-import { MapsEmsConfig } from '../common';
+import type { MapsEmsConfig } from '../config';
 
 /** @public */
 export {
@@ -23,6 +23,8 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
+
+export type { MapsEmsConfig } from '../config';
 
 export * from '../common';
 

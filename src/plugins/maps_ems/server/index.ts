@@ -12,7 +12,7 @@ import {
   Plugin,
   PluginConfigDescriptor,
 } from 'src/core/server';
-import { emsConfigSchema, MapsEmsConfig } from '../common';
+import { MapsEmsConfig, emsConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<MapsEmsConfig> = {
   exposeToBrowser: {
