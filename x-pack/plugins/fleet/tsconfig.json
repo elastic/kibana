@@ -15,7 +15,7 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "../../typings/**/*"
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
