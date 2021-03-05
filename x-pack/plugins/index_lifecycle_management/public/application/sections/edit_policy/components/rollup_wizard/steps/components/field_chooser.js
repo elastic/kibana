@@ -20,7 +20,9 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+
 import { checkIndexPatternResults } from '../../../../../../services/api';
 
 function sortFields(a, b) {
@@ -147,6 +149,8 @@ export class FieldChooser extends Component {
 
       const { indexPattern, onIndexPatternChange } = this.props;
 
+      const { isLoading } = this.state;
+
       const searchedItems = searchValue
         ? unselectedFields.filter((item) => {
             const normalizedSearchValue = searchValue.trim().toLowerCase();
@@ -178,6 +182,7 @@ export class FieldChooser extends Component {
               <EuiFieldText
                 value={indexPattern}
                 onChange={(e) => onIndexPatternChange(e.target.value)}
+                isLoading={isLoading}
               />
             </EuiFormRow>
 
@@ -193,13 +198,19 @@ export class FieldChooser extends Component {
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
-            <EuiBasicTable
-              items={searchedItems}
-              columns={columns}
-              rowProps={getRowProps}
-              responsive={false}
-              data-test-subj={`${dataTestSubj}-table`}
-            />
+            {isLoading ? (
+              <div style={{ textAlign: 'center' }}>
+                <EuiLoadingSpinner />
+              </div>
+            ) : (
+              <EuiBasicTable
+                items={searchedItems}
+                columns={columns}
+                rowProps={getRowProps}
+                responsive={false}
+                data-test-subj={`${dataTestSubj}-table`}
+              />
+            )}
           </EuiFlyoutBody>
         </EuiFlyout>
       );

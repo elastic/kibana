@@ -94,7 +94,7 @@ const i18nTexts = {
   },
 };
 
-interface Props {
+export interface Props {
   /**
    * The rollup action to configure, otherwise default to empty rollup action.
    */
@@ -133,6 +133,14 @@ interface State {
   stepsFields: StepFields;
 }
 
+const deriveStepFields = (value: RollupAction | undefined): StepFields => {
+  const deserializedRollup = value ? deserializeRollup(value) : {};
+
+  return mapValues(stepIdToStepConfigMap, (step) =>
+    cloneDeep(step.getDefaultFields(deserializedRollup))
+  );
+};
+
 export class RollupWizard extends Component<Props, State> {
   lastIndexPatternValidationTime: number;
   // @ts-ignore
@@ -142,11 +150,7 @@ export class RollupWizard extends Component<Props, State> {
     super(props);
 
     const { value } = props;
-    const deserializedRollup = value ? deserializeRollup(value) : {};
-
-    const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
-      cloneDeep(step.getDefaultFields(deserializedRollup))
-    );
+    const stepsFields = deriveStepFields(value);
     this.state = {
       indexPattern: '',
       checkpointStepId: stepIds[0],
@@ -164,6 +168,16 @@ export class RollupWizard extends Component<Props, State> {
   componentDidMount() {
     window.scroll({ top: 0 });
     this._isMounted = true;
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (prev.value !== this.props.value) {
+      const stepsFields = deriveStepFields(this.props.value);
+      this.setState({
+        stepsFields,
+        stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
+      });
+    }
   }
 
   componentWillUnmount() {
