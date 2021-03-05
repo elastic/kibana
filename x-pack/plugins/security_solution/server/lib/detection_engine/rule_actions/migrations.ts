@@ -12,7 +12,7 @@ import {
 import { IRuleActionsAttributesSavedObjectAttributes, RuleAlertAction } from './types';
 
 export const ruleActionsSavedObjectMigration = {
-  '7.10.0': (
+  '7.11.2': (
     doc: SavedObjectUnsanitizedDoc<IRuleActionsAttributesSavedObjectAttributes>
   ): SavedObjectSanitizedDoc<IRuleActionsAttributesSavedObjectAttributes> => {
     const { actions } = doc.attributes;
