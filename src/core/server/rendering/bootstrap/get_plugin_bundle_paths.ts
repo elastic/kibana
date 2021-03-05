@@ -21,22 +21,22 @@ export const getPluginsBundlePaths = ({
   regularBundlePath: string;
 }) => {
   const pluginBundlePaths = new Map<string, PluginInfo>();
+  const pluginsToProcess = [...uiPlugins.public.keys()];
 
-  const readPlugins = (pluginIds: readonly string[]) => {
-    for (const pluginId of pluginIds) {
-      if (pluginBundlePaths.has(pluginId)) {
-        continue;
+  while (pluginsToProcess.length > 0) {
+    const pluginId = pluginsToProcess.pop() as string;
+    pluginBundlePaths.set(pluginId, {
+      publicPath: `${regularBundlePath}/plugin/${pluginId}/`,
+      bundlePath: `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`,
+    });
+
+    const pluginBundleIds = uiPlugins.internal.get(pluginId)?.requiredBundles ?? [];
+    pluginBundleIds.forEach((bundleId) => {
+      if (!pluginBundlePaths.has(bundleId)) {
+        pluginsToProcess.push(bundleId);
       }
-      pluginBundlePaths.set(pluginId, {
-        publicPath: `${regularBundlePath}/plugin/${pluginId}/`,
-        bundlePath: `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`,
-      });
-
-      readPlugins(uiPlugins.internal.get(pluginId)?.requiredBundles ?? []);
-    }
-  };
-
-  readPlugins([...uiPlugins.public.keys()]);
+    });
+  }
 
   return pluginBundlePaths;
 };

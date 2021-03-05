@@ -35,7 +35,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
 };
 
 describe('getPluginsBundlePaths', () => {
-  it('returns the public and bundle paths for the specified plugins', () => {
+  it('returns an entry for each plugin and their bundle dependencies', () => {
     const pluginBundlePaths = getPluginsBundlePaths({
       regularBundlePath: '/regular-bundle-path',
       uiPlugins: createUiPlugins({
@@ -44,25 +44,25 @@ describe('getPluginsBundlePaths', () => {
       }),
     });
 
-    expect(pluginBundlePaths).toMatchInlineSnapshot(`
-      Map {
-        "a" => Object {
-          "bundlePath": "/regular-bundle-path/plugin/a/a.plugin.js",
-          "publicPath": "/regular-bundle-path/plugin/a/",
-        },
-        "b" => Object {
-          "bundlePath": "/regular-bundle-path/plugin/b/b.plugin.js",
-          "publicPath": "/regular-bundle-path/plugin/b/",
-        },
-        "d" => Object {
-          "bundlePath": "/regular-bundle-path/plugin/d/d.plugin.js",
-          "publicPath": "/regular-bundle-path/plugin/d/",
-        },
-        "c" => Object {
-          "bundlePath": "/regular-bundle-path/plugin/c/c.plugin.js",
-          "publicPath": "/regular-bundle-path/plugin/c/",
-        },
-      }
-    `);
+    expect([...pluginBundlePaths.keys()].sort()).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('returns correct paths for each bundle', () => {
+    const pluginBundlePaths = getPluginsBundlePaths({
+      regularBundlePath: '/regular-bundle-path',
+      uiPlugins: createUiPlugins({
+        a: ['b'],
+      }),
+    });
+
+    expect(pluginBundlePaths.get('a')).toEqual({
+      bundlePath: '/regular-bundle-path/plugin/a/a.plugin.js',
+      publicPath: '/regular-bundle-path/plugin/a/',
+    });
+
+    expect(pluginBundlePaths.get('b')).toEqual({
+      bundlePath: '/regular-bundle-path/plugin/b/b.plugin.js',
+      publicPath: '/regular-bundle-path/plugin/b/',
+    });
   });
 });
