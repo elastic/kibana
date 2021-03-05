@@ -23,7 +23,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
+            "source": {
+              "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
+              "lineNumber": 23
+            }
           }
         ],
         "signature": [
@@ -35,7 +38,10 @@
           "\nReact component to track the number of clicks and minutes on screen of the children components."
         ],
         "label": "TrackApplicationView",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23",
+        "source": {
+          "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
+          "lineNumber": 23
+        },
         "tags": [
           "Link",
           "constructor"
@@ -52,7 +58,10 @@
         "label": "METRIC_TYPE",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/node_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10",
+        "source": {
+          "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "METRIC_TYPE"
         ],
@@ -74,7 +83,10 @@
           "type": "Object",
           "label": "components",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L35",
+          "source": {
+            "path": "src/plugins/usage_collection/public/plugin.tsx",
+            "lineNumber": 35
+          },
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
           ]
@@ -85,7 +97,10 @@
           "type": "Function",
           "label": "reportUiCounter",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L38",
+          "source": {
+            "path": "src/plugins/usage_collection/public/plugin.tsx",
+            "lineNumber": 38
+          },
           "signature": [
             "(appName: string, type: ",
             "UiCounterMetricType",
@@ -93,7 +108,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L34",
+      "source": {
+        "path": "src/plugins/usage_collection/public/plugin.tsx",
+        "lineNumber": 34
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -110,7 +128,10 @@
           "type": "Function",
           "label": "reportUiCounter",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L42",
+          "source": {
+            "path": "src/plugins/usage_collection/public/plugin.tsx",
+            "lineNumber": 42
+          },
           "signature": [
             "(appName: string, type: ",
             "UiCounterMetricType",
@@ -118,7 +139,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/public/plugin.tsx#L41",
+      "source": {
+        "path": "src/plugins/usage_collection/public/plugin.tsx",
+        "lineNumber": 41
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -148,7 +172,10 @@
             "type": "CompoundType",
             "label": "extendFetchContext",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L145",
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 144
+            },
             "signature": [
               {
                 "pluginId": "usageCollection",
@@ -166,7 +193,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L146"
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 145
+            }
           },
           {
             "tags": [],
@@ -174,7 +204,10 @@
             "type": "Object",
             "label": "init",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L147",
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 146
+            },
             "signature": [
               "Function | undefined"
             ]
@@ -185,7 +218,10 @@
             "type": "Function",
             "label": "fetch",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L148",
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 147
+            },
             "signature": [
               {
                 "pluginId": "usageCollection",
@@ -203,7 +239,10 @@
             "type": "Function",
             "label": "isReady",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L149",
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 148
+            },
             "signature": [
               "() => boolean | Promise<boolean>"
             ]
@@ -225,7 +264,10 @@
                   "Logger"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L156"
+                "source": {
+                  "path": "src/plugins/usage_collection/server/collector/collector.ts",
+                  "lineNumber": 155
+                }
               },
               {
                 "type": "CompoundType",
@@ -242,17 +284,26 @@
                   "<TFetchReturn, any, ExtraOptions>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L157"
+                "source": {
+                  "path": "src/plugins/usage_collection/server/collector/collector.ts",
+                  "lineNumber": 156
+                }
               }
             ],
             "tags": [
               "private"
             ],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L155"
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 154
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L144",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 143
+        },
         "initialIsOpen": false
       }
     ],
@@ -271,10 +322,16 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L34"
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/collector.ts",
+              "lineNumber": 33
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L33",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       }
     ],
@@ -286,7 +343,10 @@
         "label": "AllowedSchemaTypes",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L28",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 27
+        },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"integer\" | \"byte\" | \"float\""
         ],
@@ -300,9 +360,12 @@
         "description": [
           "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L65",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 64
+        },
         "signature": [
-          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract | ISavedObjectsRepository; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
+          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
         ],
         "initialIsOpen": false
       },
@@ -312,7 +375,10 @@
         "label": "CollectorOptions",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L112",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 111
+        },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
         ],
@@ -324,7 +390,10 @@
         "label": "MakeSchemaFrom",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/collector.ts#L51",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/collector.ts",
+          "lineNumber": 50
+        },
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
         ],
@@ -336,7 +405,10 @@
         "label": "UsageCollectionSetup",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/plugin.ts#L21",
+        "source": {
+          "path": "src/plugins/usage_collection/server/plugin.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ makeStatsCollector: <TFetchReturn, WithKibanaRequest, ExtraOptions>(options: ",
           {
@@ -381,7 +453,10 @@
         "label": "UsageCollectorOptions",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/usage_collection/server/collector/usage_collector.ts#L13",
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
           {

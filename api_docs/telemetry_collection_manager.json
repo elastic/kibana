@@ -25,10 +25,16 @@
             "type": "string",
             "label": "clusterUuid",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L54"
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 53
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L53",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       },
       {
@@ -44,7 +50,10 @@
             "type": "Object",
             "label": "usageCollection",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L58",
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "Pick<",
               {
@@ -63,7 +72,10 @@
             "type": "CompoundType",
             "label": "esClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L59",
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 58
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -77,10 +89,13 @@
           {
             "tags": [],
             "id": "def-server.StatsCollectionConfig.soClient",
-            "type": "CompoundType",
+            "type": "Object",
             "label": "soClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L60",
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 59
+            },
             "signature": [
               "Pick<",
               {
@@ -90,15 +105,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\"> | Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"deleteByNamespace\" | \"incrementCounter\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
             ]
           },
           {
@@ -107,7 +114,10 @@
             "type": "Object",
             "label": "kibanaRequest",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L61",
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 60
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -120,7 +130,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L57",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 56
+        },
         "initialIsOpen": false
       },
       {
@@ -136,7 +149,10 @@
             "type": "CompoundType",
             "label": "logger",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L79",
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 78
+            },
             "signature": [
               "Logger",
               " | Console"
@@ -148,10 +164,16 @@
             "type": "string",
             "label": "version",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L80"
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 79
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L78",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 77
+        },
         "initialIsOpen": false
       },
       {
@@ -172,10 +194,16 @@
             "type": "string",
             "label": "collectionSource",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L75"
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 74
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L74",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 73
+        },
         "initialIsOpen": false
       }
     ],
@@ -187,7 +215,10 @@
         "label": "ClusterDetailsGetter",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L84",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 83
+        },
         "signature": [
           "(config: ",
           "StatsCollectionConfig",
@@ -205,7 +236,10 @@
         "label": "StatsGetter",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L88",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 87
+        },
         "signature": [
           "(clustersDetails: ",
           "ClusterDetails",
@@ -223,7 +257,10 @@
         "label": "StatsGetterConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L83",
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 82
+        },
         "signature": [
           "UnencryptedStatsGetterConfig",
           " | ",
@@ -246,7 +283,10 @@
           "type": "Function",
           "label": "setCollectionStrategy",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L20",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 19
+          },
           "signature": [
             "<T extends ",
             {
@@ -273,7 +313,10 @@
           "type": "Function",
           "label": "getOptInStats",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L23",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 22
+          },
           "signature": [
             "(optInStatus: boolean, config: ",
             {
@@ -292,7 +335,10 @@
           "type": "Function",
           "label": "getStats",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L24",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 23
+          },
           "signature": [
             "(config: ",
             {
@@ -319,13 +365,19 @@
           "type": "Function",
           "label": "areAllCollectorsReady",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L25",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 24
+          },
           "signature": [
             "() => Promise<boolean | undefined>"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L19",
+      "source": {
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 18
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -342,7 +394,10 @@
           "type": "Function",
           "label": "getOptInStats",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L29",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 28
+          },
           "signature": [
             "(optInStatus: boolean, config: ",
             {
@@ -361,7 +416,10 @@
           "type": "Function",
           "label": "getStats",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L30",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 29
+          },
           "signature": [
             "(config: ",
             {
@@ -388,13 +446,19 @@
           "type": "Function",
           "label": "areAllCollectorsReady",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L31",
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 30
+          },
           "signature": [
             "() => Promise<boolean | undefined>"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/telemetry_collection_manager/server/types.ts#L28",
+      "source": {
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 27
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
