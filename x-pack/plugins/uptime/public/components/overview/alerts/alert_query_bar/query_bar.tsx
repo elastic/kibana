@@ -30,7 +30,7 @@ interface Props {
 export const AlertQueryBar = ({ query, onChange }: Props) => {
   const { index_pattern: indexPattern, loading } = useIndexPattern();
 
-  const [inputVal, setInputVal] = useState();
+  const [inputVal, setInputVal] = useState<string>('');
 
   const { data } = useContext(UptimeStartupPluginsContext);
 
@@ -51,7 +51,7 @@ export const AlertQueryBar = ({ query, onChange }: Props) => {
         isLoading={loading}
         isClearable={true}
         onQueryChange={({ query: queryN }) => {
-          setInputVal(queryN?.query);
+          setInputVal(queryN?.query as string);
         }}
         onQuerySubmit={({ query: queryN }) => {
           if (queryN) onChange(queryN.query as string);
@@ -62,7 +62,7 @@ export const AlertQueryBar = ({ query, onChange }: Props) => {
         useDefaultBehaviors={false}
         autoSubmit={true}
         disableLanguageSwitcher={true}
-        isInvalid={inputVal && !query}
+        isInvalid={!!(inputVal && !query)}
       />
     </EuiFlexItemStyled>
   );

@@ -21,8 +21,6 @@ describe('alert monitor status component', () => {
       enabled: true,
       hasFilters: false,
       isOldAlert: true,
-      locations: [],
-      shouldUpdateUrl: false,
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
