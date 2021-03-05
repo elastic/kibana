@@ -9,11 +9,7 @@ import React, { FunctionComponent } from 'react';
 
 import { UseField } from '../../form';
 
-import {
-  DescribedFormRow,
-  DescribedFormRowProps,
-  DescribedFormRowSwitchProps,
-} from './described_form_row';
+import { DescribedFormRow, DescribedFormRowProps, DescribedFormRowSwitchProps } from './';
 
 type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<DescribedFormRowSwitchProps, 'label'> & { path: string };

@@ -173,6 +173,7 @@ export class FieldChooser extends Component {
 
             <EuiSpacer size="s" />
 
+            {/* TODO: Copy required */}
             <EuiFormRow label="Index pattern">
               <EuiFieldText
                 value={indexPattern}

@@ -12,15 +12,13 @@ import uuid from 'uuid';
 import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { NumericField } from '../../../../../../shared_imports';
 
-import { DescribedFormRow } from '../../../components';
+import { DescribedFormRow, LearnMoreLink } from '../../../components';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
-
-import { LearnMoreLink } from '../../';
 
 interface Props {
   phase: 'hot' | 'warm';

@@ -39,17 +39,17 @@ const i18nTexts = {
     activeNotConfigured: {
       heading: i18n.translate('xpack.indexLifecycleMgmt.rollup.configurationRequiredLabel', {
         // TODO: Copy required
-        defaultMessage: '[Tells user rollup configuration required]',
+        defaultMessage: '[Inform user that rollup configuration needs to be provided]',
       }),
-      buttonLabel: i18n.translate(
-        'xpack.indexLifecycleMgmt.rollup.configurationRequired.buttonLabel',
-        {
-          // TODO: Copy required
-          defaultMessage: '[Configure rollup]',
-        }
-      ),
     },
   },
+  configureButtonLabel: i18n.translate(
+    'xpack.indexLifecycleMgmt.rollup.configurationRequired.buttonLabel',
+    {
+      // TODO: Copy required
+      defaultMessage: '[This button takes you to separate configuration view]',
+    }
+  ),
 };
 
 export const RollupField: FunctionComponent<Props> = ({ phase }) => {
@@ -61,7 +61,6 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
     <>
       <ToggleFieldWithDescribedFormRow
         title={<h3 id={`${phase}-rollup`}>{globalI18nTexts.editPolicy.rollupLabel}</h3>}
-        // TODO: Copy required
         description={i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldDescription', {
           // TODO: Copy required
           defaultMessage: '[Brief description of rollups in the context of ILM]',
@@ -95,7 +94,7 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                         history.push({ search: qs.stringify({ rollup: phase }) });
                       }}
                     >
-                      {i18nTexts.states.activeNotConfigured.buttonLabel}
+                      {i18nTexts.configureButtonLabel}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -118,7 +117,7 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                         history.push({ search: qs.stringify({ rollup: phase }) });
                       }}
                     >
-                      {i18nTexts.states.activeNotConfigured.buttonLabel}
+                      {i18nTexts.configureButtonLabel}
                     </EuiButtonEmpty>
                   }
                 >

@@ -12,12 +12,10 @@ import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../shared_imports';
 
-import { DescribedFormRow } from '../../../components';
+import { DescribedFormRow, LearnMoreLink } from '../../../components';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
-
-import { LearnMoreLink } from '../..';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
