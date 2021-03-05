@@ -7,7 +7,11 @@
 
 import { mockConfig, mockLogger } from '../__mocks__';
 
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
@@ -168,6 +172,28 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(responseMock.custom).toHaveBeenCalledWith({
           body: {},
           statusCode: 201,
+          headers: mockExpectedResponseHeaders,
+        });
+      });
+
+      it('filters out any _sessionData passed back from Enterprise Search', async () => {
+        const jsonWithSessionData = {
+          _sessionData: {
+            secrets: 'no peeking',
+          },
+          regular: 'data',
+        };
+
+        EnterpriseSearchAPI.mockReturn(jsonWithSessionData, { headers: JSON_HEADER });
+
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+        await makeAPICall(requestHandler);
+
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          statusCode: 200,
+          body: {
+            regular: 'data',
+          },
           headers: mockExpectedResponseHeaders,
         });
       });
@@ -375,6 +401,34 @@ describe('EnterpriseSearchRequestHandler', () => {
 
     expect(enterpriseSearchRequestHandler.headers).toEqual({
       [READ_ONLY_MODE_HEADER]: 'true',
+    });
+  });
+
+  describe('setSessionData', () => {
+    it('sets the value of wsOAuthTokenPackage in a cookie', async () => {
+      const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
+      const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
+      const tokenPackage = 'sEkReTZ';
+
+      const expectedCookie = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`;
+      const sessionDataBody = {
+        _sessionData: { wsOAuthTokenPackage: tokenPackage },
+        regular: 'data',
+      };
+
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => {
+        return new Date(mockNow).valueOf();
+      });
+
+      EnterpriseSearchAPI.mockReturn(sessionDataBody, { headers: JSON_HEADER });
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/' });
+      await makeAPICall(requestHandler);
+
+      expect(enterpriseSearchRequestHandler.headers).toEqual({
+        ['set-cookie']: expectedCookie,
+        ...mockExpectedResponseHeaders,
+      });
     });
   });
 

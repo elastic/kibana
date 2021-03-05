@@ -32,7 +32,6 @@ interface RequestParams {
   path: string;
   params?: object;
   hasValidData?: Function;
-  computeExtraParams?: Function;
 }
 interface ErrorResponse {
   message: string;
@@ -62,12 +61,7 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest({
-    path,
-    params = {},
-    hasValidData = () => true,
-    computeExtraParams = () => {},
-  }: RequestParams) {
+  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -76,11 +70,7 @@ export class EnterpriseSearchRequestHandler {
       try {
         // Set up API URL
         const encodedPath = this.encodePathParams(path, request.params as Record<string, string>);
-        const queryParams = {
-          ...(request.query as object),
-          ...params,
-          ...computeExtraParams(request),
-        };
+        const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
@@ -302,7 +292,7 @@ export class EnterpriseSearchRequestHandler {
    */
   setSessionData(sessionData: { [key: string]: string }) {
     if (sessionData.wsOAuthTokenPackage) {
-      const anHourFromNow = new Date();
+      const anHourFromNow = new Date(Date.now());
       anHourFromNow.setHours(anHourFromNow.getHours() + 1);
 
       const cookiePayload = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${sessionData.wsOAuthTokenPackage};`;
