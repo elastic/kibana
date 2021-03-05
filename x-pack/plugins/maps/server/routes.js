@@ -23,7 +23,8 @@ import {
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
-  API_ROOT_PATH, CREATE_INDEX_API_PATH,
+  API_ROOT_PATH,
+  CREATE_INDEX_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -54,9 +55,11 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
   let emsClient;
   let lastLicenseId;
+  const router = core.http.createRouter();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
@@ -556,7 +559,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
     },
     async (context, request, response) => {
       const { query } = request;
-
       if (!query.indexPatternTitle) {
         logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
         return response.custom({
@@ -588,8 +590,16 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
     }
   );
 
-  function importData(client, id, index, settings, mappings, ingestPipeline, data) {
-    const { importData: importDataFunc } = importDataProvider(client);
+  async function importData(core, id, index, settings, mappings, ingestPipeline, data) {
+    const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
+      core.savedObjects.client,
+      core.elasticsearch.client.asCurrentUser
+    );
+    const { importData: importDataFunc } = importDataProvider(
+      core.elasticsearch.client,
+      indexPatternsService,
+      logger
+    );
     return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
   }
 
@@ -625,29 +635,18 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;
-
-        // `id` being `undefined` tells us that this is a new import due to create a new index.
-        // follow-up import calls to just add additional data will include the `id` of the created
-        // index, we'll ignore those and don't increment the counter.
-
-        // if (id === undefined) {
-        //   await updateTelemetry();
-        // }
-
         const result = await importData(
-          context.core.elasticsearch.client,
+          context.core,
           id,
           index,
           settings,
           mappings,
-          // @ts-expect-error
           ingestPipeline,
           data
         );
         return response.ok({ body: result });
-      } catch (e) {
-        // return response.customError(wrapError(e));
-        console.log(e.message);
+      } catch (error) {
+        logger.error(`Error processing geo point/shape request: ${error.message}.`);
       }
     }
   );

@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
+import { Logger } from 'src/core/server';
 import {
   INDEX_META_DATA_CREATED_BY,
   ImportResponse,
@@ -14,10 +15,15 @@ import {
   Mappings,
   IngestPipelineWrapper,
 } from '../common';
+import { IndexPatternsService } from '../../../../src/plugins/data/common';
 
 export type InputData = any[];
 
-export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
+export function importDataProvider(
+  { asCurrentUser }: IScopedClusterClient,
+  indexPatternsService: IndexPatternsService,
+  logger: Logger
+) {
   async function importData(
     id: string | undefined,
     index: string,
@@ -39,6 +45,9 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
         await createIndex(index, settings, mappings);
         createdIndex = index;
+        if (createdIndex) {
+          await createIndexPattern(index);
+        }
 
         // create the pipeline if one has been supplied
         if (pipelineId !== undefined) {
@@ -105,6 +114,20 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     await asCurrentUser.indices.create({ index, body });
+  }
+
+  async function createIndexPattern(indexPatternName: string) {
+    try {
+      await indexPatternsService.createAndSave(
+        {
+          title: indexPatternName,
+        },
+        true
+      );
+    } catch (error) {
+      logger.error(`Error creating index pattern "${indexPatternName}". ${error.message}`);
+      return;
+    }
   }
 
   async function indexData(index: string, pipelineId: string, data: InputData) {
