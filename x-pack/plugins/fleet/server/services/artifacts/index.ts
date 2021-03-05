@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './artifacts';
 export * from './types';
 export * from './client';
 export * from './types';

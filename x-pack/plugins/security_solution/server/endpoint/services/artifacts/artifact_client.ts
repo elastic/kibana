@@ -15,7 +15,7 @@ import {
   InternalArtifactCompleteSchema,
   InternalArtifactCreateSchema,
 } from '../../schemas/artifacts';
-import { Artifact, ArtifactsInterface } from '../../../../../fleet/server';
+import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
 
 const inflateAsync = promisify(_inflate);
 
@@ -64,7 +64,7 @@ export class ArtifactClient implements EndpointArtifactClientInterface {
  * to the Fleet artifacts index (then used by Fleet Server)
  */
 export class EndpointArtifactClient implements EndpointArtifactClientInterface {
-  constructor(private fleetArtifacts: ArtifactsInterface) {}
+  constructor(private fleetArtifacts: ArtifactsClientInterface) {}
 
   private parseArtifactId(
     id: string

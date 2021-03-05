@@ -21,7 +21,7 @@ export {
   getRegistryUrl,
   PackageService,
   AgentPolicyServiceInterface,
-  ArtifactsInterface,
+  ArtifactsClientInterface,
   Artifact,
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';

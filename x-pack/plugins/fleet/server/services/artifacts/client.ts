@@ -8,16 +8,16 @@ import { createHash } from 'crypto';
 import { deflate } from 'zlib';
 import { promisify } from 'util';
 import { ElasticsearchClient } from 'kibana/server';
-import uuid from 'uuid';
 import {
   Artifact,
-  ArtifactCreateOptions,
+  ArtifactsClientCreateOptions,
   ArtifactElasticsearchProperties,
   ArtifactEncodedMetadata,
-  ArtifactsInterface,
+  ArtifactsClientInterface,
+  NewArtifact,
 } from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import {
   esSearchHitToArtifact,
   kueryToArtifactsElasticsearchQuery,
@@ -25,11 +25,14 @@ import {
 } from './mappings';
 import { ArtifactAccessDeniedError, ArtifactsElasticsearchError } from './errors';
 import { ListWithKuery } from '../../types';
-import { isElasticsearchItemNotFoundError } from './utils';
+import { createArtifact, getArtifact } from './artifacts';
 
 const deflateAsync = promisify(deflate);
 
-export class FleetArtifactsClient implements ArtifactsInterface {
+/**
+ * Exposes an interface for access artifacts from within the context of an integration (`packageName`)
+ */
+export class FleetArtifactsClient implements ArtifactsClientInterface {
   constructor(private esClient: ElasticsearchClient, private packageName: string) {
     if (!packageName) {
       throw new Error('packageName is required');
@@ -45,21 +48,8 @@ export class FleetArtifactsClient implements ArtifactsInterface {
   }
 
   async getArtifact(id: string): Promise<Artifact | undefined> {
-    try {
-      const esData = await this.esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        id,
-      });
-
-      const response = esSearchHitToArtifact(esData.body);
-      return this.validate(response);
-    } catch (e) {
-      if (isElasticsearchItemNotFoundError(e)) {
-        return;
-      }
-
-      throw new ArtifactsElasticsearchError(e);
-    }
+    const artifact = await getArtifact(this.esClient, id);
+    return artifact ? this.validate(artifact) : undefined;
   }
 
   /**
@@ -69,14 +59,12 @@ export class FleetArtifactsClient implements ArtifactsInterface {
     content,
     type = '',
     identifier = this.packageName,
-  }: ArtifactCreateOptions): Promise<Artifact> {
+  }: ArtifactsClientCreateOptions): Promise<Artifact> {
     const encodedMetaData = await this.encodeContent(content);
-    const id = uuid.v4();
-    const newArtifactData: ArtifactElasticsearchProperties = {
+    const newArtifactData: NewArtifact = {
       type,
       identifier,
       packageName: this.packageName,
-      created: new Date().toISOString(),
       encryptionAlgorithm: 'none',
       relative_url: relativeDownloadUrlFromArtifact({
         identifier,
@@ -85,21 +73,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
       ...encodedMetaData,
     };
 
-    try {
-      await this.esClient.create({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        id,
-        body: newArtifactData,
-        refresh: 'wait_for',
-      });
-
-      return {
-        ...newArtifactData,
-        id,
-      };
-    } catch (e) {
-      throw new ArtifactsElasticsearchError(e);
-    }
+    return createArtifact(this.esClient, newArtifactData);
   }
 
   async deleteArtifact(id: string) {
@@ -153,7 +127,9 @@ export class FleetArtifactsClient implements ArtifactsInterface {
     return createHash('sha256').update(content).digest('hex');
   }
 
-  async encodeContent(content: ArtifactCreateOptions['content']): Promise<ArtifactEncodedMetadata> {
+  async encodeContent(
+    content: ArtifactsClientCreateOptions['content']
+  ): Promise<ArtifactEncodedMetadata> {
     const decodedContentBuffer = Buffer.from(content);
     const encodedContentButter = await deflateAsync(decodedContentBuffer);
 
