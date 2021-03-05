@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -12,7 +14,6 @@ import {
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
-  CaseStatuses,
   CaseType,
   CaseUserActionsResponse,
   CommentRequest,
@@ -36,6 +37,7 @@ import {
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
+import { StatusAll } from '../components/status';
 
 import {
   ActionLicense,
@@ -117,7 +119,7 @@ export const getCases = async ({
     onlyCollectionType: false,
     search: '',
     reporters: [],
-    status: CaseStatuses.open,
+    status: StatusAll,
     tags: [],
   },
   queryParams = {
@@ -138,7 +140,7 @@ export const getCases = async ({
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
-    query,
+    query: query.status === StatusAll ? omit(query, ['status']) : query,
     signal,
   });
   return convertAllCasesToCamel(decodeCasesFindResponse(response));

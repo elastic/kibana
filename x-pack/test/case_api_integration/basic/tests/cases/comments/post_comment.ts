@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../plugins/case/common/api';
+import { CommentType } from '../../../../../../plugins/case/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -20,15 +20,7 @@ import {
   postCollectionReq,
   postCommentGenAlertReq,
 } from '../../../../common/lib/mock';
-import {
-  createCaseAction,
-  createSubCase,
-  deleteAllCaseItems,
-  deleteCaseAction,
-  deleteCases,
-  deleteCasesUserActions,
-  deleteComments,
-} from '../../../../common/lib/utils';
+import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -373,38 +365,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
-      });
-    });
-
-    describe('sub case comments', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('posts a new comment for a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        // create another sub case just to make sure we get the right comments
-        await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
-          .send()
-          .expect(200);
-        expect(subCaseComments.total).to.be(2);
-        expect(subCaseComments.comments[0].type).to.be(CommentType.generatedAlert);
-        expect(subCaseComments.comments[1].type).to.be(CommentType.user);
       });
     });
   });

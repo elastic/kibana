@@ -17,10 +17,9 @@ import {
   CaseType,
   AssociationType,
 } from '../../../../case/common/api';
+import { CaseStatusWithAllStatus } from '../components/status';
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
-
-export type AllCaseType = AssociationType & CaseType;
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;
@@ -96,7 +95,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatuses;
+  status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
   onlyCollectionType?: boolean;
