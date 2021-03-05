@@ -14,7 +14,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 1319839
+  data: 900000
   dataEnhanced: 50420
   devTools: 38637
   discover: 105145
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 28222
-  infra: 204800
+  infra: 184320
   fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675

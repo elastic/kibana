@@ -35,15 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
             flowTarget: FlowTargetSourceDest.source,
             sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
@@ -60,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -81,15 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -108,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -129,15 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -156,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
@@ -171,15 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -198,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

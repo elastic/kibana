@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
@@ -174,7 +175,9 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription className="eui-textTruncate">
+                  {description}
+                </EuiDescriptionListDescription>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );

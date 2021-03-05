@@ -61,7 +61,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
     }
   }, [data]);
 
-  const imgSrc = stepImages[stepNumber] || data?.src;
+  const imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
 
@@ -74,6 +74,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
       maxSteps={data?.maxSteps}
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
+      isLoading={status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING}
       label={label}
       onVisible={(val) => setNumberOfCaptions((prevVal) => (val ? prevVal + 1 : prevVal - 1))}
     />

@@ -25,30 +25,11 @@ import {
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
-
-function isDefined<T>(argument: T | undefined | null): argument is T {
-  return argument !== undefined && argument !== null;
-}
-
-/**
- * Resolves the longest bucket span from the list and multiply it by 2.
- * @param bucketSpans Collection of bucket spans
- */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return (
-    Math.max(
-      ...bucketSpans
-        .map((b) => parseInterval(b))
-        .filter(isDefined)
-        .map((v) => v.asSeconds())
-    ) * 2
-  );
-}
+import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**
  * Alerting related server-side methods
@@ -277,7 +258,9 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
       const fieldName = getEntityFieldName(source);
       const fieldValue = getEntityFieldValue(source);
-      alertInstanceKey += `_${source.detector_index}_${source.function}_${fieldName}_${fieldValue}`;
+      const entity =
+        fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
+      alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
     }
     return alertInstanceKey;
   };
@@ -313,7 +296,8 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * We need to check the biggest time range to make sure anomalies are not missed.
      */
     const lookBackTimeInterval = `${Math.max(
-      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)),
+      // Double the max bucket span
+      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2,
       checkIntervalGap ? checkIntervalGap.asSeconds() : 0
     )}s`;
 

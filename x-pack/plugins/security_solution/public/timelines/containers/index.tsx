@@ -9,6 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Subscription } from 'rxjs';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
@@ -117,6 +118,7 @@ export const useTimelineEvents = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
@@ -176,12 +178,12 @@ export const useTimelineEvents = ({
       if (request == null || pageName === '' || skip) {
         return;
       }
-      let didCancel = false;
+
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
               request.language === 'eql'
@@ -191,53 +193,44 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              try {
-                if (isCompleteResponse(response)) {
-                  if (!didCancel) {
-                    setLoading(false);
-
-                    setTimelineResponse((prevResponse) => {
-                      const newTimelineResponse = {
-                        ...prevResponse,
-                        events: getTimelineEvents(response.edges),
-                        inspect: getInspectResponse(response, prevResponse.inspect),
-                        pageInfo: response.pageInfo,
-                        totalCount: response.totalCount,
-                        updatedAt: Date.now(),
-                      };
-                      if (id === TimelineId.active) {
-                        activeTimeline.setExpandedDetail({});
-                        activeTimeline.setPageName(pageName);
-                        if (request.language === 'eql') {
-                          activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
-                          activeTimeline.setEqlResponse(newTimelineResponse);
-                        } else {
-                          activeTimeline.setRequest(request);
-                          activeTimeline.setResponse(newTimelineResponse);
-                        }
-                      }
-                      return newTimelineResponse;
-                    });
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setTimelineResponse((prevResponse) => {
+                  const newTimelineResponse = {
+                    ...prevResponse,
+                    events: getTimelineEvents(response.edges),
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    totalCount: response.totalCount,
+                    updatedAt: Date.now(),
+                  };
+                  if (id === TimelineId.active) {
+                    activeTimeline.setExpandedDetail({});
+                    activeTimeline.setPageName(pageName);
+                    if (request.language === 'eql') {
+                      activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
+                      activeTimeline.setEqlResponse(newTimelineResponse);
+                    } else {
+                      activeTimeline.setRequest(request);
+                      activeTimeline.setResponse(newTimelineResponse);
+                    }
                   }
-                  searchSubscription$.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  if (!didCancel) {
-                    setLoading(false);
-                  }
-                  notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
-                  searchSubscription$.unsubscribe();
-                }
-              } catch {
+                  return newTimelineResponse;
+                });
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
                 notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (msg.message !== 'Aborted') {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_TIMELINE_EVENTS,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              notifications.toasts.addDanger({
+                title: i18n.FAIL_TIMELINE_EVENTS,
+                text: msg.message,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
@@ -280,14 +273,10 @@ export const useTimelineEvents = ({
         }
       }
 
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
   );
@@ -400,6 +389,10 @@ export const useTimelineEvents = ({
     ) {
       timelineSearch(timelineRequest);
     }
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [id, timelineRequest, timelineSearch, timerangeKind]);
 
   /*

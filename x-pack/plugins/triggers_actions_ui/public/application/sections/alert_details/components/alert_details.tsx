@@ -158,7 +158,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           }}
                           actionTypeRegistry={actionTypeRegistry}
                           alertTypeRegistry={alertTypeRegistry}
-                          reloadAlerts={setAlert}
+                          onSave={setAlert}
                         />
                       )}
                     </Fragment>

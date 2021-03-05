@@ -24,6 +24,7 @@ describe('StepImageCaption', () => {
       stepNumber: 2,
       label: getShortTimeStamp(moment('2020-11-26T15:28:56.896Z')),
       onVisible: jest.fn(),
+      isLoading: false,
     };
   });
 

@@ -63,14 +63,26 @@ export function DashboardApp({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
+
+  const getIncomingEmbeddable = useCallback(
+    (removeAfterFetch?: boolean) => {
+      return embeddable
+        .getStateTransfer()
+        .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, removeAfterFetch);
+    },
+    [embeddable]
+  );
+
   const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
     savedDashboard,
-    history
+    history,
+    getIncomingEmbeddable
   );
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const dashboardContainer = useDashboardContainer({
     timeFilter: data.query.timefilter.timefilter,
     dashboardStateManager,
+    getIncomingEmbeddable,
     setUnsavedChanges,
     history,
   });
@@ -206,7 +218,7 @@ export function DashboardApp({
     );
 
     dashboardStateManager.registerChangeListener(() => {
-      setUnsavedChanges(dashboardStateManager?.hasUnsavedPanelState());
+      setUnsavedChanges(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
       triggerRefresh$.next();
@@ -294,6 +306,7 @@ export function DashboardApp({
             }}
             viewMode={viewMode}
             lastDashboardId={savedDashboardId}
+            clearUnsavedChanges={() => setUnsavedChanges(false)}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {
               if (isUpdate === false) {
