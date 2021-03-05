@@ -54,13 +54,13 @@
           "params": {
             "subAction": "pushToService",
             "subActionParams": {
-              "short_description": "SN short desc",
-              "description": "SN desc",
-              "severity": "2",
-              "impact": "2",
-              "urgency": "2",
-              "savedObjectId": "1234-cool-id",
-              "comments": [{ "commentId": "1", "comment": "sn comment" }]
+                "severity":"2",
+                "impact":"2",
+                "urgency":"2",
+                "savedObjectId":"{{alertId}}",
+                "title":"SN short desc",
+                "description":"SN desc",
+                "comment":"sn comment"
             }
           }
         },
