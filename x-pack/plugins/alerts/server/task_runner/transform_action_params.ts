@@ -65,6 +65,14 @@ export function transformActionParams({
     state,
     kibanaBaseUrl,
     params: alertParams,
+    rule: {
+      id: alertId,
+      name: alertName,
+      alertId: alertInstanceId,
+      alertActionGroup,
+      alertActionGroupName,
+      alertActionSubGroup: alertActionSubgroup,
+    },
   };
   return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);
 }

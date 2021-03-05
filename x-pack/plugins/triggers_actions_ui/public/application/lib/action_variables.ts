@@ -24,20 +24,25 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
 export enum AlertProvidedActionVariables {
   ruleId = 'rule.id',
   ruleName = 'rule.name',
-  ruleSpaceId = 'rule.spaceId',
-  ruleTags = 'rule.tags',
-  ruleDate = 'rule.date',
   ruleAlertId = 'rule.alertId',
   ruleAlertActionGroup = 'rule.alertActionGroup',
   ruleAlertActionGroupName = 'rule.alertActionGroupName',
   ruleAlertSubActionGroup = 'rule.alertActionSubGroup',
+  spaceId = 'spaceId',
+  tags = 'tags',
+  date = 'date',
 }
 
 export enum LegacyAlertProvidedActionVariables {
   alertId = 'alertId',
   alertName = 'alertName',
   alertInstanceId = 'alertInstanceId',
+  alertActionGroup = 'alertActionGroup',
+  alertActionGroupName = 'alertActionGroupName',
+  alertActionSubGroup = 'alertActionSubGroup',
 }
+
+const deprecationMessage = 'This has been deprecated in favor of {variable}.';
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
@@ -65,22 +70,22 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleSpaceId,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleSpaceIdLabel', {
+    name: AlertProvidedActionVariables.spaceId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.spaceIdLabel', {
       defaultMessage: 'The space ID of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleTags,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTagsLabel', {
+    name: AlertProvidedActionVariables.tags,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.tagsLabel', {
       defaultMessage: 'The tags of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleDate,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleDateLabel', {
+    name: AlertProvidedActionVariables.date,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
       defaultMessage: 'The date the rule scheduled the action.',
     }),
   });
@@ -135,7 +140,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: LegacyAlertProvidedActionVariables.alertId,
     deprecated: true,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertIdLabel', {
-      defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+      defaultMessage: deprecationMessage,
       values: {
         variable: AlertProvidedActionVariables.ruleId,
       },
@@ -146,7 +151,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: LegacyAlertProvidedActionVariables.alertName,
     deprecated: true,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertNameLabel', {
-      defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+      defaultMessage: deprecationMessage,
       values: {
         variable: AlertProvidedActionVariables.ruleName,
       },
@@ -159,9 +164,51 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertInstanceIdLabel',
       {
-        defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+        defaultMessage: deprecationMessage,
         values: {
           variable: AlertProvidedActionVariables.ruleAlertId,
+        },
+      }
+    ),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertActionGroup,
+    deprecated: true,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.legacyAlertActionGroupLabel',
+      {
+        defaultMessage: deprecationMessage,
+        values: {
+          variable: AlertProvidedActionVariables.ruleAlertActionGroup,
+        },
+      }
+    ),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertActionGroupName,
+    deprecated: true,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.legacyAlertActionGroupNameLabel',
+      {
+        defaultMessage: deprecationMessage,
+        values: {
+          variable: AlertProvidedActionVariables.ruleAlertActionGroupName,
+        },
+      }
+    ),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertActionSubGroup,
+    deprecated: true,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.legacyAlertActionSubGroupLabel',
+      {
+        defaultMessage: deprecationMessage,
+        values: {
+          variable: AlertProvidedActionVariables.ruleAlertSubActionGroup,
         },
       }
     ),
