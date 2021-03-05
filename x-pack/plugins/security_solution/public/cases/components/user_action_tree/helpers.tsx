@@ -410,15 +410,14 @@ export interface Alert {
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
-  const [alerts, setAlerts] = useState<Record<string, Ecs>>({});
 
   const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
     alertsQuery,
     selectedPatterns[0]
   );
 
-  useEffect(() => {
-    const newAlerts =
+  const alerts = useMemo(
+    () =>
       alertsData?.hits.hits.reduce<Record<string, Ecs>>(
         (acc, { _id, _index, _source }) => ({
           ...acc,
@@ -430,9 +429,9 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
           },
         }),
         {}
-      ) ?? {};
-    setAlerts((prevAlerts) => (!deepEqual(newAlerts, prevAlerts) ? newAlerts : prevAlerts));
-  }, [alertsData?.hits.hits]);
+      ) ?? {},
+    [alertsData?.hits.hits]
+  );
 
   return [isLoadingAlerts, alerts];
 };
