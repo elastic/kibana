@@ -79,8 +79,7 @@ const timepickerRanges = [
   },
 ];
 
-// FLAKY: https://github.com/elastic/kibana/issues/93735
-describe.skip('SIEM Super Date Picker', () => {
+describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
@@ -137,7 +136,7 @@ describe.skip('SIEM Super Date Picker', () => {
       });
 
       test('Make Sure it is last "now-${x}h" where ${x} is in hours/minutes/seconds date', () => {
-        expect(store.getState().inputs.global.timerange.fromStr).toMatch(/^now-[0-9]/);
+        expect(store.getState().inputs.global.timerange.fromStr).toMatch(/^now-[0-9]+/);
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
