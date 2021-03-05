@@ -116,7 +116,21 @@ function getArgumentSuggestions(
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
   const operation = operationDefinitionMap[name];
-  if (!operation) {
+  if (!operation && !tinymathFunctions[name]) {
+    return { list: [], type: SUGGESTION_TYPE.FIELD };
+  }
+
+  const tinymathFunction = tinymathFunctions[name];
+  if (tinymathFunction) {
+    if (
+      tinymathFunction.positionalArguments[position].type === 'function' ||
+      tinymathFunction.positionalArguments[position].type === 'any'
+    ) {
+      return {
+        list: uniq(getPossibleFunctions(indexPattern)),
+        type: SUGGESTION_TYPE.FUNCTIONS,
+      };
+    }
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 

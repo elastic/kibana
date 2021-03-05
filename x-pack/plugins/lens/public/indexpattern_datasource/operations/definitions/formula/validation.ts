@@ -17,6 +17,7 @@ import {
   groupArgsByType,
   hasInvalidOperations,
   isMathNode,
+  tinymathFunctions,
 } from './util';
 
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
@@ -31,7 +32,7 @@ const validationErrors = {
   wrongFirstArgument: 'wrong first argument',
   cannotAcceptParameter: 'cannot accept parameter',
   shouldNotHaveField: 'operation should not have field',
-  unexpectedNode: 'unexpected node',
+  tooManyArguments: 'too many arguments',
   fieldWithNoOperation: 'unexpected field with no operation',
   failedParsing: 'Failed to parse expression.', // note: this string comes from Tinymath, do not change it
   duplicateArgument: 'duplicate argument',
@@ -126,6 +127,18 @@ function getMessageFromId({
         values,
       });
       break;
+    case 'tooManyArguments':
+      message = i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
+        defaultMessage: 'The formula {expression} has too many arguments',
+        values,
+      });
+      break;
+    // case 'mathRequiresFunction':
+    //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
+    //     defaultMessage; 'The function {name} requires an Elasticsearch function',
+    //     values,
+    //   });
+    //   break;
     default:
       message = 'no Error found';
       break;
@@ -491,32 +504,76 @@ export function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTyp
 
 export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<string>) {
   const mathNodes = findMathNodes(root);
-  const errors = [];
-  const invalidNodes = mathNodes.filter((node: TinymathFunction) => {
-    // check the following patterns:
-    const { variables, functions } = groupArgsByType(node.args);
-    const fieldVariables = variables.filter((v) => isObject(v) && !missingVariableSet.has(v.value));
-    // field + field (or string)
-    const atLeastTwoFields = fieldVariables.length > 1;
-    // field + number
-    // when computing the difference, exclude invalid fields
-    const validVariables = variables.filter(
-      (v) => !isObject(v) || !missingVariableSet.has(v.value)
-    );
-    // field + function
-    const fieldMathWithFunction = fieldVariables.length > 0 && functions.length > 0;
-    // Make sure to have at least one valid field to compare, or skip the check
-    const mathBetweenFieldAndNumbers =
-      fieldVariables.length > 0 && validVariables.length - fieldVariables.length > 0;
-    return atLeastTwoFields || mathBetweenFieldAndNumbers || fieldMathWithFunction;
-  });
-  if (invalidNodes.length) {
-    errors.push({
-      message: i18n.translate('xpack.lens.indexPattern.mathNotAllowedBetweenFields', {
-        defaultMessage: 'Math operations are allowed between operations, not fields',
-      }),
-      locations: invalidNodes.map(({ location }) => location),
+  const errors: ErrorWrapper[] = [];
+  mathNodes.forEach((node: TinymathFunction) => {
+    const { positionalArguments } = tinymathFunctions[node.name];
+    if (!node.args.length) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongFirstArgument',
+          values: {
+            operation: node.name,
+            type: 'operation',
+            argument: `()`,
+          },
+          locations: [node.location],
+        })
+      );
+    }
+
+    if (node.args.length > positionalArguments.length) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'tooManyArguments',
+          values: {
+            operation: node.name,
+          },
+          locations: [node.location],
+        })
+      );
+    }
+
+    positionalArguments.forEach((requirements, index) => {
+      const arg = node.args[index];
+      if (requirements.type === 'number' && typeof arg !== 'number') {
+        errors.push(
+          getMessageFromId({
+            messageId: 'wrongTypeParameter',
+            values: {
+              operation: node.name,
+              params: getValueOrName(arg),
+            },
+            locations: [node.location],
+          })
+        );
+      }
+
+      if (isObject(arg) && arg.type === 'variable' && !missingVariableSet.has(arg.value)) {
+        errors.push(
+          getMessageFromId({
+            messageId: 'shouldNotHaveField',
+            values: {
+              operation: node.name,
+              params: getValueOrName(arg),
+            },
+            locations: [node.location],
+          })
+        );
+      }
+
+      if (requirements.type === 'function' && !isObject(arg)) {
+        errors.push(
+          getMessageFromId({
+            messageId: 'wrongTypeParameter',
+            values: {
+              operation: node.name,
+              params: getValueOrName(arg),
+            },
+            locations: [node.location],
+          })
+        );
+      }
     });
-  }
+  });
   return errors;
 }
