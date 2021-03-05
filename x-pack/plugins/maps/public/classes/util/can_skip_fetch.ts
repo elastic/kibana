@@ -55,7 +55,7 @@ export async function canSkipSourceUpdate({
   source,
   prevDataRequest,
   nextMeta,
-  considerSpatialParameters = true,
+  considerSpatialParameters,
 }: {
   source: ISource;
   prevDataRequest: DataRequest | undefined;

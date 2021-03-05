@@ -332,6 +332,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       source: joinSource,
       prevDataRequest,
       nextMeta: searchFilters,
+      considerSpatialParameters: true,
     });
     if (canSkipFetch) {
       return {

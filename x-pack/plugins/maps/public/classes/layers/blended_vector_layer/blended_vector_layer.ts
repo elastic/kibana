@@ -302,6 +302,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       source: this.getSource(),
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
+      considerSpatialParameters: true,
     });
 
     let activeSource;
