@@ -828,8 +828,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L72"
+              "lineNumber": 73,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L73"
             },
             "signature": [
               "Record<string, Pick<",
@@ -846,8 +846,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-          "lineNumber": 71,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L71"
+          "lineNumber": 72,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L72"
         },
         "initialIsOpen": false
       },
@@ -1318,8 +1318,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L88"
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L90"
             },
             "signature": [
               "React.ComponentType<",
@@ -1345,8 +1345,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L97"
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L99"
             },
             "signature": [
               "(input: ",
@@ -1370,8 +1370,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L101"
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L103"
             },
             "signature": [
               "() => boolean"
@@ -1380,8 +1380,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/plugin.ts",
-          "lineNumber": 79,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L79"
+          "lineNumber": 81,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/plugin.ts#L81"
         },
         "initialIsOpen": false
       }
@@ -1502,8 +1502,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-          "lineNumber": 75,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L75"
+          "lineNumber": 76,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/types.ts#L76"
         },
         "signature": [
           "{ columns: Record<string, IndexPatternColumn>; columnOrder: string[]; incompleteColumns?: Record<string, IncompleteColumn> | undefined; }"
