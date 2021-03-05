@@ -538,7 +538,7 @@ export class SearchSource {
     return field;
   }
 
-  public flatten() {
+  private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};

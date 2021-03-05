@@ -16,6 +16,7 @@ import {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
+  IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
@@ -58,13 +59,17 @@ export class CsvGenerator {
     private logger: LevelLogger
   ) {}
 
-  private async search(searchSource: ISearchSource, scrollSettings: CsvExportSettings['scroll']) {
-    const { body: searchBody, index: searchIndex } = searchSource.flatten();
+  private async scan(
+    index: IndexPattern,
+    searchSource: ISearchSource,
+    scrollSettings: CsvExportSettings['scroll']
+  ) {
+    const searchBody = await searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
       params: {
         body: searchBody,
-        index: searchIndex.title,
+        index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
       },
@@ -251,6 +256,11 @@ export class CsvGenerator {
     ]);
 
     const index = searchSource.getField('index');
+
+    if (!index) {
+      throw new Error(`The search must have a revference to an index pattern!`);
+    }
+
     const fields = searchSource.getField('fields');
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
@@ -262,24 +272,22 @@ export class CsvGenerator {
     let totalRecords = 0;
     let scrollId: string | undefined;
 
-    if (index) {
-      // apply timezone from the job to all date field formatters
-      try {
-        index.fields.getByType('date').forEach(({ name }) => {
-          this.logger.debug(`setting timezone on ${name}`);
-          const format: FieldFormatConfig = {
-            ...index.fieldFormatMap[name],
-            id: index.fieldFormatMap[name]?.id || 'date', // allow id: date_nanos
-            params: {
-              ...index.fieldFormatMap[name]?.params,
-              timezone: settings.timezone,
-            },
-          };
-          index.setFieldFormat(name, format);
-        });
-      } catch (err) {
-        this.logger.error(err);
-      }
+    // apply timezone from the job to all date field formatters
+    try {
+      index.fields.getByType('date').forEach(({ name }) => {
+        this.logger.debug(`setting timezone on ${name}`);
+        const format: FieldFormatConfig = {
+          ...index.fieldFormatMap[name],
+          id: index.fieldFormatMap[name]?.id || 'date', // allow id: date_nanos
+          params: {
+            ...index.fieldFormatMap[name]?.params,
+            timezone: settings.timezone,
+          },
+        };
+        index.setFieldFormat(name, format);
+      });
+    } catch (err) {
+      this.logger.error(err);
     }
 
     do {
@@ -290,7 +298,7 @@ export class CsvGenerator {
       try {
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.search(searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, scrollSettings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total;
