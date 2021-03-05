@@ -94,7 +94,7 @@
     "yarn": "^1.21.1"
   },
   "dependencies": {
-    "@elastic/datemath": "link:packages/elastic-datemath",
+    "@elastic/datemath": "link:bazel/bin/packages/elastic-datemath/npm_module",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.3",
     "@elastic/ems-client": "7.12.0",
     "@elastic/eui": "31.7.0",

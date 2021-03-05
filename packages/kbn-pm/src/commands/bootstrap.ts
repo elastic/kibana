@@ -46,9 +46,6 @@ export const BootstrapCommand: ICommand = {
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     //
-    // Until we have our first package build within Bazel we will always need to directly call the yarn rule
-    // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
-    // TODO: Change CLI default in order to not force install as soon as we have our first Bazel package being built
     if (forceInstall) {
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
     }
