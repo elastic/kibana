@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { appContextService } from '../../../';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { CallESAsCurrentUser } from '../../../../types';
