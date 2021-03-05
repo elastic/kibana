@@ -328,7 +328,10 @@ const RuleDetailsPageComponent = () => {
       </EuiFlexItem>
     ) : (
       <>
-        <RuleStatus status={currentStatus?.status} statusDate={currentStatus?.status_date}>
+        <RuleStatus
+          status={currentStatus?.status === 'partial failure' ? 'warning' : currentStatus?.status}
+          statusDate={currentStatus?.status_date}
+        >
           <EuiButtonIcon
             data-test-subj="refreshButton"
             color="primary"

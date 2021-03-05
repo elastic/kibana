@@ -371,7 +371,7 @@ export const signalRulesAlertType = ({
           ]);
         } else if (isThresholdRule(type) && threshold) {
           if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.warning(
+            await ruleStatusService.partialFailure(
               'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
             );
             wroteWarningStatus = true;
@@ -565,7 +565,7 @@ export const signalRulesAlertType = ({
             throw new Error('EQL query rule must have a query defined');
           }
           if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.warning(
+            await ruleStatusService.partialFailure(
               'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
             );
             wroteWarningStatus = true;
