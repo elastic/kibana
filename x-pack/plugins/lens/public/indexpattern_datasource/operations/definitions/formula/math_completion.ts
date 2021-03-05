@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { IndexPattern } from '../../../types';
 import { getAvailableOperationsByMetadata } from '../../operations';
+import { tinymathFunctions } from './util';
 import type { GenericOperationDefinition } from '..';
 
 export enum SUGGESTION_TYPE {
@@ -98,7 +99,7 @@ export function getPossibleFunctions(indexPattern: IndexPattern) {
     }
   });
 
-  return uniq(possibleOperationNames);
+  return [...uniq(possibleOperationNames), ...Object.keys(tinymathFunctions)];
 }
 
 function getFunctionSuggestions(word: monaco.editor.IWordAtPosition, indexPattern: IndexPattern) {
@@ -171,6 +172,7 @@ export function getSuggestion(
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
   let command: monaco.languages.CompletionItem['command'];
+  let documentation: string | monaco.IMarkdownString = '';
 
   switch (type) {
     case SUGGESTION_TYPE.FIELD:
@@ -190,7 +192,15 @@ export function getSuggestion(
       kind = monaco.languages.CompletionItemKind.Function;
       insertText = `${insertText}($0)`;
       insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-      detail = typeof suggestion === 'string' ? '' : `(${suggestion.displayName})`;
+      detail =
+        typeof suggestion === 'string'
+          ? tinymathFunctions[suggestion]
+            ? 'TinyMath'
+            : 'Elasticsearch'
+          : `(${suggestion.displayName})`;
+      if (typeof suggestion === 'string' && tinymathFunctions[suggestion]) {
+        documentation = { value: tinymathFunctions[suggestion].help };
+      }
 
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
@@ -212,6 +222,7 @@ export function getSuggestion(
     insertTextRules,
     kind,
     label: insertText,
+    documentation,
     command,
     range,
   };

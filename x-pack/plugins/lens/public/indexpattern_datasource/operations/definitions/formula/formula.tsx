@@ -16,10 +16,17 @@ import {
   EuiDescriptionList,
   EuiText,
   EuiSpacer,
-  EuiPanel,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
-import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  CodeEditor,
+  CodeEditorProps,
+  Markdown,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   OperationDefinition,
   GenericOperationDefinition,
@@ -39,6 +46,7 @@ import {
   getSafeFieldName,
   groupArgsByType,
   hasMathNode,
+  tinymathFunctions,
 } from './util';
 import { useDebounceWithOptions } from '../helpers';
 import {
@@ -55,7 +63,6 @@ import './formula.scss';
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
 });
-
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
   params: {
@@ -201,6 +208,7 @@ function FormulaEditor({
   operationDefinitionMap,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel | null>(null);
 
   useDebounceWithOptions(
@@ -323,84 +331,187 @@ function FormulaEditor({
     [indexPattern, operationDefinitionMap]
   );
 
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiText>
-            {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
-              defaultMessage: 'Function reference',
+  const codeEditorOptions: CodeEditorProps = {
+    height: 280,
+    width: 300,
+    languageId: LANGUAGE_ID,
+    value: text || '',
+    onChange: setText,
+    suggestionProvider: {
+      triggerCharacters: ['.', ',', '(', '='],
+      provideCompletionItems,
+    },
+    options: {
+      automaticLayout: true,
+      fontSize: 14,
+      folding: false,
+      lineNumbers: 'off',
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false,
+      },
+      wordWrap: 'on',
+      // Disable suggestions that appear when we don't provide a default suggestion
+      wordBasedSuggestions: false,
+      wrappingIndent: 'indent',
+    },
+    editorDidMount: (editor) => {
+      const model = editor.getModel();
+      if (model) {
+        editorModel.current = model;
+      }
+      editor.onDidDispose(() => (editorModel.current = null));
+    },
+  };
+
+  return !isOpen ? (
+    <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      <CodeEditor {...codeEditorOptions} height={50} width={'100%'} />
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButton onClick={() => setIsOpen(!isOpen)} iconType="expand" size="s">
+            {i18n.translate('xpack.lens.formula.expandEditorLabel', {
+              defaultMessage: 'Pop out',
             })}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <div style={{ height: 100, overflow: 'auto' }}>
-            <EuiText size="s">
-              <p>
-                {i18n.translate('xpack.lens.formula.basicFunctions', {
-                  defaultMessage: 'Basic functions',
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            disabled={currentColumn.params.formula === text}
+            color={currentColumn.params.formula !== text ? 'primary' : 'text'}
+            fill={currentColumn.params.formula !== text}
+            onClick={() => {
+              updateLayer(
+                regenerateLayerFromAst(
+                  text || '',
+                  layer,
+                  columnId,
+                  currentColumn,
+                  indexPattern,
+                  operationDefinitionMap
+                )
+              );
+            }}
+            iconType="play"
+            size="s"
+          >
+            {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
+              defaultMessage: 'Submit',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  ) : (
+    <EuiModal
+      onClose={() => {
+        setIsOpen(false);
+        setText(currentColumn.params.formula);
+      }}
+    >
+      <EuiModalHeader>
+        <h1>
+          {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
+            defaultMessage: 'Formula editor',
+          })}
+        </h1>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+              <CodeEditor {...codeEditorOptions} height={280} width={300} />
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+              <EuiText>
+                {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
+                  defaultMessage: 'Function reference',
                 })}
-              </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <div style={{ height: 250, overflow: 'auto' }}>
+                <EuiText size="s">
+                  <Markdown
+                    markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                      defaultMessage: `
+## How it works
 
-              <p>
-                <strong>+, -, /, *</strong>
-              </p>
+Lens formulas let you do math using a combination of Elasticsearch aggregations and
+math functions. There are three main types of functions:
 
-              <p>
-                <strong>pow()</strong>
-              </p>
-            </EuiText>
+* Elasticsearch metrics, like sum(bytes)
+* Time series functions use Elasticsearch metrics as input, like cumulative_sum()
+* Math functions like round()
 
-            <EuiSpacer />
+An example formula that uses all of these:
 
-            <EuiText>
-              {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
-                defaultMessage: 'Elasticsearch aggregations',
-                description: 'Do not translate Elasticsearch',
-              })}
-            </EuiText>
-            <EuiDescriptionList
-              compressed
-              listItems={getPossibleFunctions(indexPattern).map((key) => ({
-                title: `${key}: ${operationDefinitionMap[key].displayName}`,
-                description: getHelpText(key, operationDefinitionMap),
-              }))}
-            />
-          </div>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <CodeEditor
-          height={200}
-          width="100%"
-          languageId={LANGUAGE_ID}
-          value={text || ''}
-          onChange={setText}
-          suggestionProvider={{
-            triggerCharacters: ['.', ',', '(', '='],
-            provideCompletionItems,
+round(100 * moving_average(avg(cpu.load.pct), window=10))
+
+Elasticsearch functions take a field name, which can be in quotes. sum(bytes) is the same
+as sum("bytes").
+
+Some functions take named arguments, like moving_average(count(), window=5)
+
+Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
+
+### Basic math
+
+Use the symbols +, -, /, and * to perform basic math.
+                  `,
+                      description:
+                        'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+                    })}
+                  />
+
+                  <EuiDescriptionList
+                    compressed
+                    listItems={getPossibleFunctions(indexPattern)
+                      .filter((key) => key in tinymathFunctions)
+                      .map((key) => ({
+                        title: `${key}`,
+                        description: <Markdown markdown={tinymathFunctions[key].help} />,
+                      }))}
+                  />
+                </EuiText>
+
+                <EuiSpacer />
+
+                <EuiText>
+                  {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
+                    defaultMessage: 'Elasticsearch aggregations',
+                    description: 'Do not translate Elasticsearch',
+                  })}
+                </EuiText>
+                <EuiDescriptionList
+                  compressed
+                  listItems={getPossibleFunctions(indexPattern)
+                    .filter((key) => key in operationDefinitionMap)
+                    .map((key) => ({
+                      title: `${key}: ${operationDefinitionMap[key].displayName}`,
+                      description: getHelpText(key, operationDefinitionMap),
+                    }))}
+                />
+              </div>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton
+          color="text"
+          onClick={() => {
+            setIsOpen(false);
+            setText(currentColumn.params.formula);
           }}
-          options={{
-            automaticLayout: false,
-            fontSize: 14,
-            folding: false,
-            lineNumbers: 'off',
-            scrollBeyondLastLine: false,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          editorDidMount={(editor) => {
-            const model = editor.getModel();
-            if (model) {
-              editorModel.current = model;
-            }
-            editor.onDidDispose(() => (editorModel.current = null));
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
+          iconType="cross"
+        >
+          {i18n.translate('xpack.lens.indexPattern.formulaCancelLabel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButton>
         <EuiButton
           disabled={currentColumn.params.formula === text}
           color={currentColumn.params.formula !== text ? 'primary' : 'text'}
@@ -423,8 +534,8 @@ function FormulaEditor({
             defaultMessage: 'Submit',
           })}
         </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }
 

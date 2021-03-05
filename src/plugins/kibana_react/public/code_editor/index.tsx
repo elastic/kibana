@@ -19,6 +19,8 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
+export type CodeEditorProps = Props;
+
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
   return (

@@ -50,6 +50,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     defaultMessage: 'Percentile',
   }),
   input: 'field',
+  operationParams: [{ name: 'percentile', type: 'number', required: false }],
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -71,14 +72,15 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   },
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
-  buildColumn: ({ field, previousColumn, indexPattern }) => {
+  buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingFormat =
       previousColumn?.params && 'format' in previousColumn?.params
         ? previousColumn?.params?.format
         : undefined;
     const existingPercentileParam =
       previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
-    const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
+    const newPercentileParam =
+      columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
     return {
       label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
       dataType: 'number',

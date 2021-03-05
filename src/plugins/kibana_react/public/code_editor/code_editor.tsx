@@ -35,9 +35,9 @@ export interface Props {
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
    */
-  options?: monaco.editor.IEditorConstructionOptions;
+  options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
@@ -162,7 +162,7 @@ export class CodeEditor extends React.Component<Props, {}> {
           editorDidMount={this._editorDidMount}
           width={width}
           height={height}
-          options={options}
+          options={{ ...options, wordBasedSuggestions: false }}
         />
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>

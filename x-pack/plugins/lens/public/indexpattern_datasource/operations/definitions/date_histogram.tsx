@@ -58,6 +58,7 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
@@ -75,8 +76,8 @@ export const dateHistogramOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
-  buildColumn({ field }) {
-    let interval = autoInterval;
+  buildColumn({ field }, columnParams) {
+    let interval = columnParams?.interval ?? autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = restrictedInterval(field.aggregationRestrictions) as string;

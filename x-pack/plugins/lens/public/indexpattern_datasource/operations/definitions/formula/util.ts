@@ -102,30 +102,160 @@ export function getOperationParams(
     return args;
   }, {});
 }
-export const tinymathValidOperators = new Set([
-  'add',
-  'subtract',
-  'multiply',
-  'divide',
-  'abs',
-  'cbrt',
-  'ceil',
-  'clamp',
-  'cube',
-  'exp',
-  'fix',
-  'floor',
-  'log',
-  'log10',
-  'mod',
-  'pow',
-  'round',
-  'sqrt',
-  'square',
-]);
+
+// Todo: i18n everything here
+export const tinymathFunctions: Record<
+  string,
+  {
+    positionalArguments: Array<{
+      type: 'any' | 'function' | 'number';
+      required?: boolean;
+    }>;
+    // help: React.ReactElement;
+    // Help is in Markdown format
+    help: string;
+  }
+> = {
+  add: {
+    positionalArguments: [{ type: 'any' }, { type: 'any', required: true }],
+    help: `
+Also works with + symbol
+Example: ${'`count() + sum(bytes)`'}
+Example: ${'`add(count(), 5)`'}
+    `,
+  },
+  subtract: {
+    positionalArguments: [{ type: 'any' }, { type: 'any', required: true }],
+    help: `
+Also works with ${'`-`'} symbol
+Example: ${'`subtract(sum(bytes), avg(bytes))`'}
+    `,
+  },
+  multiply: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Also works with ${'`*`'} symbol
+Example: ${'`multiply(sum(bytes), 2)`'}
+    `,
+  },
+  divide: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Also works with ${'`/`'} symbol
+Example: ${'`ceil(sum(bytes))`'}
+    `,
+  },
+  abs: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Absolute value
+Example: ${'`abs(sum(bytes))`'}
+    `,
+  },
+  cbrt: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Cube root of value
+Example: ${'`cbrt(sum(bytes))`'}
+    `,
+  },
+  ceil: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Ceiling of value, rounds up
+Example: ${'`ceil(sum(bytes))`'}
+    `,
+  },
+  clamp: {
+    positionalArguments: [{ type: 'function' }, { type: 'number' }, { type: 'number' }],
+    help: `
+Limits the value from a minimum to maximum
+Example: ${'`ceil(sum(bytes))`'}
+    `,
+  },
+  cube: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Limits the value from a minimum to maximum
+Example: ${'`ceil(sum(bytes))`'}
+    `,
+  },
+  exp: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Raises <em>e</em> to the nth power.
+Example: ${'`exp(sum(bytes))`'}
+    `,
+  },
+  fix: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+For positive values, takes the floor. For negative values, takes the ceiling.
+Example: ${'`fix(sum(bytes))`'}
+    `,
+  },
+  floor: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Round down to nearest integer value
+Example: ${'`floor(sum(bytes))`'}
+    `,
+  },
+  log: {
+    positionalArguments: [{ type: 'function' }, { type: 'number', required: false }],
+    help: `
+Logarithm with optional base. The natural base <em>e</em> is used as default.
+Example: ${'`log(sum(bytes))`'}
+Example: ${'`log(sum(bytes), 2)`'}
+    `,
+  },
+  log10: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Base 10 logarithm.
+Example: ${'`log10(sum(bytes))`'}
+    `,
+  },
+  mod: {
+    positionalArguments: [{ type: 'function' }, { type: 'number', required: true }],
+    help: `
+Remainder after dividing the function by a number
+Example: ${'`mod(sum(bytes), 2)`'}
+    `,
+  },
+  pow: {
+    positionalArguments: [{ type: 'function' }, { type: 'number', required: true }],
+    help: `
+Raises the value to a certain power. The second argument is required
+Example: ${'`pow(sum(bytes), 3)`'}
+    `,
+  },
+  round: {
+    positionalArguments: [{ type: 'function' }, { type: 'number' }],
+    help: `
+Rounds to a specific number of decimal places, default of 0
+Example: ${'`round(sum(bytes))`'}
+Example: ${'`round(sum(bytes), 2)`'}
+    `,
+  },
+  sqrt: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Square root of a positive value only
+Example: ${'`sqrt(sum(bytes))`'}
+    `,
+  },
+  square: {
+    positionalArguments: [{ type: 'function' }],
+    help: `
+Raise the value to the 2nd power
+Example: ${'`square(sum(bytes))`'}
+    `,
+  },
+};
 
 export function isMathNode(node: TinymathAST) {
-  return isObject(node) && node.type === 'function' && tinymathValidOperators.has(node.name);
+  return isObject(node) && node.type === 'function' && tinymathFunctions[node.name];
 }
 
 export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
