@@ -107,4 +107,11 @@ describe('#getPlatformArchivePath()', () => {
       `<absolute path>/target/kibana-oss-8.0.0-windows-x86_64.zip`
     );
   });
+
+  describe('#getPlatformArchivePath()', () => {
+    it('creates correct path for different platforms', () => {
+      expect(ossBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-oss-8.0.0"`);
+      expect(defaultBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-8.0.0"`);
+    });
+  });
 });

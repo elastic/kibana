@@ -42,6 +42,10 @@ export class Build {
     );
   }
 
+  getRootDirectory() {
+    return `${this.name}-${this.config.getBuildVersion()}`;
+  }
+
   getName() {
     return this.name;
   }
