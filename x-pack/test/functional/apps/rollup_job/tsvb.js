@@ -84,6 +84,7 @@ export default function ({ getService, getPageObjects }) {
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);

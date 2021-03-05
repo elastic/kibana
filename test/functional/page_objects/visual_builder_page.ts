@@ -614,6 +614,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       );
       return await comboBox.isOptionSelected(groupBy, value);
     }
+
+    public async setMetricsDataTimerangeMode(value: string) {
+      const timerangeMode = await find.byCssSelector(
+        '[id$="_timeRange-row"] [data-test-subj="comboBoxInput"]'
+      );
+      return await comboBox.setElement(timerangeMode, value);
+    }
   }
 
   return new VisualBuilderPage();
