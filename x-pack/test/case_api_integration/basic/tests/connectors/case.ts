@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -17,21 +16,10 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromComments,
 } from '../../../common/lib/mock';
-import {
-  createRule,
-  createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
-  getRuleForSignalTesting,
-  getSignalsByIds,
-  waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-} from '../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('case_connector', () => {
     let createdActionId = '';
