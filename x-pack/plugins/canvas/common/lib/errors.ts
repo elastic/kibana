@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+type NewableError = (...args: any[]) => Error;
+
 // helper to correctly set the prototype of custom error constructor
-function setErrorPrototype(CustomError) {
+function setErrorPrototype(CustomError: NewableError) {
   CustomError.prototype = Object.create(Error.prototype, {
     constructor: {
       value: Error,
@@ -20,15 +22,17 @@ function setErrorPrototype(CustomError) {
 }
 
 // helper to create a custom error by name
-function createError(name) {
-  function CustomError(...args) {
+function createError(name: string) {
+  function CustomError(...args: any[]) {
     const instance = new Error(...args);
-    instance.name = this.name = name;
+    // @ts-expect-error this has not type annotation
+    const self = this as any;
+    instance.name = self.name = name;
 
     if (Error.captureStackTrace) {
       Error.captureStackTrace(instance, CustomError);
     } else {
-      Object.defineProperty(this, 'stack', {
+      Object.defineProperty(self, 'stack', {
         get() {
           return instance.stack;
         },
