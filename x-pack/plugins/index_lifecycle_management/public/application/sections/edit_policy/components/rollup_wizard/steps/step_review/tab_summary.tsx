@@ -146,7 +146,8 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.summary.itemRollupIndexILMPolicy"
                   data-test-subj="rollupDetailLogisticsDelayTitle"
-                  defaultMessage="Rollup index ILM policy"
+                  // TODO: Copy required
+                  defaultMessage="[Rollup index ILM policy]"
                 />
               </EuiDescriptionListTitle>
 
@@ -154,7 +155,8 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
                 {rollupIndexIlmPolicy || (
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.rollup.summary.itemRollupIndexILMPolicy.default"
-                    defaultMessage="This policy will manage the rollup index."
+                    // TODO: Copy required
+                    defaultMessage="[The rollup index will be managed by this policy]"
                   />
                 )}
               </EuiDescriptionListDescription>
