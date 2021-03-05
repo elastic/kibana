@@ -19,11 +19,13 @@ export const capabilitiesServiceFactory: CapabilitiesServiceFactory = ({
   canAccessDashboards,
   canCreateNewDashboards,
   canEditDashboards,
+  canSaveVisualizations,
 }) => {
   const check = (value: boolean = true) => value;
   return {
     canAccessDashboards: () => check(canAccessDashboards),
     canCreateNewDashboards: () => check(canCreateNewDashboards),
     canEditDashboards: () => check(canEditDashboards),
+    canSaveVisualizations: () => check(canSaveVisualizations),
   };
 };
