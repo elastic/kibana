@@ -39,7 +39,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
     }
     actions={
       <EuiButton
-        data-test-subj="createFirstConnectorButton"
+        data-test-subj="createFirstActionButton"
         key="create-action"
         fill
         iconType="plusInCircle"

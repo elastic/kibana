@@ -149,7 +149,7 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleTypesMessage',
             { defaultMessage: 'Unable to load rule types' }
           ),
         });
@@ -208,7 +208,7 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
             {
               defaultMessage: 'Unable to load rules',
             }
@@ -234,7 +234,7 @@ export const AlertsList: React.FunctionComponent = () => {
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleStatusInfoMessage',
           {
             defaultMessage: 'Unable to load rule status info',
           }

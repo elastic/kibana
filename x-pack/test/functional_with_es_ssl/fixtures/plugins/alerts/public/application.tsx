@@ -25,7 +25,7 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
           render={(props: RouteComponentProps<{ id: string }>) => {
             return (
               <EuiText data-test-subj="noop-title">
-                <h2>View Alert {props.match.params.id}</h2>
+                <h2>View Rule {props.match.params.id}</h2>
               </EuiText>
             );
           }}

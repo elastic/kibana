@@ -62,7 +62,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteAlertsMessage',
+          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteRulesMessage',
           {
             defaultMessage: 'Failed to mute rule(s)',
           }
@@ -82,7 +82,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteAlertsMessage',
+          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteRulesMessage',
           {
             defaultMessage: 'Failed to unmute rule(s)',
           }
@@ -102,7 +102,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableAlertsMessage',
+          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableRulesMessage',
           {
             defaultMessage: 'Failed to enable rule(s)',
           }
@@ -122,7 +122,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableAlertsMessage',
+          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableRulesMessage',
           {
             defaultMessage: 'Failed to disable rule(s)',
           }
@@ -142,7 +142,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteAlertsMessage',
+          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteRulesMessage',
           {
             defaultMessage: 'Failed to delete rule(s)',
           }

@@ -140,7 +140,7 @@ export const ActionConnectorForm = ({
       <Fragment>
         <EuiCallOut
           title={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionTypeConfigurationWarningTitleText',
+            'xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningTitleText',
             {
               defaultMessage: 'Connector type not registered',
             }
@@ -151,7 +151,7 @@ export const ActionConnectorForm = ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningDescriptionText"
                 defaultMessage="To create this connector, you must configure at least one {connectorType} account. {docLink}"
                 values={{
                   connectorType: actionTypeName ?? connector.actionTypeId,

@@ -102,7 +102,7 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   }
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
         defaultMessage: 'Rule type is required.',
       })
     );
@@ -277,7 +277,7 @@ export const AlertForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadRuleTypesMessage',
             { defaultMessage: 'Unable to load rule types' }
           ),
         });
