@@ -33,19 +33,19 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: i18n.translate(
-    'xpack.alerts.server.healthStatus.available',
+    'xpack.alerting.server.healthStatus.available',
     {
       defaultMessage: 'Alerting framework is available',
     }
   ),
   [ServiceStatusLevels.degraded.toString()]: i18n.translate(
-    'xpack.alerts.server.healthStatus.degraded',
+    'xpack.alerting.server.healthStatus.degraded',
     {
       defaultMessage: 'Alerting framework is degraded',
     }
   ),
   [ServiceStatusLevels.unavailable.toString()]: i18n.translate(
-    'xpack.alerts.server.healthStatus.unavailable',
+    'xpack.alerting.server.healthStatus.unavailable',
     {
       defaultMessage: 'Alerting framework is unavailable',
     }
