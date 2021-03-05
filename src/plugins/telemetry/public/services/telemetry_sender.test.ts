@@ -126,9 +126,7 @@ describe('TelemetrySender', () => {
         originalFetch = window.fetch;
       });
 
-      // @ts-ignore
       beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-      // @ts-ignore
       afterAll(() => (window.fetch = originalFetch));
 
       it('does not send if already sending', async () => {
@@ -250,9 +248,7 @@ describe('TelemetrySender', () => {
       originalSetInterval = window.setInterval;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.setInterval = originalSetInterval));
 
     it('calls sendIfDue every 60000 ms', () => {
