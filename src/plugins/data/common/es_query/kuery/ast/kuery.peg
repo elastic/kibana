@@ -27,18 +27,20 @@ start
 
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
-  / left:AndQuery Or right:OrQuery {
-    const cursor = parseCursor && [left, right].find(node => node.type === 'cursor');
+  / head:AndQuery tail:(Or query:AndQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('or', [left, right]);
+    return buildFunctionNode('or', nodes);
   }
   / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery {
-    const cursor = parseCursor && [left, right].find(node => node.type === 'cursor');
+  = head:NotQuery tail:(And query:NotQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('and', [left, right]);
+    return buildFunctionNode('and', nodes);
   }
   / NotQuery
 
@@ -139,28 +141,30 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    const cursor = parseCursor && [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:AndListOfValues tail:(Or partial:AndListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('or', nodes.map(partial => partial(field)));
   }
   / AndListOfValues
 
 AndListOfValues
-  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    const cursor = parseCursor && [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:NotListOfValues tail:(And partial:NotListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('and', nodes.map(partial => partial(field)));
   }
   / NotListOfValues
 
