@@ -12,7 +12,7 @@ import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { AlertType as CommonAlertType } from '../../alerts/common';
+import { ActionVariable, AlertType as CommonAlertType } from '../../alerts/common';
 import {
   ActionGroup,
   AlertActionParam,
@@ -151,12 +151,6 @@ export type ActionConnectorWithoutId<
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
 };
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
-}
 
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];

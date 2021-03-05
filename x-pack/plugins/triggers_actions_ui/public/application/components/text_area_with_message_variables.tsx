@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../types';
+import { ActionVariable } from '../../../../alerts/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {

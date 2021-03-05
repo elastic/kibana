@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionVariable, ActionVariables } from '../../types';
+import { ActionVariables } from '../../types';
+import { ActionVariable } from '../../../../alerts/common';
 
 // return a "flattened" list of action variables for an alertType
 export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {
@@ -21,10 +22,20 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
 }
 
 export enum AlertProvidedActionVariables {
+  ruleId = 'rule.id',
+  ruleName = 'rule.name',
+  ruleSpaceId = 'rule.spaceId',
+  ruleTags = 'rule.tags',
+  ruleDate = 'rule.date',
+  ruleAlertId = 'rule.alertId',
+  ruleAlertActionGroup = 'rule.alertActionGroup',
+  ruleAlertActionGroupName = 'rule.alertActionGroupName',
+  ruleAlertSubActionGroup = 'rule.alertActionSubGroup',
+}
+
+export enum LegacyAlertProvidedActionVariables {
   alertId = 'alertId',
   alertName = 'alertName',
-  spaceId = 'spaceId',
-  tags = 'tags',
   alertInstanceId = 'alertInstanceId',
 }
 
@@ -40,72 +51,74 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 
   result.push({
-    name: AlertProvidedActionVariables.alertId,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
-      defaultMessage: 'The id of the alert.',
+    name: AlertProvidedActionVariables.ruleId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleIdLabel', {
+      defaultMessage: 'The ID of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.alertName,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertNameLabel', {
-      defaultMessage: 'The name of the alert.',
+    name: AlertProvidedActionVariables.ruleName,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleNameLabel', {
+      defaultMessage: 'The name of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.spaceId,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.spaceIdLabel', {
-      defaultMessage: 'The spaceId of the alert.',
+    name: AlertProvidedActionVariables.ruleSpaceId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleSpaceIdLabel', {
+      defaultMessage: 'The space ID of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.tags,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.tagsLabel', {
-      defaultMessage: 'The tags of the alert.',
+    name: AlertProvidedActionVariables.ruleTags,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTagsLabel', {
+      defaultMessage: 'The tags of the rule.',
     }),
   });
 
   result.push({
-    name: 'date',
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
-      defaultMessage: 'The date the alert scheduled the action.',
+    name: AlertProvidedActionVariables.ruleDate,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleDateLabel', {
+      defaultMessage: 'The date the rule scheduled the action.',
     }),
   });
 
   result.push({
-    name: 'alertInstanceId',
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertInstanceIdLabel', {
-      defaultMessage: 'The alert instance id that scheduled actions for the alert.',
+    name: AlertProvidedActionVariables.ruleAlertId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleAlertIdLabel', {
+      defaultMessage: 'The ID of the alert that scheduled actions for the rule.',
     }),
   });
 
   result.push({
-    name: 'alertActionGroup',
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
-      defaultMessage: 'The alert action group that was used to scheduled actions for the alert.',
-    }),
-  });
-
-  result.push({
-    name: 'alertActionSubgroup',
+    name: AlertProvidedActionVariables.ruleAlertActionGroup,
     description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.alertActionSubgroupLabel',
+      'xpack.triggersActionsUI.actionVariables.ruleAlertActionGroupLabel',
       {
-        defaultMessage:
-          'The alert action subgroup that was used to scheduled actions for the alert.',
+        defaultMessage: 'The action group of the alert that scheduled actions for the rule.',
       }
     ),
   });
 
   result.push({
-    name: 'alertActionGroupName',
+    name: AlertProvidedActionVariables.ruleAlertSubActionGroup,
     description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.alertActionGroupNameLabel',
+      'xpack.triggersActionsUI.actionVariables.ruleAlertSubActionGroupLabel',
+      {
+        defaultMessage: 'The action subgroup of the alert that scheduled actions for the rule.',
+      }
+    ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.ruleAlertActionGroupName,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.ruleAlertActionGroupNameLabel',
       {
         defaultMessage:
-          'The human readable name of the alert action group that was used to scheduled actions for the alert.',
+          'The human readable name of the action group of the alert that scheduled actions for the rule.',
       }
     ),
   });
@@ -116,6 +129,42 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       defaultMessage:
         'The configured server.publicBaseUrl value or empty string if not configured.',
     }),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertId,
+    deprecated: true,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertIdLabel', {
+      defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleId,
+      },
+    }),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertName,
+    deprecated: true,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertNameLabel', {
+      defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleName,
+      },
+    }),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.alertInstanceId,
+    deprecated: true,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.legacyAlertInstanceIdLabel',
+      {
+        defaultMessage: 'This variable has been deprecated in favor of {variable}.',
+        values: {
+          variable: AlertProvidedActionVariables.ruleAlertId,
+        },
+      }
+    ),
   });
 
   return result;

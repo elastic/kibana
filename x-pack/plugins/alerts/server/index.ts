@@ -15,7 +15,6 @@ import { AlertsConfigType } from './types';
 export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
 export type {
-  ActionVariable,
   AlertType,
   ActionGroup,
   ActionGroupIdsOf,

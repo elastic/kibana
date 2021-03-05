@@ -15,8 +15,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
-import { ActionVariable } from '../../types';
 import { templateActionVariable } from '../lib';
+import { ActionVariable } from '../../../../alerts/common';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -37,6 +37,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         key={variable.name}
         data-test-subj={`variableMenuButton-${variable.name}`}
         icon="empty"
+        disabled={variable.deprecated}
         onClick={() => {
           onSelectEventHandler(variable);
           setIsVariablesPopoverOpen(false);
