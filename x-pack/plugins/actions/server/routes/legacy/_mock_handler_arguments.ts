@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { ActionType } from '../../common';
-import { ActionsClientMock, actionsClientMock } from '../actions_client.mock';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { ActionType } from '../../../common';
+import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
+import { ActionsRequestHandlerContext } from '../../types';
 
 export function mockHandlerArguments(
   {
@@ -19,7 +20,7 @@ export function mockHandlerArguments(
   }: { actionsClient?: ActionsClientMock; listTypes?: ActionType[] },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
+): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
@@ -37,7 +38,7 @@ export function mockHandlerArguments(
           );
         },
       },
-    } as unknown) as RequestHandlerContext,
+    } as unknown) as ActionsRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
