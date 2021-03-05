@@ -83,7 +83,7 @@ describe('AlertingBuiltins Plugin', () => {
             },
           ],
           "id": ".es-query",
-          "name": "ES query",
+          "name": "Elasticsearch query",
         }
       `);
 

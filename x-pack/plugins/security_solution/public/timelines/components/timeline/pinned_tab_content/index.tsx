@@ -21,6 +21,7 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -30,6 +31,7 @@ import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -97,6 +99,12 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     SourcererScopeName.timeline
   );
 
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
       return '';
@@ -159,7 +167,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     docValueFields,
     endDate: '',
     id: `pinned-${timelineId}`,
-    indexNames: [''],
+    indexNames: existingIndexNames,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery,
