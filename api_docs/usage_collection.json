@@ -182,8 +182,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L145"
+              "lineNumber": 144,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L144"
             },
             "signature": [
               {
@@ -204,8 +204,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L146"
+              "lineNumber": 145,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L145"
             }
           },
           {
@@ -216,8 +216,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L147"
+              "lineNumber": 146,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L146"
             },
             "signature": [
               "Function | undefined"
@@ -231,8 +231,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 148,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L148"
+              "lineNumber": 147,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L147"
             },
             "signature": [
               {
@@ -253,8 +253,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 149,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L149"
+              "lineNumber": 148,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L148"
             },
             "signature": [
               "() => boolean | Promise<boolean>"
@@ -279,8 +279,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 156,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L156"
+                  "lineNumber": 155,
+                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L155"
                 }
               },
               {
@@ -300,8 +300,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 157,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L157"
+                  "lineNumber": 156,
+                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L156"
                 }
               }
             ],
@@ -313,15 +313,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L155"
+              "lineNumber": 154,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L154"
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 144,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L144"
+          "lineNumber": 143,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L143"
         },
         "initialIsOpen": false
       }
@@ -343,15 +343,15 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L34"
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L33"
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L33"
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L32"
         },
         "initialIsOpen": false
       }
@@ -366,8 +366,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L28"
+          "lineNumber": 27,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L27"
         },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"integer\" | \"byte\" | \"float\""
@@ -382,8 +382,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L51"
+          "lineNumber": 50,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L50"
         },
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
@@ -398,8 +398,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 112,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L112"
+          "lineNumber": 111,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L111"
         },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
@@ -448,11 +448,11 @@
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 65,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L65"
+          "lineNumber": 64,
+          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L64"
         },
         "signature": [
-          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract | ISavedObjectsRepository; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
+          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
         ],
         "initialIsOpen": false
       },
