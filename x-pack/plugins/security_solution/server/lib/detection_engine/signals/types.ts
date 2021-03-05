@@ -51,7 +51,7 @@ export interface SignalsStatusParams {
 
 export interface ThresholdResult {
   terms?: Array<{
-    field?: string;
+    field: string;
     value: string;
   }>;
   cardinality?: Array<{
@@ -59,6 +59,7 @@ export interface ThresholdResult {
     value: number;
   }>;
   count: number;
+  from: string;
 }
 
 export interface ThresholdSignalHistoryRecord {
