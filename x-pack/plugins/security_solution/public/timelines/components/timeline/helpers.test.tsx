@@ -451,8 +451,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
@@ -469,8 +469,8 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'filter',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
