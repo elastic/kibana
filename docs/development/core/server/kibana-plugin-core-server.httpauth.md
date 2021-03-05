@@ -17,5 +17,4 @@ export interface HttpAuth
 |  --- | --- | --- |
 |  [get](./kibana-plugin-core-server.httpauth.get.md) | <code>GetAuthState</code> | Gets authentication state for a request. Returned by <code>auth</code> interceptor. [GetAuthState](./kibana-plugin-core-server.getauthstate.md) |
 |  [isAuthenticated](./kibana-plugin-core-server.httpauth.isauthenticated.md) | <code>IsAuthenticated</code> | Returns authentication status for a request. [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) |
-|  [isEnabled](./kibana-plugin-core-server.httpauth.isenabled.md) | <code>() =&gt; boolean</code> | Returns true if authentication is enabled for the http server |
 

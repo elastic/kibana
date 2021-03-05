@@ -980,7 +980,6 @@ export type Headers = {
 export interface HttpAuth {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
-    isEnabled: () => boolean;
 }
 
 // @public
