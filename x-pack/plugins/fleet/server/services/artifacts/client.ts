@@ -17,8 +17,7 @@ import {
   ArtifactsInterface,
 } from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { SearchResponse } from '../../../../../../src/core/server';
+import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 import {
   esSearchHitToArtifact,
   kueryToArtifactsElasticsearchQuery,
@@ -31,7 +30,11 @@ import { isElasticsearchItemNotFoundError } from './utils';
 const deflateAsync = promisify(deflate);
 
 export class FleetArtifactsClient implements ArtifactsInterface {
-  constructor(private esClient: ElasticsearchClient, private packageName: string) {}
+  constructor(private esClient: ElasticsearchClient, private packageName: string) {
+    if (!packageName) {
+      throw new Error('packageName is required');
+    }
+  }
 
   private validate(artifact: Artifact): Artifact {
     if (artifact.packageName !== this.packageName) {
@@ -69,7 +72,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
   }: ArtifactCreateOptions): Promise<Artifact> {
     const encodedMetaData = await this.encodeContent(content);
     const id = uuid.v4();
-    const newArtifactData: Omit<Artifact, 'id'> = {
+    const newArtifactData: ArtifactElasticsearchProperties = {
       type,
       identifier,
       packageName: this.packageName,
@@ -81,14 +84,22 @@ export class FleetArtifactsClient implements ArtifactsInterface {
       }),
       ...encodedMetaData,
     };
-    const esResponse = await this.esClient.create<Artifact, Omit<Artifact, 'id'>>({
-      index: FLEET_SERVER_ARTIFACTS_INDEX,
-      id,
-      body: newArtifactData,
-      refresh: 'wait_for',
-    });
 
-    return response;
+    try {
+      await this.esClient.create({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        id,
+        body: newArtifactData,
+        refresh: 'wait_for',
+      });
+
+      return {
+        ...newArtifactData,
+        id,
+      };
+    } catch (e) {
+      throw new ArtifactsElasticsearchError(e);
+    }
   }
 
   async deleteArtifact(id: string) {
@@ -114,7 +125,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
 
     try {
       const searchResult = await this.esClient.search<
-        SearchResponse<ArtifactElasticsearchProperties>
+        ESSearchResponse<ArtifactElasticsearchProperties, {}>
       >({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         body: {
@@ -131,7 +142,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
         items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
         page,
         perPage,
-        total: searchResult.body.hits.total,
+        total: searchResult.body.hits.total.value,
       };
     } catch (e) {
       throw new ArtifactsElasticsearchError(e);

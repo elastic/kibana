@@ -7,6 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { inflate as _inflate } from 'zlib';
+import { promisify } from 'util';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import {
@@ -14,6 +16,8 @@ import {
   InternalArtifactCreateSchema,
 } from '../../schemas/artifacts';
 import { Artifact, ArtifactsInterface } from '../../../../../fleet/server';
+
+const inflateAsync = promisify(_inflate);
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>>;
@@ -55,13 +59,20 @@ export class ArtifactClient implements EndpointArtifactClientInterface {
   }
 }
 
+/**
+ * Endpoint specific artifact managment client which uses FleetArtifactsClient to persist artifacts
+ * to the Fleet artifacts index (then used by Fleet Server)
+ */
 export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   constructor(private fleetArtifacts: ArtifactsInterface) {}
 
-  private parseArtifactId(id: string): Pick<Artifact, 'decodedSha256' | 'identifier'> {
+  private parseArtifactId(
+    id: string
+  ): Pick<Artifact, 'decodedSha256' | 'identifier'> & { type: string } {
     const idPieces = id.split('-');
 
     return {
+      type: idPieces[1],
       decodedSha256: idPieces.pop()!,
       identifier: idPieces.join('-'),
     };
@@ -83,8 +94,19 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    // FIXME:PT implement method
+    // FIXME:PT refactor to make this more efficient by passing through the uncompressed artifact content
     // Artifact `.body` is compressed/encoded. We need it decoded and as a string
+    const artifactContent = await inflateAsync(Buffer.from(artifact.body, 'base64'));
+
+    const createdArtifact = await this.fleetArtifacts.createArtifact({
+      content: artifactContent.toString(),
+      identifier: artifact.identifier,
+      type: this.parseArtifactId(artifact.identifier).type,
+    });
+
+    return ({
+      attributes: createdArtifact,
+    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
   }
 
   async deleteArtifact(id: string) {
