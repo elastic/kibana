@@ -155,7 +155,7 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
-  services.callCluster('transport.request', {
+  services.scopedClusterClient.transport.request({
     path: '/_security/user/_has_privileges',
     method: 'POST',
     body: {
@@ -205,7 +205,11 @@ export const getListsClient = ({
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const listClient = lists.getListClient(
+    services.scopedClusterClient,
+    spaceId,
+    updatedByUser ?? 'elastic'
+  );
   const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'

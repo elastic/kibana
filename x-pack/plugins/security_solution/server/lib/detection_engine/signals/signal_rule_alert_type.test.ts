@@ -30,6 +30,8 @@ import { getExceptionListClientMock } from '../../../../../lists/server/services
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -140,11 +142,13 @@ describe('rules_notification_alert_type', () => {
         ),
       };
     });
-    alertServices.callCluster.mockResolvedValue({
-      hits: {
-        total: { value: 10 },
-      },
-    });
+    alertServices.scopedClusterClient.transport.request.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          total: { value: 10 },
+        },
+      })
+    );
     const value: Partial<ApiResponse> = {
       statusCode: 200,
       body: {

@@ -12,6 +12,7 @@ import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
@@ -564,7 +565,10 @@ export const signalRulesAlertType = ({
             wroteWarningStatus = true;
           }
           try {
-            const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
+            const signalIndexVersion = await getIndexVersion(
+              services.scopedClusterClient,
+              outputIndex
+            );
             if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
               throw new Error(
                 `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
@@ -590,10 +594,9 @@ export const signalRulesAlertType = ({
             exceptionItems ?? [],
             eventCategoryOverride
           );
-          const response: EqlSignalSearchResponse = await services.callCluster(
-            'transport.request',
+          const { body: response } = (await services.scopedClusterClient.transport.request(
             request
-          );
+          )) as ApiResponse<EqlSignalSearchResponse>;
           let newSignals: WrappedSignalHit[] | undefined;
           if (response.hits.sequences !== undefined) {
             newSignals = response.hits.sequences.reduce(

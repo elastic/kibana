@@ -197,7 +197,7 @@ const config = {
 } as any;
 
 const baseParams = {
-  callCluster: services.callCluster,
+  callCluster: services.scopedClusterClient,
   params: {
     criteria: [baseCriterion],
     groupBy: undefined,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse } from 'kibana/server';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
@@ -21,7 +22,7 @@ import {
 export const MAX_PER_PAGE = 9000;
 
 export const getThreatList = async ({
-  callCluster,
+  esClient,
   query,
   language,
   index,
@@ -52,7 +53,7 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const response: SearchResponse<ThreatListItem> = await callCluster('search', {
+  const { body: response } = await esClient.search({
     body: {
       query: queryFilter,
       fields: [
@@ -69,13 +70,13 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index,
     size: calculatedPerPage,
   });
 
   logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
-  return response;
+  return response as SearchResponse<ThreatListItem>;
 };
 
 /**
@@ -108,7 +109,7 @@ export const getSortWithTieBreaker = ({
 };
 
 export const getThreatListCount = async ({
-  callCluster,
+  esClient,
   query,
   language,
   threatFilters,
@@ -122,13 +123,15 @@ export const getThreatListCount = async ({
     index,
     exceptionItems
   );
-  const response: {
+  const {
+    body: response,
+  }: ApiResponse<{
     count: number;
-  } = await callCluster('count', {
+  }> = await esClient.count({
     body: {
       query: queryFilter,
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index,
   });
   return response.count;

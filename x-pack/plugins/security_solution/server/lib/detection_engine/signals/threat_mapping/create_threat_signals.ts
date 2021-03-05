@@ -66,7 +66,7 @@ export const createThreatSignals = async ({
   };
 
   let threatListCount = await getThreatListCount({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -76,7 +76,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -166,7 +166,7 @@ export const createThreatSignals = async ({
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient,
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,

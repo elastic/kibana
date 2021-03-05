@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { LegacyAPICaller } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient } from '../../../../../../../../src/core/server';
 import { readIndex } from '../../index/read_index';
 
 interface IndicesAliasResponse {
@@ -20,10 +21,10 @@ interface IndexAliasResponse {
 }
 
 export const getIndexVersion = async (
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   index: string
 ): Promise<number> => {
-  const indexAlias: IndicesAliasResponse = await callCluster('indices.getAlias', {
+  const { body: indexAlias }: ApiResponse<IndicesAliasResponse> = await esClient.indices.getAlias({
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(
@@ -32,6 +33,6 @@ export const getIndexVersion = async (
   if (writeIndex === undefined) {
     return 0;
   }
-  const writeIndexMapping = await readIndex(callCluster, writeIndex);
+  const writeIndexMapping = await readIndex(esClient, writeIndex);
   return get(writeIndexMapping, [writeIndex, 'mappings', '_meta', 'version']) ?? 0;
 };
