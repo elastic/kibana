@@ -25,29 +25,22 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
-
     const dataPluginStart = await reporting.getDataService();
-    const searchSourceService = await dataPluginStart.search.searchSource.asScoped(fakeRequest);
-    const data = dataPluginStart.search.asScoped(fakeRequest);
-
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
       uiSettingsClient
     );
 
-    const esClient = (await reporting.getEsClient()).asScoped(fakeRequest);
-
-    const csv = new CsvGenerator(
-      job,
-      config,
-      esClient,
-      data,
-      uiSettingsClient,
-      searchSourceService,
+    const clients = {
+      uiSettings: uiSettingsClient,
+      data: dataPluginStart.search.asScoped(fakeRequest),
+      es: (await reporting.getEsClient()).asScoped(fakeRequest),
+    };
+    const dependencies = {
+      searchSourceStart: await dataPluginStart.search.searchSource.asScoped(fakeRequest),
       fieldFormatsRegistry,
-      cancellationToken,
-      logger
-    );
+    };
 
+    const csv = new CsvGenerator(job, config, clients, dependencies, cancellationToken, logger);
     return await csv.generateData();
   };
 };

@@ -33,34 +33,30 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
 
   return async function runTask(jobId, immediateJobParams, context, req) {
-    const esClient = (await reporting.getEsClient()).asScoped(req);
-    const savedObjectsClient = context.core.savedObjects.client;
-    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const dataPluginStart = await reporting.getDataService();
-    const searchSourceService = await dataPluginStart.search.searchSource.asScoped(req);
-    const data = dataPluginStart.search.asScoped(req);
-
-    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
-      uiSettingsClient
-    );
-
     const job = {
       objectType: 'immediate-search',
       ...immediateJobParams,
     };
 
-    const csv = new CsvGenerator(
-      job,
-      config,
-      esClient,
-      data,
-      uiSettingsClient,
-      searchSourceService,
-      fieldFormatsRegistry,
-      new CancellationToken(),
-      logger
+    const savedObjectsClient = context.core.savedObjects.client;
+    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+    const dataPluginStart = await reporting.getDataService();
+    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
+      uiSettingsClient
     );
 
+    const clients = {
+      uiSettings: uiSettingsClient,
+      data: dataPluginStart.search.asScoped(req),
+      es: (await reporting.getEsClient()).asScoped(req),
+    };
+    const dependencies = {
+      fieldFormatsRegistry,
+      searchSourceStart: await dataPluginStart.search.searchSource.asScoped(req),
+    };
+    const cancellationToken = new CancellationToken();
+
+    const csv = new CsvGenerator(job, config, clients, dependencies, cancellationToken, logger);
     const result = await csv.generateData();
 
     if (result.csv_contains_formulas) {

@@ -5,18 +5,15 @@
  * 2.0.
  */
 
+import * as Rx from 'rxjs';
 import { identity, range } from 'lodash';
-import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
-import {
-  EsQuerySearchAfter,
-  FieldFormatsRegistry,
-  ISearchStartSearchSource,
-} from 'src/plugins/data/common';
+import { FieldFormatsRegistry, ISearchStartSearchSource } from 'src/plugins/data/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
@@ -49,12 +46,21 @@ const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
 };
-const mockSearchSourceFetchDefault = jest.fn().mockResolvedValue({
-  hits: {
-    hits: [],
-    total: 0,
-  },
-});
+const mockDataClientSearchDefault = jest.fn().mockImplementation(
+  (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
+    Rx.of({
+      rawResponse: {
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+        hits: {
+          hits: [],
+          total: 0,
+          max_score: 0,
+        },
+      },
+    })
+);
 const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: string) => {
   switch (key) {
     case 'fields':
@@ -79,6 +85,7 @@ const mockFieldFormatsRegistry = ({
 beforeEach(async () => {
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
+  mockDataClient.search = mockDataClientSearchDefault;
 
   uiSettingsClient = uiSettingsServiceMock
     .createStartContract()
@@ -106,7 +113,6 @@ beforeEach(async () => {
   );
 
   searchSourceMock.getField = mockSearchSourceGetFieldDefault;
-  searchSourceMock.fetch = mockSearchSourceFetchDefault;
 });
 
 const logger = createMockLevelLogger();
@@ -115,61 +121,63 @@ it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
     createMockJob({}),
     mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
     new CancellationToken(),
     logger
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.content).toMatchInlineSnapshot(`
-    "date,ip,message
-    "
-  `);
+  expect(csvResult.content).toMatchSnapshot();
   expect(csvResult.csv_contains_formulas).toBe(false);
-  expect(csvResult.needs_sorting).toBe(false);
 });
 
 it('formats a search result to CSV content', async () => {
-  searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-    hits: {
-      hits: [
-        {
-          fields: {
-            date: `["2020-12-31T00:14:28.000Z"]`,
-            ip: `["110.135.176.89"]`,
-            message: `["This is a great message!"]`,
-          },
-          sort: [1, 'a'] as EsQuerySearchAfter,
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                date: `["2020-12-31T00:14:28.000Z"]`,
+                ip: `["110.135.176.89"]`,
+                message: `["This is a great message!"]`,
+              },
+            },
+          ],
+          total: 1,
         },
-      ],
-      total: 1,
-    },
-  });
+      },
+    })
+  );
   const generateCsv = new CsvGenerator(
     createMockJob({}),
     mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
     new CancellationToken(),
     logger
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.content).toMatchInlineSnapshot(`
-    "date,ip,message
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\"
-    "
-  `);
+  expect(csvResult.content).toMatchSnapshot();
   expect(csvResult.csv_contains_formulas).toBe(false);
-  expect(csvResult.needs_sorting).toBe(false);
 });
 
-const TEST_NUM_TOTAL = 100;
+const HITS_TOTAL = 100;
 
 it('calculates the bytes of the content', async () => {
   searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
@@ -178,33 +186,39 @@ it('calculates the bytes of the content', async () => {
     }
     return mockSearchSourceGetFieldDefault(key);
   });
-  searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-    hits: {
-      hits: range(0, TEST_NUM_TOTAL).map((hit, i) => ({
-        fields: {
-          message: ['this is a great message'],
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        hits: {
+          hits: range(0, HITS_TOTAL).map((hit, i) => ({
+            fields: {
+              message: ['this is a great message'],
+            },
+          })),
+          total: HITS_TOTAL,
         },
-        sort: [i, 1] as EsQuerySearchAfter,
-      })),
-      total: TEST_NUM_TOTAL,
-    },
-  });
+      },
+    })
+  );
 
   const generateCsv = new CsvGenerator(
     createMockJob({}),
     mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
     new CancellationToken(),
     logger
   );
   const csvResult = await generateCsv.generateData();
   expect(csvResult.size).toBe(2608);
   expect(csvResult.max_size_reached).toBe(false);
-  expect(csvResult.needs_sorting).toBe(false);
   expect(csvResult.warnings).toEqual([]);
 });
 
@@ -222,103 +236,94 @@ it('warns if max size was reached', async () => {
     })
   );
 
-  searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-    hits: {
-      hits: range(0, TEST_NUM_TOTAL).map((hit, i) => ({
-        fields: {
-          date: ['2020-12-31T00:14:28.000Z'],
-          ip: ['110.135.176.89'],
-          message: ['super cali fragile istic XPLA docious'],
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        hits: {
+          hits: range(0, HITS_TOTAL).map((hit, i) => ({
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              ip: ['110.135.176.89'],
+              message: ['super cali fragile istic XPLA docious'],
+            },
+          })),
+          total: HITS_TOTAL,
         },
-        sort: [i, ''] as EsQuerySearchAfter,
-      })),
-      total: TEST_NUM_TOTAL,
-    },
-  });
+      },
+    })
+  );
 
   const generateCsv = new CsvGenerator(
     createMockJob({}),
     mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
     new CancellationToken(),
     logger
   );
   const csvResult = await generateCsv.generateData();
   expect(csvResult.max_size_reached).toBe(true);
-  expect(csvResult.needs_sorting).toBe(false);
   expect(csvResult.warnings).toEqual([]);
-  expect(csvResult.content).toMatchInlineSnapshot(`
-    "date,ip,message
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
-    \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"super cali fragile istic XPLA docious\\"
-    "
-  `);
+  expect(csvResult.content).toMatchSnapshot();
 });
 
-it('warns if it detects paging through unsorted search results', async () => {
-  searchSourceMock.fetch = jest.fn().mockResolvedValue({
-    hits: {
-      hits: range(0, 15).map(() => ({
-        fields: {
-          date: ['2020-12-31T00:14:28.000Z'],
-          ip: ['110.135.176.89'],
-          message: ['super cali fragile istic XPLA docious'],
+it('uses the scrollId to page all the data', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        _scroll_id: 'awesome-scroll-hero',
+        hits: {
+          hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
+            fields: {
+              date: ['2020-12-31T00:14:28.000Z'],
+              ip: ['110.135.176.89'],
+              message: ['hit from the initial search'],
+            },
+          })),
+          total: HITS_TOTAL,
         },
-      })),
-      total: 50,
+      },
+    })
+  );
+  mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
+    body: {
+      hits: {
+        hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
+          fields: {
+            date: ['2020-12-31T00:14:28.000Z'],
+            ip: ['110.135.176.89'],
+            message: ['hit from a subsequent scroll'],
+          },
+        })),
+      },
     },
   });
 
   const generateCsv = new CsvGenerator(
     createMockJob({}),
     mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
-    new CancellationToken(),
-    logger
-  );
-  const csvResult = await generateCsv.generateData();
-  expect(csvResult.needs_sorting).toBe(true);
-});
-
-it('warns if it detects paging through poorly sorted data', async () => {
-  searchSourceMock.fetch = jest.fn().mockResolvedValue({
-    hits: {
-      hits: range(0, 15).map(() => ({
-        fields: {
-          date: ['2020-12-31T00:14:28.000Z'],
-          ip: ['110.135.176.89'],
-          message: ['super cali fragile istic XPLA docious'],
-          sort: [0, 0] as EsQuerySearchAfter,
-        },
-      })),
-      total: 50,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
     },
-  });
-
-  const generateCsv = new CsvGenerator(
-    createMockJob({}),
-    mockConfig,
-    mockEsClient,
-    mockDataClient,
-    uiSettingsClient,
-    mockSearchSourceService,
-    mockFieldFormatsRegistry,
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
     new CancellationToken(),
     logger
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.needs_sorting).toBe(true);
+  expect(csvResult.warnings).toEqual([]);
+  expect(csvResult.content).toMatchSnapshot();
 });
 
 describe('fields', () => {
@@ -329,42 +334,44 @@ describe('fields', () => {
       }
       return mockSearchSourceGetFieldDefault(key);
     });
-    searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _id: 'my-cool-id',
-            _index: 'my-cool-index',
-            _version: 4,
-            fields: {
-              sku: [`This is a cool SKU.`, `This is also a cool SKU.`],
-            },
-            sort: [1, 'a'] as EsQuerySearchAfter,
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  sku: [`This is a cool SKU.`, `This is also a cool SKU.`],
+                },
+              },
+            ],
+            total: 1,
           },
-        ],
-        total: 1,
-      },
-    });
+        },
+      })
+    );
 
     const generateCsv = new CsvGenerator(
       createMockJob({ searchSource: {} }),
       mockConfig,
-      mockEsClient,
-      mockDataClient,
-      uiSettingsClient,
-      mockSearchSourceService,
-      mockFieldFormatsRegistry,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
       new CancellationToken(),
       logger
     );
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchInlineSnapshot(`
-      "\\"_id\\",sku
-      \\"my-cool-id\\",\\"This is a cool SKU., This is also a cool SKU.\\"
-      "
-    `);
-    expect(csvResult.needs_sorting).toBe(false);
+    expect(csvResult.content).toMatchSnapshot();
   });
 
   it('provides top-level underscored fields as columns', async () => {
@@ -374,23 +381,26 @@ describe('fields', () => {
       }
       return mockSearchSourceGetFieldDefault(key);
     });
-    searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _id: 'my-cool-id',
-            _index: 'my-cool-index',
-            _version: 4,
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              message: [`it's nice to see you`],
-            },
-            sort: [1, 'a'] as EsQuerySearchAfter,
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  message: [`it's nice to see you`],
+                },
+              },
+            ],
+            total: 1,
           },
-        ],
-        total: 1,
-      },
-    });
+        },
+      })
+    );
 
     const generateCsv = new CsvGenerator(
       createMockJob({
@@ -403,24 +413,23 @@ describe('fields', () => {
         },
       }),
       mockConfig,
-      mockEsClient,
-      mockDataClient,
-      uiSettingsClient,
-      mockSearchSourceService,
-      mockFieldFormatsRegistry,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
       new CancellationToken(),
       logger
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchInlineSnapshot(`
-      "\\"_id\\",\\"_index\\",date,message
-      \\"my-cool-id\\",\\"my-cool-index\\",\\"2020-12-31T00:14:28.000Z\\",\\"it's nice to see you\\"
-      "
-    `);
+    expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
-    expect(csvResult.needs_sorting).toBe(false);
   });
 });
 
@@ -428,61 +437,66 @@ describe('formulas', () => {
   const TEST_FORMULA = '=SUM(A1:A2)';
 
   it(`escapes formula values in a cell, doesn't warn the csv contains formulas`, async () => {
-    searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              ip: ['110.135.176.89'],
-              message: [TEST_FORMULA],
-            },
-            sort: [1, 'a'] as EsQuerySearchAfter,
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  message: [TEST_FORMULA],
+                },
+              },
+            ],
+            total: 1,
           },
-        ],
-        total: 1,
-      },
-    });
+        },
+      })
+    );
 
     const generateCsv = new CsvGenerator(
       createMockJob({}),
       mockConfig,
-      mockEsClient,
-      mockDataClient,
-      uiSettingsClient,
-      mockSearchSourceService,
-      mockFieldFormatsRegistry,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
       new CancellationToken(),
       logger
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchInlineSnapshot(`
-      "date,ip,message
-      \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"'=SUM(A1:A2)\\"
-      "
-    `);
+    expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
-    expect(csvResult.needs_sorting).toBe(false);
   });
 
   it(`escapes formula values in a header, doesn't warn the csv contains formulas`, async () => {
-    searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              ip: ['110.135.176.89'],
-              [TEST_FORMULA]: 'This is great data',
-            },
-            sort: [1, 'a'] as EsQuerySearchAfter,
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  [TEST_FORMULA]: 'This is great data',
+                },
+              },
+            ],
+            total: 1,
           },
-        ],
-        total: 1,
-      },
-    });
+        },
+      })
+    );
 
     searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
       if (key === 'fields') {
@@ -494,24 +508,23 @@ describe('formulas', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({}),
       mockConfig,
-      mockEsClient,
-      mockDataClient,
-      uiSettingsClient,
-      mockSearchSourceService,
-      mockFieldFormatsRegistry,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
       new CancellationToken(),
       logger
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchInlineSnapshot(`
-      "date,ip,\\"'=SUM(A1:A2)\\"
-      \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is great data\\"
-      "
-    `);
+    expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
-    expect(csvResult.needs_sorting).toBe(false);
   });
 
   it('can check for formulas, without escaping them', async () => {
@@ -525,42 +538,44 @@ describe('formulas', () => {
         },
       })
     );
-    searchSourceMock.fetch = jest.fn().mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            fields: {
-              date: ['2020-12-31T00:14:28.000Z'],
-              ip: ['110.135.176.89'],
-              message: [TEST_FORMULA],
-            },
-            sort: [1, 'a'] as EsQuerySearchAfter,
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  ip: ['110.135.176.89'],
+                  message: [TEST_FORMULA],
+                },
+              },
+            ],
+            total: 1,
           },
-        ],
-        total: 1,
-      },
-    });
+        },
+      })
+    );
 
     const generateCsv = new CsvGenerator(
       createMockJob({}),
       mockConfig,
-      mockEsClient,
-      mockDataClient,
-      uiSettingsClient,
-      mockSearchSourceService,
-      mockFieldFormatsRegistry,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
       new CancellationToken(),
       logger
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchInlineSnapshot(`
-      "date,ip,message
-      \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"=SUM(A1:A2)\\"
-      "
-    `);
+    expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
-    expect(csvResult.needs_sorting).toBe(false);
   });
 });

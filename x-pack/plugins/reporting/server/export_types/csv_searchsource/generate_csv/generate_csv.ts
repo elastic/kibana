@@ -31,6 +31,17 @@ import { cellHasFormulas } from './cell_has_formula';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
+interface Clients {
+  es: IScopedClusterClient;
+  data: IScopedSearchClient;
+  uiSettings: IUiSettingsClient;
+}
+
+interface Dependencies {
+  searchSourceStart: ISearchStartSearchSource;
+  fieldFormatsRegistry: IFieldFormatsRegistry;
+}
+
 export class CsvGenerator {
   private _columnMap: number[] | null = null;
   private _formatters: Record<string, FieldFormat> | null = null;
@@ -41,11 +52,8 @@ export class CsvGenerator {
   constructor(
     private job: JobParamsCSV,
     private config: ReportingConfig,
-    private esClient: IScopedClusterClient,
-    private data: IScopedSearchClient,
-    private uiSettingsClient: IUiSettingsClient,
-    private searchSourceService: ISearchStartSearchSource,
-    private fieldFormatsRegistry: IFieldFormatsRegistry,
+    private clients: Clients,
+    private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
     private logger: LevelLogger
   ) {}
@@ -62,7 +70,7 @@ export class CsvGenerator {
       },
     };
     const results = (
-      await this.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
+      await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
     ).rawResponse;
 
     return results;
@@ -71,7 +79,7 @@ export class CsvGenerator {
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
     const results = (
-      await this.esClient.asCurrentUser.scroll({
+      await this.clients.es.asCurrentUser.scroll({
         scroll: scrollSettings.duration,
         scroll_id: scrollId,
       })
@@ -113,7 +121,7 @@ export class CsvGenerator {
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
-      const fieldFormat = this.fieldFormatsRegistry.deserialize(c.meta.params);
+      const fieldFormat = this.dependencies.fieldFormatsRegistry.deserialize(c.meta.params);
       formatters[c.id] = fieldFormat;
     });
 
@@ -233,8 +241,13 @@ export class CsvGenerator {
 
   public async generateData(): Promise<TaskRunResult> {
     const [settings, searchSource] = await Promise.all([
-      getExportSettings(this.uiSettingsClient, this.config, this.job.browserTimezone, this.logger),
-      this.searchSourceService.create(this.job.searchSource),
+      getExportSettings(
+        this.clients.uiSettings,
+        this.config,
+        this.job.browserTimezone,
+        this.logger
+      ),
+      this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
 
     const index = searchSource.getField('index');
@@ -278,7 +291,7 @@ export class CsvGenerator {
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
           results = await this.search(searchSource, scrollSettings);
-          scrollId = results._scroll_id;
+          scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total;
             this.logger.debug(`Total search results: ${totalRecords}`);
@@ -343,7 +356,7 @@ export class CsvGenerator {
     if (scrollId) {
       this.logger.debug(`executing clearScroll request`);
       try {
-        await this.esClient.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
+        await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
       } catch (err) {
         this.logger.error(err);
       }
