@@ -27017,39 +27017,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.doesKueryExpressionHaveLuceneSyntaxError",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Any",
-            "label": "expression",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L60"
-            }
-          }
-        ],
-        "signature": [
-          "(expression: any) => boolean"
-        ],
-        "description": [],
-        "label": "doesKueryExpressionHaveLuceneSyntaxError",
-        "source": {
-          "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-          "lineNumber": 59,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L59"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.toElasticsearchQuery",
         "type": "Function",
         "children": [
@@ -27069,8 +27036,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L78"
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L67"
             }
           },
           {
@@ -27090,8 +27057,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L79"
+              "lineNumber": 68,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L68"
             }
           },
           {
@@ -27104,8 +27071,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L80"
+              "lineNumber": 69,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L69"
             }
           },
           {
@@ -27118,8 +27085,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L81"
+              "lineNumber": 70,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L70"
             }
           }
         ],
@@ -27153,8 +27120,8 @@
         "label": "toElasticsearchQuery",
         "source": {
           "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-          "lineNumber": 77,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L77"
+          "lineNumber": 66,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/ast/ast.ts#L66"
         },
         "tags": [
           "params",
@@ -27888,26 +27855,14 @@
           },
           {
             "tags": [],
-            "id": "def-common.KueryParseOptions.errorOnLuceneSyntax",
-            "type": "boolean",
-            "label": "errorOnLuceneSyntax",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/types.ts#L24"
-            }
-          },
-          {
-            "tags": [],
             "id": "def-common.KueryParseOptions.cursorSymbol",
             "type": "string",
             "label": "cursorSymbol",
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/types.ts#L25"
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/types.ts#L24"
             },
             "signature": [
               "string | undefined"
@@ -27921,8 +27876,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/types.ts#L26"
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/es_query/kuery/types.ts#L25"
             },
             "signature": [
               "boolean | undefined"
