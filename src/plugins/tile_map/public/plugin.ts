@@ -57,9 +57,8 @@ export interface TileMapPluginStartDependencies {
   share: SharePluginStart;
 }
 
-export interface TileMapPluginSetup {
-  config: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TileMapPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TileMapPluginStart {}
 

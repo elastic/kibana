@@ -67,9 +67,8 @@ export interface RegionMapsConfig {
   layers: any[];
 }
 
-export interface RegionMapPluginSetup {
-  config: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RegionMapPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RegionMapPluginStart {}
 
@@ -106,9 +105,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
       createRegionMapTypeDefinition(visualizationDependencies)
     );
 
-    return {
-      config,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: RegionMapPluginStartDependencies) {
