@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../models';
+
 import { ListWithKuerySchema } from './index';
 
 export const GetPackagePoliciesRequestSchema = {

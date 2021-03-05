@@ -6,24 +6,26 @@
  */
 
 import * as Rx from 'rxjs';
-import {
-  createSpaces,
-  createMockSavedObjectsRepository,
-  mockRouteContextWithInvalidLicense,
-  mockRouteContext,
-} from '../__fixtures__';
-import { initGetSpaceApi } from './get';
+
 import { kibanaResponseFactory } from 'src/core/server';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
+
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { initGetSpaceApi } from './get';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();

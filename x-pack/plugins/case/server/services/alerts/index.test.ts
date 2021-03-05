@@ -17,10 +17,8 @@ describe('updateAlertsStatus', () => {
   describe('happy path', () => {
     let alertService: AlertServiceContract;
     const args = {
-      ids: ['alert-id-1'],
-      indices: new Set<string>(['.siem-signals']),
+      alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
       request: {} as KibanaRequest,
-      status: CaseStatuses.closed,
       scopedClusterClient: esClient,
       logger,
     };
@@ -33,14 +31,17 @@ describe('updateAlertsStatus', () => {
     test('it update the status of the alert correctly', async () => {
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toHaveBeenCalledWith({
-        body: {
-          query: { ids: { values: args.ids } },
-          script: { lang: 'painless', source: `ctx._source.signal.status = '${args.status}'` },
-        },
-        conflicts: 'abort',
-        ignore_unavailable: true,
-        index: [...args.indices],
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'alert-id-1', _index: '.siem-signals' } },
+          {
+            doc: {
+              signal: {
+                status: CaseStatuses.closed,
+              },
+            },
+          },
+        ],
       });
     });
 
@@ -48,9 +49,7 @@ describe('updateAlertsStatus', () => {
       it('ignores empty indices', async () => {
         expect(
           await alertService.updateAlertsStatus({
-            ids: ['alert-id-1'],
-            status: CaseStatuses.closed,
-            indices: new Set<string>(['']),
+            alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
             scopedClusterClient: esClient,
             logger,
           })
