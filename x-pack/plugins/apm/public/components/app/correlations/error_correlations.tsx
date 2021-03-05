@@ -32,6 +32,7 @@ import { CustomFields } from './custom_fields';
 import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
