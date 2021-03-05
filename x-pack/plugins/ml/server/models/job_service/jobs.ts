@@ -142,7 +142,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }
@@ -315,6 +318,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
             (ds) => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
+            // @ts-expect-error
             datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
           }
         }
@@ -383,6 +387,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
+            // @ts-expect-error
             tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;

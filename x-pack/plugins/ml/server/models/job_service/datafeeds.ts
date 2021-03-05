@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
@@ -22,7 +23,8 @@ export interface MlDatafeedsStatsResponse {
 
 interface Results {
   [id: string]: {
-    started: boolean;
+    started?: estypes.StartDatafeedResponse['started'];
+    stopped?: estypes.StopDatafeedResponse['stopped'];
     error?: any;
   };
 }
@@ -100,8 +102,10 @@ export function datafeedsProvider(mlClient: MlClient) {
   async function startDatafeed(datafeedId: string, start?: number, end?: number) {
     return mlClient.startDatafeed({
       datafeed_id: datafeedId,
-      start: (start as unknown) as string,
-      end: (end as unknown) as string,
+      body: {
+        start: (start as unknown) as string,
+        end: (end as unknown) as string,
+      },
     });
   }
 
@@ -110,12 +114,10 @@ export function datafeedsProvider(mlClient: MlClient) {
 
     for (const datafeedId of datafeedIds) {
       try {
-        const { body } = await mlClient.stopDatafeed<{
-          started: boolean;
-        }>({
+        const { body } = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
         });
-        results[datafeedId] = body;
+        results[datafeedId].stopped = body.stopped;
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
@@ -170,9 +172,7 @@ export function datafeedsProvider(mlClient: MlClient) {
       // get all the datafeeds and match it with the jobId
       const {
         body: { datafeeds },
-      } = await mlClient.getDatafeeds<MlDatafeedsResponse>(
-        excludeGenerated ? { exclude_generated: true } : {}
-      );
+      } = await mlClient.getDatafeeds(excludeGenerated ? { exclude_generated: true } : {}); //
       for (const result of datafeeds) {
         if (result.job_id === jobId) {
           return result;
@@ -185,7 +185,7 @@ export function datafeedsProvider(mlClient: MlClient) {
     try {
       const {
         body: { datafeeds: datafeedsResults },
-      } = await mlClient.getDatafeeds<MlDatafeedsResponse>({
+      } = await mlClient.getDatafeeds({
         datafeed_id: assumedDefaultDatafeedId,
         ...(excludeGenerated ? { exclude_generated: true } : {}),
       });

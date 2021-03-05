@@ -124,7 +124,7 @@ export function categorizationExamplesProvider({
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
     const {
       body: { tokens },
-    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
+    } = await asInternalUser.indices.analyze({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,
@@ -136,19 +136,21 @@ export function categorizationExamplesProvider({
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 
-    tokens.forEach((t, i) => {
-      for (let g = 0; g < sumLengths.length; g++) {
-        if (t.start_offset <= sumLengths[g] + g) {
-          const offset = g > 0 ? sumLengths[g - 1] + g : 0;
-          tokensPerExample[g].push({
-            ...t,
-            start_offset: t.start_offset - offset,
-            end_offset: t.end_offset - offset,
-          });
-          break;
+    if (tokens !== undefined) {
+      tokens.forEach((t, i) => {
+        for (let g = 0; g < sumLengths.length; g++) {
+          if (t.start_offset <= sumLengths[g] + g) {
+            const offset = g > 0 ? sumLengths[g - 1] + g : 0;
+            tokensPerExample[g].push({
+              ...t,
+              start_offset: t.start_offset - offset,
+              end_offset: t.end_offset - offset,
+            });
+            break;
+          }
         }
-      }
-    });
+      });
+    }
     return tokensPerExample;
   }
 

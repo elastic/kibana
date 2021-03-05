@@ -348,6 +348,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
     const response = await mlClient.anomalySearch(
       {
+        // @ts-expect-error
         body: requestBody,
       },
       jobIds

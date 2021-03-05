@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -28,7 +29,7 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: string | null;
+  excludeFrequent: estypes.ExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
 }
@@ -56,7 +57,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null
   ) {
     // addDetector doesn't support adding new custom rules.
@@ -83,7 +84,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null,
     index: number
   ) {
@@ -114,7 +115,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null,
     customRules: CustomRule[] | null
   ): { detector: Detector; richDetector: RichDetector } {

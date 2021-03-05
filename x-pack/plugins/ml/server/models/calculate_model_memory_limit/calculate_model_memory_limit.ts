@@ -116,7 +116,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
         timeFieldName,
         earliestMs,
         latestMs,
-        bucketSpan,
+        bucketSpan as string, // update to Time type
         datafeedConfig
       );
     }

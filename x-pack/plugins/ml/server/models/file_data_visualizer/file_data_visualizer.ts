@@ -20,6 +20,7 @@ export function fileDataVisualizerProvider(client: IScopedClusterClient) {
     overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
     const {
       body,
+      // @ts-expect-error es client out of date
     } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
       body: data,
       ...overrides,

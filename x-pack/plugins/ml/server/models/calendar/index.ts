@@ -6,4 +6,3 @@
  */
 
 export { CalendarManager, Calendar, FormCalendar } from './calendar_manager';
-export { CalendarEvent } from './event_manager';
