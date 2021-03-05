@@ -173,6 +173,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
+    async clickField(field: string) {
+      await testSubjects.click(`lnsFieldListPanelField-${field}`);
+    },
+
+    async editField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelEdit');
+      });
+    },
+
+    /**
      * Copies field to chosen destination that is defined by distance of `steps`
      * (right arrow presses) from it
      *
@@ -771,6 +786,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('indexPattern-add-field');
     },
   });
 }

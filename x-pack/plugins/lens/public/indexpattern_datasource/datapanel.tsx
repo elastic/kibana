@@ -498,7 +498,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const editField = useMemo(
     () =>
       editPermission
-        ? async (fieldName?: string) => {
+        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+            trackUiEvent(`open_field_editor_${uiAction}`);
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
@@ -506,6 +507,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               },
               fieldName,
               onSave: async () => {
+                trackUiEvent(`save_field_${uiAction}`);
                 const newlyMappedIndexPattern = await loadIndexPatterns({
                   indexPatternsService: data.indexPatterns,
                   cache: {},
@@ -553,10 +555,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
-  const addField = useMemo(() => (editPermission && editField ? () => editField() : undefined), [
-    editField,
-    editPermission,
-  ]);
+  const addField = useMemo(
+    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, editPermission]
+  );
 
   const fieldProps = useMemo(
     () => ({
