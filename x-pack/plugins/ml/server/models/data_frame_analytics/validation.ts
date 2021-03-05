@@ -70,10 +70,8 @@ const analysisFieldsWarningMessage = {
 };
 
 function getTrainingPercentMessage(trainingDocs: number) {
-  let trainingPercentMessage;
-
   if (trainingDocs >= TRAINING_DOCS_UPPER) {
-    trainingPercentMessage = {
+    return {
       id: 'training_percent_high',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.highTrainingPercentWarning', {
         defaultMessage:
@@ -83,7 +81,7 @@ function getTrainingPercentMessage(trainingDocs: number) {
       heading: trainingPercentHeading,
     };
   } else if (trainingDocs <= TRAINING_DOCS_LOWER) {
-    trainingPercentMessage = {
+    return {
       id: 'training_percent_low',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.lowTrainingPercentWarning', {
         defaultMessage:
@@ -93,7 +91,7 @@ function getTrainingPercentMessage(trainingDocs: number) {
       heading: trainingPercentHeading,
     };
   } else {
-    trainingPercentMessage = {
+    return {
       id: 'training_percent',
       text: i18n.translate('xpack.ml.models.dfaValidation.messages.trainingPercentSuccess', {
         defaultMessage: 'The training percent is high enough to model patterns in the data.',
@@ -102,8 +100,6 @@ function getTrainingPercentMessage(trainingDocs: number) {
       heading: trainingPercentHeading,
     };
   }
-
-  return trainingPercentMessage;
 }
 
 async function getValidationCheckMessages(
@@ -145,7 +141,7 @@ async function getValidationCheckMessages(
   }
 
   try {
-    const { body }: { body: ValidationSearchResult } = await asCurrentUser.search({
+    const { body } = await asCurrentUser.search<ValidationSearchResult>({
       index,
       size: 0,
       track_total_hits: true,

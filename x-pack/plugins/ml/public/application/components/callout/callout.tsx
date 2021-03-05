@@ -24,10 +24,8 @@ const statusToEuiColor = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'primary';
-      break;
     case VALIDATION_STATUS.ERROR:
       return 'danger';
-      break;
     default:
       return status;
   }
@@ -37,16 +35,12 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'iInCircle';
-      break;
     case VALIDATION_STATUS.ERROR:
       return 'cross';
-      break;
     case VALIDATION_STATUS.SUCCESS:
       return 'check';
-      break;
     case VALIDATION_STATUS.WARNING:
       return 'alert';
-      break;
     default:
       return status;
   }

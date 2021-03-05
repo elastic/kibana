@@ -9,7 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApiContext } from '../../../../../contexts/kibana';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -30,13 +30,16 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
   const [errorMessage, setErrorMessage] = useState<CalloutMessage | undefined>();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
+  const {
+    dataFrameAnalytics: { validateDataFrameAnalytics },
+  } = useMlApiContext();
 
   const runValidationChecks = async () => {
     try {
       const analyticsJobConfig = (isAdvancedEditorEnabled
         ? jobConfig
         : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
-      const validationResults: CalloutMessage[] = await ml.dataFrameAnalytics.validateDataFrameAnalytics(
+      const validationResults: CalloutMessage[] = await validateDataFrameAnalytics(
         analyticsJobConfig
       );
 
