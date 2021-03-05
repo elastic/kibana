@@ -5,38 +5,40 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { AgentService } from '../../../../fleet/server';
 import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
 } from './../../../../fleet/common/constants/agent';
-import { Agent, defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
+import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
 export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.Endpoint;
 
-export const getFleetSavedObjectsMetadata = async (savedObjectsClient: ISavedObjectsRepository) =>
-  savedObjectsClient.find<Agent>({
-    // Get up to 10000 agents with endpoint installed
-    type: AGENT_SAVED_OBJECT_TYPE,
-    fields: [
-      'packages',
-      'last_checkin',
-      'local_metadata.agent.id',
-      'local_metadata.host.id',
-      'local_metadata.host.name',
-      'local_metadata.host.hostname',
-      'local_metadata.elastic.agent.id',
-      'local_metadata.os',
-    ],
-    filter: `${AGENT_SAVED_OBJECT_TYPE}.attributes.packages: ${FLEET_ENDPOINT_PACKAGE_CONSTANT}`,
+export const getFleetSavedObjectsMetadata = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  agentService: AgentService | undefined,
+  esClient: ElasticsearchClient
+) => {
+  const agentData = await agentService?.listAgents(savedObjectsClient, esClient, {
+    showInactive: true,
     perPage: 10000,
     sortField: 'enrolled_at',
     sortOrder: 'desc',
+    kuery: `${AGENT_SAVED_OBJECT_TYPE}.attributes.packages: ${FLEET_ENDPOINT_PACKAGE_CONSTANT}`,
   });
+  return agentData;
+};
+
+/*
+  TODO: AS OF 7.13, this access will no longer work due to the enabling of fleet server. An alternative route will have
+  to be discussed to retrieve the policy data we need. Currently it's only `malware`, but the hope is to add more,
+  so a more scalable solution will be desirable.
+*/
 
 export const getLatestFleetEndpointEvent = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsClient: SavedObjectsClientContract,
   agentId: string
 ) =>
   savedObjectsClient.find<AgentEventSOAttributes>({
