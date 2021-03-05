@@ -44,7 +44,7 @@ export interface IImporter {
   import(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
 }
