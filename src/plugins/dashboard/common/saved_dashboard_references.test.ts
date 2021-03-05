@@ -46,7 +46,7 @@ describe('extractReferences', () => {
       Object {
         "attributes": Object {
           "foo": true,
-          "panelsJSON": "[{\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
+          "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"embeddableConfig\\":{},\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"embeddableConfig\\":{},\\"panelRefName\\":\\"panel_1\\"}]",
         },
         "references": Array [
           Object {
@@ -101,7 +101,7 @@ describe('extractReferences', () => {
       Object {
         "attributes": Object {
           "foo": true,
-          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"title\\":\\"Title 1\\",\\"embeddableConfig\\":{}}]",
         },
         "references": Array [],
       }
