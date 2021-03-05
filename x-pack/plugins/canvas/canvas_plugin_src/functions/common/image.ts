@@ -63,7 +63,7 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
       return {
         type: 'image',
         mode: modeStyle,
-        dataurl: resolveWithMissingImage(dataurl, elasticLogo),
+        dataurl: resolveWithMissingImage(dataurl, elasticLogo) as string,
       };
     },
   };

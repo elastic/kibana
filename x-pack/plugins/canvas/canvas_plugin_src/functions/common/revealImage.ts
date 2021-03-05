@@ -74,8 +74,8 @@ export function revealImage(): ExpressionFunctionDefinition<
         value: {
           percent,
           ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline),
-          emptyImage: resolveWithMissingImage(args.emptyImage),
+          image: resolveWithMissingImage(args.image, elasticOutline) as string,
+          emptyImage: resolveWithMissingImage(args.emptyImage) as string,
         },
       };
     },
