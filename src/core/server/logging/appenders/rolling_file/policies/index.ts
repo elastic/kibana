@@ -22,7 +22,7 @@ import {
   timeIntervalTriggeringPolicyConfigSchema,
 } from './time_interval';
 
-export { TriggeringPolicy } from './policy';
+export type { TriggeringPolicy } from './policy';
 
 /**
  * Any of the existing policy's configuration

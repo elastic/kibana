@@ -25,6 +25,7 @@ import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
@@ -68,6 +69,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   alerts?: AlertingStart;
+  spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
 }
@@ -142,6 +144,7 @@ export class Plugin
           data: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
+          spaces: pluginsStart.spaces,
           element: params.element,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
