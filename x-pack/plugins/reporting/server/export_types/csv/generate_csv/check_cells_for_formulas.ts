@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keys, pick, some, values } from 'lodash';
+import { pick, keys, values, some } from 'lodash';
 import { cellHasFormulas } from '../../csv_searchsource/generate_csv/cell_has_formula';
 
 interface IFlattened {

@@ -36,11 +36,9 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
 
   if (exportType.jobType === CSV_JOB_TYPE || exportType.jobType === CSV_JOB_TYPE_DEPRECATED) {
     const csvContainsFormulas = get(output, 'csv_contains_formulas', false);
-    const csvRowCount = get(output, 'csv_row_count', false);
     const maxSizedReach = get(output, 'max_size_reached', false);
 
     metaDataHeaders['kbn-csv-contains-formulas'] = csvContainsFormulas;
-    metaDataHeaders['kbn-csv-num-rows'] = csvRowCount;
     metaDataHeaders['kbn-max-size-reached'] = maxSizedReach;
   }
 
