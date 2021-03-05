@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -24,6 +24,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { activeCursor$ } from '../../lib/active_cursor';
+import { computeGradientFinalColor } from '../../../lib/compute_gradient_final_color';
 import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -31,6 +32,7 @@ import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
 import { emptyLabel } from '../../../../../common/empty_label';
+import { PALETTES } from '../../../../../common/types';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -61,6 +63,7 @@ export const TimeSeries = ({
   annotations,
 }) => {
   const chartRef = useRef();
+  const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -87,10 +90,17 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { legacyColors: colors, theme: themeService } = getChartsSetup();
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+  const { theme: themeService, palettes } = getChartsSetup();
 
-  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettesService = await palettes.getPalettes();
+      setPalettesRegistry(palettesService);
+    };
+    fetchPalettes();
+  }, [palettes]);
+
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
@@ -99,6 +109,51 @@ export const TimeSeries = ({
     const [min, max] = x;
     onBrush(min, max);
   };
+
+  const getSeriesColor = useCallback(
+    (seriesName, seriesGroupId, seriesId) => {
+      if (!seriesName) {
+        return null;
+      }
+
+      const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
+      const paletteName =
+        seriesById[0].palette.name === PALETTES.RAINBOW ||
+        seriesById[0].palette.name === PALETTES.GRADIENT
+          ? 'custom'
+          : seriesById[0].palette.name;
+
+      const gradientFinalColor = computeGradientFinalColor(
+        seriesById[0].baseColor,
+        seriesById.length
+      );
+      const paletteParams =
+        seriesById[0].palette.name === PALETTES.GRADIENT
+          ? {
+              ...seriesById[0].palette.params,
+              colors: [seriesById[0].baseColor, gradientFinalColor],
+            }
+          : seriesById[0].palette.params;
+
+      const outputColor = palettesRegistry?.get(paletteName).getColor(
+        [
+          {
+            name: seriesName,
+            rankAtDepth: seriesById.findIndex(({ id }) => id === seriesId),
+            totalSeriesAtDepth: seriesById.length,
+          },
+        ],
+        {
+          maxDepth: 1,
+          totalSeries: seriesById.length,
+          behindText: false,
+        },
+        paletteParams
+      );
+      return outputColor || null;
+    },
+    [palettesRegistry, series]
+  );
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -155,6 +210,7 @@ export const TimeSeries = ({
         (
           {
             id,
+            seriesId,
             label,
             labelFormatted,
             bars,
@@ -165,6 +221,7 @@ export const TimeSeries = ({
             yScaleType,
             groupId,
             color,
+            isSplitByTerms,
             stack,
             points,
             y1AccessorFormat,
@@ -177,12 +234,12 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
+          // The colors from the paletteService should be applied only when the timeseries is split by terms
+          const finalColor = isSplitByTerms ? getSeriesColor(seriesName, seriesId, id) : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator

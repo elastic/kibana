@@ -7,7 +7,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
-
+import { PalettePicker } from '../../palette_picker';
+import { getChartsSetup } from '../../../../services';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -41,7 +42,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: 'kibana',
+    split_color_mode: '',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -124,33 +125,23 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const selectedChartTypeOption = chartTypeOptions.find((option) => {
     return model.chart_type === option.value;
   });
+  const { palettes } = getChartsSetup();
+  const [palettesRegistry, setPalettesRegistry] = useState(null);
 
-  const splitColorOptions = [
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.defaultPaletteLabel',
-        defaultMessage: 'Default palette',
-      }),
-      value: 'kibana',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.rainbowLabel',
-        defaultMessage: 'Rainbow',
-      }),
-      value: 'rainbow',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.gradientLabel',
-        defaultMessage: 'Gradient',
-      }),
-      value: 'gradient',
-    },
-  ];
-  const selectedSplitColorOption = splitColorOptions.find((option) => {
-    return model.split_color_mode === option.value;
-  });
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettesService = await palettes.getPalettes();
+      setPalettesRegistry(palettesService);
+    };
+    fetchPalettes();
+  }, [palettes]);
+
+  const handlePaletteChange = (val) => {
+    props.onChange({
+      split_color_mode: val.name,
+      palette: val,
+    });
+  };
 
   let type;
 
@@ -342,6 +333,14 @@ export const TimeseriesConfig = injectI18n(function (props) {
       ? props.model.series_index_pattern
       : props.indexPatternForQuery;
 
+  const initialPalette = {
+    ...model.palette,
+    name:
+      model.split_color_mode === 'kibana'
+        ? 'kibana_palette'
+        : model.split_color_mode || model.palette.name,
+  };
+
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
@@ -420,25 +419,26 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <EuiSpacer size="s" />
           <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiFormRow
-            id={htmlId('splitColor')}
-            label={
-              <FormattedMessage
-                id="visTypeTimeseries.timeSeries.splitColorThemeLabel"
-                defaultMessage="Split color theme"
+        {palettesRegistry && (
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
+              id={htmlId('splitColor')}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.timeSeries.splitColorThemeLabel"
+                  defaultMessage="Split color theme"
+                />
+              }
+            >
+              <PalettePicker
+                palettes={palettesRegistry}
+                activePalette={initialPalette}
+                setPalette={handlePaletteChange}
+                color={model.color}
               />
-            }
-          >
-            <EuiComboBox
-              isClearable={false}
-              options={splitColorOptions}
-              selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
-              onChange={handleSelectChange('split_color_mode')}
-              singleSelection={{ asPlainText: true }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />

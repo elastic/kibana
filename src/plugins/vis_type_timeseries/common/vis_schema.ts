@@ -172,6 +172,10 @@ export const seriesItems = schema.object({
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
+  palette: schema.object({
+    type: stringRequired,
+    name: stringRequired,
+  }),
   split_filters: schema.maybe(schema.arrayOf(splitFiltersItems)),
   split_mode: stringRequired,
   stacked: stringRequired,
