@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const runtimeMappings = {
     rt_airline_lower: {
       type: 'keyword',
-      script: "emit(doc['airline'].value.toLowerCase())",
+      script: 'emit(params._source.airline.toLowerCase())',
     },
     rt_responsetime_x_2: {
       type: 'double',
@@ -42,6 +42,27 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await transform.api.cleanTransformIndices();
     });
+
+    // Only testing that histogram charts are available for runtime fields here
+    const histogramCharts = [
+      {
+        chartAvailable: true,
+        id: 'rt_airline_lower',
+        legend: '19 categories',
+        colorStats: [
+          { key: '#000000', value: 50 },
+          { key: '#54B399', value: 50 },
+        ],
+      },
+      {
+        chartAvailable: true,
+        id: 'rt_responsetime_x_2',
+        colorStats: [
+          { key: '#54B399', value: 5 },
+          { key: '#000000', value: 95 },
+        ],
+      },
+    ];
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
@@ -130,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
             'rt_responsetime_x_2.max',
             'rt_responsetime_x_2.min',
           ],
+          histogramCharts,
         },
       } as PivotTransformTestData,
       {
@@ -175,9 +197,8 @@ export default function ({ getService }: FtrProviderContext) {
           // The runtime mappings currently don't show up for Latest preview
           // so no need to check
           previewData: [],
-          // Should be checking for 'rt_airline_lower' and 'rt_responsetime_x_2'
-          // but Discover is throwing error for rt_airline_lower
-          discoverRuntimeFields: [],
+          discoverRuntimeFields: ['rt_airline_lower', 'rt_responsetime_x_2'],
+          histogramCharts,
         },
       } as LatestTransformTestData,
     ];
@@ -245,6 +266,13 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the advanced query editor switch');
           await transform.wizard.assertAdvancedQueryEditorSwitchExists();
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
+
+          await transform.testExecution.logTestStep('enables the index preview histogram charts');
+          await transform.wizard.enableIndexPreviewHistogramCharts(false);
+          await transform.testExecution.logTestStep('displays the index preview histogram charts');
+          await transform.wizard.assertIndexPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');
@@ -360,9 +388,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('redirects to Discover page');
           await transform.wizard.redirectToDiscover();
 
+          if (testData.type === 'latest') {
+            const fromTime = 'Feb 7, 2016 @ 00:00:00.000';
+            const toTime = 'Feb 11, 2016 @ 23:59:54.000';
+            await transform.wizard.setDiscoverTimeRange(fromTime, toTime);
+          }
+
           await transform.testExecution.logTestStep(
             'Discover page contains all the created runtime fields'
           );
+
           for (const runtimeAgg of testData.expected.discoverRuntimeFields) {
             await transform.wizard.assertDiscoverContainField(runtimeAgg);
           }

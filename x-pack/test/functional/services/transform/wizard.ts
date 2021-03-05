@@ -16,7 +16,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover']);
+  const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
@@ -228,14 +228,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedHistogramCharts: Array<{
         chartAvailable: boolean;
         id: string;
-        legend: string;
+        legend?: string;
         colorStats?: any[];
       }>
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
-        for (const [index, expected] of expectedHistogramCharts.entries()) {
+        for (const [, expected] of expectedHistogramCharts.entries()) {
+          const index = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${index}`);
 
           if (expected.chartAvailable) {
@@ -260,11 +261,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
             await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
           }
 
-          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
-          expect(actualLegend).to.eql(
-            expected.legend,
-            `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
-          );
+          if (expected.legend !== undefined) {
+            const actualLegend = await testSubjects.getVisibleText(
+              `mlDataGridChart-${index}-legend`
+            );
+            expect(actualLegend).to.eql(
+              expected.legend,
+              `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
+            );
+          }
 
           const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
           expect(actualId).to.eql(
@@ -852,6 +857,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await testSubjects.click('transformWizardCardDiscover');
         await PageObjects.discover.isDiscoverAppOnScreen();
       });
+    },
+
+    async setDiscoverTimeRange(fromTime: string, toTime: string) {
+      await PageObjects.discover.isDiscoverAppOnScreen();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
     async assertDiscoverContainField(field: string) {
